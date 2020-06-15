@@ -48,29 +48,30 @@
 package org.openmdx.base.dataprovider.kernel;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.resource.spi.InvalidPropertyException;
 import javax.resource.spi.ResourceAllocationException;
 
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.AbstractInteraction;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.rest.cci.RestConnection;
-import org.openmdx.kernel.configuration.Configuration;
-import org.openmdx.kernel.configuration.ConfigurationProvider;
-import org.openmdx.kernel.configuration.PropertiesConfigurationProvider;
+import org.openmdx.kernel.configuration.Configurations;
+import org.openmdx.kernel.configuration.PropertiesProvider;
+import org.openmdx.kernel.configuration.cci.Configuration;
+import org.openmdx.kernel.configuration.cci.ConfigurationProvider;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Factory;
 import org.openmdx.kernel.loading.PlugInFactory;
 import org.w3c.cci2.SparseArray;
-import org.w3c.spi.PrimitiveTypeParsers;
 
 /**
  * Embedded Dataprovider
@@ -126,11 +127,6 @@ public class Dataprovider_2 implements Port<RestConnection> {
     private final Map<String, Map<String, ?>> layerPlugInConfigurationOverride;
     
     /**
-     * Qualified configuration name delimiter
-     */
-    private static final char DELIMITER = '/';
-    
-    /**
      * The connections' factory
      * 
      * @deprecated will not be supported by the dataprovider 2 stack
@@ -184,28 +180,21 @@ public class Dataprovider_2 implements Port<RestConnection> {
      protected Port<RestConnection> buildDelegate(
      ) throws ResourceException {
     	 final ConfigurationProvider configurationProvider = getConfigurationProvider();
-    	 final Configuration dataproviderConfiguration = configurationProvider.getConfiguration("");
-    	 final SparseArray<String> layerPlugInNames = dataproviderConfiguration.getValues("layerPlugIn", String.class);
+    	 final Configuration dataproviderConfiguration = configurationProvider.getSection("");
+    	 final SparseArray<String> layerPlugInNames = dataproviderConfiguration.getSparseArray("layerPlugIn", String.class);
     	 Port<RestConnection> delegate = null;
     	 for(String layerPlugInName : layerPlugInNames) {
-    		 final Configuration layerPlugInConfiguration = configurationProvider.getConfiguration(
+    		 final Configuration layerPlugInConfiguration = configurationProvider.getSection(
+    			getLayerPlugInConfigurationOverride(layerPlugInName, delegate), 
     			layerPlugInName, 
-    			getLayerPlugInConfigurationOverride(layerPlugInName, delegate)
+    			Collections.emptyMap()
     		 );
     		 delegate = buildLayerPlugIn(layerPlugInConfiguration);
-    		 if(this.connectionFactory != null) {
-        		 try {
-        		     Method connectionFactorySetter = delegate.getClass().getMethod("setConnectionFactory", ConnectionFactory.class);
-        		     connectionFactorySetter.invoke(delegate, this.connectionFactory);
-        		 } catch(Exception ignore) {
-        		     // ignore
-        		 }
-    		 }
     	 }
     	 return delegate;
      }
 
-     /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /**
       * Build the layer plug-in according to the configuration
       * 
       * @param plugInConfiguration the layer plug-in configuration
@@ -252,6 +241,12 @@ public class Dataprovider_2 implements Port<RestConnection> {
 				this.layerPlugInConfigurationOverride.get(layerPlugInName)
 			);
 		}
+        if(this.connectionFactory != null) {
+            layerPlugInConfigurationOverride.put(
+                "connectionFactory", 
+                this.connectionFactory
+            );
+        }
 		if(delegate != null) {
 			layerPlugInConfigurationOverride.put(
 				"delegate",
@@ -261,7 +256,7 @@ public class Dataprovider_2 implements Port<RestConnection> {
 			 final String datasourceName = getDatasourceName();
 			 if(datasourceName != null) {
 				 layerPlugInConfigurationOverride.put(
-					"datasourceName", 
+				    SharedConfigurationEntries.DATABASE_CONNECTION_FACTORY_NAME, 
 					datasourceName	 
 				 );
 			 }
@@ -274,16 +269,13 @@ public class Dataprovider_2 implements Port<RestConnection> {
       * 
       * @return the configuration provider
       * 
-      * @throws ResoucreException
+      * @throws InvalidPropertyException
       */
 	private ConfigurationProvider getConfigurationProvider(
 	) throws InvalidPropertyException {
+	    final Properties properties;
 		try {
-			return PropertiesConfigurationProvider.newInstance(
-				PrimitiveTypeParsers.getStandardParser(), 
-				DELIMITER, 
-				getConfiguration()
-			);
+		    properties = PropertiesProvider.getProperties(getConfiguration());
 		} catch (IOException exception) {
 			throw ResourceExceptions.initHolder(
 				new InvalidPropertyException(
@@ -296,6 +288,9 @@ public class Dataprovider_2 implements Port<RestConnection> {
 				)
 			);
 		}
+        return Configurations.getDataproviderConfigurationProvider(
+            properties
+        );
 	}
 
     /**

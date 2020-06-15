@@ -37,9 +37,7 @@ package org.openmdx.uses.org.apache.commons.pool2;
  * @see PooledObjectFactory
  * @see BaseKeyedPooledObjectFactory
  *
- * @version $Revision: 1333925 $
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public abstract class BasePooledObjectFactory<T> implements PooledObjectFactory<T> {
     /**

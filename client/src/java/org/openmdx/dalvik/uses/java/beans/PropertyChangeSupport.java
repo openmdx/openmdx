@@ -46,7 +46,7 @@ import java.util.Map.Entry;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 @SuppressWarnings({"unchecked"})
@@ -145,7 +145,6 @@ public class PropertyChangeSupport implements Serializable {
      * @see PropertyChangeListenerProxy
      * @return all of the <code>PropertyChangeListeners</code> added or an
      *         empty array if no listeners have been added
-     * @since 1.4
      */
     public PropertyChangeListener[] getPropertyChangeListeners() {
         return this.map.getListeners();
@@ -210,7 +209,6 @@ public class PropertyChangeSupport implements Serializable {
      *         the named property.  If no such listeners have been added,
      *         or if <code>propertyName</code> is null, an empty array is
      *         returned.
-     * @since 1.4
      */
     public PropertyChangeListener[] getPropertyChangeListeners(String propertyName) {
         return this.map.getListeners(propertyName);
@@ -325,7 +323,6 @@ public class PropertyChangeSupport implements Serializable {
      * @param index        index of the property element that was changed.
      * @param oldValue     The old value of the property.
      * @param newValue     The new value of the property.
-     * @since 1.5
      */
     public void fireIndexedPropertyChange(String propertyName, int index,
                                           Object oldValue, Object newValue) {
@@ -347,7 +344,6 @@ public class PropertyChangeSupport implements Serializable {
      * @param index        index of the property element that was changed.
      * @param oldValue     The old value of the property.
      * @param newValue     The new value of the property.
-     * @since 1.5
      */
     public void fireIndexedPropertyChange(String propertyName, int index,
                                           int oldValue, int newValue) {
@@ -373,7 +369,6 @@ public class PropertyChangeSupport implements Serializable {
      * @param index        index of the property element that was changed.
      * @param oldValue     The old value of the property.
      * @param newValue     The new value of the property.
-     * @since 1.5
      */
     public void fireIndexedPropertyChange(String propertyName, int index,
                                           boolean oldValue, boolean newValue) {

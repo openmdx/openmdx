@@ -56,7 +56,6 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.exception.InvalidParameter
  * Released under the LGPL<BR>
  * An AccountingRequest to perform a Stop Accounting Request
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.2 $
  */
 public class StopAccountingRequest extends AccountingRequest {
     /**

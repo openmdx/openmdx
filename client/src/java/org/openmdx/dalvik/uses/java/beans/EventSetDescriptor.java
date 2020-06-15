@@ -42,7 +42,7 @@ import java.lang.reflect.Method;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 @SuppressWarnings({"rawtypes"})
@@ -154,7 +154,6 @@ public class EventSetDescriptor extends FeatureDescriptor {
      *          can be used to access the array of event listener objects.
      * @exception IntrospectionException if an exception occurs during
      *              introspection.
-     * @since 1.4
      */
     public EventSetDescriptor(Class<?> sourceClass,
                 String eventSetName,
@@ -246,7 +245,6 @@ public class EventSetDescriptor extends FeatureDescriptor {
      *          that can be used to access the array of event listener objects.
      * @exception IntrospectionException if an exception occurs during
      *              introspection.
-     * @since 1.4
      */
     public EventSetDescriptor(String eventSetName,
                 Class<?> listenerType,
@@ -405,7 +403,6 @@ public class EventSetDescriptor extends FeatureDescriptor {
      *
      * @return The method used to access the array of listeners at the event
      *         source or null if it doesn't exist.
-     * @since 1.4
      */
     public synchronized Method getGetListenerMethod() {
         return (getMethodDescriptor != null ?

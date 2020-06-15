@@ -81,9 +81,7 @@ import org.openmdx.uses.org.apache.commons.pool2.UsageTracking;
  *
  * @param <T> Type of element pooled in this pool.
  *
- * @version $Revision: 1679560 $
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public class GenericObjectPool<T> extends BaseGenericObjectPool<T>
         implements ObjectPool<T>, GenericObjectPoolMXBean, UsageTracking<T> {
@@ -844,7 +842,7 @@ public class GenericObjectPool<T> extends BaseGenericObjectPool<T>
      * in the pool.
      *
      * @throws Exception If the associated factory throws an exception
-     * @since 2.4
+     * @since Commons Pool 2.4
      */
     public void preparePool() throws Exception {
         if (getMinIdle() < 1) {

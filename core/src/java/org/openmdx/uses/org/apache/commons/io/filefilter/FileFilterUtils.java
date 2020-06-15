@@ -43,7 +43,7 @@ import org.openmdx.uses.org.apache.commons.io.IOCase;
  * file filter implementations in this package so you don't have to import
  * every class you use.
  *
- * @since 1.0
+ * @since Commons I/O 1.0
  * @version $Id: FileFilterUtils.java 1471767 2013-04-24 23:24:19Z sebb $
  */
 public class FileFilterUtils {
@@ -80,7 +80,7 @@ public class FileFilterUtils {
      * @throws IllegalArgumentException if the filter is {@code null}
      *         or <code>files</code> contains a {@code null} value.
      *
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static File[] filter(final IOFileFilter filter, final File... files) {
         if (filter == null) {
@@ -125,7 +125,7 @@ public class FileFilterUtils {
      * @throws IllegalArgumentException if the filter is {@code null}
      *         or <code>files</code> contains a {@code null} value.
      *
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static File[] filter(final IOFileFilter filter, final Iterable<File> files) {
         final List<File> acceptedFiles = filterList(filter, files);
@@ -155,7 +155,7 @@ public class FileFilterUtils {
      *         file filter.
      * @throws IllegalArgumentException if the filter is {@code null}
      *         or <code>files</code> contains a {@code null} value.
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static List<File> filterList(final IOFileFilter filter, final Iterable<File> files) {
         return filter(filter, files, new ArrayList<File>());
@@ -184,7 +184,7 @@ public class FileFilterUtils {
      *         file filter.
      * @throws IllegalArgumentException if the filter is {@code null}
      *         or <code>files</code> contains a {@code null} value.
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static List<File> filterList(final IOFileFilter filter, final File... files) {
         final File[] acceptedFiles = filter(filter, files);
@@ -215,7 +215,7 @@ public class FileFilterUtils {
      * @throws IllegalArgumentException if the filter is {@code null}
      *         or <code>files</code> contains a {@code null} value.
      *
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static Set<File> filterSet(final IOFileFilter filter, final File... files) {
         final File[] acceptedFiles = filter(filter, files);
@@ -246,7 +246,7 @@ public class FileFilterUtils {
      * @throws IllegalArgumentException if the filter is {@code null}
      *         or <code>files</code> contains a {@code null} value.
      *
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static Set<File> filterSet(final IOFileFilter filter, final Iterable<File> files) {
         return filter(filter, files, new HashSet<File>());
@@ -310,7 +310,7 @@ public class FileFilterUtils {
      * @param caseSensitivity  how to handle case sensitivity, null means case-sensitive
      * @return a prefix checking filter
      * @see PrefixFileFilter
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static IOFileFilter prefixFileFilter(final String prefix, final IOCase caseSensitivity) {
         return new PrefixFileFilter(prefix, caseSensitivity);
@@ -334,7 +334,7 @@ public class FileFilterUtils {
      * @param caseSensitivity  how to handle case sensitivity, null means case-sensitive
      * @return a suffix checking filter
      * @see SuffixFileFilter
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static IOFileFilter suffixFileFilter(final String suffix, final IOCase caseSensitivity) {
         return new SuffixFileFilter(suffix, caseSensitivity);
@@ -358,7 +358,7 @@ public class FileFilterUtils {
      * @param caseSensitivity  how to handle case sensitivity, null means case-sensitive
      * @return a name checking filter
      * @see NameFileFilter
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static IOFileFilter nameFileFilter(final String name, final IOCase caseSensitivity) {
         return new NameFileFilter(name, caseSensitivity);
@@ -424,7 +424,7 @@ public class FileFilterUtils {
      * @throws IllegalArgumentException if the filters are null or contain a
      *         null value.
      * @see AndFileFilter
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static IOFileFilter and(final IOFileFilter... filters) {
         return new AndFileFilter(toList(filters));
@@ -439,7 +439,7 @@ public class FileFilterUtils {
      * @throws IllegalArgumentException if the filters are null or contain a
      *         null value.
      * @see OrFileFilter
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static IOFileFilter or(final IOFileFilter... filters) {
         return new OrFileFilter(toList(filters));
@@ -452,7 +452,7 @@ public class FileFilterUtils {
      * @return The list of file filters
      * @throws IllegalArgumentException if the filters are null or contain a
      *         null value.
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static List<IOFileFilter> toList(final IOFileFilter... filters) {
         if (filters == null) {
@@ -533,7 +533,7 @@ public class FileFilterUtils {
      * @param cutoff  the time threshold
      * @return an appropriately configured age file filter
      * @see AgeFileFilter
-     * @since 1.2
+     * @since Commons I/O 1.2
      */
     public static IOFileFilter ageFileFilter(final long cutoff) {
         return new AgeFileFilter(cutoff);
@@ -546,7 +546,7 @@ public class FileFilterUtils {
      * @param acceptOlder  if true, older files get accepted, if false, newer
      * @return an appropriately configured age file filter
      * @see AgeFileFilter
-     * @since 1.2
+     * @since Commons I/O 1.2
      */
     public static IOFileFilter ageFileFilter(final long cutoff, final boolean acceptOlder) {
         return new AgeFileFilter(cutoff, acceptOlder);
@@ -559,7 +559,7 @@ public class FileFilterUtils {
      * @param cutoffDate  the time threshold
      * @return an appropriately configured age file filter
      * @see AgeFileFilter
-     * @since 1.2
+     * @since Commons I/O 1.2
      */
     public static IOFileFilter ageFileFilter(final Date cutoffDate) {
         return new AgeFileFilter(cutoffDate);
@@ -572,7 +572,7 @@ public class FileFilterUtils {
      * @param acceptOlder  if true, older files get accepted, if false, newer
      * @return an appropriately configured age file filter
      * @see AgeFileFilter
-     * @since 1.2
+     * @since Commons I/O 1.2
      */
     public static IOFileFilter ageFileFilter(final Date cutoffDate, final boolean acceptOlder) {
         return new AgeFileFilter(cutoffDate, acceptOlder);
@@ -586,7 +586,7 @@ public class FileFilterUtils {
      *        time is usesd as the threshold age of the files
      * @return an appropriately configured age file filter
      * @see AgeFileFilter
-     * @since 1.2
+     * @since Commons I/O 1.2
      */
     public static IOFileFilter ageFileFilter(final File cutoffReference) {
         return new AgeFileFilter(cutoffReference);
@@ -600,7 +600,7 @@ public class FileFilterUtils {
      * @param acceptOlder  if true, older files get accepted, if false, newer
      * @return an appropriately configured age file filter
      * @see AgeFileFilter
-     * @since 1.2
+     * @since Commons I/O 1.2
      */
     public static IOFileFilter ageFileFilter(final File cutoffReference, final boolean acceptOlder) {
         return new AgeFileFilter(cutoffReference, acceptOlder);
@@ -613,7 +613,7 @@ public class FileFilterUtils {
      * @param threshold  the file size threshold
      * @return an appropriately configured SizeFileFilter
      * @see SizeFileFilter
-     * @since 1.2
+     * @since Commons I/O 1.2
      */
     public static IOFileFilter sizeFileFilter(final long threshold) {
         return new SizeFileFilter(threshold);
@@ -626,7 +626,7 @@ public class FileFilterUtils {
      * @param acceptLarger  if true, larger files get accepted, if false, smaller
      * @return an appropriately configured SizeFileFilter
      * @see SizeFileFilter
-     * @since 1.2
+     * @since Commons I/O 1.2
      */
     public static IOFileFilter sizeFileFilter(final long threshold, final boolean acceptLarger) {
         return new SizeFileFilter(threshold, acceptLarger);
@@ -640,7 +640,7 @@ public class FileFilterUtils {
      * @param maxSizeInclusive the maximum file size (inclusive)
      * @return an appropriately configured IOFileFilter
      * @see SizeFileFilter
-     * @since 1.3
+     * @since Commons I/O 1.3
      */
     public static IOFileFilter sizeRangeFileFilter(final long minSizeInclusive, final long maxSizeInclusive ) {
         final IOFileFilter minimumFilter = new SizeFileFilter(minSizeInclusive, true);
@@ -661,7 +661,7 @@ public class FileFilterUtils {
      * @throws IllegalArgumentException if <code>magicNumber</code> is
      *         {@code null} or the empty String.
      * @see MagicNumberFileFilter
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static IOFileFilter magicNumberFileFilter(final String magicNumber) {
         return new MagicNumberFileFilter(magicNumber);
@@ -682,7 +682,7 @@ public class FileFilterUtils {
      *         {@code null} or the empty String, or if offset is a
      *         negative number.
      * @see MagicNumberFileFilter
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static IOFileFilter magicNumberFileFilter(final String magicNumber, final long offset) {
         return new MagicNumberFileFilter(magicNumber, offset);
@@ -701,7 +701,7 @@ public class FileFilterUtils {
      * @throws IllegalArgumentException if <code>magicNumber</code> is
      *         {@code null} or is of length zero.
      * @see MagicNumberFileFilter
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static IOFileFilter magicNumberFileFilter(final byte[] magicNumber) {
         return new MagicNumberFileFilter(magicNumber);
@@ -722,7 +722,7 @@ public class FileFilterUtils {
      *         {@code null}, or contains no bytes, or <code>offset</code>
      *         is a negative number.
      * @see MagicNumberFileFilter
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static IOFileFilter magicNumberFileFilter(final byte[] magicNumber, final long offset) {
         return new MagicNumberFileFilter(magicNumber, offset);
@@ -744,7 +744,7 @@ public class FileFilterUtils {
      *
      * @param filter  the filter to decorate, null means an unrestricted filter
      * @return the decorated filter, never null
-     * @since 1.1 (method existed but had bug in 1.0)
+     * @since Commons I/O 1.1 (method existed but had bug in 1.0)
      */
     public static IOFileFilter makeCVSAware(final IOFileFilter filter) {
         if (filter == null) {
@@ -761,7 +761,7 @@ public class FileFilterUtils {
      *
      * @param filter  the filter to decorate, null means an unrestricted filter
      * @return the decorated filter, never null
-     * @since 1.1
+     * @since Commons I/O 1.1
      */
     public static IOFileFilter makeSVNAware(final IOFileFilter filter) {
         if (filter == null) {
@@ -778,7 +778,7 @@ public class FileFilterUtils {
      * @param filter  the filter to decorate, null means an unrestricted filter
      * @return the decorated filter, never null
      * @see DirectoryFileFilter#DIRECTORY
-     * @since 1.3
+     * @since Commons I/O 1.3
      */
     public static IOFileFilter makeDirectoryOnly(final IOFileFilter filter) {
         if (filter == null) {
@@ -793,7 +793,7 @@ public class FileFilterUtils {
      * @param filter  the filter to decorate, null means an unrestricted filter
      * @return the decorated filter, never null
      * @see FileFileFilter#FILE
-     * @since 1.3
+     * @since Commons I/O 1.3
      */
     public static IOFileFilter makeFileOnly(final IOFileFilter filter) {
         if (filter == null) {

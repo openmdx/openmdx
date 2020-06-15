@@ -1,141 +1,141 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_R-YpsAtrEeSrLJCNh24WvQ" name="kernel">
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_R-YpsAtrEeSrLJCNh24WvQ" name="kernel">
   <packagedElement xmi:type="uml:Package" xmi:id="_SxSgAEY4Ed-vwsjpTy3tRQP" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_SxSgAEY4Ed-vwsjpTy3tRQ" name="openmdx">
       <packagedElement xmi:type="uml:Package" xmi:id="_uQRyAAtrEeSrLJCNh24WvQ" name="kernel">
         <packagedElement xmi:type="uml:Class" xmi:id="_1yMrUAtrEeSrLJCNh24WvQ" name="Query">
-          <eAnnotations xmi:id="_MkPyI965EdmrtKJSXC0aFQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MkPyJN65EdmrtKJSXC0aFQ" key="struct"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MkPyI965EdmrtKJSXC0aFQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MkPyJN65EdmrtKJSXC0aFQ" key="struct"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_eV54oAtuEeSrLJCNh24cvQ" name="resourceIdentifier">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_eV54oAtuEeSrLJCNh24cvQ" name="resourceIdentifier">
             <type xmi:type="uml:PrimitiveType" href="org.openmdx.base.uml#_3C7B8A60016D400E4AD203B8"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_C8dB8AtzEeSrLJCNh24WvQ"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_P1wwsAu1EeSrLJCNh24WvQ" name="queryType">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_P1wwsAu1EeSrLJCNh24WvQ" name="queryType">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_chqbkAu1EeSrLJCNh24WvQ"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_iZk0sAu2EeSrLJCNh24WvQ" name="queryFilter" type="_YVx0gAu2EeSrLJCNh24WvQ">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_iZk0sAu2EeSrLJCNh24WvQ" name="queryFilter" type="_YVx0gAu2EeSrLJCNh24WvQ">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_obmWoAu4EeSrLJCNh24WvQ"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_DC664Au2EeSrLJCNh24WvQ" name="size">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_DC664Au2EeSrLJCNh24WvQ" name="size">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B631401F0"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_F4FKIAu2EeSrLJCNh24WvQ"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_w1rQgAt3EeSrLJCNh24WvQ" name="position">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_w1rQgAt3EeSrLJCNh24WvQ" name="position">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B631401F0"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="__YAk0Au0EeSrLJCNh24WvQ"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_4EyA8CWhEeSB6cJkJl9-YA" name="fetchGroupName">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_4EyA8CWhEeSB6cJkJl9-YA" name="fetchGroupName">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_K7Ib4CWiEeSB6cJkJl9-YA"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_E69HYAxiEeSlraDC3RhXoQ" name="featureName">
-            <eAnnotations xmi:id="_p1JxYCnyEeSF04t1OEIZfw" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_p1JxYSnyEeSF04t1OEIZfw" key="set"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_E69HYAxiEeSlraDC3RhXoQ" name="featureName">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_p1JxYCnyEeSF04t1OEIZfw" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_p1JxYSnyEeSF04t1OEIZfw" key="set"/>
             </eAnnotations>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_R7p9kAxiEeSlraDC3RhXoQ" value="1"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_MYotEAu2EeSrLJCNh24WvQ" name="query">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_MYotEAu2EeSrLJCNh24WvQ" name="query">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_SrBRACWoEeSB6cJkJl9-YA"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_i1GFoCoLEeSoUOwLQxydqg" name="refresh">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_i1GFoCoLEeSoUOwLQxydqg" name="refresh">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_YVx0gAu2EeSrLJCNh24WvQ" name="QueryFilter">
-          <eAnnotations xmi:id="_e3ktkAu2EeSrLJCNh24WvQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_e3ktkQu2EeSrLJCNh24WvQ" key="struct"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_e3ktkAu2EeSrLJCNh24WvQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_e3ktkQu2EeSrLJCNh24WvQ" key="struct"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_S8UKkAu4EeSrLJCNh24WvQ" name="condition" type="_OYwVQAu3EeSrLJCNh24WvQ">
-            <eAnnotations xmi:id="_KW1F8Ax9EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_KW1F8Qx9EeSHhO7w_kSBNQ" key="list"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_S8UKkAu4EeSrLJCNh24WvQ" name="condition" type="_OYwVQAu3EeSrLJCNh24WvQ">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_KW1F8Ax9EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_KW1F8Qx9EeSHhO7w_kSBNQ" key="list"/>
             </eAnnotations>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_-xLRcAx8EeSHhO7w_kSBNQ" name="orderSpecifier" type="_b7g48AxiEeSlraDC3RhXoQ">
-            <eAnnotations xmi:id="_1XAIAAu2EeSrLJCNh24WvQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_1XAIAQu2EeSrLJCNh24WvQ" key="list"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_-xLRcAx8EeSHhO7w_kSBNQ" name="orderSpecifier" type="_b7g48AxiEeSlraDC3RhXoQ">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_1XAIAAu2EeSrLJCNh24WvQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_1XAIAQu2EeSrLJCNh24WvQ" key="list"/>
             </eAnnotations>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_Hjr-AAx_EeSHhO7w_kSBNQ" name="extension" type="_WFz1kAx9EeSHhO7w_kSBNQ">
-            <eAnnotations xmi:id="_cwSdYA0pEeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_cwSdYQ0pEeSHhO7w_kSBNQ" key="list"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_Hjr-AAx_EeSHhO7w_kSBNQ" name="extension" type="_WFz1kAx9EeSHhO7w_kSBNQ">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_cwSdYA0pEeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_cwSdYQ0pEeSHhO7w_kSBNQ" key="list"/>
             </eAnnotations>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_OYwVQAu3EeSrLJCNh24WvQ" name="Condition">
-          <eAnnotations xmi:id="_VaRQMAu3EeSrLJCNh24WvQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_VaRQMQu3EeSrLJCNh24WvQ" key="struct"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_VaRQMAu3EeSrLJCNh24WvQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_VaRQMQu3EeSrLJCNh24WvQ" key="struct"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_x6JKIAu3EeSrLJCNh24WvQ" name="quantifier" isReadOnly="true">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_x6JKIAu3EeSrLJCNh24WvQ" name="quantifier" isReadOnly="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63110001"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_64DgUAu3EeSrLJCNh24WvQ" name="feature">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_64DgUAu3EeSrLJCNh24WvQ" name="feature">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_IHUaIAu8EeSrLJCNh24WvQ" name="type">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_IHUaIAu8EeSrLJCNh24WvQ" name="type">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63110001"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_NdAscAu8EeSrLJCNh24WvQ" name="value">
-            <eAnnotations xmi:id="_WcDEAAu8EeSrLJCNh24WvQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_WcDEAQu8EeSrLJCNh24WvQ" key="list"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_NdAscAu8EeSrLJCNh24WvQ" name="value">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_WcDEAAu8EeSrLJCNh24WvQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_WcDEAQu8EeSrLJCNh24WvQ" key="list"/>
             </eAnnotations>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_E6T2IAu9EeSrLJCNh24WvQ"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_b7g48AxiEeSlraDC3RhXoQ" name="FeatureOrder">
-          <eAnnotations xmi:id="_r7KMgAxiEeSlraDC3RhXoQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_r7KMgQxiEeSlraDC3RhXoQ" key="struct"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_r7KMgAxiEeSlraDC3RhXoQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_r7KMgQxiEeSlraDC3RhXoQ" key="struct"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_8SgOYAxiEeSlraDC3RhXoQ" name="feature">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_8SgOYAxiEeSlraDC3RhXoQ" name="feature">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_wYvyIAxiEeSlraDC3RhXoQ" name="sortOrder">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_wYvyIAxiEeSlraDC3RhXoQ" name="sortOrder">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63110001"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_WFz1kAx9EeSHhO7w_kSBNQ" name="QueryExtension">
-          <eAnnotations xmi:id="_T-uiYAx_EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_T-uiYQx_EeSHhO7w_kSBNQ" key="struct"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_T-uiYAx_EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_T-uiYQx_EeSHhO7w_kSBNQ" key="struct"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_jdxVMAx9EeSHhO7w_kSBNQ" name="clause">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_jdxVMAx9EeSHhO7w_kSBNQ" name="clause">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_19fY0Ax9EeSHhO7w_kSBNQ" name="booleanParam">
-            <eAnnotations xmi:id="_M_xBoAx-EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_M_xBoQx-EeSHhO7w_kSBNQ" key="list"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_19fY0Ax9EeSHhO7w_kSBNQ" name="booleanParam">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_M_xBoAx-EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_M_xBoQx-EeSHhO7w_kSBNQ" key="list"/>
             </eAnnotations>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_SG0bAAx-EeSHhO7w_kSBNQ" name="stringParam">
-            <eAnnotations xmi:id="_SG0bAQx-EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_SG0bAgx-EeSHhO7w_kSBNQ" key="list"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_SG0bAAx-EeSHhO7w_kSBNQ" name="stringParam">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_SG0bAQx-EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_SG0bAgx-EeSHhO7w_kSBNQ" key="list"/>
             </eAnnotations>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_XkXBwAx-EeSHhO7w_kSBNQ" name="dateParam">
-            <eAnnotations xmi:id="_XkXBwQx-EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_XkXBwgx-EeSHhO7w_kSBNQ" key="list"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_XkXBwAx-EeSHhO7w_kSBNQ" name="dateParam">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_XkXBwQx-EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_XkXBwgx-EeSHhO7w_kSBNQ" key="list"/>
             </eAnnotations>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63230061"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_dFSTsAx-EeSHhO7w_kSBNQ" name="dateTimeParam">
-            <eAnnotations xmi:id="_dFSTsQx-EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_dFSTsgx-EeSHhO7w_kSBNQ" key="list"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_dFSTsAx-EeSHhO7w_kSBNQ" name="dateTimeParam">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_dFSTsQx-EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_dFSTsgx-EeSHhO7w_kSBNQ" key="list"/>
             </eAnnotations>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B630802BB"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_i2UeMAx-EeSHhO7w_kSBNQ" name="integerParam">
-            <eAnnotations xmi:id="_i2UeMQx-EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_i2UeMgx-EeSHhO7w_kSBNQ" key="list"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_i2UeMAx-EeSHhO7w_kSBNQ" name="integerParam">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_i2UeMQx-EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_i2UeMgx-EeSHhO7w_kSBNQ" key="list"/>
             </eAnnotations>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3CC6A34B0011"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_q38LQAx-EeSHhO7w_kSBNQ" name="decimalParam">
-            <eAnnotations xmi:id="_q38LQQx-EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_q38LQgx-EeSHhO7w_kSBNQ" key="list"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_q38LQAx-EeSHhO7w_kSBNQ" name="decimalParam">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_q38LQQx-EeSHhO7w_kSBNQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_q38LQgx-EeSHhO7w_kSBNQ" key="list"/>
             </eAnnotations>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B631E003C"/>
           </ownedAttribute>
@@ -143,4 +143,10 @@
       </packagedElement>
     </packagedElement>
   </packagedElement>
+  <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_mInasBZlEemGMr2sON_HWQ">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_mIoBwBZlEemGMr2sON_HWQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+      <references xmi:type="ecore:EPackage" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"/>
+    </eAnnotations>
+    <appliedProfile xmi:type="uml:Profile" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#ActionLanguage"/>
+  </profileApplication>
 </uml:Model>

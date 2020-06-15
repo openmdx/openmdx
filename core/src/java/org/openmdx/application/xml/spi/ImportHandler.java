@@ -73,7 +73,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.cci.ObjectRecord;
@@ -97,17 +96,17 @@ import org.xml.sax.helpers.DefaultHandler;
 public class ImportHandler extends DefaultHandler {
 
     /**
-     * Constructor 
+     * Constructor
      *
      * @param target
-     * @param documentURL 
+     * @param documentURL
      * @param defaultImportMode
      */
     public ImportHandler(
-         ImportTarget target, 
-         InputSource source,
-         ImportMode defaultImportMode
-    ){
+        ImportTarget target,
+        InputSource source,
+        ImportMode defaultImportMode
+    ) {
         this.target = target;
         this.url = getDocumentURL(source);
         this.binary = isBinary(source);
@@ -135,7 +134,7 @@ public class ImportHandler extends DefaultHandler {
      * qualifier This set is required to determine on endElement operations
      * whether an attribute/ struct/reference is closed or an object.
      */
-    private Map<String,Map<String,String>> objectElements = null;
+    private Map<String, Map<String, String>> objectElements = null;
 
     // state/context of current object
     private ObjectRecord currentObject = null;
@@ -144,7 +143,7 @@ public class ImportHandler extends DefaultHandler {
      * The current object's operation
      */
     private ImportMode currentObjectOperation;
-    
+
     private Path currentPath = null;
 
     private StringBuilder currentAttributeValue = null;
@@ -161,7 +160,7 @@ public class ImportHandler extends DefaultHandler {
 
     private String currentAttributeKey = null;
 
-    private String currentAttributeMultiplicity = null;
+    private Multiplicity currentAttributeMultiplicity = null;
 
     private String currentAttributeOperation = null;
 
@@ -172,9 +171,9 @@ public class ImportHandler extends DefaultHandler {
     private final ImportTarget target;
 
     private final URL url;
-    
+
     private final ImportMode defaultImportMode;
-    
+
     /**
      * <code>true</code> in case of a WBXML input
      */
@@ -185,13 +184,13 @@ public class ImportHandler extends DefaultHandler {
 
     // attributes types as (<qualified attribute name>, <qualified type name)
     // pair.
-    private static final Map<String,String> attributeTypes = new HashMap<String,String>();
+    private static final Map<String, String> attributeTypes = new HashMap<String, String>();
 
     // attribute multiplicities
-    private static final Map<String,String> attributeMultiplicities = new HashMap<String,String>();
+    private static final Map<String, String> attributeMultiplicities = new HashMap<String, String>();
 
     // qualifier names of a complex schema type.
-    private static final Map<String,String> qualifierNames = new HashMap<String,String>();
+    private static final Map<String, String> qualifierNames = new HashMap<String, String>();
 
     private static final List<Path> cachedParentPaths = new ArrayList<Path>();
 
@@ -204,20 +203,21 @@ public class ImportHandler extends DefaultHandler {
         "+00:00", "-00:00"
     };
 
-
     private static final String LEGACY_RESOURCE_RPEFIX = "xri:+resource/";
     private static final String STANDARD_RESOURCE_PREFIX = "xri://+resource/";
-    
+    private static final String FALLBACK_ATTRIBUTE_TYPE = "org.w3c.string";
+
     /**
      * Determine the document URL
      * 
-     * @param source the <code>InputSource</code>
+     * @param source
+     *            the <code>InputSource</code>
      * 
      * @return the document <code>URL</code>
      */
     private static URL getDocumentURL(
         InputSource source
-    ){
+    ) {
         String uri = source.getSystemId();
         if (uri == null) {
             return null;
@@ -237,52 +237,55 @@ public class ImportHandler extends DefaultHandler {
     /**
      * Determine the document is binary
      * 
-     * @param source the <code>InputSource</code>
+     * @param source
+     *            the <code>InputSource</code>
      * 
      * @return <code>true</code> in case of WBXML input
      */
     private static boolean isBinary(
         InputSource source
-    ){
-        if(source.getCharacterStream() != null) {
+    ) {
+        if (source.getCharacterStream() != null) {
             return false;
         }
         String uri = source.getSystemId();
-        if(uri != null) {
+        if (uri != null) {
             uri = uri.toLowerCase();
-            if(uri.endsWith(".wbxml")) {
+            if (uri.endsWith(".wbxml")) {
                 return true;
             }
-            if(uri.endsWith(".xml")) {
+            if (uri.endsWith(".xml")) {
                 return false;
             }
         }
         String encoding = source.getEncoding();
         return encoding == null;
     }
-    
+
     /**
      * Tells whether we are reading an XML or a WBXML source
      * 
      * @return <code>true</code> in case of a WBXML source
      */
-    public boolean isBinary(){
+    public boolean isBinary() {
         return this.binary;
     }
-    
-    
+
     // -----------------------------------------------------------------------
     // Implements EntityResolver
     // -----------------------------------------------------------------------
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.helpers.DefaultHandler#resolveEntity(java.lang.String, java.lang.String)
      */
     @Override
     public InputSource resolveEntity(
-        String publicId, 
+        String publicId,
         String systemId
-    ) throws SAXException {
+    )
+        throws SAXException {
         return this.getSchemaInputSource(systemId);
     }
 
@@ -295,16 +298,13 @@ public class ImportHandler extends DefaultHandler {
      */
     private void initTypes(
         org.w3c.dom.Document schemaDocument
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         org.w3c.dom.Element docElement = schemaDocument.getDocumentElement();
         org.w3c.dom.NodeList complexTypeNodes = docElement.getElementsByTagName("xsd:complexType");
         // iterate all xsd:complexType
         int complexTypeNodesLength = complexTypeNodes.getLength();
-        for (
-            int i = 0; 
-            i < complexTypeNodesLength; 
-            i++
-        ) {
+        for (int i = 0; i < complexTypeNodesLength; i++) {
             org.w3c.dom.Node complexType = complexTypeNodes.item(i);
             org.w3c.dom.NamedNodeMap complexTypeAttributes = complexType.getAttributes();
             org.w3c.dom.Attr complexTypeName = (org.w3c.dom.Attr) complexTypeAttributes.getNamedItem("name");
@@ -312,58 +312,42 @@ public class ImportHandler extends DefaultHandler {
                 // get qualifierName of complex type
                 org.w3c.dom.NodeList attributeNodes = ((org.w3c.dom.Element) complexType).getElementsByTagName("xsd:attribute");
                 int attributeNodesLength = attributeNodes.getLength();
-                for (
-                    int j = 0; 
-                    j < attributeNodesLength; 
-                    j++
-                ) {
+                for (int j = 0; j < attributeNodesLength; j++) {
                     org.w3c.dom.Node attributeNode = attributeNodes.item(j);
                     if ("_qualifier".equals(attributeNode.getAttributes().getNamedItem("name").getNodeValue())) {
-                        ImportHandler.qualifierNames.put(complexTypeName
-                            .getNodeValue(), attributeNode
-                            .getAttributes()
-                            .getNamedItem("fixed")
-                            .getNodeValue());
+                        ImportHandler.qualifierNames.put(
+                            complexTypeName
+                                .getNodeValue(), attributeNode
+                                    .getAttributes()
+                                    .getNamedItem("fixed")
+                                    .getNodeValue()
+                        );
                     }
                 }
                 // get qualifierTypes, qualifierMultiplicities
-                org.w3c.dom.NodeList elementNodes =((org.w3c.dom.Element) complexType).getElementsByTagName("xsd:element");
+                org.w3c.dom.NodeList elementNodes = ((org.w3c.dom.Element) complexType).getElementsByTagName("xsd:element");
                 int elementNodesLength = elementNodes.getLength();
-                for (
-                    int j = 0; 
-                    j < elementNodesLength; 
-                    j++
-                ) {
+                for (int j = 0; j < elementNodesLength; j++) {
                     org.w3c.dom.Node element = elementNodes.item(j);
                     org.w3c.dom.NamedNodeMap elementAttributes = element.getAttributes();
                     org.w3c.dom.Attr attributeName = (org.w3c.dom.Attr) elementAttributes.getNamedItem("name");
                     org.w3c.dom.Attr attributeType = (org.w3c.dom.Attr) elementAttributes.getNamedItem("type");
                     // default multiplicity Multiplicities.SINGLE_VALUE
-                    if (
-                        attributeName != null &&
+                    if (attributeName != null &&
                         !"_content".equals(attributeName.getNodeValue()) &&
                         !"_object".equals(attributeName.getNodeValue()) &&
                         !"_item".equals(attributeName.getNodeValue()) &&
-                        attributeName.getNodeValue().indexOf('.') < 0
-                     ) {
+                        attributeName.getNodeValue().indexOf('.') < 0) {
                         String attributeTypeName = null;
                         // multi-valued attribute defined as complexType
                         if (attributeType == null) {
                             // find xsd:attribute name=""_multiplicity"" of
                             // complexType
                             org.w3c.dom.NodeList l0 = ((org.w3c.dom.Element) element).getElementsByTagName("xsd:complexType");
-                            for (
-                                int i0 = 0; 
-                                i0 < l0.getLength(); 
-                                i0++
-                            ) {
+                            for (int i0 = 0; i0 < l0.getLength(); i0++) {
                                 org.w3c.dom.Node n0 = l0.item(i0);
                                 org.w3c.dom.NodeList l1 = ((org.w3c.dom.Element) n0).getElementsByTagName("xsd:attribute");
-                                for (
-                                    int i1 = 0; 
-                                    i1 < l1.getLength(); 
-                                    i1++
-                                ) {
+                                for (int i1 = 0; i1 < l1.getLength(); i1++) {
                                     org.w3c.dom.Node n1 = l1.item(i1);
                                     if ("_multiplicity".equals(n1.getAttributes().getNamedItem("name").getNodeValue())) {
                                         ImportHandler.attributeMultiplicities.put(
@@ -375,17 +359,11 @@ public class ImportHandler extends DefaultHandler {
                             }
                             // xsd:extension base=
                             org.w3c.dom.Node extension = element;
-                            while (
-                                extension != null &&
-                                !"xsd:extension".equals(extension.getNodeName())
-                            ) {
+                            while (extension != null &&
+                                !"xsd:extension".equals(extension.getNodeName())) {
                                 org.w3c.dom.NodeList children = extension.getChildNodes();
                                 extension = null;
-                                for (
-                                    int k = 0; 
-                                    k < children.getLength(); 
-                                    k++
-                                ) {
+                                for (int k = 0; k < children.getLength(); k++) {
                                     if (children.item(k).getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
                                         extension = children.item(k);
                                         break;
@@ -413,7 +391,7 @@ public class ImportHandler extends DefaultHandler {
                             // SysLog.warning("type for attribute " +
                             // attributeName +
                             // " not defined. Assuming org:w3c:string");
-                            attributeTypeName = "org.w3c.string";
+                            attributeTypeName = FALLBACK_ATTRIBUTE_TYPE;
                         }
                         ImportHandler.attributeTypes.put(
                             complexTypeName.getNodeValue().replace('.', ':') + ":" + attributeName.getNodeValue(),
@@ -434,30 +412,30 @@ public class ImportHandler extends DefaultHandler {
      */
     private void loadMetaData(
         String uriSchema
-    ) throws ServiceException {
-        if("xri://+resource/org/omg/model1/xmi1/model1.xsd".equals(uriSchema)) {
+    )
+        throws ServiceException {
+        if ("xri://+resource/org/omg/model1/xmi1/model1.xsd".equals(uriSchema)) {
             Model1MetaData.amendAttributeTypes(attributeTypes);
             Model1MetaData.amendAttributeMultiplicities(attributeMultiplicities);
             Model1MetaData.amendQualifierNames(qualifierNames);
-        } else try {
-            org.w3c.dom.Document schemaDocument = DocumentBuilderFactory.newInstance(
-            ).newDocumentBuilder(
-            ).parse(
-                this.getSchemaInputSource(uriSchema)
-            );
-            this.initTypes(schemaDocument);
-        } catch (Exception exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                "Could not retrieve meta data from schema",
-                new BasicException.Parameter("schema", uriSchema)
-            );
-        }
+        } else
+            try {
+                org.w3c.dom.Document schemaDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
+                    this.getSchemaInputSource(uriSchema)
+                );
+                this.initTypes(schemaDocument);
+            } catch (Exception exception) {
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION,
+                    "Could not retrieve meta data from schema",
+                    new BasicException.Parameter("schema", uriSchema)
+                );
+            }
         ImportHandler.loadedSchemas.add(uriSchema);
     }
-    
+
     /**
      * Retrieve the meta data if necessary
      * 
@@ -466,14 +444,16 @@ public class ImportHandler extends DefaultHandler {
      */
     private void retrieveMetaData(
         String uriSchema
-    ) throws SAXException {
+    )
+        throws SAXException {
         try {
-            if(uriSchema.indexOf("/xmi/") > 0) throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                "\"/xmi/\" directory no longer supported",
-                new BasicException.Parameter("uri", uriSchema)
-            );
+            if (uriSchema.indexOf("/xmi/") > 0)
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED,
+                    "\"/xmi/\" directory no longer supported",
+                    new BasicException.Parameter("uri", uriSchema)
+                );
             synchronized (ImportHandler.loadedSchemas) {
                 if (!ImportHandler.loadedSchemas.contains(uriSchema)) {
                     loadMetaData(uriSchema);
@@ -483,21 +463,22 @@ public class ImportHandler extends DefaultHandler {
             throw new SAXException(exception.log());
         }
     }
-    
 
     // ------------------------------------------------------------------------
     // Implements ContentHandler
     // ------------------------------------------------------------------------
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.helpers.DefaultHandler#startDocument()
      */
     @Override
-    public void startDocument(
-    ) throws SAXException {
+    public void startDocument()
+        throws SAXException {
         this.currentPath = new Path("");
         this.objectStack = new Stack<ObjectRecord>();
-        this.objectElements = new HashMap<String,Map<String,String>>();
+        this.objectElements = new HashMap<String, Map<String, String>>();
         this.currentObject = null;
         this.currentAttributeValue = null;
         this.previousElementEnded = true;
@@ -513,25 +494,19 @@ public class ImportHandler extends DefaultHandler {
         String localpart,
         String rawname,
         Attributes attributes
-    ) throws SAXException {
+    )
+        throws SAXException {
         this.previousElementEnded = false;
         this.currentAttributeValue = null;
         // check whether to load schema
-        for (
-            int i = 0; 
-            i < attributes.getLength(); 
-            i++
-        ) {
+        for (int i = 0; i < attributes.getLength(); i++) {
             if ("noNamespaceSchemaLocation".equals(attributes.getLocalName(i))) {
                 this.retrieveMetaData(attributes.getValue(i));
             }
         }
         List<String> element = parseElement(localpart);
         String qualifierName = ImportHandler.qualifierNames.get(localpart);
-        String multiplicityKey = this.currentLocalpartObject + ":" + localpart;
-        final String attributeMultiplicity = ImportHandler.attributeMultiplicities.get(
-            multiplicityKey
-        );
+        final Multiplicity attributeMultiplicity = getCurrentAttributeMultiplicity(localpart);
         //
         // element has a qualifier --> new object
         //
@@ -545,7 +520,7 @@ public class ImportHandler extends DefaultHandler {
                 // - <qualifier> - "_qualifier" (fixed) - "_operation"
                 // (optional)
                 //
-                Map<String,String> attributeValues = new HashMap<String,String>();
+                Map<String, String> attributeValues = new HashMap<String, String>();
                 attributeValues.put("_qualifier", qualifierName);
                 for (int i = 0; i < attributes.getLength(); i++) {
                     String attributeName = attributes.getLocalName(i);
@@ -553,17 +528,17 @@ public class ImportHandler extends DefaultHandler {
                         && !"_qualifier".equals(attributeName)
                         && !"noNamespaceSchemaLocation".equals(attributeName)
                         && !"xsi".equals(attributeName)) {
-                        attributeValues.put(attributeName, attributes
-                            .getValue(i));
+                        attributeValues.put(
+                            attributeName, attributes
+                                .getValue(i)
+                        );
                     }
                 }
                 if (this.currentPath.size() < 4) {
                     // "null" fix for Authority|Provider
-                    attributeValues.put("_operation", "null"); 
-                } else  if (
-                    attributeValues.size() < 3 ||
-                    "".equals(attributeValues.get("_operation"))
-                ) {
+                    attributeValues.put("_operation", "null");
+                } else if (attributeValues.size() < 3 ||
+                    "".equals(attributeValues.get("_operation"))) {
                     // "set" is the default operation
                     attributeValues.put("_operation", this.defaultImportMode.name().toLowerCase());
                 }
@@ -576,60 +551,59 @@ public class ImportHandler extends DefaultHandler {
                         new BasicException.Parameter("localpart", localpart),
                         new BasicException.Parameter(
                             "attributes",
-                            attributeValues));
+                            attributeValues
+                        )
+                    );
                 }
                 this.objectElements.put(localpart, attributeValues);
                 this.currentPath = this.currentPath.getChild(
                     "".equals(qualifier) ? ":" + this.nextTemporaryId-- : qualifier
                 );
                 this.currentObject = Facades.newObject(
-				    this.currentPath,
-				    this.toNameComponent(element)
-				).getDelegate(
-				);
-				String operation = attributeValues.get("_operation");
-				if (!"null".equals(operation)) {
-				    Path objectId = Object_2Facade.getPath(this.currentObject);
-				    // An object and its sub-objects are processed as a single
-				    // unit of work
-				    if (this.pendingAt == -1) {
-				        this.pendingAt = objectId.size();
-				    }
-				    if("create".equals(operation)) {
-				        this.currentObjectOperation = ImportMode.CREATE;
-				    } else if ("set".equals(operation)) {
-				        this.currentObjectOperation = ImportMode.SET;
-				    } else if ("update".equals(operation)) {
-				        this.currentObjectOperation = ImportMode.UPDATE;
-				    } else if (
-				        "operation".equals(operation) || 
-				        "remove".equals(operation)
-				    ) {
-				        //
-				        // unsupported request
-				        //
-				        throw new ServiceException(
-				            BasicException.Code.DEFAULT_DOMAIN,
-				            BasicException.Code.NOT_SUPPORTED,
-				            "No longer supported _operation argument",
-				            new BasicException.Parameter("xri", objectId),
-				            new BasicException.Parameter("unsupported","operation","remove"),
-				            new BasicException.Parameter("requested", operation)
-				        );
-				    } else {
-				        //
-				        // illegal request
-				        //
-				        throw new ServiceException(
-				            BasicException.Code.DEFAULT_DOMAIN,
-				            BasicException.Code.NOT_SUPPORTED,
-				            "Unsupported _operation argument",
-				            new BasicException.Parameter("xri", objectId),
-				            new BasicException.Parameter("supported", "", "null", "set", "create", "update"),
-				            new BasicException.Parameter("requested", operation)
-				        );
-				    }
-				}
+                    this.currentPath,
+                    this.toNameComponent(element)
+                ).getDelegate();
+                String operation = attributeValues.get("_operation");
+                if (!"null".equals(operation)) {
+                    Path objectId = Object_2Facade.getPath(this.currentObject);
+                    // An object and its sub-objects are processed as a single
+                    // unit of work
+                    if (this.pendingAt == -1) {
+                        this.pendingAt = objectId.size();
+                    }
+                    if ("create".equals(operation)) {
+                        this.currentObjectOperation = ImportMode.CREATE;
+                    } else if ("set".equals(operation)) {
+                        this.currentObjectOperation = ImportMode.SET;
+                    } else if ("update".equals(operation)) {
+                        this.currentObjectOperation = ImportMode.UPDATE;
+                    } else if ("operation".equals(operation) ||
+                        "remove".equals(operation)) {
+                        //
+                        // unsupported request
+                        //
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_SUPPORTED,
+                            "No longer supported _operation argument",
+                            new BasicException.Parameter(BasicException.Parameter.XRI, objectId),
+                            new BasicException.Parameter("unsupported", "operation", "remove"),
+                            new BasicException.Parameter("requested", operation)
+                        );
+                    } else {
+                        //
+                        // illegal request
+                        //
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_SUPPORTED,
+                            "Unsupported _operation argument",
+                            new BasicException.Parameter(BasicException.Parameter.XRI, objectId),
+                            new BasicException.Parameter("supported", "", "null", "set", "create", "update"),
+                            new BasicException.Parameter("requested", operation)
+                        );
+                    }
+                }
             } catch (ServiceException e) {
                 throw new SAXException(e);
             }
@@ -639,48 +613,38 @@ public class ImportHandler extends DefaultHandler {
             //
             this.currentAttributeOperation = attributes.getValue("_operation");
             final String _position = attributes.getValue("_position");
-			int position = _position == null ? 0 : Integer.parseInt(_position);
+            int position = _position == null ? 0 : Integer.parseInt(_position);
             this.currentAttributePosition = position == -1 ? this.currentAttributePosition + 1 : position;
             this.currentAttributeKey = attributes.getValue("_key");
-        } else if (
-            Multiplicity.SET.code().equals(attributeMultiplicity) ||
-            Multiplicity.LIST.code().equals(attributeMultiplicity) ||
-            Multiplicity.SPARSEARRAY.code().equals(attributeMultiplicity) ||
-            ModelHelper.UNBOUND.equals(attributeMultiplicity)
-        ) {
+        } else if (attributeMultiplicity != null && attributeMultiplicity.isMultiValued()) {
+            // multi-valued attribute with attributes 'offset', 'multiplicity' last
+            // component of the element is the unqualified element name
+            this.currentAttributeName = localpart;
+            this.currentAttributeMultiplicity = attributeMultiplicity;
             try {
-                // multi-valued attribute with attributes 'offset', 'multiplicity' last
-                // component of the element is the unqualified element name
-                this.currentPath = this.currentPath.getChild(
-                    element.get(element.size() - 1)
-                );
-                this.currentAttributeName = localpart;
-                this.currentAttributeOffset = attributes.getValue("_offset") == null ? 0 :  Integer.parseInt(
-                    attributes.getValue("_offset")
-                );
-                this.currentAttributeMultiplicity = attributeMultiplicity;
-                this.currentAttributePosition = -1;
-                Facades.asObject(this.currentObject).clearAttributeValuesAsList(this.currentAttributeName);
-            } catch (ServiceException exception) {
-                throw new SAXException(exception);
-            }
-        } else if (
-            Multiplicity.MAP.code().equals(attributeMultiplicity)
-        ) {
-            try {
-                // multi-valued attribute with attributes 'offset', 'multiplicity' last
-                // component of the element is the unqualified element name
-                String featureName = element.get(element.size() - 1);
-                this.currentPath = this.currentPath.getChild(featureName);
-                this.currentAttributeName = localpart;
-                this.currentAttributeOffset = 0; // no offset for maps
-                this.currentAttributeMultiplicity = attributeMultiplicity;
-                this.currentAttributePosition = -1; // no position for maps
-                Facades.asObject(
-                    this.currentObject
-                ).attributeValuesAsMap(
-                    this.currentAttributeName
-                ).clear();
+                if (attributeMultiplicity.isCollection()) {
+                    // LIST, SET, SPARSEARRAY
+                    this.currentPath = this.currentPath.getChild(
+                        element.get(element.size() - 1)
+                    );
+                    this.currentAttributeOffset = attributes.getValue("_offset") == null ? 0
+                        : Integer.parseInt(
+                            attributes.getValue("_offset")
+                        );
+                    this.currentAttributePosition = -1;
+                    Facades.asObject(this.currentObject).clearAttributeValuesAsList(this.currentAttributeName);
+                } else {
+                    // MAP
+                    String featureName = element.get(element.size() - 1);
+                    this.currentPath = this.currentPath.getChild(featureName);
+                    this.currentAttributeOffset = 0; // no offset for maps
+                    this.currentAttributePosition = -1; // no position for maps
+                    Facades.asObject(
+                        this.currentObject
+                    ).attributeValuesAsMap(
+                        this.currentAttributeName
+                    ).clear();
+                }
             } catch (ServiceException exception) {
                 throw new SAXException(exception);
             }
@@ -703,41 +667,51 @@ public class ImportHandler extends DefaultHandler {
         }
     }
 
+    private Multiplicity getCurrentAttributeMultiplicity(String localpart) {
+        final String multiplicityKey = this.currentLocalpartObject + ":" + localpart;
+        final String attributeMultiplicity = ImportHandler.attributeMultiplicities.get(
+            multiplicityKey
+        );
+        return attributeMultiplicity == null ? null : Multiplicity.parse(attributeMultiplicity);
+    }
+
     /**
      * 
      */
     @Override
     public void characters(
-        char[] ch, 
-        int offset, 
+        char[] ch,
+        int offset,
         int length
-    ) throws SAXException {
+    )
+        throws SAXException {
         if (this.currentAttributeValue == null) {
             this.currentAttributeValue = new StringBuilder();
         }
         this.currentAttributeValue.append(ch, offset, length);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
     public void endElement(
-        String uri, 
-        String localName, 
+        String uri,
+        String localName,
         String qName
-    ) throws SAXException {
+    )
+        throws SAXException {
         try {
             //
             // The end element corresponds to an Object. Process the
             // currentObject and get next from stack
             //
-            if (
-                "_object".equals(localName) || 
-                this.objectElements.get(localName) != null
-            ) {
+            if ("_object".equals(localName) ||
+                this.objectElements.get(localName) != null) {
                 if (this.currentObject != null) {
-                    if(this.currentObjectOperation != null) {
+                    if (this.currentObjectOperation != null) {
                         this.target.importObject(this.currentObjectOperation, this.currentObject);
                         this.currentObjectOperation = null;
                     }
@@ -759,260 +733,221 @@ public class ImportHandler extends DefaultHandler {
                 //
                 // In v3 format there are never pending objects.
                 //
-                if (
-                    "_object".equals(localName) && 
-                    (this.currentObject != null || !this.objectStack.isEmpty())
-                ) {
+                if ("_object".equals(localName) &&
+                    (this.currentObject != null || !this.objectStack.isEmpty())) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
                         "pending object found. There must be no pending objects in v3 schema format.",
-                        new BasicException.Parameter("object",this.currentObject)
+                        new BasicException.Parameter("object", this.currentObject)
                     );
                 }
             }
             // it is an end element of a Attribute|Reference|StructureType
             else if (this.currentObject != null) {
-                //
-                // The default object to store the values is currentObject.
-                // However, in the case of StructureTypes the objects are nested and the 
-                // target  object has to be set to correct nested object.
-                //
-                //   MappedRecord targetObject = this.currentObject;
-                //   for(
-                //     int i = this.currentObject.path().size() + 1;
-                //     i < this.currentPath.size() - 1;
-                //     i++
-                //   ) {
-                //     String attributeName = this.currentPath.get(i);
-                //     if(targetObject.getValues(attributeName) == null) {
-                //       targetObject.values(attributeName).add(
-                //         targetObject = new DataproviderObject(this.currentPath.getPrefix(i+1))
-                //        );
-                //     }
-                //   }
-                //
                 /**
                  * store attribute value the attribute value between two closing
                  * elements is a sequence of blanks. Skip this value
                  */
                 if (!this.previousElementEnded) {
-                    if (this.currentAttributeValue != null) {
-                        Object_2Facade facade = Facades.asObject(this.currentObject);
-                        // attribute name
-                        String attributeName = this.currentPath.getLastSegment().toClassicRepresentation();
-                        String qualifiedClassName = facade.getValue().getRecordName();
-                        // attribute type
-                        String attributeType = ImportHandler.attributeTypes.get(qualifiedClassName + ":" + this.currentAttributeName);
-                        if (attributeType == null) {
-                            attributeType = "org.w3c.string";
-                        }
-                        java.lang.Object value = null;
-                        if ("org.w3c.string".equals(attributeType) || "string".equals(attributeType)) {
-                            value = this.currentAttributeValue.toString();
-                        } else if ("org.w3c.short".equals(attributeType) || "short".equals(attributeType)) {
-                            String v = this.currentAttributeValue.toString().trim();
-                            if (v.length() > 0) {
-                                value = Short.valueOf(v);
-                            }
-                        } else if ("org.w3c.long".equals(attributeType) || "long".equals(attributeType)) {
-                            String v = this.currentAttributeValue.toString().trim();
-                            if (v.length() > 0) {
-                                value = Long.valueOf(v);
-                            }
-                        } else if ("org.w3c.integer".equals(attributeType) || "integer".equals(attributeType)) {
-                            String v = this.currentAttributeValue.toString().trim();
-                            if (v.length() > 0) {
-                                value = Integer.valueOf(v);
-                            }
-                        } else if ("org.w3c.decimal".equals(attributeType) || "decimal".equals(attributeType)) {
-                            String v = this.currentAttributeValue.toString().trim();
-                            if (v.length() > 0) {
-                                value = new BigDecimal(v);
-                            }
-                        } else if ("org.w3c.boolean".equals(attributeType) || "boolean".equals(attributeType)) {
-                            String v = this.currentAttributeValue.toString().trim();
-                            if (v.length() > 0) {
-                                value = Boolean.valueOf(v);
-                            }
-                        } else if ("org.w3c.dateTime".equals(attributeType) || "dateTime".equals(attributeType)) {
-                            String v = this.currentAttributeValue.toString().trim();
-                            if (v.length() > 0) {
-                                value = parseDateTime(v);
-                            }
-                        } else if ("org.w3c.date".equals(attributeType) || "date".equals(attributeType)) {
-                            String v = this.currentAttributeValue.toString().trim();
-                            if (v.length() > 0) {
-                                try {
-                                    value = Datatypes.create(
-                                        XMLGregorianCalendar.class,
-                                        v
-                                    );
-                                } catch (IllegalArgumentException e) {
-                                    throw new ServiceException(e);
-                                }
-                            }
-                        } else if ("org.openmdx.base.duration".equals(attributeType)) {
-                            value = Datatypes.create(Duration.class, this.currentAttributeValue.toString().trim());
-                        } else if ("org.openmdx.base.anyURI".equals(attributeType)) {
-                            value = Datatypes.create(URI.class, this.currentAttributeValue.toString().trim());
-                        } else if ("org.openmdx.base.ObjectId".equals(attributeType)) {
-                            Path pathValue = new Path(
-                                this.currentAttributeValue.toString().trim()
-                            );
-                            int index = cachedParentPaths.indexOf(pathValue.getParent());
-                            if(index >= 0) {
-                                value = cachedParentPaths.get(index).getChild(pathValue.getLastSegment());
-                            } else {
-                                cachedParentPaths.add(pathValue.getParent());
-                                value = pathValue;
-                            }
-                        } else if ("org.w3c.binary".equals(attributeType)) {
-                            value = Base64.decode(
-                                this.currentAttributeValue.toString()
-                            );
-                        } else {
-                            ImportHandler.attributeTypes.put(
-                                qualifiedClassName + ":" + this.currentAttributeName,
-                                "org.w3c.string"
-                            );
-                            value = this.currentAttributeValue.toString();
-                        }
-                        //
-                        // Set values according to multiplicity and operation
-                        //
-                        boolean notSupported = false;
-                        int absolutePosition = this.currentAttributeOffset + this.currentAttributePosition;
-                        if (Multiplicity.SET.code().equalsIgnoreCase(this.currentAttributeMultiplicity)) {
-                            // SET
-                            List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
-                            if (
-                                this.currentAttributeOperation == null || 
-                                "".equals(this.currentAttributeOperation) || 
-                                "add".equals(this.currentAttributeOperation)
-                             ) {
-                                values.add(value);
-                            } else if ("remove".equals(this.currentAttributeOperation)) {
-                                values.remove(value);
-                            } else {
-                                notSupported = true;
-                            }
-                        } else if (
-                    		Multiplicity.LIST.code().equalsIgnoreCase(this.currentAttributeMultiplicity) || 
-                    		ModelHelper.UNBOUND.equals(this.currentAttributeMultiplicity)
-                        ) {
-                            // LIST
-                            List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
-                            if (
-                                this.currentAttributeOperation == null || 
-                                "".equals(this.currentAttributeOperation) || 
-                                "add".equals(this.currentAttributeOperation)
-                            ) {
-                                values.add(value);
-                            } else if ("remove".equals(this.currentAttributeOperation)) {
-                                values.remove(value);
-                            } else if ("set".equals(this.currentAttributeOperation)) {
-                                values.set(absolutePosition, value);
-                            } else {
-                                notSupported = true;
-                            }
-                        } else if (
-                            this.currentAttributeMultiplicity == null || 
-                            Multiplicity.SPARSEARRAY.code().equalsIgnoreCase(this.currentAttributeMultiplicity)
-                        ) {
-                            // SPARSEARRAY
-                            // In case of v2 format the multiplicity is not set
-                            if (
-                                this.currentAttributeOperation == null || 
-                                "".equals(this.currentAttributeOperation) || 
-                                "set".equals(this.currentAttributeOperation)
-                            ) {
-                                if(facade.isTypeSafe()) {
-                                    if(facade.isCollection(attributeName)) {
-                                        if (absolutePosition < 0) {
-                                            Collection<Object> values = facade.attributeValuesAsCollection(attributeName);
-                                            values.add(value);
-                                        } else {
-                                            List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
-                                            values.set(absolutePosition, value);
-                                        }
-                                    } else {
-                                        facade.setAttributeValue(attributeName, value);
-                                    }
-                                } else {
-                                    List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
+                    Object_2Facade facade = Facades.asObject(this.currentObject);
+                    // attribute name
+                    String attributeName = this.currentPath.getLastSegment().toClassicRepresentation();
+                    java.lang.Object value = getCurrentAttributeValue();
+                    //
+                    // Set values according to multiplicity and operation
+                    //
+                    boolean supported = true;
+                    int absolutePosition = this.currentAttributeOffset + this.currentAttributePosition;
+
+                    if (this.currentAttributeMultiplicity == null) {
+                        // SPARSEARRAY
+                        // In case of v2 format the multiplicity is not set
+                        if (this.currentAttributeOperation == null ||
+                            "".equals(this.currentAttributeOperation) ||
+                            "set".equals(this.currentAttributeOperation)) {
+                            if (facade.isTypeSafe()) {
+                                if (facade.isCollection(attributeName)) {
                                     if (absolutePosition < 0) {
+                                        Collection<Object> values = facade.attributeValuesAsCollection(attributeName);
                                         values.add(value);
                                     } else {
+                                        List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
                                         values.set(absolutePosition, value);
                                     }
+                                } else {
+                                    facade.setAttributeValue(attributeName, value);
                                 }
-                            } else if ("add".equals(this.currentAttributeOperation)) {
-                                List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
-                                values.add(value);
-                            } else if ("remove".equals(this.currentAttributeOperation)) {
-                                List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
-                                values.remove(value);
                             } else {
-                                notSupported = true;
+                                List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
+                                if (absolutePosition < 0) {
+                                    values.add(value);
+                                } else {
+                                    values.set(absolutePosition, value);
+                                }
                             }
-                        } else if (
-                            Multiplicity.MAP.code().equalsIgnoreCase(this.currentAttributeMultiplicity)
-                        ) {
-                            Map<String, Object> values = facade.attributeValuesAsMap(attributeName);
-                            if(this.currentAttributeKey == null) {
-                                throw new ServiceException(
-                                    BasicException.Code.DEFAULT_DOMAIN,
-                                    BasicException.Code.ASSERTION_FAILURE,
-                                    "Map items need a _key",
-                                    new BasicException.Parameter("object",this.currentObject),
-                                    new BasicException.Parameter("_multiplicity",this.currentAttributeMultiplicity)
-                                );
-                            }
-                            values.put(this.currentAttributeKey, value);
+                        } else if ("add".equals(this.currentAttributeOperation)) {
+                            List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
+                            values.add(value);
+                        } else if ("remove".equals(this.currentAttributeOperation)) {
+                            List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
+                            values.remove(value);
                         } else {
-                            // unsupported multiplicity
-                            notSupported = true;
+                            supported = false;
                         }
-                        if (notSupported) {
-                            throw new ServiceException(
-                                BasicException.Code.DEFAULT_DOMAIN,
-                                BasicException.Code.NOT_SUPPORTED,
-                                "attribute operation for this multiplicity not supported.",
-                                new BasicException.Parameter(
-                                    "object",
-                                    this.currentObject
-                                ),
-                                new BasicException.Parameter(
-                                    "attribute",
-                                    this.currentAttributeName
-                                ),
-                                new BasicException.Parameter(
-                                    "operation",
-                                    this.currentAttributeOperation
-                                ),
-                                new BasicException.Parameter(
-                                    "multiplicity",
-                                    this.currentAttributeMultiplicity
-                                )
-                            );
-                        }
-                        this.currentAttributeOperation = null;
                     } else {
-                        SysLog.detail("no value for " + localName);
+                        switch (this.currentAttributeMultiplicity) {
+                            case SET: {
+                                final List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
+                                switch (getCurrentAttributeOperation(AttributeOperation.ADD)) {
+                                    case ADD:
+                                        if (value != null) {
+                                            values.add(value);
+                                        }
+                                        break;
+                                    case REMOVE:
+                                        values.remove(value);
+                                        break;
+                                    default:
+                                        supported = false;
+                                }
+                            }
+                                break;
+                            case LIST: {
+                                List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
+                                switch (getCurrentAttributeOperation(AttributeOperation.ADD)) {
+                                    case ADD:
+                                        if (value != null) {
+                                            values.add(value);
+                                        }
+                                        break;
+                                    case REMOVE:
+                                        values.remove(value);
+                                        break;
+                                    case SET:
+                                        values.set(absolutePosition, value);
+                                        break;
+                                    default:
+                                        supported = false;
+                                }
+                            }
+                                break;
+                            case SPARSEARRAY:
+                                switch (getCurrentAttributeOperation(AttributeOperation.ADD)) {
+                                    case SET:
+                                        if (facade.isTypeSafe()) {
+                                            if (facade.isCollection(attributeName)) {
+                                                if (absolutePosition < 0) {
+                                                    if (value != null) {
+                                                        Collection<Object> values = facade.attributeValuesAsCollection(attributeName);
+                                                        values.add(value);
+                                                    }
+                                                } else {
+                                                    List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
+                                                    values.set(absolutePosition, value);
+                                                }
+                                            } else {
+                                                facade.setAttributeValue(attributeName, value);
+                                            }
+                                        } else {
+                                            List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
+                                            if (absolutePosition < 0) {
+                                                if (value != null) {
+                                                    values.add(value);
+                                                }
+                                            } else {
+                                                values.set(absolutePosition, value);
+                                            }
+                                        }
+                                        break;
+                                    case ADD: {
+                                        if (value != null) {
+                                            List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
+                                            values.add(value);
+                                        }
+                                    }
+                                        break;
+                                    case REMOVE: {
+                                        List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
+                                        if (value != null) {
+                                            values.remove(value);
+                                        } else if (absolutePosition >= 0) {
+                                            values.remove(absolutePosition);
+                                        } else {
+                                            supported = false;
+                                        }
+                                    }
+                                        break;
+                                    default:
+                                        supported = false;
+                                }
+                                break;
+                            case MAP:
+                                if (value != null) {
+                                    final Map<String, Object> values = facade.attributeValuesAsMap(attributeName);
+                                    if (this.currentAttributeKey == null) {
+                                        throw new ServiceException(
+                                            BasicException.Code.DEFAULT_DOMAIN,
+                                            BasicException.Code.ASSERTION_FAILURE,
+                                            "Map items need a _key",
+                                            new BasicException.Parameter("object", this.currentObject),
+                                            new BasicException.Parameter("_multiplicity", this.currentAttributeMultiplicity)
+                                        );
+                                    }
+                                    switch (getCurrentAttributeOperation(AttributeOperation.SET)) {
+                                        case SET:
+                                            values.put(this.currentAttributeKey, value);
+                                            break;
+                                        case REMOVE:
+                                            values.remove(this.currentAttributeKey, value);
+                                            break;
+                                        default:
+                                            supported = false;
+                                    }
+                                }
+                                break;
+                            default:
+                                supported = false;
+                        }
                     }
+                    if (!supported) {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_SUPPORTED,
+                            "attribute operation for this multiplicity not supported.",
+                            new BasicException.Parameter(
+                                "object",
+                                this.currentObject
+                            ),
+                            new BasicException.Parameter(
+                                "attribute",
+                                this.currentAttributeName
+                            ),
+                            new BasicException.Parameter(
+                                "operation",
+                                this.currentAttributeOperation
+                            ),
+                            new BasicException.Parameter(
+                                "multiplicity",
+                                this.currentAttributeMultiplicity
+                            ),
+                            new BasicException.Parameter(
+                                "value",
+                                value
+                            )
+                        );
+                    }
+                    this.currentAttributeOperation = null;
                 }
             }
-            if (
-                !"_item".equals(localName) && 
-                !"_object".equals(localName) && 
-                !"_content".equals(localName)
-            ) {
+            if (!"_item".equals(localName) &&
+                !"_object".equals(localName) &&
+                !"_content".equals(localName)) {
                 // </item> is the end tag for a value of a multi-valued attribute.
                 // Leave currentPath unchanged.
                 this.currentPath = this.currentPath.getParent();
                 this.currentAttributeMultiplicity = null;
-             }
+            }
             this.currentAttributeValue = null;
             this.previousElementEnded = true;
         } catch (ServiceException exception) {
@@ -1026,25 +961,123 @@ public class ImportHandler extends DefaultHandler {
         }
     }
 
+    private AttributeOperation getCurrentAttributeOperation(
+        AttributeOperation defaultValue
+    ) {
+        return this.currentAttributeOperation == null || this.currentAttributeOperation.isEmpty() ? defaultValue
+            : AttributeOperation.parse(this.currentAttributeOperation);
+    }
+
+    private java.lang.Object getCurrentAttributeValue()
+        throws ServiceException {
+        // attribute type
+        String attributeType = getCurrentAttributeType();
+        if (this.currentAttributeValue != null) {
+            if (FALLBACK_ATTRIBUTE_TYPE.equals(attributeType) || "string".equals(attributeType)) {
+                return this.currentAttributeValue.toString();
+            } else if ("org.w3c.short".equals(attributeType) || "short".equals(attributeType)) {
+                String v = this.currentAttributeValue.toString().trim();
+                if (v.length() > 0) {
+                    return Short.valueOf(v);
+                }
+            } else if ("org.w3c.long".equals(attributeType) || "long".equals(attributeType)) {
+                String v = this.currentAttributeValue.toString().trim();
+                if (v.length() > 0) {
+                    return Long.valueOf(v);
+                }
+            } else if ("org.w3c.integer".equals(attributeType) || "integer".equals(attributeType)) {
+                String v = this.currentAttributeValue.toString().trim();
+                if (v.length() > 0) {
+                    return Integer.valueOf(v);
+                }
+            } else if ("org.w3c.decimal".equals(attributeType) || "decimal".equals(attributeType)) {
+                String v = this.currentAttributeValue.toString().trim();
+                if (v.length() > 0) {
+                    return new BigDecimal(v);
+                }
+            } else if ("org.w3c.boolean".equals(attributeType) || "boolean".equals(attributeType)) {
+                String v = this.currentAttributeValue.toString().trim();
+                if (v.length() > 0) {
+                    return Boolean.valueOf(v);
+                }
+            } else if ("org.w3c.dateTime".equals(attributeType) || "dateTime".equals(attributeType)) {
+                String v = this.currentAttributeValue.toString().trim();
+                if (v.length() > 0) {
+                    return parseDateTime(v);
+                }
+            } else if ("org.w3c.date".equals(attributeType) || "date".equals(attributeType)) {
+                String v = this.currentAttributeValue.toString().trim();
+                if (v.length() > 0) {
+                    try {
+                        return Datatypes.create(
+                            XMLGregorianCalendar.class,
+                            v
+                        );
+                    } catch (IllegalArgumentException e) {
+                        throw new ServiceException(e);
+                    }
+                }
+            } else if ("org.openmdx.base.duration".equals(attributeType)) {
+                return Datatypes.create(Duration.class, this.currentAttributeValue.toString().trim());
+            } else if ("org.openmdx.base.anyURI".equals(attributeType)) {
+                return Datatypes.create(URI.class, this.currentAttributeValue.toString().trim());
+            } else if ("org.openmdx.base.ObjectId".equals(attributeType)) {
+                Path pathValue = new Path(
+                    this.currentAttributeValue.toString().trim()
+                );
+                int index = cachedParentPaths.indexOf(pathValue.getParent());
+                if (index >= 0) {
+                    return cachedParentPaths.get(index).getChild(pathValue.getLastSegment());
+                } else {
+                    cachedParentPaths.add(pathValue.getParent());
+                    return pathValue;
+                }
+            } else if ("org.w3c.binary".equals(attributeType)) {
+                return Base64.decode(
+                    this.currentAttributeValue.toString()
+                );
+            } else {
+                ImportHandler.attributeTypes.put(
+                    getQualifiedCurrentAttributeName(),
+                    FALLBACK_ATTRIBUTE_TYPE
+                );
+                return this.currentAttributeValue.toString();
+            }
+        }
+        return null;
+    }
+
+    private String getCurrentAttributeType() {
+        String attributeType = ImportHandler.attributeTypes.get(getQualifiedCurrentAttributeName());
+        return attributeType == null ? FALLBACK_ATTRIBUTE_TYPE : attributeType;
+    }
+
+    private String getQualifiedCurrentAttributeName() {
+        final String qualifiedClassName = this.currentObject.getValue().getRecordName();
+        return qualifiedClassName + ":" + this.currentAttributeName;
+    }
+
     /**
      * timePoint is of the form 2001-09-29T15:45:21.798Z
      * 
-     * @param source the time stamp to be parsed
+     * @param source
+     *            the time stamp to be parsed
      * 
      * @return the date/time value
      * 
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     private Date parseDateTime(
         String source
-    ) throws ServiceException{
+    )
+        throws ServiceException {
         String v = source;
         try {
             //
             // Handle UTC date/time value
             // 
-            for(String utcId : UTC_IDS) {
-                if(v.endsWith(utcId)) {
+            for (String utcId : UTC_IDS) {
+                if (v.endsWith(utcId)) {
                     return Datatypes.create(Date.class, v);
                 }
             }
@@ -1053,18 +1086,14 @@ public class ImportHandler extends DefaultHandler {
             //
             int timePosition = v.indexOf('T');
             int timeZonePosition = v.lastIndexOf('+', timePosition);
-            if(timeZonePosition < 0) {
+            if (timeZonePosition < 0) {
                 timeZonePosition = v.lastIndexOf('-', timePosition);
             }
-            if (
-                timeZonePosition > timePosition && 
-                !v.regionMatches(true, timeZonePosition - 3, "GMT", 0, 3)
-            ){
+            if (timeZonePosition > timePosition &&
+                !v.regionMatches(true, timeZonePosition - 3, "GMT", 0, 3)) {
                 v = v.substring(0, timeZonePosition) + "GMT" + v.substring(timeZonePosition);
             }
-            return (
-                v.indexOf('.', timePosition) < 0 ? localSecondFormat : localMillisecondFormat
-            ).parse(
+            return (v.indexOf('.', timePosition) < 0 ? localSecondFormat : localMillisecondFormat).parse(
                 v
             );
         } catch (IllegalArgumentException exception) {
@@ -1073,8 +1102,7 @@ public class ImportHandler extends DefaultHandler {
             throw new ServiceException(e);
         }
     }
-    
-    
+
     // ------------------------------------------------------------------------
     // Implements errorHandler
     // ------------------------------------------------------------------------
@@ -1105,24 +1133,30 @@ public class ImportHandler extends DefaultHandler {
         );
         return str.toString();
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.helpers.DefaultHandler#warning(org.xml.sax.SAXParseException)
      */
     @Override
     public void warning(
         SAXParseException e
-    ) throws SAXException {
+    )
+        throws SAXException {
         SysLog.warning(getLocationString(e), e.getMessage());
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.helpers.DefaultHandler#error(org.xml.sax.SAXParseException)
      */
     @Override
     public void error(
         SAXParseException e
-    ) throws SAXException {
+    )
+        throws SAXException {
         throw new SAXException(
             new ServiceException(
                 e,
@@ -1135,24 +1169,28 @@ public class ImportHandler extends DefaultHandler {
         );
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.helpers.DefaultHandler#fatalError(org.xml.sax.SAXParseException)
      */
     @Override
     public void fatalError(
         SAXParseException e
-    ) throws SAXException {
-        throw new SAXException(new ServiceException(
-            e,
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.PROCESSING_FAILURE,
-            "fatal XML parse error",
-            new BasicException.Parameter("message", e.getMessage()),
-            new BasicException.Parameter("location", getLocationString(e)))
+    )
+        throws SAXException {
+        throw new SAXException(
+            new ServiceException(
+                e,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.PROCESSING_FAILURE,
+                "fatal XML parse error",
+                new BasicException.Parameter("message", e.getMessage()),
+                new BasicException.Parameter("location", getLocationString(e))
+            )
         );
     }
 
-    
     // ------------------------------------------------------------------------
     // XmlImporter
     // ------------------------------------------------------------------------
@@ -1181,8 +1219,7 @@ public class ImportHandler extends DefaultHandler {
         if (nameElements.size() == 0) {
             return "";
         }
-        StringBuilder nameComponent =
-            new StringBuilder(nameElements.get(0));
+        StringBuilder nameComponent = new StringBuilder(nameElements.get(0));
         for (int i = 1; i < nameElements.size(); i++) {
             nameComponent.append(':').append(nameElements.get(i));
         }
@@ -1191,11 +1228,12 @@ public class ImportHandler extends DefaultHandler {
 
     private InputSource getSchemaInputSource(
         String schemaUri
-    ) throws SAXException {
+    )
+        throws SAXException {
         final InputStream schemaSource;
-        if (schemaUri.startsWith(STANDARD_RESOURCE_PREFIX)){
+        if (schemaUri.startsWith(STANDARD_RESOURCE_PREFIX)) {
             schemaSource = Resources.getResourceAsStream(schemaUri.substring(STANDARD_RESOURCE_PREFIX.length()));
-        } else if(schemaUri.startsWith(LEGACY_RESOURCE_RPEFIX)) {
+        } else if (schemaUri.startsWith(LEGACY_RESOURCE_RPEFIX)) {
             SysLog.warning(
                 "Deprecated XRI 1 format 'xri:+resource', use 'xri://+resource/...'!",
                 schemaUri

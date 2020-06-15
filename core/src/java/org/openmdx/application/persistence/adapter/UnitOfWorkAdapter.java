@@ -229,7 +229,7 @@ class UnitOfWorkAdapter implements UnitOfWork {
     @Override
     public void setSynchronization(Synchronization sync) {
         this.transaction.setSynchronization(
-            new SynchronizationAdapter(sync)
+            new TransactionSynchronizationAdapter(sync)
         );
     }
 
@@ -241,8 +241,8 @@ class UnitOfWorkAdapter implements UnitOfWork {
         javax.transaction.Synchronization synchronization = this.transaction.getSynchronization();
         if(synchronization == null) {
             return null;
-        } else if (synchronization instanceof SynchronizationAdapter) {
-            return ((SynchronizationAdapter)synchronization).getDelegate();
+        } else if (synchronization instanceof TransactionSynchronizationAdapter) {
+            return ((TransactionSynchronizationAdapter)synchronization).getDelegate();
         } else {
             throw new JDOUserException(
                 "A synchronization object set to javax.jdo.Transaction " +
@@ -313,56 +313,6 @@ class UnitOfWorkAdapter implements UnitOfWork {
         throw new JDOFatalUserException(
             "The associated persistence manager does not support clear()"
         );
-    }
-
-    
-    //------------------------------------------------------------------------
-    // Class Synchronization Adapter
-    //------------------------------------------------------------------------
-    
-    /**
-     * Synchronization Adapter
-     */
-    static class SynchronizationAdapter implements javax.transaction.Synchronization {
-
-        /**
-         * Constructor 
-         *
-         * @param delegate
-         */
-        SynchronizationAdapter(
-            Synchronization delegate
-        ) {
-            this.delegate = delegate;
-        }
-
-        private final Synchronization delegate;
-        
-        /* (non-Javadoc)
-         * @see javax.transaction.Synchronization#afterCompletion(int)
-         */
-        @Override
-        public void afterCompletion(int status) {
-            this.delegate.afterCompletion(Status.valueOf(status));
-        }
-
-        /* (non-Javadoc)
-         * @see javax.transaction.Synchronization#beforeCompletion()
-         */
-        @Override
-        public void beforeCompletion() {
-            this.delegate.beforeCompletion();
-        }
-        
-        /**
-         * Retrieve delegate.
-         *
-         * @return Returns the delegate.
-         */
-        Synchronization getDelegate() {
-            return this.delegate;
-        }
-
     }
 
 }

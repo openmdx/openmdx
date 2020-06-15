@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>openMDX ~ Ant (jre-1.8)</name>
+	<name>openMDX ~ Ant (java-11)</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -35,19 +35,15 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>build</name>
-			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/ant/build</locationURI>
-		</link>
-		<link>
-			<name>etc</name>
-			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/ant/etc</locationURI>
-		</link>
-		<link>
-			<name>src</name>
-			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/ant/src</locationURI>
+			<name>openmdx.version.properties</name>
+			<type>1</type>
+			<locationURI>copy_PARENT/openmdx.version.properties</locationURI>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>copy_PARENT</name>
+			<value>$%7BPARENT-3-PROJECT_LOC%7D/Repository/openMDX-CSS</value>
+		</variable>
+	</variableList>
 </projectDescription>

@@ -64,6 +64,8 @@ import java.util.logging.Level;
 
 import javax.jdo.Extent;
 import javax.jdo.FetchPlan;
+import javax.jdo.JDOFatalDataStoreException;
+import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -116,8 +118,6 @@ import org.w3c.cci2.StringTypePredicate;
 
 /**
  * RefQuery_1_0 implementation
- * <p>
- * TODO handle reference to a PersistenceManager
  */
 @SuppressWarnings({
     "rawtypes", "unchecked"
@@ -132,11 +132,12 @@ public class RefQuery_1 implements RefQuery_1_0 {
      * @param filterType
      * @param subclasses
      */
-    protected RefQuery_1(
+    RefQuery_1(
         QueryFilterRecord filter,
         Mapping_1_0 mapping,
         String filterType,
-        boolean subclasses
+        boolean subclasses,
+        PersistenceManager persistenceManager
     ) {
         this.filter = filter == null ? new org.openmdx.base.rest.spi.QueryFilterRecord() : filter;
         this.filterType = filterType;
@@ -162,6 +163,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
         this.filterTypeCondition = indexOfFilterTypeCondition < 0 ? that.filterTypeCondition.clone()
             : (org.openmdx.base.rest.spi.ConditionRecord) this.filter.getCondition().get(indexOfFilterTypeCondition);
         this.mapping = that.mapping;
+        this.persistenceManager = that.persistenceManager;
     }
 
     //-----------------------------------------------------------------------
@@ -1955,7 +1957,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
                                 filterValue,
                                 getMapping(),
                                 typeName,
-                                true // subclasses
+                                true, // subclasses
+                                getPersistenceManager()
                             )));
             }
         } catch (ServiceException exception) {
@@ -2266,7 +2269,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
      */
     @Override
     public PersistenceManager getPersistenceManager() {
-        return null;
+        return this.persistenceManager;
     }
 
     /*
@@ -2622,7 +2625,88 @@ public class RefQuery_1 implements RefQuery_1_0 {
     protected final String filterType;
     protected final org.openmdx.base.rest.spi.ConditionRecord filterTypeCondition;
     protected final QueryFilterRecord filter;
+    private transient PersistenceManager persistenceManager;
     private transient Mapping_1_0 mapping;
+
+    /**
+     * The number of milliseconds allowed for read operations to complete
+     */
+    private Integer datastoreReadTimeoutMillis;
+
+    /**
+     * The number of milliseconds allowed for write operations to complete
+     */
+    private Integer datastoreWriteTimeoutMillis;
+    
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#setDatastoreReadTimeoutMillis(java.lang.Integer)
+     */
+    @Override
+    public void setDatastoreReadTimeoutMillis(Integer interval) {
+        this.datastoreReadTimeoutMillis = interval;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#getDatastoreReadTimeoutMillis()
+     */
+    @Override
+    public Integer getDatastoreReadTimeoutMillis() {
+        return this.datastoreReadTimeoutMillis;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#setDatastoreWriteTimeoutMillis(java.lang.Integer)
+     */
+    @Override
+    public void setDatastoreWriteTimeoutMillis(Integer interval) {
+        this.datastoreWriteTimeoutMillis = interval;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#getDatastoreWriteTimeoutMillis()
+     */
+    @Override
+    public Integer getDatastoreWriteTimeoutMillis() {
+        return this.datastoreWriteTimeoutMillis;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#cancelAll()
+     */
+    @Override
+    public void cancelAll() {
+        throw new JDOUnsupportedOptionException(
+            "Cancel is not supported by openMDX"
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#cancel(java.lang.Thread)
+     */
+    @Override
+    public void cancel(Thread thread) {
+        throw new JDOUnsupportedOptionException(
+            "Cancel is not supported by openMDX"
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#setSerializeRead(java.lang.Boolean)
+     */
+    @Override
+    public void setSerializeRead(Boolean serialize) {
+        if(Boolean.TRUE.equals(serialize)) {
+            throw new JDOFatalDataStoreException("openMDX does not support read serialization");
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#getSerializeRead()
+     */
+    @Override
+    public Boolean getSerializeRead() {
+        return null;
+    }
 
 }
 

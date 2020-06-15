@@ -55,5 +55,34 @@ package org.openmdx.base.mof.repository.cci;
 public interface CollectionTypeRecord extends DataTypeRecord, TypedElementRecord {
 
     String NAME = "org:omg:model1:CollectionType";
+
+    enum Member {
+        allSubtype,
+        modifiedAt,
+        multiplicity,
+        visibility,
+        modifiedBy,
+        compositeReference,
+        qualifiedName,
+        attribute,
+        supertype,
+        reference,
+        content,
+        field,
+        annotation,
+        identity,
+        operation,
+        isAbstract,
+        createdBy,
+        stereotype,
+        createdAt,
+        container,
+        name,
+        subtype,
+        feature,
+        allSupertype
+      }
+    
+    String getMultiplicity();
     
 }

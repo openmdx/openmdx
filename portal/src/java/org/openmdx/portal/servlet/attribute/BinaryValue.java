@@ -72,6 +72,7 @@ import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
@@ -200,7 +201,7 @@ public class BinaryValue extends AttributeValue implements Serializable {
         );
         // name
         SysLog.trace("getting name for " + this.fieldDef.qualifiedFeatureName + " for", this.object);
-        this.name = this.getString(this.fieldDef.qualifiedFeatureName + "Name", false);
+        this.name = this.getString(null, this.fieldDef.qualifiedFeatureName + "Name", false);
         if(this.name == null) {
             this.name = DEFAULT_NAME;
         }
@@ -218,7 +219,7 @@ public class BinaryValue extends AttributeValue implements Serializable {
             ((RefObject_1_0)this.object).refGetPath() != null &&
             featureDef != null
         ) {
-            Object bytes = super.getValue(false);
+            Object bytes = super.getValue(null, false);
             if(bytes == null) {
             	this.isNull = true;
             } else if(bytes instanceof Collection) {
@@ -227,10 +228,12 @@ public class BinaryValue extends AttributeValue implements Serializable {
                 this.isNull = false;
             }
             if(!this.isNull) {
-                String encodedName = this.name;
+                String encodedName;
                 try {
                     encodedName = URLEncoder.encode(this.name, "UTF-8");
-                } catch(Exception e) {}
+                } catch(Exception e) {
+                	encodedName = this.name;
+                }
                 this.downloadAction = 
                     new Action(
                         Action.EVENT_DOWNLOAD_FROM_FEATURE,
@@ -249,7 +252,7 @@ public class BinaryValue extends AttributeValue implements Serializable {
             // file which is returned on EVENT_DOWNLOAD
             String location = null;        
             Object content = null;
-            Object value = super.getValue(false);
+            Object value = super.getValue(null, false);
             if(value instanceof Collection) {
                 content = (byte[])((Collection<?>)value).iterator().next();
             } else if(value instanceof BinaryLargeObjects.StreamLargeObject) {
@@ -270,17 +273,16 @@ public class BinaryValue extends AttributeValue implements Serializable {
                     File f = new File(
                         application.getTempFileName(location, "")
                     );
-                    OutputStream os = new FileOutputStream(f);
-                    if(content instanceof byte[]) {
-                    	os.write((byte[])content);
-                    } else if(content instanceof InputStream) {
-                    	BinaryLargeObjects.streamCopy((InputStream)content, 0L, os);
+                    try (OutputStream os = new FileOutputStream(f)){
+                        if(content instanceof byte[]) {
+                        	os.write((byte[])content);
+                        } else if(content instanceof InputStream) {
+                        	BinaryLargeObjects.streamCopy((InputStream)content, 0L, os);
+                        }
+                        os.flush();
                     }
-                    os.flush();
-                    os.close();
                 } catch(Exception e) {
-                    ServiceException e0 = new ServiceException(e);
-                    SysLog.warning(e0.getMessage(), e0.getCause());
+                    Throwables.log(e);
                 }
             }
             if(!this.isNull) {
@@ -324,6 +326,7 @@ public class BinaryValue extends AttributeValue implements Serializable {
      */
     @Override
     public Object getValue(
+    	ViewPort p,     		
         boolean shortFormat
     ) {
         return this.downloadAction;
@@ -345,10 +348,11 @@ public class BinaryValue extends AttributeValue implements Serializable {
      * @throws ServiceException
      */
     public void getBinaryValue(
+    	ViewPort p,     		
         OutputStream os
     ) throws ServiceException {
         try {
-            Object value = super.getValue(false);
+            Object value = super.getValue(p, false);
             if(value instanceof Collection) {
                 value = ((Collection<?>)value).iterator().next();
             }
@@ -509,7 +513,7 @@ public class BinaryValue extends AttributeValue implements Serializable {
         String readonlyModifier,
         String lockedModifier,
         String stringifiedValue,
-        boolean forEditing
+        final boolean forEditing
     ) throws ServiceException { 
         Texts_1_0 texts = this.app.getTexts();
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();   
@@ -526,7 +530,7 @@ public class BinaryValue extends AttributeValue implements Serializable {
             }
             p.write("</td>");
             p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, "></td>");            
-        } else {
+        } else { // !forEditing
         	// Show
         	String cssClass = this.app.getPortalExtension().getDefaultCssClassFieldGroup(this, this.app);
         	if(this.getCssClassFieldGroup() != null) {
@@ -550,10 +554,10 @@ public class BinaryValue extends AttributeValue implements Serializable {
         			stringifiedValue, 
         			forEditing
         		);
-        	} else {        	
+        	} else {
 	            HttpServletRequest request = p.getHttpServletRequest();          
 	            styleModifier = "style=\"height: " + (1.2+(attribute.getSpanRow()-1)*1.5) + "em\"";
-	            Action binaryValueAction = (Action)this.getValue(false);
+	            Action binaryValueAction = (Action)this.getValue(p, false);
 	            Set<String> acceptedMimeTypes = this.getAcceptedMimeTypes(request);
 	            // mimeType                                     
 	            boolean isAcceptedMimeType = false;
@@ -575,12 +579,12 @@ public class BinaryValue extends AttributeValue implements Serializable {
 	                    label, 
 	                    gapModifier, 
 	                    rowSpanModifier, 
-	                    forEditing ? "" : widthModifier, 
+	                    widthModifier, // forEditing ? "" : widthModifier, 
 	                    styleModifier
 	                );
-		            if(forEditing) {
-		            	p.write("<td class=\"", CssClass.addon.toString(), "\" />");
-		            }
+//		            if(forEditing) {
+//		            	p.write("<td class=\"", CssClass.addon.toString(), "\" />");
+//		            }
 	            } else {
 		            // Single-valued BinaryValue as link -->
 	                p.write(gapModifier);
@@ -588,9 +592,9 @@ public class BinaryValue extends AttributeValue implements Serializable {
 	                p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ", (forEditing ? "" : widthModifier), ">");
 	                p.write("<div class=\"", CssClass.field.toString(), "\">", attribute.getStringifiedValue(p, false, false), "</div>");
 	                p.write("</td>");
-		            if(forEditing) {
-		            	p.write("<td class=\"", CssClass.addon.toString(), "\" />");
-		            }
+//		            if(forEditing) {
+//		            	p.write("<td class=\"", CssClass.addon.toString(), "\" />");
+//		            }
 	            }
 	        }
         }

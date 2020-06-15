@@ -48,7 +48,7 @@
 package org.openmdx.dalvik.beans;
 
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.util.Date;
@@ -78,7 +78,7 @@ import org.w3c.spi2.Datatypes;
 /**
  * Alternate Java Bean Transfomer
  * 
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  */
 public class AlternateJavaBeanTransformer implements BeanTransformer {
 
@@ -90,57 +90,56 @@ public class AlternateJavaBeanTransformer implements BeanTransformer {
         Object javaBean,
         ExceptionListener exceptionListener
     ) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        XMLEncoder encoder = new XMLEncoder(out);
-        if(exceptionListener != null) {
-            encoder.setExceptionListener(exceptionListener);
-        }
-        encoder.setPersistenceDelegate(
-            BigDecimal.class, 
-            bigDecimalPersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            Path.class, 
-            pathPersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            Date.class, 
-            datePersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            xmlGregorianCalendarClass, 
-            immutableDatePersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            ImmutableDate.class, 
-            immutableDatePersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            ImmutableDateTime.class, 
-            dateTimePersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            Duration.class, 
-            durationPersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            Quantifier.class, 
-            quantifierPersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            URI.class, 
-            uriPersistenceDelegate
-        );
-        encoder.writeObject(javaBean);
-        encoder.close();
-        try {
+        try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            try (final XMLEncoder encoder = new XMLEncoder(out)) {
+                if(exceptionListener != null) {
+                    encoder.setExceptionListener(exceptionListener);
+                }
+                encoder.setPersistenceDelegate(
+                    BigDecimal.class, 
+                    bigDecimalPersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    Path.class, 
+                    pathPersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    Date.class, 
+                    datePersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    xmlGregorianCalendarClass, 
+                    immutableDatePersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    ImmutableDate.class, 
+                    immutableDatePersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    ImmutableDateTime.class, 
+                    dateTimePersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    Duration.class, 
+                    durationPersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    Quantifier.class, 
+                    quantifierPersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    URI.class, 
+                    uriPersistenceDelegate
+                );
+                encoder.writeObject(javaBean);
+            }
             return out.toString("UTF-8");
-        } catch (UnsupportedEncodingException exception) {
+        } catch (IOException exception) {
             throw new RuntimeServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                "UTF-8 is expected to be supported"
+                "Unable to read to streams content  as UTF-8 end to close it"
             );
         }
     }

@@ -66,6 +66,7 @@ import java.util.TreeSet;
 
 import javax.naming.Context;
 
+import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -149,7 +150,6 @@ public class TestModelRepository {
      * @param r2
      * @throws ServiceException 
      */
-    @SuppressWarnings("unchecked")
     private void assertRepositoryEquality(
         Map<Path,ModelElement_1_0> r1,
         Map<Path,ModelElement_1_0> r2
@@ -197,94 +197,93 @@ public class TestModelRepository {
             final File file = new File(dir, name + "Record.java");
             final ModelElement_1_0 classDef = model.getElement("org:omg:model1:" + name);
             final Map<String, ModelElement_1_0> attributeDefs = model.getAttributeDefs(classDef, false, true);
-            final PrintWriter writer = new PrintWriter(file);
-            writer.println("/*");
-            writer.println(" * ====================================================================");
-            writer.println(" * Project:     openMDX/Core, http://www.openmdx.org/");
-            writer.println(" * Description: Query Record");
-            writer.println(" * Description: org::omg::model1::" + name + " Record");
-            writer.println(" */");
-            writer.println("package org.openmdx.base.mof.repository.spi;");
-            writer.println();
-            writer.println("import org.openmdx.base.rest.spi.AbstractMappedRecord;");
-            writer.println();
-            writer.println("/**");
-            writer.println(" * org::omg::model1::" + name + " Record");
-            writer.println(" */");
-            writer.println("public class " + name + "Record");
-            writer.println("  extends AbstractMappedRecord<org.openmdx.base.mof.repository.cci." + name  + "Record.Member>");
-            writer.println("  implements org.openmdx.base.mof.repository.cci." + name + "Record");
-            writer.println("{");
-            writer.println();
-            writer.println("    /**");
-            writer.println("     * Allows to share the member information among the instances");
-            writer.println("     */");
-            writer.println("    private static final Members<Member> MEMBERS = Members.newInstance(Member.class);");
-            writer.println();
-            writer.println();
-            writer.println("    /**");
-            writer.println("     * Implements <code>Serializable</code>");
-            writer.println("     */");
-            writer.println();
-            writer.println("    @Override");
-            writer.println("    public void makeImmutable() {");
-            writer.println("        super.makeImmutable();");
-            writer.println("    }");
-            writer.println();
-            writer.println("    @Override");
-            writer.println("    public String getRecordName() {");
-            writer.println("        return NAME;");
-            writer.println("    }");
-            writer.println();
-            writer.println("    /**");
-            writer.println("     * Retrieve a value by index");
-            writer.println("     *");
-            writer.println("     * @param index the index");
-            writer.println("     * @return the value");
-            writer.println("     */");
-            writer.println("     @Override");
-            writer.println("     protected Object get(");
-            writer.println("         Member index");
-            writer.println(      "){");
-            writer.println("         switch(index) {");
-            for(String attr : attributeDefs.keySet()) {
-                writer.println("             case " + attr + ": return null; // TODO");
+            try(final PrintWriter writer = new PrintWriter(file)){
+                writer.println("/*");
+                writer.println(" * ====================================================================");
+                writer.println(" * Project:     openMDX/Core, http://www.openmdx.org/");
+                writer.println(" * Description: Query Record");
+                writer.println(" * Description: org::omg::model1::" + name + " Record");
+                writer.println(" */");
+                writer.println("package org.openmdx.base.mof.repository.spi;");
+                writer.println();
+                writer.println("import org.openmdx.base.rest.spi.AbstractMappedRecord;");
+                writer.println();
+                writer.println("/**");
+                writer.println(" * org::omg::model1::" + name + " Record");
+                writer.println(" */");
+                writer.println("public class " + name + "Record");
+                writer.println("  extends AbstractMappedRecord<org.openmdx.base.mof.repository.cci." + name  + "Record.Member>");
+                writer.println("  implements org.openmdx.base.mof.repository.cci." + name + "Record");
+                writer.println("{");
+                writer.println();
+                writer.println("    /**");
+                writer.println("     * Allows to share the member information among the instances");
+                writer.println("     */");
+                writer.println("    private static final Members<Member> MEMBERS = Members.newInstance(Member.class);");
+                writer.println();
+                writer.println();
+                writer.println("    /**");
+                writer.println("     * Implements <code>Serializable</code>");
+                writer.println("     */");
+                writer.println();
+                writer.println("    @Override");
+                writer.println("    public void makeImmutable() {");
+                writer.println("        super.makeImmutable();");
+                writer.println("    }");
+                writer.println();
+                writer.println("    @Override");
+                writer.println("    public String getRecordName() {");
+                writer.println("        return NAME;");
+                writer.println("    }");
+                writer.println();
+                writer.println("    /**");
+                writer.println("     * Retrieve a value by index");
+                writer.println("     *");
+                writer.println("     * @param index the index");
+                writer.println("     * @return the value");
+                writer.println("     */");
+                writer.println("     @Override");
+                writer.println("     protected Object get(");
+                writer.println("         Member index");
+                writer.println(      "){");
+                writer.println("         switch(index) {");
+                for(String attr : attributeDefs.keySet()) {
+                    writer.println("             case " + attr + ": return null; // TODO");
+                }
+                writer.println("             default: return super.get(index);");
+                writer.println(      "}");
+                writer.println();
+                writer.println("    /**");
+                writer.println("     * Retrieve a value by index");
+                writer.println("     * ");
+                writer.println("     * @param index the index");
+                writer.println("     * @param value the new value");
+                writer.println("     * ");
+                writer.println("     * @return the old value");
+                writer.println("     */");
+                writer.println("     @Override");
+                writer.println("     protected void put(");
+                writer.println("         Member index,");
+                writer.println("         Object value");
+                writer.println("     ){");
+                writer.println("         switch(index) {");
+                for(String attr : attributeDefs.keySet()) {
+                    writer.println("             case " + attr + ":");
+                    writer.println("                 break;");
+                }
+                writer.println("            default:");
+                writer.println("                 super.put(index, value);");
+                writer.println("         }");
+                writer.println("     }");
+                writer.println("         ");
+                writer.println();
+                writer.println("    @Override");
+                writer.println("    protected Members<Member> members() {");
+                writer.println("        return MEMBERS;");
+                writer.println("    }");
+                writer.println();
+                writer.println("}");
             }
-            writer.println("             default: return super.get(index);");
-            writer.println(      "}");
-            writer.println();
-            writer.println("    /**");
-            writer.println("     * Retrieve a value by index");
-            writer.println("     * ");
-            writer.println("     * @param index the index");
-            writer.println("     * @param value the new value");
-            writer.println("     * ");
-            writer.println("     * @return the old value");
-            writer.println("     */");
-            writer.println("     @Override");
-            writer.println("     protected void put(");
-            writer.println("         Member index,");
-            writer.println("         Object value");
-            writer.println("     ){");
-            writer.println("         switch(index) {");
-            for(String attr : attributeDefs.keySet()) {
-                writer.println("             case " + attr + ":");
-                writer.println("                 break;");
-            }
-            writer.println("            default:");
-            writer.println("                 super.put(index, value);");
-            writer.println("         }");
-            writer.println("     }");
-            writer.println("         ");
-            writer.println();
-            writer.println("    @Override");
-            writer.println("    protected Members<Member> members() {");
-            writer.println("        return MEMBERS;");
-            writer.println("    }");
-            writer.println();
-            writer.println("}");
-            
-            writer.close();
         }
     }
     
@@ -320,5 +319,22 @@ public class TestModelRepository {
         SysLog.performance("Restoring openCRX model " + uri, restoreTime);
         return model;
     }
-        
+
+    @Test
+    public void determineFeatureType() throws ServiceException {
+        //
+        // Arrange
+        //
+        final Model_1_0 model = Model_1Factory.getModel();
+        final String qualifiedFeatureName = "org:openmdx:base:Creatable:createdAt";
+        //
+        // Act
+        //
+        final ModelElement_1_0 attributeDef = model.getElement(qualifiedFeatureName);
+        final String qualifiedTypeName = attributeDef.getType().getLastSegment().toString();
+        //
+        // Assert
+        //
+        Assert.assertEquals("org:w3c:dateTime", qualifiedTypeName);
+    }
 }

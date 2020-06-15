@@ -59,6 +59,7 @@ import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.control.UserAttributePaneControl;
 
@@ -148,7 +149,7 @@ public class UserAttributePane extends AttributePane implements Serializable {
     		}
     		p.write("  jQuery.ajax({type: 'get', url: '", control.getId(), "?xri=" + URLEncoder.encode(objectIdentity.toXRI(), "UTF-8"), "&requestId=", view.getRequestId(), "&paneId=", paneId, "&forEditing=", Boolean.toString(forEditing), "', dataType: 'html', success: function(data){$('userPane", paneId, "').innerHTML=data;evalScripts(data);}});");
     	} catch(Exception ignore) {
-    		new ServiceException(ignore).log();
+            Throwables.log(ignore);
     	}
 		p.write("</script>");
     }

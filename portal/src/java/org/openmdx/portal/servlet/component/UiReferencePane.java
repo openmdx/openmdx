@@ -324,8 +324,8 @@ public class UiReferencePane extends ReferencePane implements Serializable {
     		) {
     			// Filter group 0 does not have sub-levels
     			if(!"0".equals(filterGroupName)) {
-    				p.write("          </ul>");
-    				p.write("        </li>");
+    				p.write("          </div>");
+    				p.write("        </div></li>");
     			}
     			filterGroupName = filter.getGroupName();
     			// Is selected filter member of this group?
@@ -342,30 +342,31 @@ public class UiReferencePane extends ReferencePane implements Serializable {
     			boolean hilite = groupHasSelectedFilter;
     			// Class filter group
     			if("1".equals(filterGroupName)) {
-    				p.write("      <li class=\"", CssClass.dropdown.toString(), (hilite ? " " + CssClass.active : ""), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#!\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_FILTER_CLASS, "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(texts.getClassFilterTitle(), false), "\""), "</a>");
-    			} 
-    			// All other filter groups
-    			else {
-    				p.write("      <li class=\"", CssClass.dropdown.toString(), (hilite ? " " + CssClass.active : ""), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#!\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\">", p.getImg("src=\"", p.getResourcePath("images/"), "filter_", htmlEncoder.encode(filterGroupName, false), p.getImgType(), "\" border=\"0\" align=\"absmiddle\" style=\"margin-right: 2px;\" alt=\"o\" title=\"", htmlEncoder.encode(filterGroupName, false), "\""), "</a>");
+    				p.write("      <li class=\"", CssClass.nav_item.toString(), "\"><div class=\"", CssClass.dropdown.toString(), (hilite ? " " + CssClass.active : ""), "\">");
+    				p.write("        <button type=\"button\" class=\"", CssClass.btn.toString(), "\" data-toggle=\"", CssClass.dropdown.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:this.parentNode.hide=function(){};\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_FILTER_CLASS, "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(texts.getClassFilterTitle(), false), "\""), "</button>");
+    			} else {
+        			// All other filter groups
+    				p.write("      <li class=\"", CssClass.nav_item.toString(), "\"><div class=\"", CssClass.dropdown.toString(), (hilite ? " " + CssClass.active : ""), "\">");
+    				p.write("        <button type=\"button\" class=\"", CssClass.btn.toString(), "\" data-toggle=\"", CssClass.dropdown.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:this.parentNode.hide=function(){};\">", p.getImg("src=\"", p.getResourcePath("images/"), "filter_", htmlEncoder.encode(filterGroupName, false), p.getImgType(), "\" border=\"0\" align=\"absmiddle\" style=\"margin-right: 2px;\" alt=\"o\" title=\"", htmlEncoder.encode(filterGroupName, false), "\""), "</button>");
     			}
-    			p.write("        <ul class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\">");
-    		} 
+    			p.write("        <div class=\"", CssClass.dropdown_menu.toString(), "\">");
+    		}
     		filterGroupName = filter.getGroupName();
     		if(!filter.hasParameter()) {
     			Action action = grid.getSelectFilterAction(filter);
     			boolean hilite = grid.getCurrentFilter().getName().equals(filter.getName());
     			if(filterGroupName.equals("0")) {
-    				p.write("        <li class=\"", (hilite ? " " + CssClass.active : ""), "\"><a href=\"#\" style=\"", groupingStyle, ";", STYLE_GRID_MENU_SMALL, "\" \" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(action.getTitle(), false), "\""), "</a></li>");
+    				p.write("        <li class=\"", CssClass.nav_item.toString(), "\"><button class=\"", CssClass.btn.toString(), "\" class=\"", (hilite ? " " + CssClass.active : ""), "\" style=\"", groupingStyle, ";", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(action.getTitle(), false), "\""), "</button></li>");
     			} else {
-    				p.write("        <li class=\"", (hilite ? " class=\"" + CssClass.active : ""), "\"><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"\""), " ", htmlEncoder.encode(texts.getSelectAllText(), false), " ", htmlEncoder.encode(action.getTitle(), false), "</a></li>");
+    				p.write("        <div class=\"", CssClass.nav_item.toString(), "\"><button class=\"", CssClass.dropdown_item.toString(), " ", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), " ", CssClass.nav_link.toString(), " ", (hilite ? " " + CssClass.active : ""), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"\""), " ", htmlEncoder.encode(texts.getSelectAllText(), false), " ", htmlEncoder.encode(action.getTitle(), false), "</button></div>");
     			}
     		}
     	}
     	// Close current filter group
     	if(!"0".equals(filterGroupName)) {
-    		p.write("          </ul>");
-    		p.write("        </li>");
-    	}    	
+    		p.write("          </div>");
+    		p.write("        </div></li>");
+    	}
     }
     
     /* (non-Javadoc)
@@ -486,7 +487,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 		p.write("    <fieldset style=\"margin:-5px 0px 5px 0px;\">");
 		p.write("    <div>");
 		p.write("      <div class=\"", CssClass.row.toString(), "\">");
-		p.write("        <div class=\"", CssClass.colMd3.toString(), "\">");
+		p.write("        <div class=\"", CssClass.col_md_3.toString(), "\">");
     	Action columnFilterAddAction = searchableColumns.get(0);
     	int count = 0;
     	for(int i = 0; i < searchableColumns.size(); i++) {
@@ -494,7 +495,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
     		if(action.getTitle() != null && !action.getTitle().trim().isEmpty()) {
 				if(count > 0 && count % 5 == 0) {	        		
 					p.write("        </div>");
-					p.write("        <div class=\"", CssClass.colMd3.toString(), "\">");
+					p.write("        <div class=\"", CssClass.col_md_3.toString(), "\">");
 				}
     			String fieldName = action.getParameter(Action.PARAMETER_NAME);
 				PortalExtension_1_0.SearchFieldDef searchFieldDef = portalExtension.getSearchFieldDef(
@@ -505,7 +506,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 				if(searchFieldDef != null) {
 					String searchFieldId = formId + "_" + fieldName;
 					p.write("<div class=\"", CssClass.row.toString(), "\">");					
-					p.write("  <div class=\"", CssClass.colSm12.toString(), "\">");
+					p.write("  <div class=\"", CssClass.col_sm_12.toString(), "\">");
 					p.write("    <input type=\"text\" id=\"", searchFieldId, "\" name=\"", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, ".", fieldName, "\" placeholder=\"", htmlEncoder.encode(action.getTitle(), false), "\" style=\"padding:4px;margin:2px;width:100%;\" value=\"", htmlEncoder.encode(grid.getFilterValue(fieldName), false), "\" />");
 					p.write("  </div>");
 					p.write("</div>");
@@ -524,7 +525,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 	                p.write("</script>");
 				} else {
 					p.write("<div class=\"", CssClass.row.toString(), "\">");					
-					p.write("  <div class=\"", CssClass.colSm12.toString(), "\">");
+					p.write("  <div class=\"", CssClass.col_sm_12.toString(), "\">");
 					p.write("    <input type=\"text\" id=\"", formId + "." + fieldName, "\" name=\"", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, ".", fieldName, "\" placeholder=\"",  htmlEncoder.encode(action.getTitle(), false), "\" style=\"padding:4px;margin:2px;width:100%;\" value=\"", htmlEncoder.encode(grid.getFilterValue(fieldName), false), "\"/>");
 					p.write("  </div>");
 					p.write("</div>");
@@ -537,14 +538,14 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 		String showSearchFormFieldId = formId + "." + WebKeys.REQUEST_PARAMETER_SHOW_SEARCH_FORM;
 		String resetFilterFieldId = formId + "." + WebKeys.REQUEST_PARAMETER_RESET_FILTER;
 		p.write("      <div class=\"", CssClass.row.toString(), "\" style=\"margin:5px;\">");
-		p.write("        <div class=\"", CssClass.colSm12.toString(), "\">");
+		p.write("        <div class=\"", CssClass.col_sm_12.toString(), "\">");
 		p.write("          <div class=\"", CssClass.row.toString(), "\">");
-		p.write("            <div class=\"", CssClass.colSm12.toString(), "\">");
+		p.write("            <div class=\"", CssClass.col_sm_12.toString(), "\">");
 		p.write("              ", p.getImg("class=\"", CssClass.popUpButton.toString(), "\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_FILTER_HELP, "\" border=\"0\" alt=\"?\" align=\"top\" onclick=\"javascript:void(window.open('helpSearch_", app.getCurrentLocaleAsString(), ".html', 'Help', 'fullscreen=no,toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=yes,directories=no,location=no,width=400'));\""));    		        	
 		p.write("              &nbsp;&nbsp;&nbsp;&nbsp;");
-		p.write("              <button class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), " ", CssClass.btnSm.toString(), "\" onclick=\"javascript:var searchForm=document.forms['", formId, "'];var params=Form.serialize(searchForm);", updateTabScriptletPre, p.getEvalHRef(columnFilterAddAction), ", data: params", updateTabScriptletPost, "\">", texts.getSearchText(), "</button>");
-		p.write("              <button type=\"submit\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), " ", CssClass.btnSm.toString(), "\" onclick=\"javascript:$('", resetFilterFieldId, "').value='true';var searchForm=document.forms['", formId, "'];var params=Form.serialize(searchForm);", updateTabScriptletPre, p.getEvalHRef(columnFilterAddAction), ", data: params", updateTabScriptletPost, "\"><img align=\"absmiddle\" border=\"0\" title=\"All\" src=\"./images/filter_all.gif\">&nbsp;", texts.getSearchText(), "</button>");
-		p.write("              <button class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), " ", CssClass.btnSm.toString(), "\" onclick=\"javascript:$('", id, "_filterArea').style.display='none';return false;\">", texts.getCancelTitle(), "</button>");
+		p.write("              <button class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), " ", CssClass.btn_sm.toString(), "\" onclick=\"javascript:var searchForm=document.forms['", formId, "'];var params=Form.serialize(searchForm);", updateTabScriptletPre, p.getEvalHRef(columnFilterAddAction), ", data: params", updateTabScriptletPost, "\">", texts.getSearchText(), "</button>");
+		p.write("              <button type=\"submit\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), " ", CssClass.btn_sm.toString(), "\" onclick=\"javascript:$('", resetFilterFieldId, "').value='true';var searchForm=document.forms['", formId, "'];var params=Form.serialize(searchForm);", updateTabScriptletPre, p.getEvalHRef(columnFilterAddAction), ", data: params", updateTabScriptletPost, "\"><img align=\"absmiddle\" border=\"0\" title=\"All\" src=\"./images/filter_all.gif\">&nbsp;", texts.getSearchText(), "</button>");
+		p.write("              <button class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), " ", CssClass.btn_sm.toString(), "\" onclick=\"javascript:$('", id, "_filterArea').style.display='none';return false;\">", texts.getCancelTitle(), "</button>");
 		p.write("              &nbsp;&nbsp;&nbsp;&nbsp;");
 		p.write("              <input type=\"hidden\" id=\"", showSearchFormFieldId, "\" name=\"", WebKeys.REQUEST_PARAMETER_SHOW_SEARCH_FORM, "\" value=\"", (showSearchFormOnInit ? "true" : "false"), "\" />");
 		p.write("              <input type=\"hidden\" id=\"", resetFilterFieldId, "\" name=\"", WebKeys.REQUEST_PARAMETER_RESET_FILTER, "\" value=\"false\"/>");
@@ -583,7 +584,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 		if(ReferencePaneControl.FRAME_VIEW.equals(frame)) {
 			int nReferences = this.getSelectReferenceAction().length;
 			if(nReferences > 0) {
-				p.write("<ul class=\"", CssClass.nav.toString(), " ", CssClass.navTabs.toString(), " ", CssClass.navCondensed.toString(), "\" style=\"position:relative;z-index:", Integer.toString(zIndex+1), ";\">");
+				p.write("<ul class=\"", CssClass.nav.toString(), " ", CssClass.nav_tabs.toString(), " ", CssClass.nav_condensed.toString(), "\" style=\"position:relative;z-index:", Integer.toString(zIndex+1), ";\">");
 				boolean isGroupTabActive = false;
 				boolean isFirstGroupTab = true;
 				int selectedReference = -1;
@@ -618,22 +619,23 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 							if(isFirstGroupTab) {
 								isFirstGroupTab = false;
 							}
-							p.write("  <li class=\"", CssClass.hiddenPrint.toString(), "\"><a href=\"#\" onclick=\"javascript:gTabSelect(this, true);return false;\">", WebKeys.TAB_GROUPING_CHARACTER, "</a></li>");
+							p.write("  <li class=\"", CssClass.nav_item.toString(), " ", CssClass.d_print_none.toString(), "\"><a class=\"", CssClass.nav_link.toString(), "\" href=\"#\" onclick=\"javascript:gTabSelect(this, true);return false;\">", WebKeys.TAB_GROUPING_CHARACTER, "</a></li>");
 						}
 						if(isGroupTabActive && (!isGroupTab || (i == nReferences-1))) {
 							isGroupTabActive = false;
 						}
-						String tabClass = i == this.getSelectedReference() 
-							? CssClass.active.toString() 
-							: isGroupTabActive 
-								? CssClass.hidden.toString() 
-								: CssClass.hiddenPrint.toString();
-						p.write("  <li class=\"", tabClass, "\"><a href=\"#\" onclick=\"javascript:gTabSelect(this);jQuery.ajax({type: 'get', url: ", p.getEvalHRef(action), ", dataType: 'html', success: function(data){$('", gridContentId, "').innerHTML=data;evalScripts(data);}});return false;\" title=\"", (encodedTabTitle == null ? "" : encodedTabTitle), "\">", encodedTabLabel, "</a></li>");
+						String tabClassItem = isGroupTabActive
+							? CssClass.d_none.toString()
+							: CssClass.d_print_none.toString();
+						String tabClassLink = i == this.getSelectedReference()
+							? CssClass.active.toString()
+							: "";
+						p.write("  <li class=\"", CssClass.nav_item.toString(), " ", tabClassItem, "\"><a class=\"", CssClass.nav_link.toString(), " ", tabClassLink, "\" href=\"#\" onclick=\"javascript:gTabSelect(this);jQuery.ajax({type: 'get', url: ", p.getEvalHRef(action), ", dataType: 'html', success: function(data){$('", gridContentId, "').innerHTML=data;evalScripts(data);}});return false;\" title=\"", (encodedTabTitle == null ? "" : encodedTabTitle), "\">", encodedTabLabel, "</a></li>");
 					}
 				}
 				p.write("</ul>");
 				if(selectedReference >= 0) {
-					p.write("<div id=\"", gridContentId, "\" class=\"", CssClass.gContent.toString(), "\" style=\"position:relative;z-index:", Integer.toString(zIndex), ";\">");
+					p.write("<div id=\"", gridContentId, "\" class=\"", CssClass.gContent.toString(), "\" style=\"position:relative;\">");
 					p.write("  <div class=\"", CssClass.loading.toString(), "\" style=\"height:40px;\"></div>");
 					p.write("</div>");
 					Action selectReferenceTabAction = this.getSelectReferenceAction()[selectedReference];
@@ -736,12 +738,12 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 							addObjectAction.getParameter(Action.PARAMETER_REFERENCE),
 							null
 						);
-						p.write("<div id=\"", gridMenuId, "\" class=\"", CssClass.menuOpPanel.toString(), " ", CssClass.hiddenPrint.toString(), "\">");
-						p.write("  <table cellspacing=\"0\" cellpadding=\"0\" id=\"menuOp\" width=\"100%\">");
+						p.write("<div id=\"", gridMenuId, "\" class=\"", CssClass.d_print_none.toString(), "\">");
+						p.write("  <table cellspacing=\"0\" cellpadding=\"0\" class=\"", CssClass.gridNav.toString(), "\">");
 						p.write("    <tr>");
-						p.write("      <td>");
+						p.write("      <td class=\"", CssClass.gridNavActions.toString(), "\">");
 						p.write("        <div id=\"", tabId, "_gridButtons\">");
-						p.write("          <ul id=\"", CssClass.ssfNav.toString(), "\" class=\"", CssClass.ssfNav.toString(), "\" onmouseover=\"sfinit(this);\" >");
+						p.write("          <ul id=\"", CssClass.ssf_nav.toString(), "\" class=\"", CssClass.ssf_nav.toString(), "\" onmouseover=\"sfinit(this);\" >");
 						p.write("            <li><a href=\"#\" onclick=\"javascript:return false;\">", htmlEncoder.encode(texts.getEditTitle(), false), "&nbsp;&nbsp;&nbsp;</a>");
 						p.write("              <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
 						p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(addObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "=", Action.PARAMETER_OBJECTXRI, "*('+encodeURIComponent($F('", adderFieldId, "'))+')'", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getAddObjectTitle(), false), "</a></li>");
@@ -796,31 +798,31 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					//
 					// Composite objects
 					//
-					p.write("<div id=\"", gridMenuId, "" , "\" class=\"", CssClass.hiddenPrint.toString(), "\">");
-					p.write("  <table class=\"", CssClass.table.toString(), " ", CssClass.tableCondensed.toString(), "\" cellspacing=\"0\" cellpadding=\"0\" style=\"width:100%;border-spacing:0;\">");
+					p.write("<div id=\"", gridMenuId, "" , "\" class=\"", CssClass.d_print_none.toString(), "\">");
+					p.write("  <table class=\"", CssClass.table.toString(), " ", CssClass.table_condensed.toString(), " ", CssClass.gridNav.toString(), "\" cellspacing=\"0\" cellpadding=\"0\">");
 					p.write("    <tr>");
 					//
 					// Navigation
 					//
-					p.write("      <td class=\"", CssClass.menuOpPanelActions.toString(), " ", CssClass.colXs3.toString(), "\" style=\"border-bottom:0px;\">");
-					p.write("        <ul class=\"", CssClass.nav.toString(), " ", CssClass.navPills.toString(), "\">");
+					p.write("      <td class=\"", CssClass.gridNavActions.toString(), "\" width=\"40%\">");
+					p.write("        <ul class=\"", CssClass.nav.toString(), " ", CssClass.nav_pills.toString(), "\">");
 					// Page 0
-					p.write("        <li><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(firstPageAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), firstPageAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"|<\""), "</a></li>");
+					p.write("          <li class=\"", CssClass.nav_item.toString(), "\"><button class=\"", CssClass.btn.toString(), " ", CssClass.nav_link.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(firstPageAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), firstPageAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"|<\""), "</button></li>");
 					// Page previous
 					if(pagePreviousIsEnabled) {
-						p.write("        <li class=\"", CssClass.hiddenXs.toString(), "\"><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"<<\""), "</a></li>");
-						p.write("        <li><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"<\""), "</a></li>");
+						p.write("        <li class=\"", CssClass.nav_item.toString(), " ", CssClass.d_none.toString(), " ", CssClass.d_lg_block.toString(), "\"><button class=\"", CssClass.btn.toString(), " ", CssClass.nav_link.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"<<\""), "</button></li>");
+						p.write("        <li class=\"", CssClass.nav_item.toString(), "\"><button class=\"", CssClass.btn.toString(), " ", CssClass.nav_link.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"<\""), "</button></li>");
 					} else {
-						p.write("        <li class=\"", CssClass.hiddenXs.toString(), "\" ><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"<<\""), "</a></li>");
-						p.write("        <li><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"<\""), "</a></li>");
+						p.write("        <li class=\"", CssClass.nav_item.toString(), " ", CssClass.d_none.toString(), " ", CssClass.d_lg_block.toString(), "\" ><button class=\"", CssClass.btn.toString(), " ", CssClass.nav_link.toString(), "\" style=\"", STYLE_NO_WRAP, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"<<\""), "</button></li>");
+						p.write("        <li class=\"", CssClass.nav_item.toString(), "\"><button class=\"", CssClass.btn.toString(), " ", CssClass.nav_link.toString(), "\" style=\"", STYLE_NO_WRAP, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"<\""), "</button></li>");
 					}
 					// Page next
 					if(pageNextIsEnabled) {
-						p.write("        <li><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextAction), " + '&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\">\""), "</a></li>");
-						p.write("        <li class=\"", CssClass.hiddenXs.toString(), "\" ><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\">>\""), "</a></li>");
+						p.write("        <li class=\"", CssClass.nav_item.toString(), "\"><button class=\"", CssClass.btn.toString(), " ", CssClass.nav_link.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextAction), " + '&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\">\""), "</button></li>");
+						p.write("        <li class=\"", CssClass.nav_item.toString(), " ", CssClass.d_none.toString(), " ", CssClass.d_lg_block.toString(), "\" ><button class=\"", CssClass.btn.toString(), " ", CssClass.nav_link.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\">>\""), "</button></li>");
 					} else {
-						p.write("        <li><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\">\""), "</a></li>");
-						p.write("        <li class=\"", CssClass.hiddenXs.toString(), "\" ><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" >", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\">>\""), "</a></li>");
+						p.write("        <li class=\"", CssClass.nav_item.toString(), "\"><button class=\"", CssClass.btn.toString(), " ", CssClass.nav_link.toString(), "\" style=\"", STYLE_NO_WRAP, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\">\""), "</button></li>");
+						p.write("        <li class=\"", CssClass.nav_item.toString(), " ", CssClass.d_none.toString(), " ", CssClass.d_lg_block.toString(), "\" ><button class=\"", CssClass.btn.toString(), " ", CssClass.nav_link.toString(), "\" style=\"", STYLE_NO_WRAP, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\">>\""), "</button></li>");
 					}
 					// Page size
 					p.write("        <input style=\"margin:0px;\" type=\"hidden\" name=\"pagesize\" id=\"pagesize", tabId, "\" size=2 value=\"", Integer.toString(grid.getPageSize()), "\"/>");
@@ -828,7 +830,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					if((filters.length > 1) && !grid.getShowRows()) {
 						org.openmdx.portal.servlet.Filter filter = filters[0];
 						Action action = grid.getSelectFilterAction(filter);
-						p.write("        <li><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SHOW_GRID_CONTENT, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", htmlEncoder.encode(action.getTitle(), false), "\""), "</a></li>");
+						p.write("        <li class=\"", CssClass.nav_item.toString(), "\"><button class=\"", CssClass.btn.toString(), " ", CssClass.nav_link.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SHOW_GRID_CONTENT, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", htmlEncoder.encode(action.getTitle(), false), "\""), "</button></li>");
 					}
 					// Show/Hide search panel
 					if(!searchableColumns.isEmpty()) {
@@ -841,10 +843,10 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 							}
 						}
 						if(firstSearchableColumn == null) {
-							p.write("        <li><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:ft=$('", tabId, "_filterArea');if(ft.style.display!='block'){ft.style.display='block';}else{ft.style.display='none';};return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</a></li>");	                    	
+							p.write("        <li class=\"", CssClass.nav_item.toString(), "\"><button class=\"", CssClass.btn.toString(), " ", CssClass.nav_link.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:ft=$('", tabId, "_filterArea');if(ft.style.display!='block'){ft.style.display='block';}else{ft.style.display='none';};return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</button></li>");	                    	
 						} else {
 							boolean hilite = grid.hasFilterValues();
-							p.write("        <li><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:ft=$('", tabId, "_filterArea');if(ft.style.display!='block'){ft.style.display='block';try{$('", this.getSearchFormFieldId(tabId, firstSearchableColumn), "').focus();}catch(e){};}else{ft.style.display='none';};return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" ", (hilite ? " class=\"" + CssClass.hilite + "\"" : ""), " border=\"0\" align=\"bottom\" alt=\"v\""), "</a></li>");
+							p.write("        <li class=\"", CssClass.nav_item.toString(), "\"><button class=\"", CssClass.btn.toString(), " ", CssClass.nav_link.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:ft=$('", tabId, "_filterArea');if(ft.style.display!='block'){ft.style.display='block';try{$('", this.getSearchFormFieldId(tabId, firstSearchableColumn), "').focus();}catch(e){};}else{ft.style.display='none';};return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" ", (hilite ? " class=\"" + CssClass.hilite + "\"" : ""), " border=\"0\" align=\"bottom\" alt=\"v\""), "</button></li>");
 						}
 					}
 					p.write("       </ul>");
@@ -852,8 +854,8 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					//
 					// Default filter functions
 					//
-					p.write("      <td class=\"", CssClass.filterButtons.toString(), " ", CssClass.colXs2.toString(), " ", CssClass.colSm2.toString(), " ", CssClass.colMd3.toString(), "\" style=\"border-bottom:0px;\">");
-					p.write("        <ul class=\"", CssClass.nav.toString(), " ", CssClass.navPills.toString(), "\" >");              
+					p.write("      <td class=\"", CssClass.filterButtons.toString(), "\" width=\"29%\">");
+					p.write("        <ul class=\"", CssClass.nav.toString(), " ", CssClass.nav_pills.toString(), "\" >");              
 					this.paintFilterMenus(
 						p, 
 						grid, 
@@ -866,16 +868,16 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					if(!Boolean.TRUE.equals(view.isReadOnly())) {
 						Action setCurrentFilterAsDefaultAction = grid.getSetCurrentFilterAsDefaultAction();
 						Action setDefaultFilterOnInitAction = grid.getSetShowGridContentOnInitAction();
-						p.write("          <li class=\"", CssClass.hiddenXs.toString(), " ", CssClass.hiddenSm.toString(),  "\"><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(setCurrentFilterAsDefaultAction), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), setCurrentFilterAsDefaultAction.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(setCurrentFilterAsDefaultAction.getTitle(), false), "\""), "</a></li>");
-						p.write("          <li class=\"", CssClass.hiddenXs.toString(), " ", CssClass.hiddenSm.toString(),  "\"><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(setDefaultFilterOnInitAction), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), setDefaultFilterOnInitAction.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"v\" title=\"", htmlEncoder.encode(setDefaultFilterOnInitAction.getTitle(), false), "\""), "</a></li>");
+						p.write("          <li class=\"", CssClass.nav_item.toString(), " ", CssClass.d_none.toString(), " ", CssClass.d_lg_block.toString(),  "\"><button class=\"", CssClass.btn.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(setCurrentFilterAsDefaultAction), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), setCurrentFilterAsDefaultAction.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(setCurrentFilterAsDefaultAction.getTitle(), false), "\""), "</button></li>");
+						p.write("          <li class=\"", CssClass.nav_item.toString(), " ", CssClass.d_none.toString(), " ", CssClass.d_lg_block.toString(),  "\"><button class=\"", CssClass.btn.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(setDefaultFilterOnInitAction), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), setDefaultFilterOnInitAction.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"v\" title=\"", htmlEncoder.encode(setDefaultFilterOnInitAction.getTitle(), false), "\""), "</button></li>");
 					}
 					p.write("        </ul>");
 					p.write("      </td>");
 					//
 					// Menu
 					//
-					p.write("      <td class=\"", CssClass.filterButtons.toString(), " ", CssClass.hiddenXs.toString(), " ", CssClass.colSm2.toString(), " ", CssClass.colMd3.toString(), "\" style=\"border-bottom:0px;\">");					
-					p.write("        <ul class=\"", CssClass.nav.toString(), " ", CssClass.navPills.toString(), "\">");
+					p.write("      <td class=\"", CssClass.filterButtons.toString(), "\" width=\"29%\">");					
+					p.write("        <ul class=\"", CssClass.nav.toString(), " ", CssClass.nav_pills.toString(), "\">");
 					Action multiDeleteAction = grid.getMultiDeleteAction();
 					if(
 						(grid.getObjectCreator() != null) &&
@@ -886,51 +888,62 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 						//
 						// Menu New
 						//
-						p.write("              <li onclick=\"javascript:toggleMenu(this);\"><a href=\"#!\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\">", htmlEncoder.encode(texts.getNewText(), false), "</a>");
-						p.write("                <ul class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\">");
+						p.write("<li class=\"", CssClass.nav_item.toString(), "\">");
+						p.write("  <div class=\"", CssClass.dropdown.toString(), " ", CssClass.d_none.toString(), " ", CssClass.d_md_block.toString(), "\">");
+						p.write("    <button type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), "\" data-toggle=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:this.parentNode.hide=function(){};\" style=\"", STYLE_NO_WRAP, "\">", htmlEncoder.encode(texts.getNewText(), false), "</button>");
+						p.write("    <div class=\"", CssClass.dropdown_menu.toString(), "\">");
 						for(int j = 0; j < grid.getObjectCreator().length; j++) {
 							Action action = grid.getObjectCreator()[j];
-							p.write("                  <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;&nbsp;", htmlEncoder.encode(action.getTitle(), false), "</a></li>");
-						}                
-						p.write("                </ul>");
-						p.write("              </li>");
+							p.write("      <a href=\"#\" class=\"", CssClass.dropdown_item.toString(), " ", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;&nbsp;", htmlEncoder.encode(action.getTitle(), false), "</a>");
+						}
+						p.write("    </div>");
+						p.write("  </div>");
+						p.write("</li>");
 						//
 						// Menu Edit
 						//
-						p.write("              <li class=\"", CssClass.hiddenSm.toString(), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#!\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\">", htmlEncoder.encode(texts.getEditTitle(), false), "</a>");
-						p.write("                <ul class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\">");
+						p.write("<li class=\"", CssClass.nav_item.toString(), "\">");
+						p.write("  <div class=\"", CssClass.dropdown.toString(), " ", CssClass.d_none.toString(), " ", CssClass.d_md_block.toString(), "\">");
+						p.write("    <button type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), "\" data-toggle=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:this.parentNode.hide=function(){};\" style=\"", STYLE_NO_WRAP, "\">", htmlEncoder.encode(texts.getEditTitle(), false), "</button>");
+						p.write("    <div class=\"", CssClass.dropdown_menu.toString(), "\">");
 						// Multi-delete
 						if(this.getIsMultiDeleteEnabled() && (multiDeleteAction != null)) {
-							p.write("                  <li><a href=\"#\" onclick=\"javascript:var para=getSelectedGridRows('", tabId, "_gridTable',1);if(para.length>1){$('parameter.list", tabId, "').value=para;};$('event.submit", tabId, "').value='", Integer.toString(multiDeleteAction.getEvent()), "';document.showForm", tabId, ".submit();\">", htmlEncoder.encode(multiDeleteAction.getTitle(), false), "</a></li>");
+							p.write("      <button class=\"", CssClass.dropdown_item.toString(), " ", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:var para=getSelectedGridRows('", tabId, "_gridTable',1);if(para.length>1){$('parameter.list", tabId, "').value=para;};$('event.submit", tabId, "').value='", Integer.toString(multiDeleteAction.getEvent()), "';document.showForm", tabId, ".submit();\">", htmlEncoder.encode(multiDeleteAction.getTitle(), false), "</button>");
 						} else {
-							p.write("                  <li><a href=\"#\" onclick=\"javascript:;\"><span>", htmlEncoder.encode(texts.getDeleteTitle(), false), "</span></a></li>");                    
+							p.write("      <button class=\"", CssClass.dropdown_item.toString(), " ", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:;\"><span>", htmlEncoder.encode(texts.getDeleteTitle(), false), "</span></button>");
 						}
-						p.write("                </ul>");
-						p.write("              </li>");
+						p.write("    </div>");
+						p.write("  </div>");
+						p.write("</li>");
 					}
 					// Grid actions
 					{
 						List<Action> gridActions = app.getPortalExtension().getGridActions(view, grid);
 						if(gridActions != null && !gridActions.isEmpty()) {
-							p.write("              <li class=\"", CssClass.hiddenSm.toString(), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#!\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\">", htmlEncoder.encode(texts.getActionsTitle(), false), "</a>");
-							p.write("                <ul class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\">");
+							p.write("<li class=\"", CssClass.nav_item.toString(), "\">");
+							p.write("  <div class=\"", CssClass.dropdown.toString(), " ", CssClass.d_none.toString(), " ", CssClass.d_lg_block.toString(), "\">");
+							p.write("    <button type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), "\" data-toggle=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:this.parentNode.hide=function(){};\" style=\"", STYLE_NO_WRAP, "\">", htmlEncoder.encode(texts.getActionsTitle(), false), "</button>");
+							p.write("    <div class=\"", CssClass.dropdown_menu.toString(), "\">");
 							for(Action action: gridActions) {
-								p.write("                  <li><a href=\"#\" onclick=\"javascript:var para=getSelectedGridRows('", tabId, "_gridTable',1);if(para.length>1){$('parameter.list", tabId, "').value=para;};$('event.submit", tabId, "').value='", Integer.toString(action.getEvent()), "';$('parameter.size", tabId, "').value='", action.getParameter(Action.PARAMETER_SIZE), "';document.showForm", tabId, ".submit();\">", htmlEncoder.encode(action.getTitle(), false), "</a></li>");		                        	
+								p.write("      <button class=\"", CssClass.dropdown_item.toString(), " ", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:var para=getSelectedGridRows('", tabId, "_gridTable',1);if(para.length>1){$('parameter.list", tabId, "').value=para;};$('event.submit", tabId, "').value='", Integer.toString(action.getEvent()), "';$('parameter.size", tabId, "').value='", action.getParameter(Action.PARAMETER_SIZE), "';document.showForm", tabId, ".submit();\">", htmlEncoder.encode(action.getTitle(), false), "</button>");		                        	
 							}
-							p.write("                </ul>");
-							p.write("              </li>");	                    		
+							p.write("    </div>");
+							p.write("  </div>");	                    		
+							p.write("</li>");
 						}
 					}
 					//
 					// Menu View
 					//                        
-					p.write("              <li onclick=\"javascript:toggleMenu(this);\"><a href=\"#!\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\">", htmlEncoder.encode(texts.getViewTitle(), false), "</a>");
-					p.write("                <ul class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\">");
+					p.write("<li class=\"", CssClass.nav_item.toString(), "\">");
+					p.write("  <div class=\"", CssClass.dropdown.toString(), " ", CssClass.d_none.toString(), " ", CssClass.d_lg_block.toString(), "\">");
+					p.write("    <button type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), "\" data-toggle=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:this.parentNode.hide=function(){};\" style=\"", STYLE_NO_WRAP, "\">", htmlEncoder.encode(texts.getViewTitle(), false), "</button>");
+					p.write("    <div class=\"", CssClass.dropdown_menu.toString(), "\">");
 					for(int i = 0; i < DEFAULT_PAGE_SIZES.length; i++) {
 						String pageSize = Integer.toString(DEFAULT_PAGE_SIZES[i]);
 						String showPagesText = texts.getShowRowsText();;
 						showPagesText = showPagesText.replaceAll("\\$\\{0\\}", pageSize);
-						p.write("                  <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(selectGridTabAction), "+'&amp;pagesize=", pageSize, "'", updateTabScriptletPost, "\">", htmlEncoder.encode(showPagesText, false), "</a></li>");
+						p.write("      <button class=\"", CssClass.dropdown_item.toString(), " ", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(selectGridTabAction), "+'&amp;pagesize=", pageSize, "'", updateTabScriptletPost, "\">", htmlEncoder.encode(showPagesText, false), "</button>");
 					}
 					{
 						// Column ordering
@@ -944,18 +957,18 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 								String columnLabel = app.getCurrentLocaleAsIndex() < fieldDef.getLabel().size()
 									? fieldDef.getLabel().get(app.getCurrentLocaleAsIndex())
 									: fieldDef.getLabel().get(0);
-								p.write("<li><a class=\"", CssClass.hiddenXs.toString(), "\" href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(swapColumnOrderAction), updateTabScriptletPost, "\">", columnLabel, "&nbsp;<span class=\"glyphicon glyphicon-chevron-down\"></span></a></li>");
+								p.write("<button class=\"", CssClass.dropdown_item.toString(), " ", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), " ", CssClass.d_xs_none.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(swapColumnOrderAction), updateTabScriptletPost, "\">", columnLabel, "&nbsp;", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SORT_DOWN, "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</button>");
 							}
 						}
 					}
 					{
 						// Reset column ordering
 						Action swapColumnOrderAction = grid.getGridControl().getSwapColumnOrderAction(0, 0);
-						p.write("<li><a class=\"", CssClass.hiddenXs.toString(), "\" href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(swapColumnOrderAction), updateTabScriptletPost, "\"><span class=\"glyphicon glyphicon-th\"></span>&nbsp;", texts.getResetTitle(), "</a></li>");
+						p.write("<button class=\"", CssClass.dropdown_item.toString(), " ", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), " ", CssClass.d_xs_none.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(swapColumnOrderAction), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_CANCEL, "\" border=\"0\" align=\"bottom\" alt=\"v\""), "&nbsp;", texts.getResetTitle(), "</button>");
 					}
-					p.write("                </ul>");
-					p.write("              </li>");
-					p.write("          </ul>");
+					p.write("    </div>");
+					p.write("  </div>");
+					p.write("</li>");
 					//
 					// Actions Form: multi-delete and user-defined actions
 					//
@@ -973,13 +986,17 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					// 
 					// Info
 					//
-					p.write("      <td class=\"", CssClass.menuOpPanelInfo.toString(), " ", CssClass.colXs1.toString(), " ", CssClass.hiddenXs.toString(), "\" style=\"border-bottom:0px;vertical-align:middle;\">");
+					p.write("<td class=\"", CssClass.gridNavInfo.toString(), " ", CssClass.d_none.toString(), " " , CssClass.d_lg_block.toString(), "\" width=\"1%\">");
+					p.write("<button class=\"", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), "\">");
 					if(grid.getCurrentPage() > 0 || rows.size() > 0) {
 						int startRow = grid.getCurrentPage() * grid.getPageSize();
-						p.write("        (", Integer.toString(startRow + 1), "-", Integer.toString(startRow + rows.size()), (grid.getTotalRows() == null ? "" : "/" + Integer.toString(grid.getTotalRows())), ")");
+						p.write("(", Integer.toString(startRow + 1), "-", Integer.toString(startRow + rows.size()), (grid.getTotalRows() == null ? "" : "/" + Integer.toString(grid.getTotalRows())), ")</button>");
+					} else {
+						p.write("&nbsp;");
 					}
-					p.write("      </td>");
-					// 
+					p.write("</button>");
+					p.write("</td>");
+					//
 					// End of panel
 					//
 					p.write("    </tr>");
@@ -1019,10 +1036,10 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 				}
 				p.write("</div>"); // filterArea
 				// Table header
-				p.write("<div class=\"", CssClass.tableResponsive.toString(), "\">");
-				p.write("<table class=\"", "", CssClass.table.toString(), " ", CssClass.tableHover.toString(), " ", CssClass.tableStriped.toString(), " ", CssClass.tableCondensed.toString(), "\" id=\"", tabId, "_gridTable\">");
+				p.write("<div class=\"", CssClass.table_responsive.toString(), "\">");
+				p.write("<table class=\"", "", CssClass.table.toString(), " ", CssClass.table_hover.toString(), " ", CssClass.table_condensed.toString(), "\" id=\"", tabId, "_gridTable\">");
 				p.write("  <thead>");
-				p.write("  <tr>");
+				p.write("  <tr class=\"", CssClass.table_row_striped.toString(), "\">");
 				if(grid.showRowSelectors()) {
 					p.write("<th></th>");
 				}
@@ -1032,7 +1049,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					ValuedField columnDef = j > 0 ? grid.getColumnDefs().get(j - 1) : null;
 					if(j == 0) {
 						p.write("<th width=\"40px;\">");
-						p.write("  <table class=\"", CssClass.filterHeader.toString(), " ", CssClass.hiddenPrint.toString(), "\"><tr><td>");
+						p.write("  <table class=\"", CssClass.filterHeader.toString(), " ", CssClass.d_print_none.toString(), "\"><tr><td>");
 						p.write("    <input id=\"multiselect", tabId, "\" type=\"checkbox\" onclick=\"javascript:selectGridRows('", tabId, "_gridTable',1, this.checked);\"/>");
 						p.write("  </td></tr></table>");
 						p.write("</th>");
@@ -1087,7 +1104,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					long rowNumber = UiReferencePane.currentRowId++;
 					String rowId = tabId + "_row" + rowNumber;                    
 					List<Object> cells = rows.get(j).getCells();
-					ObjectReference objRow = (ObjectReference)((AttributeValue)cells.get(0)).getValue(true);
+					ObjectReference objRow = (ObjectReference)((AttributeValue)cells.get(0)).getValue(p, true);
 					// row color
 					String[] gridRowColors = app.getPortalExtension().getGridRowColors(objRow.getObject());
 					String rowColor = gridRowColors == null ? null : gridRowColors[0];
@@ -1103,7 +1120,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					styleModifier = styleModifier.length() == 0 
 						? styleModifier 
 						: "style=\"" + styleModifier + "\"";
-					p.write("<tr ", styleModifier, " onclick=\"javascript:selectGridRow(this);\" >");
+					p.write("<tr class=\"", (j % 2 == 1 ? CssClass.table_row_striped.toString() : ""), "\" ", styleModifier, " onclick=\"javascript:selectGridRow(this);\" >");
 					if((objRow != null) && grid.showRowSelectors()) {
 						if((view.getLookupType() != null) && objRow.isInstanceof(view.getLookupType())) {
 							p.write("<td class=\"", CssClass.gridColTypeCheck.toString(), "\"><span class=\"", CssClass.lookupSelector.toString(), "\"><input type=\"checkbox\" name=\"objselect\" value=\"\" onclick=\"OF.selectAndClose('", htmlEncoder.encode(objRow.getXRI(), false), "', '", htmlEncoder.encode(objRow.getTitleAsJavascriptArg(), false), "', '", view.getId(), "', window);\" /></span></td>");
@@ -1120,8 +1137,8 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 							cssClass = valueHolder.getCssClassObjectContainer();
 						}
 						Object value = valueHolder.getValue(
-							// default is short-text
-							cssClass == null || !cssClass.contains(CssClass.longText.toString())
+							p,
+							cssClass == null || !cssClass.contains(CssClass.longText.toString()) // default is short-text
 						);
 						String stringifiedValue = valueHolder.getStringifiedValue(
 							p,
@@ -1324,7 +1341,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					}
 					p.write("</tr>");
 					// Row for object details (handled by EVENT_GRID_SHOW_ROW_DETAILS)
-					p.write("<tr>");
+					p.write("<tr style=\"background-color:inherit;\">");
 					p.write("  <td colspan=\"", Integer.toString(grid.getShowMaxMember()), "\" style=\"padding:0px;border-top:0px;border-bottom:0px;\"><table class=\"", CssClass.tablePanel.toString(), "\">");
 					p.write("    <td class=\"", CssClass.gridCloser.toString(), "\"><img class=\"imgCloser\" id=\"", rowId, "_details-closer\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_CLOSE, "\" alt=\"\" style=\"display:none;\" onclick=\"javascript:$('", rowId, "_details').innerHTML='';this.style.display='none';\" /></td>");
 					p.write("    <td width=\"100%\"><div id=\"", rowId, "_details\" /></td>");
@@ -1338,24 +1355,24 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					// Only show pagers if there are more than 10 rows 
 					if(rows.size() > 10) {                    
 						if(grid.getAddObjectAction() == null) { 
-							p.write("        <ul class=\"", CssClass.nav.toString(), " ", CssClass.navPills.toString(), " ", CssClass.hiddenPrint.toString(), "\">");
+							p.write("        <ul class=\"", CssClass.nav.toString(), " ", CssClass.nav_pills.toString(), " ", CssClass.d_print_none.toString(), "\">");
 							// Page 0
-							p.write("          <li><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(firstPageAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), firstPageAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a></li>");
+							p.write("          <li><button class=\"", CssClass.btn.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(firstPageAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), firstPageAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</button></li>");
 							// Page previous
 							if(pagePreviousIsEnabled) {
-								p.write("          <li class=\"", CssClass.hiddenXs.toString(), "\"><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a></li>");
-								p.write("          <li><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a></li>");
+								p.write("          <li class=\"", CssClass.d_none.toString(), " ", CssClass.d_lg_block.toString(), "\"><button class=\"", CssClass.btn.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</button></li>");
+								p.write("          <li><button class=\"", CssClass.btn.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</button></li>");
 							} else {
-								p.write("          <li class=\"", CssClass.hiddenXs.toString(), "\"><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a></li>");
-								p.write("          <li><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a></li>");
+								p.write("          <li class=\"", CssClass.d_none.toString(), " ", CssClass.d_lg_block.toString(), "\"><button class=\"", CssClass.btn.toString(), "\" style=\"", STYLE_NO_WRAP, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</button></li>");
+								p.write("          <li><button class=\"", CssClass.btn.toString(), "\" style=\"", STYLE_NO_WRAP, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</button></li>");
 							}
 							// Page next
 							if(pageNextIsEnabled) {
-								p.write("          <li><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextAction), " + '&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</a></li>");
-								p.write("          <li class=\"", CssClass.hiddenXs.toString(), "\"><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a></li>");
+								p.write("          <li><button class=\"", CssClass.btn.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextAction), " + '&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</button></li>");
+								p.write("          <li class=\"", CssClass.d_none.toString(), " ", CssClass.d_lg_block.toString(), "\"><button class=\"", CssClass.btn.toString(), "\" style=\"", STYLE_NO_WRAP, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</button></li>");
 							} else {
-								p.write("          <li><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a></li>");
-								p.write("          <li class=\"", CssClass.hiddenXs.toString(), "\"><a href=\"#\" style=\"", STYLE_GRID_MENU_SMALL, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a></li>");
+								p.write("          <li><button class=\"", CssClass.btn.toString(), "\" style=\"", STYLE_NO_WRAP, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</button></li>");
+								p.write("          <li class=\"", CssClass.d_none.toString(), " ", CssClass.d_lg_block.toString(), "\"><button class=\"", CssClass.btn.toString(), "\" style=\"", STYLE_NO_WRAP, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</button></li>");
 							}
 							p.write("        </ul>");
 						}
@@ -1379,7 +1396,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
     // (e.g. required for row menu)
     private static long currentRowId = 0L;
 
-    public static final String STYLE_GRID_MENU_SMALL = "padding-left:7px;padding-right:7px;";
+    public static final String STYLE_NO_WRAP = "white-space:nowrap;";
     public static final int NO_WRAP_THRESHOLD = 40;
     public static final int MAX_REFERENCE_PANE = 100;
     public static final String SEARCH_FORM_NAME = "searchForm";
@@ -1389,5 +1406,3 @@ public class UiReferencePane extends ReferencePane implements Serializable {
     protected int selectedReference = -1;
     
 }
-
-//--- End of File -----------------------------------------------------------

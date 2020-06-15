@@ -45,9 +45,7 @@ import org.openmdx.uses.org.apache.commons.pool2.PooledObjectFactory;
  * @param <T>
  *            Type of element pooled in this pool.
  *
- * @version $Revision: 1622090 $
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public class SoftReferenceObjectPool<T> extends BaseObjectPool<T> {
 

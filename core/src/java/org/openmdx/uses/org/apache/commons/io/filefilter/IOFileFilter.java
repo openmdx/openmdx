@@ -33,7 +33,7 @@ import java.io.FilenameFilter;
  * An interface which brings the FileFilter and FilenameFilter
  * interfaces together.
  *
- * @since 1.0
+ * @since Commons I/O 1.0
  * @version $Id: IOFileFilter.java 1471767 2013-04-24 23:24:19Z sebb $
  */
 public interface IOFileFilter extends FileFilter, FilenameFilter {

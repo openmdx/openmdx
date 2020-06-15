@@ -65,6 +65,7 @@ import java.util.HashMap;
 import java.util.ListIterator;
 import java.util.Map;
 
+import javax.jdo.FetchGroup;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionSpec;
@@ -140,24 +141,24 @@ public class RestServlet_2 extends HttpServlet {
 
     private final static int DEFAULT_POSITION = 0;
     private final static int DEFAULT_SIZE = 25;
-    
+
     /**
      * Use "text/xml" as pretty printing default value.
      */
     private final static String DEFAULT_MIME_TYPE = "text/xml";
-    
+
     /**
-     * Note that our default encoding is "UTF-8" even for "text/xml" as 
+     * Note that our default encoding is "UTF-8" even for "text/xml" as
      * opposed to the RFC 3023 specification which requires "US-ASCII" as
-     * default encoding for "text/xml"! 
+     * default encoding for "text/xml"!
      */
     private final static String DEFAULT_CHARACTER_ENCODING = "UTF-8";
-    
+
     /**
      * Implements <code>Serializable</code>
      */
     private static final long serialVersionUID = -4403464830407956377L;
-    
+
     /**
      * The servlet's connection factory
      */
@@ -169,64 +170,66 @@ public class RestServlet_2 extends HttpServlet {
     protected static final AppConfigurationEntry REMOTE_USER_LOGIN_CONFIGURATION = new AppConfigurationEntry(
         RemoteUserLoginModule.class.getName(),
         LoginModuleControlFlag.REQUIRED,
-        Collections.<String,Object>emptyMap()
+        Collections.<String, Object>emptyMap()
     );
 
     /**
      * The eagerly acquired REST formatter instance
      */
     protected static final StandardRestFormatter restFormatter = RestFormatters.getFormatter();
-    
+
     /**
      * The REST Servlet's standard login configuration
      */
     private final Configuration STANDARD_LOGIN_CONFIGURATION = new Configuration() {
 
         /**
-         * Provide 
+         * Provide
          * 
-         * @param the application name, usually one of<ul>
-         * <li><code>"connect"</code>
-         * <li><code>"auto-connect"</code>
-         * </ul>
+         * @param the
+         *            application name, usually one of
+         *            <ul>
+         *            <li><code>"connect"</code>
+         *            <li><code>"auto-connect"</code>
+         *            </ul>
          */
         @Override
         public AppConfigurationEntry[] getAppConfigurationEntry(
             String name
         ) {
-        	return getLoginConfiguration(name);
+            return getLoginConfiguration(name);
         }
 
         @Override
         public void refresh() {
-           // nothing to do
+            // nothing to do
         }
 
-     };    
-    
-     /**
-      * Provide the REST Servlet's login configuration
-      * 
-      * @param name
-      * @return
-      */
-     protected AppConfigurationEntry[] getLoginConfiguration(
-         String name
-     ) {
-         return new AppConfigurationEntry[]{
-             REMOTE_USER_LOGIN_CONFIGURATION
-         };
-     }
-     
+    };
+
     /**
-     * Provides the login configuration 
+     * Provide the REST Servlet's login configuration
+     * 
+     * @param name
+     * @return
+     */
+    protected AppConfigurationEntry[] getLoginConfiguration(
+        String name
+    ) {
+        return new AppConfigurationEntry[] {
+            REMOTE_USER_LOGIN_CONFIGURATION
+        };
+    }
+
+    /**
+     * Provides the login configuration
      * 
      * @return the login configuration to be used
      */
-    protected Configuration getLoginConfiguration(){
-    	return STANDARD_LOGIN_CONFIGURATION;
+    protected Configuration getLoginConfiguration() {
+        return STANDARD_LOGIN_CONFIGURATION;
     }
-    
+
     /**
      * Tells whether the session is in auto-commit mode
      * 
@@ -236,7 +239,7 @@ public class RestServlet_2 extends HttpServlet {
      */
     protected boolean isAutoCommitting(
         HttpServletRequest request
-    ){
+    ) {
         return Boolean.TRUE.equals(
             request.getSession(true).getAttribute("org.openmdx.rest.AutoCommit")
         );
@@ -251,13 +254,13 @@ public class RestServlet_2 extends HttpServlet {
      */
     protected boolean isRetainValues(
         HttpServletRequest request
-    ){
+    ) {
         String interactionVerb = request.getHeader("interaction-verb");
         return interactionVerb == null || Integer.parseInt(interactionVerb) != InteractionSpec.SYNC_SEND;
     }
 
     /**
-     * Tells whether null values shall be serialized
+     * Tells whether null values shall be serialized.
      * 
      * @param request
      * 
@@ -265,38 +268,63 @@ public class RestServlet_2 extends HttpServlet {
      */
     protected boolean isSerializeNulls(
         HttpServletRequest request
-    ){
-        String serializeNulls = request.getHeader("serialize-nulls");
+    ) {
+        final String serializeNulls = request.getHeader("serialize-nulls");
         return serializeNulls == null ? false : Boolean.parseBoolean(serializeNulls);
     }
 
+    /**
+     * Rewrite given fetchGroup according rewrite-fetchgroup pattern.
+     * 
+     * @param request
+     * @param fetchGroup
+     * @return
+     */
+    protected String rewriteFetchGroup(
+        HttpServletRequest request,
+        String fetchGroup
+    ) {
+        String rewriteFetchGroup = request.getHeader("rewrite-fetchgroup");
+        if(fetchGroup != null && rewriteFetchGroup != null) {
+            String[] rewritePattern = rewriteFetchGroup.split("/");
+            if(rewritePattern != null && rewritePattern.length == 2) {
+                fetchGroup = fetchGroup.replaceAll(
+                    rewritePattern[0],
+                    rewritePattern[1]
+                );
+            }
+        }
+        return fetchGroup;
+    }
+
     protected Connection newConnection(
-    	String configurationName,
-    	CallbackHandler callbackHandler
-    ) throws ResourceException {
-    	try {
-	        Subject subject = new Subject();
-	        LoginContext loginContext = new LoginContext(
-	            configurationName, 
-	            subject, 
-	            callbackHandler, 
-	            getLoginConfiguration()
-	        );
-	        loginContext.login();
-	        for(ConnectionSpec connectionSpec : subject.getPublicCredentials(ConnectionSpec.class)) {
-	           return this.connectionFactory.getConnection(connectionSpec);
-	        }
-    	} catch (LoginException exception) {
-            throw new SecurityException(
-            	"Login for the configuration '" + configurationName + "' failed",
-            	exception
+        final String configurationName,
+        final CallbackHandler callbackHandler
+    )
+        throws ResourceException {
+        try {
+            final Subject subject = new Subject();
+            final LoginContext loginContext = new LoginContext(
+                configurationName,
+                subject,
+                callbackHandler,
+                getLoginConfiguration()
             );
-    	}
-        throw new SecurityException (
-        	"The login module for the configuration '" + configurationName + "' did not provide a JCA connection spec"
+            loginContext.login();
+            for (final ConnectionSpec connectionSpec : subject.getPublicCredentials(ConnectionSpec.class)) {
+                return this.connectionFactory.getConnection(connectionSpec);
+            }
+        } catch (LoginException exception) {
+            throw new SecurityException(
+                "Login for the configuration '" + configurationName + "' failed",
+                exception
+            );
+        }
+        throw new SecurityException(
+            "The login module for the configuration '" + configurationName + "' did not provide a JCA connection spec"
         );
     }
-    
+
     /**
      * Retrieve the connection associated with the current session
      * 
@@ -307,12 +335,13 @@ public class RestServlet_2 extends HttpServlet {
      * @throws ServletException
      */
     protected Connection getConnection(
-        HttpServletRequest request
-    ) throws ServletException {
+        final HttpServletRequest request
+    )
+        throws ServletException {
         try {
-            HttpSession session = request.getSession(true);
+            final HttpSession session = request.getSession(true);
             Boolean autoCommit = (Boolean) session.getAttribute("org.openmdx.rest.AutoCommit");
-            if(autoCommit == null) {
+            if (autoCommit == null) {
                 session.setAttribute(
                     "org.openmdx.rest.AutoCommit",
                     autoCommit = Boolean.TRUE
@@ -321,9 +350,10 @@ public class RestServlet_2 extends HttpServlet {
             return autoCommit.booleanValue() ? this.newConnection(
                 "auto-connect",
                 new RequestCallbackHandler(request)
-            ) : (Connection)session.getAttribute(
-                Connection.class.getName()
-            );
+            )
+                : (Connection) session.getAttribute(
+                    Connection.class.getName()
+                );
         } catch (ResourceException exception) {
             throw Throwables.log(
                 new ServletException(
@@ -344,9 +374,10 @@ public class RestServlet_2 extends HttpServlet {
      * @throws ServletException
      */
     protected Interaction getInteraction(
-        HttpServletRequest req
-    ) throws ServletException {
-        Connection connection = getConnection(req);
+        final HttpServletRequest req
+    )
+        throws ServletException {
+        final Connection connection = getConnection(req);
         try {
             return connection.createInteraction();
         } catch (ResourceException exception) {
@@ -367,10 +398,10 @@ public class RestServlet_2 extends HttpServlet {
      * @return the requets's XRI
      */
     private Path getXri(
-        HttpServletRequest request 
+        final HttpServletRequest request
     ) {
         String path = request.getServletPath();
-        if(path.endsWith("/")) {
+        if (path.endsWith("/")) {
             path = path.substring(0, path.length() - 1);
         }
         return RestFormatters.toResourceIdentifier(path);
@@ -379,54 +410,50 @@ public class RestServlet_2 extends HttpServlet {
     /**
      * Map an openMDX exception code to a HTTP status code
      * 
-     * @param exceptionCode an openMDX exception code
+     * @param exceptionCode
+     *            an openMDX exception code
      * 
      * @return the corresponding HTTP status code
      */
     private static int toStatusCode(
-        int exceptionCode
-    ){
-        return
-            exceptionCode == BasicException.Code.NOT_FOUND ? HttpServletResponse.SC_NOT_FOUND :
-            exceptionCode == BasicException.Code.AUTHORIZATION_FAILURE ? HttpServletResponse.SC_FORBIDDEN :
-            exceptionCode == BasicException.Code.CONCURRENT_ACCESS_FAILURE ? HttpServletResponse.SC_PRECONDITION_FAILED :
-            exceptionCode == BasicException.Code.ILLEGAL_STATE ? HttpServletResponse.SC_CONFLICT :
-            exceptionCode == BasicException.Code.NOT_IMPLEMENTED ? HttpServletResponse.SC_NOT_IMPLEMENTED :
-            HttpServletResponse.SC_BAD_REQUEST;
+        final int exceptionCode
+    ) {
+        return exceptionCode == BasicException.Code.NOT_FOUND ? HttpServletResponse.SC_NOT_FOUND
+            : exceptionCode == BasicException.Code.AUTHORIZATION_FAILURE ? HttpServletResponse.SC_FORBIDDEN
+                : exceptionCode == BasicException.Code.CONCURRENT_ACCESS_FAILURE ? HttpServletResponse.SC_PRECONDITION_FAILED
+                    : exceptionCode == BasicException.Code.ILLEGAL_STATE ? HttpServletResponse.SC_CONFLICT
+                        : exceptionCode == BasicException.Code.NOT_IMPLEMENTED ? HttpServletResponse.SC_NOT_IMPLEMENTED
+                            : HttpServletResponse.SC_BAD_REQUEST;
     }
-    
+
     /**
      * Exception handler
      * 
-     * @param request 
+     * @param request
      * @param resp
      * @param exception
      */
     protected void handleException(
-        HttpServletRequest request,
-        HttpServletResponse response, 
-        ResourceException exception
+        final HttpServletRequest request,
+        final HttpServletResponse response,
+        final ResourceException exception
     ) {
         BasicException exceptionStack = BasicException.toExceptionStack(exception);
-        while(
-            exceptionStack.getExceptionCode() == BasicException.Code.GENERIC && 
-            exceptionStack.getCause() != null
-        ) {
+        while (exceptionStack.getExceptionCode() == BasicException.Code.GENERIC &&
+            exceptionStack.getCause() != null) {
             exceptionStack = exceptionStack.getCause();
         }
-        if(exceptionStack.getExceptionCode() == BasicException.Code.NOT_FOUND) {
+        if (exceptionStack.getExceptionCode() == BasicException.Code.NOT_FOUND) {
             SysLog.detail("Resource Exception", exceptionStack);
         } else {
-            SysLog.warning("Resource Exception", exceptionStack);            
+            SysLog.warning("Resource Exception", exceptionStack);
         }
         response.setStatus(toStatusCode(exceptionStack.getExceptionCode()));
-        ServletTarget target = new ServletTarget(request, response);
-        restFormatter.format(
-            target,
-            exceptionStack
-        );
-        try {
-            target.close();
+        try (ServletTarget target = new ServletTarget(request, response)) {
+            restFormatter.format(
+                target,
+                exceptionStack
+            );
         } catch (IOException ignored) {
             SysLog.trace("Ignored close failure", ignored);
         }
@@ -435,46 +462,46 @@ public class RestServlet_2 extends HttpServlet {
     /**
      * Exception handler
      * 
-     * @param request 
+     * @param request
      * @param response
      * @param exception
      */
     protected void handleException(
-        HttpServletRequest request, 
-        HttpServletResponse response, 
-        Exception exception
+        final HttpServletRequest request,
+        final HttpServletResponse response,
+        final Exception exception
     ) {
-        BasicException exceptionStack = BasicException.toExceptionStack(exception);
+        final BasicException exceptionStack = BasicException.toExceptionStack(exception);
         SysLog.error("Internal Server Error", exceptionStack);
         request.getSession().removeAttribute(Connection.class.getName());
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        ServletTarget target = new ServletTarget(request, response);
-        restFormatter.format(
-            target,
-            exceptionStack
-        );
-        try {
-            target.close();
-        } catch (IOException ignored) {
-            SysLog.trace("Ignored close failure", ignored);
+        try (ServletTarget target = new ServletTarget(request, response)) {
+            restFormatter.format(
+                target,
+                exceptionStack
+            );
+        } catch (IOException exception1) {
+            SysLog.trace("Ignored close failure", exception1);
         }
     }
-    
+
     /**
      * Servlet initialization
      * 
-     * @param config servlet configuration
+     * @param config
+     *            servlet configuration
      * 
      * @exception ServletExcetpion
      */
     @Override
     public void init(
-        ServletConfig config
-    ) throws ServletException {
+        final ServletConfig config
+    )
+        throws ServletException {
         super.init(config);
         try {
-            String entityManagerFactoryName = config.getInitParameter("entity-manager-factory-name");
-            Map<Object,Object> overrides = new HashMap<Object,Object>();
+            final String entityManagerFactoryName = config.getInitParameter("entity-manager-factory-name");
+            final Map<Object, Object> overrides = new HashMap<Object, Object>();
             overrides.put(
                 ConfigurableProperty.IsolateThreads.qualifiedName(),
                 Boolean.FALSE.toString()
@@ -483,19 +510,18 @@ public class RestServlet_2 extends HttpServlet {
                 ConfigurableProperty.Multithreaded.qualifiedName(),
                 Boolean.TRUE.toString()
             );
-            if(config.getInitParameter("RefInitializeOnCreate") != null) {
+            if (config.getInitParameter("RefInitializeOnCreate") != null) {
                 log("The init parameter 'RefInitializeOnCreate' is no longer supported");
             }
             this.connectionFactory = InboundConnectionFactory_2.newInstance(
-                entityManagerFactoryName == null ? "jdo:EntityManagerFactory" : 
-                entityManagerFactoryName.indexOf(':') < 0 ? "jdo:" + entityManagerFactoryName :
-                entityManagerFactoryName, 
+                entityManagerFactoryName == null ? "jdo:EntityManagerFactory"
+                    : entityManagerFactoryName.indexOf(':') < 0 ? "jdo:" + entityManagerFactoryName : entityManagerFactoryName,
                 overrides
-            );            
-        } catch(Exception exception) {
+            );
+        } catch (Exception exception) {
             throw Throwables.log(
                 new ServletException(exception)
-            );            
+            );
         }
     }
 
@@ -503,37 +529,34 @@ public class RestServlet_2 extends HttpServlet {
      * Re-fetch objects after auto-commit
      * 
      * @param interaction
-     * @param reply the list to be updated
+     * @param reply
+     *            the list to be updated
      * 
      * @throws ResourceException
      */
-    @SuppressWarnings(
-        {"unchecked", "cast", "rawtypes"}
-    )
+    @SuppressWarnings({ "unchecked", "cast", "rawtypes" })
     private void reFetch(
-        Interaction interaction,
-        IndexedRecord reply
-    ) throws ResourceException {
-        for(
-            ListIterator i = ((IndexedRecord)reply).listIterator();
-            i.hasNext();
-        ) {
-            Object oldObject = i.next();
-            if(oldObject instanceof Record) {
-                Record oldRecord = (Record) oldObject;
-                if(org.openmdx.base.rest.spi.ObjectRecord.isCompatible(oldRecord)) {
-                    Path xri = Object_2Facade.getPath((MappedRecord) oldRecord);
+        final Interaction interaction,
+        final IndexedRecord reply
+    )
+        throws ResourceException {
+        for (final ListIterator i = ((IndexedRecord) reply).listIterator(); i.hasNext();) {
+            final Object oldObject = i.next();
+            if (oldObject instanceof Record) {
+                final Record oldRecord = (Record) oldObject;
+                if (org.openmdx.base.rest.spi.ObjectRecord.isCompatible(oldRecord)) {
+                    final Path xri = Object_2Facade.getPath((MappedRecord) oldRecord);
                     QueryRecord query = null;
                     try {
                         query = Facades.newQuery(xri).getDelegate();
-                    } catch(Exception ignore) {
+                    } catch (Exception ignore) {
                         // ignore
                     }
-                    IndexedRecord output = (IndexedRecord) interaction.execute(
+                    final IndexedRecord output = (IndexedRecord) interaction.execute(
                         InteractionSpecs.getRestInteractionSpecs(true).GET,
                         query
                     );
-                    if(!output.isEmpty()) {
+                    if (!output.isEmpty()) {
                         i.set(output.get(0));
                     }
                 }
@@ -555,35 +578,36 @@ public class RestServlet_2 extends HttpServlet {
      * @throws ResourceException
      */
     protected Record execute(
-        Interaction interaction,
-        boolean autoCommit,
-        boolean reFetchAfterAutoCommit,
-        RestInteractionSpec interactionSpec, 
-        Record input
-    ) throws ResourceException {
-        if(autoCommit) {
-            LocalTransaction transaction = interaction.getConnection().getLocalTransaction(); 
+        final Interaction interaction,
+        final boolean autoCommit,
+        final boolean reFetchAfterAutoCommit,
+        final RestInteractionSpec interactionSpec,
+        final Record input
+    )
+        throws ResourceException {
+        if (autoCommit) {
+            final LocalTransaction transaction = interaction.getConnection().getLocalTransaction();
             transaction.begin();
             Status status = Status.STATUS_ACTIVE;
             try {
-                Record reply = interaction.execute(
-                    interactionSpec, 
+                final Record reply = interaction.execute(
+                    interactionSpec,
                     input
                 );
                 status = Status.STATUS_COMMITTING;
                 transaction.commit();
                 status = Status.STATUS_COMMITTED;
-                if(reFetchAfterAutoCommit && reply instanceof IndexedRecord) {
-                    reFetch(interaction, (IndexedRecord)reply);
+                if (reFetchAfterAutoCommit && reply instanceof IndexedRecord) {
+                    reFetch(interaction, (IndexedRecord) reply);
                 }
-                return reply; 
+                return reply;
             } catch (ResourceException exception) {
-                switch(status) {
+                switch (status) {
                     case STATUS_ACTIVE:
                         try {
                             transaction.rollback();
-                        } catch(Exception rollbackException) {
-                            BasicException exceptionChain = BasicException.newEmbeddedExceptionStack(
+                        } catch (Exception rollbackException) {
+                            final BasicException exceptionChain = BasicException.newEmbeddedExceptionStack(
                                 rollbackException,
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.HEURISTIC
@@ -629,12 +653,12 @@ public class RestServlet_2 extends HttpServlet {
             }
         } else {
             return interaction.execute(
-                interactionSpec, 
+                interactionSpec,
                 input
-            );                
+            );
         }
     }
-    
+
     /**
      * Tells whether the request's query string shall be interpreted as REST input record
      * 
@@ -643,9 +667,9 @@ public class RestServlet_2 extends HttpServlet {
      * @return <code>true</code> if the query string shall be interpreted as REST input record
      */
     private static boolean hasQuery(
-        HttpServletRequest request
-    ){
-        String query = request.getQueryString();
+        final HttpServletRequest request
+    ) {
+        final String query = request.getQueryString();
         return query != null && query.length() != 0;
     }
 
@@ -653,65 +677,77 @@ public class RestServlet_2 extends HttpServlet {
      * Retrieve the interaction spec. The HTTP function may be overridden by a function name parameter.
      * 
      * @param request
-     * @param defaultFunction the default function, usually corresponding to the HTTP method
+     * @param defaultFunction
+     *            the default function, usually corresponding to the HTTP method
      * 
      * @return the interaction spec to be used
      * 
      * @throws ResourceException
      */
     private RestInteractionSpec getInteractionSpec(
-        HttpServletRequest request,
-        RestFunction defaultFunction
-    ) throws ResourceException {
-        String functionName = request.getParameter("FunctionName");
-        RestFunction restFunction;
-        if(functionName == null) {
+        final HttpServletRequest request,
+        final RestFunction defaultFunction
+    )
+        throws ResourceException {
+        final String functionName = request.getParameter("FunctionName");
+        final RestFunction restFunction;
+        if (functionName == null) {
             restFunction = defaultFunction;
-        } else try {
-            restFunction = RestFunction.valueOf(functionName);
-        } catch (IllegalArgumentException exception) {
-            throw new ResourceException (
-                "Unsupported REST function name '" + functionName + "'",
-                exception
-            );
-        }
+        } else
+            try {
+                restFunction = RestFunction.valueOf(functionName);
+            } catch (IllegalArgumentException exception) {
+                throw new ResourceException(
+                    "Unsupported REST function name '" + functionName + "'",
+                    exception
+                );
+            }
         InteractionSpecs interactionSpecs = InteractionSpecs.getRestInteractionSpecs(this.isRetainValues(request));
-        switch(restFunction) {
-            case GET: return interactionSpecs.GET;
-            case PUT: return interactionSpecs.UPDATE;
-            case DELETE: return interactionSpecs.DELETE;
-            case POST: return interactionSpecs.CREATE;
-            default: return null;
+        switch (restFunction) {
+            case GET:
+                return interactionSpecs.GET;
+            case PUT:
+                return interactionSpecs.UPDATE;
+            case DELETE:
+                return interactionSpecs.DELETE;
+            case POST:
+                return interactionSpecs.CREATE;
+            default:
+                return null;
         }
     }
-    
+
     /**
      * REST DELETE Request
      * 
-     * @param request the HTTP Request
-     * @param response the HTTP Response
-     *  
+     * @param request
+     *            the HTTP Request
+     * @param response
+     *            the HTTP Response
+     * 
      * @exception ServletException
      * @exception IOException
      */
     @Override
     protected void doDelete(
-        HttpServletRequest request, 
-        HttpServletResponse response
-    ) throws ServletException, IOException {
+        final HttpServletRequest request,
+        final HttpServletResponse response
+    )
+        throws ServletException,
+        IOException {
         prolog(request, response);
-        Path xri = this.getXri(request);
+        final Path xri = this.getXri(request);
         // Close connection|session
         // Closing the session also closes the connection
-        if(isSessionIdentifier(xri) || isConnectionObjectIdentifier(xri)) {
-            HttpSession session = request.getSession(true);
-            Connection connection = (Connection)session.getAttribute(Connection.class.getName());
-            if(connection != null) {
+        if (isSessionIdentifier(xri) || isConnectionObjectIdentifier(xri)) {
+            final HttpSession session = request.getSession(true);
+            final Connection connection = (Connection) session.getAttribute(Connection.class.getName());
+            if (connection != null) {
                 try {
                     connection.close();
                 } catch (ResourceException exception) {
                     Throwables.log(exception);
-                }                
+                }
             }
             session.setAttribute(
                 "org.openmdx.rest.AutoCommit",
@@ -721,7 +757,7 @@ public class RestServlet_2 extends HttpServlet {
                 Connection.class.getName(),
                 null
             );
-            if(isSessionIdentifier(xri)) {
+            if (isSessionIdentifier(xri)) {
                 try {
                     session.invalidate();
                 } catch (IllegalStateException exception) {
@@ -729,46 +765,44 @@ public class RestServlet_2 extends HttpServlet {
                 }
             }
         } else {
-            Interaction interaction = getInteraction(request);
+            final Interaction interaction = getInteraction(request);
             try {
-                String contentType = request.getContentType();
-                if(
-                	"application/x-www-form-urlencoded".equals(contentType) || 
-                	(contentType == null && !hasQuery(request))
-                ) {                
-                	execute(  
+                final String contentType = request.getContentType();
+                if ("application/x-www-form-urlencoded".equals(contentType) ||
+                    (contentType == null && !hasQuery(request))) {
+                    execute(
                         interaction,
-                        !isTransactionObjectIdentifier(xri) && isAutoCommitting(request), 
-                        false, 
-                        InteractionSpecs.getRestInteractionSpecs(false).DELETE, 
+                        !isTransactionObjectIdentifier(xri) && isAutoCommitting(request),
+                        false,
+                        InteractionSpecs.getRestInteractionSpecs(false).DELETE,
                         Query_2Facade.newInstance(xri).getDelegate()
                     );
                 } else {
                     final MappedRecord object = parseRequest(request, response);
-                    execute(  
+                    execute(
                         interaction,
-                        !isControlObjectType(object.getRecordName()) && isAutoCommitting(request), 
-                        false, 
-                        InteractionSpecs.getRestInteractionSpecs(false).DELETE, 
+                        !isControlObjectType(object.getRecordName()) && isAutoCommitting(request),
+                        false,
+                        InteractionSpecs.getRestInteractionSpecs(false).DELETE,
                         object
                     );
                 }
-                response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
-            } catch(ResourceException exception) {
+                response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            } catch (ResourceException exception) {
                 this.handleException(
                     request,
-                    response, 
+                    response,
                     exception
                 );
-            } catch(Exception exception) {
+            } catch (Exception exception) {
                 this.handleException(
-                    request, 
-                    response, 
+                    request,
+                    response,
                     exception
                 );
             } finally {
                 try {
-                    if(this.isAutoCommitting(request)) {
+                    if (this.isAutoCommitting(request)) {
                         Connection connection = interaction.getConnection();
                         interaction.close();
                         connection.close();
@@ -786,216 +820,221 @@ public class RestServlet_2 extends HttpServlet {
     /**
      * HTTP GET Request
      * 
-     * @param request the HTTP Request
-     * @param response the HTTP Response
-     *  
+     * @param request
+     *            the HTTP Request
+     * @param response
+     *            the HTTP Response
+     * 
      * @exception ServletException
      * @exception IOException
      */
     @Override
     protected void doGet(
-        HttpServletRequest request, 
-        HttpServletResponse response
-    ) throws ServletException, IOException {
-        Model_1_0 model = Model_1Factory.getModel();
-        String servletPath = request.getServletPath();
-        if(servletPath.startsWith("/api-ui")) {
+        final HttpServletRequest request,
+        final HttpServletResponse response
+    )
+        throws ServletException,
+        IOException {
+        final Model_1_0 model = Model_1Factory.getModel();
+        final String servletPath = request.getServletPath();
+        if (servletPath.startsWith("/api-ui")) {
             try {
                 BinaryLargeObjects.streamCopy(
-                    request.getServletContext().getResourceAsStream(servletPath), 
-                    0L, 
+                    request.getServletContext().getResourceAsStream(servletPath),
+                    0L,
                     response.getOutputStream()
                 );
                 response.setStatus(HttpServletResponse.SC_OK);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             }
-        } else if(servletPath.startsWith("/api")) {
+        } else if (servletPath.startsWith("/api")) {
             try {
-                if(request.getParameter("xri") != null) {
+                if (request.getParameter("xri") != null) {
                     response.sendRedirect(
                         request.getContextPath() +
-                        new Path(request.getParameter("xri")).toClassicRepresentation() + "/:api"
-                    );                
-                } else if(request.getParameter("type") != null) {
+                            new Path(request.getParameter("xri")).toClassicRepresentation() + "/:api"
+                    );
+                } else if (request.getParameter("type") != null) {
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.setContentType("application/json");
-                    PrintWriter pw = response.getWriter();
-                    new Swagger(
-                        model.getElement(request.getParameter("type"))
-                    ).writeAPI(
-                        pw, 
-                        null, // host 
-                        null, // basePath 
-                        null // description
-                    );
-                    pw.close();      
+                    try (PrintWriter pw = response.getWriter()) {
+                        new Swagger(
+                            model.getElement(request.getParameter("type"))
+                        ).writeAPI(
+                            pw,
+                            null, // host 
+                            null, // basePath 
+                            null // description
+                        );
+                    }
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NO_CONTENT);                
+                    response.setStatus(HttpServletResponse.SC_NO_CONTENT);
                 }
-            } catch(Exception exception) {
+            } catch (Exception exception) {
                 this.handleException(
-                    request, 
+                    request,
                     response, exception
                 );
             }
         } else {
             prolog(request, response);
-            Interaction interaction = getInteraction(request);
+            final Interaction interaction = getInteraction(request);
             try {
-                Path xri = this.getXri(request);
-                InteractionSpec get = InteractionSpecs.getRestInteractionSpecs(
+                final Path xri = this.getXri(request);
+                final InteractionSpec get = InteractionSpecs.getRestInteractionSpecs(
                     !this.isAutoCommitting(request) && this.isRetainValues(request)
                 ).GET;
-                boolean serializeNulls = this.isSerializeNulls(request);
+                final boolean serializeNulls = this.isSerializeNulls(request);
                 // Object
-                if(xri.isObjectPath()) {
-                    if(xri.isPattern()) {
+                if (xri.isObjectPath()) {
+                    if (xri.isPattern()) {
                         throw new UnsupportedOperationException("WILDCARD");//  TODO
                     } else {
-                        IndexedRecord output = (IndexedRecord) interaction.execute(
-                            get, 
+                        final IndexedRecord output = (IndexedRecord) interaction.execute(
+                            get,
                             Facades.newQuery(xri).getDelegate()
                         );
-                        if(output == null) {
-                            response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
-                        }  else if(output.isEmpty()) {
-                            response.setStatus(HttpServletResponse.SC_NOT_FOUND);                    
+                        if (output == null) {
+                            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                        } else if (output.isEmpty()) {
+                            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                         } else {
                             response.setStatus(HttpServletResponse.SC_OK);
-                            ServletTarget target = new ServletTarget(request, response); 
-                            restFormatter.format(
-                                target,
-                                toObjectRecord(output.get(0)),
-                                serializeNulls
-                            );
-                            target.close();
+                            try (ServletTarget target = new ServletTarget(request, response)) {
+                                restFormatter.format(
+                                    target,
+                                    toObjectRecord(output.get(0)),
+                                    serializeNulls
+                                );
+                            }
                         }
                     }
                 } else {
-                    if(":api".equals(xri.getLastSegment().toClassicRepresentation())) {
-                        IndexedRecord output = (IndexedRecord) interaction.execute(
-                            get, 
+                    if (":api".equals(xri.getLastSegment().toClassicRepresentation())) {
+                        final IndexedRecord output = (IndexedRecord) interaction.execute(
+                            get,
                             Facades.newQuery(xri.getParent()).getDelegate()
                         );
-                        if(output == null) {
-                            response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
-                        }  else if(output.isEmpty()) {
-                            response.setStatus(HttpServletResponse.SC_NOT_FOUND);                    
+                        if (output == null) {
+                            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                        } else if (output.isEmpty()) {
+                            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                         } else {
                             response.setStatus(HttpServletResponse.SC_OK);
                             response.setContentType("application/json");
-                            PrintWriter pw = response.getWriter();
-                            String basePath = request.getContextPath() + request.getServletPath().replace("/:api", "");
-                            String host = null;
-                            {
-                                String requestURL = request.getRequestURL().toString();
-                                int pos1 = requestURL.indexOf("://");
-                                int pos2 = requestURL.indexOf("/", pos1 + 3);
-                                if(pos2 > pos1) {
-                                    host = requestURL.substring(pos1 + 3, pos2);
-                                } else {
-                                    host= null;
+                            try (final PrintWriter pw = response.getWriter()) {
+                                final String basePath = request.getContextPath() + request.getServletPath().replace("/:api", "");
+                                final String host;
+                                {
+                                    String requestURL = request.getRequestURL().toString();
+                                    int pos1 = requestURL.indexOf("://");
+                                    int pos2 = requestURL.indexOf("/", pos1 + 3);
+                                    if (pos2 > pos1) {
+                                        host = requestURL.substring(pos1 + 3, pos2);
+                                    } else {
+                                        host = null;
+                                    }
                                 }
+                                final ObjectRecord object = this.toObjectRecord(output.get(0));
+                                new Swagger(
+                                    model.getElement(object.getValue().getRecordName())
+                                ).writeAPI(
+                                    pw,
+                                    host,
+                                    basePath,
+                                    object.getResourceIdentifier().toXRI()
+                                );
                             }
-                            ObjectRecord object = this.toObjectRecord(output.get(0));
-                            new Swagger(
-                                model.getElement(object.getValue().getRecordName())
-                            ).writeAPI(
-                                pw, 
-                                host, 
-                                basePath, 
-                                object.getResourceIdentifier().toXRI()
-                            );
-                            pw.close();
                         }
-                    } else if(":api-ui".equals(xri.getLastSegment().toClassicRepresentation())) {
+                    } else if (":api-ui".equals(xri.getLastSegment().toClassicRepresentation())) {
                         response.sendRedirect(
                             request.getContextPath() +
-                            "/api-ui/index.html?url=" + request.getRequestURL().toString().replace(":api-ui", ":api")
+                                "/api-ui/index.html?url=" + request.getRequestURL().toString().replace(":api-ui", ":api")
                         );
                     } else {
                         // Object query
                         final MappedRecord input;
-                        if(request.getHeader("interaction-verb") == null) {
-                            Query_2Facade inputFacade = Facades.newQuery(xri);
-                            String queryType = request.getParameter("queryType");
-                            if(queryType == null){
+                        if (request.getHeader("interaction-verb") == null) {
+                            final Query_2Facade inputFacade = Facades.newQuery(xri);
+                            final String queryType = request.getParameter("queryType");
+                            if (queryType == null) {
                                 inputFacade.setQueryType(Model_1Factory.getModel().getTypes(xri.getChild(":*"))[2].getQualifiedName());
                             } else {
                                 inputFacade.setQueryType(queryType);
                             }
-                            String query = request.getParameter("query"); 
-                            if(query != null) {
+                            final String query = request.getParameter("query");
+                            if (query != null) {
                                 inputFacade.setQuery(query);
                             }
-                            String position = request.getParameter("position");
-                            if(position == null) {
+                            final String position = request.getParameter("position");
+                            if (position == null) {
                                 inputFacade.setPosition(Integer.valueOf(DEFAULT_POSITION));
                             } else {
                                 inputFacade.setPosition(Integer.valueOf(position));
                             }
-                            String size = request.getParameter("size");
-                            if(size == null) {
+                            final String size = request.getParameter("size");
+                            if (size == null) {
                                 inputFacade.setSize(Integer.valueOf(DEFAULT_SIZE));
                             } else {
                                 inputFacade.setSize(Integer.valueOf(size));
                             }
-                            String[] groups = request.getParameterValues("groups"); 
-                            if(groups != null) {
-                            	switch(groups.length) {
-                            	case 0:
-                                    inputFacade.setFetchGroupName(null);
-                                    break;
-                            	case 1:
-                                    inputFacade.setFetchGroupName(groups[0]);
-                                    break;
-                            	default:
-                                	throw new RuntimeServiceException(
-                	                    BasicException.Code.DEFAULT_DOMAIN,
-                	                    BasicException.Code.NOT_SUPPORTED,
-                	                    "At most one fetch group may be specified",
-                	                    new BasicException.Parameter("groups", (Object[])groups)
-                	                );
-                            	}
+                            final String[] groups = request.getParameterValues("groups");
+                            if(groups == null || groups.length == 0) {
+                                // fetchGroupName=ALL as default
+                                inputFacade.setFetchGroupName(FetchGroup.ALL);
+                            } else if(groups.length == 1) {
+                                inputFacade.setFetchGroupName(
+                                    this.rewriteFetchGroup(
+                                        request,
+                                        groups[0]
+                                    )
+                                );
+                            } else {
+                                throw new RuntimeServiceException(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.NOT_SUPPORTED,
+                                    "At most one fetch group may be specified",
+                                    new BasicException.Parameter("groups", (Object[]) groups)
+                                );
                             }
                             input = inputFacade.getDelegate();
                         } else {
                             input = parseRequest(request, response);
                         }
-                        IndexedRecord output = (IndexedRecord) interaction.execute(
-                            get, 
+                        final IndexedRecord output = (IndexedRecord) interaction.execute(
+                            get,
                             input
                         );
-                        if(output == null) {
-                            response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
+                        if (output == null) {
+                            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
                         } else {
                             response.setStatus(HttpServletResponse.SC_OK);
-                            ServletTarget target = new ServletTarget(request, response); 
-                            restFormatter.format(
-                                target,
-                                xri,
-                                output,
-                                serializeNulls
-                            );
-                            target.close();
+                            try (ServletTarget target = new ServletTarget(request, response)) {
+                                restFormatter.format(
+                                    target,
+                                    xri,
+                                    output,
+                                    serializeNulls
+                                );
+                            }
                         }
                     }
                 }
-            } catch(ResourceException exception) {
+            } catch (ResourceException exception) {
                 this.handleException(
-                    request, 
-                    response, 
+                    request,
+                    response,
                     exception
                 );
-            } catch(Exception exception) {
+            } catch (Exception exception) {
                 this.handleException(
-                    request, 
+                    request,
                     response, exception
                 );
             } finally {
                 try {
-                    if(this.isAutoCommitting(request)) {
+                    if (this.isAutoCommitting(request)) {
                         Connection connection = interaction.getConnection();
                         interaction.close();
                         connection.close();
@@ -1013,24 +1052,28 @@ public class RestServlet_2 extends HttpServlet {
     /**
      * HTTP POST Request
      * 
-     * @param request the HTTP Request
-     * @param response the HTTP Response
-     *  
+     * @param request
+     *            the HTTP Request
+     * @param response
+     *            the HTTP Response
+     * 
      * @exception ServletException
      * @exception IOException
      */
     @SuppressWarnings("unchecked")
     @Override
     protected void doPost(
-        HttpServletRequest request, 
-        HttpServletResponse response
-    ) throws ServletException, IOException {
+        final HttpServletRequest request,
+        final HttpServletResponse response
+    )
+        throws ServletException,
+        IOException {
         prolog(request, response);
-        Path xri = this.getXri(request);
-        if(isConnectionObjectIdentifier(xri)) {
-            HttpSession session = request.getSession(true);
-            Connection connection = (Connection)session.getAttribute(Connection.class.getName());
-            if(connection == null) {
+        final Path xri = this.getXri(request);
+        if (isConnectionObjectIdentifier(xri)) {
+            final HttpSession session = request.getSession(true);
+            Connection connection = (Connection) session.getAttribute(Connection.class.getName());
+            if (connection == null) {
                 try {
                     session.setAttribute(
                         "org.openmdx.rest.AutoCommit",
@@ -1039,21 +1082,21 @@ public class RestServlet_2 extends HttpServlet {
                     session.setAttribute(
                         Connection.class.getName(),
                         connection = this.newConnection(
-                    		"connect",
-                    		new RequestCallbackHandler(request)
+                            "connect",
+                            new RequestCallbackHandler(request)
                         )
                     );
                     response.setStatus(HttpServletResponse.SC_NO_CONTENT);
                 } catch (ResourceException exception) {
                     handleException(
                         request,
-                        response, 
+                        response,
                         exception
                     );
                 } catch (Exception exception) {
                     handleException(
-                        request, 
-                        response, 
+                        request,
+                        response,
                         exception
                     );
                 }
@@ -1062,19 +1105,19 @@ public class RestServlet_2 extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_NO_CONTENT);
             }
         } else {
-            Interaction interaction = getInteraction(request);
-            boolean isAutoCommitting = this.isAutoCommitting(request);
-            boolean serializeNulls = this.isSerializeNulls(request);            
+            final Interaction interaction = getInteraction(request);
+            final boolean autoCommitting = this.isAutoCommitting(request);
+            final boolean serializeNulls = this.isSerializeNulls(request);
             try {
                 final MappedRecord value = parseRequest(request, response);
-                if(org.openmdx.base.rest.spi.ObjectRecord.isCompatible(value)) {
-                    MappedRecord input;
-                    if(xri.equals(Object_2Facade.getPath(value))) {
+                if (org.openmdx.base.rest.spi.ObjectRecord.isCompatible(value)) {
+                    final MappedRecord input;
+                    if (xri.equals(Object_2Facade.getPath(value))) {
                         input = value;
                     } else {
-                        RecordFactory factory = this.connectionFactory.getRecordFactory();
-                        if(factory instanceof ExtendedRecordFactory) {
-                            input = ((ExtendedRecordFactory)factory).singletonMappedRecord(
+                        final RecordFactory factory = this.connectionFactory.getRecordFactory();
+                        if (factory instanceof ExtendedRecordFactory) {
+                            input = ((ExtendedRecordFactory) factory).singletonMappedRecord(
                                 Multiplicity.MAP.code(),
                                 null,
                                 xri,
@@ -1085,83 +1128,95 @@ public class RestServlet_2 extends HttpServlet {
                             input.put(xri, value);
                         }
                     }
-                    IndexedRecord output = (IndexedRecord) execute(
+                    final IndexedRecord output = (IndexedRecord) execute(
                         interaction,
-                        !isTransactionObjectIdentifier(xri) && isAutoCommitting,
-                        true, 
-                        InteractionSpecs.getRestInteractionSpecs(isRetainValues(request)).CREATE, 
+                        !isTransactionObjectIdentifier(xri) && autoCommitting,
+                        true,
+                        InteractionSpecs.getRestInteractionSpecs(isRetainValues(request)).CREATE,
                         input
                     );
-                    if(output == null || output.isEmpty()) {
+                    if (output == null || output.isEmpty()) {
                         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
                     } else {
                         response.setStatus(HttpServletResponse.SC_OK);
-                        ServletTarget target = new ServletTarget(request, response);
-                        for(Object record : output){
+                        try (final ServletTarget target = new ServletTarget(request, response)) {
+                            for (final Object record : output) {
+                                restFormatter.format(
+                                    target,
+                                    toObjectRecord(record),
+                                    serializeNulls
+                                );
+                            }
+                        }
+                    }
+                } else if (org.openmdx.base.rest.spi.QueryRecord.isCompatible(value)) {
+                    QueryRecord query = (QueryRecord)value;
+                    final boolean multivalued;
+                    if (xri.size() % 2 == 0) {
+                        multivalued = true;
+                    } else if (xri.isPattern()) {
+                        throw new UnsupportedOperationException("WILDCARD");// TODO
+                    } else {
+                        multivalued = false;
+                    }
+                    final InteractionSpec get = InteractionSpecs.getRestInteractionSpecs(
+                        !autoCommitting && this.isRetainValues(request)
+                    ).GET;
+                    query.setFetchGroupName(
+                        this.rewriteFetchGroup(
+                            request,
+                            query.getFetchGroupName()
+                        )
+                    );
+                    final IndexedRecord output = (IndexedRecord) interaction.execute(
+                        get,
+                        query
+                    );
+                    if (output == null) {
+                        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                    } else if (multivalued) {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        try (ServletTarget target = new ServletTarget(request, response)) {
                             restFormatter.format(
-                                target, 
-                                toObjectRecord(record),
+                                target,
+                                xri,
+                                output,
                                 serializeNulls
                             );
                         }
-                        target.close();
-                    }
-                } else if(org.openmdx.base.rest.spi.QueryRecord.isCompatible(value)) {
-                    boolean multivalued;
-                    if(xri.size() % 2 == 0) {
-                       multivalued = true;
-                    } else if(xri.isPattern()) {
-                       throw new UnsupportedOperationException("WILDCARD");// TODO
-                    } else{
-                       multivalued = false;
-                    }
-                    InteractionSpec get = InteractionSpecs.getRestInteractionSpecs(!isAutoCommitting && this.isRetainValues(request)).GET;
-                    IndexedRecord output = (IndexedRecord) interaction.execute(get, value);
-                    if(output == null) {
-                       response.setStatus(HttpServletResponse.SC_NO_CONTENT);
-                    } else if(multivalued) {
-                       response.setStatus(HttpServletResponse.SC_OK);
-                       ServletTarget target = new ServletTarget(request, response);
-                       restFormatter.format(
-                           target,
-                           xri,
-                           output,
-                           serializeNulls
-                       );
-                       target.close();
-                    } else if(output.isEmpty()) {
-                       response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    } else{
-                       response.setStatus(HttpServletResponse.SC_OK);
-                       ServletTarget target = new ServletTarget(request, response);
-                       restFormatter.format(
-                           target,
-                           toObjectRecord(output.get(0)),
-                           serializeNulls
-                       );
-                       target.close();
+                    } else if (output.isEmpty()) {
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        try (final ServletTarget target = new ServletTarget(request, response)) {
+                            restFormatter.format(
+                                target,
+                                toObjectRecord(output.get(0)),
+                                serializeNulls
+                            );
+                        }
                     }
                 } else {
-                    MappedRecord input = this.connectionFactory.getRecordFactory().createMappedRecord(MessageRecord.NAME);
-                    if(input instanceof MessageRecord) {
-                        ((MessageRecord)input).setResourceIdentifier(xri);
-                        ((MessageRecord)input).setBody(value);
+                    final MappedRecord input = this.connectionFactory.getRecordFactory().createMappedRecord(MessageRecord.NAME);
+                    if (input instanceof MessageRecord) {
+                        ((MessageRecord) input).setResourceIdentifier(xri);
+                        ((MessageRecord) input).setBody(value);
                     } else {
-                         input.put("path", xri);
-                         input.put("body", value);
+                        input.put("path", xri);
+                        input.put("body", value);
                     }
-                    MappedRecord output = (MappedRecord) execute(  
+                    final MappedRecord output = (MappedRecord) execute(
                         interaction,
-                        !isTransactionCommitIdentifier(xri) && isAutoCommitting, 
-                        false, 
-                        InteractionSpecs.getRestInteractionSpecs(true).INVOKE, 
+                        !isTransactionCommitIdentifier(xri) && autoCommitting,
+                        false,
+                        InteractionSpecs.getRestInteractionSpecs(true).INVOKE,
                         input
-                    );   
-                    if(output == null || output.isEmpty()) {
+                    );
+                    if (output == null || output.isEmpty()) {
                         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
                     } else {
-                        MessageRecord reply;
-                        if(output instanceof MessageRecord) {
+                        final MessageRecord reply;
+                        if (output instanceof MessageRecord) {
                             reply = (MessageRecord) output;
                         } else {
                             reply = Records.getRecordFactory().createMappedRecord(MessageRecord.class);
@@ -1169,30 +1224,30 @@ public class RestServlet_2 extends HttpServlet {
                             reply.setBody(value);
                         }
                         response.setStatus(HttpServletResponse.SC_OK);
-                        ServletTarget target = new ServletTarget(request, response);
-                        restFormatter.format(
-                            target,
-                            "result",
-                            reply,
-                            serializeNulls
-                        );
-                        target.close();
+                        try (final ServletTarget target = new ServletTarget(request, response)) {
+                            restFormatter.format(
+                                target,
+                                "result",
+                                reply,
+                                serializeNulls
+                            );
+                        }
                     }
                 }
-            } catch(ResourceException exception) {
+            } catch (ResourceException exception) {
                 this.handleException(
-                    request, 
-                    response, 
+                    request,
+                    response,
                     exception
                 );
-            } catch(Exception exception) {
+            } catch (Exception exception) {
                 this.handleException(
-                    request, 
+                    request,
                     response, exception
                 );
             } finally {
                 try {
-                    if(isAutoCommitting) {
+                    if (autoCommitting) {
                         Connection connection = interaction.getConnection();
                         interaction.close();
                         connection.close();
@@ -1210,58 +1265,62 @@ public class RestServlet_2 extends HttpServlet {
     /**
      * HTTP PUT Request
      * 
-     * @param request the HTTP Request
-     * @param response the HTTP Response
-     *  
+     * @param request
+     *            the HTTP Request
+     * @param response
+     *            the HTTP Response
+     * 
      * @exception ServletException
      * @exception IOException
      */
     @Override
     protected void doPut(
-        HttpServletRequest request, 
-        HttpServletResponse response
-    ) throws ServletException, IOException {
+        final HttpServletRequest request,
+        final HttpServletResponse response
+    )
+        throws ServletException,
+        IOException {
         prolog(request, response);
-        Interaction interaction = getInteraction(request);
+        final Interaction interaction = getInteraction(request);
         try {
-            MappedRecord input = parseRequest(request, response);
-            boolean serializeNulls = this.isSerializeNulls(request);            
-            IndexedRecord output = (IndexedRecord)execute(  
+            final MappedRecord input = parseRequest(request, response);
+            final boolean serializeNulls = this.isSerializeNulls(request);
+            final IndexedRecord output = (IndexedRecord) execute(
                 interaction,
-                isAutoCommitting(request), 
-                true, 
-                this.getInteractionSpec(request, RestFunction.PUT), 
+                isAutoCommitting(request),
+                true,
+                this.getInteractionSpec(request, RestFunction.PUT),
                 input
             );
-            if(output == null || output.isEmpty()) {
+            if (output == null || output.isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_NO_CONTENT);
             } else {
                 response.setStatus(HttpServletResponse.SC_OK);
-                ServletTarget target = new ServletTarget(request, response);
-                for(Object record : output) {
-                    restFormatter.format(
-                        target, 
-                        toObjectRecord(record),
-                        serializeNulls
-                    );
+                try (final ServletTarget target = new ServletTarget(request, response)) {
+                    for (Object record : output) {
+                        restFormatter.format(
+                            target,
+                            toObjectRecord(record),
+                            serializeNulls
+                        );
+                    }
                 }
-                target.close();
             }
-        } catch(ResourceException exception) {
+        } catch (ResourceException exception) {
             this.handleException(
-                request, 
-                response, 
+                request,
+                response,
                 exception
             );
-        } catch(Exception exception) {
+        } catch (Exception exception) {
             this.handleException(
-                request, 
+                request,
                 response, exception
             );
         } finally {
             try {
-                if(this.isAutoCommitting(request)) {
-                    Connection connection = interaction.getConnection();
+                if (this.isAutoCommitting(request)) {
+                    final Connection connection = interaction.getConnection();
                     interaction.close();
                     connection.close();
                 } else {
@@ -1274,33 +1333,37 @@ public class RestServlet_2 extends HttpServlet {
         epilog(request, response);
     }
 
-	private MappedRecord parseRequest(
-		HttpServletRequest request,
-		HttpServletResponse response
-	) throws CommException {
-		Path xri = this.getXri(request);
-		try {
-		    return RestParser.parseRequest(
-		        RestServlet_2.getSource(request, response),
-		        xri
-		    );
-		} catch (SAXException exception) {
-		    throw ResourceExceptions.initHolder(
-		        new CommException(
-		            "Request could not be parsed properly",
-		            BasicException.newEmbeddedExceptionStack(
-		                exception,
-		                BasicException.Code.DEFAULT_DOMAIN,
-		                BasicException.Code.TRANSFORMATION_FAILURE,
-		                new BasicException.Parameter("xri", xri)
-		            )
-		        )
-		    );
-		}
-	}
+    private MappedRecord parseRequest(
+        final HttpServletRequest request,
+        final HttpServletResponse response
+    )
+        throws CommException {
+        final Path xri = this.getXri(request);
+        try {
+            return RestParser.parseRequest(
+                RestServlet_2.getSource(request, response),
+                xri
+            );
+        } catch (SAXException exception) {
+            throw ResourceExceptions.initHolder(
+                new CommException(
+                    "Request could not be parsed properly",
+                    BasicException.newEmbeddedExceptionStack(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.TRANSFORMATION_FAILURE,
+                        new BasicException.Parameter(BasicException.Parameter.XRI, xri)
+                    )
+                )
+            );
+        }
+    }
 
-    private ObjectRecord toObjectRecord(Object record) throws ServiceException {
-        if (org.openmdx.base.rest.spi.ObjectRecord.isCompatible((Record)record)) {
+    private ObjectRecord toObjectRecord(
+        final Object record
+    )
+        throws ServiceException {
+        if (org.openmdx.base.rest.spi.ObjectRecord.isCompatible((Record) record)) {
             return (ObjectRecord) record;
         } else {
             throw new ServiceException(
@@ -1308,7 +1371,7 @@ public class RestServlet_2 extends HttpServlet {
                 BasicException.Code.BAD_PARAMETER,
                 "Unexpected record type",
                 new BasicException.Parameter("expected", org.openmdx.base.rest.cci.ObjectRecord.NAME),
-                new BasicException.Parameter("actual", ((Record)record).getRecordName())
+                new BasicException.Parameter("actual", ((Record) record).getRecordName())
             );
         }
     }
@@ -1319,18 +1382,19 @@ public class RestServlet_2 extends HttpServlet {
      * @param request
      * @param response
      * 
-     * @throws IOException 
+     * @throws IOException
      */
     protected void epilog(
-        HttpServletRequest request, 
-        HttpServletResponse response
-    ) throws IOException{
+        final HttpServletRequest request,
+        final HttpServletResponse response
+    )
+        throws IOException {
         //
         // Force any content in the buffer to be written to the client
         //
         response.flushBuffer();
     }
-    
+
     /**
      * Set response content type and encoding
      * 
@@ -1338,22 +1402,21 @@ public class RestServlet_2 extends HttpServlet {
      * @param response
      */
     protected void prolog(
-        HttpServletRequest request, 
-        HttpServletResponse response
-    ){
+        final HttpServletRequest request,
+        final HttpServletResponse response
+    ) {
         //
         // Use accept headers
         //
-        String characterEncoding = new HttpHeaderFieldValue(
+        final String characterEncoding = new HttpHeaderFieldValue(
             request.getHeaders("Accept-Charset")
         ).getPreferredContent(
             DEFAULT_CHARACTER_ENCODING
-        ).getValue(
-        );
-        HttpHeaderFieldValue acceptType = new HttpHeaderFieldValue(request.getHeaders("Accept"));
-        for(HttpHeaderFieldContent candidate : acceptType){
-            String mimeType = candidate.getValue();
-            if(XMLOutputFactories.isSupported(mimeType)) {
+        ).getValue();
+        final HttpHeaderFieldValue acceptType = new HttpHeaderFieldValue(request.getHeaders("Accept"));
+        for (final HttpHeaderFieldContent candidate : acceptType) {
+            final String mimeType = candidate.getValue();
+            if (XMLOutputFactories.isSupported(mimeType)) {
                 prepare(
                     response,
                     mimeType,
@@ -1365,11 +1428,11 @@ public class RestServlet_2 extends HttpServlet {
         //
         // Fallback: reply similar to request
         //
-        String contentType = request.getContentType();
-        if(contentType != null) {
-            HttpHeaderFieldContent requestType = new HttpHeaderFieldContent(contentType);
-            String mimeType = requestType.getValue();
-            if(XMLOutputFactories.isSupported(mimeType)) {
+        final String contentType = request.getContentType();
+        if (contentType != null) {
+            final HttpHeaderFieldContent requestType = new HttpHeaderFieldContent(contentType);
+            final String mimeType = requestType.getValue();
+            if (XMLOutputFactories.isSupported(mimeType)) {
                 prepare(
                     response,
                     mimeType,
@@ -1387,7 +1450,7 @@ public class RestServlet_2 extends HttpServlet {
             characterEncoding
         );
     }
-    
+
     /**
      * Set content type and character encoding
      * 
@@ -1396,14 +1459,14 @@ public class RestServlet_2 extends HttpServlet {
      * @param characterEncoding
      */
     private void prepare(
-        HttpServletResponse response,
-        String mimeType,
-        String characterEncoding
-    ){
+        final HttpServletResponse response,
+        final String mimeType,
+        final String characterEncoding
+    ) {
         response.setContentType(mimeType + ";charset=" + characterEncoding);
         response.setCharacterEncoding(characterEncoding);
     }
-    
+
     /**
      * Retrieve the decoded query string
      * 
@@ -1414,12 +1477,13 @@ public class RestServlet_2 extends HttpServlet {
      * @throws IOException
      */
     private static String getQueryString(
-        HttpServletRequest request
-    ) throws IOException{
-        String query = request.getQueryString();
-        return query == null || query.length() == 0 ? null : URLDecoder.decode(query, "UTF-8"); 
+        final HttpServletRequest request
+    )
+        throws IOException {
+        final String query = request.getQueryString();
+        return query == null || query.length() == 0 ? null : URLDecoder.decode(query, "UTF-8");
     }
-    
+
     /**
      * Use the query string if a request has no body
      * 
@@ -1427,12 +1491,13 @@ public class RestServlet_2 extends HttpServlet {
      * 
      * @return the request's query string reader which may be empty but never <code>null</code>.
      * 
-     * @throws IOException 
+     * @throws IOException
      */
     private static Reader getQueryReader(
-        HttpServletRequest request
-    ) throws IOException {
-        String query = getQueryString(request);
+        final HttpServletRequest request
+    )
+        throws IOException {
+        final String query = getQueryString(request);
         return new StringReader(query == null ? "" : query);
     }
 
@@ -1443,17 +1508,18 @@ public class RestServlet_2 extends HttpServlet {
      * 
      * @return the request's query string input stream which may be empty but never <code>null</code>.
      * 
-     * @throws IOException 
+     * @throws IOException
      */
     private static InputStream getQueryInputStream(
-        HttpServletRequest request
-    ) throws IOException {
-        String query = request.getQueryString(); // getQueryString(request);
+        final HttpServletRequest request
+    )
+        throws IOException {
+        final String query = request.getQueryString(); // getQueryString(request);
         return new ByteArrayInputStream(
             query == null ? new byte[0] : Base64.decode(query)
         );
     }
-    
+
     /**
      * Tells whether the query string should be treated as input record
      * 
@@ -1462,22 +1528,22 @@ public class RestServlet_2 extends HttpServlet {
      * @return <code>true</code> if the HTTP request usually has no body
      */
     private static boolean useQueryAsSource(
-        HttpServletRequest request
-    ){
-        String method = request.getMethod();
+        final HttpServletRequest request
+    ) {
+        final String method = request.getMethod();
         return "GET".equals(method) || "DELETE".equals(method);
     }
-    
+
     /**
      * Retrieve the base URL
      * 
      * @return the base URL
      */
     protected static String getBase(
-        HttpServletRequest request
+        final HttpServletRequest request
     ) {
-        String contextPath = request.getContextPath();
-        StringBuffer url = request.getRequestURL();
+        final String contextPath = request.getContextPath();
+        final StringBuffer url = request.getRequestURL();
         return url.substring(
             0,
             url.indexOf(contextPath) + contextPath.length()
@@ -1487,58 +1553,62 @@ public class RestServlet_2 extends HttpServlet {
     /**
      * Provide a <code>parse()</code> source
      * 
-     * @param request the HTTP request
-     * @param response the HTTP response
+     * @param request
+     *            the HTTP request
+     * @param response
+     *            the HTTP response
      * 
      * @return a <code>Source</code>
      * 
      * @throws ServiceException
      */
     private static RestSource getSource(
-        HttpServletRequest request, 
-        HttpServletResponse response
-    ) throws SAXException {
+        final HttpServletRequest request,
+        final HttpServletResponse response
+    )
+        throws SAXException {
         try {
-            HttpHeaderFieldValue contentHeader = new HttpHeaderFieldValue(
+            final HttpHeaderFieldValue contentHeader = new HttpHeaderFieldValue(
                 request.getHeaders("Content-Type")
-            ); 
-            boolean query = contentHeader.isEmpty() && useQueryAsSource(request);
-            HttpHeaderFieldContent contentType = query ? new HttpHeaderFieldContent(
-                response.getContentType()
-            ) : contentHeader.getPreferredContent(
-                "application/xml;charset=UTF-8"
             );
-            String mimeType = contentType.getValue();
-            String encoding = contentType.getParameterValue("charset", null);
-            InputSource inputSource = RestFormatters.isBinary(mimeType) ? new InputSource(
+            final boolean query = contentHeader.isEmpty() && useQueryAsSource(request);
+            final HttpHeaderFieldContent contentType = query ? new HttpHeaderFieldContent(
+                response.getContentType()
+            )
+                : contentHeader.getPreferredContent(
+                    "application/xml;charset=UTF-8"
+                );
+            final String mimeType = contentType.getValue();
+            final String encoding = contentType.getParameterValue("charset", null);
+            final InputSource inputSource = RestFormatters.isBinary(mimeType) ? new InputSource(
                 query ? getQueryInputStream(request) : request.getInputStream()
-            ) : new InputSource (
-                query ? getQueryReader(request) : request.getReader()
-            ); 
+            )
+                : new InputSource(
+                    query ? getQueryReader(request) : request.getReader()
+                );
             inputSource.setEncoding(encoding);
             return new RestSource(
-                RestServlet_2.getBase(request), 
-                inputSource, 
-                mimeType, 
+                RestServlet_2.getBase(request),
+                inputSource,
+                mimeType,
                 null
             );
         } catch (IOException exception) {
             throw new SAXException(exception);
         }
     }
-    
-    
+
     //------------------------------------------------------------------------
     // Class ServletTarget
     //------------------------------------------------------------------------
-    
+
     /**
      * Servlet Output Target
      */
     static class ServletTarget extends RestTarget {
-        
+
         /**
-         * Constructor 
+         * Constructor
          *
          * @param request
          * @param response
@@ -1546,8 +1616,8 @@ public class RestServlet_2 extends HttpServlet {
          * @throws ServiceException
          */
         ServletTarget(
-            HttpServletRequest request,
-            HttpServletResponse response
+            final HttpServletRequest request,
+            final HttpServletResponse response
         ) {
             super(RestServlet_2.getBase(request));
             this.response = response;
@@ -1558,27 +1628,30 @@ public class RestServlet_2 extends HttpServlet {
          */
         private final HttpServletResponse response;
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see org.openmdx.application.rest.http.RestFormat.Target#newWriter()
          */
         @Override
-        protected XMLStreamWriter newWriter(
-        ) throws XMLStreamException {
+        protected XMLStreamWriter newWriter()
+            throws XMLStreamException {
             try {
-                HttpHeaderFieldContent contentType = new HttpHeaderFieldContent(this.response.getContentType());
-                String mimeType = contentType.getValue();
-                XMLOutputFactory xmlOutputFactory = restFormatter.getOutputFactory(mimeType);
-                if((RestFormatters.isBinary(mimeType))) {
+                final HttpHeaderFieldContent contentType = new HttpHeaderFieldContent(this.response.getContentType());
+                final String mimeType = contentType.getValue();
+                final XMLOutputFactory xmlOutputFactory = restFormatter.getOutputFactory(mimeType);
+                if ((RestFormatters.isBinary(mimeType))) {
                     String characterEncoding = contentType.getParameterValue(
                         "charset",
                         this.response.getCharacterEncoding()
                     );
                     return characterEncoding == null ? xmlOutputFactory.createXMLStreamWriter(
                         this.response.getOutputStream()
-                    ) : xmlOutputFactory.createXMLStreamWriter(
-                        this.response.getOutputStream(),
-                        characterEncoding
-                    );
+                    )
+                        : xmlOutputFactory.createXMLStreamWriter(
+                            this.response.getOutputStream(),
+                            characterEncoding
+                        );
                 } else {
                     return xmlOutputFactory.createXMLStreamWriter(
                         this.response.getWriter()
@@ -1590,7 +1663,7 @@ public class RestServlet_2 extends HttpServlet {
                 throw toXMLStreamException(exception);
             }
         }
-        
+
     }
-    
+
 }

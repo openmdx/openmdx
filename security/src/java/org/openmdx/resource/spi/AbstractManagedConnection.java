@@ -69,6 +69,7 @@ import javax.transaction.xa.XAResource;
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.resource.cci.AuthenticationInfo;
 
 
 /**
@@ -78,7 +79,6 @@ public abstract class AbstractManagedConnection<F extends ManagedConnectionFacto
 
 	/**
 	 * Constructor
-	 * @param connectionRequestInfo TODO
 	 */
     protected AbstractManagedConnection(
     	F factory,
@@ -272,19 +272,42 @@ public abstract class AbstractManagedConnection<F extends ManagedConnectionFacto
     }
     
     /**
-     * Tests whether connection's credential matches the expected credential
-     * @param factory TODO
+     * Tests whether the managed connection matches
+     * 
      * @param credential the expected credential
+     * @param connectionRquestInfo additional connection request info
+     * 
+     * @return {@code true} if the managed connection matches
      */
-    protected boolean matches(
-    	ManagedConnectionFactory factory,
-    	Object credential, 
+    protected abstract boolean matches(
+    	Object credential,
     	ConnectionRequestInfo connectionRequestInfo
-    ){
-     	return
-     	    this.factory == factory &&
-     	    Objects.equals(this.connectionRequestInfo, connectionRequestInfo) &&
-     	    Objects.equals(this.credential, credential);
+    );
+
+    /**
+     * Tests whether the credentials match
+     * 
+     * @param credential the expected credential
+     * 
+     * @return {@code true} if the credentials match
+     */
+    protected boolean credentialsMatch(
+        Object credential
+    ) {
+        return Objects.equals(this.credential, credential);
+    }
+
+    /**
+     * Tests whether connection request information matches
+     * 
+     * @param connectionRquestInfo additional connection request info
+     * 
+     * @return {@code true} if the connection request information matches
+     */
+    protected boolean connectionRequestInformationMatches(
+        ConnectionRequestInfo connectionRequestInfo
+    ) {
+        return Objects.equals(this.connectionRequestInfo, connectionRequestInfo);
     }
 
 	/* (non-Javadoc)
@@ -392,12 +415,20 @@ public abstract class AbstractManagedConnection<F extends ManagedConnectionFacto
 
     
     /**
-     * In case a managed connection authenticates lazily, e.g. upon connection
-     * allocation
+     * 
      * 
      * @return the credential
      */
-    protected PasswordCredential getCredential() {
+    protected PasswordCredential getCredential(
+        Subject subject, 
+        ConnectionRequestInfo connectionRequestInfo
+    ) {
+        if(connectionRequestInfo instanceof AuthenticationInfo) {
+            return PasswordCredentials.newPasswordCredential(getManagedConnectionFactory(), (AuthenticationInfo)connectionRequestInfo);
+        }
+        if(subject != null) {
+            PasswordCredentials.getPasswordCredential(getManagedConnectionFactory(), subject);
+        }
         return credential;
     }
     

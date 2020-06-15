@@ -158,24 +158,26 @@ public class RootMenuControl extends Control implements Serializable {
             if("1".equals(state)) {
             	count++;
             }
-            if(count > topNavigationShowMax) { 
+            if(count > topNavigationShowMax) {
             	break;
             }
             itemIndex++;
             // Only show menu entry if state is "1"
             if(action.isEnabled() && "1".equals(state)) {
-                String selectedTag = "";
+                String selectedClass = "";
                 Path currentObjectIdentity = new Path(action.getParameter(Action.PARAMETER_OBJECTXRI));
                 if(selectedObjectIdentity.startsWith(currentObjectIdentity)) {
-                    selectedTag = "class=\"" + CssClass.active + "\"";
+                    selectedClass = CssClass.active.toString();
                 }
-               	p.write("<li ", selectedTag, "><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\"><span>", action.getTitle(), "</span></a>");
+               	p.write("<li class=\"", CssClass.nav_item.toString(), " ", selectedClass, "\"><a href=\"#\" class=\"", CssClass.nav_link.toString(), "\" style=\"padding-right:15px;white-space:nowrap;background-color:inherit;\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\"><span>", action.getTitle(), "</span></a>");
             }
             i++;
         }
         if(i < selectRootObjectAction.length) {
-            p.write("<li class=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"margin-top:2px;\"><button class=\"", CssClass.navbarToggle.toString(), "\" style=\"display:block;margin:0px;padding:0px;\"><span class=\"sr-only\">Show menu</span><span class=\"icon-bar\"></span><span class=\"icon-bar\"></span><span class=\"icon-bar\"></span></button></a>");
-            p.write("  <ul class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\">");
+            p.write("<li class=\"", CssClass.nav_item.toString(), "\">");
+            p.write("  <div class=\"", CssClass.dropdown.toString(), "\">");
+            p.write("    <button type=\"button\" class=\"", CssClass.btn.toString(), "\" data-toggle=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:this.parentNode.hide=function(){};\"><span class=\"", CssClass.navbar_toggler.toString(), "-icon\"></span></button>");
+            p.write("    <div class=\"", CssClass.dropdown_menu.toString(), "\">");
             while(i < selectRootObjectAction.length) {
                 Action action = selectRootObjectAction[i];
                 if((action.getEvent() == SelectObjectAction.EVENT_ID) && (action.getParameter(Action.PARAMETER_REFERENCE).length() == 0)) {                
@@ -185,12 +187,13 @@ public class RootMenuControl extends Control implements Serializable {
                     );
                     itemIndex++;
                     if(action.isEnabled() && "1".equals(state)) {    
-                		p.write("    <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", action.getTitle(), "</a></li>");
+                		p.write("    <a href=\"#\" class=\"", CssClass.dropdown_item.toString(), "\" style=\"padding-right:15px;white-space:nowrap;\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", action.getTitle(), "</a>");
                     }
                 }
                 i++;
             }
-            p.write("  </ul>");
+            p.write("    </div>");
+            p.write("  </div>");
             p.write("</li>");
         }
     }
@@ -205,7 +208,7 @@ public class RootMenuControl extends Control implements Serializable {
     	ViewPort p
     ) throws ServiceException {
     	p.write("<div id=\"menuFlyIn\">");
-    	p.write("  <ul id=\"", CssClass.ssfNav.toString(), "\" class=\"", CssClass.ssfNav.toString(), "\" onmouseover=\"sfinit(this);\" >");
+    	p.write("  <ul id=\"", CssClass.ssf_nav.toString(), "\" class=\"", CssClass.ssf_nav.toString(), "\" onmouseover=\"sfinit(this);\" >");
     	p.write("    <li><a href=\"#\" onclick=\"javascript:return false;\"><img id=\"rootMenuAnchor\" src=\"./images/flyin.gif\" border=\"0\"/></a>");
     	p.write("      <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
     	RootMenuControl.paintQuickAccessors(p);

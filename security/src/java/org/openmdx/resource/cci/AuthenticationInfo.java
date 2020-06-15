@@ -47,6 +47,7 @@
  */
 package org.openmdx.resource.cci;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import javax.resource.spi.ConnectionRequestInfo;
@@ -123,7 +124,7 @@ public final class AuthenticationInfo implements ConnectionRequestInfo {
             final AuthenticationInfo that = (AuthenticationInfo) obj;
             return 
                 Objects.equals(this.userName, that.userName) &&
-                Objects.equals(this.password, that.password);
+                Arrays.equals(this.password, that.password);
         } else {
             return false;
         }

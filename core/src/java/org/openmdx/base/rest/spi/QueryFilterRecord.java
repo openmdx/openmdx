@@ -55,14 +55,13 @@ import javax.resource.cci.IndexedRecord;
 import org.openmdx.base.rest.cci.ConditionRecord;
 import org.openmdx.base.rest.cci.FeatureOrderRecord;
 import org.openmdx.base.rest.cci.QueryExtensionRecord;
-import org.w3c.cci2.AnyTypePredicate;
 
 /**
  * Query Filter Record
  */
 public class QueryFilterRecord 
     extends AbstractMappedRecord<org.openmdx.base.rest.cci.QueryFilterRecord.Member>
-    implements org.openmdx.base.rest.cci.QueryFilterRecord, AnyTypePredicate 
+    implements org.openmdx.base.rest.cci.QueryFilterRecord 
 {
     
     /**

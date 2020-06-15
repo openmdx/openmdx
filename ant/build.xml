@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
+= Project:     openMDX, http://www.openmdx.org/
 = Description: openMDX/Ant Build File
-= Copyright:   (c) 2003-2014 OMEX AG
+= Owner:       OMEX AG, Switzerland, http://www.omex.ch
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2019, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -55,6 +56,19 @@
 	<description>Builds the openMDX/Ant</description>
 	<property name="project.specification.title" value="openMDX/Ant"/>
 
+	<!-- Class Path Declaration -->
+	<property name="project.thirdparty.platform" value="jre-1.8"/>
+	<path id="project.lib.classpath">
+		<pathelement location="${openmdx.home}/apache/${project.thirdparty.platform}/ant/lib/ant.jar"/>
+		<pathelement location="${openmdx.home}/osgi/${project.thirdparty.platform}/extension/lib/junit.jar"/>
+	</path>
+	<path id="project.bin.classpath">
+		<path refid="project.lib.classpath"/>
+		<pathelement location="${build.dir}/bin"/>
+		<pathelement location="${basedir}/src/resource"/>
+	</path>
+	
+	<!-- Build Library -->
 	<property name="openmdx.home" location=".."/>
 	<import file="etc/ant/build-library.xml"/>
 
@@ -67,15 +81,6 @@
 	<!-- Included Ant Projects -->
 	<import file="etc/ant/build-properties.xml"/>
 
-	<path id="project.lib.classpath">
-		<pathelement location="${openmdx.home}/apache/${build.target.platform}/ant/lib/ant.jar"/>
-		<pathelement location="${openmdx.home}/osgi/${build.target.platform}/extension/lib/junit.jar"/>
-	</path>
-	<path id="project.bin.classpath">
-		<path refid="project.lib.classpath"/>
-		<pathelement location="${build.dir}/bin"/>
-		<pathelement location="${basedir}/src/resource"/>
-	</path>
 	<patternset id="project.junit.test.case">
 		<patternset refid="null.pattern"/>
 	</patternset>

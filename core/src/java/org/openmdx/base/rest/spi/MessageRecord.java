@@ -91,7 +91,7 @@ public class MessageRecord
     private static final long serialVersionUID = 6030385859226659109L;
 
     /**
-     * The <code>"path"</code> entry
+     * The <code>"resourceIdentifier"</code> entry
      */
     private Path resourceIdentifier;
     

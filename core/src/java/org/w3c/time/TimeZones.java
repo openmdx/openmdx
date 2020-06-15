@@ -86,18 +86,19 @@ public class TimeZones {
     public static TimeZone toTimeZone(
         int zoneOffset
     ) {
-        TimeZone timeZone;
         if(zoneOffset == DatatypeConstants.FIELD_UNDEFINED) {
-            timeZone = DEFAULT_TIME_ZONE;
-        } else {
-            final Integer key = Integer.valueOf(zoneOffset);
-            timeZone = TIME_ZONES.get(key);
-            if (timeZone == null) {
-                timeZone = TimeZone.getTimeZone(toTimeZoneId(zoneOffset));
-                TIME_ZONES.putIfAbsent(key, timeZone);
+            return DEFAULT_TIME_ZONE;
+        } 
+        final Integer key = Integer.valueOf(zoneOffset);
+        TimeZone existingTimeZone = TIME_ZONES.get(key);
+        if (existingTimeZone == null) {
+            final TimeZone newTimeZone = TimeZone.getTimeZone(toTimeZoneId(zoneOffset));
+            existingTimeZone = TIME_ZONES.putIfAbsent(key, newTimeZone);
+            if(existingTimeZone == null) {
+                return newTimeZone;
             }
         }
-        return timeZone;
+        return existingTimeZone;
     }
 
     /**

@@ -42,7 +42,7 @@ import java.io.Serializable;
  * }
  * </pre>
  *
- * @since 1.0
+ * @since Commons I/O 1.0
  * @version $Id: DirectoryFileFilter.java 1642757 2014-12-01 21:09:30Z sebb $
  *
  * @see FileFilterUtils#directoryFileFilter()
@@ -52,7 +52,7 @@ public class DirectoryFileFilter extends AbstractFileFilter implements Serializa
     private static final long serialVersionUID = -5148237843784525732L;
     /**
      * Singleton instance of directory filter.
-     * @since 1.3
+     * @since Commons I/O 1.3
      */
     public static final IOFileFilter DIRECTORY = new DirectoryFileFilter();
     /**

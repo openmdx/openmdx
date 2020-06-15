@@ -71,7 +71,7 @@ import org.openmdx.base.resource.spi.AbstractInteraction;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.spi.ConnectionAdapter;
-import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
+import org.openmdx.base.rest.spi.RestConnectionFactory;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.naming.ComponentEnvironment;
@@ -87,7 +87,7 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
 	 * Constructor 
 	 */
     SuspendingConnectionAdapter(
-        ConnectionFactoryAdapter connectionFactory, 
+        RestConnectionFactory connectionFactory, 
         RestConnectionSpec connectionSpec
     ){
         super(

@@ -95,8 +95,8 @@ public abstract class AbstractConnection implements AutoCloseable {
     ){
     	if(this.managedConnection != null){
     		this.managedConnection.dissociateConnection(this, true);
+    		this.managedConnection = null;
     	}
-		this.managedConnection = null;
     }
     
 }

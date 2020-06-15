@@ -48,17 +48,18 @@ package org.openmdx.base.persistence.spi;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import javax.jdo.Extent;
 import javax.jdo.FetchGroup;
 import javax.jdo.JDOException;
 import javax.jdo.JDOUserException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.listener.InstanceLifecycleListener;
 
+import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.JDOPersistenceManagerFactory;
 import org.openmdx.kernel.resource.spi.CloseCallback;
 
 /**
@@ -67,7 +68,7 @@ import org.openmdx.kernel.resource.spi.CloseCallback;
  * @since openMDX 2.0
  */
 @SuppressWarnings({"rawtypes","unchecked"})
-public abstract class AbstractPersistenceManager implements PersistenceManager {
+public abstract class AbstractPersistenceManager implements PersistenceManager_1_0 {
 
     /**
      * Constructor 
@@ -76,7 +77,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @param instanceLifecycleListener the instance life cycle listener has to be provided by the subclass
      */
     protected AbstractPersistenceManager(
-        final PersistenceManagerFactory factory, 
+        final JDOPersistenceManagerFactory factory, 
         final MarshallingInstanceLifecycleListener instanceLifecycleListener
     ){
         final boolean multithreaded = factory.getMultithreaded();
@@ -87,6 +88,8 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         this.setMultithreaded(multithreaded);
         this.setDetachAllOnCommit(factory.getDetachAllOnCommit());
         this.setCopyOnAttach(factory.getCopyOnAttach());
+        this.setDatastoreReadTimeoutMillis(factory.getDatastoreReadTimeoutMillis());
+        this.setDatastoreWriteTimeoutMillis(factory.getDatastoreWriteTimeoutMillis());
     }
 
     /**
@@ -97,7 +100,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /**
      * The connection factory
      */
-    private PersistenceManagerFactory persistenceManagerFactory;
+    private JDOPersistenceManagerFactory persistenceManagerFactory;
 
     /**
      * 
@@ -120,6 +123,16 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     private boolean copyOnAttach;
 
     /**
+     * The number of milliseconds allowed for read operations to complete
+     */
+    private Integer datastoreReadTimeoutMillis;
+
+    /**
+     * The number of milliseconds allowed for write operations to complete
+     */
+    private Integer datastoreWriteTimeoutMillis;
+    
+    /**
      * Tells, whether the persistence manager has been closed
      */
     private volatile boolean closed = false;
@@ -130,15 +143,10 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     private Map<Object,Object> userObjects;
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#currentUnitOfWork()
-     */
-    protected abstract UnitOfWork currentUnitOfWork();
-    
-    /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getPersistenceManagerFactory()
      */
-   @Override
-    public PersistenceManagerFactory getPersistenceManagerFactory() {
+    @Override
+    public JDOPersistenceManagerFactory getPersistenceManagerFactory() {
         if(this.closed) {
             throw BasicException.initHolder(
                 new JDOUserException(
@@ -615,4 +623,63 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
         
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#setDatastoreReadTimeoutMillis(java.lang.Integer)
+     */
+    @Override
+    public void setDatastoreReadTimeoutMillis(Integer interval) {
+        this.datastoreReadTimeoutMillis = interval;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#getDatastoreReadTimeoutMillis()
+     */
+    @Override
+    public Integer getDatastoreReadTimeoutMillis() {
+        return this.datastoreReadTimeoutMillis;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#setDatastoreWriteTimeoutMillis(java.lang.Integer)
+     */
+    @Override
+    public void setDatastoreWriteTimeoutMillis(Integer interval) {
+        this.datastoreWriteTimeoutMillis = interval;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#getDatastoreWriteTimeoutMillis()
+     */
+    @Override
+    public Integer getDatastoreWriteTimeoutMillis() {
+        return this.datastoreWriteTimeoutMillis;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#setProperty(java.lang.String, java.lang.Object)
+     */
+    @Override
+    public void setProperty(
+        String propertyName,
+        Object value
+    ) {
+        PersistenceManagers.setProperty(this, propertyName, value);
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#getProperties()
+     */
+    @Override
+    public Map<String, Object> getProperties() {
+        return PersistenceManagers.getProperties(this);
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#getSupportedProperties()
+     */
+    @Override
+    public Set<String> getSupportedProperties() {
+        return PersistenceManagers.getSupportedProperties(); 
+    }
+
 }

@@ -194,7 +194,8 @@ public interface Database_2_0 extends Database_1_0 {
         JoinType joinType, String joinColumn, boolean fixedViewAliasName, ModelElement_1_0 referencedType,
         List<FilterProperty> allFilterProperties, List<FilterProperty> primaryFilterProperties,
         List<String> includingClauses, List<List<Object>> includingClausesValues, List<String> exludingClauses,
-        List<List<Object>> exludingClausesValues
+        List<List<Object>> exludingClausesValues,
+        Map<String,Object> context
     )
         throws ServiceException;
     

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jdoconfig xmlns="http://java.sun.com/xml/ns/jdo/jdoconfig"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://java.sun.com/xml/ns/jdo/jdoconfig"
+>
+
+    <!-- Entity manager factory configuration for the application "Vertrag" -->
+    <persistence-manager-factory 
+    	name="test-PKI-EntityManagerFactory"
+    	class="org.openmdx.base.accessor.jmi.spi.EntityManagerFactory_1"
+    	connection-factory-name="jdo:test-PKI-DataManagerFactory"
+    />
+
+    <!-- Data object manager factory configuration for the application "Vertrag" -->
+    <persistence-manager-factory 
+    	name="test-PKI-DataManagerFactory"
+    	class="org.openmdx.base.accessor.rest.DataManagerFactory_1"
+    	connection-factory-name="java:comp/env/jdbc/CVTR_DataSourceXA"
+    >
+        <property name="org.openmdx.jdo.DataManager.xriPattern[0]" value="xri://@openmdx*org.openmdx.preferences1/provider/PKI/($...)"/>
+        <property name="org.openmdx.jdo.DataManager.restPlugIn[0]" value="test.openmdx.jdo.PlugIn.PKI"/>
+        <property name="org.openmdx.jdo.DataManager.optimalFetchSize" value="(java.lang.Integer)64"/>
+        <property name="org.openmdx.jdo.DataManager.cacheThreshold" value="(java.lang.Integer)256"/>
+        <property name="test.openmdx.jdo.PlugIn.PKI.class" value="org.openmdx.base.dataprovider.kernel.Dataprovider_2"/>
+        <property name="test.openmdx.jdo.PlugIn.PKI.configuration" value="xri://+resource/META-INF/test-PKI-Provider.properties"/>
+    </persistence-manager-factory>
+
+</jdoconfig>

@@ -51,7 +51,7 @@ import org.xml.sax.SAXException;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  *
  * @author Philip Milne
@@ -86,47 +86,6 @@ public class ObjectHandler extends HandlerBase {
         if (typeName == "void") return void.class;
         return null;
     }
-
-//    /**
-//     * Returns the <code>Class</code> object associated with
-//     * the class or interface with the given string name,
-//     * using the default class loader.
-//     *
-//     * @param name  fully qualified name of the desired class
-//     * @param cl    class loader from which the class must be loaded
-//     * @return class object representing the desired class
-//     *
-//     * @exception ClassNotFoundException  if the class cannot be located
-//     *                                    by the specified class loader
-//     *
-//     * @deprecated As of JDK version 7, replaced by
-//     *             {@link ClassFinder#resolveClass(String)}.
-//     */
-//    @Deprecated
-//    public static Class classForName(String name) throws ClassNotFoundException {
-//        return ClassFinder.resolveClass(name);
-//    }
-//
-//    /**
-//     * Returns the <code>Class</code> object associated with
-//     * the class or interface with the given string name,
-//     * using the given class loader.
-//     *
-//     * @param name  fully qualified name of the desired class
-//     * @param cl    class loader from which the class must be loaded
-//     * @return class object representing the desired class
-//     *
-//     * @exception ClassNotFoundException  if the class cannot be located
-//     *                                    by the specified class loader
-//     *
-//     * @deprecated As of JDK version 7, replaced by
-//     *             {@link ClassFinder#resolveClass(String,ClassLoader)}.
-//     */
-//    @Deprecated
-//    public static Class classForName(String name, ClassLoader cl)
-//        throws ClassNotFoundException {
-//        return ClassFinder.resolveClass(name, cl);
-//    }
 
     private Hashtable environment;
     private Vector expStack;

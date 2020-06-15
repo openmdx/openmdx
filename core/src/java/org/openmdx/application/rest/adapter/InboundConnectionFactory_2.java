@@ -214,6 +214,7 @@ public class InboundConnectionFactory_2 extends AbstractConnectionFactory {
     public Connection getConnection(
     ) throws ResourceException {
         return new InboundConnection_2(
+            this,
             null, // REST ConnectionSpec
             this.getPersistenceManagerFactory().getPersistenceManager()
         );
@@ -246,6 +247,7 @@ public class InboundConnectionFactory_2 extends AbstractConnectionFactory {
                 connectionSpec.isBulkLoad()
             );
             return new InboundConnection_2(
+                this,
                 connectionSpec, 
                 persistenceManager
             );

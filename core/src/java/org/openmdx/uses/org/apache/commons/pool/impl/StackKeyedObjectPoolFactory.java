@@ -1,10 +1,4 @@
 /*
- * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/StackKeyedObjectPoolFactory.java,v $
- * $Revision: 1.3 $
- * $Date: 2004/06/29 10:33:53 $
- *
- * ====================================================================
- *
  * The Apache Software License, Version 1.1
  *
  * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights

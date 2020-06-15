@@ -47,8 +47,6 @@
  */
 package org.openmdx.state2.aop0;
 
-import org.openmdx.base.naming.PathComponent;
-
 /**
  * Apply bang policy to state qualifiers
  */
@@ -59,12 +57,9 @@ public class BangPlugIn_1 extends AbstractPlugIn_1 {
      */
     private static final String BANG = "!";
     
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.aop0.PlugIn_1#toQualifier(org.openmdx.base.naming.PathComponent, java.lang.Integer)
-     */
     @Override
     protected String newBasicStateQualifier(
-        PathComponent coreQualifier,
+        String coreQualifier,
         Integer stateQualifier
     ) {
         return coreQualifier + BANG + stateQualifier;

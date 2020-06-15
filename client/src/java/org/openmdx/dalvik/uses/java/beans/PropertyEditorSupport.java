@@ -36,7 +36,7 @@ package org.openmdx.dalvik.uses.java.beans;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 @SuppressWarnings({"rawtypes","unchecked"})
@@ -44,8 +44,6 @@ public class PropertyEditorSupport implements PropertyEditor {
 
     /**
      * Constructs a <code>PropertyEditorSupport</code> object.
-     *
-     * @since 1.5
      */
     public PropertyEditorSupport() {
         setSource(this);
@@ -55,7 +53,6 @@ public class PropertyEditorSupport implements PropertyEditor {
      * Constructs a <code>PropertyEditorSupport</code> object.
      *
      * @param source the source used for event firing
-     * @since 1.5
      */
     public PropertyEditorSupport(Object source) {
         if (source == null) {
@@ -71,7 +68,6 @@ public class PropertyEditorSupport implements PropertyEditor {
      * <code>PropertyEditorSupport</code> is returned.
      *
      * @return the source object or this instance
-     * @since 1.5
      */
     public Object getSource() {
         return source;
@@ -85,7 +81,6 @@ public class PropertyEditorSupport implements PropertyEditor {
      * purposes only and should not be modified by the PropertyEditor.
      *
      * @param source source object to be used for events
-     * @since 1.5
      */
     public void setSource(Object source) {
         this.source = source;

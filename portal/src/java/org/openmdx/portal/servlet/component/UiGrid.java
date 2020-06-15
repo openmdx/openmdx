@@ -98,6 +98,7 @@ import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -1158,8 +1159,7 @@ public abstract class UiGrid extends Grid implements Serializable {
     			}
     			this.selectRowObjectActions = selectRowObjectActions;
     		} catch(Exception e) {
-    			ServiceException e0 = new ServiceException(e);
-    			e0.log();
+                Throwables.log(e);
     		}
     	}
     	return rows;
@@ -1534,7 +1534,9 @@ public abstract class UiGrid extends Grid implements Serializable {
 									0, // paramCount
 									app
 								);
-							} catch(Exception ignore) {}
+							} catch(Exception ignore) {
+								SysLog.trace("Exception ignored", ignore);
+							}
 							if(customQuery != null) {
 								for(ConditionRecord customQueryCondition: customQuery.getCondition()) {
 									if(conditions.containsKey(customQueryCondition.getFeature())) {

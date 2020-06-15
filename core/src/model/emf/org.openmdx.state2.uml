@@ -1,86 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_wdbxAN67EdmkJO73lqONhA" name="state2" viewpoint="">
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_wdbxAN67EdmkJO73lqONhA" name="state2" viewpoint="">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D407170B300B4PP" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D407170B300B4P" name="openmdx">
       <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D407170B300B4" name="state2">
         <packagedElement xmi:type="uml:Class" xmi:id="_AUReEOc9EdqFRN8NA1-Qnw" name="DateState" isAbstract="true">
-          <eAnnotations xmi:id="_FXrg0H89Ed2MQvsjduCbTg" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_FXrg0X89Ed2MQvsjduCbTg" key="root"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_FXrg0H89Ed2MQvsjduCbTg" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_FXrg0X89Ed2MQvsjduCbTg" key="root"/>
           </eAnnotations>
-          <generalization xmi:id="_aSukIOc9EdqFRN8NA1-Qnw" general="_NA7W4Oc9EdqFRN8NA1-Qnw"/>
-          <ownedAttribute xmi:id="_jftREOc9EdqFRN8NA1-Qnw" name="stateValidFrom">
+          <generalization xmi:type="uml:Generalization" xmi:id="_aSukIOc9EdqFRN8NA1-Qnw" general="_NA7W4Oc9EdqFRN8NA1-Qnw"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_jftREOc9EdqFRN8NA1-Qnw" name="stateValidFrom">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63230061"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_6g3qIOc-EdqFRN8NA1-Qnw"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_6g3qIec-EdqFRN8NA1-Qnw" value="1"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_lKGWUOc9EdqFRN8NA1-Qnw" name="stateValidTo">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_lKGWUOc9EdqFRN8NA1-Qnw" name="stateValidTo">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63230061"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_7BV58Oc-EdqFRN8NA1-Qnw"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_7BV58ec-EdqFRN8NA1-Qnw" value="1"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_B-kcsOc9EdqFRN8NA1-Qnw" name="DateTimeState" isAbstract="true">
-          <eAnnotations xmi:id="_o7O44H89Ed2MQvsjduCbTg" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_o7O44X89Ed2MQvsjduCbTg" key="root"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_o7O44H89Ed2MQvsjduCbTg" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_o7O44X89Ed2MQvsjduCbTg" key="root"/>
           </eAnnotations>
-          <generalization xmi:id="_bAea8Oc9EdqFRN8NA1-Qnw" general="_NA7W4Oc9EdqFRN8NA1-Qnw"/>
-          <ownedAttribute xmi:id="_-YmmIOc9EdqFRN8NA1-Qnw" name="stateInvalidFrom">
+          <generalization xmi:type="uml:Generalization" xmi:id="_bAea8Oc9EdqFRN8NA1-Qnw" general="_NA7W4Oc9EdqFRN8NA1-Qnw"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_-YmmIOc9EdqFRN8NA1-Qnw" name="stateInvalidFrom">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B630802BB"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_8MCLcOc-EdqFRN8NA1-Qnw"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_8MCLcec-EdqFRN8NA1-Qnw" value="1"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_7oHbgOc9EdqFRN8NA1-Qnw" name="stateValidFrom">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_7oHbgOc9EdqFRN8NA1-Qnw" name="stateValidFrom">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B630802BB"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_7kTdEOc-EdqFRN8NA1-Qnw"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_7kTdEec-EdqFRN8NA1-Qnw" value="1"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_NA7W4Oc9EdqFRN8NA1-Qnw" name="BasicState" isAbstract="true">
-          <eAnnotations xmi:id="_xhzikH88Ed2MQvsjduCbTg" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_xhzikX88Ed2MQvsjduCbTg" key="root"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_xhzikH88Ed2MQvsjduCbTg" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_xhzikX88Ed2MQvsjduCbTg" key="root"/>
           </eAnnotations>
-          <generalization xmi:id="_k0DtgOdAEdqFRN8NA1-Qnw">
+          <generalization xmi:type="uml:Generalization" xmi:id="_k0DtgOdAEdqFRN8NA1-Qnw">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_wJRXcOcuEdqFRN8NA1-Qnw?base/base/View?"/>
           </generalization>
-          <generalization xmi:id="_ihmdUH89Ed2MQvsjduCbTg">
+          <generalization xmi:type="uml:Generalization" xmi:id="_ihmdUH89Ed2MQvsjduCbTg">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_PfY_YH83Ed2MQvsjduCbTg"/>
           </generalization>
-          <generalization xmi:id="_i_jkoH89Ed2MQvsjduCbTg">
+          <generalization xmi:type="uml:Generalization" xmi:id="_i_jkoH89Ed2MQvsjduCbTg">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_OdIx0H8vEd2MQvsjduCbTg"/>
           </generalization>
-          <generalization xmi:id="_jgCbgH89Ed2MQvsjduCbTg">
+          <generalization xmi:type="uml:Generalization" xmi:id="_jgCbgH89Ed2MQvsjduCbTg">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_o2xYAH8vEd2MQvsjduCbTg"/>
           </generalization>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_-U_-kIC4Ed2lDKTVYu2_Tw" name="StateCapable" isAbstract="true">
-          <eAnnotations xmi:id="_AMymoIC5Ed2lDKTVYu2_Tw" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_D-wcYIC5Ed2lDKTVYu2_Tw" key="root"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_AMymoIC5Ed2lDKTVYu2_Tw" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_D-wcYIC5Ed2lDKTVYu2_Tw" key="root"/>
           </eAnnotations>
-          <generalization xmi:id="_ErdKUIC5Ed2lDKTVYu2_Tw">
+          <generalization xmi:type="uml:Generalization" xmi:id="_ErdKUIC5Ed2lDKTVYu2_Tw">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_anOBsH8yEd2MQvsjduCbTg"/>
           </generalization>
-          <generalization xmi:id="_FMYtIIC5Ed2lDKTVYu2_Tw">
+          <generalization xmi:type="uml:Generalization" xmi:id="_FMYtIIC5Ed2lDKTVYu2_Tw">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D403CAF5A0142"/>
           </generalization>
-          <generalization xmi:id="_oolkcIyhEd6xh6MVzLqAFg">
+          <generalization xmi:type="uml:Generalization" xmi:id="_oolkcIyhEd6xh6MVzLqAFg">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_jK4zQH8vEd2MQvsjduCbTg"/>
           </generalization>
-          <generalization xmi:id="_YKu6EMShEd-3-qbbT8i9CQ">
+          <generalization xmi:type="uml:Generalization" xmi:id="_YKu6EMShEd-3-qbbT8i9CQ">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D403F48350281"/>
           </generalization>
-          <ownedAttribute xmi:id="_FpXZ0KtHEd2CZJkknFnJMw" name="transactionTimeUnique" isReadOnly="true">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_FpXZ0KtHEd2CZJkknFnJMw" name="transactionTimeUnique" isReadOnly="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_mvwMwNsnEd23fqg3-BoJNA" name="stateVersion" visibility="public" isReadOnly="true" isDerived="true">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_mvwMwNsnEd23fqg3-BoJNA" name="stateVersion" visibility="public" isReadOnly="true" isDerived="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3CC6A34B0011"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_LoXHEDlYEeGI4drss5KBww" name="Legacy" isAbstract="true">
-          <eAnnotations xmi:id="_uPX-YDlYEeGI4drss5KBww" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_uPX-YTlYEeGI4drss5KBww" key="root"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_uPX-YDlYEeGI4drss5KBww" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_uPX-YTlYEeGI4drss5KBww" key="root"/>
           </eAnnotations>
-          <generalization xmi:id="_olmpwDlpEeGXmauThx7sfg" general="_-U_-kIC4Ed2lDKTVYu2_Tw"/>
-          <ownedAttribute xmi:id="_QWC0YKtGEd2CZJkknFnJMw" name="validTimeUnique" isReadOnly="true">
+          <generalization xmi:type="uml:Generalization" xmi:id="_olmpwDlpEeGXmauThx7sfg" general="_-U_-kIC4Ed2lDKTVYu2_Tw"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_QWC0YKtGEd2CZJkknFnJMw" name="validTimeUnique" isReadOnly="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_0IzGEKtGEd2CZJkknFnJMw" value="1"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_0IzGEatGEd2CZJkknFnJMw" value="1"/>
@@ -89,4 +89,10 @@
       </packagedElement>
     </packagedElement>
   </packagedElement>
+  <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_WkGHcBZmEemGMr2sON_HWQ">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_WkGugBZmEemGMr2sON_HWQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+      <references xmi:type="ecore:EPackage" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"/>
+    </eAnnotations>
+    <appliedProfile xmi:type="uml:Profile" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#ActionLanguage"/>
+  </profileApplication>
 </uml:Model>

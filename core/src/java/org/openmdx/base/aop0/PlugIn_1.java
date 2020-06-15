@@ -65,7 +65,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
-import org.openmdx.base.naming.PathComponent;
+import org.openmdx.base.naming.ClassicSegments;
 import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.exception.BasicException;
@@ -152,7 +152,7 @@ public class PlugIn_1
     ) {
         if(qualifier == null && object.isProxy()) {
             return org.openmdx.base.naming.TransactionalSegment.getClassicRepresentationOfNewInstance();
-        } else if(qualifier == null || PathComponent.isPlaceHolder(qualifier)) {
+        } else if(qualifier == null || ClassicSegments.isPlaceholder(qualifier)) {
             UUID uuid = UUIDs.newUUID();
             switch(this.defaultQualifierType) {
                 case UID: return UUIDConversion.toUID(uuid);

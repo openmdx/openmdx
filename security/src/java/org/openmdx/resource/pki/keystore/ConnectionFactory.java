@@ -53,14 +53,13 @@ import java.security.cert.CertStoreException;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 
-import org.openmdx.resource.spi.AbstractConnection;
 import org.openmdx.resource.spi.AbstractConnectionFactory;
 
 /**
  * ConnectionFactory
  */
 public class ConnectionFactory
-	extends AbstractConnectionFactory<AbstractConnection,GeneralSecurityException>
+	extends AbstractConnectionFactory<KeyStoreConnection,GeneralSecurityException>
 {
 
     /**

@@ -44,7 +44,7 @@ import java.util.Properties;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  *
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 @SuppressWarnings("rawtypes")

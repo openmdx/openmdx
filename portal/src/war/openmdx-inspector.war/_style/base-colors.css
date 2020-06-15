@@ -23,6 +23,8 @@ color: #000000;}
 color: #000000;}
                              .filterHeader {
 color: #444444;}
+                             .filterCell {
+color: #666666;}
                              .filterCellhover {
 color: #000000;}
                              .cellInfo, .cellUserInfo, .cellUserInfo a, .cellUserInfo a:hover, .cellLogo, .cellHistory, .cellHistory a:hover {
@@ -75,6 +77,12 @@ background-color: #DDDDDD;}
                              .gridTableHeader, .gridTableHeaderFull, .gridTableHeaderFullEdit {
 background-color: #EEEEEE;}
 */
+                             #reloadIcon:hover {
+background-color: #ddd;}
+                             #breadcrum {
+background-color: #f5f5f5;}
+                             .breadcrumb {
+background-color: #f5f5f5;}
                              .imgsubmit {
 background-color: #F4F4F4;}
                              .objectTitle {
@@ -90,13 +98,18 @@ background-color: #EEEEEE;}
                              input.valueLLocked, select.valueLLocked, input.valueRLocked, select.valueRLocked, textarea.stringLocked, textarea.multiStringLocked {
 background-color: #FAFAFA;}
                              .valuePicture, .valueMulti, valueString, .valueL, .valueLG, .valueLLocked, .valueR, .valueRG, .valueRLocked {
-background-color: #FAFAFA;}
+background-color: white;}
                              .attributeTitle, input.classsubmit {
 background-color: #FAFAFA;}
                              .popUp {
 background-color: #F8F8F8;}
-                             .fieldGroupName {
-background-color: #F4F4F4;}
+
+.fieldGroupName {
+  background-color: #F4F4F4;
+}
+.fieldLabel {
+  background-color: #FAFAFA;
+}
                              .gridTablehover, .gridTableFullhover, .gridTableFullEdithover {
 background-color: #F8F8F8;}
                              .gridTableselected, .gridTableFullselected, .gridTableFullEditselected {
@@ -149,7 +162,7 @@ border-color: #FAFAFA;}
                              a.new:hover, a.opTab:hover, a.opTabhover {
 border-color: #DDDDDD;}
                              .valueL, .valueLG, .valueR, .valueRG, .qualifier, input.valueLLocked, input.valueRLocked, select.valueLLocked, select.valueRLocked {
-border-color: #FAFAFA;}
+border-color: white;}
                              .fieldGroup {
 border-color: #FAFAFA;}
                              .fieldGroupName {

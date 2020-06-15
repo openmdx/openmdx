@@ -62,50 +62,56 @@ public class Model_1Dumper {
     /**
      * Dump the model repository content to an output stream
      * 
-     * @param target the destination
-     * @param mimeType the MIME type defines the output format
-     * @param model the model to be dumped
+     * @param target
+     *            the destination
+     * @param mimeType
+     *            the MIME type defines the output format
+     * @param model
+     *            the model to be dumped
      * 
      * @throws ServiceException
      */
     public static void save(
-        OutputStream target, 
+        OutputStream target,
         String mimeType,
         Model_1_0 model
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         new XMIMapper_1().externalizeRepository(
             model,
             target,
             mimeType
         );
     }
-   
+
     /**
-     * Dumps the content of the model repository to the file specified by the 
+     * Dumps the content of the model repository to the file specified by the
      * (single) argument.
      * 
-     * @param the target file name
-     * @param mime type
+     * @param the
+     *            target file name
+     * @param mime
+     *            type
      */
     public static void main(
         String... arguments
-    ){
-        if(arguments == null || arguments.length < 1 || arguments.length > 2) {
+    ) {
+        if (arguments == null || arguments.length < 1 || arguments.length > 2) {
             System.err.println("Usage: java " + Model_1Dumper.class.getName() + " <targetFileName> [<mimeType>]");
         } else {
-	        final String targetFileName = arguments[0];
-	        final String mimeType = arguments.length > 1 ? arguments[1] : "application/vnd.openmdx-xmi.wbxml";
-	        try {
-	            System.out.println("Saving the model repository to " + targetFileName + "...");
-	            final Model_1_0 model = Model_1Factory.getModel();
-	            final FileOutputStream target = new FileOutputStream(targetFileName);
-	            save(target, mimeType, model);
-	            target.close();
-	        } catch (Exception exception) {
-	            exception.printStackTrace();
-	            System.exit(-1);
-	        }
+            final String targetFileName = arguments[0];
+            final String mimeType = arguments.length > 1 ? arguments[1] : "application/vnd.openmdx-xmi.wbxml";
+            try {
+                System.out.println("Saving the model repository to " + targetFileName + "...");
+                final Model_1_0 model = Model_1Factory.getModel();
+                try (final FileOutputStream target = new FileOutputStream(targetFileName)) {
+                    save(target, mimeType, model);
+                }
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                System.exit(-1);
+            }
         }
     }
-    
+
 }

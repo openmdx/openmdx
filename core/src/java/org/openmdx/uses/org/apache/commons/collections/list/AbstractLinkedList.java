@@ -39,7 +39,7 @@ import org.openmdx.uses.org.apache.commons.collections.OrderedIterator;
  * is here.
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.9 $ $Date: 2011/04/12 15:30:20 $
+ * @version Revision: 1.9  Date: 2011/04/12 15:30:20
  *
  * @author Rich Dougherty
  * @author Phil Steitz

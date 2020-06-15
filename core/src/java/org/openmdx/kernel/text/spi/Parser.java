@@ -47,6 +47,8 @@
  */
 package org.openmdx.kernel.text.spi;
 
+import java.util.Optional;
+
 /**
  * Parser
  */
@@ -61,6 +63,18 @@ public interface Parser {
      */
     boolean handles (
     	Class<?> type
+    );
+
+    /**
+     * Determines whether the given class is handled by this parser
+     * 
+     * @param className the name of the class
+     * 
+     * @return {@link Optional} containing the class when handled, 
+     * {@link Optional#empty()} otherwise
+     */
+    Optional<Class<?>> handles(
+        String className
     );
     
     /**

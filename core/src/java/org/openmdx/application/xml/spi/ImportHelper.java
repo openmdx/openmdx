@@ -126,27 +126,14 @@ public class ImportHelper {
                 xmlValidation = this.xmlValidation;
             }
             SysLog.detail("XML Reader", reader.getClass().getName());
-            //
             // Features
-            //
-            setFeature(
-                reader,
-                "http://xml.org/sax/features/namespaces",
-                true
-            );
-            setFeature(
-                reader,
-                "http://xml.org/sax/features/validation",
-                xmlValidation
-            );
-            setFeature(
-                reader,
-                "http://apache.org/xml/features/validation/schema",
-                xmlValidation
-            );
-            // 
+            setFeature(reader, "http://xml.org/sax/features/namespaces", true);
+            setFeature(reader, "http://xml.org/sax/features/validation", xmlValidation);
+            setFeature(reader, "http://apache.org/xml/features/validation/schema", xmlValidation);
+            // XML eXternal Entity injection (XXE)
+            // See https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+            setFeature(reader, "http://apache.org/xml/features/disallow-doctype-decl", true);
             // Handlers
-            //
             reader.setContentHandler(importHandler);
             reader.setDTDHandler(importHandler);
             reader.setErrorHandler(errorHandler == null ? importHandler : errorHandler);

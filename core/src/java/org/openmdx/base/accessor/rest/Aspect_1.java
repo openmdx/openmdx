@@ -52,6 +52,8 @@ import java.util.Map;
 
 import javax.jdo.Extent;
 import javax.jdo.FetchPlan;
+import javax.jdo.JDOFatalDataStoreException;
+import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 
@@ -83,6 +85,16 @@ class Aspect_1 implements Query {
      */
     private FetchPlan fetchPlan = null;
 
+    /**
+     * The number of milliseconds allowed for read operations to complete
+     */
+    private Integer datastoreReadTimeoutMillis;
+
+    /**
+     * The number of milliseconds allowed for write operations to complete
+     */
+    private Integer datastoreWriteTimeoutMillis;
+    
     /**
      * Implements <code>Serializable</code>
      */
@@ -455,6 +467,76 @@ class Aspect_1 implements Query {
      */
     public void setUnmodifiable() {
         // Idempotent
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#setDatastoreReadTimeoutMillis(java.lang.Integer)
+     */
+    @Override
+    public void setDatastoreReadTimeoutMillis(Integer interval) {
+        this.datastoreReadTimeoutMillis = interval;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#getDatastoreReadTimeoutMillis()
+     */
+    @Override
+    public Integer getDatastoreReadTimeoutMillis() {
+        return this.datastoreReadTimeoutMillis;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#setDatastoreWriteTimeoutMillis(java.lang.Integer)
+     */
+    @Override
+    public void setDatastoreWriteTimeoutMillis(Integer interval) {
+        this.datastoreWriteTimeoutMillis = interval;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#getDatastoreWriteTimeoutMillis()
+     */
+    @Override
+    public Integer getDatastoreWriteTimeoutMillis() {
+        return this.datastoreWriteTimeoutMillis;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#cancelAll()
+     */
+    @Override
+    public void cancelAll() {
+        throw new JDOUnsupportedOptionException(
+            "Cancel is not supported by openMDX"
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#cancel(java.lang.Thread)
+     */
+    @Override
+    public void cancel(Thread thread) {
+        throw new JDOUnsupportedOptionException(
+            "Cancel is not supported by openMDX"
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#setSerializeRead(java.lang.Boolean)
+     */
+    @Override
+    public void setSerializeRead(Boolean serialize) {
+        if(Boolean.TRUE.equals(serialize)) {
+            throw new JDOFatalDataStoreException("openMDX does not support read serialization");
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#getSerializeRead()
+     */
+    @Override
+    public Boolean getSerializeRead() {
+        return Boolean.FALSE;
     }
 
 }

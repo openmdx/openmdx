@@ -80,8 +80,8 @@ import org.openmdx.application.mof.mapping.java.metadata.PackageMetaData;
 import org.openmdx.application.mof.mapping.java.metadata.Visibility;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.xml.EntityMapper;
+import org.openmdx.kernel.xri.XRI_2Protocols;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -252,7 +252,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.base.jdo2.metadata.Extendable#getExtension(java.lang.String)
+         * @see org.openmdx.application.mof.mapping.java.metadata.Extendable#getExtension(java.lang.String)
          */
         public Map<String,Map<String, String>> getExtension(
             ExtensionTarget target
@@ -447,7 +447,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
         }
         
         /* (non-Javadoc)
-         * @see org.openmdx.base.jdo2.metadata.PackageMetaData#getClassMetaData(java.lang.String)
+         * @see org.openmdx.application.mof.mapping.java.metadata.PackageMetaData#getClassMetaData(java.lang.String)
          */
         public ClassMetaData getClassMetaData(String name) {
             ClassMetaData classMetaData = this.classes.get(name);
@@ -613,7 +613,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
             }
             
             /* (non-Javadoc)
-             * @see org.openmdx.base.jdo2.metadata.ClassMetaData#getFieldMetaData(java.lang.String)
+             * @see org.openmdx.application.mof.mapping.java.metadata.ClassMetaData#getFieldMetaData(java.lang.String)
              */
             public FieldMetaData getFieldMetaData(String name) {
                 return this.fields.get(name);
@@ -633,28 +633,28 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
             }
 
             /* (non-Javadoc)
-             * @see org.openmdx.base.jdo2.metadata.ClassMetaData#isRequiresExtent()
+             * @see org.openmdx.application.mof.mapping.java.metadata.ClassMetaData#isRequiresExtent()
              */
             public boolean isRequiresExtent() {
                 return this.requiresExtent;
             }
     
             /* (non-Javadoc)
-             * @see org.openmdx.base.jdo2.metadata.ClassMetaData#isRequiresSlices()
+             * @see org.openmdx.application.mof.mapping.java.metadata.ClassMetaData#isRequiresSlices()
              */
             public boolean isRequiresSlices() {
                 return this.requiresSlices;
             }
             
             /* (non-Javadoc)
-             * @see org.openmdx.model1.importer.jdo2.ClassMetaData#getInheritance()
+             * @see org.openmdx.application.mof.mapping.java.metadata.ClassMetaData#getInheritance()
              */
             public InheritanceMetaData getInheritance() {
                 return this.inheritance;
             }
             
             /* (non-Javadoc)
-             * @see org.openmdx.model1.importer.jdo2.ClassMetaData#getPersistenceModifier()
+             * @see org.openmdx.application.mof.mapping.java.metadata.ClassMetaData#getPersistenceModifier()
              */
             public ClassPersistenceModifier getPersistenceModifier() {
                 return this.persistenceModifier;
@@ -759,21 +759,21 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                 }
         
                 /* (non-Javadoc)
-                 * @see org.openmdx.base.jdo2.metadata.FieldMetaData#getPersistenceModifier()
+                 * @see org.openmdx.application.mof.mapping.java.metadata.FieldMetaData#getPersistenceModifier()
                  */
                 public FieldPersistenceModifier getPersistenceModifier() {
                     return this.persistenceModifier;
                 }
                 
                 /* (non-Javadoc)
-                 * @see org.openmdx.model1.importer.jdo2.FieldMetaData#getVisibility()
+                 * @see org.openmdx.application.mof.mapping.java.metadata.FieldMetaData#getVisibility()
                  */
                 public Visibility getVisibility() {
                     return this.visibility;
                 }
         
                 /* (non-Javadoc)
-                 * @see org.openmdx.model1.importer.jdo2.FieldMetaData#getFieldType()
+                 * @see org.openmdx.application.mof.mapping.java.metadata.FieldMetaData#getFieldType()
                  */
                 public String getFieldType() {
                     return this.fieldType;
@@ -901,7 +901,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                 }
         
                 /* (non-Javadoc)
-                 * @see org.openmdx.base.jdo2.metadata.Inheritance#getStrategy()
+                 * @see org.openmdx.application.mof.mapping.java.metadata.Inheritance#getStrategy()
                  */
                 public InheritanceStrategy getStrategy() {
                     return this.strategy;

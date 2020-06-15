@@ -49,26 +49,76 @@ package org.openmdx.base.persistence.spi;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import javax.jdo.JDOException;
+import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
+
+import org.openmdx.base.collection.Sets;
+import org.openmdx.base.persistence.cci.ConfigurableProperty;
 
 /**
  * Abstract PersistenceManager
  *
  * @since openMDX 2.0
  */
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class PersistenceManagers {
 
     /**
-     * Constructor 
+     * Constructor
      */
-    private PersistenceManagers(
-    ){
+    private PersistenceManagers() {
         // avoid instantiation
     }
+
+    
+    /**
+     * The following optional features are supported<ul>
+     * <li>javax.jdo.option.TransientTransactional
+     * <li>javax.jdo.option.NontransactionalRead
+     * <li>javax.jdo.option.NontransactionalWrite
+     * <li>javax.jdo.option.RetainValues
+     * <li>javax.jdo.option.Optimistic
+     * <li>javax.jdo.option.ApplicationIdentity
+     * <li>javax.jdo.option.ChangeApplicationIdentity
+     * <li>javax.jdo.option.List
+     * <li>javax.jdo.option.GetDataStoreConnection
+     * </ul>
+     * <p>
+     * The following optional features are <b>not</b> supported<ul>
+     * <li>javax.jdo.option.ArrayList
+     * <li>javax.jdo.option.HashMap
+     * <li>javax.jdo.option.Hashtable
+     * <li>javax.jdo.option.LinkedList
+     * <li>javax.jdo.option.TreeMap
+     * <li>javax.jdo.option.TreeSet
+     * <li>javax.jdo.option.Vector
+     * <li>javax.jdo.option.Array
+     * <li>javax.jdo.option.NullCollection
+     * <li>javax.jdo.option.DatastoreIdentity
+     * <li>javax.jdo.option.NonDurableIdentity
+     * <li>javax.jdo.option.BinaryCompatibility
+     * <li>javax.jdo.option.UnconstrainedQueryVariables
+     * </ul>
+     */
+    private final static Set<String> SUPPORTED_OPTIONS = Collections.unmodifiableSet(
+        Sets.asSet(
+            ConfigurableProperty.TransientTransactional.qualifiedName(), // "javax.jdo.option.TransientTransactional"
+            ConfigurableProperty.NontransactionalRead.qualifiedName(), // "javax.jdo.option.NontransactionalRead"
+            ConfigurableProperty.RetainValues.qualifiedName(), // "javax.jdo.option.RetainValues"
+            ConfigurableProperty.Optimistic.qualifiedName(), // "javax.jdo.option.Optimistic"
+            ConfigurableProperty.ApplicationIdentity.qualifiedName(), // "javax.jdo.option.ApplicationIdentity"
+            ConfigurableProperty.GetDataStoreConnection.qualifiedName(), // "javax.jdo.option.GetDataStoreConnection"
+            "javax.jdo.option.List" // mandatory since JDO 2
+        )
+    );
 
     /**
      * Evict All
@@ -77,21 +127,21 @@ public class PersistenceManagers {
      * @param pcs
      */
     public static void evictAll(
-        PersistenceManager pm, 
+        PersistenceManager pm,
         Collection<?> pcs
     ) {
         List<JDOException> exceptions = null;
-        for(Object pc : pcs) try {
-            pm.evict (pc);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions != null) throw new JDOException(
-            "Eviction failure",
-            exceptions.toArray(new JDOException[exceptions.size()])
-        );
+        for (Object pc : pcs)
+            try {
+                pm.evict(pc);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions != null)
+            throw new JDOException(
+                "Eviction failure",
+                exceptions.toArray(new JDOException[exceptions.size()])
+            );
     }
 
     /**
@@ -101,21 +151,21 @@ public class PersistenceManagers {
      * @param pcs
      */
     public static void refreshAll(
-        PersistenceManager pm, 
+        PersistenceManager pm,
         Collection<?> pcs
     ) {
         List<JDOException> exceptions = null;
-        for(Object pc : pcs) try {
-            pm.refresh(pc);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions != null) throw new JDOException(
-            "Refresh failure",
-            exceptions.toArray(new JDOException[exceptions.size()])
-        );
+        for (Object pc : pcs)
+            try {
+                pm.refresh(pc);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions != null)
+            throw new JDOException(
+                "Refresh failure",
+                exceptions.toArray(new JDOException[exceptions.size()])
+            );
     }
 
     /**
@@ -125,23 +175,23 @@ public class PersistenceManagers {
      * @param pcs
      */
     public static void deletePersistentAll(
-        PersistenceManager pm, 
+        PersistenceManager pm,
         Object... pcs
     ) {
         List<JDOException> exceptions = null;
-        for(Object pc : pcs) try {
-            pm.deletePersistent(pc);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions != null) throw new JDOException(
-            "Delete persistent failure",
-            exceptions.toArray(new JDOException[exceptions.size()])
-        );
+        for (Object pc : pcs)
+            try {
+                pm.deletePersistent(pc);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions != null)
+            throw new JDOException(
+                "Delete persistent failure",
+                exceptions.toArray(new JDOException[exceptions.size()])
+            );
     }
-    
+
     /**
      * Refresh All
      * 
@@ -149,23 +199,23 @@ public class PersistenceManagers {
      * @param pcs
      */
     public static void refreshAll(
-        PersistenceManager pm, 
+        PersistenceManager pm,
         Object... pcs
     ) {
         List<JDOException> exceptions = null;
-        for(Object pc : pcs) try {
-            pm.refresh(pc);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions != null) throw new JDOException(
-            "Refresh failure",
-            exceptions.toArray(new JDOException[exceptions.size()])
-        );
+        for (Object pc : pcs)
+            try {
+                pm.refresh(pc);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions != null)
+            throw new JDOException(
+                "Refresh failure",
+                exceptions.toArray(new JDOException[exceptions.size()])
+            );
     }
-    
+
     /**
      * Refresh All
      * 
@@ -173,16 +223,17 @@ public class PersistenceManagers {
      * @param jdoe
      */
     public static void refreshAll(
-        PersistenceManager pm, 
+        PersistenceManager pm,
         JDOException jdoe
     ) {
         Throwable[] throwables = jdoe.getNestedExceptions();
-        if(throwables != null) {
+        if (throwables != null) {
             List<Object> objects = new ArrayList<Object>();
-            for(Throwable throwable : throwables) {
-                if(throwable instanceof JDOException) {
-                    Object object = ((JDOException)throwable).getFailedObject();
-                    if(object != null) objects.add(object);
+            for (Throwable throwable : throwables) {
+                if (throwable instanceof JDOException) {
+                    Object object = ((JDOException) throwable).getFailedObject();
+                    if (object != null)
+                        objects.add(object);
                 }
             }
             refreshAll(pm, objects);
@@ -197,14 +248,13 @@ public class PersistenceManagers {
         T[] pcs
     ) {
         List<JDOException> exceptions = null;
-        for(Object pc : pcs) try {
-            pm.makePersistent (pc);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions == null) {
+        for (Object pc : pcs)
+            try {
+                pm.makePersistent(pc);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions == null) {
             return pcs;
         } else {
             throw new JDOException(
@@ -227,14 +277,13 @@ public class PersistenceManagers {
         Collection<T> pcs
     ) {
         List<JDOException> exceptions = null;
-        for(Object pc : pcs) try {
-            pm.makePersistent (pc);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions == null) {
+        for (Object pc : pcs)
+            try {
+                pm.makePersistent(pc);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions == null) {
             return pcs;
         } else {
             throw new JDOException(
@@ -255,36 +304,36 @@ public class PersistenceManagers {
         Collection<?> pcs
     ) {
         List<JDOException> exceptions = null;
-        for(Object pc : pcs) try {
-            pm.deletePersistent (pc);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions != null) throw new JDOException(
-            "Delete persistent failure",
-            exceptions.toArray(new JDOException[exceptions.size()])
-        );
+        for (Object pc : pcs)
+            try {
+                pm.deletePersistent(pc);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions != null)
+            throw new JDOException(
+                "Delete persistent failure",
+                exceptions.toArray(new JDOException[exceptions.size()])
+            );
     }
 
     public static void makeTransientAll(
         PersistenceManager pm,
-        Collection<?> pcs, 
+        Collection<?> pcs,
         boolean useFetchPlan
     ) {
         List<JDOException> exceptions = null;
-        for(Object pc : pcs) try {
-            pm.makeTransient (pc, useFetchPlan);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions != null) throw new JDOException(
-            "Make transient failure",
-            exceptions.toArray(new JDOException[exceptions.size()])
-        );
+        for (Object pc : pcs)
+            try {
+                pm.makeTransient(pc, useFetchPlan);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions != null)
+            throw new JDOException(
+                "Make transient failure",
+                exceptions.toArray(new JDOException[exceptions.size()])
+            );
     }
 
     /**
@@ -296,21 +345,21 @@ public class PersistenceManagers {
      */
     public static void makeTransientAll(
         PersistenceManager pm,
-        boolean useFetchPlan, 
+        boolean useFetchPlan,
         Object... pcs
     ) {
         List<JDOException> exceptions = null;
-        for(Object pc : pcs) try {
-            pm.makeTransient (pc, useFetchPlan);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions != null) throw new JDOException(
-            "Make transient failure",
-            exceptions.toArray(new JDOException[exceptions.size()])
-        );
+        for (Object pc : pcs)
+            try {
+                pm.makeTransient(pc, useFetchPlan);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions != null)
+            throw new JDOException(
+                "Make transient failure",
+                exceptions.toArray(new JDOException[exceptions.size()])
+            );
     }
 
     /**
@@ -320,21 +369,21 @@ public class PersistenceManagers {
      * @param pcs
      */
     public static void makeTransactionalAll(
-        PersistenceManager pm, 
+        PersistenceManager pm,
         Collection<?> pcs
     ) {
         List<JDOException> exceptions = null;
-        for(Object pc : pcs) try {
-            pm.makeTransactional (pc);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions != null) throw new JDOException(
-            "Make transactional failure",
-            exceptions.toArray(new JDOException[exceptions.size()])
-        );
+        for (Object pc : pcs)
+            try {
+                pm.makeTransactional(pc);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions != null)
+            throw new JDOException(
+                "Make transactional failure",
+                exceptions.toArray(new JDOException[exceptions.size()])
+            );
     }
 
     /**
@@ -348,17 +397,17 @@ public class PersistenceManagers {
         Collection<?> pcs
     ) {
         List<JDOException> exceptions = null;
-        for(Object pc : pcs) try {
-            pm.makeNontransactional (pc);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions != null) throw new JDOException(
-            "Make non-transactional failure",
-            exceptions.toArray(new JDOException[exceptions.size()])
-        );
+        for (Object pc : pcs)
+            try {
+                pm.makeNontransactional(pc);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions != null)
+            throw new JDOException(
+                "Make non-transactional failure",
+                exceptions.toArray(new JDOException[exceptions.size()])
+            );
     }
 
     /**
@@ -370,21 +419,21 @@ public class PersistenceManagers {
      */
     public static void retrieveAll(
         PersistenceManager pm,
-        boolean useFetchPlan, 
+        boolean useFetchPlan,
         Collection<?> pcs
     ) {
         List<JDOException> exceptions = null;
-        for(Object pc : pcs) try {
-            pm.retrieve(pc, useFetchPlan);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions != null) throw new JDOException(
-            "Retrieve failure",
-            exceptions.toArray(new JDOException[exceptions.size()])
-        );
+        for (Object pc : pcs)
+            try {
+                pm.retrieve(pc, useFetchPlan);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions != null)
+            throw new JDOException(
+                "Retrieve failure",
+                exceptions.toArray(new JDOException[exceptions.size()])
+            );
     }
 
     /**
@@ -395,22 +444,22 @@ public class PersistenceManagers {
      * @param pcs
      */
     public static void retrieveAll(
-        PersistenceManager pm, 
-        boolean useFetchPlan, 
+        PersistenceManager pm,
+        boolean useFetchPlan,
         Object... pcs
     ) {
         List<JDOException> exceptions = null;
-        for(Object pc : pcs) try {
-            pm.retrieve(pc, useFetchPlan);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions != null) throw new JDOException(
-            "Retrieve failure",
-            exceptions.toArray(new JDOException[exceptions.size()])
-        );
+        for (Object pc : pcs)
+            try {
+                pm.retrieve(pc, useFetchPlan);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions != null)
+            throw new JDOException(
+                "Retrieve failure",
+                exceptions.toArray(new JDOException[exceptions.size()])
+            );
     }
 
     /**
@@ -427,22 +476,24 @@ public class PersistenceManagers {
     ) {
         List<JDOException> exceptions = null;
         List<T> objects = new ArrayList<T>(pcs.size());
-        for(T pc : pcs) try {
-            objects.add(pm.detachCopy (pc));
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions == null){
+        for (T pc : pcs)
+            try {
+                objects.add(pm.detachCopy(pc));
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions == null) {
             return objects;
-        } else throw new JDOException(
-            "Detach copy failure",
-            exceptions.toArray(new JDOException[exceptions.size()])
-        );
+        } else
+            throw new JDOException(
+                "Detach copy failure",
+                exceptions.toArray(new JDOException[exceptions.size()])
+            );
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.PersistenceManager#detachCopyAll(java.lang.Object[])
      */
     public static <T> T[] detachCopyAll(
@@ -452,19 +503,19 @@ public class PersistenceManagers {
         List<JDOException> exceptions = null;
         T[] objects = pcs.clone();
         int i = 0;
-        for(T pc : pcs) try {
-            objects[i++] = pm.detachCopy (pc);
-        } catch (JDOException exception) {
-            (
-                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
-            ).add(exception);
-        }
-        if(exceptions == null){
+        for (T pc : pcs)
+            try {
+                objects[i++] = pm.detachCopy(pc);
+            } catch (JDOException exception) {
+                (exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions).add(exception);
+            }
+        if (exceptions == null) {
             return objects;
-        } else throw new JDOException(
-            "Detach copy failure",
-            exceptions.toArray(new JDOException[exceptions.size()])
-        );
+        } else
+            throw new JDOException(
+                "Detach copy failure",
+                exceptions.toArray(new JDOException[exceptions.size()])
+            );
     }
 
     /**
@@ -479,10 +530,10 @@ public class PersistenceManagers {
     public static Collection getObjectsById(
         PersistenceManager pm,
         boolean validate,
-        Collection<?> oids 
+        Collection<?> oids
     ) {
         Collection<Object> objects = new ArrayList<Object>(oids.size());
-        for(Object oid : oids) {
+        for (Object oid : oids) {
             objects.add(pm.getObjectById(oid, validate));
         }
         return objects;
@@ -499,15 +550,11 @@ public class PersistenceManagers {
      */
     public static Object[] getObjectsById(
         PersistenceManager pm,
-        boolean validate, 
+        boolean validate,
         Object... oids
     ) {
         Object[] objects = new Object[oids.length];
-        for(
-            int i = 0;
-            i < oids.length;
-            i++
-        ) {
+        for (int i = 0; i < oids.length; i++) {
             objects[i] = pm.getObjectById(oids[i], validate);
         }
         return objects;
@@ -516,23 +563,22 @@ public class PersistenceManagers {
     /**
      * Convert the user name representing a principal chain into a principal chain
      * 
-     * @param a user name representing a principal chain
+     * @param a
+     *            user name representing a principal chain
      * 
      * @return the principal chain represented by the user name
      */
     public static List<String> toPrincipalChain(
         String username
-    ){
-        if(username == null || username.length() == 0) {
+    ) {
+        if (username == null || username.length() == 0) {
             return Collections.emptyList();
-        } else if (
-            (username.startsWith("[") && username.endsWith("]")) ||
-            (username.startsWith("{") && username.endsWith("}"))
-        ) {
+        } else if ((username.startsWith("[") && username.endsWith("]")) ||
+            (username.startsWith("{") && username.endsWith("}"))) {
             List<String> principalChain = new ArrayList<String>();
-            for(String principal: username.substring(1, username.length() - 1).split(",")) {
+            for (String principal : username.substring(1, username.length() - 1).split(",")) {
                 principal = principal.trim();
-                if(!"".equals(principal)) {
+                if (!"".equals(principal)) {
                     principalChain.add(principal);
                 }
             }
@@ -542,4 +588,96 @@ public class PersistenceManagers {
         }
     }
 
+    public static Map<String, Object> getProperties(
+        PersistenceManager persistenceManager
+    ) {
+        final Map<String, Object> properties = new HashMap<>();
+        put(properties, ConfigurableProperty.CopyOnAttach, persistenceManager.getCopyOnAttach());
+        put(properties, ConfigurableProperty.DatastoreReadTimeoutMillis, persistenceManager.getDatastoreReadTimeoutMillis());
+        put(properties, ConfigurableProperty.DatastoreWriteTimeoutMillis, persistenceManager.getDatastoreWriteTimeoutMillis());
+        put(properties, ConfigurableProperty.DetachAllOnCommit, persistenceManager.getDetachAllOnCommit());
+        put(properties, ConfigurableProperty.IgnoreCache, persistenceManager.getIgnoreCache());
+        put(properties, ConfigurableProperty.Multithreaded, persistenceManager.getMultithreaded());
+        final PersistenceManagerFactory persistenceManagerFactory = persistenceManager.getPersistenceManagerFactory();
+        put(properties, ConfigurableProperty.NontransactionalRead, persistenceManagerFactory.getNontransactionalRead());
+        put(properties, ConfigurableProperty.NontransactionalWrite, persistenceManagerFactory.getNontransactionalWrite());
+        put(properties, ConfigurableProperty.Optimistic, persistenceManagerFactory.getOptimistic());
+        put(properties, ConfigurableProperty.ReadOnly, persistenceManagerFactory.getReadOnly());
+        put(properties, ConfigurableProperty.RestoreValues, persistenceManagerFactory.getRestoreValues());
+        put(properties, ConfigurableProperty.RetainValues, persistenceManagerFactory.getRetainValues());
+        return properties;
+    }
+
+    private static void put(
+        Map<String, Object> target,
+        ConfigurableProperty key,
+        boolean value
+    ) {
+        target.put(key.qualifiedName(), String.valueOf(value));
+    }
+    
+    private static void put(
+        Map<String, Object> target,
+        ConfigurableProperty key,
+        Object value
+    ) {
+        target.put(key.qualifiedName(), value == null ? null : value.toString());
+    }
+    
+    public static void setProperty(
+        PersistenceManager persistenceManager,
+        String propertyName,
+        Object value
+    ) {
+        final Optional<ConfigurableProperty> property = ConfigurableProperty.fromQualifiedName(propertyName);
+        if(property.isPresent()) {
+            switch(property.get()) {
+                case CopyOnAttach: 
+                    persistenceManager.setCopyOnAttach(toFlag(value));
+                    break;
+                case DatastoreReadTimeoutMillis:
+                    persistenceManager.setDatastoreReadTimeoutMillis(toMilliseconds(value));
+                    break;
+                case DatastoreWriteTimeoutMillis:
+                    persistenceManager.setDatastoreWriteTimeoutMillis(toMilliseconds(value));
+                    break;
+                case DetachAllOnCommit:
+                    persistenceManager.setDetachAllOnCommit(toFlag(value));
+                    break;
+                case IgnoreCache:
+                    persistenceManager.setIgnoreCache(toFlag(value));
+                    break;
+                case Multithreaded:
+                    persistenceManager.setMultithreaded(toFlag(value));
+                    break;
+                default:
+                    throw new JDOUserException ("The property " + property.get().qualifiedName()
+                        + "can be set at factory level only");
+            }
+        }
+    }
+
+
+    private static boolean toFlag(Object value) {
+        return value instanceof Boolean ? 
+            ((Boolean)value).booleanValue() :
+            Boolean.parseBoolean((String)value);
+    }
+    
+    private static Integer toMilliseconds(Object value) {
+        return 
+            value == null ? null :
+            value instanceof Integer ? (Integer)value :
+            Integer.valueOf((String)value);
+    }
+    
+    /**
+     * Retrieve the supported properties.
+     *
+     * @return Returns the supported properties.
+     */
+    public static Set<String> getSupportedProperties() {
+        return SUPPORTED_OPTIONS;
+    }
+    
 }

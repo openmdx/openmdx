@@ -34,7 +34,7 @@ import org.openmdx.uses.org.apache.commons.pool2.PooledObjectFactory;
 /**
  * Implementation specific utilities.
  *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 class PoolImplUtils {
 

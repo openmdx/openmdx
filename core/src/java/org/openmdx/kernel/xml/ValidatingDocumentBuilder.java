@@ -149,14 +149,11 @@ public class ValidatingDocumentBuilder {
         ).newDocumentBuilder();
         documentBuilder.setEntityResolver(EntityMapper.getInstance());
         documentBuilder.setErrorHandler(new DocumentErrorHandler(url));
-        InputStream stream = url.openStream(); 
-        Document document = dtd ? 
-            documentBuilder.parse(stream) :
-            documentBuilder.parse(stream, namespace + '/');
-        try {
-            stream.close();
-        } catch (IOException ignored) {
-            SysLog.trace("Ignored close failure", ignored);
+        final Document document;
+        try(InputStream stream = url.openStream()){
+            document = dtd ? 
+                documentBuilder.parse(stream) :
+                documentBuilder.parse(stream, namespace + '/');
         }
         return document;
     }
@@ -174,14 +171,15 @@ public class ValidatingDocumentBuilder {
     protected String xmlNamespace(
         URL url
     ) throws IOException {
-        Reader in = new AdaptiveInputStreamReader(
-            url.openStream(),
-            null, // encoding 
-            true, // byteOrderMarkAware 
-            true, // xmlDeclarationAware
-            true // popagateClode
-        );
-        try {
+        try (
+            Reader in = new AdaptiveInputStreamReader(
+                url.openStream(),
+                null, // encoding 
+                true, // byteOrderMarkAware 
+                true, // xmlDeclarationAware
+                true // popagateClode
+            );
+        ) {
             char[] charArray = new char[READ_AHEAD_LIMIT];
             int l = in.read(charArray);
             CharBuffer charBuffer = CharBuffer.wrap(charArray, 0, l);
@@ -204,8 +202,6 @@ public class ValidatingDocumentBuilder {
                 );
             }
             return null;
-        } finally {
-            in.close();
         }
     }
     

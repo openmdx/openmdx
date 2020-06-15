@@ -31,7 +31,7 @@ import java.io.Serializable;
 /**
  * A file filter that always returns true.
  *
- * @since 1.0
+ * @since Commons I/O 1.0
  * @version $Id: TrueFileFilter.java 1642757 2014-12-01 21:09:30Z sebb $
  * @see FileFilterUtils#trueFileFilter()
  */
@@ -40,7 +40,7 @@ public class TrueFileFilter implements IOFileFilter, Serializable {
     private static final long serialVersionUID = 8782512160909720199L;
     /**
      * Singleton instance of true filter.
-     * @since 1.3
+     * @since Commons I/O 1.3
      */
     public static final IOFileFilter TRUE = new TrueFileFilter();
     /**

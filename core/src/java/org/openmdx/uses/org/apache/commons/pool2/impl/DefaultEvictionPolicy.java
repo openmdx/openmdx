@@ -44,9 +44,7 @@ import org.openmdx.uses.org.apache.commons.pool2.PooledObject;
  *
  * @param <T> the type of objects in the pool
  *
- * @version $Revision: $
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public class DefaultEvictionPolicy<T> implements EvictionPolicy<T> {
 

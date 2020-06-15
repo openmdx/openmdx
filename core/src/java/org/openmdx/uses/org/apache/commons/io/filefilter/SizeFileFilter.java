@@ -44,7 +44,7 @@ import java.io.Serializable;
  * </pre>
  *
  * @version $Id: SizeFileFilter.java 1642757 2014-12-01 21:09:30Z sebb $
- * @since 1.2
+ * @since Commons I/O 1.2
  * @see FileFilterUtils#sizeFileFilter(long)
  * @see FileFilterUtils#sizeFileFilter(long, boolean)
  * @see FileFilterUtils#sizeRangeFileFilter(long, long)

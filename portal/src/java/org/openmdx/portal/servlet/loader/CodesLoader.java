@@ -146,9 +146,34 @@ public class CodesLoader extends Loader {
 							}
 						}
 						// Merge entries
-						Set<Entry<Path,ObjectRecord>> entrySet = j == 0 
-							? codes.entrySet() 
-							: mergedCodes.entrySet();
+						Set<Entry<Path,ObjectRecord>> entrySet = null;
+						if(j == 0) {
+							entrySet = codes.entrySet();
+							for(Iterator<Entry<Path,ObjectRecord>> l = entrySet.iterator(); l.hasNext(); ) {
+								try {
+									Entry<Path,ObjectRecord> e = l.next();
+									Object_2Facade codeEntry = Object_2Facade.newInstance(e.getValue());
+									if(codeEntry.getObjectClass().endsWith("CodeValueEntry")) {
+										// Clear if shortText is null
+										if(
+											!codeEntry.attributeValuesAsList("shortText").isEmpty() &&
+											codeEntry.attributeValue("shortText") == null
+										) {
+											codeEntry.clearAttributeValuesAsList("shortText");
+										}
+										// Clear if longText is null
+										if(
+											!codeEntry.attributeValuesAsList("longText").isEmpty() &&
+											codeEntry.attributeValue("longText") == null
+										) {
+											codeEntry.clearAttributeValuesAsList("longText");
+										}
+									}
+								} catch(Exception ignore) {}
+							}
+						} else {
+							entrySet = mergedCodes.entrySet();
+						}
 						for(Iterator<Entry<Path,ObjectRecord>> l = entrySet.iterator(); l.hasNext(); ) {
 							Entry<Path,ObjectRecord> e = l.next();
 							// Merge entry
@@ -190,27 +215,29 @@ public class CodesLoader extends Loader {
 										} catch (ResourceException e0) {
 											throw new ServiceException(e0);
 										}
-										if(!codeEntryFacade.attributeValuesAsList("shortText").isEmpty()) {
+										if(
+											!codeEntryFacade.attributeValuesAsList("shortText").isEmpty() &&
+											codeEntryFacade.attributeValue("shortText") != null
+										) {
+											Object shortText = codeEntryFacade.attributeValue("shortText") == null
+												? "" // no null values in shortText list allowed
+												: codeEntryFacade.attributeValue("shortText");
 											while(mergedCodeEntryFacade.attributeValuesAsList("shortText").size() <= j) {
-												mergedCodeEntryFacade.attributeValuesAsList("shortText").add(
-													codeEntryFacade.attributeValue("shortText")
-												);
+												mergedCodeEntryFacade.attributeValuesAsList("shortText").add(shortText);
 											}
-											mergedCodeEntryFacade.attributeValuesAsList("shortText").set(
-												j,
-												codeEntryFacade.attributeValue("shortText")
-											);
+											mergedCodeEntryFacade.attributeValuesAsList("shortText").set(j, shortText);
 										}
-										if(!codeEntryFacade.attributeValuesAsList("longText").isEmpty()) {
+										if(
+											!codeEntryFacade.attributeValuesAsList("longText").isEmpty() &&
+											codeEntryFacade.attributeValue("longText") != null
+										) {
+											Object longText = codeEntryFacade.attributeValue("longText") == null
+												? "" // no null values in longText list allowed
+												: codeEntryFacade.attributeValue("longText");
 											while(mergedCodeEntryFacade.attributeValuesAsList("longText").size() <= j) {
-												mergedCodeEntryFacade.attributeValuesAsList("longText").add(
-													codeEntryFacade.attributeValue("longText")
-												);
+												mergedCodeEntryFacade.attributeValuesAsList("longText").add(longText);
 											}
-											mergedCodeEntryFacade.attributeValuesAsList("longText").set(
-												j,
-												codeEntryFacade.attributeValue("longText")
-											);
+											mergedCodeEntryFacade.attributeValuesAsList("longText").set(j, longText);
 										}
 									}
 								}

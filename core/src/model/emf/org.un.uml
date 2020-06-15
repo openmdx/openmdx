@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="20110701" xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_6UQFIN67EdmkJO73lqONhA" name="un">
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_6UQFIN67EdmkJO73lqONhA" name="un">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3C8B7F380249P" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3C8B7F380249" name="un">
       <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C8B7F4400E8" name="Country">
-        <eAnnotations xmi:id="_MhkRk965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-          <details xmi:id="_MhkRlN65EdmrtKJSXC0_FQ" key="alias"/>
+        <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MhkRk965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+          <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MhkRlN65EdmrtKJSXC0_FQ" key="alias"/>
         </eAnnotations>
-        <ownedAttribute xmi:id="_3C7B8A60016D3E66723E0311" name="org::w3c::string"/>
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E66723E0311" name="org::w3c::string"/>
       </packagedElement>
     </packagedElement>
   </packagedElement>

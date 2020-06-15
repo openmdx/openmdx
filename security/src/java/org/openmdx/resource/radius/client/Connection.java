@@ -70,7 +70,7 @@ public class Connection
 	 */
 	private RadiusConnection getDelegate(
 	) throws RadiusException {
-    	ManagedConnection managedConnection = (ManagedConnection) super.getManagedConnection();
+    	final ManagedConnection managedConnection = (ManagedConnection) super.getManagedConnection();
     	if(managedConnection == null) throw new RadiusException(
     		"The RADIUS connection is already closed"
     	);

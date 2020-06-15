@@ -58,7 +58,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.CssClass;
@@ -105,7 +105,7 @@ public class SessionInfoControl extends Control implements Serializable {
             ApplicationContext app = p.getApplicationContext();
             p.write("<span>", app.getLoginPrincipal(), "</span>");
         } catch(Exception e) {
-            new ServiceException(e).log();
+            Throwables.log(e);
         }
     }
     
@@ -125,20 +125,21 @@ public class SessionInfoControl extends Control implements Serializable {
             if(forEditing) {
                 p.write("<span>", app.getCurrentLocaleAsString(), "</span>");            
             } else {
-                p.write("<ul class=\"", CssClass.nav.toString(), " ", CssClass.navPills.toString(), "\">");
-                p.write("  <li class=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\">", app.getCurrentLocaleAsString(), "  <b class=\"caret\"></b></a>");
-                p.write("    <ul class=\"", CssClass.dropdownMenu.toString(), "\" style=\"z-index:1010;\">");
+                p.write("<ul class=\"", CssClass.nav.toString(), " ", CssClass.nav_pills.toString(), "\">");
+                p.write("  <div class=\"", CssClass.dropdown.toString(), "\">");
+                p.write("    <button type=\"button\" class=\"", CssClass.btn.toString(), " " , CssClass.btn_sm.toString(), " " , CssClass.dropdown_toggle.toString(), "\" data-toggle=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:this.parentNode.hide=function(){};\">", app.getCurrentLocaleAsString(), "  <b class=\"caret\"></b></button>");
+                p.write("    <div class=\"", CssClass.dropdown_menu.toString(), "\" style=\"z-index:1010;\">");
                 Action[] selectLocaleAction = ((ShowObjectView)view).getSelectLocaleAction();
                 for(int i = 0; i < selectLocaleAction.length; i++) {
                     Action action = selectLocaleAction[i];
-                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\"><span style=\"font-family:courier;\">", action.getParameter(Action.PARAMETER_LOCALE), " - </span>", action.getTitle(), "</a></li>");
+                    p.write("      <a href=\"#\" class=\"" + CssClass.dropdown_item.toString(), "\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", action.getParameter(Action.PARAMETER_LOCALE), " - ", action.getTitle(), "</a>");
                 }
-                p.write("    </ul>");
-                p.write("  </li>");
+                p.write("    </div>");
+                p.write("  </div>");
                 p.write("</ul>");
             }
         } catch(Exception e) {
-            new ServiceException(e).log();
+            Throwables.log(e);
         }
     }
     
@@ -161,10 +162,10 @@ public class SessionInfoControl extends Control implements Serializable {
             ApplicationContext app = p.getApplicationContext();            
             Action logoffAction = view.getLogoffAction();        
             if(!forEditing) {
-                p.write("<a class=\"", buttonClass, "\" style=\"", buttonStyle, "\" href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(logoffAction), ";\">", logoffAction.getTitle(), "&nbsp;", app.getLoginPrincipal(), "</a>");            
+                p.write("<a class=\"", buttonClass, "\" style=\"", buttonStyle, "\" href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(logoffAction), ";\">", logoffAction.getTitle(), "&nbsp;", app.getLoginPrincipal(), "</a>");
             }
         } catch(Exception e) {
-            new ServiceException(e).log();
+            Throwables.log(e);
         }
     }
     
@@ -213,21 +214,22 @@ public class SessionInfoControl extends Control implements Serializable {
                 p.write("<span>", app.getCurrentUserRole(), "</span>");            
             } else {
             	boolean hasRoles = setRoleAction.length > 1;
-                p.write("<ul class=\"", CssClass.nav.toString(), " ", CssClass.navPills.toString(), "\">");
-                p.write("  <li class=\"", CssClass.dropdown.toString(), (hasRoles ? "" : " " + CssClass.disabled), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\">", htmlEncoder.encode(currentRoleTitle, false), " <b class=\"caret\"></b></a>");
+                p.write("<ul class=\"", CssClass.nav.toString(), " ", CssClass.nav_pills.toString(), "\">");
+                p.write("  <div class=\"", CssClass.dropdown.toString(), (hasRoles ? "" : " " + CssClass.disabled), "\">");
+                p.write("    <button type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_sm.toString(), " ", CssClass.dropdown_toggle.toString(), "\" data-toggle=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:this.parentNode.hide=function(){};\">", htmlEncoder.encode(currentRoleTitle, false), " <b class=\"caret\"></b></button>");
                 if(hasRoles) {
-                	p.write("    <ul class=\"", CssClass.dropdownMenu.toString(), "\" style=\"z-index:1010;\">");
+                	p.write("    <div class=\"", CssClass.dropdown_menu.toString(), "\" style=\"z-index:1010;\">");
 	                for(int i = 0; i < setRoleAction.length; i++) {
 	                    Action action = setRoleAction[i];
-	                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", action.getTitle(), "</a></li>");
+	                    p.write("      <a href=\"#\" class=\"", CssClass.dropdown_item.toString(), "\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", action.getTitle(), "</a>");
 	                }
-	                p.write("    </ul>");
+	                p.write("    </div>");
                 }
-                p.write("  </li>");
+                p.write("  </div>");
                 p.write("</ul>");
             }
         } catch(Exception e) {
-            new ServiceException(e).log();
+            Throwables.log(e);
         }        
     }
 
@@ -255,7 +257,7 @@ public class SessionInfoControl extends Control implements Serializable {
                 dateTimeFormat.getTimeZone().getID()
             );
         } catch(Exception e) {
-            new ServiceException(e).log();
+            Throwables.log(e);
         }
     }
     
@@ -277,10 +279,10 @@ public class SessionInfoControl extends Control implements Serializable {
             View view = p.getView();        
             Action saveSettingsAction = view.getSaveSettingsAction();
             if(!forEditing) {
-                p.write("<a class=\"", buttonClass, "\" style=\"", buttonStyle, "\" href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(saveSettingsAction), ", {asynchronous:true});\">", saveSettingsAction.getTitle(), "</a>");            
+                p.write("<a class=\"", buttonClass, "\" style=\"", buttonStyle, "\" href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(saveSettingsAction), ", {asynchronous:true});\">", saveSettingsAction.getTitle(), "</a>");
             }
         } catch(Exception e) {
-            new ServiceException(e).log();
+            Throwables.log(e);
         }
     }
 

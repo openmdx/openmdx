@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2018, OMEX AG, Switzerland
+ * Copyright (c) 2006-2019, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,52 +47,69 @@
  */
 package org.openmdx.resource.ldap.spi;
 
-import org.openmdx.resource.ldap.cci.LDAPConnection;
-import org.openmdx.resource.spi.AbstractConnection;
+import java.io.IOException;
+import java.util.List;
 
-import netscape.ldap.LDAPAttribute;
-import netscape.ldap.LDAPConstraints;
-import netscape.ldap.LDAPControl;
-import netscape.ldap.LDAPEntry;
-import netscape.ldap.LDAPException;
-import netscape.ldap.LDAPExtendedOperation;
-import netscape.ldap.LDAPModification;
-import netscape.ldap.LDAPModificationSet;
-import netscape.ldap.LDAPSearchConstraints;
-import netscape.ldap.LDAPSearchResults;
-import netscape.ldap.LDAPv3;
+import org.apache.directory.api.asn1.util.Oid;
+import org.apache.directory.api.ldap.codec.api.BinaryAttributeDetector;
+import org.apache.directory.api.ldap.codec.api.LdapApiService;
+import org.apache.directory.api.ldap.model.cursor.EntryCursor;
+import org.apache.directory.api.ldap.model.cursor.SearchCursor;
+import org.apache.directory.api.ldap.model.entry.Entry;
+import org.apache.directory.api.ldap.model.entry.Modification;
+import org.apache.directory.api.ldap.model.entry.ModificationOperation;
+import org.apache.directory.api.ldap.model.entry.Value;
+import org.apache.directory.api.ldap.model.exception.LdapAuthenticationNotSupportedException;
+import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.directory.api.ldap.model.message.AbandonRequest;
+import org.apache.directory.api.ldap.model.message.AddRequest;
+import org.apache.directory.api.ldap.model.message.AddResponse;
+import org.apache.directory.api.ldap.model.message.BindRequest;
+import org.apache.directory.api.ldap.model.message.BindResponse;
+import org.apache.directory.api.ldap.model.message.CompareRequest;
+import org.apache.directory.api.ldap.model.message.CompareResponse;
+import org.apache.directory.api.ldap.model.message.Control;
+import org.apache.directory.api.ldap.model.message.DeleteRequest;
+import org.apache.directory.api.ldap.model.message.DeleteResponse;
+import org.apache.directory.api.ldap.model.message.ExtendedRequest;
+import org.apache.directory.api.ldap.model.message.ExtendedResponse;
+import org.apache.directory.api.ldap.model.message.ModifyDnRequest;
+import org.apache.directory.api.ldap.model.message.ModifyDnResponse;
+import org.apache.directory.api.ldap.model.message.ModifyRequest;
+import org.apache.directory.api.ldap.model.message.ModifyResponse;
+import org.apache.directory.api.ldap.model.message.ResultCodeEnum;
+import org.apache.directory.api.ldap.model.message.SearchRequest;
+import org.apache.directory.api.ldap.model.message.SearchScope;
+import org.apache.directory.api.ldap.model.name.Dn;
+import org.apache.directory.api.ldap.model.name.Rdn;
+import org.apache.directory.api.ldap.model.schema.SchemaManager;
+import org.apache.directory.ldap.client.api.LdapConnection;
+import org.apache.directory.ldap.client.api.SaslRequest;
+import org.apache.directory.ldap.client.api.exception.InvalidConnectionException;
+import org.apache.directory.ldap.client.template.exception.LdapRuntimeException;
+import org.openmdx.resource.spi.AbstractConnection;
 
 /**
  * LDAP Connection
  */
-class Connection
-	extends AbstractConnection
-    implements LDAPConnection
-{
+class Connection extends AbstractConnection implements LdapConnection {
     
     /**
      * Constructor 
      * 
-     * @param delegate the delegate
+     * @param ldapConnection the delegate
      */
-    Connection(LDAPv3 delegate) {
-        this.delegate = delegate;
+    Connection(LdapConnection ldapConnection) {
+        this.ldapConnection = ldapConnection;
     }
 
-    private LDAPv3 delegate;
-
-    private static final String MANAGED_ENVIRONMENT = 
-        "This method is not supported in a managed environment";
-
+    private LdapConnection ldapConnection;
+    
     /**
-     * Tests whether this handle is connected
-     * 
-     * @return {@code true} if this handle is connected
+     * Use the JCA contract for authentication
      */
-    private boolean isConnected() {
-        return this.delegate != null;
-    }
-
+    private static final String AUTHENTICATION_NOT_SUPPORTED = "Authentication not supported in a managed environment";
+    
     //------------------------------------------------------------------------
     // Implements AutoCloseable
     //------------------------------------------------------------------------
@@ -101,212 +118,944 @@ class Connection
      * @see java.lang.AutoCloseable#close()
      */
     @Override
-    public void close() throws LDAPException{
-        disconnect();
-    }
-    
-    
-	//------------------------------------------------------------------------
-	// Implements LDAPv3
-	//------------------------------------------------------------------------
-
-	/**
-	 * Retrieve the delegate
-	 * 
-	 * @exception LDAPException if the connection is already disconnected
-	 */
-	private final LDAPv3 getDelegate(
-	) throws LDAPException {
-	    if(!isConnected()) throw new LDAPException(
-			"Already disconnected", 
-			LDAPException.CONNECT_ERROR
-		);
-    	return this.delegate;
-    }
-
-    @Override
-    public void abandon(LDAPSearchResults arg0) throws LDAPException {
-		this.getDelegate().abandon(arg0);
-	}
-
-  	@Override
-	public void add(LDAPEntry arg0, LDAPConstraints arg1) throws LDAPException {
-		this.getDelegate().add(arg0, arg1);
-	}
-
-  	@Override
-	public void add(LDAPEntry arg0) throws LDAPException {
-		this.getDelegate().add(arg0);
-	}
-
-  	@Override
-	public void authenticate(int version, String distinguishedName, String password)
-			throws LDAPException {
-        throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
-	}
-
-  	@Override
-	public void authenticate(String distinguishedName, String passsword) throws LDAPException {
-        throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
-	}
-
-  	@Override
-	public void bind(int arg0, String arg1, String arg2) throws LDAPException {
-        throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
-	}
-
-  	@Override
-	public void bind(String arg0, String arg1) throws LDAPException {
-        throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
-	}
-
-  	@Override
-	public boolean compare(String arg0, LDAPAttribute arg1, LDAPConstraints arg2)
-			throws LDAPException {
-		return this.getDelegate().compare(arg0, arg1, arg2);
-	}
-
-  	@Override
-	public boolean compare(String arg0, LDAPAttribute arg1)
-			throws LDAPException {
-		return this.getDelegate().compare(arg0, arg1);
-	}
-
-  	@Override
-	public void connect(int arg0, String arg1, int arg2, String arg3,
-			String arg4) throws LDAPException {
-        throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
-	}
-
-  	@Override
-	public void connect(String arg0, int arg1, String arg2, String arg3)
-			throws LDAPException {
-        throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
-	}
-
-  	@Override
-	public void connect(String arg0, int arg1) throws LDAPException {
-        throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
-	}
-
-  	@Override
-	public void delete(String arg0, LDAPConstraints arg1) throws LDAPException {
-		this.getDelegate().delete(arg0, arg1);
-	}
-
-  	@Override
-	public void delete(String arg0) throws LDAPException {
-		this.getDelegate().delete(arg0);
-	}
-
-  	@Override
-	public void disconnect() throws LDAPException {
-  	    if(isConnected()) {
-  	        this.delegate.disconnect();
-  	        this.delegate = null;
-  	        dissociateManagedConnection();
-  	    }
-	}
-
-  	@Override
-	public LDAPExtendedOperation extendedOperation(LDAPExtendedOperation arg0)
-			throws LDAPException {
-		return this.getDelegate().extendedOperation(arg0);
-	}
-
-  	@Override
-	public Object getOption(int arg0) throws LDAPException {
-		return this.getDelegate().getOption(arg0);
-	}
-
-  	@Override
-	public LDAPControl[] getResponseControls() {
-		try {
-	        return this.getDelegate().getResponseControls();
-        } catch (LDAPException e) {
-        	throw new IllegalStateException(e);
+    public void close() throws IOException{
+        if(isOpen()) {
+          try {
+            this.ldapConnection.unBind();
+            } catch (LdapException e) {
+                throw new IOException("Unable to unbind", e);
+            } finally {
+              this.ldapConnection = null;  
+              dissociateManagedConnection();
+            }
         }
-	}
+    }
+    
+    protected boolean isOpen() {
+        return this.ldapConnection != null;
+    }
+    
+    private LdapConnection getDelegate() throws LdapException {
+        if(!isOpen()) throw new InvalidConnectionException("The connection is alreday closed");
+        return this.ldapConnection;
+    }
 
-  	@Override
-	public void modify(String arg0, LDAPModification arg1, LDAPConstraints arg2)
-			throws LDAPException {
-		this.getDelegate().modify(arg0, arg1, arg2);
-	}
+    
+    //------------------------------------------------------------------------
+    // Extends LdapConnectionWrapper
+    //------------------------------------------------------------------------
 
-  	@Override
-	public void modify(String arg0, LDAPModification arg1) throws LDAPException {
-		this.getDelegate().modify(arg0, arg1);
-	}
+    /* (non-Javadoc)
+     * @see org.apache.directory.ldap.client.api.LdapConnectionWrapper#bind()
+     */
+    @Override
+    public void bind(
+    ) throws LdapException {
+        throw new LdapAuthenticationNotSupportedException(ResultCodeEnum.AUTH_METHOD_NOT_SUPPORTED, AUTHENTICATION_NOT_SUPPORTED);
+    }
 
-  	@Override
-	public void modify(String arg0, LDAPModificationSet arg1,
-			LDAPConstraints arg2) throws LDAPException {
-		this.getDelegate().modify(arg0, arg1, arg2);
-	}
 
-  	@Override
-	public void modify(String arg0, LDAPModificationSet arg1)
-			throws LDAPException {
-		this.getDelegate().modify(arg0, arg1);
-	}
+    /* (non-Javadoc)
+     * @see org.apache.directory.ldap.client.api.LdapConnectionWrapper#anonymousBind()
+     */
+    @Override
+    public void anonymousBind(
+    ) throws LdapException {
+        throw new LdapAuthenticationNotSupportedException(ResultCodeEnum.AUTH_METHOD_NOT_SUPPORTED, AUTHENTICATION_NOT_SUPPORTED);
+    }
 
-  	@Override
-	public LDAPEntry read(String arg0, String[] arg1, LDAPSearchConstraints arg2)
-			throws LDAPException {
-		return this.getDelegate().read(arg0, arg1, arg2);
-	}
 
-  	@Override
-	public LDAPEntry read(String arg0, String[] arg1) throws LDAPException {
-		return this.getDelegate().read(arg0, arg1);
-	}
+    /* (non-Javadoc)
+     * @see org.apache.directory.ldap.client.api.LdapConnectionWrapper#bind(java.lang.String)
+     */
+    @Override
+    public void bind(
+        String name
+    ) throws LdapException {
+        throw new LdapAuthenticationNotSupportedException(ResultCodeEnum.AUTH_METHOD_NOT_SUPPORTED, AUTHENTICATION_NOT_SUPPORTED);
+    }
 
-  	@Override
-	public LDAPEntry read(String arg0) throws LDAPException {
-		return this.getDelegate().read(arg0);
-	}
 
-  	@Override
-	public void rename(String arg0, String arg1, boolean arg2,
-			LDAPConstraints arg3) throws LDAPException {
-		this.getDelegate().rename(arg0, arg1, arg2, arg3);
-	}
+    /* (non-Javadoc)
+     * @see org.apache.directory.ldap.client.api.LdapConnectionWrapper#bind(java.lang.String, java.lang.String)
+     */
+    @Override
+    public void bind(
+        String name,
+        String credentials
+    ) throws LdapException {
+        throw new LdapAuthenticationNotSupportedException(ResultCodeEnum.AUTH_METHOD_NOT_SUPPORTED, AUTHENTICATION_NOT_SUPPORTED);
+    }
 
-  	@Override
-	public void rename(String arg0, String arg1, boolean arg2)
-			throws LDAPException {
-		this.getDelegate().rename(arg0, arg1, arg2);
-	}
 
-  	@Override
-	public void rename(String arg0, String arg1, String arg2, boolean arg3,
-			LDAPConstraints arg4) throws LDAPException {
-		this.getDelegate().rename(arg0, arg1, arg2, arg3, arg4);
-	}
+    /* (non-Javadoc)
+     * @see org.apache.directory.ldap.client.api.LdapConnectionWrapper#bind(org.apache.directory.api.ldap.model.name.Dn)
+     */
+    @Override
+    public void bind(
+        Dn name
+    ) throws LdapException {
+        throw new LdapAuthenticationNotSupportedException(ResultCodeEnum.AUTH_METHOD_NOT_SUPPORTED, AUTHENTICATION_NOT_SUPPORTED);
+    }
 
-  	@Override
-	public void rename(String arg0, String arg1, String arg2, boolean arg3)
-			throws LDAPException {
-		this.getDelegate().rename(arg0, arg1, arg2, arg3);
-	}
 
-  	@Override
-	public LDAPSearchResults search(String arg0, int arg1, String arg2,
-			String[] arg3, boolean arg4, LDAPSearchConstraints arg5)
-			throws LDAPException {
-		return this.getDelegate().search(arg0, arg1, arg2, arg3, arg4, arg5);
-	}
+    /* (non-Javadoc)
+     * @see org.apache.directory.ldap.client.api.LdapConnectionWrapper#bind(org.apache.directory.api.ldap.model.name.Dn, java.lang.String)
+     */
+    @Override
+    public void bind(
+        Dn name,
+        String credentials
+    ) throws LdapException {
+        throw new LdapAuthenticationNotSupportedException(ResultCodeEnum.AUTH_METHOD_NOT_SUPPORTED, AUTHENTICATION_NOT_SUPPORTED);
+    }
 
-  	@Override
-	public LDAPSearchResults search(String arg0, int arg1, String arg2,
-			String[] arg3, boolean arg4) throws LDAPException {
-		return this.getDelegate().search(arg0, arg1, arg2, arg3, arg4);
-	}
 
-  	@Override
-	public void setOption(int arg0, Object arg1) throws LDAPException {
-		this.getDelegate().setOption(arg0, arg1);
-	}
+    /* (non-Javadoc)
+     * @see org.apache.directory.ldap.client.api.LdapConnectionWrapper#bind(org.apache.directory.api.ldap.model.message.BindRequest)
+     */
+    @Override
+    public BindResponse bind(
+        BindRequest bindRequest
+    ) throws LdapException {
+        throw new LdapAuthenticationNotSupportedException(ResultCodeEnum.AUTH_METHOD_NOT_SUPPORTED, AUTHENTICATION_NOT_SUPPORTED);
+    }
 
+
+    /* (non-Javadoc)
+     * @see org.apache.directory.ldap.client.api.LdapConnectionWrapper#bind(org.apache.directory.ldap.client.api.SaslRequest)
+     */
+    @Override
+    public BindResponse bind(
+        SaslRequest saslRequest
+    ) throws LdapException {
+        throw new LdapAuthenticationNotSupportedException(ResultCodeEnum.AUTH_METHOD_NOT_SUPPORTED, AUTHENTICATION_NOT_SUPPORTED);
+    }
+
+
+    /* (non-Javadoc)
+     * @see org.apache.directory.ldap.client.api.LdapConnectionWrapper#unBind()
+     */
+    @Override
+    public void unBind(
+    ) throws LdapException {
+        throw new LdapAuthenticationNotSupportedException(ResultCodeEnum.AUTH_METHOD_NOT_SUPPORTED, AUTHENTICATION_NOT_SUPPORTED);
+    }
+
+    /**
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnection#isConnected()
+     */
+    public boolean isConnected(
+    ) {
+        return isOpen() && ldapConnection.isConnected();
+    }
+
+    /**
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnection#isAuthenticated()
+     */
+    public boolean isAuthenticated(
+    ) {
+        return isOpen() && ldapConnection.isAuthenticated();
+    }
+
+    /**
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#connect()
+     */
+    public boolean connect(
+    ) throws LdapException {
+        return getDelegate().connect();
+    }
+
+    /**
+     * @param entry
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#add(org.apache.directory.api.ldap.model.entry.Entry)
+     */
+    public void add(
+        Entry entry
+    ) throws LdapException {
+        getDelegate().add(entry);
+    }
+
+    /**
+     * @param addRequest
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#add(org.apache.directory.api.ldap.model.message.AddRequest)
+     */
+    public AddResponse add(
+        AddRequest addRequest
+    ) throws LdapException {
+        return getDelegate().add(addRequest);
+    }
+
+    /**
+     * @param messageId
+     * @see org.apache.directory.ldap.client.api.LdapConnection#abandon(int)
+     */
+    public void abandon(
+        int messageId
+    ) {
+        try {
+            getDelegate().abandon(messageId);
+        } catch (LdapException e) {
+            throw new LdapRuntimeException(e);
+        }
+    }
+
+    /**
+     * @param abandonRequest
+     * @see org.apache.directory.ldap.client.api.LdapConnection#abandon(org.apache.directory.api.ldap.model.message.AbandonRequest)
+     */
+    public void abandon(
+        AbandonRequest abandonRequest
+    ) {
+        try {
+            getDelegate().abandon(abandonRequest);
+        } catch (LdapException e) {
+            throw new LdapRuntimeException(e);
+        }
+    }
+
+    /**
+     * @param baseDn
+     * @param filter
+     * @param scope
+     * @param attributes
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#search(org.apache.directory.api.ldap.model.name.Dn, java.lang.String, org.apache.directory.api.ldap.model.message.SearchScope, java.lang.String[])
+     */
+    public EntryCursor search(
+        Dn baseDn,
+        String filter,
+        SearchScope scope,
+        String... attributes
+    ) throws LdapException {
+        return getDelegate().search(baseDn, filter, scope, attributes);
+    }
+
+    /**
+     * @param baseDn
+     * @param filter
+     * @param scope
+     * @param attributes
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#search(java.lang.String, java.lang.String, org.apache.directory.api.ldap.model.message.SearchScope, java.lang.String[])
+     */
+    public EntryCursor search(
+        String baseDn,
+        String filter,
+        SearchScope scope,
+        String... attributes
+    ) throws LdapException {
+        return getDelegate().search(baseDn, filter, scope, attributes);
+    }
+
+    /**
+     * @param searchRequest
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#search(org.apache.directory.api.ldap.model.message.SearchRequest)
+     */
+    public SearchCursor search(
+        SearchRequest searchRequest
+    ) throws LdapException {
+        return getDelegate().search(searchRequest);
+    }
+
+    /**
+     * @param timeOut
+     * @see org.apache.directory.ldap.client.api.LdapConnection#setTimeOut(long)
+     */
+    public void setTimeOut(
+        long timeOut
+    ) {
+        try {
+            getDelegate().setTimeOut(timeOut);
+        } catch (LdapException e) {
+            throw new LdapRuntimeException(e);
+        }
+    }
+
+    /**
+     * @param dn
+     * @param modifications
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#modify(org.apache.directory.api.ldap.model.name.Dn, org.apache.directory.api.ldap.model.entry.Modification[])
+     */
+    public void modify(
+        Dn dn,
+        Modification... modifications
+    ) throws LdapException {
+        getDelegate().modify(dn, modifications);
+    }
+
+    /**
+     * @param dn
+     * @param modifications
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#modify(java.lang.String, org.apache.directory.api.ldap.model.entry.Modification[])
+     */
+    public void modify(
+        String dn,
+        Modification... modifications
+    ) throws LdapException {
+        getDelegate().modify(dn, modifications);
+    }
+
+    /**
+     * @param entry
+     * @param modOp
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#modify(org.apache.directory.api.ldap.model.entry.Entry, org.apache.directory.api.ldap.model.entry.ModificationOperation)
+     */
+    public void modify(
+        Entry entry,
+        ModificationOperation modOp
+    ) throws LdapException {
+        getDelegate().modify(entry, modOp);
+    }
+
+    /**
+     * @param modRequest
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#modify(org.apache.directory.api.ldap.model.message.ModifyRequest)
+     */
+    public ModifyResponse modify(
+        ModifyRequest modRequest
+    ) throws LdapException {
+        return getDelegate().modify(modRequest);
+    }
+
+    /**
+     * @param entryDn
+     * @param newRdn
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#rename(java.lang.String, java.lang.String)
+     */
+    public void rename(
+        String entryDn,
+        String newRdn
+    ) throws LdapException {
+        getDelegate().rename(entryDn, newRdn);
+    }
+
+    /**
+     * @param entryDn
+     * @param newRdn
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#rename(org.apache.directory.api.ldap.model.name.Dn, org.apache.directory.api.ldap.model.name.Rdn)
+     */
+    public void rename(
+        Dn entryDn,
+        Rdn newRdn
+    ) throws LdapException {
+        getDelegate().rename(entryDn, newRdn);
+    }
+
+    /**
+     * @param entryDn
+     * @param newRdn
+     * @param deleteOldRdn
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#rename(java.lang.String, java.lang.String, boolean)
+     */
+    public void rename(
+        String entryDn,
+        String newRdn,
+        boolean deleteOldRdn
+    ) throws LdapException {
+        getDelegate().rename(entryDn, newRdn, deleteOldRdn);
+    }
+
+    /**
+     * @param entryDn
+     * @param newRdn
+     * @param deleteOldRdn
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#rename(org.apache.directory.api.ldap.model.name.Dn, org.apache.directory.api.ldap.model.name.Rdn, boolean)
+     */
+    public void rename(
+        Dn entryDn,
+        Rdn newRdn,
+        boolean deleteOldRdn
+    ) throws LdapException {
+        getDelegate().rename(entryDn, newRdn, deleteOldRdn);
+    }
+
+    /**
+     * @param entryDn
+     * @param newSuperiorDn
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#move(java.lang.String, java.lang.String)
+     */
+    public void move(
+        String entryDn,
+        String newSuperiorDn
+    ) throws LdapException {
+        getDelegate().move(entryDn, newSuperiorDn);
+    }
+
+    /**
+     * @param entryDn
+     * @param newSuperiorDn
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#move(org.apache.directory.api.ldap.model.name.Dn, org.apache.directory.api.ldap.model.name.Dn)
+     */
+    public void move(
+        Dn entryDn,
+        Dn newSuperiorDn
+    ) throws LdapException {
+        getDelegate().move(entryDn, newSuperiorDn);
+    }
+
+    /**
+     * @param entryDn
+     * @param newDn
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#moveAndRename(org.apache.directory.api.ldap.model.name.Dn, org.apache.directory.api.ldap.model.name.Dn)
+     */
+    public void moveAndRename(
+        Dn entryDn,
+        Dn newDn
+    ) throws LdapException {
+        getDelegate().moveAndRename(entryDn, newDn);
+    }
+
+    /**
+     * @param entryDn
+     * @param newDn
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#moveAndRename(java.lang.String, java.lang.String)
+     */
+    public void moveAndRename(
+        String entryDn,
+        String newDn
+    ) throws LdapException {
+        getDelegate().moveAndRename(entryDn, newDn);
+    }
+
+    /**
+     * @param entryDn
+     * @param newDn
+     * @param deleteOldRdn
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#moveAndRename(org.apache.directory.api.ldap.model.name.Dn, org.apache.directory.api.ldap.model.name.Dn, boolean)
+     */
+    public void moveAndRename(
+        Dn entryDn,
+        Dn newDn,
+        boolean deleteOldRdn
+    ) throws LdapException {
+        getDelegate().moveAndRename(entryDn, newDn, deleteOldRdn);
+    }
+
+    /**
+     * @param entryDn
+     * @param newDn
+     * @param deleteOldRdn
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#moveAndRename(java.lang.String, java.lang.String, boolean)
+     */
+    public void moveAndRename(
+        String entryDn,
+        String newDn,
+        boolean deleteOldRdn
+    ) throws LdapException {
+        getDelegate().moveAndRename(entryDn, newDn, deleteOldRdn);
+    }
+
+    /**
+     * @param modDnRequest
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#modifyDn(org.apache.directory.api.ldap.model.message.ModifyDnRequest)
+     */
+    public ModifyDnResponse modifyDn(
+        ModifyDnRequest modDnRequest
+    ) throws LdapException {
+        return getDelegate().modifyDn(modDnRequest);
+    }
+
+    /**
+     * @param dn
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#delete(java.lang.String)
+     */
+    public void delete(
+        String dn
+    ) throws LdapException {
+        getDelegate().delete(dn);
+    }
+
+    /**
+     * @param dn
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#delete(org.apache.directory.api.ldap.model.name.Dn)
+     */
+    public void delete(
+        Dn dn
+    ) throws LdapException {
+        getDelegate().delete(dn);
+    }
+
+    /**
+     * @param deleteRequest
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#delete(org.apache.directory.api.ldap.model.message.DeleteRequest)
+     */
+    public DeleteResponse delete(
+        DeleteRequest deleteRequest
+    ) throws LdapException {
+        return getDelegate().delete(deleteRequest);
+    }
+
+    /**
+     * @param dn
+     * @param attributeName
+     * @param value
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#compare(java.lang.String, java.lang.String, java.lang.String)
+     */
+    public boolean compare(
+        String dn,
+        String attributeName,
+        String value
+    ) throws LdapException {
+        return getDelegate().compare(dn, attributeName, value);
+    }
+
+    /**
+     * @param dn
+     * @param attributeName
+     * @param value
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#compare(java.lang.String, java.lang.String, byte[])
+     */
+    public boolean compare(
+        String dn,
+        String attributeName,
+        byte[] value
+    ) throws LdapException {
+        return getDelegate().compare(dn, attributeName, value);
+    }
+
+    /**
+     * @param dn
+     * @param attributeName
+     * @param value
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#compare(java.lang.String, java.lang.String, org.apache.directory.api.ldap.model.entry.Value)
+     */
+    public boolean compare(
+        String dn,
+        String attributeName,
+        Value value
+    ) throws LdapException {
+        return getDelegate().compare(dn, attributeName, value);
+    }
+
+    /**
+     * @param dn
+     * @param attributeName
+     * @param value
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#compare(org.apache.directory.api.ldap.model.name.Dn, java.lang.String, java.lang.String)
+     */
+    public boolean compare(
+        Dn dn,
+        String attributeName,
+        String value
+    ) throws LdapException {
+        return getDelegate().compare(dn, attributeName, value);
+    }
+
+    /**
+     * @param dn
+     * @param attributeName
+     * @param value
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#compare(org.apache.directory.api.ldap.model.name.Dn, java.lang.String, byte[])
+     */
+    public boolean compare(
+        Dn dn,
+        String attributeName,
+        byte[] value
+    ) throws LdapException {
+        return getDelegate().compare(dn, attributeName, value);
+    }
+
+    /**
+     * @param dn
+     * @param attributeName
+     * @param value
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#compare(org.apache.directory.api.ldap.model.name.Dn, java.lang.String, org.apache.directory.api.ldap.model.entry.Value)
+     */
+    public boolean compare(
+        Dn dn,
+        String attributeName,
+        Value value
+    ) throws LdapException {
+        return getDelegate().compare(dn, attributeName, value);
+    }
+
+    /**
+     * @param compareRequest
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#compare(org.apache.directory.api.ldap.model.message.CompareRequest)
+     */
+    public CompareResponse compare(
+        CompareRequest compareRequest
+    ) throws LdapException {
+        return getDelegate().compare(compareRequest);
+    }
+
+    /**
+     * @param oid
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#extended(java.lang.String)
+     */
+    public ExtendedResponse extended(
+        String oid
+    ) throws LdapException {
+        return getDelegate().extended(oid);
+    }
+
+    /**
+     * @param oid
+     * @param value
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#extended(java.lang.String, byte[])
+     */
+    public ExtendedResponse extended(
+        String oid,
+        byte[] value
+    ) throws LdapException {
+        return getDelegate().extended(oid, value);
+    }
+
+    /**
+     * @param oid
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#extended(org.apache.directory.api.asn1.util.Oid)
+     */
+    public ExtendedResponse extended(
+        Oid oid
+    ) throws LdapException {
+        return getDelegate().extended(oid);
+    }
+
+    /**
+     * @param oid
+     * @param value
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#extended(org.apache.directory.api.asn1.util.Oid, byte[])
+     */
+    public ExtendedResponse extended(
+        Oid oid,
+        byte[] value
+    ) throws LdapException {
+        return getDelegate().extended(oid, value);
+    }
+
+    /**
+     * @param extendedRequest
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#extended(org.apache.directory.api.ldap.model.message.ExtendedRequest)
+     */
+    public ExtendedResponse extended(
+        ExtendedRequest extendedRequest
+    ) throws LdapException {
+        return getDelegate().extended(extendedRequest);
+    }
+
+    /**
+     * @param dn
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#exists(java.lang.String)
+     */
+    public boolean exists(
+        String dn
+    ) throws LdapException {
+        return getDelegate().exists(dn);
+    }
+
+    /**
+     * @param dn
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#exists(org.apache.directory.api.ldap.model.name.Dn)
+     */
+    public boolean exists(
+        Dn dn
+    ) throws LdapException {
+        return getDelegate().exists(dn);
+    }
+
+    /**
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#getRootDse()
+     */
+    public Entry getRootDse(
+    ) throws LdapException {
+        return getDelegate().getRootDse();
+    }
+
+    /**
+     * @param attributes
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#getRootDse(java.lang.String[])
+     */
+    public Entry getRootDse(
+        String... attributes
+    ) throws LdapException {
+        return getDelegate().getRootDse(attributes);
+    }
+
+    /**
+     * @param dn
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#lookup(org.apache.directory.api.ldap.model.name.Dn)
+     */
+    public Entry lookup(
+        Dn dn
+    ) throws LdapException {
+        return getDelegate().lookup(dn);
+    }
+
+    /**
+     * @param dn
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#lookup(java.lang.String)
+     */
+    public Entry lookup(
+        String dn
+    ) throws LdapException {
+        return getDelegate().lookup(dn);
+    }
+
+    /**
+     * @param dn
+     * @param attributes
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#lookup(org.apache.directory.api.ldap.model.name.Dn, java.lang.String[])
+     */
+    public Entry lookup(
+        Dn dn,
+        String... attributes
+    ) throws LdapException {
+        return getDelegate().lookup(dn, attributes);
+    }
+
+    /**
+     * @param dn
+     * @param controls
+     * @param attributes
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#lookup(org.apache.directory.api.ldap.model.name.Dn, org.apache.directory.api.ldap.model.message.Control[], java.lang.String[])
+     */
+    public Entry lookup(
+        Dn dn,
+        Control[] controls,
+        String... attributes
+    ) throws LdapException {
+        return getDelegate().lookup(dn, controls, attributes);
+    }
+
+    /**
+     * @param dn
+     * @param attributes
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#lookup(java.lang.String, java.lang.String[])
+     */
+    public Entry lookup(
+        String dn,
+        String... attributes
+    ) throws LdapException {
+        return getDelegate().lookup(dn, attributes);
+    }
+
+    /**
+     * @param dn
+     * @param controls
+     * @param attributes
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#lookup(java.lang.String, org.apache.directory.api.ldap.model.message.Control[], java.lang.String[])
+     */
+    public Entry lookup(
+        String dn,
+        Control[] controls,
+        String... attributes
+    ) throws LdapException {
+        return getDelegate().lookup(dn, controls, attributes);
+    }
+
+    /**
+     * @param controlOID
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#isControlSupported(java.lang.String)
+     */
+    public boolean isControlSupported(
+        String controlOID
+    ) throws LdapException {
+        return getDelegate().isControlSupported(controlOID);
+    }
+
+    /**
+     * @return
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#getSupportedControls()
+     */
+    public List<String> getSupportedControls(
+    ) throws LdapException {
+        return getDelegate().getSupportedControls();
+    }
+
+    /**
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#loadSchema()
+     */
+    public void loadSchema(
+    ) throws LdapException {
+        getDelegate().loadSchema();
+    }
+
+    /**
+     * @throws LdapException
+     * @see org.apache.directory.ldap.client.api.LdapConnection#loadSchemaRelaxed()
+     */
+    public void loadSchemaRelaxed(
+    ) throws LdapException {
+        getDelegate().loadSchemaRelaxed();
+    }
+
+    /**
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnection#getSchemaManager()
+     */
+    public SchemaManager getSchemaManager(
+    ) {
+        try {
+            return getDelegate().getSchemaManager();
+        } catch (LdapException e) {
+            throw new LdapRuntimeException(e);
+        }
+    }
+
+    /**
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnection#getCodecService()
+     */
+    public LdapApiService getCodecService(
+    ) {
+        try {
+            return getDelegate().getCodecService();
+        } catch (LdapException e) {
+            throw new LdapRuntimeException(e);
+        }
+    }
+
+    /**
+     * @param messageId
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnection#isRequestCompleted(int)
+     */
+    public boolean isRequestCompleted(
+        int messageId
+    ) {
+        try {
+            return getDelegate().isRequestCompleted(messageId);
+        } catch (LdapException e) {
+            throw new LdapRuntimeException(e);
+        }
+    }
+
+    /**
+     * @param messageId
+     * @return
+     * @deprecated
+     * @see org.apache.directory.ldap.client.api.LdapConnection#doesFutureExistFor(int)
+     */
+    public boolean doesFutureExistFor(
+        int messageId
+    ) {
+        try {
+            return getDelegate().doesFutureExistFor(messageId);
+        } catch (LdapException e) {
+            throw new LdapRuntimeException(e);
+        }
+    }
+
+    /**
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnection#getBinaryAttributeDetector()
+     */
+    public BinaryAttributeDetector getBinaryAttributeDetector(
+    ) {
+        try {
+            return getDelegate().getBinaryAttributeDetector();
+        } catch (LdapException e) {
+            throw new LdapRuntimeException(e);
+        }
+    }
+
+    /**
+     * @param binaryAttributeDetecter
+     * @see org.apache.directory.ldap.client.api.LdapConnection#setBinaryAttributeDetector(org.apache.directory.api.ldap.codec.api.BinaryAttributeDetector)
+     */
+    public void setBinaryAttributeDetector(
+        BinaryAttributeDetector binaryAttributeDetecter
+    ) {
+        try {
+            getDelegate().setBinaryAttributeDetector(binaryAttributeDetecter);
+        } catch (LdapException e) {
+            throw new LdapRuntimeException(e);
+        }
+    }
+
+    /**
+     * @param schemaManager
+     * @see org.apache.directory.ldap.client.api.LdapConnection#setSchemaManager(org.apache.directory.api.ldap.model.schema.SchemaManager)
+     */
+    public void setSchemaManager(
+        SchemaManager schemaManager
+    ) {
+        try {
+            getDelegate().setSchemaManager(schemaManager);
+        } catch (LdapException e) {
+            throw new LdapRuntimeException(e);
+        }
+    }
+    
 }

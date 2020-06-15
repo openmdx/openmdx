@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE connector 
+	PUBLIC "-//Sun Microsystems, Inc.//DTD Connector 1.0//EN" 
+	"http://java.sun.com/dtd/connector_1_0.dtd"
+>
+<connector>
+	<display-name>LDAP Provider</display-name>
+	<description>openMDX/Security openLDAP Test</description>
+	<vendor-name>OMEX AG</vendor-name>
+	<spec-version>1.0</spec-version>
+	<eis-type>LDAP</eis-type>
+	<version>3.0</version>
+	<resourceadapter>
+		<managedconnectionfactory-class>org.openmdx.resource.ldap.v3.ManagedConnectionFactory</managedconnectionfactory-class>
+		<connectionfactory-interface>org.openmdx.resource.cci.ConnectionFactory</connectionfactory-interface>
+		<connectionfactory-impl-class>org.openmdx.resource.ldap.spi.ConnectionFactory</connectionfactory-impl-class>
+		<connection-interface>netscape.ldap.LDAPv3</connection-interface>
+		<connection-impl-class>org.openmdx.resource.ldap.v3.Connection</connection-impl-class>
+		<transaction-support>NoTransaction</transaction-support>
+		<config-property>
+			<description>
+				This property accepts values such as
+				  "directory.knowledge.com"
+				  "199.254.1.2"
+				  "directory.knowledge.com:1050 people.catalog.com 199.254.1.2"
+		  </description>
+			<config-property-name>ConnectionURL</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>sec.cs.kent.ac.uk:389</config-property-value>
+		</config-property>
+		<config-property>
+			<description>
+				The LDAP Protocol Version to be used
+		  	</description>
+			<config-property-name>ProtocolVersion</config-property-name>
+			<config-property-type>java.lang.Integer</config-property-type>
+			<config-property-value>3</config-property-value>
+		</config-property>
+		<!-- UserName/Password intended for LightweightContainer usage only 
+			<config-property>
+			  <description>
+			    This property accepts a distinguished name such as
+			  	"cn=Barbara Jensen,ou=Product Development,o=Ace Industry,c=us"
+			  </description>
+				<config-property-name>UserName</config-property-name>
+				<config-property-type>java.lang.String</config-property-type>
+				<config-property-value>cn=Barbara Jensen,ou=Product Development,o=Ace Industry,c=us</config-property-value>
+			</config-property>
+			<config-property>
+				<config-property-name>Password</config-property-name>
+				<config-property-type>java.lang.String</config-property-type>
+				<config-property-value>guess!</config-property-value>
+			</config-property>
+		-->
+		<authentication-mechanism>
+			<authentication-mechanism-type>BasicPassword</authentication-mechanism-type>
+			<credential-interface>javax.resource.spi.security.PasswordCredential</credential-interface>
+		</authentication-mechanism>
+		<reauthentication-support>false</reauthentication-support>
+	</resourceadapter>
+</connector>

@@ -83,11 +83,10 @@ public class EppTask extends Task {
         }
     }
     private void preprocess() throws IOException {
-        BufferedReader br = null;
-        BufferedWriter bw = null;
-        try {
-            br = new BufferedReader(new FileReader(srcfile));
-            bw = new BufferedWriter(new FileWriter(destfile));
+        try (
+            final BufferedReader br = new BufferedReader(new FileReader(srcfile));
+            final BufferedWriter bw = new BufferedWriter(new FileWriter(destfile))
+        ){
             Set set = new HashSet(Arrays.asList(defs.replaceAll("\\s+", "").split(",")));
             Pattern pattern = Pattern.compile("^\\s*#(" + IFDEF + "|" + IFNDEF + "|" +
                     ELSE + "|" + ENDIF + "|" + INCLUDE  + ")\\s*(\\S*)\\s*$");
@@ -141,28 +140,20 @@ public class EppTask extends Task {
                     bw.newLine();
                 }
             }
-        } finally {
-            if (br != null) {
-                br.close();
-            }
-            if (bw != null) {
-                bw.close();
-            }
         }
     }
-    private void include(String file, BufferedWriter bw) throws IOException {
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(new File(incdir, file)));
+    
+    private void include(
+        final String file, 
+        final BufferedWriter bw
+    ) throws IOException {
+        try (final BufferedReader br = new BufferedReader(new FileReader(new File(incdir, file)))){
             String line;
             while ((line = br.readLine()) != null) {
                 bw.write(line);
                 bw.newLine();
             }
-        } finally {
-            if (br != null) {
-                br.close();
-            }
         }
     }
+    
 }

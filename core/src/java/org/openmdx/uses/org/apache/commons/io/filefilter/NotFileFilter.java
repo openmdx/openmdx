@@ -31,7 +31,7 @@ import java.io.Serializable;
 /**
  * This filter produces a logical NOT of the filters specified.
  *
- * @since 1.0
+ * @since Commons I/O 1.0
  * @version $Id: NotFileFilter.java 1642757 2014-12-01 21:09:30Z sebb $
  * @see FileFilterUtils#notFileFilter(IOFileFilter)
  */

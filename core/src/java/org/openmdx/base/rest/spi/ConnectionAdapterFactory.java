@@ -62,7 +62,7 @@ public interface ConnectionAdapterFactory {
      * Create a connection adapter 
      */
     RestConnection newConnectionAdapter(
-        ConnectionFactoryAdapter connectionFactory, 
+        RestConnectionFactory connectionFactory, 
         RestConnectionSpec connectionSpec
     ) throws ResourceException;
 

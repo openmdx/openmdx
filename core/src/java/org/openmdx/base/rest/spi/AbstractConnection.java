@@ -49,6 +49,7 @@ package org.openmdx.base.rest.spi;
 
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
+import org.openmdx.base.resource.cci.ConnectionFactory;
 import javax.resource.cci.ResultSetInfo;
 import javax.resource.spi.IllegalStateException;
 
@@ -65,104 +66,107 @@ import org.openmdx.kernel.exception.BasicException;
 public abstract class AbstractConnection implements RestConnection {
 
     /**
-     * Constructor 
+     * Constructor
      * 
-     * @param connectionSpec 
+     * @param connectionFactory
+     *            the connection's factory
+     * @param connectionSpec
+     *            the connection specification
      */
     protected AbstractConnection(
-        final RestConnectionSpec connectionSpec
-    ){
-        this.closed = false;
+        final ConnectionFactory connectionFactory,
+        final RestConnectionSpec connectionSpec) {
+        this.connectionFactory = connectionFactory;
         this.metaData = new MetaData(connectionSpec);
+        this.closed = false;
     }
+
+    /**
+     * The JCA connection factory
+     */
+    private final ConnectionFactory connectionFactory;
 
     /**
      * The REST connection meta data
      */
     private final MetaData metaData;
-    
+
     /**
-     * Tells whether the 
+     * Tells whether the
      */
     private boolean closed;
-    
 
-    //------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // Implements Connection
-    //------------------------------------------------------------------------
-    
+    // ------------------------------------------------------------------------
+
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#getMetaData()
      */
     @Override
-    public final RestConnectionMetaData getMetaData(
-    ){
+    public final RestConnectionMetaData getMetaData() {
         return this.metaData;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.cci.RestConnection#getConnectionFactory()
+     */
+    @Override
+    public org.openmdx.base.resource.cci.ConnectionFactory getConnectionFactory() {
+        return this.connectionFactory;
     }
 
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#getResultSetInfo()
      */
     @Override
-    public final ResultSetInfo getResultSetInfo(
-    ) throws ResourceException {
-        throw ResourceExceptions.initHolder( 
+    public final ResultSetInfo getResultSetInfo() throws ResourceException {
+        throw ResourceExceptions.initHolder(
             new NotSupportedException(
-                "Result sets are not supported by REST connections",
-                BasicException.newEmbeddedExceptionStack(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED
-                )
-            )
-        );
-    }
+                "Result sets are not supported by REST connections", BasicException.newEmbeddedExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.NOT_SUPPORTED)));
+            }
 
     /**
      * Test whether the connection is open
      * 
-     * @exception IllegalStateException if the connection is closed
+     * @exception IllegalStateException
+     *                if the connection is closed
      */
-    protected void assertOpen(
-    ) throws ResourceException {
-        if(this.closed) {
-            throw ResourceExceptions.initHolder( 
+    protected void assertOpen() throws ResourceException {
+        if (this.closed) {
+            throw ResourceExceptions.initHolder(
                 new IllegalStateException(
-                    "This REST connection is closed",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ILLEGAL_STATE
-                    )
-                )
-            );
-        }
+                    "This REST connection is closed", BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.ILLEGAL_STATE)));
+                }
     }
-    
+
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#close()
      */
     @Override
-    public void close(
-    ) throws ResourceException {
+    public void close() throws ResourceException {
         this.assertOpen();
         this.closed = true;
     }
 
-
-    //------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // Class MetaData
-    //------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     /**
      * REST Connection Meta Data
      */
     static class MetaData implements RestConnectionMetaData {
-        
+
         /**
-         * Constructor 
+         * Constructor
          *
          * @param connectionSpec
          */
-        MetaData(RestConnectionSpec connectionSpec) {
+        MetaData(
+            RestConnectionSpec connectionSpec) {
             this.connectionSpec = connectionSpec;
         }
 
@@ -170,31 +174,28 @@ public abstract class AbstractConnection implements RestConnection {
          * The connection's spec
          */
         final RestConnectionSpec connectionSpec;
-        
+
         /**
          * It's an openMDX connection
          */
         @Override
-        public String getEISProductName(
-        ) throws ResourceException {
+        public String getEISProductName() throws ResourceException {
             return "openMDX/REST";
         }
-    
+
         /**
          * with the given openMDX version
          */
         @Override
-        public String getEISProductVersion(
-        ) throws ResourceException {
+        public String getEISProductVersion() throws ResourceException {
             return Version.getSpecificationVersion();
         }
-    
+
         /**
          * Use the stringified principal chain
          */
         @Override
-        public String getUserName(
-        ) throws ResourceException {
+        public String getUserName() throws ResourceException {
             return this.connectionSpec == null ? null : this.connectionSpec.getUserName();
         }
 
@@ -206,12 +207,11 @@ public abstract class AbstractConnection implements RestConnection {
             return this.connectionSpec != null && this.connectionSpec.isBulkLoad();
         }
 
-		@Override
-		public RestConnectionSpec getConnectionSpec() {
-			return this.connectionSpec;
-		}
-        
+        @Override
+        public RestConnectionSpec getConnectionSpec() {
+            return this.connectionSpec;
+        }
+
     }
 
 }
-

@@ -77,6 +77,7 @@ import org.codehaus.groovy.runtime.InvokerHelper;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.conversion.UUIDConversion;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ViewPort;
@@ -134,10 +135,13 @@ public abstract class Control implements Serializable {
                 } catch(Exception e) {
                     throw new ScriptException("Could not parse script: " + scriptName, e);
                 }
-                this.scriptCache.putIfAbsent(
+                final ScriptCacheEntry currentEntry = this.scriptCache.putIfAbsent(
                     scriptName, 
                     entry
                 );
+                if(currentEntry != null) {
+                	entry = currentEntry;
+                }
             }
             return entry;
         }
@@ -322,7 +326,7 @@ public abstract class Control implements Serializable {
             }
         } catch(Exception e) {
         	SysLog.warning("Script exception", e);
-            new ServiceException(e).log();
+            Throwables.log(e);
         }
     }
   

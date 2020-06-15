@@ -19,8 +19,7 @@ package org.ietf.jgss;
  * their numeric values to textual representations. <p>
  *
  * @author Mayank Upadhyay
- * @version %I%, %G%
- * @since 1.4
+ * @since GSS 1.4
  */
 public class GSSException extends Exception {
 

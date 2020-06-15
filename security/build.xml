@@ -62,6 +62,7 @@
 	<path id="project.lib.classpath">
 		<path refid="openmdx.core.lib" />
 		<path refid="openmdx.core.bin" />
+		<pathelement location="../apache/${build.java.platform}/directory/lib/ldap-api.jar"/>
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="project.lib.classpath" />
@@ -71,7 +72,7 @@
 		<pathelement location="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip" />
 	</path>
 	<patternset id="project.junit.test.case">
-		<include name="org/openmdx/test/**/Test*.java" />
+			<include name="org/openmdx/test/**/Test*.java" />
 	</patternset>
 	<patternset id="openmdx-security.content">
 		<include name="org/openmdx/security/**" />
@@ -198,8 +199,8 @@
 			</openmdx:archivefileset>
 		</openmdx:archive>
         <openmdx:archive
-			destfile="${deliver.dir}/source-archive/openmdx-ldap.java-sources.zip"
-			format="zip"
+			destfile="${deliver.dir}/lib/openmdx-ldap-sources.jar"
+			format="jar"
 		>
 			<openmdx:archivefileset dir="${basedir}/src/java">
 				<patternset refid="openmdx-ldap.content" />
@@ -231,8 +232,8 @@
 			</openmdx:archivefileset>
 		</openmdx:archive>
         <openmdx:archive
-			destfile="${deliver.dir}/source-archive/openmdx-security.java-sources.zip"
-			format="zip"
+			destfile="${deliver.dir}/lib/openmdx-security-sources.jar"
+			format="jar"
 		>
 			<openmdx:archivefileset dir="${basedir}/src/java">
 				<patternset refid="openmdx-security.content" />
@@ -258,7 +259,7 @@
 			</openmdx:archivefileset>
 		</openmdx:archive>
         <openmdx:archive
-			destfile="${deliver.dir}/source-archive/openmdx-resource.java-sources.zip"
+			destfile="${deliver.dir}/lib/openmdx-resource-sources.jar"
 			format="zip"
 		>
 			<openmdx:archivefileset dir="${basedir}/src/java">
@@ -282,8 +283,8 @@
 			</openmdx:archivefileset>
 		</openmdx:archive>
         <openmdx:archive
-			destfile="${deliver.dir}/source-archive/openmdx-radius.java-sources.zip"
-			format="zip"
+			destfile="${deliver.dir}/lib/openmdx-radius-sources.jar"
+			format="jar"
 		>
 			<openmdx:archivefileset dir="${basedir}/src/java">
 				<patternset refid="openmdx-radius.content" />
@@ -303,8 +304,8 @@
 			</openmdx:archivefileset>
 		</openmdx:archive>
         <openmdx:archive
-			destfile="${deliver.dir}/source-archive/openmdx-pki.java-sources.zip"
-			format="zip"
+			destfile="${deliver.dir}/lib/openmdx-pki-sources.jar"
+			format="jar"
 		>
 			<openmdx:archivefileset dir="${basedir}/src/java">
 				<patternset refid="openmdx-pki.content" />
@@ -324,8 +325,8 @@
 			</openmdx:archivefileset>
 		</openmdx:archive>
         <openmdx:archive
-			destfile="${deliver.dir}/source-archive/openmdx-authentication.java-sources.zip"
-			format="zip"
+			destfile="${deliver.dir}/lib/openmdx-authentication-sources.jar"
+			format="jar"
 		>
 			<openmdx:archivefileset dir="${basedir}/src/java">
 				<patternset refid="openmdx-authentication.content" />

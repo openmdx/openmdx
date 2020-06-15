@@ -741,9 +741,10 @@ public class RadiusClient
         byte[] requestAuthenticator, 
         int socketIndex
     ) throws RadiusException{
-        ByteArrayInputStream bais = new ByteArrayInputStream(packet.getData());
-        DataInputStream input = new DataInputStream(bais);
-        try{
+        try (
+            ByteArrayInputStream bais = new ByteArrayInputStream(packet.getData());
+            DataInputStream input = new DataInputStream(bais);
+        ){
             int returnCode = -1;
             /* int packetLength = */ packet.getLength();
             byte code = input.readByte();
@@ -799,31 +800,22 @@ public class RadiusClient
                 int attributeType;
                 int attributeLength;
                 byte[] attributeValue;
-                DataInputStream attributeInput = new DataInputStream(new ByteArrayInputStream(responseAttributeBytes));
-
-                for (int left=0; left < attributesLength; ){
-                    attributeType = (attributeInput.readByte() & 0xff);
-                    attributeLength = attributeInput.readByte() & 0xff;
-                    attributeValue = new byte[attributeLength - 2];
-                    attributeInput.read(attributeValue, 0, attributeLength - 2);
-                    responsePacket.setAttribute(new RadiusAttribute(attributeType, attributeValue));
-                    left += attributeLength;
+                try(DataInputStream attributeInput = new DataInputStream(new ByteArrayInputStream(responseAttributeBytes))){
+                    for (int left=0; left < attributesLength; ){
+                        attributeType = (attributeInput.readByte() & 0xff);
+                        attributeLength = attributeInput.readByte() & 0xff;
+                        attributeValue = new byte[attributeLength - 2];
+                        attributeInput.read(attributeValue, 0, attributeLength - 2);
+                        responsePacket.setAttribute(new RadiusAttribute(attributeType, attributeValue));
+                        left += attributeLength;
+                    }
                 }
-                attributeInput.close();
             }            
             return responsePacket;
         }catch(IOException ioex){
             throw new RadiusException(ioex);
         }catch(InvalidParameterException ipex){
             throw new RadiusException(ipex, "Invalid response attributes sent back from server.");
-        } finally{
-            try{
-                input.close();
-            } catch(
-                IOException ignore
-            ){
-                // Ignore close exception
-            }
         }
     }
     /**
@@ -841,11 +833,10 @@ public class RadiusClient
                                                 byte[] requestAuthenticator,
                                                 byte[] requestAttributes)
     throws RadiusException{
-        ByteArrayOutputStream baos  = new ByteArrayOutputStream();
-        DataOutputStream output     = new DataOutputStream(baos);
-        DatagramPacket packet_out   = null;
-
-        try{
+        try (
+            ByteArrayOutputStream baos  = new ByteArrayOutputStream();
+            DataOutputStream output     = new DataOutputStream(baos);
+        ){
             //1 byte: Code
             output.writeByte(code);
             //1 byte: identifier
@@ -858,17 +849,15 @@ public class RadiusClient
 
             output.write(requestAttributes, 0, requestAttributes.length);
 
-            packet_out = new DatagramPacket(new byte[length], length);
+            final DatagramPacket packet_out = new DatagramPacket(new byte[length], length);
             packet_out.setLength(length);
-
             packet_out.setData(baos.toByteArray());
-            output.close();
-            baos.close();
+            
+            //won't get here in the case of an exception so we won't return return null or a malformed packet
+            return packet_out;
         }catch(IOException ioex){
             throw new RadiusException(ioex);
         }
-        //won't get here in the case of an exception so we won't return return null or a malformed packet
-        return packet_out;
     }
     /**
      * This method sends the outgoing packet and recieves the incoming response

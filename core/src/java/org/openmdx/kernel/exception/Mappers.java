@@ -69,10 +69,8 @@ class Mappers implements BasicException.Mapper {
     Mappers(){
         Properties configuration = new Properties();
         for(URL url : Resources.getMetaInfResources(BasicException.class.getClassLoader(), "openmdx-exception-mapper.properties")) {
-            try {
-                InputStream source = url.openStream();       
+            try (InputStream source = url.openStream()){
                 configuration.load(source);
-                source.close();
             } catch (IOException exception) {
                 SysLog.warning("Exception mapper configuration failure: " + url, exception);
             }

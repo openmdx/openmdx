@@ -141,8 +141,23 @@ public class RestParser {
             try {
                 SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
                 XMLReader reader = parser.getXMLReader();
-                reader.setFeature("http://xml.org/sax/features/namespaces", true);
-                reader.setFeature("http://xml.org/sax/features/validation", false);
+                try {
+                    reader.setFeature("http://xml.org/sax/features/namespaces", true);
+                } catch(SAXException e) {
+                    SysLog.info("Unable to set SAXReader feature", e.getMessage());
+                }
+                try {
+                    reader.setFeature("http://xml.org/sax/features/validation", false);
+                } catch(SAXException e) {
+                    SysLog.info("Unable to set SAXReader feature", e.getMessage());
+                }
+                try {
+                    // Prevent XML eXternal Entity injection (XXE)
+                    // See https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+                    reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+                } catch(SAXException e) {
+                    SysLog.info("Unable to set SAXReader feature", e.getMessage());
+                }
                 return reader;
             } catch (Exception e) {
                 throw new RuntimeServiceException(e);
@@ -179,22 +194,6 @@ public class RestParser {
             }
         }
     };
-    
-    /**
-     * Convert the path info into a resource identifier
-     * 
-     * @param pathInfo
-     * 
-     * @return the XRI corresponding to the path info
-     */
-    public static Path toResourceIdentifier(
-        String pathInfo
-    ){  
-        return new Path(
-            (pathInfo.startsWith("/@openmdx") ? "" : pathInfo.startsWith("/!") ? "xri://@openmdx" : "xri://@openmdx*") + 
-            pathInfo.substring(1)
-        );
-    }
     
     /**
      * Retrieve an XML Reader instance
@@ -253,7 +252,7 @@ public class RestParser {
                     while((c = is.read()) != -1) {
                         s.append((char)c);
                     }
-                    System.out.println(s);
+                    SysLog.detail("Request", s);
                     source.getBody().setCharacterStream(new StringReader(s.toString()));
                 }
             }

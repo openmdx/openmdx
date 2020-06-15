@@ -95,4 +95,10 @@ class RegularExpressionPattern extends AbstractPattern {
         return this.pattern;
     }
 
+    @Override
+    public String toString(
+    ) {
+        return this.compiledExpression.toString();
+    }
+
 }

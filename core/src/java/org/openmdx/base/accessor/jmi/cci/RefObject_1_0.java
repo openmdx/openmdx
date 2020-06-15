@@ -53,7 +53,6 @@ import javax.jmi.reflect.RefObject;
 
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.cci.PersistenceHelper;
 
 /**
  * This interface extends the javax.jmi.reflect.RefObject interface 
@@ -91,19 +90,6 @@ public interface RefObject_1_0 extends RefObject {
    *
    */
   public Set<String> refDefaultFetchGroup(
-  );
-
-  /**
-   * Initializes the object based on the source object. The source object
-   * must be of the same class or a subtype of the target.
-   * 
-   * @param existing existing object.
-   * 
-   * @deprecated use {@link PersistenceHelper#clone(Object, String...)}
-   */
-  @Deprecated
-  public void refInitialize(
-    RefObject source
   );
 
  /**

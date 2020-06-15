@@ -47,6 +47,9 @@
  */
 package test.openmdx.datatypes1.dto;
 
+import java.util.Optional;
+
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.text.spi.Parser;
 
 /**
@@ -67,6 +70,22 @@ public class CodeParser implements Parser {
     @Override
     public boolean handles(Class<?> type) {
         return type != null && Code.class.isAssignableFrom(type);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.kernel.text.spi.Parser#handles(java.lang.String)
+     */
+    @Override
+    public Optional<Class<?>> handles(
+        String className
+    ) {
+        final Class<Object> type;
+        try {
+            type = Classes.getApplicationClass(className);
+        } catch (ClassNotFoundException exception) {
+            return Optional.empty();
+        }
+        return handles(type) ? Optional.of(type) : Optional.empty();
     }
 
     /* (non-Javadoc)

@@ -74,6 +74,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx";
         expectation.iri = URI.create("xri://@openmdx");
         expectation.uri = "@openmdx";
+        expectation.url = "/a/context/url";
         expectation.classicRepresentation = "";
         expectation.legacyUri = "spice:/";
         expectation.legacyXri = "xri:@openmdx";
@@ -81,11 +82,27 @@ public class PathTest {
     }
     
     @Test
-    public void when1ComponentThenConstructAuthorityPath(){
+    public void when1ComponentWithPercentOnlyThenCatchAllPath(){
+        expectation.components = new String[]{"%"};
+        expectation.xri = "xri://@openmdx*($...)";
+        expectation.iri = URI.create("xri://@openmdx*($...)");
+        expectation.uri = "@openmdx*($...)";
+        expectation.url = "/a/context/url/($...)";
+        expectation.classicRepresentation = "%";
+        expectation.legacyUri = "spice://%";
+        expectation.legacyXri = "xri:@openmdx:***";
+        expectation.objectPath = false;
+        expectation.containsWildcarcd = true;
+        arrangeActAndAssertAccordingToExpectation();
+    }
+    
+    @Test
+    public void when1ComponentWithoutWildcardThenConstructAuthorityPath(){
         expectation.components = new String[]{"A"};
         expectation.xri = "xri://@openmdx*A";
         expectation.iri = URI.create("xri://@openmdx*A");
         expectation.uri = "@openmdx*A";
+        expectation.url = "/a/context/url/A";
         expectation.classicRepresentation = "A";
         expectation.legacyUri = "spice://A";
         expectation.legacyXri = "xri:@openmdx:A";
@@ -93,13 +110,14 @@ public class PathTest {
         arrangeActAndAssertAccordingToExpectation();
         
     }
-
+    
     @Test
     public void when1ComponentWithAuthorityWildcardThenConstructAuthorityPattern(){
         expectation.components = new String[]{":*"};
         expectation.xri = "xri://@openmdx*($..)";
         expectation.iri = URI.create("xri://@openmdx*($..)");
         expectation.uri = "@openmdx*($..)";
+        expectation.url = "/a/context/url/($..)";
         expectation.classicRepresentation = "::*";
         expectation.legacyUri = "spice://:*";
         expectation.legacyXri = "xri:@openmdx:**";
@@ -112,9 +130,10 @@ public class PathTest {
     public void whenUUIDThenConstructTransactionalPath(){
         // Arrange
         expectation.components = new String[]{"!($t*uuid*15b1e210-f8c2-11e3-aa50-0133ea275f6a)"};
-        expectation.xri = "xri://@openmdx" + ("!($t*uuid*15b1e210-f8c2-11e3-aa50-0133ea275f6a)");
+        expectation.xri = "xri://@openmdx!($t*uuid*15b1e210-f8c2-11e3-aa50-0133ea275f6a)";
         expectation.iri = URI.create("xri://@openmdx!($t*uuid*15b1e210-f8c2-11e3-aa50-0133ea275f6a)");
         expectation.uri = "@openmdx" + ("!($t*uuid*15b1e210-f8c2-11e3-aa50-0133ea275f6a)");
+        expectation.url = "/a/context/url/!($t*uuid*15b1e210-f8c2-11e3-aa50-0133ea275f6a)";
         expectation.classicRepresentation = "!($t*uuid*15b1e210-f8c2-11e3-aa50-0133ea275f6a)";
         expectation.legacyUri = "spice://" + ("!($t*uuid*15b1e210-f8c2-11e3-aa50-0133ea275f6a)");
         expectation.legacyXri = "xri:@openmdx:" + ("!($t*uuid*15b1e210-f8c2-11e3-aa50-0133ea275f6a)");
@@ -133,11 +152,12 @@ public class PathTest {
         expectation.xri = "xri://@openmdx!($t*uuid*($.))";
         expectation.iri = URI.create("xri://@openmdx!($t*uuid*($.))");
         expectation.uri = "@openmdx!($t*uuid*($.))";
+        expectation.url = "/a/context/url/!($t*uuid*($.))";
         expectation.classicRepresentation = "!($t*uuid*($.))";
         expectation.legacyUri = "spice://!($t*uuid*($.))";
         // expectation.legacyXri = "xri:@openmdx:!($t*uuid*($.))";
         expectation.objectPath = true;
-        expectation.transientObjectId = false; // TODO Should it be true in future?
+        expectation.transientObjectId = false; 
         expectation.containsWildcarcd = true;
         arrangeActAndAssertAccordingToExpectation();
     }
@@ -149,6 +169,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A/provider";
         expectation.iri = URI.create("xri://@openmdx*A/provider");
         expectation.uri = "@openmdx*A/provider";
+        expectation.url = "/a/context/url/A/provider";
         expectation.classicRepresentation = "A/provider";
         expectation.legacyUri = "spice://A/provider";
         expectation.legacyXri = "xri:@openmdx:A/provider";
@@ -161,6 +182,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A/provider/($..)";
         expectation.iri = URI.create("xri://@openmdx*A/provider/($..)");
         expectation.uri = "@openmdx*A/provider/($..)";
+        expectation.url = "/a/context/url/A/provider/($..)";
         expectation.classicRepresentation = "A/provider/::*";
         expectation.legacyUri = "spice://A/provider/:*";
         expectation.legacyXri = "xri:@openmdx:A/provider/**";
@@ -175,6 +197,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A/provider/($..)/segment";
         expectation.iri = URI.create("xri://@openmdx*A/provider/($..)/segment");
         expectation.uri = "@openmdx*A/provider/($..)/segment";
+        expectation.url = "/a/context/url/A/provider/($..)/segment";
         expectation.classicRepresentation = "A/provider/::*/segment";
         expectation.legacyUri = "spice://A/provider/:*/segment";
         expectation.legacyXri = "xri:@openmdx:A/provider/**/segment";
@@ -188,6 +211,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A/provider/($...)";
         expectation.iri = URI.create("xri://@openmdx*A/provider/($...)");
         expectation.uri = "@openmdx*A/provider/($...)";
+        expectation.url = "/a/context/url/A/provider/($...)";
         expectation.classicRepresentation = "A/provider/%";
         expectation.legacyUri = "spice://A/provider/%";
         expectation.legacyXri = "xri:@openmdx:A/provider/***";
@@ -202,6 +226,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A/provider/($.*p)*($..)";
         expectation.iri = URI.create(expectation.xri);
         expectation.uri = "@openmdx*A/provider/($.*p)*($..)";
+        expectation.url = "/a/context/url/A/provider/($.*p)*($..)";
         expectation.classicRepresentation = "A/provider/::p*";
         expectation.legacyUri = "spice://A/provider/:p*";
         expectation.legacyXri = "xri:@openmdx:A/provider/p**";
@@ -216,6 +241,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A.B/($..)";
         expectation.iri = URI.create("xri://@openmdx*A.B/($..)");
         expectation.uri = "@openmdx*A.B/($..)";
+        expectation.url = "/a/context/url/A.B/($..)";
         expectation.classicRepresentation = "A::B/::*";
         expectation.legacyUri = "spice://A:B/:*";
         expectation.legacyXri = "xri:@openmdx:A.B/**";
@@ -232,6 +258,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System/preferences/($t*ces*lost%2Bfound)";
         expectation.iri = URI.create("xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System/preferences/($t*ces*lost%252Bfound)");
         expectation.uri = "@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System/preferences/($t*ces*lost%252Bfound)";
+        expectation.url = "/a/context/url/org.openmdx.preferences1/provider/Java:Properties/segment/System/preferences/($t*ces*lost%252Bfound)";
         expectation.classicRepresentation = "org::openmdx::preferences1/provider/Java::Properties/segment/System/preferences/lost+found";
         expectation.legacyUri = "spice://org:openmdx:preferences1/provider/Java:Properties/segment/System/preferences/lost+found";
         expectation.legacyXri = "xri:@openmdx:org.openmdx.preferences1/provider/Java:Properties/segment/System/preferences/lost+found";
@@ -245,6 +272,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp/env)";
         expectation.iri = URI.create("xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp%2Fenv)");
         expectation.uri = "@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp%2Fenv)";
+        expectation.url = "/a/context/url/org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp%2Fenv)";
         expectation.classicRepresentation = "org::openmdx::preferences1/provider/Java::Properties/segment/(java::comp//env)";
         expectation.legacyUri = "spice://org:openmdx:preferences1/provider/Java:Properties/segment/(java:comp%2fenv)";
         expectation.legacyXri = "xri:@openmdx:org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp/env)";
@@ -258,6 +286,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp)";
         expectation.iri = URI.create("xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp)");
         expectation.uri = "@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp)";
+        expectation.url = "/a/context/url/org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp)";
         expectation.classicRepresentation = "org::openmdx::preferences1/provider/Java::Properties/segment/(java::comp)";
         expectation.legacyUri = "spice://org:openmdx:preferences1/provider/Java:Properties/segment/(java:comp)";
         expectation.legacyXri = "xri:@openmdx:org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp)";
@@ -271,6 +300,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System";
         expectation.iri = URI.create("xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System");
         expectation.uri = "@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System";
+        expectation.url = "/a/context/url/org.openmdx.preferences1/provider/Java:Properties/segment/System";
         expectation.classicRepresentation = "org::openmdx::preferences1/provider/Java::Properties/segment/System";
         expectation.legacyUri = "spice://org:openmdx:preferences1/provider/Java:Properties/segment/System";
         expectation.legacyXri = "xri:@openmdx:org.openmdx.preferences1/provider/Java:Properties/segment/System";
@@ -284,12 +314,13 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(+resource/application-preferences.xml)";
         expectation.iri = URI.create("xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(+resource%2Fapplication-preferences.xml)");
         expectation.uri = "@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(+resource%2Fapplication-preferences.xml)";
+        expectation.url = "/a/context/url/org.openmdx.preferences1/provider/Java:Properties/segment/(+resource%2Fapplication-preferences.xml)";
         expectation.classicRepresentation = "org::openmdx::preferences1/provider/Java::Properties/segment/(+resource//application-preferences.xml)";
         expectation.legacyUri = "spice://org:openmdx:preferences1/provider/Java:Properties/segment/(+resource%2fapplication-preferences.xml)";
         expectation.legacyXri = "xri:@openmdx:org.openmdx.preferences1/provider/Java:Properties/segment/(+resource/application-preferences.xml)";
         expectation.objectPath = true;
         arrangeActAndAssertAccordingToExpectation();
-        assertEquals("CR20006216", "(+resource/application-preferences.xml)", new Path(expectation.xri).getComponent(4).get(0));
+        assertEquals("CR20006216", "(+resource/application-preferences.xml)", new Path(expectation.xri).getSegment(4).toClassicRepresentation());
     }
     
     @Test
@@ -298,6 +329,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A.B/Fran\u00e7ois";
         expectation.iri = URI.create("xri://@openmdx*A.B/Fran\u00e7ois");
         expectation.uri = "@openmdx*A.B/Fran%C3%A7ois";
+        expectation.url = "/a/context/url/A.B/Fran%C3%A7ois";
         expectation.classicRepresentation = "A::B/Fran\u00e7ois";
         expectation.legacyUri = "spice://A:B/Fran%c3%a7ois";
         expectation.legacyXri = "xri:@openmdx:A.B/Fran\u00e7ois";
@@ -310,6 +342,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A.B/provider/P:Q/segment/S.T/object/($t*ces*RR_1%3Bstate%3D0)";
         expectation.iri = URI.create("xri://@openmdx*A.B/provider/P:Q/segment/S.T/object/($t*ces*RR_1%253Bstate%253D0)");
         expectation.uri = "@openmdx*A.B/provider/P:Q/segment/S.T/object/($t*ces*RR_1%253Bstate%253D0)";
+        expectation.url = "/a/context/url/A.B/provider/P:Q/segment/S.T/object/($t*ces*RR_1%253Bstate%253D0)";
         expectation.classicRepresentation = "A::B/provider/P::Q/segment/S.T/object/RR_1;state=0";
         expectation.legacyUri = "spice://A:B/provider/P:Q/segment/S.T/object/RR_1;state=0";
         expectation.legacyXri = "xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/RR_1;state=0";
@@ -322,6 +355,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A.B/provider/P:Q/segment/S.T/object/012345;transient";
         expectation.iri = URI.create("xri://@openmdx*A.B/provider/P:Q/segment/S.T/object/012345;transient");
         expectation.uri = "@openmdx*A.B/provider/P:Q/segment/S.T/object/012345;transient";
+        expectation.url = "/a/context/url/A.B/provider/P:Q/segment/S.T/object/012345;transient";
         expectation.classicRepresentation = "A::B/provider/P::Q/segment/S.T/object/012345;transient";
         expectation.legacyUri = "spice://A:B/provider/P:Q/segment/S.T/object/012345;transient";
         expectation.legacyXri = "xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/012345;transient";
@@ -334,6 +368,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A0.A1/provider/A/segment/(@openmdx*B0.B1/provider/B)";
         expectation.iri = URI.create("xri://@openmdx*A0.A1/provider/A/segment/(@openmdx*B0.B1%2Fprovider%2FB)");
         expectation.uri = "@openmdx*A0.A1/provider/A/segment/(@openmdx*B0.B1%2Fprovider%2FB)";
+        expectation.url = "/a/context/url/A0.A1/provider/A/segment/(@openmdx*B0.B1%2Fprovider%2FB)";
         expectation.classicRepresentation = "A0::A1/provider/A/segment/B0::::B1//provider//B";
         expectation.legacyUri = "spice://A0:A1/provider/A/segment/B0%3a%3aB1%2fprovider%2fB";
         expectation.legacyXri = "xri:@openmdx:A0.A1/provider/A/segment/(@openmdx:B0.B1/provider/B)";
@@ -346,6 +381,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A.B/provider/(@openmdx*B/($t*ces*B0%253AB1))/segment";
         expectation.iri = URI.create("xri://@openmdx*A.B/provider/(@openmdx*B%2F($t*ces*B0%25253AB1))/segment");
         expectation.uri = "@openmdx*A.B/provider/(@openmdx*B%2F($t*ces*B0%25253AB1))/segment";
+        expectation.url = "/a/context/url/A.B/provider/(@openmdx*B%2F($t*ces*B0%25253AB1))/segment";
         expectation.classicRepresentation = "A::B/provider/B//B0%3AB1/segment";
         expectation.legacyUri = "spice://A:B/provider/B%2fB0%253AB1/segment";
         expectation.legacyXri = "xri:@openmdx:A.B/provider/(@openmdx:B/B0%253AB1)/segment";
@@ -358,6 +394,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A.B/provider/($t*ces*%24%7BPROVIDER%7D)/segment/($t*ces*%24%7BSEGMENT%7D)";
         expectation.iri = URI.create("xri://@openmdx*A.B/provider/($t*ces*%2524%257BPROVIDER%257D)/segment/($t*ces*%2524%257BSEGMENT%257D)");
         expectation.uri = "@openmdx*A.B/provider/($t*ces*%2524%257BPROVIDER%257D)/segment/($t*ces*%2524%257BSEGMENT%257D)";
+        expectation.url = "/a/context/url/A.B/provider/($t*ces*%2524%257BPROVIDER%257D)/segment/($t*ces*%2524%257BSEGMENT%257D)";
         expectation.classicRepresentation = "A::B/provider/${PROVIDER}/segment/${SEGMENT}";
         expectation.legacyUri = "spice://A:B/provider/$%7bPROVIDER%7d/segment/$%7bSEGMENT%7d";
         expectation.legacyXri = "xri:@openmdx:A.B/provider/$%7BPROVIDER%7D/segment/$%7BSEGMENT%7D";
@@ -370,6 +407,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A.B/($t*ces*%20%21%22%24%2500%26%27%2A%2B%2C-.0123456789%3A%3B%3C%3D%3E%40ABCDEFGHIJKLMNOPQRSTUVWXYZ%5B%5C%5D%5E_%60abcdefghijklmnopqrstuvwxyz%7B%7C%7D~)";
         expectation.iri = URI.create("xri://@openmdx*A.B/($t*ces*%2520%2521%2522%2524%252500%2526%2527%252A%252B%252C-.0123456789%253A%253B%253C%253D%253E%2540ABCDEFGHIJKLMNOPQRSTUVWXYZ%255B%255C%255D%255E_%2560abcdefghijklmnopqrstuvwxyz%257B%257C%257D~)");
         expectation.uri = "@openmdx*A.B/($t*ces*%2520%2521%2522%2524%252500%2526%2527%252A%252B%252C-.0123456789%253A%253B%253C%253D%253E%2540ABCDEFGHIJKLMNOPQRSTUVWXYZ%255B%255C%255D%255E_%2560abcdefghijklmnopqrstuvwxyz%257B%257C%257D~)";
+        expectation.url = "/a/context/url/A.B/($t*ces*%2520%2521%2522%2524%252500%2526%2527%252A%252B%252C-.0123456789%253A%253B%253C%253D%253E%2540ABCDEFGHIJKLMNOPQRSTUVWXYZ%255B%255C%255D%255E_%2560abcdefghijklmnopqrstuvwxyz%257B%257C%257D~)";
         expectation.classicRepresentation = "A::B/ !\"$%00&'*+,-.0123456789::;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
         expectation.legacyUri = "spice://A:B/%20!%22$%2500&'*+,-.0123456789:;%3c=%3e@ABCDEFGHIJKLMNOPQRSTUVWXYZ%5b%5c%5d%5e_%60abcdefghijklmnopqrstuvwxyz%7b%7c%7d~";
         expectation.legacyXri = "xri:@openmdx:A.B/%20!%22$%2500&'*+,-.0123456789:;%3C=%3E@ABCDEFGHIJKLMNOPQRSTUVWXYZ%5B%5C%5D%5E_%60abcdefghijklmnopqrstuvwxyz%7B%7C%7D~";
@@ -382,6 +420,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*($..)/provider/($..)/segment/($...)";
         expectation.iri = URI.create("xri://@openmdx*($..)/provider/($..)/segment/($...)");
         expectation.uri = "@openmdx*($..)/provider/($..)/segment/($...)";
+        expectation.url = "/a/context/url/($..)/provider/($..)/segment/($...)";
         expectation.classicRepresentation = "::*/provider/::*/segment/%";
         expectation.legacyUri = "spice://:*/provider/:*/segment/%";
         expectation.legacyXri = "xri:@openmdx:**/provider/**/segment/***";
@@ -395,6 +434,7 @@ public class PathTest {
         expectation.xri = "xri://@openmdx*A.B/provider/($.*org)*($..)/segment/($.*org)*($..)/($...)";
         expectation.iri = URI.create("xri://@openmdx*A.B/provider/($.*org)*($..)/segment/($.*org)*($..)/($...)");
         expectation.uri = "@openmdx*A.B/provider/($.*org)*($..)/segment/($.*org)*($..)/($...)";
+        expectation.url = "/a/context/url/A.B/provider/($.*org)*($..)/segment/($.*org)*($..)/($...)";
         expectation.classicRepresentation = "A::B/provider/::org*/segment/org%";
         expectation.legacyUri = "spice://A:B/provider/:org*/segment/org%";
         expectation.legacyXri = "xri:@openmdx:A.B/provider/org**/segment/org***";
@@ -403,11 +443,26 @@ public class PathTest {
     }
 
     @Test
+    public void whenColonFollowedByUIDThenTransactionalPathSegment(){
+        expectation.components = new String[]{"A:B","provider","Test","segment","Upload","item",":72637cf0-c8d6-11e9-8ead-4925e71c6b13"};
+        expectation.xri = "xri://@openmdx*A.B/provider/Test/segment/Upload/item/:72637cf0-c8d6-11e9-8ead-4925e71c6b13";
+        expectation.iri = URI.create("xri://@openmdx*A.B/provider/Test/segment/Upload/item/:72637cf0-c8d6-11e9-8ead-4925e71c6b13");
+        expectation.uri = "@openmdx*A.B/provider/Test/segment/Upload/item/:72637cf0-c8d6-11e9-8ead-4925e71c6b13";
+        expectation.url = "/a/context/url/A.B/provider/Test/segment/Upload/item/:72637cf0-c8d6-11e9-8ead-4925e71c6b13";
+        expectation.classicRepresentation = "A::B/provider/Test/segment/Upload/item/::72637cf0-c8d6-11e9-8ead-4925e71c6b13";
+        expectation.legacyUri = "spice://A:B/provider/Test/segment/Upload/item/:72637cf0-c8d6-11e9-8ead-4925e71c6b13";
+        expectation.legacyXri = "xri:@openmdx:A.B/provider/Test/segment/Upload/item/:72637cf0-c8d6-11e9-8ead-4925e71c6b13";
+        expectation.containsWildcarcd = false;
+        arrangeActAndAssertAccordingToExpectation();
+    }
+    
+    @Test
     public void whenSomeProvidersWithColonSomeSegmentsWithColonAndAllItsDescendantsThenBuildSegmentAndDescendantsPattern(){
         expectation.components = new String[]{"A:B","provider",":org:*","segment","org:%"};
         expectation.xri = "xri://@openmdx*A.B/provider/($.*org:)*($..)/segment/($.*org:)*($..)/($...)";
         expectation.iri = URI.create("xri://@openmdx*A.B/provider/($.*org:)*($..)/segment/($.*org:)*($..)/($...)");
         expectation.uri = "@openmdx*A.B/provider/($.*org:)*($..)/segment/($.*org:)*($..)/($...)";
+        expectation.url = "/a/context/url/A.B/provider/($.*org:)*($..)/segment/($.*org:)*($..)/($...)";
         expectation.classicRepresentation = "A::B/provider/::org::*/segment/org::%";
         expectation.legacyUri = "spice://A:B/provider/:org:*/segment/org:%";
         expectation.legacyXri = "xri:@openmdx:A.B/provider/org:**/segment/org:***";
@@ -763,6 +818,7 @@ public class PathTest {
         String legacyXri;
         String legacyUri;
         String classicRepresentation;
+        String url;
         UUID uuid;
         boolean objectPath;
         boolean containsWildcarcd;
@@ -892,6 +948,25 @@ public class PathTest {
                 return new Path((UUID)source);
             }
 
+        },
+        URL{
+
+            @Override
+            String toExternalRepresentation(Path source) {
+                return urlEncoder.encode(source);
+            }
+            
+            @Override
+            String getExternalRepresentation(Expectation expectation) {
+                return expectation.url;
+            }
+
+
+            @Override
+            Path fromExternalRepresentation(Object source) {
+                return urlDecoder.decode((String)source);
+            }
+            
         };        
         
         abstract Object toExternalRepresentation(Path source);
@@ -906,6 +981,9 @@ public class PathTest {
             return getExternalRepresentation(expectation) != null;
         }
         
+        private static final String A_CONTEXT_URL = "/a/context/url";
+        private static final URLDecoder urlDecoder = new URLDecoder(A_CONTEXT_URL);
+        private static final URLEncoder urlEncoder = new URLEncoder(A_CONTEXT_URL);
     }
     
 }

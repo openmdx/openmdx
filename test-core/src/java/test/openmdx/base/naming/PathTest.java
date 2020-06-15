@@ -47,12 +47,14 @@
  */
 package test.openmdx.base.naming;
 
+import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.exception.Throwables;
+import org.openmdx.kernel.xri.XRIAuthorities;
+import org.openmdx.kernel.xri.XRI_2Protocols;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.naming.Path;
 
 public class PathTest extends TestCase {
 
@@ -304,7 +306,7 @@ public class PathTest extends TestCase {
             assertEquals("Path('a/b0//b1/c')",  path3, new Path ("spice://a/b0%2fb1/c"));
             assertEquals("Path('a/b;x=0;y=1,2,3,z=false/c')",   path4, new Path ("spice://a/b;x=0;y=1,2,3,z=false/c"));
         } catch (RuntimeException exception) {
-            new ServiceException(exception).log();
+            Throwables.log(exception);
             throw exception;
         }
     }
@@ -423,6 +425,19 @@ public class PathTest extends TestCase {
         assertEquals("A/B B/C+C/D&D/E-E/F:F/G=G", "xri://@openmdx*A/($t*ces*B%20B)/($t*ces*C%2BC)/D&D/E-E/F:F/($t*ces*G%3DG)", new Path(new String[]{"A","B B","C+C","D&D","E-E","F:F","G=G"}).toXRI());
         assertEquals("A/B B/C+C/D&D/E-E/F:F/G=G", "@openmdx*A/($t*ces*B%2520B)/($t*ces*C%252BC)/D&D/E-E/F:F/($t*ces*G%253DG)", new Path(new String[]{"A","B B","C+C","D&D","E-E","F:F","G=G"}).toURI());
         assertEquals("A/B B/C+C/D&D/E-E/F:F/G=G", new Path(new String[]{"A","B B","C+C","D&D","E-E","F:F","G=G"}),new Path("@openmdx*A/($t*ces*B%2520B)/($t*ces*C%252BC)/D&D/E-E/F:F/($t*ces*G%253DG)"));
+        assertEquals("@openmdx!($t*uuid*cf730615-beb8-11e9-a5fb-afa7e42b2e0b)", new Path("xri://@openmdx!($t*uuid*cf730615-beb8-11e9-a5fb-afa7e42b2e0b)").toURI());
     }
 
+    public void testTransient(
+    ){
+        assertEquals("xri://@openmdx!($t*uuid*cf730615-beb8-11e9-a5fb-afa7e42b2e0b)", new Path("xri://@openmdx!($t*uuid*cf730615-beb8-11e9-a5fb-afa7e42b2e0b)").toXRI());
+        assertEquals("@openmdx!($t*uuid*cf730615-beb8-11e9-a5fb-afa7e42b2e0b)", new Path("xri://@openmdx!($t*uuid*cf730615-beb8-11e9-a5fb-afa7e42b2e0b)").toURI());
+    }
+
+    public void testEmpty(
+    ){
+        assertEquals(XRI_2Protocols.OPENMDX_PREFIX, path1.toXRI());
+        assertEquals(XRIAuthorities.OPENMDX_AUTHORITY, path1.toURI());
+    }
+    
 }

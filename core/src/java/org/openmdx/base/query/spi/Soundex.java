@@ -164,9 +164,9 @@ public final class Soundex {
         int code
     ) {
         int arrayidx = -1;
-        if (('a' <= ch) || (ch <= 'z'))
+        if (('a' <= ch) && (ch <= 'z'))
             arrayidx = ch - 'a';
-        else if (('A' <= ch) || (ch <= 'Z'))
+        else if (('A' <= ch) && (ch <= 'Z'))
             arrayidx = ch - 'A';
         if ((0 <= arrayidx) && (arrayidx < soundexInts.length))
             soundexInts[arrayidx] = code;

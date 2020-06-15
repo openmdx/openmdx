@@ -62,7 +62,6 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.exception.InvalidParameter
 /**
  * Released under the LGPL<BR>
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.4 $
  */
 public class PapAccessRequest extends RadiusPacket {
     private boolean initialized = false;

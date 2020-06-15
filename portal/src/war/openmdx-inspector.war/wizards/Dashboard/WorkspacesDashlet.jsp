@@ -190,8 +190,8 @@ org.openmdx.base.naming.*
 									}
 %>									
 									<div>
-										<input type="submit" class="<%= CssClass.btn.toString() + " " + CssClass.btnDefault.toString() %>" name="<%= COMMAND_APPLY %>" tabindex="9010" value="<%= texts.getSaveTitle() %>" onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_APPLY %>';<%= submitFormScriptlet %>;" />
-										<input type="submit" class="<%= CssClass.btn.toString() + " " + CssClass.btnDefault.toString() %>" name="<%= COMMAND_CANCEL %>" tabindex="9020" value="<%= texts.getCancelTitle() %>" onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_CANCEL %>';<%= submitFormScriptlet %>;" />
+										<input type="submit" class="<%= CssClass.btn.toString() + " " + CssClass.btn_light.toString() %>" name="<%= COMMAND_APPLY %>" tabindex="9010" value="<%= texts.getSaveTitle() %>" onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_APPLY %>';<%= submitFormScriptlet %>;" />
+										<input type="submit" class="<%= CssClass.btn.toString() + " " + CssClass.btn_light.toString() %>" name="<%= COMMAND_CANCEL %>" tabindex="9020" value="<%= texts.getCancelTitle() %>" onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_CANCEL %>';<%= submitFormScriptlet %>;" />
 									</div>
 <%
 								}

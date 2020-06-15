@@ -122,7 +122,7 @@ public interface AnyTypePredicate {
 
     /**
      * This method is deprecated in order to avoid its erroneous use in lieu 
-     * of equalTo().
+     * of {@link #equalTo(Object)}.
      * 
      * @deprecated to avoid erroneous use 
      * 

@@ -65,6 +65,7 @@ import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -112,8 +113,7 @@ import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.rest.spi.LockAssertions;
-import org.openmdx.base.accessor.rest.spi.ManagedConnectionCache_2_0;
-import org.openmdx.base.accessor.rest.spi.ManagedConnectionCache_2_0.Mode;
+import org.openmdx.base.accessor.rest.spi.ObjectRecords;
 import org.openmdx.base.accessor.spi.AbstractDataObject_1;
 import org.openmdx.base.accessor.spi.DateMarshaller;
 import org.openmdx.base.accessor.spi.DateTimeMarshaller;
@@ -129,8 +129,6 @@ import org.openmdx.base.collection.MarshallingMap;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.collection.PopulationMap;
-import org.openmdx.base.collection.Sets;
-import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
@@ -141,10 +139,10 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.Persistency;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
+import org.openmdx.base.naming.ClassicSegments;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.naming.PathComponent;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
-import org.openmdx.base.persistence.spi.SharedObjects;
+import org.openmdx.base.persistence.spi.StandardFetchPlan;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.OrderSpecifier;
@@ -158,6 +156,7 @@ import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.transaction.Status;
+import org.openmdx.kernel.collection.TreeSparseArray;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
@@ -175,18 +174,17 @@ import org.w3c.format.DateTimeFormat;
 /**
  * DataObject_1_0 implementation
  */
-public class DataObject_1 
-    implements DataObject_1_0, Serializable
-{
+public class DataObject_1
+    implements DataObject_1_0, Serializable {
 
     /**
      * Constructor for a detached-clean instance
      */
     public DataObject_1(
-        Path identity, 
-        Object version, 
+        Path identity,
+        byte[] version,
         boolean multithreaded
-    ){
+    ) {
         this.identity = identity;
         this.transientObjectId = null;
         this.detached = true;
@@ -194,172 +192,179 @@ public class DataObject_1
         this.version = version;
         this.flushableValues = Maps.newMap(multithreaded);
     }
-    
+
     /**
-     * Constructor 
+     * Constructor
      * 
      * @param manager
-     * @param identity 
-     * @param transientObjectId 
+     * @param identity
+     * @param transientObjectId
      * @param objectClass
-     * @param frozen 
+     * @param frozen
      * 
      * @throws ServiceException
      */
     DataObject_1(
-        DataObjectManager_1 manager,
-        Path identity, 
-        UUID transientObjectId, 
-        String objectClass, 
-        boolean frozen
-    ) throws ServiceException{
+        final DataObjectManager_1 manager,
+        final Path identity,
+        final UUID transientObjectId,
+        final String objectClass,
+        final boolean frozen 
+    )
+        throws ServiceException {
+        if (objectClass == null && identity == null)
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                "The identity is required for persisten objects, the object class for transient ones",
+                new BasicException.Parameter("identity", identity),
+                new BasicException.Parameter("model-class", objectClass)
+            );
         final boolean threadSafetyRequired = manager.isThreadSafetyRequired();
         this.dataObjectManager = manager;
-		this.identity = identity;
-		this.transientObjectId = transientObjectId == null ? UUIDs.newUUID() : transientObjectId;
+        this.identity = identity;
+        this.transientObjectId = transientObjectId == null ? UUIDs.newUUID() : transientObjectId;
         this.flushableValues = Maps.newMap(threadSafetyRequired);
-		if(identity == null) {
-            this.transientValues = Maps.newMapSupportingNullValues(threadSafetyRequired);
-		}
-		this.detached = false;
-		this.untouchable = frozen;
-		manager.putUnlessPresent(
-		    this.transientObjectId,  
-		    this
-		);
-        if(objectClass == null && identity == null) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.BAD_PARAMETER,
-            "The identity is required for persisten objects, the object class for transient ones"
-        );
+        this.detached = false;
+        this.untouchable = frozen;
         this.transactionalValuesRecordName = objectClass;
-        if(identity != null) {
+        if (identity == null) {
+            this.transientValues = Maps.newMapSupportingNullValues(threadSafetyRequired);
+        } else {
             manager.putUnlessPresent(identity, this);
         }
+        manager.putUnlessPresent(
+            this.transientObjectId,
+            this
+        );
     }
 
-	/**
+    /**
      * Constructor
      * 
      * @param that
-	 * @param beforeImage <code>true</code> if the before-image shall be cloned
-	 * @param identity 
-     * @param exclude the features not to be cloned
+     * @param beforeImage
+     *            <code>true</code> if the before-image shall be cloned
+     * @param identity
+     * @param exclude
+     *            the features not to be cloned
      * 
      * @throws ServiceException
      */
     @SuppressWarnings("unchecked")
     private DataObject_1(
-        DataObject_1 that, 
-        boolean beforeImage, 
+        DataObject_1 that,
+        boolean beforeImage,
         String... exclude
-    ) throws ServiceException{
+    )
+        throws ServiceException {
         this(
             that.dataObjectManager,
             null, // identity
             null, // transientObjectId 
-            DataObject_1.getRecordName(that, false), 
+            DataObject_1.getRecordName(that, false),
             beforeImage
         );
         this.version = null;
-        Set<String> notToBeCloned = Sets.asSet(exclude);
-        if(that.jdoIsPersistent() && !that.jdoIsNew()) {
-		    that.objRetrieve(
-		        false, 
-		        null, 
-		        null, 
-		        beforeImage, 
+        if (that.jdoIsPersistent() && !that.jdoIsNew()) {
+            that.objRetrieve(
+                false,
+                beforeImage ? null : CLONE_FETCH_PLAN,
+                null,
+                beforeImage,
                 true // throwNotFoundException
-		     );
-		}
-		this.persistentValues = newRecord(this.transactionalValuesRecordName);
-        if(!that.objIsHollow()) {
-            //
-            // Persistent Values
-            //
-        	for(Map.Entry<?,?> e: ((Map<?,?>)that.persistentValues).entrySet()) {
-                if(!notToBeCloned.contains(e.getKey())){
-	    			this.persistentValues.put(e.getKey(), e.getValue());
-                }
-        	}
+            );
         }
-        TransactionalState_1 thisState = this.getState(false);
-        Set<String> thisDirty = thisState.dirtyFeatures(false);
-        if(beforeImage){
+        final Set<String> notToBeCloned = new HashSet<>(Arrays.asList(exclude));
+        if (!beforeImage && isExtentCapable()) {
+            notToBeCloned.add(SystemAttributes.OBJECT_IDENTITY);
+        }
+        this.persistentValues = newRecord(this.transactionalValuesRecordName);
+        if (!that.objIsHollow()) {
             //
             // Persistent Values
             //
-			thisDirty.addAll(that.persistentValues.keySet());
+            for (Map.Entry<?, ?> e : ((Map<?, ?>) that.persistentValues).entrySet()) {
+                if (!notToBeCloned.contains(e.getKey())) {
+                    this.persistentValues.put(e.getKey(), e.getValue());
+                }
+            }
+        }
+        final TransactionalState_1 thisState = this.getState(false);
+        final Set<String> thisDirty = thisState.dirtyFeatures(false);
+        if (beforeImage) {
+            //
+            // Persistent Values
+            //
+            thisDirty.addAll(that.persistentValues.keySet());
         } else {
             //
             // Transactional Values
             //
             TransactionalState_1 thatState = that.getState(true);
-            if(thatState != null) {
-                for(Map.Entry<String,Object> e : thatState.values(true).entrySet()){
+            if (thatState != null) {
+                for (Map.Entry<String, Object> e : thatState.values(true).entrySet()) {
                     String feature = e.getKey();
-                    if(!notToBeCloned.contains(feature)){
-	                    Object candidate = e.getValue();
-	                    if(candidate instanceof Set) {
-	                        Set<Object> target = this.objGetSet(feature);
-	                        target.clear();
-	                        target.addAll((Set<?>)candidate);
-	                    } else if (candidate instanceof List) {
-	                        List<Object> target = this.objGetList(feature);
-	                        target.clear();
-	                        target.addAll((List<?>)candidate);
-	                    } else if (candidate instanceof SortedMap) {
-	                        SortedMap<Integer,Object> target = this.objGetSparseArray(feature);
-	                        target.clear();
-	                        target.putAll((SortedMap<Integer,Object>)candidate);
-	                    } else {
-	                        this.objSetValue(feature, candidate);
-	                    }
+                    if (!notToBeCloned.contains(feature)) {
+                        Object candidate = e.getValue();
+                        if (candidate instanceof Set) {
+                            Set<Object> target = this.objGetSet(feature);
+                            target.clear();
+                            target.addAll((Set<?>) candidate);
+                        } else if (candidate instanceof List) {
+                            List<Object> target = this.objGetList(feature);
+                            target.clear();
+                            target.addAll((List<?>) candidate);
+                        } else if (candidate instanceof SortedMap) {
+                            SortedMap<Integer, Object> target = this.objGetSparseArray(feature);
+                            target.clear();
+                            target.putAll((SortedMap<Integer, Object>) candidate);
+                        } else {
+                            this.objSetValue(feature, candidate);
+                        }
                     }
                 }
             }
             //
             // Transient Values
             //
-            if (
-                that.transientValues != null &&
-                this.transientValues != null
-             ) {
-                for(Map.Entry<String,Object> e : that.transientValues.entrySet()){
+            if (that.transientValues != null &&
+                this.transientValues != null) {
+                for (Map.Entry<String, Object> e : that.transientValues.entrySet()) {
                     String feature = e.getKey();
-                    if(!notToBeCloned.contains(feature)) {
-	                    Object candidate = e.getValue();
-	                    if(candidate instanceof Set) {
-	                        this.transientValues.put(feature, new HashSet<Object>((Set<?>)candidate));
-	                        this.objGetSet(feature);
-	                    } else if (candidate instanceof List) {
-	                        this.transientValues.put(feature, new ArrayList<Object>((List<?>)candidate));
-	                        this.objGetList(feature);
-	                    } else if (candidate instanceof SortedMap) {
-	                        this.transientValues.put(feature, new TreeMap<Integer,Object>((SortedMap<Integer,Object>)candidate));
-	                        this.objGetSparseArray(feature);
-	                    } else {
-	                        this.transientValues.put(feature, candidate);
-	                    }
+                    if (!notToBeCloned.contains(feature)) {
+                        Object candidate = e.getValue();
+                        if (candidate instanceof Set) {
+                            this.transientValues.put(feature, new HashSet<Object>((Set<?>) candidate));
+                            this.objGetSet(feature);
+                        } else if (candidate instanceof List) {
+                            this.transientValues.put(feature, new ArrayList<Object>((List<?>) candidate));
+                            this.objGetList(feature);
+                        } else if (candidate instanceof SortedMap) {
+                            this.transientValues.put(feature, new TreeMap<Integer, Object>((SortedMap<Integer, Object>) candidate));
+                            this.objGetSparseArray(feature);
+                        } else {
+                            this.transientValues.put(feature, candidate);
+                        }
                     }
                 }
-            } 
+            }
             //
             // Dirty Features
             //
             thisDirty.addAll(thisState.values(false).keySet());
-            if(that.persistentValues != null) {
+            if (that.persistentValues != null) {
                 thisDirty.addAll(that.persistentValues.keySet());
             }
-            if(this.transientValues != null) {
+            if (this.transientValues != null) {
                 thisDirty.addAll(this.transientValues.keySet());
             }
             //
             // Streams
             //
-            for(Map.Entry<String, ModelElement_1_0> attribute : getAttributes().entrySet()) {
+            for (Map.Entry<String, ModelElement_1_0> attribute : getAttributes().entrySet()) {
                 ModelElement_1_0 featureDef = attribute.getValue();
-                if(isStreamed(featureDef) && isPersistent(featureDef)){
+                if (isStreamed(featureDef) && isPersistent(featureDef)) {
                     String featureName = attribute.getKey();
                     this.objSetValue(
                         featureName,
@@ -380,7 +385,7 @@ public class DataObject_1
      */
     @SuppressWarnings("unchecked")
     final static Class<? extends InstanceLifecycleListener>[] LIFECYCLE_LISTENER_CLASS = new Class[8];
-    
+
     /**
      * The object's identity
      *
@@ -397,24 +402,24 @@ public class DataObject_1
      * @serial
      */
     private final UUID transientObjectId;
-    
+
     /**
      * @serial
      */
     private String transactionalValuesRecordName;
 
     /**
-     * Tells whether this object shall become transient on rollback 
+     * Tells whether this object shall become transient on rollback
      */
     private boolean transientOnRollback = false;
-    
+
     /**
      * 
      */
     private String qualifier = null;
-    
+
     /**
-     * @serial 
+     * @serial
      * 
      * @see #jdoIsDeleted()
      */
@@ -433,7 +438,7 @@ public class DataObject_1
      * @see #jdoIsDetached()
      */
     private final boolean detached;
-    
+
     /**
      * The read-only flag is true in case of before images
      */
@@ -447,23 +452,23 @@ public class DataObject_1
     /**
      *
      */
-    protected Map<String,Object> transientValues;
-    
+    protected Map<String, Object> transientValues;
+
     /**
      * @serial the write lock
      */
-    protected Object version = null;
+    protected byte[] version = null;
 
     /**
      * @serial the read lock
      */
     protected Object lock = null;
-    
+
     /**
      * The id of the non-existing object
      */
     private transient String notFound = null;
-    
+
     /**
      * Such an object cant't leave its hollow state
      */
@@ -473,11 +478,11 @@ public class DataObject_1
      * Cache the before image
      */
     private transient DataObject_1 beforeImage = null;
-    
+
     /**
      * The flushable value registry
      */
-    transient Map<String,Flushable> flushableValues;
+    transient Map<String, Flushable> flushableValues;
 
     /**
      * The persistent aspects
@@ -488,7 +493,7 @@ public class DataObject_1
      * The persistent aspects
      */
     private transient Container_1_0 aspects = null;
-            
+
     /**
      * 
      */
@@ -498,48 +503,56 @@ public class DataObject_1
      * 
      */
     private boolean loadLock = false;
-    
+
     /**
      * Map a data types's qualified name to its marshaller
      */
-    static final Map<String,Marshaller> DATA_TYPE_MARSHALLER = new HashMap<String,Marshaller>();
+    static final Map<String, Marshaller> DATA_TYPE_MARSHALLER = new HashMap<String, Marshaller>();
 
     private static final String ANONYMOUS_XRI = "";
-    
+
     private static final Pattern WRITE_LOCK_PATTERN = Pattern.compile(
-    		"(" + SystemAttributes.CREATED_AT + "|" + SystemAttributes.MODIFIED_AT + ")=" +
-    		"([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[.][0-9]{3})000Z"
+        "(" + SystemAttributes.CREATED_AT + "|" + SystemAttributes.MODIFIED_AT + ")=" +
+            "([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[.][0-9]{3})000Z"
     );
 
     /**
+     * The clone fetch plan retrieves allattributes
+     */
+    private static final FetchPlan CLONE_FETCH_PLAN = StandardFetchPlan.newInstance(null);
+    
+    /**
      * Valdidate the object's state and retrieve its class
      * 
-     * @param that the object to be inspected
-     * @param lenient an exception is thrown for hollow objects unless <code>lenient</code> is <code>true</code> 
+     * @param that
+     *            the object to be inspected
+     * @param lenient
+     *            an exception is thrown for hollow objects unless <code>lenient</code> is <code>true</code>
      * 
      * @return the object's class
      * 
      * @throws ServiceException
      */
     static String getRecordName(
-        DataObject_1 that, 
+        DataObject_1 that,
         boolean lenient
-    ) throws ServiceException {
-        if(that.transactionalValuesRecordName == null && that.objIsHollow()) {
-        	if(lenient){
-        		return null;
-        	} else {
-	            throw new ServiceException(
-	                BasicException.Code.DEFAULT_DOMAIN,
-	                BasicException.Code.ILLEGAL_STATE,
-	                "The source object is hollow"
-	            );
-        	}
+    )
+        throws ServiceException {
+        if (that.transactionalValuesRecordName == null && that.objIsHollow()) {
+            if (lenient) {
+                return null;
+            } else {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ILLEGAL_STATE,
+                    "The source object is hollow"
+                );
+            }
         } else {
             return that.transactionalValuesRecordName == null ? that.persistentValues.getRecordName() : that.transactionalValuesRecordName;
         }
     }
-    
+
     /**
      * Test whether two objects are either both <code>null</code> or equal.
      * 
@@ -551,12 +564,10 @@ public class DataObject_1
     static boolean equal(
         Object left,
         Object right
-    ){
-        return left == right || (
-        	left != null && right != null && left.equals(right)
-        );
+    ) {
+        return left == right || (left != null && right != null && left.equals(right));
     }
-    
+
     /**
      * Tells whether the object represents an aspect
      * 
@@ -564,11 +575,11 @@ public class DataObject_1
      * 
      * @throws ServiceException
      */
-    public boolean isAspect(
-    ) throws ServiceException {
+    public boolean isAspect()
+        throws ServiceException {
         return getModel().isInstanceof(this, "org:openmdx:base:Aspect");
     }
-    
+
     /**
      * Tells whether the object is an instance of <code>org::openmdx::base::Modifiable</code>
      * 
@@ -576,8 +587,8 @@ public class DataObject_1
      * 
      * @throws ServiceException
      */
-    public boolean isModifiable(
-    ) throws ServiceException {
+    public boolean isModifiable()
+        throws ServiceException {
         return getModel().isInstanceof(this, "org:openmdx:base:Modifiable");
     }
 
@@ -588,11 +599,23 @@ public class DataObject_1
      * 
      * @throws ServiceException
      */
-    public boolean isCreatable(
-    ) throws ServiceException {
+    public boolean isCreatable()
+        throws ServiceException {
         return getModel().isInstanceof(this, "org:openmdx:base:Creatable");
     }
-    
+
+    /**
+     * Tells whether the object is an instance of <code>org::openmdx::base::ExtentCapable</code>
+     * 
+     * @return <code>true</code> if the object is an instance of <code>org::openmdx::base::ExtentCapable</code>
+     * 
+     * @throws ServiceException
+     */
+    private boolean isExtentCapable()
+        throws ServiceException {
+        return getModel().isInstanceof(this, "org:openmdx:base:ExtentCapable");
+    }
+
     /**
      * Tells whether the object is an instance of Removable
      * 
@@ -600,8 +623,8 @@ public class DataObject_1
      * 
      * @throws ServiceException
      */
-    public boolean isRemovable(
-    ) throws ServiceException {
+    public boolean isRemovable()
+        throws ServiceException {
         return getModel().isInstanceof(this, "org:openmdx:base:Removable");
     }
 
@@ -611,11 +634,12 @@ public class DataObject_1
     public Model_1_0 getModel() {
         return this.dataObjectManager.getModel();
     }
-    
+
     /**
      * Tells whether the given feature name refers to an aspect's core reference
      * 
-     * @param feature the feature name
+     * @param feature
+     *            the feature name
      * 
      * @return <code>true</code> if the given feature name refers to an aspect's core reference
      * 
@@ -623,7 +647,8 @@ public class DataObject_1
      */
     private boolean isAspectHasCore(
         String feature
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         return SystemAttributes.CORE.equals(feature) && isAspect();
     }
 
@@ -636,24 +661,23 @@ public class DataObject_1
      */
     final TransactionalState_1 getState(
         boolean optional
-    ){
-        if(
-            optional && 
-            (this.dataObjectManager == null || this.dataObjectManager.isClosed())
-        ) {
+    ) {
+        if (optional &&
+            (this.dataObjectManager == null || this.dataObjectManager.isClosed())) {
             return null;
         } else {
-            return this.getUnitOfWork().getState(this,optional);
-        }        
+            return this.getUnitOfWork().getState(this, optional);
+        }
     }
 
     void setExistence(
         Path identity,
         boolean existence
-    ) throws ServiceException{
+    )
+        throws ServiceException {
         UnitOfWork_1 unitOfWork = this.getUnitOfWork();
-        if(unitOfWork.isActive()) {
-            if(!identity.startsWith(this.identity) || identity.size() - this.identity.size() != 2) {
+        if (unitOfWork.isActive()) {
+            if (!identity.startsWith(this.identity) || identity.size() - this.identity.size() != 2) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
@@ -665,22 +689,22 @@ public class DataObject_1
             }
             Set<String> notFound;
             TransactionalState_1 state = unitOfWork.getState(DataObject_1.this, existence);
-            if(state == null) {
+            if (state == null) {
                 notFound = null;
             } else {
                 String feature = identity.getSegment(identity.size() - 2).toClassicRepresentation();
-                Map<String,Set<String>> values = state.unavailability(existence);
+                Map<String, Set<String>> values = state.unavailability(existence);
                 notFound = values.get(feature);
-                if(notFound == null && !existence) {
+                if (notFound == null && !existence) {
                     values.put(
                         feature,
                         notFound = new HashSet<String>()
                     );
                 }
             }
-            if(notFound != null) {
+            if (notFound != null) {
                 String qualifier = identity.getSegment(identity.size() - 1).toClassicRepresentation();
-                if(existence) {
+                if (existence) {
                     notFound.remove(qualifier);
                 } else {
                     notFound.add(qualifier);
@@ -692,30 +716,31 @@ public class DataObject_1
     /**
      * Returns the object's model class.
      *
-     * @return  the object's model class
+     * @return the object's model class
      *
-     * @exception   ServiceException
-     *              if the information is unavailable
+     * @exception ServiceException
+     *                if the information is unavailable
      */
     @Override
-    public String objGetClass(
-    ) throws ServiceException {
-        if(this.transactionalValuesRecordName == null) {
+    public String objGetClass()
+        throws ServiceException {
+        if (this.transactionalValuesRecordName == null) {
             try {
                 this.objRetrieve(
                     false, // reload
-                    this.dataObjectManager.getFetchPlan(), 
+                    this.dataObjectManager.getFetchPlan(),
                     null, // features
                     false, // beforeImage
                     true // throwNotFoundException
                 );
                 this.transactionalValuesRecordName = this.persistentValues.getRecordName();
-            } catch (NullPointerException exception){
+            } catch (NullPointerException exception) {
                 throw new ServiceException(
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_AVAILABLE,
-                    "Object class can't be determined"
+                    "Object class can't be determined",
+                    new BasicException.Parameter("identity", this.identity)                
                 );
             }
         }
@@ -725,21 +750,21 @@ public class DataObject_1
     /**
      * Returns the object's identity.
      *
-     * @return    the object's identity;
-     *            or null for transient objects
+     * @return the object's identity;
+     *         or null for transient objects
      */
     @Override
-    public Path jdoGetObjectId(
-    ){
+    public Path jdoGetObjectId() {
         return this.identity;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoGetTransactionalObjectId()
      */
     @Override
-    public UUID jdoGetTransactionalObjectId(
-    ) {
+    public UUID jdoGetTransactionalObjectId() {
         return this.transientObjectId;
     }
 
@@ -750,23 +775,23 @@ public class DataObject_1
      * The returned set is a copy of the original set, i.e. interceptors are
      * free to modify it before passing it on.
      *
-     * @return  the names of the features in the default fetch group
-     * @throws ServiceException 
+     * @return the names of the features in the default fetch group
+     * @throws ServiceException
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Set<String> objDefaultFetchGroup(
-    ) throws ServiceException{
+    public Set<String> objDefaultFetchGroup()
+        throws ServiceException {
         Set<String> result = new HashSet<String>();
         TransactionalState_1 state = this.getState(true);
-        if(state != null) {
+        if (state != null) {
             result.addAll(state.values(true).keySet());
         } else if (this.transientValues != null) {
             result.addAll(this.transientValues.keySet());
-        } 
-        if(!objIsHollow()) {
+        }
+        if (!objIsHollow()) {
             result.addAll(this.persistentValues.keySet());
-        }            
+        }
         return result;
     }
 
@@ -780,62 +805,65 @@ public class DataObject_1
     @SuppressWarnings("unchecked")
     synchronized DataObject_1 postLoad(
         ObjectRecord objectHolder
-    ) throws ServiceException {
-        if(this.loadLock) {
-        	return null;
-        } else try {
-        	this.loadLock = true;
-            if(this.identity == null || this.identity.equals(objectHolder.getResourceIdentifier())) {
-                //
-                // Composite & Transient
-                //
-                if(this.persistentValues == null) {
-                    this.persistentValues = objectHolder.getValue();
-                    this.version = objectHolder.getVersion();
+    )
+        throws ServiceException {
+        if (this.loadLock) {
+            return null;
+        } else
+            try {
+                this.loadLock = true;
+                if (this.identity == null || this.identity.equals(objectHolder.getResourceIdentifier())) {
+                    //
+                    // Composite & Transient
+                    //
+                    if (this.persistentValues == null) {
+                        this.persistentValues = objectHolder.getValue();
+                        this.version = objectHolder.getVersion();
+                    } else {
+                        MappedRecord source = objectHolder.getValue();
+                        MappedRecord persistentValues = newRecord(source.getRecordName());
+                        persistentValues.putAll(source);
+                        persistentValues.putAll(this.persistentValues);
+                        this.persistentValues = persistentValues;
+                    }
+                    this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.LOAD, false);
+                    return this;
                 } else {
-                    MappedRecord source = objectHolder.getValue();
-                    MappedRecord persistentValues = newRecord(source.getRecordName());
-                    persistentValues.putAll(source);
-                    persistentValues.putAll(this.persistentValues);
-                    this.persistentValues = persistentValues;
+                    //
+                    // Shared
+                    //
+                    DataObject_1 composite = this.dataObjectManager.getObjectById(objectHolder.getResourceIdentifier());
+                    setInaccessibilityReason(
+                        new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.ILLEGAL_STATE,
+                            "Shared object proxy had to be replaced by composite object proxy",
+                            ExceptionHelper.newObjectIdParameter("shared", this),
+                            new BasicException.Parameter("composite", objectHolder.getResourceIdentifier())
+
+                        )
+                    );
+                    return composite.postLoad(objectHolder);
                 }
-                this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.LOAD, false);
-                return this;
-            } else {
-                //
-                // Shared
-                //
-                DataObject_1 composite = this.dataObjectManager.getObjectById(objectHolder.getResourceIdentifier()); 
-                setInaccessibilityReason(
-                    new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ILLEGAL_STATE,
-                        "Shared object proxy had to be replaced by composite object proxy",
-                        ExceptionHelper.newObjectIdParameter("shared", this),
-                        new BasicException.Parameter("composite", objectHolder.getResourceIdentifier())
-                        
-                    )
-                );
-                return composite.postLoad(objectHolder);
+            } finally {
+                this.loadLock = false;
             }
-        } finally {
-        	this.loadLock = false;
-        }
     }
 
     /**
      * Make the object inaccessible
      * 
-     * @param makeNonTransactional 
+     * @param makeNonTransactional
      */
     void invalidate(
         boolean makeNonTransactional
-    ){
-        if(makeNonTransactional) try {
-            this.getUnitOfWork().remove(this);
-        } catch (Exception ignored) {
-            // Just ignore it
-        }
+    ) {
+        if (makeNonTransactional)
+            try {
+                this.getUnitOfWork().remove(this);
+            } catch (Exception ignored) {
+                // Just ignore it
+            }
         this.clear();
         this.version = null;
         this.persistentValues = null;
@@ -846,25 +874,27 @@ public class DataObject_1
     /**
      * Ask the persistence framework for the object's content
      * 
-     * @param fetchPlan 
-     * @param features 
-     * @param refresh tells whether the (remote) object shall be 
-     * refreshed before answering the query
-     * @param throwNotFoundException 
+     * @param fetchPlan
+     * @param features
+     * @param refresh
+     *            tells whether the (remote) object shall be
+     *            refreshed before answering the query
+     * @param throwNotFoundException
      */
     @SuppressWarnings("unchecked")
     DataObject_1 unconditionalLoad(
-        FetchPlan fetchPlan, 
-        Set<String> features, 
-        boolean refresh, 
+        FetchPlan fetchPlan,
+        Set<String> features,
+        boolean refresh,
         boolean throwNotFoundException
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         try {
             Query_2Facade query = Query_2Facade.forObjectId(this);
-            if(fetchPlan != null) {
+            if (fetchPlan != null) {
                 query.setGroups(fetchPlan.getGroups());
             }
-            if(features != null) {
+            if (features != null) {
                 query.setFeatures(features);
             }
             query.setRefresh(refresh);
@@ -873,7 +903,7 @@ public class DataObject_1
                 this.dataObjectManager.getInteractionSpecs().GET,
                 query.getDelegate()
             );
-            if(reply == null || reply.isEmpty()) {
+            if (reply == null || reply.isEmpty()) {
                 this.setNotFound(jdoGetObjectId());
             } else {
                 this.setFound();
@@ -881,10 +911,10 @@ public class DataObject_1
             }
         } catch (ResourceException exception) {
             this.setInaccessibilityReason(new ServiceException(exception));
-        } catch (ServiceException exception){      
+        } catch (ServiceException exception) {
             setInaccessibilityReason(exception);
         }
-        if(throwNotFoundException || this.notFound == null){
+        if (throwNotFoundException || this.notFound == null) {
             throw getInaccessibilityReason(); // inaccessible
         } else {
             return null; // not found
@@ -900,104 +930,107 @@ public class DataObject_1
      */
     private void setInaccessibilityReason(
         ServiceException inaccessabilityReason
-    ){
+    ) {
         this.inaccessabilityReason = inaccessabilityReason;
         this.notFound = (inaccessabilityReason.getExceptionCode() == BasicException.Code.NOT_FOUND) ? ANONYMOUS_XRI : null;
         makeInaccessable();
     }
-    
+
     private void setNotFound(
         Path xri
-    ){
+    ) {
         this.notFound = xri == null ? ANONYMOUS_XRI : xri.toXRI();
         this.inaccessabilityReason = null; // lazily initialised
         makeInaccessable();
     }
 
-    private void setFound(){
+    private void setFound() {
         this.notFound = null;
         this.inaccessabilityReason = null;
     }
-    
+
     /**
      * @param inaccessabilityReason
      */
     private void makeInaccessable() {
-        if(this.dataObjectManager == null) {
+        if (this.dataObjectManager == null) {
             this.invalidate(
                 false // makeNonTransactional
             );
-        } else if(this.notFound == null) {
+        } else if (this.notFound == null) {
             this.invalidate(
                 true // makeNonTransactional
             );
-        } else try {
-            this.dataObjectManager.invalidate(
-                this.identity, 
-                true // makeNonTransactional
-            );
-        } catch (ServiceException exception) {
-            exception.log();
-        }
+        } else
+            try {
+                this.dataObjectManager.invalidate(
+                    this.identity,
+                    true // makeNonTransactional
+                );
+            } catch (ServiceException exception) {
+                exception.log();
+            }
     }
 
     /**
      * Evict the data object
      */
-    public void evictUnconditionally(
-    ){
+    public void evictUnconditionally() {
         clear();
         this.version = null;
         this.persistentValues = null;
     }
-    
+
     /**
-     * Refresh the data object 
+     * Refresh the data object
      * 
      * @throws ServiceException
      */
-    void refreshUnconditionally(
-    ) throws ServiceException {
+    void refreshUnconditionally()
+        throws ServiceException {
         this.evictUnconditionally();
         Container_1 container = this.getContainer(true);
-        if(container != null) {
+        if (container != null) {
             container.openmdxjdoEvict(false, true);
         }
         this.unconditionalLoad(
-    		this.dataObjectManager.getFetchPlan(), 
-    		null, // features
-    		true, // refresh
-    		true // throwNotFoundException
+            this.dataObjectManager.getFetchPlan(),
+            null, // features
+            true, // refresh
+            true // throwNotFoundException
         );
         evictReadLock();
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#getContainer(boolean)
      */
     public Container_1 getContainer(
         final boolean lazily
-    ){
-        if(this.container == null && this.jdoIsPersistent()) {
+    ) {
+        if (this.container == null && this.jdoIsPersistent()) {
             final Path identity = this.jdoGetObjectId();
             final int size = identity.size() - 2;
-            if(size > 0) {
+            if (size > 0) {
                 final Path parentId = identity.getPrefix(size);
-                if(!lazily || this.dataObjectManager.containsKey(parentId)) {
-                    final DataObject_1_0 parent = this.dataObjectManager.getObjectById(parentId, false); 
-                    if(!parent.objIsInaccessible()) try {
-                        this.container = (Container_1) parent.objGetContainer(
-                            identity.getSegment(size).toClassicRepresentation()
-                        );
-                    } catch (ServiceException exception) {
-                        return null; // As if the parent were inaccessible
-                    }
+                if (!lazily || this.dataObjectManager.containsKey(parentId)) {
+                    final DataObject_1_0 parent = this.dataObjectManager.getObjectById(parentId, false);
+                    if (!parent.objIsInaccessible())
+                        try {
+                            this.container = (Container_1) parent.objGetContainer(
+                                identity.getSegment(size).toClassicRepresentation()
+                            );
+                        } catch (ServiceException exception) {
+                            return null; // As if the parent were inaccessible
+                        }
                 }
             }
         }
         return this.container;
     }
-    
+
     /**
      * Let a Container_1 register itself to speed-up "lazy" retrieval
      * 
@@ -1005,91 +1038,90 @@ public class DataObject_1
      */
     void setContainer(
         Container_1 container
-    ){
+    ) {
         this.container = container;
     }
-    
+
     /**
      * Determines whether the object is <code>TRANSIENT</code> or <code>PERSISTENT_NEW</code>
      * 
      * @return <code>true</code> if the object is <code>TRANSIENT</code> or <code>PERSISTENT_NEW</code>
      */
-    protected boolean isTransientOrNew(){
+    protected boolean isTransientOrNew() {
         return !jdoIsPersistent() || jdoIsNew();
     }
-    
+
     /**
      * Retrieve this object's persistent aspects
      * 
      * @return the persistent aspects
      * 
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     @Override
-    public Container_1_0 getAspects(
-    ) throws ServiceException{
+    public Container_1_0 getAspects()
+        throws ServiceException {
         Container_1 container = this.getContainer(false);
-        if(container != null) {
-        	getAspects(container);
+        if (container != null) {
+            getAspects(container);
         }
         return this.aspects;
     }
 
     Container_1_0 getAspects(Container_1 container) {
-		if(this.aspects == null || container != this.aspects.container()) {
-		    this.aspects = container.subMap(
-		        new Filter(
-		            new IsInCondition(
-		                Quantifier.THERE_EXISTS,
-		                SystemAttributes.CORE,
-		                true, // IS_IN,
-		                this.jdoIsPersistent() ? this.jdoGetObjectId() : this.jdoGetTransactionalObjectId()
-		            )
-		        )
-		    );
-		    if(this.aspects instanceof Selection_1) {
-		    	final Selection_1 selection = (Selection_1)this.aspects;
-		    	if(isTransientOrNew()) {
-					selection.markAsEmpty();
-		    	}
-		    }
-		    
-		}
-		return this.aspects;
-	}
+        if (this.aspects == null || container != this.aspects.container()) {
+            this.aspects = container.subMap(
+                new Filter(
+                    new IsInCondition(
+                        Quantifier.THERE_EXISTS,
+                        SystemAttributes.CORE,
+                        true, // IS_IN,
+                        this.jdoIsPersistent() ? this.jdoGetObjectId() : this.jdoGetTransactionalObjectId()
+                    )
+                )
+            );
+            if (this.aspects instanceof Selection_1) {
+                final Selection_1 selection = (Selection_1) this.aspects;
+                if (isTransientOrNew()) {
+                    selection.markAsEmpty();
+                }
+            }
 
-    Container_1_0 aspects(){
-    	return this.aspects;
+        }
+        return this.aspects;
     }
-    
-    boolean isQualified(){
+
+    Container_1_0 aspects() {
+        return this.aspects;
+    }
+
+    boolean isQualified() {
         return this.jdoIsPersistent() || this.qualifier != null;
     }
-    
-    String getQualifier(
-    ){
+
+    String getQualifier() {
         return this.jdoIsPersistent() ? this.jdoGetObjectId().getLastSegment().toClassicRepresentation() : this.qualifier;
     }
 
     /**
-     * The transient qualifier is used when an object is added without 
+     * The transient qualifier is used when an object is added without
      * qualifier to a transient container
      * 
      * @return the object's transient qualifier
      */
-    String getPlaceHolder(){
+    String getPlaceHolder() {
         return ":" + this.transientObjectId;
     }
-    
+
     /**
      * Retrieve the unit of work
      * 
      * @return the layer specific unit of work
      * 
-     * @throws JDOUserException in case of an invalid object 
+     * @throws JDOUserException
+     *             in case of an invalid object
      */
-    public final UnitOfWork_1 getUnitOfWork(
-    ){
+    public final UnitOfWork_1 getUnitOfWork() {
         if (this.dataObjectManager == null) {
             throw BasicException.initHolder(
                 new JDOUserException(
@@ -1100,7 +1132,7 @@ public class DataObject_1
                         ExceptionHelper.newObjectIdParameter("id", this)
                     )
                 )
-            );  
+            );
         }
         return this.dataObjectManager.currentUnitOfWork();
     }
@@ -1108,32 +1140,43 @@ public class DataObject_1
     /**
      * Retrieve the unit of work
      * 
-     * @param a feature to be marked dirty, or <code>null</code>
+     * @param featureName
+     *            name of the feature to be marked dirty
      * 
-     * @return the unit of work or <code>null</code> for non-transactional access
+     * @return the unit of work or {@code null} for non-transactional access
      * 
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     final UnitOfWork_1 getUnitOfWorkIfTransactional(
-        String makeDirty
-    ) throws ServiceException {
-        UnitOfWork_1 unitOfWork = this.getUnitOfWork(); 
-        boolean transactional = makeDirty != null && this.jdoIsPersistent();
-        if(transactional) {
+        String featureName
+    )
+        throws ServiceException {
+        final UnitOfWork_1 unitOfWork = this.getUnitOfWork();
+        if (this.jdoIsPersistent()) {
             this.addTo(unitOfWork);
-        } else {
-            transactional = unitOfWork.isMember(this);
-        }
-        if(transactional) {
-            if(makeDirty != null) {
-                TransactionalState_1 state = unitOfWork.getState(this,false);
-                state.setPrepared(false);
-                state.dirtyFeatures(false).add(makeDirty);
-            }
-            return unitOfWork;
-        } else {
+        } else if (!unitOfWork.isMember(this)) {
             return null;
         }
+        TransactionalState_1 state = unitOfWork.getState(this, false);
+        state.setPrepared(false);
+        state.dirtyFeatures(false).add(featureName);
+        return unitOfWork;
+    }
+
+    /**
+     * Retrieve the unit of work
+     * 
+     * @param featureName
+     *            name of the feature to be marked dirty
+     * 
+     * @return the unit of work or {@code null} for non-transactional access
+     * 
+     * @throws ServiceException
+     */
+    final UnitOfWork_1 getUnitOfWorkIfTransactional()
+        throws ServiceException {
+        final UnitOfWork_1 unitOfWork = this.getUnitOfWork();
+        return unitOfWork.isMember(this) ? unitOfWork : null;
     }
 
     /**
@@ -1141,74 +1184,78 @@ public class DataObject_1
      * <p>
      * This method is idempotent.
      *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if no unit of work is in progress
-     * @exception   ServiceException
-     *              if the object can't be added to the unit of work for
+     * @exception ServiceException
+     *                ILLEGAL_STATE
+     *                if no unit of work is in progress
+     * @exception ServiceException
+     *                if the object can't be added to the unit of work for
      *                another reason.
      */
-    void objMakeTransactional(
-    ) throws ServiceException {
-        this.addTo(getUnitOfWork()); 
+    void objMakeTransactional()
+        throws ServiceException {
+        this.addTo(getUnitOfWork());
     }
 
     /**
-     * An object is touched when a non query operation is invoked
-     * @throws ServiceException 
+     * An object is touched either explicitly or when a non query operation is invoked
+     * 
+     * @throws ServiceException
+     *             in case of failure
      */
-    public void touch(
-    ) throws ServiceException{
+    @Override
+    public void touch()
+        throws ServiceException {
         objMakeTransactional();
-        this.getUnitOfWork().getState(this,false).touch();
+        this.getUnitOfWork().getState(this, false).touch();
     }
-    
+
     /**
      * Add to unit of work
      * 
      * @param unitOfWork
      * 
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     private final void addTo(
         UnitOfWork_1 unitOfWork
-    ) throws ServiceException {
-        if(unitOfWork.add(this)) {
-            if(this.transientValues == null){
+    )
+        throws ServiceException {
+        if (unitOfWork.add(this)) {
+            if (this.transientValues == null) {
                 this.objRetrieve(
                     false, // reload
-                    this.dataObjectManager.getFetchPlan(), 
+                    this.dataObjectManager.getFetchPlan(),
                     null, // features
                     false, // beforeImage
                     true // throwNotFoundException
                 );
             } else {
-                unitOfWork.getState(this,false).setValues(this.transientValues, this.jdoIsNew());
+                unitOfWork.getState(this, false).setValues(this.transientValues, this.jdoIsNew());
                 this.transientValues = null;
             }
-            if(
-            	unitOfWork.isReadLockRequired() &&
-            	this.jdoIsPersistent() && !this.jdoIsNew() && 
-            	isModifiable() && !isRemovable()
-            ) {
-            	this.lock = LockAssertions.newReadLockAssertion(unitOfWork.getTransactionTime());
+            if (unitOfWork.isReadLockRequired() &&
+                this.jdoIsPersistent() && !this.jdoIsNew() &&
+                isModifiable() && !isRemovable()) {
+                this.lock = LockAssertions.newReadLockAssertion(unitOfWork.getTransactionTime());
             }
         }
     }
-    
+
     /**
      * After this call the object ignores unit of work boundaries.
      * <p>
      * This method is idempotent.
      *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if the object is dirty.
-     * @exception   ServiceException
-     *              if the object can't be removed from its unit of work for
+     * @exception ServiceException
+     *                ILLEGAL_STATE
+     *                if the object is dirty.
+     * @exception ServiceException
+     *                if the object can't be removed from its unit of work for
      *                another reason
      */
-    void objMakeNontransactional(
-    ) throws ServiceException {
-        if(this.jdoIsDirty()) {
+    void objMakeNontransactional()
+        throws ServiceException {
+        if (this.jdoIsDirty()) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
@@ -1217,25 +1264,26 @@ public class DataObject_1
         }
         getUnitOfWork().remove(this);
     }
-    
+
     /**
      * This method clones this data object
      *
-     * @parame exclude the features not to be cloned
+     * @param exclude
+     *            the features not to be cloned
      *
      * @return the clone
      */
     @Override
     public DataObject_1_0 openmdxjdoClone(
-    	String... exclude
+        String... exclude
     ) {
         try {
             return new DataObject_1(
-                this, 
+                this,
                 false, // beforeImage
                 exclude
             );
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new JDOUserException(
                 "Unable to clone object",
                 e,
@@ -1243,63 +1291,68 @@ public class DataObject_1
             );
         }
     }
-    
+
     /**
      * The move operation moves the object to the scope of the container
      * passed as the first parameter. The object remains valid after move has
      * successfully executed.
      *
-     * @param     there
+     * @param there
      *            the object's new container.
-     * @param     criteria
+     * @param criteria
      *            The criteria is used to move the object to the container or
      *            <code>null</null>, in which case it is up to the
      *            implementation to define the criteria.
      *
-     * @exception ServiceException  ILLEGAL_STATE
+     * &#64;exception ServiceException  ILLEGAL_STATE
      *            if the object is persistent.
-     * @exception ServiceException BAD_PARAMETER
+     * &#64;exception ServiceException BAD_PARAMETER
      *            if <code>there</code> is not an instance of <code>DelegatingContainer</code>.
      * @exception ServiceException
-     *            if the move operation fails.
+     *                if the move operation fails.
      */
     @Override
     public void objMove(
-        Container_1_0 there,
-        String criteria
-    ) throws ServiceException {
+        final Container_1_0 there,
+        final String criteria
+    )
+        throws ServiceException {
         //
         // Validate the arguments
         //
-        if(there == null){
+        if (there == null) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
                 "The container is null"
             );
-        } 
+        }
         final Container_1_0 newContainer = there.container();
-		if (this.jdoIsPersistent()) {
+        if (this.jdoIsPersistent()) {
             final Container_1 oldContainer = this.getContainer(true);
-			throw new ServiceException(
+            throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
                 "Attempt to move a persistent object",
                 ExceptionHelper.newObjectIdParameter("id", this),
-                new BasicException.Parameter("old", ReducedJDOHelper.getTransactionalObjectId(oldContainer), ReducedJDOHelper.getObjectId(oldContainer)),
-                new BasicException.Parameter("new", ReducedJDOHelper.getTransactionalObjectId(newContainer), ReducedJDOHelper.getObjectId(newContainer))
+                new BasicException.Parameter(
+                    "old", ReducedJDOHelper.getTransactionalObjectId(oldContainer), ReducedJDOHelper.getObjectId(oldContainer)
+                ),
+                new BasicException.Parameter(
+                    "new", ReducedJDOHelper.getTransactionalObjectId(newContainer), ReducedJDOHelper.getObjectId(newContainer)
+                )
             );
         }
         this.container = (Container_1) newContainer;
         //
         // Set the container
         //
-        if(this.container.jdoIsPersistent()){
+        if (this.container.jdoIsPersistent()) {
             String qualifier = criteria;
-            for(PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
+            for (PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
                 qualifier = plugIn.getQualifier(this, qualifier);
             }
-            if(qualifier == null) {
+            if (qualifier == null) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
@@ -1307,11 +1360,11 @@ public class DataObject_1
                     ExceptionHelper.newObjectIdParameter("id", this),
                     new BasicException.Parameter("criteria", criteria)
                 );
-            }            
+            }
             Path identity = this.container.jdoGetObjectId().getChild(qualifier);
             boolean flushed = false;
-            if(PathComponent.isPlaceHolder(qualifier)) {
-                if(isProxy()) {
+            if (ClassicSegments.isPlaceholder(qualifier)) {
+                if (isProxy()) {
                     this.objMakeTransactional();
                     TransactionalState_1 state = this.getState(false);
                     state.setLifeCycleEventPending(true);
@@ -1325,55 +1378,55 @@ public class DataObject_1
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.BAD_PARAMETER,
                         "The qualifier must be neither null nor a place holder unless the container is a proxy",
-                        new BasicException.Parameter("container",container.jdoGetObjectId()),
-                        new BasicException.Parameter("qualifier",qualifier),
-                        new BasicException.Parameter("proxy",Boolean.FALSE)
+                        new BasicException.Parameter("container", container.jdoGetObjectId()),
+                        new BasicException.Parameter("qualifier", qualifier),
+                        new BasicException.Parameter("proxy", Boolean.FALSE)
                     );
                 }
-            } else if(this.dataObjectManager.containsKey(identity)) {
+            } else if (this.dataObjectManager.containsKey(identity)) {
                 DataObject_1_0 collision = this.dataObjectManager.getObjectById(identity, false);
-                if(collision != this) {
+                if (collision != this) {
                     try {
                         collision.objGetClass();
                     } catch (Exception exception) {
                         // The candidate could be evicted now
                     }
-                    if(this.dataObjectManager.containsKey(identity)) {
+                    if (this.dataObjectManager.containsKey(identity)) {
                         this.getState(false).setLifeCycleEventPending(false);
                         this.container = null;
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.DUPLICATE,
                             "There is already an object with the same qualifier in the container",
-                            new BasicException.Parameter("xri",identity)
+                            new BasicException.Parameter(BasicException.Parameter.XRI, identity)
                         );
-                    }                    
+                    }
                 }
             }
             DataObject_1 parent = this.dataObjectManager.getObjectById(
                 identity.getPrefix(identity.size() - 2),
                 false
-            ); 
+            );
             parent.objMakeTransactional();
             parent.setExistence(identity, true);
             this.makePersistent(
-                identity, 
+                identity,
                 flushed // already flushed
             );
-            for(Flushable flushable : this.flushableValues.values()){
-                if(flushable instanceof Container_1){
+            for (Flushable flushable : this.flushableValues.values()) {
+                if (flushable instanceof Container_1) {
                     this.makePersistent(
-                        (Container_1)flushable,
+                        (Container_1) flushable,
                         false // aspect
                     );
                     this.makePersistent(
-                        (Container_1)flushable,
+                        (Container_1) flushable,
                         true // aspect
                     );
                 } else if (flushable instanceof ManagedAspect) {
                     ManagedAspect managedAspect = (ManagedAspect) flushable;
                     managedAspect.evict();
-                    if(this.created){
+                    if (this.created) {
                         managedAspect.move();
                     }
                 }
@@ -1381,28 +1434,28 @@ public class DataObject_1
             if (container.isRetrieved()) {
                 String key = getCacheKey();
                 if (key == null) {
-                   this.container.addToCache(qualifier, this);
+                    this.container.addToCache(qualifier, this);
                 } else if (!key.equals(qualifier)) {
-                   this.container.removeFromChache(key);
-                   this.container.addToCache(qualifier, this);
+                    this.container.removeFromChache(key);
+                    this.container.addToCache(qualifier, this);
                 }
-            }            
+            }
         } else {
             //
             // Add to a transient container
             //
-            if(criteria == null) {
+            if (criteria == null) {
                 this.container.addToCache(
                     this.getPlaceHolder(),
                     this
                 );
             } else {
                 this.container.addToCache(
-                    this.qualifier = criteria, 
+                    this.qualifier = criteria,
                     this
                 );
-                for(Flushable flushable : this.flushableValues.values()){
-                    if(flushable instanceof ManagedAspect) {
+                for (Flushable flushable : this.flushableValues.values()) {
+                    if (flushable instanceof ManagedAspect) {
                         ((ManagedAspect) flushable).move();
                     }
                 }
@@ -1415,48 +1468,50 @@ public class DataObject_1
      * 
      * @return the object's registration key, or <code>null<code> if it is not cached
      */
-    private String getCacheKey(
-    ){
+    private String getCacheKey() {
         for (Map.Entry<String, DataObject_1_0> e : this.container.getCache().entrySet()) {
-           if (e.getValue() == this) {
-              return e.getKey();
-           }
+            if (e.getValue() == this) {
+                return e.getKey();
+            }
         }
         return null;
     }
-    
+
     /**
      * Make an object persistent ignoring its container and callbacks
      * 
-     * @param identity the object id
-     * @param flushed <code>true</code> if the object is alread flushed
-     * @throws ServiceException  
+     * @param identity
+     *            the object id
+     * @param flushed
+     *            <code>true</code> if the object is alread flushed
+     * @throws ServiceException
      */
     public void makePersistent(
-        Path identity, 
+        Path identity,
         boolean flushed
-    ) throws ServiceException {
-        if(!flushed){
+    )
+        throws ServiceException {
+        if (!flushed) {
             TransactionalState_1 state = this.getState(false);
             state.setLifeCycleEventPending(true);
             this.created = true;
             this.identity = identity;
         }
-        if(this.transientObjectId == null) {
+        if (this.transientObjectId == null) {
             this.dataObjectManager.putUnlessPresent(identity, this);
-        }  else {
-            this.dataObjectManager.move(this.transientObjectId,identity);
+        } else {
+            this.dataObjectManager.move(this.transientObjectId, identity);
         }
-        if(!flushed){
+        if (!flushed) {
             this.objMakeTransactional();
         }
-        if(!this.untouchable) {
+        if (!this.untouchable) {
             this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.CREATE, false);
         }
     }
-    
+
     /**
-     * Make either the aspects or other descendants persistent 
+     * Make either the aspects or other descendants persistent
      * 
      * @param descendants
      * @param aspect
@@ -1466,13 +1521,14 @@ public class DataObject_1
     private void makePersistent(
         Container_1 descendants,
         boolean aspect
-    ) throws ServiceException{
-        Map<String,DataObject_1_0> children = new LinkedHashMap<String,DataObject_1_0>();
-        for(Map.Entry<String,DataObject_1_0> child : descendants.entrySet()) {
+    )
+        throws ServiceException {
+        Map<String, DataObject_1_0> children = new LinkedHashMap<String, DataObject_1_0>();
+        for (Map.Entry<String, DataObject_1_0> child : descendants.entrySet()) {
             final DataObject_1_0 value = child.getValue();
-			if(!value.jdoIsPersistent()) {
+            if (!value.jdoIsPersistent()) {
                 final String key = child.getKey();
-				if(aspect == (PathComponent.isPlaceHolder(key) && new PathComponent(key).size() == 3)){    
+                if (aspect == ClassicSegments.getCoreComponentFromAspectQualifierPlaceholder(key).isPresent()) {
                     children.put(
                         key,
                         value
@@ -1480,14 +1536,14 @@ public class DataObject_1
                 }
             }
         }
-        for(Map.Entry<String,DataObject_1_0> child : children.entrySet()) {
+        for (Map.Entry<String, DataObject_1_0> child : children.entrySet()) {
             child.getValue().objMove(
                 descendants,
                 child.getKey()
             );
         }
     }
-    
+
     /**
      * Retrieve the meta object
      * 
@@ -1495,10 +1551,11 @@ public class DataObject_1
      * 
      * @throws ServiceException
      */
-    ModelElement_1_0 getClassifier() throws ServiceException{
+    ModelElement_1_0 getClassifier()
+        throws ServiceException {
         return getModel().getElement(this.objGetClass());
     }
-    
+
     /**
      * Removes an object.
      * <p>
@@ -1507,15 +1564,17 @@ public class DataObject_1
      * <code>isDeleted()</code> will return <code>true</code> unless the
      * object has been transient.
      * 
-     * @param updateCache 
-     * @exception   ServiceException NOT_SUPPORTED
-     *              If the object refuses to be removed.
-     * @exception   ServiceException
-     *              if the object can't be removed
+     * @param updateCache
+     * @exception ServiceException
+     *                NOT_SUPPORTED
+     *                If the object refuses to be removed.
+     * @exception ServiceException
+     *                if the object can't be removed
      */
     void objRemove(
         boolean updateCache
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         objRemove();
     }
 
@@ -1527,44 +1586,45 @@ public class DataObject_1
      * <code>isDeleted()</code> will return <code>true</code> unless the
      * object has been transient.
      * 
-     * @exception   ServiceException NOT_SUPPORTED
-     *              If the object refuses to be removed.
-     * @exception   ServiceException
-     *              if the object can't be removed
+     * @exception ServiceException
+     *                NOT_SUPPORTED
+     *                If the object refuses to be removed.
+     * @exception ServiceException
+     *                if the object can't be removed
      */
-    void objRemove(
-    ) throws ServiceException {
+    void objRemove()
+        throws ServiceException {
         Model_1_0 model = getModel();
         //
         // Cascade Removal To Children
         //
-        if(!this.jdoIsPersistent()) {
+        if (!this.jdoIsPersistent()) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
                 "Attempt to remove a transient object"
             );
         }
-        if(this.jdoIsNew()) {
-            for(Flushable flushable : this.flushableValues.values()) {
-                if(flushable instanceof Container_1) {
-                	for (DataObject_1_0 child : ((Container_1)flushable).values()) {
-                		//
-                		// Be aware that an aspect could have been removed by its core for example
-                		//
-                		if(child instanceof DataObject_1) {
-                			((DataObject_1)child).objRemove();
-                		}
-                	}
+        if (this.jdoIsNew()) {
+            for (Flushable flushable : this.flushableValues.values()) {
+                if (flushable instanceof Container_1) {
+                    for (DataObject_1_0 child : ((Container_1) flushable).values()) {
+                        //
+                        // Be aware that an aspect could have been removed by its core for example
+                        //
+                        if (child instanceof DataObject_1) {
+                            ((DataObject_1) child).objRemove();
+                        }
+                    }
                 }
             }
         } else {
-            CascadeDelete: for(PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
-                if(plugIn.requiresCallbackOnCascadedDelete(this)) {
-                    for(Map.Entry<String, ModelElement_1_0> e : getClassifier().objGetMap("allFeature").entrySet()){
+            CascadeDelete: for (PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
+                if (plugIn.requiresCallbackOnCascadedDelete(this)) {
+                    for (Map.Entry<String, ModelElement_1_0> e : getClassifier().objGetMap("allFeature").entrySet()) {
                         ModelElement_1_0 featureDef = e.getValue();
-                        if(model.isReferenceType(featureDef)) {
-                            if(AggregationKind.COMPOSITE.equals(model.getElement(featureDef.getReferencedEnd()).getAggregation())){
+                        if (model.isReferenceType(featureDef)) {
+                            if (AggregationKind.COMPOSITE.equals(model.getElement(featureDef.getReferencedEnd()).getAggregation())) {
                                 this.dataObjectManager.deletePersistentAll(
                                     this.objGetContainer(e.getKey()).values()
                                 );
@@ -1585,14 +1645,12 @@ public class DataObject_1
         //
         // Cascade Removal To Aspects
         //
-        if(
-            model.isInstanceof(this, "org:openmdx:base:AspectCapable") &&
-            !model.isInstanceof(this, "org:openmdx:base:Aspect")
-        ){
+        if (model.isInstanceof(this, "org:openmdx:base:AspectCapable") &&
+            !model.isInstanceof(this, "org:openmdx:base:Aspect")) {
             this.getAspects().clear();
         }
         Container_1 container = this.getContainer(true);
-        if(container != null) {
+        if (container != null) {
             container.removeFromChache(this.identity.getLastSegment().toClassicRepresentation());
         }
     }
@@ -1602,8 +1660,9 @@ public class DataObject_1
      * 
      * @throws ServiceException
      */
-    void prepare() throws ServiceException {
-        if(!this.untouchable && this.jdoIsDirty() && !this.jdoIsDeleted()) {
+    void prepare()
+        throws ServiceException {
+        if (!this.untouchable && this.jdoIsDirty() && !this.jdoIsDeleted()) {
             this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.STORE, false);
         }
         this.getState(false).setPrepared(true);
@@ -1612,47 +1671,49 @@ public class DataObject_1
     /**
      * Propagate new instances if necessary
      * 
-     * @exception   ServiceException
-     *              if the object can't be flushed
-     * @throws ResourceException 
+     * @exception ServiceException
+     *                if the object can't be flushed
+     * @throws ResourceException
      */
     void propagate(
         Interaction interaction
-    ) throws ServiceException, ResourceException {
+    )
+        throws ServiceException,
+        ResourceException {
         TransactionalState_1 state = this.getState(false);
-        if(state.isLifeCycleEventPending()){
+        if (state.isLifeCycleEventPending()) {
             ObjectRecord input;
-			if(!state.isFlushed()) {
-				final String base = this.identity.getLastSegment().toClassicRepresentation();
-				if(PathComponent.isPlaceHolder(base)) {
-					input = Records.getRecordFactory().createMappedRecord(ObjectRecord.class);
-					input.setTransientObjectId(this.jdoGetTransactionalObjectId());
-					if(this.transactionalValuesRecordName != null) {
-						input.setValue(
-							Records.getRecordFactory().createMappedRecord(this.transactionalValuesRecordName)
-						);
-					}
-	                interaction.execute(
-	                    this.dataObjectManager.getInteractionSpecs().CREATE,
-	                    input
-	                );
-	                state.setFlushed(true);
-				}
+            if (!state.isFlushed()) {
+                final String base = this.identity.getLastSegment().toClassicRepresentation();
+                if (ClassicSegments.isPlaceholder(base)) {
+                    input = Records.getRecordFactory().createMappedRecord(ObjectRecord.class);
+                    input.setTransientObjectId(this.jdoGetTransactionalObjectId());
+                    if (this.transactionalValuesRecordName != null) {
+                        input.setValue(
+                            Records.getRecordFactory().createMappedRecord(this.transactionalValuesRecordName)
+                        );
+                    }
+                    interaction.execute(
+                        this.dataObjectManager.getInteractionSpecs().CREATE,
+                        input
+                    );
+                    state.setFlushed(true);
+                }
             }
-			input = Records.getRecordFactory().createMappedRecord(ObjectRecord.class);
-			input.setResourceIdentifier(this.identity);
-			if(this.transactionalValuesRecordName != null) {
-				input.setValue(
-					Records.getRecordFactory().createMappedRecord(this.transactionalValuesRecordName)
-				);
-			}
-            if(state.isFlushed()) {
-            	input.setTransientObjectId(this.transientObjectId);
+            input = Records.getRecordFactory().createMappedRecord(ObjectRecord.class);
+            input.setResourceIdentifier(this.identity);
+            if (this.transactionalValuesRecordName != null) {
+                input.setValue(
+                    Records.getRecordFactory().createMappedRecord(this.transactionalValuesRecordName)
+                );
+            }
+            if (state.isFlushed()) {
+                input.setTransientObjectId(this.transientObjectId);
                 Record reply = interaction.execute(
                     this.dataObjectManager.getInteractionSpecs().MOVE,
                     input
                 );
-                final ObjectRecord persistent = (ObjectRecord)((IndexedRecord)reply).get(0);
+                final ObjectRecord persistent = (ObjectRecord) ((IndexedRecord) reply).get(0);
                 this.identity = persistent.getResourceIdentifier();
             } else {
                 interaction.execute(
@@ -1660,32 +1721,33 @@ public class DataObject_1
                     input
                 );
             }
-        }        
+        }
     }
 
     /**
      * Flush the state of the instance to its provider.
      * 
      * @param interaction
-     * @param beforeCompletion 
+     * @param beforeCompletion
      * 
-     * @exception   ServiceException
-     *              if the object can't be flushed
+     * @exception ServiceException
+     *                if the object can't be flushed
      */
     void flush(
-        Interaction interaction, 
+        Interaction interaction,
         boolean beforeCompletion
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         TransactionalState_1 state = this.getState(false);
-        if(beforeCompletion && !this.untouchable && jdoIsPersistent() && !isProxy()){
-            validate(state);   
+        if (beforeCompletion && !this.untouchable && jdoIsPersistent() && !isProxy()) {
+            validate(state);
         }
         flushStructuralFeatures(interaction, state);
         flushBehaviouralFeatures(interaction, state);
         state.setDirtyFeaturesFlushed();
-        if(!beforeCompletion) {
-    		evictReadLock();
-			evictWriteLock();
+        if (!beforeCompletion) {
+            evictReadLock();
+            evictWriteLock();
         }
     }
 
@@ -1696,37 +1758,39 @@ public class DataObject_1
      */
     private void validate(
         TransactionalState_1 state
-    ) throws ServiceException {
-        if(jdoIsDeleted()) return;
+    )
+        throws ServiceException {
+        if (jdoIsDeleted())
+            return;
         Collection<String> missing = null;
         ModelElement_1_0 classifier = getClassifier();
-        if(jdoIsNew()) {
+        if (jdoIsNew()) {
             Map<String, ModelElement_1_0> attributes = classifier.getModel().getAttributeDefs(
                 classifier,
                 false, // sub-types
                 true // includeDerived
             );
-            for(Map.Entry<String, ModelElement_1_0> attribute : attributes.entrySet()){
-                if(cardinalityIsInvalid(classifier, attribute.getValue())) {
-                    if(missing == null) {
+            for (Map.Entry<String, ModelElement_1_0> attribute : attributes.entrySet()) {
+                if (cardinalityIsInvalid(classifier, attribute.getValue())) {
+                    if (missing == null) {
                         missing = new ArrayList<String>();
                     }
                     missing.add(attribute.getKey());
                 }
             }
-        } else if (jdoIsDirty()){
+        } else if (jdoIsDirty()) {
             Map<String, ModelElement_1_0> attributes = getAttributes();
-            for(String feature : state.dirtyFeatures(true)) {
+            for (String feature : state.dirtyFeatures(true)) {
                 ModelElement_1_0 attribute = attributes.get(feature);
-                if(cardinalityIsInvalid(classifier, attribute)) {
-                    if(missing == null) {
+                if (cardinalityIsInvalid(classifier, attribute)) {
+                    if (missing == null) {
                         missing = new ArrayList<String>();
                     }
                     missing.add(feature);
                 }
             }
         }
-        if(missing != null) {
+        if (missing != null) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.VALIDATION_FAILURE,
@@ -1748,16 +1812,20 @@ public class DataObject_1
      *
      * @throws ServiceException
      */
-    private boolean cardinalityIsInvalid(ModelElement_1_0 classDef, ModelElement_1_0 featureDef) throws ServiceException {
-       if (isMandatory(featureDef) && !dataObjectManager.isExemptFromValidation(this, featureDef) && isPersistent(featureDef)) {
-          String featureName = featureDef.getName();
-          if(!ModelHelper.isFeatureHeldByCore(classDef, featureName)) {
-              return this.objGetValue(featureName) == null;
-          }
-       }
-       return false;
-    }     
-    
+    private boolean cardinalityIsInvalid(
+        ModelElement_1_0 classDef,
+        ModelElement_1_0 featureDef
+    )
+        throws ServiceException {
+        if (isMandatory(featureDef) && !dataObjectManager.isExemptFromValidation(this, featureDef) && isPersistent(featureDef)) {
+            String featureName = featureDef.getName();
+            if (!ModelHelper.isFeatureHeldByCore(classDef, featureName)) {
+                return this.objGetValue(featureName) == null;
+            }
+        }
+        return false;
+    }
+
     /**
      * Initialize a newly created object record
      * 
@@ -1765,26 +1833,27 @@ public class DataObject_1
      * @param values
      * 
      * @return the initialize facade
-     * @throws ResourceException 
+     * @throws ResourceException
      */
     private ObjectRecord newInput(
-    	boolean transactionalId,
-    	MappedRecord values
-    ) throws ResourceException {
-    	ObjectRecord input = Records.getRecordFactory().createMappedRecord(ObjectRecord.class);
-    	if(transactionalId) {
-    		input.setTransientObjectId(this.jdoGetTransactionalObjectId());
-    	} else {
-    		input.setResourceIdentifier(this.jdoGetObjectId());
-    	}
+        boolean transactionalId,
+        MappedRecord values
+    )
+        throws ResourceException {
+        ObjectRecord input = Records.getRecordFactory().createMappedRecord(ObjectRecord.class);
+        if (transactionalId) {
+            input.setTransientObjectId(this.jdoGetTransactionalObjectId());
+        } else {
+            input.setResourceIdentifier(this.jdoGetObjectId());
+        }
         input.setVersion(this.jdoGetVersion());
         input.setLock(this.lock);
-        if(values != null) {
-	        input.setValue(values);
+        if (values != null) {
+            input.setValue(values);
         }
-    	return input;
+        return input;
     }
-    	
+
     /**
      * Flush structural features
      * 
@@ -1798,18 +1867,19 @@ public class DataObject_1
     private void flushStructuralFeatures(
         Interaction interaction,
         TransactionalState_1 state
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         try {
-            if(!jdoIsPersistent() && state.isLifeCycleEventPending()) {
-                Map<String,Object> transactionalValues = state.values(false);
-                if(this.persistentValues == null) {
+            if (!jdoIsPersistent() && state.isLifeCycleEventPending()) {
+                Map<String, Object> transactionalValues = state.values(false);
+                if (this.persistentValues == null) {
                     this.persistentValues = newRecord(this.transactionalValuesRecordName);
                 }
-                for(Map.Entry<String,Object> e : transactionalValues.entrySet()) {
+                for (Map.Entry<String, Object> e : transactionalValues.entrySet()) {
                     String feature = e.getKey();
                     Object source = e.getValue();
                     Flushable flushable = this.flushableValues.get(feature);
-                    if(flushable != null) {
+                    if (flushable != null) {
                         try {
                             flushable.flush();
                         } catch (IOException exception) {
@@ -1819,12 +1889,12 @@ public class DataObject_1
                         this.persistentValues.put(
                             feature,
                             source == null ? null : this.getMarshaller(feature).unmarshal(source)
-                        );                    
+                        );
                     }
                 }
                 final ObjectRecord input = newInput(
-                	true,
-                	this.persistentValues
+                    true,
+                    this.persistentValues
                 );
                 interaction.execute(
                     this.dataObjectManager.getInteractionSpecs().CREATE,
@@ -1832,13 +1902,13 @@ public class DataObject_1
                 );
                 state.setLifeCycleEventPending(false);
                 state.setFlushed(true);
-            } else if(this.jdoIsDeleted()){
-                if(state.isLifeCycleEventPending()){
-                    if(!this.jdoIsNew() || state.isFlushed()) {
+            } else if (this.jdoIsDeleted()) {
+                if (state.isLifeCycleEventPending()) {
+                    if (!this.jdoIsNew() || state.isFlushed()) {
                         String objectClass = DataObject_1.getRecordName(this, false);
-						final ObjectRecord input = newInput(
-                        	false,
-                        	objectClass == null ? null : Records.getRecordFactory().createMappedRecord(objectClass)
+                        final ObjectRecord input = newInput(
+                            false,
+                            objectClass == null ? null : Records.getRecordFactory().createMappedRecord(objectClass)
                         );
                         interaction.execute(
                             this.dataObjectManager.getInteractionSpecs().DELETE,
@@ -1848,20 +1918,20 @@ public class DataObject_1
                     }
                     state.setLifeCycleEventPending(false);
                 }
-            } else if(this.jdoIsNew() && state.isLifeCycleEventPending()) {
-                Map<String,Object> transactionalValues = state.values(false);
-                if(this.persistentValues == null) {
+            } else if (this.jdoIsNew() && state.isLifeCycleEventPending()) {
+                Map<String, Object> transactionalValues = state.values(false);
+                if (this.persistentValues == null) {
                     this.persistentValues = newRecord(this.transactionalValuesRecordName);
                 }
-                for(Map.Entry<String,Object> e : transactionalValues.entrySet()) {
+                for (Map.Entry<String, Object> e : transactionalValues.entrySet()) {
                     String feature = e.getKey();
                     Object source = e.getValue();
                     Flushable flushable = this.flushableValues.get(feature);
-                    if(flushable == null) {
+                    if (flushable == null) {
                         this.persistentValues.put(
                             feature,
                             source == null ? null : this.getMarshaller(feature).unmarshal(source)
-                        );                    
+                        );
                     } else {
                         try {
                             flushable.flush();
@@ -1871,12 +1941,12 @@ public class DataObject_1
                     }
                 }
                 final ObjectRecord input;
-                if(this.isProxy()) {
-                    if(PathComponent.isPlaceHolder(this.identity.getLastSegment().toClassicRepresentation())) {
-                    	input = newInput(
-                    		true,
-                    		this.persistentValues
-                    	);
+                if (this.isProxy()) {
+                    if (ClassicSegments.isPlaceholder(this.identity.getLastSegment().toClassicRepresentation())) {
+                        input = newInput(
+                            true,
+                            this.persistentValues
+                        );
                         interaction.execute(
                             this.dataObjectManager.getInteractionSpecs().CREATE,
                             input
@@ -1887,31 +1957,31 @@ public class DataObject_1
                             this.dataObjectManager.getInteractionSpecs().MOVE,
                             input
                         );
-                        final ObjectRecord persistent =(ObjectRecord)((IndexedRecord)reply).get(0);
-                        this.identity  = persistent.getResourceIdentifier();
+                        final ObjectRecord persistent = (ObjectRecord) ((IndexedRecord) reply).get(0);
+                        this.identity = persistent.getResourceIdentifier();
                     } else {
-                    	input = newInput(
-                    		false,
-                    		this.persistentValues
-                    	);
+                        input = newInput(
+                            false,
+                            this.persistentValues
+                        );
                         interaction.execute(
                             this.dataObjectManager.getInteractionSpecs().UPDATE,
                             input
                         );
                     }
                     state.setFlushed(true);
-                } else { 
-                	input = newInput(
-                		false,
-                		this.persistentValues
-                	);
-                    if(state.isFlushed()) {
+                } else {
+                    input = newInput(
+                        false,
+                        this.persistentValues
+                    );
+                    if (state.isFlushed()) {
                         interaction.execute(
                             this.dataObjectManager.getInteractionSpecs().UPDATE,
                             Records.getRecordFactory().singletonMappedRecord(
-                                "map", 
+                                Multiplicity.MAP.code(),
                                 null, // recordShortDescription
-                                this.transientObjectId, 
+                                this.transientObjectId,
                                 input
                             )
                         );
@@ -1924,26 +1994,25 @@ public class DataObject_1
                 }
                 this.transientOnRollback = true;
                 state.setLifeCycleEventPending(false);
-            } else if(
-                (this.jdoIsDirty() || (this.jdoIsPersistent() && this.version != null)) &&
+            } else if ((this.jdoIsDirty() || (this.jdoIsPersistent() && this.version != null)) &&
                 this.jdoGetObjectId().size() > 4 // exclude Authorities and Providers
-            ){
+            ) {
                 MappedRecord beforeImage = this.persistentValues;
                 this.persistentValues = newRecord(this.objGetClass());
-                Map<String,Object> transactionalValues = state.values(false);
-                for(String feature : state.dirtyFeatures(true)){
+                Map<String, Object> transactionalValues = state.values(false);
+                for (String feature : state.dirtyFeatures(true)) {
                     Flushable flushable = this.flushableValues.get(feature);
-                    if(flushable != null) {
+                    if (flushable != null) {
                         try {
                             flushable.flush();
                         } catch (IOException exception) {
                             throw new ServiceException(exception);
                         }
-                    } else if(transactionalValues.containsKey(feature)) {
+                    } else if (transactionalValues.containsKey(feature)) {
                         Object source = transactionalValues.get(feature);
-                        if(source instanceof Flushable) {
+                        if (source instanceof Flushable) {
                             try {
-                                ((Flushable)source).flush();
+                                ((Flushable) source).flush();
                             } catch (IOException exception) {
                                 throw new ServiceException(exception);
                             }
@@ -1951,7 +2020,7 @@ public class DataObject_1
                             this.persistentValues.put(
                                 feature,
                                 this.getMarshaller(feature).unmarshal(source)
-                            );                    
+                            );
                         }
                     } else if (beforeImage != null) {
                         this.persistentValues.put(
@@ -1961,8 +2030,8 @@ public class DataObject_1
                     }
                 }
                 final ObjectRecord input = newInput(
-                	false,
-                	this.persistentValues
+                    false,
+                    this.persistentValues
                 );
                 this.persistentValues = beforeImage;
                 interaction.execute(
@@ -1985,18 +2054,14 @@ public class DataObject_1
      */
     private void flushBehaviouralFeatures(
         Interaction interaction,
-        TransactionalState_1 state)
+        TransactionalState_1 state
+    )
         throws ServiceException {
         Queue<Operation> operations = state.operations(true);
-        for(
-            Operation operation = operations.poll();
-            operation != null;
-            operation = operations.poll()
-        ){
+        for (Operation operation = operations.poll(); operation != null; operation = operations.poll()) {
             operation.invoke(interaction);
         }
     }
-
 
     /**
      * Tells whether the given feature has been modified
@@ -2009,76 +2074,78 @@ public class DataObject_1
      */
     private boolean isFeatureModified(
         ModelElement_1_0 feature
-    ) throws ServiceException {
-        if(this.beforeImage == null) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE,
-            "Before image should have been set"
-        );
+    )
+        throws ServiceException {
+        if (this.beforeImage == null)
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "Before image should have been set"
+            );
         Multiplicity multiplicity = ModelHelper.getMultiplicity(feature);
         String featureName = feature.getName();
-        switch(multiplicity) {
-        	case SINGLE_VALUE: case OPTIONAL: 
-        		return !equal(this.beforeImage.objGetValue(featureName), this.objGetValue(featureName));
-        	case LIST: 
-        		return !equal(this.beforeImage.objGetList(featureName), this.objGetList(featureName));
-        	case SET: 
-        		return !equal(this.beforeImage.objGetSet(featureName), this.objGetSet(featureName));
-        	case SPARSEARRAY: 
-        		return !equal(this.beforeImage.objGetSparseArray(featureName), this.objGetSparseArray(featureName));
-        	case STREAM:
+        switch (multiplicity) {
+            case SINGLE_VALUE:
+            case OPTIONAL:
+                return !equal(this.beforeImage.objGetValue(featureName), this.objGetValue(featureName));
+            case LIST:
+                return !equal(this.beforeImage.objGetList(featureName), this.objGetList(featureName));
+            case SET:
+                return !equal(this.beforeImage.objGetSet(featureName), this.objGetSet(featureName));
+            case SPARSEARRAY:
+                return !equal(this.beforeImage.objGetSparseArray(featureName), this.objGetSparseArray(featureName));
+            case STREAM:
                 SysLog.log(
-                    Level.FINER, 
+                    Level.FINER,
                     "{0} features are not compared with their before image, " +
-                    "the feature {1} in the object {2} as therefore treated as modified", 
-                    multiplicity, 
-                    featureName, 
+                        "the feature {1} in the object {2} as therefore treated as modified",
+                    multiplicity,
+                    featureName,
                     ReducedJDOHelper.getAnyObjectId(this)
                 );
                 return true;
-        	    
+
             default:
                 SysLog.log(
-                    Level.WARNING, 
-                    "Unsupported Multiplicity {0}, treat the feature {1} in the object {2} as modified", 
-                    multiplicity, 
-                    featureName, 
+                    Level.WARNING,
+                    "Unsupported Multiplicity {0}, treat the feature {1} in the object {2} as modified",
+                    multiplicity,
+                    featureName,
                     ReducedJDOHelper.getAnyObjectId(this)
                 );
                 return true;
         }
     }
 
-	/**
+    /**
      * Tests whether some non-derived features have been modified
      * and removes idempotent modifications
      * 
-     * @param beforeImage the object's before-image
+     * @param beforeImage
+     *            the object's before-image
      * 
      * @return <code>true</code> if some non-derived features have been modified
      * 
      * @throws ServiceException
      */
     public boolean thereRemainDirtyFeaturesAfterRemovingTheUnmodifiedOnes(
-    	DataObject_1_0 beforeImage
-    ) throws ServiceException{
+        DataObject_1_0 beforeImage
+    )
+        throws ServiceException {
         TransactionalState_1 state = this.getState(false);
-        Map<String,ModelElement_1_0> attributes = getAttributes();
+        Map<String, ModelElement_1_0> attributes = getAttributes();
         boolean dirty = state.isTouched();
-        Set<String> dirtyFeatures = state.dirtyFeatures(true); 
-        for(
-            Iterator<String> i = dirtyFeatures.iterator(); 
-            i.hasNext();
-        ){
+        Set<String> dirtyFeatures = state.dirtyFeatures(true);
+        for (Iterator<String> i = dirtyFeatures.iterator(); i.hasNext();) {
             ModelElement_1_0 attribute = attributes.get(i.next());
-            if(!this.isFeatureModified(attribute)) {
+            if (!this.isFeatureModified(attribute)) {
                 i.remove();
-            } else if(!ModelHelper.isDerived(attribute)) {
+            } else if (!ModelHelper.isDerived(attribute)) {
                 dirty = true;
             }
         }
-        if(!dirty) {
-        	detectConcurrentModification(beforeImage);
+        if (!dirty) {
+            detectConcurrentModification(beforeImage);
         }
         return dirty;
     }
@@ -2090,8 +2157,8 @@ public class DataObject_1
      * 
      * @throws ServiceException
      */
-    private Map<String, ModelElement_1_0> getAttributes(
-    ) throws ServiceException {
+    private Map<String, ModelElement_1_0> getAttributes()
+        throws ServiceException {
         ModelElement_1_0 classifier = getClassifier();
         return classifier.getModel().getAttributeDefs(
             classifier,
@@ -2099,11 +2166,12 @@ public class DataObject_1
             true // includeDerived
         );
     }
-    
+
     /**
      * Tells whether an attribute is persistent
      * 
-     * @param attribute the attribute to be tested
+     * @param attribute
+     *            the attribute to be tested
      * 
      * @return <code>true</code> if the attribute is persistent
      * 
@@ -2111,14 +2179,16 @@ public class DataObject_1
      */
     private static boolean isPersistent(
         ModelElement_1_0 attribute
-    ) throws ServiceException {
-        return Persistency.getInstance().isPersistentAttribute(attribute); 
+    )
+        throws ServiceException {
+        return Persistency.getInstance().isPersistentAttribute(attribute);
     }
 
     /**
      * Tells whether an attribute is streamed
      * 
-     * @param attribute the attribute to be tested
+     * @param attribute
+     *            the attribute to be tested
      * 
      * @return <code>true</code> if the attribute is streamed
      * 
@@ -2126,14 +2196,16 @@ public class DataObject_1
      */
     private static boolean isStreamed(
         ModelElement_1_0 attribute
-    ) throws ServiceException {
-        return  isStreamedValue(attribute);
+    )
+        throws ServiceException {
+        return isStreamedValue(attribute);
     }
-    
+
     /**
      * Tells whether an attribute is mandatory
      * 
-     * @param attribute the attribute to be tested
+     * @param attribute
+     *            the attribute to be tested
      * 
      * @return <code>true</code> if the attribute is mandatory
      * 
@@ -2141,10 +2213,11 @@ public class DataObject_1
      */
     private static boolean isMandatory(
         ModelElement_1_0 attribute
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         return ModelHelper.getMultiplicity(attribute) == Multiplicity.SINGLE_VALUE;
     }
-    
+
     /**
      * Provide the before image
      * 
@@ -2152,132 +2225,143 @@ public class DataObject_1
      * 
      * @throws ServiceException
      */
-    public DataObject_1 getBeforeImage(
-    ) throws ServiceException {
-    	if(this.jdoIsNew()) return null;
-    	if(this.beforeImage == null || this.beforeImage.objIsInaccessible()) {
+    public DataObject_1 getBeforeImage()
+        throws ServiceException {
+        if (this.jdoIsNew())
+            return null;
+        if (this.beforeImage == null || this.beforeImage.objIsInaccessible()) {
             this.beforeImage = new DataObject_1(
-                this, 
+                this,
                 true
             );
         }
         return this.beforeImage;
     }
-    
-    public void makePersistentCleanWhenUnmodified(
-    ) throws ServiceException{
+
+    public void makePersistentCleanWhenUnmodified()
+        throws ServiceException {
         thereRemainDirtyFeaturesAfterRemovingTheUnmodifiedOnes(getBeforeImage());
         evictBeforeImage(); // free memory
-        
+
     }
 
     /**
      * Check the locks before releasing the object from the unit of work
      * 
-     * @param beforeImage the object's before image
+     * @param beforeImage
+     *            the object's before image
      * 
      * @throws ServiceException
      */
     private void detectConcurrentModification(
-    	DataObject_1_0 beforeImage
-    ) throws ServiceException {
-    	String writeLockAssertion = getWriteLockAssertion();
-    	if(writeLockAssertion != null){
-    		assertWriteLock(beforeImage, writeLockAssertion);
-    	}
-    	if(LockAssertions.isReadLockAssertion(this.lock)){
-    		assertReadLock(beforeImage, LockAssertions.getTransactionTime(this.lock));
-    	}
+        DataObject_1_0 beforeImage
+    )
+        throws ServiceException {
+        String writeLockAssertion = getWriteLockAssertion();
+        if (writeLockAssertion != null) {
+            assertWriteLock(beforeImage, writeLockAssertion);
+        }
+        if (LockAssertions.isReadLockAssertion(this.lock)) {
+            assertReadLock(beforeImage, LockAssertions.getTransactionTime(this.lock));
+        }
     }
 
     /**
      * Assert that the object has not been updated concurrently through another persistence manager during this unit of work
      * 
-     * @param beforeImage the object's before image
-     * @param lockValue the read lock value
+     * @param beforeImage
+     *            the object's before image
+     * @param lockValue
+     *            the read lock value
      * 
      * @throws ServiceException
      */
     private void assertReadLock(
-    	DataObject_1_0 beforeImage, 
-    	Date lockValue
-    ) throws ServiceException{
-    	Date currentValue = (Date) beforeImage.objGetValue(SystemAttributes.MODIFIED_AT);
-    	if(currentValue != null) {
-    		if(currentValue.after(lockValue)) {
-				throw new ServiceException(
-					BasicException.Code.DEFAULT_DOMAIN,
-					BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-					"Object has been updated by another persistence manager during this unit of work",
-					new BasicException.Parameter("xri", ReducedJDOHelper.getAnyObjectId(this)),
-					new BasicException.Parameter("lockAssertion", this.lock),
-					new BasicException.Parameter(SystemAttributes.MODIFIED_AT, DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue))
-		    	);
-    		}
-    	}
+        DataObject_1_0 beforeImage,
+        Date lockValue
+    )
+        throws ServiceException {
+        Date currentValue = (Date) beforeImage.objGetValue(SystemAttributes.MODIFIED_AT);
+        if (currentValue != null) {
+            if (currentValue.after(lockValue)) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+                    "Object has been updated by another persistence manager during this unit of work",
+                    new BasicException.Parameter(BasicException.Parameter.XRI, ReducedJDOHelper.getAnyObjectId(this)),
+                    new BasicException.Parameter("lockAssertion", this.lock),
+                    new BasicException.Parameter(SystemAttributes.MODIFIED_AT, DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue))
+                );
+            }
+        }
     }
-    
-	/**
+
+    /**
      * Assert that the object has not been updated concurrently through another persistence manager since it has been cached
      * 
-     * @param beforeImage the object's before image
-	 * @param lockAssertion the write lock assertion
-	 * 
-	 * @throws ServiceException
-	 */
-	private void assertWriteLock(
-		DataObject_1_0 beforeImage, 
-		String lockAssertion
-	) throws ServiceException {
-		Matcher lockMatcher = WRITE_LOCK_PATTERN.matcher(lockAssertion);
-		if(lockMatcher.matches()) try {
-			String lockFeature = lockMatcher.group(1);
-			Date currentValue = (Date) beforeImage.objGetValue(lockFeature);
-			if(currentValue != null) {
-				Date lockValue = DateTimeFormat.EXTENDED_UTC_FORMAT.parse(lockMatcher.group(2) + "Z");
-				if(!lockValue.equals(currentValue)) {
-					throw new ServiceException(
-						BasicException.Code.DEFAULT_DOMAIN,
-						BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-						"Object has been updated by another persistence manager since it has been cached",
-						new BasicException.Parameter("xri", ReducedJDOHelper.getAnyObjectId(this)),
-						new BasicException.Parameter("lockAssertion", lockAssertion),
-						new BasicException.Parameter(lockFeature, DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue))
-			    	);
-				}
-			}
-		} catch (ParseException exception) {
-			SysLog.warning("Unable to validate lock assertion for object " + ReducedJDOHelper.getAnyObjectId(this), lockAssertion);
-		}
-	}
-    
-    private String getWriteLockAssertion(
-    ) throws ServiceException{
-    	if(this.version instanceof byte[]) {
-        	try {
-    			return new String((byte[])this.version, "UTF-8");
-    		} catch (UnsupportedEncodingException exception) {
-    			throw new ServiceException(
-    				exception,
-    				BasicException.Code.DEFAULT_DOMAIN,
-    				BasicException.Code.ASSERTION_FAILURE,
-    				"UTF-8 should be supported"
-    			);
-    		}
-    	} else {
-    		return null;
-    	}
+     * @param beforeImage
+     *            the object's before image
+     * @param lockAssertion
+     *            the write lock assertion
+     * 
+     * @throws ServiceException
+     */
+    private void assertWriteLock(
+        DataObject_1_0 beforeImage,
+        String lockAssertion
+    )
+        throws ServiceException {
+        Matcher lockMatcher = WRITE_LOCK_PATTERN.matcher(lockAssertion);
+        if (lockMatcher.matches())
+            try {
+                String lockFeature = lockMatcher.group(1);
+                Date currentValue = (Date) beforeImage.objGetValue(lockFeature);
+                if (currentValue != null) {
+                    Date lockValue = DateTimeFormat.EXTENDED_UTC_FORMAT.parse(lockMatcher.group(2) + "Z");
+                    if (!lockValue.equals(currentValue)) {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+                            "Object has been updated by another persistence manager since it has been cached",
+                            new BasicException.Parameter(BasicException.Parameter.XRI, ReducedJDOHelper.getAnyObjectId(this)),
+                            new BasicException.Parameter("lockAssertion", lockAssertion),
+                            new BasicException.Parameter(lockFeature, DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue))
+                        );
+                    }
+                }
+            } catch (ParseException exception) {
+                SysLog.warning("Unable to validate lock assertion for object " + ReducedJDOHelper.getAnyObjectId(this), lockAssertion);
+            }
+    }
+
+    private String getWriteLockAssertion()
+        throws ServiceException {
+        if (this.version instanceof byte[]) {
+            try {
+                return new String((byte[]) this.version, "UTF-8");
+            } catch (UnsupportedEncodingException exception) {
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "UTF-8 should be supported"
+                );
+            }
+        } else {
+            return null;
+        }
     }
 
     void afterCompletion(
         Status status
-    ) throws ServiceException {
-        switch(status) {
+    )
+        throws ServiceException {
+        switch (status) {
             case STATUS_COMMITTED:
-                if(this.jdoIsDeleted()){
-                    if(this.jdoIsPersistent()) {
+                if (this.jdoIsDeleted()) {
+                    if (this.jdoIsPersistent()) {
                         this.dataObjectManager.invalidate(
-                            this.identity, 
+                            this.identity,
                             false // makeNonTransactional
                         );
                     }
@@ -2287,14 +2371,14 @@ public class DataObject_1
                 break;
             case STATUS_ROLLEDBACK:
                 this.getState(false).setLifeCycleEventPending(false);
-                if(this.jdoIsDeleted()){
+                if (this.jdoIsDeleted()) {
                     this.deleted = false;
                 }
-                if(this.transientOnRollback || this.jdoIsNew()){
-                    if(this.dataObjectManager != null) {
+                if (this.transientOnRollback || this.jdoIsNew()) {
+                    if (this.dataObjectManager != null) {
                         this.dataObjectManager.makeTransient(this);
                     }
-                    if(this.container != null) {
+                    if (this.container != null) {
                         this.container.removeFromChache(this.identity.getLastSegment().toClassicRepresentation());
                         this.container = null;
                         this.aspects = null;
@@ -2306,7 +2390,7 @@ public class DataObject_1
                 break;
         }
         Container_1 container = this.getContainer(true);
-        if(container != null) {
+        if (container != null) {
             container.openmdxjdoEvict(false, true);
         }
         this.transientOnRollback = false;
@@ -2317,26 +2401,25 @@ public class DataObject_1
     /**
      * Reset the read lock
      */
-    private void evictReadLock(){
+    private void evictReadLock() {
         this.lock = null;
     }
-    
+
     /**
      * Reset the write lock
      */
-    private void evictWriteLock(){
+    private void evictWriteLock() {
         this.version = null;
     }
-    
+
     /**
      * Evict the data object
      */
-    void evict(
-    ){
+    void evict() {
         boolean clear;
-        if(this.jdoIsDirty()) {
+        if (this.jdoIsDirty()) {
             clear = false; // to not to lose changes
-        } else if (this.jdoIsPersistent()){
+        } else if (this.jdoIsPersistent()) {
             try {
                 this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.CLEAR, true);
             } catch (ServiceException exception) {
@@ -2346,27 +2429,27 @@ public class DataObject_1
                 );
             }
             clear = true;
-        } else if(this.isProxy()) {
+        } else if (this.isProxy()) {
             clear = true;
         } else {
             clear = false;
         }
-        if(clear){   
+        if (clear) {
             this.clear();
-            for(Map.Entry<String, Flushable> entry : this.flushableValues.entrySet()) {
+            for (Map.Entry<String, Flushable> entry : this.flushableValues.entrySet()) {
                 Flushable value = entry.getValue();
-                if(value instanceof ManagedAspect) {
-                    ((ManagedAspect)value).evict();
+                if (value instanceof ManagedAspect) {
+                    ((ManagedAspect) value).evict();
                 } else if (value instanceof PersistenceCapableCollection) {
-                    ((PersistenceCapableCollection)value).openmdxjdoEvict(
+                    ((PersistenceCapableCollection) value).openmdxjdoEvict(
                         false, // allMembers
                         true // allSubSets
-                     );
+                    );
                 }
             }
         }
         evictReadLock();
-		evictWriteLock();
+        evictWriteLock();
         this.persistentValues = null;
         evictBeforeImage();
     }
@@ -2375,36 +2458,37 @@ public class DataObject_1
      * The before image is evicted unless it is persistent.
      */
     private void evictBeforeImage() {
-        if(this.beforeImage != null && !this.beforeImage.jdoIsPersistent()) {
+        if (this.beforeImage != null && !this.beforeImage.jdoIsPersistent()) {
             this.beforeImage.evictUnconditionally();
             this.beforeImage = null;
         }
     }
 
-    private void clear(
-    ){
+    private void clear() {
         try {
             TransactionalState_1 state = getState(true);
-            if(state != null){ 
+            if (state != null) {
                 state.clear();
             }
         } catch (JDOException ignore) {
             // Eviction should nevertheless be successful
         }
     }
-    
+
     /**
      * Tells whether the object is out-of-sync with its "remote" counterpart
      * 
-     * @return <code>true</code> if the object is out-of-sync with its 
-     * "remote" counterpart
+     * @return <code>true</code> if the object is out-of-sync with its
+     *         "remote" counterpart
      */
-    final boolean isOutOfSync(){
+    final boolean isOutOfSync() {
         TransactionalState_1 state = this.getState(true);
         return state != null && state.isOutOfSync();
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objThreadSafetyRequired()
      */
     @Override
@@ -2421,12 +2505,11 @@ public class DataObject_1
      *
      * @return true if this instance has been modified in the current unit
      *         of work.
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     @Override
-    public boolean jdoIsDirty(
-    ) {
-        if(this.jdoIsNew() || this.jdoIsDeleted()) {
+    public boolean jdoIsDirty() {
+        if (this.jdoIsNew() || this.jdoIsDeleted()) {
             return true;
         } else if (this.jdoIsPersistent()) {
             TransactionalState_1 state = this.getState(true);
@@ -2443,34 +2526,32 @@ public class DataObject_1
      * @return true if this instance is persistent.
      */
     @Override
-    public boolean jdoIsPersistent(
-    ){
+    public boolean jdoIsPersistent() {
         return this.identity != null;
     }
-    
+
     /**
      * Tells whether the object is contained in a container
      * 
-     * @return <code>true</code> if the object is either persistent or has 
-     * already been moved to a container
+     * @return <code>true</code> if the object is either persistent or has
+     *         already been moved to a container
      */
     @Override
-    public boolean objIsContained(){
+    public boolean objIsContained() {
         return this.jdoIsPersistent() || this.container != null;
     }
-    
+
     /**
      * Tests whether this object has been newly made persistent. Instances
      * that have been made persistent in the current unit of work return true.
      * <p>
      * Transient instances return false.
      *
-     * @return  true if this instance was made persistent in the current unit
-     *          of work.
+     * @return true if this instance was made persistent in the current unit
+     *         of work.
      */
     @Override
-    public boolean jdoIsNew(
-    ){
+    public boolean jdoIsNew() {
         return this.created;
     }
 
@@ -2479,8 +2560,7 @@ public class DataObject_1
      * 
      * @return <code>true</code> if the object is hollow
      */
-    protected boolean objIsHollow(
-    ){
+    protected boolean objIsHollow() {
         return this.persistentValues == null;
     }
 
@@ -2489,34 +2569,25 @@ public class DataObject_1
      * 
      * @return <code>true</code> if this object is a proxy
      */
-    public boolean isProxy(
-    ){
+    public boolean isProxy() {
         return this.dataObjectManager.isProxy();
     }
-    
+
     /**
      * Tests whether this object is a virtual object
      * 
      * @return <code>true</code> if this object is a virtual object
      */
-    private boolean isVirtual(
-    ){
-        try {
-            return 
-                this.jdoIsPersistent() && 
-                SharedObjects.getPlugInObject(this.dataObjectManager, ManagedConnectionCache_2_0.class).isAvailable(Mode.BASIC,this.identity);
-        } catch (Exception ignore) {
-            return false;
-        }        
+    private boolean isVirtual() {
+        return ObjectRecords.isVirtualObjectVersion(this.version);
     }
-    
+
     /**
      * Tests whether this object becomes transient on rollback.
      *
-     * @return  true if this instance becomes transient on rollback
+     * @return true if this instance becomes transient on rollback
      */
-    public boolean isTransientOnRollback(
-    ){
+    public boolean isTransientOnRollback() {
         return jdoIsNew();
     }
 
@@ -2525,60 +2596,60 @@ public class DataObject_1
      * deleted in the current unit of work return true.
      * Transient instances return false.
      *
-     * @return  true if this instance was deleted in the current unit of work.
+     * @return true if this instance was deleted in the current unit of work.
      */
     @Override
-    public boolean jdoIsDeleted(
-    ){
+    public boolean jdoIsDeleted() {
         return this.deleted;
     }
 
     /**
      * Tests whether this object belongs to the current unit of work.
      *
-     * @return  true if this instance belongs to the current unit of work.
+     * @return true if this instance belongs to the current unit of work.
      */
     @Override
-    public boolean jdoIsTransactional(
-    ) {
+    public boolean jdoIsTransactional() {
         try {
             return this.getUnitOfWork().isMember(this);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new JDOUserException(
                 "Unable to get object state",
                 e,
                 this
-            );            
+            );
         }
     }
 
     /**
      * Tests whether this object can't leave its hollow state
      *
-     * @return  true if this instance is inaccessible
+     * @return true if this instance is inaccessible
      */
     @Override
-    public boolean objIsInaccessible(
-    ){
+    public boolean objIsInaccessible() {
         return this.notFound != null || this.inaccessabilityReason != null;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objDoesNotExist()
      */
     @Override
     public boolean objDoesNotExist() {
-        if(this.jdoIsPersistent() && objIsHollow()) try {
-            this.objRetrieve(
-                false, // reload
-                this.dataObjectManager.getFetchPlan(), 
-                null, // features
-                false, // beforeImage
-                false // throwNotFoundException
-            );
-        } catch (ServiceException exception) {
-            return exception.getExceptionCode() == BasicException.Code.NOT_FOUND;
-        }
+        if (this.jdoIsPersistent() && objIsHollow())
+            try {
+                this.objRetrieve(
+                    false, // reload
+                    this.dataObjectManager.getFetchPlan(),
+                    null, // features
+                    false, // beforeImage
+                    false // throwNotFoundException
+                );
+            } catch (ServiceException exception) {
+                return exception.getExceptionCode() == BasicException.Code.NOT_FOUND;
+            }
         return this.notFound != null;
     }
 
@@ -2589,7 +2660,7 @@ public class DataObject_1
      */
     @Override
     public ServiceException getInaccessibilityReason() {
-        if(this.notFound != null && this.inaccessabilityReason == null) {
+        if (this.notFound != null && this.inaccessabilityReason == null) {
             this.inaccessabilityReason = new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_FOUND,
@@ -2599,116 +2670,123 @@ public class DataObject_1
         }
         return this.inaccessabilityReason;
     }
-    
+
     /**
      * Ensure that the object is read enabled
      * 
-     * @param reload 
+     * @param reload
      * @param fetchPlan
-     * @param features 
-     * @param beforeImage load the complete before image
-     * @param throwNotFoundException if <code>false</code> return <code>null</code>
-     * instead of throwing an exception if the object does not exist 
+     * @param features
+     * @param beforeImage
+     *            load the complete before image
+     * @param throwNotFoundException
+     *            if <code>false</code> return <code>null</code>
+     *            instead of throwing an exception if the object does not exist
      * 
      * @return the retrieved object
      * 
-     * @exception ServiceException<ul>
-     * <li>ILLEGAL_STATE if the object is deleted
-     * <li>NOT_FOUND if the object does not exist and throwNotFoundException is <code>true</code>
-     * </ul>
+     * @exception ServiceException
+     *                <ul>
+     *                <li>ILLEGAL_STATE if the object is deleted
+     *                <li>NOT_FOUND if the object does not exist and throwNotFoundException is <code>true</code>
+     *                </ul>
      */
     @SuppressWarnings("unchecked")
     DataObject_1 objRetrieve(
-        boolean reload, 
-        FetchPlan fetchPlan, 
-        Set<String> features, 
-        boolean beforeImage, 
+        boolean reload,
+        FetchPlan fetchPlan,
+        Set<String> features,
+        boolean beforeImage,
         boolean throwNotFoundException
-    ) throws ServiceException {
-        if(this.objIsInaccessible()){
-            if(throwNotFoundException || notFound == null){
-                throw this.getInaccessibilityReason();
+    )
+        throws ServiceException {
+        if (objIsInaccessible()) {
+            if (throwNotFoundException || notFound == null) {
+                throw getInaccessibilityReason();
             } else {
                 return null;
             }
-        } else if(reload || this.objIsHollow()) {
-            if(this.isProxy() && !isVirtual()) {
+        } else if (reload || this.objIsHollow()) {
+            if (isProxy() && !isVirtual()) {
                 this.dataObjectManager.currentUnitOfWork().synchronize();
-                return this.unconditionalLoad(
-                	fetchPlan, 
-                	features, 
-                	false, // refresh
+                return unconditionalLoad(
+                    fetchPlan,
+                    features,
+                    false, // refresh
                     throwNotFoundException
                 );
             } else if (jdoIsPersistent() && !jdoIsNew()) {
-                return this.unconditionalLoad(
-                	fetchPlan, 
-                	features, 
-                	false, // refresh
-                	throwNotFoundException
+                return unconditionalLoad(
+                    fetchPlan,
+                    features,
+                    false, // refresh
+                    throwNotFoundException
                 );
             } else {
                 return this;
             }
-        } else if (fetchPlan == null){
-            Set<String> fetched = beforeImage ? (
-        		objIsHollow() ? Collections.emptySet() : persistentValues.keySet()
-            ) : objDefaultFetchGroup();
+        } else if (fetchPlan == null) {
+            Set<String> fetched = beforeImage ? (objIsHollow() ? Collections.emptySet() : persistentValues.keySet())
+                : objDefaultFetchGroup();
             Set<String> missing = null;
-            for(Map.Entry<String, ModelElement_1_0> attribute : getAttributes().entrySet()) {
+            for (Map.Entry<String, ModelElement_1_0> attribute : getAttributes().entrySet()) {
                 String attributeName = attribute.getKey();
-                if(
-                    !fetched.contains(attributeName) && 
-                    isPersistent(attribute.getValue()) && 
-                    !isStreamed(attribute.getValue())
-                ) {
-                    if(missing == null) {
+                if (!fetched.contains(attributeName) &&
+                    isPersistent(attribute.getValue()) &&
+                    !isStreamed(attribute.getValue())) {
+                    if (missing == null) {
                         missing = new HashSet<String>();
                     }
                     missing.add(attributeName);
                 }
-            }            
-            if(missing != null) try {
-                MappedRecord persistentValues = newRecord(
-                    this.persistentValues.getRecordName()
-                );
-                persistentValues.putAll(this.persistentValues);
-                List<OrderSpecifier> orders = new ArrayList<OrderSpecifier>();
-                for(String feature : missing) {
-                    orders.add(
-                        new OrderSpecifier(feature, SortOrder.UNSORTED)
+            }
+            if (missing != null || (fetchPlan != null && !fetchPlan.getGroups().isEmpty())) {
+                try {
+                    MappedRecord persistentValues = newRecord(
+                        this.persistentValues.getRecordName()
                     );
+                    persistentValues.putAll(this.persistentValues);
+                    List<OrderSpecifier> orders = new ArrayList<>();
+                    for (String feature : missing) {
+                        orders.add(
+                            new OrderSpecifier(feature, SortOrder.UNSORTED)
+                        );
+                    }
+                    Query_2Facade input = Query_2Facade.forObjectId(this);
+                    if(fetchPlan != null) {
+                        input.setGroups(fetchPlan.getGroups());
+                    }
+                    input.setQueryFilter(
+                        new Filter(
+                            null, // condition
+                            orders,
+                            null // extension
+                        )
+                    );
+                    IndexedRecord indexedRecord = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
+                        this.dataObjectManager.getInteractionSpecs().GET,
+                        input.getDelegate()
+                    );
+                    if (indexedRecord.isEmpty())
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_FOUND,
+                            "Could not fetch missing attributes",
+                            ExceptionHelper.newObjectIdParameter("id", this),
+                            new BasicException.Parameter("feature", missing)
+                        );
+                    ObjectRecord output = (ObjectRecord) indexedRecord.get(0);
+                    persistentValues.putAll(
+                        output.getValue()
+                    );
+                    this.persistentValues = persistentValues;
+                } catch (ResourceException exception) {
+                    throw new ServiceException(exception);
                 }
-                Query_2Facade input = Query_2Facade.forObjectId(this);
-                input.setQueryFilter(
-                    new Filter(
-                        null, // condition
-                        orders,
-                        null // extension
-                    )
-                );
-                IndexedRecord indexedRecord = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
-                    this.dataObjectManager.getInteractionSpecs().GET,
-                    input.getDelegate()
-                );
-                if(indexedRecord.isEmpty()) throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_FOUND,
-                    "Could not fetch missing attributes",
-                    ExceptionHelper.newObjectIdParameter("id", this),
-                    new BasicException.Parameter("feature", missing)
-                );
-                ObjectRecord output = (ObjectRecord)indexedRecord.get(0);                
-                persistentValues.putAll(
-                    output.getValue()
-                );
-                this.persistentValues = persistentValues;
-            } catch (ResourceException exception) {
-                throw new ServiceException(exception);
             }
             return this;
         } else {
-        	// TODO Retrieve according to fetch plan
+            // TODO Retrieve according to fetch plan
             return this;
         }
     }
@@ -2716,35 +2794,53 @@ public class DataObject_1
     /**
      * Test whether the given attribute has to be loaded
      * 
-     * @param name the attribute's name
-     * 
+     * @param name
+     *            the attribute's name
      * @return <code>true</code> if the given attribute has to be loaded
      * 
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     private boolean attributeMustBeLoaded(
         String name
-    ) throws ServiceException{
-        if(this.jdoIsPersistent() && !this.jdoIsNew()) {
-            this. objRetrieve(
+    )
+        throws ServiceException {
+        return this.attributeIsRetrievedAndMustBeLoaded(name) && !this.persistentValues.containsKey(name);
+    }
+
+    /**
+     * Test whether the given attribute has to be loaded
+     * 
+     * @param name
+     *            the attribute's name
+     * 
+     * @return <code>true</code> if the given attribute has to be loaded
+     * 
+     * @throws ServiceException
+     */
+    private boolean attributeIsRetrievedAndMustBeLoaded(
+        String name
+    )
+        throws ServiceException {
+        if (this.jdoIsPersistent() && !this.jdoIsNew()) {
+            this.objRetrieve(
                 false, // reload
-                this.dataObjectManager.getFetchPlan(), 
-                Collections.singleton(name), 
-                false, 
+                this.dataObjectManager.getFetchPlan(),
+                Collections.singleton(name),
+                false,
                 true // throwNotFoundException
             );
             return true;
         } else if (this.isProxy() && Boolean.TRUE.equals(this.getFeature(name).isDerived())) {
             this.objMakeTransactional();
             TransactionalState_1 state = this.getState(false);
-            if(!state.isFlushed()) {
+            if (!state.isFlushed()) {
                 state.setLifeCycleEventPending(true);
             }
             this.objRetrieve(
                 true, // reload
-                this.dataObjectManager.getFetchPlan(), 
-                Collections.singleton(name), 
-                false, 
+                this.dataObjectManager.getFetchPlan(),
+                Collections.singleton(name),
+                false,
                 true // throwNotFoundException
             );
             return true;
@@ -2752,164 +2848,200 @@ public class DataObject_1
             return false;
         }
     }
-    
+
     /**
      * Ensure that the attribute is fetched.
      *
-     * @param     name
+     * @param name
      *            attribute name
-     * @param     stream
+     * @param stream
      *            defines whether the value is a stream or not
-     * @param clear 
+     * @param clear
+     *            tells whether a collection shall be cleared
      * 
-     * @exception   ServiceException    ILLEGAL_STATE
-     *                  if the object is deleted
+     * @exception ServiceException
+     *                ILLEGAL_STATE
+     *                if the object is deleted
      */
-    @SuppressWarnings("unchecked")
     final Object getPersistentAttribute(
         String name,
         boolean stream,
-        Multiplicity multiplicity, 
+        Multiplicity multiplicity,
         boolean clear
-    ) throws ServiceException {
-        Object rawValue;
-        //
-        // Retrieve
-        //
-        if(!clear && this.attributeMustBeLoaded(name)) {
-            try {
-                rawValue = this.persistentValues.get(name);
-                if(
-                    rawValue == null &&
-                    !this.persistentValues.containsKey(name)
-                ) {
-                    MappedRecord persistentValues = newRecord(this.persistentValues.getRecordName());
-                    persistentValues.putAll(this.persistentValues);
-                    Filter attributeSpecifier = new Filter(
-                        null, // condition
-                        Collections.singletonList(
-                            new OrderSpecifier(name, SortOrder.UNSORTED)
-                        ),
-                        null // extension
-                    );
-                    Query_2Facade input = Query_2Facade.forObjectId(this);
-                    input.setQueryFilter(attributeSpecifier);
-                    IndexedRecord indexedRecord = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
-                        this.dataObjectManager.getInteractionSpecs().GET,
-                        input.getDelegate()
-                    );
-                    if(indexedRecord.isEmpty()) {
-                    	throw new ServiceException(
-	                        BasicException.Code.DEFAULT_DOMAIN,
-	                        BasicException.Code.NOT_FOUND,
-	                        "Could not fetch attribute",
-	                        ExceptionHelper.newObjectIdParameter("id", this),
-	                        new BasicException.Parameter("feature", name)
-	                    );
-                    }
-                    ObjectRecord output = (ObjectRecord)indexedRecord.get(0);                
-                    persistentValues.putAll(
-                        output.getValue()
-                    );
-                    rawValue = stream ? persistentValues.remove(name) : persistentValues.get(name);
-                    this.persistentValues = persistentValues;
-                }
-            } catch (ResourceException exception) {
-                throw new ServiceException(exception);
-            }
-        } else if (this.persistentValues == null) {
-            rawValue = null;
-        } else {    
-            rawValue = this.persistentValues.get(name);
-        }
-        //
-        // Normalize 
-        //
-        Object normalizedValue = rawValue;
-        switch(multiplicity) {
-	        case SINGLE_VALUE: case OPTIONAL: {
-	            if(rawValue instanceof List) {
-	                List<?> source = (List<?>)rawValue;
-	                normalizedValue = source.isEmpty() ? null : source.get(0);
-	            }
-	        } break;
-	        case SET: case LIST: {
-	            if(rawValue instanceof List<?>) {
-	                if(clear){
-	                    ((Collection<?>)rawValue).clear();
-	                }
-	            } else {
-	                List<Object> target = new ArrayList<Object>();
-	                if(!clear){
-	                    if (rawValue instanceof Collection<?>) {
-	                        target.addAll((Collection<?>)rawValue);
-	                    } else if (rawValue instanceof Map<?,?>) {
-	                        SortedMap<Integer, ? extends Object> sortedValue = rawValue instanceof SortedMap<?,?> ? (SortedMap<Integer,?>) rawValue : new TreeMap<Integer,Object>((Map<Integer,?>)rawValue);
-							target.addAll(
-	                            SortedMaps.asSparseArray(sortedValue).asList()
-	                        );
-	                    } else if(rawValue != null) {
-	                        target.add(rawValue);
-	                    }
-	                }
-	                normalizedValue = target;
-	            } 
-	        } break;
-	        case SPARSEARRAY: {
-	            if(rawValue instanceof SparseArray<?>) {
-	                if(clear) {
-	                    ((SparseArray<?>)rawValue).clear();
-	                }
-	            } else {
-	                SparseArray<Object> target = new TreeSparseArray<Object>();
-	                if(!clear){
-	                    if(rawValue instanceof Map<?,?>) {
-	                        target.putAll((Map<Integer,?>) rawValue);
-	                    } else if(rawValue instanceof Collection<?>) {
-	                        int i = 0;
-	                        for(Object value : (Collection<?>)rawValue) {
-	                            target.put(Integer.valueOf(i++), value);
-	                        }
-	                    } else if (rawValue != null) {
-	                        target.put(Integer.valueOf(0), rawValue);
-	                    }
-	                }
-	                normalizedValue = target;
-	            }
-	        } break;
-            case MAP: case STREAM:
-                // TODO not handled yet
-                break;
-        }
-        //
-        // Cache
-        //
-        if(this.persistentValues != null) {
-            if(stream) {
+    )
+        throws ServiceException {
+        final Object rawValue = retrievePersistentValue(name, stream, clear);
+        final Object normalizedValue = normalizePersistentValue(rawValue, multiplicity, clear);
+        cachePersistentValue(name, stream, rawValue, normalizedValue);
+        return normalizedValue;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void cachePersistentValue(
+        String name,
+        boolean stream,
+        final Object rawValue,
+        final Object normalizedValue
+    ) {
+        if (this.persistentValues != null) {
+            if (stream) {
                 this.persistentValues.remove(name);
-            } else if(rawValue != normalizedValue){
+            } else if (rawValue != normalizedValue) {
                 this.persistentValues.put(
                     name,
                     normalizedValue
                 );
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object normalizePersistentValue(
+        final Object rawValue,
+        Multiplicity multiplicity,
+        boolean clear
+    ) {
+        Object normalizedValue = rawValue;
+        switch (multiplicity) {
+            case SINGLE_VALUE:
+            case OPTIONAL: {
+                if (rawValue instanceof List) {
+                    List<?> source = (List<?>) rawValue;
+                    normalizedValue = source.isEmpty() ? null : source.get(0);
+                }
+            }
+                break;
+            case SET:
+            case LIST: {
+                if (rawValue instanceof List<?>) {
+                    if (clear) {
+                        ((Collection<?>) rawValue).clear();
+                    }
+                } else {
+                    List<Object> target = new ArrayList<Object>();
+                    if (!clear) {
+                        if (rawValue instanceof Collection<?>) {
+                            target.addAll((Collection<?>) rawValue);
+                        } else if (rawValue instanceof Map<?, ?>) {
+                            SortedMap<Integer, ? extends Object> sortedValue = rawValue instanceof SortedMap<?, ?>
+                                ? (SortedMap<Integer, ?>) rawValue
+                                : new TreeMap<Integer, Object>((Map<Integer, ?>) rawValue);
+                            target.addAll(
+                                SortedMaps.asSparseArray(sortedValue).asList()
+                            );
+                        } else if (rawValue != null) {
+                            target.add(rawValue);
+                        }
+                    }
+                    normalizedValue = target;
+                }
+            }
+                break;
+            case SPARSEARRAY: {
+                if (rawValue instanceof SparseArray<?>) {
+                    if (clear) {
+                        ((SparseArray<?>) rawValue).clear();
+                    }
+                } else {
+                    SparseArray<Object> target = new TreeSparseArray<Object>();
+                    if (!clear) {
+                        if (rawValue instanceof Map<?, ?>) {
+                            target.putAll((Map<Integer, ?>) rawValue);
+                        } else if (rawValue instanceof Collection<?>) {
+                            int i = 0;
+                            for (Object value : (Collection<?>) rawValue) {
+                                target.put(Integer.valueOf(i++), value);
+                            }
+                        } else if (rawValue != null) {
+                            target.put(Integer.valueOf(0), rawValue);
+                        }
+                    }
+                    normalizedValue = target;
+                }
+            }
+                break;
+            case MAP:
+            case STREAM:
+                // TODO not handled yet
+                break;
+        }
         return normalizedValue;
+    }
+
+    private Object retrievePersistentValue(
+        String name,
+        boolean stream,
+        boolean clear
+    )
+        throws ServiceException {
+        if (!clear && attributeMustBeLoaded(name)) {
+            return loadPersistentValue(name, stream);
+        } else if (this.persistentValues == null) {
+            return null;
+        } else {
+            return this.persistentValues.get(name);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object loadPersistentValue(
+        String name,
+        boolean stream
+    )
+        throws ServiceException {
+        final MappedRecord persistentValues = newRecord(this.persistentValues.getRecordName());
+        persistentValues.putAll(this.persistentValues);
+        final Filter attributeSpecifier = new Filter(
+            null, // condition
+            Collections.singletonList(
+                new OrderSpecifier(name, SortOrder.UNSORTED)
+            ),
+            null // extension
+        );
+        final Object persistentValue;
+        try {
+            final Query_2Facade input = Query_2Facade.forObjectId(this);
+            input.setQueryFilter(attributeSpecifier);
+            final IndexedRecord indexedRecord = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
+                this.dataObjectManager.getInteractionSpecs().GET,
+                input.getDelegate()
+            );
+            if (indexedRecord.isEmpty()) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_FOUND,
+                    "Could not fetch attribute",
+                    ExceptionHelper.newObjectIdParameter("id", this),
+                    new BasicException.Parameter("feature", name)
+                );
+            }
+            final ObjectRecord output = (ObjectRecord) indexedRecord.get(0);
+            persistentValues.putAll(
+                output.getValue()
+            );
+            persistentValue = stream ? persistentValues.remove(name) : persistentValues.get(name);
+            this.persistentValues = persistentValues;
+        } catch (ResourceException exception) {
+            throw new ServiceException(exception);
+        }
+        return persistentValue;
     }
 
     /**
      * Ensure that the argument is single valued
      *
      * @param argument
-     *        the argument to be checked
+     *            the argument to be checked
      *
-     * @exception   ServiceException    BAD_PARAMETER
-     *                  if the argument is multi-valued
+     * @exception ServiceException
+     *                BAD_PARAMETER
+     *                if the argument is multi-valued
      */
     protected void assertSingleValued(
         Object argument
-    ) throws ServiceException {
-        if(argument instanceof Collection<?>) {
+    )
+        throws ServiceException {
+        if (argument instanceof Collection<?>) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.BAD_PARAMETER,
                 "Single valued argument expected",
@@ -2924,35 +3056,37 @@ public class DataObject_1
      * This method returns a <code>BAD_PARAMETER</code> exception unless the
      * feature is single valued or a stream.
      *
-     * @param       feature
-     *              the attribute's name
-     * @param       to
-     *              the object.
+     * @param feature
+     *            the attribute's name
+     * @param to
+     *            the object.
      *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if the object is write protected.
-     * @exception   ServiceException BAD_PARAMETER
-     *              if the feature is multi-valued
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if the object has no such feature
-     * @exception   ServiceException
-     *              if the object is not accessible
+     * @exception ServiceException
+     *                ILLEGAL_STATE
+     *                if the object is write protected.
+     * @exception ServiceException
+     *                BAD_PARAMETER
+     *                if the feature is multi-valued
+     * @exception ServiceException
+     *                NOT_SUPPORTED
+     *                if the object has no such feature
+     * @exception ServiceException
+     *                if the object is not accessible
      */
     @Override
     public void objSetValue(
         String feature,
         Object to
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         this.assertSingleValued(to);
         UnitOfWork_1 unitOfWork = this.getUnitOfWorkIfTransactional(feature);
-        (
-            unitOfWork == null ? this.transientValues : unitOfWork.getState(this,false).values(false)
-        ).put(
-            feature, 
+        (unitOfWork == null ? this.transientValues : unitOfWork.getState(this, false).values(false)).put(
+            feature,
             to
         );
-        if(to != null && this.isAspectHasCore(feature)) {
-            for(PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
+        if (to != null && this.isAspectHasCore(feature)) {
+            for (PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
                 plugIn.postSetCore(this, (DataObject_1) to);
             }
         }
@@ -2969,55 +3103,57 @@ public class DataObject_1
     private LargeObject getLargeObjectValue(
         final String featureName,
         final ModelElement_1_0 featureDef
-    ) throws ServiceException{
+    )
+        throws ServiceException {
         String type = featureDef.getModel().getDereferencedType(featureDef.getType()).getQualifiedName();
         Object persistentValue = this.getPersistentAttribute(
-            featureName, 
+            featureName,
             true, // stream 
-            Multiplicity.SINGLE_VALUE, 
+            Multiplicity.SINGLE_VALUE,
             false // clear
         );
-        if(PrimitiveTypes.BINARY.equals(type)) {
+        if (PrimitiveTypes.BINARY.equals(type)) {
             InputStream value;
             Long length;
-            if(persistentValue == null) {
+            if (persistentValue == null) {
                 return null;
-            } else if(persistentValue instanceof InputStream) {
+            } else if (persistentValue instanceof InputStream) {
                 //
                 // Compatibility Mode
                 //
                 value = (InputStream) persistentValue;
                 length = null;
-            } else try {
-                //
-                // Native Mode
-                //
-                BinaryLargeObject object = (BinaryLargeObject) persistentValue;
-                value = object.getContent();
-                length = object.getLength();
-            } catch (IOException exception) {
-               throw new ServiceException(exception); 
-            }
+            } else
+                try {
+                    //
+                    // Native Mode
+                    //
+                    BinaryLargeObject object = (BinaryLargeObject) persistentValue;
+                    value = object.getContent();
+                    length = object.getLength();
+                } catch (IOException exception) {
+                    throw new ServiceException(exception);
+                }
             return new BinaryLargeObjects.StreamLargeObject(value, length) {
-                
+
                 private static final long serialVersionUID = 6010313705463030648L;
 
                 @Override
-                protected InputStream newContent(
-                ) throws IOException {
+                protected InputStream newContent()
+                    throws IOException {
                     Object persistentValue;
                     try {
                         persistentValue = DataObject_1.this.getPersistentAttribute(
-                            featureName, 
+                            featureName,
                             true, // stream 
-                            Multiplicity.SINGLE_VALUE, 
+                            Multiplicity.SINGLE_VALUE,
                             false // clear
                         );
                     } catch (ServiceException exception) {
                         BasicException cause = exception.getCause();
                         throw (IOException) new IOException(cause.getDescription()).initCause(cause);
                     }
-                    if(persistentValue instanceof InputStream) {
+                    if (persistentValue instanceof InputStream) {
                         //
                         // Compatibility Mode
                         //
@@ -3026,52 +3162,53 @@ public class DataObject_1
                         //
                         // Native Mode
                         //
-                        return ((BinaryLargeObject)persistentValue).getContent();
+                        return ((BinaryLargeObject) persistentValue).getContent();
                     }
                 }
-                
-            }; 
+
+            };
         } else if (PrimitiveTypes.STRING.equals(type)) {
             Reader value;
             Long length;
-            if(persistentValue == null) {
+            if (persistentValue == null) {
                 return null;
-            } else if(persistentValue instanceof Reader) {
+            } else if (persistentValue instanceof Reader) {
                 //
                 // Compatibility Mode
                 //
                 value = (Reader) persistentValue;
                 length = null;
-            } else try {
-                //
-                // Native Mode
-                //
-                CharacterLargeObject object = (CharacterLargeObject) persistentValue;
-                value = object.getContent();
-                length = object.getLength();
-            } catch (IOException exception) {
-               throw new ServiceException(exception); 
-            }
-            return new CharacterLargeObjects.StreamLargeObject(value,length){
-                
+            } else
+                try {
+                    //
+                    // Native Mode
+                    //
+                    CharacterLargeObject object = (CharacterLargeObject) persistentValue;
+                    value = object.getContent();
+                    length = object.getLength();
+                } catch (IOException exception) {
+                    throw new ServiceException(exception);
+                }
+            return new CharacterLargeObjects.StreamLargeObject(value, length) {
+
                 private static final long serialVersionUID = -6402214529785948658L;
 
                 @Override
-                protected Reader newContent(
-                ) throws IOException {
+                protected Reader newContent()
+                    throws IOException {
                     Object persistentValue;
                     try {
                         persistentValue = DataObject_1.this.getPersistentAttribute(
-                            featureName, 
+                            featureName,
                             true, // stream 
-                            Multiplicity.SINGLE_VALUE, 
+                            Multiplicity.SINGLE_VALUE,
                             false // clear
                         );
                     } catch (ServiceException exception) {
-                    	BasicException cause = exception.getCause();
-                    	throw (IOException) new IOException(cause.getDescription()).initCause(cause);
+                        BasicException cause = exception.getCause();
+                        throw (IOException) new IOException(cause.getDescription()).initCause(cause);
                     }
-                    if(persistentValue instanceof Reader) {
+                    if (persistentValue instanceof Reader) {
                         //
                         // Compatibility Mode
                         //
@@ -3080,114 +3217,111 @@ public class DataObject_1
                         //
                         // Native Mode
                         //
-                        return ((CharacterLargeObject)persistentValue).getContent();
+                        return ((CharacterLargeObject) persistentValue).getContent();
                     }
                 }
-                
-            }; 
-        } else throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_SUPPORTED,
-            "Unsupported stream type",
-            new BasicException.Parameter("expected", PrimitiveTypes.BINARY, PrimitiveTypes.STRING),
-            new BasicException.Parameter("actual", type)
-        );
-        
+
+            };
+        } else
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "Unsupported stream type",
+                new BasicException.Parameter("expected", PrimitiveTypes.BINARY, PrimitiveTypes.STRING),
+                new BasicException.Parameter("actual", type)
+            );
+
     }
-        
+
     /**
      * Get an attribute.
      * <p>
      * Note: This specific implementation may allow to return multivalued
      * attributes as well!
      *
-     * @param       feature
-     *              the feature's name
+     * @param feature
+     *            the feature's name
      *
-     * @return      the object representing the feature;
-     *              or null if the feature's value hasn't been set yet.
+     * @return the object representing the feature;
+     *         or null if the feature's value hasn't been set yet.
      *
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if the object has no such feature
-     * @exception   ServiceException
-     *              if the object is not accessible
+     * @exception ServiceException
+     *                NOT_SUPPORTED
+     *                if the object has no such feature
+     * @exception ServiceException
+     *                if the object is not accessible
      */
     @Override
     public Object objGetValue(
         final String feature
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         if (this.transientValues == null) {
             UnitOfWork_1 unitOfWork = this.getUnitOfWork();
-            Map<String,Object> transactionalValues;
-            if(this.jdoIsTransactional()) { 
+            Map<String, Object> transactionalValues;
+            if (this.jdoIsTransactional()) {
                 transactionalValues = unitOfWork.getState(DataObject_1.this, false).values(false);
                 Object transactionalValue = transactionalValues.get(feature);
-                if(transactionalValue != null || transactionalValues.containsKey(feature)) {
+                if (transactionalValue != null || transactionalValues.containsKey(feature)) {
                     return transactionalValue;
                 }
             } else {
-                transactionalValues = null; 
+                transactionalValues = null;
             }
             ModelElement_1_0 featureDef = this.getFeature(feature);
             Object transactionalValue;
-            if(isStreamedValue(featureDef)){
+            if (isStreamedValue(featureDef)) {
                 transactionalValue = this.getLargeObjectValue(feature, featureDef);
             } else {
                 Object nonTransactionalValue = this.getPersistentAttribute(
-                    feature, 
-                    false, 
-                    Multiplicity.SINGLE_VALUE, 
+                    feature,
+                    false,
+                    Multiplicity.SINGLE_VALUE,
                     false
                 );
-                transactionalValue = 
-                    nonTransactionalValue == null ? null :  
-                    featureDef == null ? nonTransactionalValue : // an embedded object's class
-                        this.getMarshaller(featureDef).marshal(nonTransactionalValue);
+                transactionalValue = nonTransactionalValue == null ? null : featureDef == null ? nonTransactionalValue : // an embedded object's class
+                    this.getMarshaller(featureDef).marshal(nonTransactionalValue);
             }
-            if(transactionalValues != null) {
+            if (transactionalValues != null) {
                 transactionalValues.put(feature, transactionalValue);
             }
             return transactionalValue;
+        } else if ((this.objIsHollow() && !this.isProxy()) ||
+            this.transientValues.containsKey(feature)) {
+            return this.transientValues.get(feature);
         } else {
-            if(
-                (this.objIsHollow() && !this.isProxy()) ||
-                this.transientValues.containsKey(feature)
-            ) {
-                return this.transientValues.get(feature);
+            ModelElement_1_0 featureDef = this.getFeature(feature);
+            Object transientValue;
+            if (isStreamedValue(featureDef)) {
+                transientValue = this.getLargeObjectValue(feature, featureDef);
             } else {
-                ModelElement_1_0 featureDef = this.getFeature(feature);
-                Object transientValue;
-                if(isStreamedValue(featureDef)){
-                    transientValue = this.getLargeObjectValue(feature, featureDef);
-                } else {
-                    Object clonedValue = this.getPersistentAttribute(
-                        feature, 
-                        false, // stream
-                        Multiplicity.SINGLE_VALUE,
-                        false // clear
-                    );
-                    transientValue = 
-                        clonedValue == null ? null :  
-                        featureDef == null ? clonedValue : // an embedded object's class
-                        this.getMarshaller(featureDef).marshal(clonedValue);
-                }
-                (this.jdoIsTransactional() ? this.getState(false).values(false) : this.transientValues).put(
-                    feature, 
-                    transientValue
+                Object clonedValue = this.getPersistentAttribute(
+                    feature,
+                    false, // stream
+                    Multiplicity.SINGLE_VALUE,
+                    false // clear
                 );
-                return transientValue;
+                transientValue = clonedValue == null ? null : featureDef == null ? clonedValue : // an embedded object's class
+                    this.getMarshaller(featureDef).marshal(clonedValue);
             }
+            (this.jdoIsTransactional() ? this.getState(false).values(false) : this.transientValues).put(
+                feature,
+                transientValue
+            );
+            return transientValue;
         }
+
     }
 
-	/**
-	 * Null-safe streamable test
-	 */
-	private static boolean isStreamedValue(
-		ModelElement_1_0 featureDef
-	) throws ServiceException {
-		return featureDef != null && ModelHelper.getMultiplicity(featureDef).isStreamValued();
-	}
+    /**
+     * Null-safe streamable test
+     */
+    private static boolean isStreamedValue(
+        ModelElement_1_0 featureDef
+    )
+        throws ServiceException {
+        return featureDef != null && ModelHelper.getMultiplicity(featureDef).isStreamValued();
+    }
 
     /**
      * Cast the value of a given feature
@@ -3196,14 +3330,16 @@ public class DataObject_1
      * @param type
      * 
      * @return the value
-     * @throws ServiceException if the value is not of the given type
+     * @throws ServiceException
+     *             if the value is not of the given type
      */
     private <T> T getFlushable(
         String feature,
         Class<T> type
-    ) throws ServiceException{
+    )
+        throws ServiceException {
         Object value = this.flushableValues.get(feature);
-        if(value == null || type.isInstance(value)) {
+        if (value == null || type.isInstance(value)) {
             return type.cast(value);
         } else {
             throw new ServiceException(
@@ -3217,7 +3353,7 @@ public class DataObject_1
             );
         }
     }
-    
+
     /**
      * Assert that multi-value requests are model conform
      * 
@@ -3225,11 +3361,12 @@ public class DataObject_1
      * @param map
      */
     private void assertMultivalued(
-        String feature, 
+        String feature,
         Multiplicity requested
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         Multiplicity multiplicity = ModelHelper.getMultiplicity(getAttributes().get(feature));
-        if(multiplicity != requested) {
+        if (multiplicity != requested) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
@@ -3241,33 +3378,36 @@ public class DataObject_1
             ).log();
         }
     }
-    
+
     /**
      * Get a List attribute.
      * <p>
      * This method never returns <code>null</code> as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
-     * @param       feature
-     *              The feature's name.
+     * @param feature
+     *            The feature's name.
      *
-     * @return      a collection which may be empty but never null.
+     * @return a collection which may be empty but never null.
      *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if the object is deleted
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if the object has no such feature
-     * @exception   ClassCastException
-     *              if the feature's value is not a list
+     * @exception ServiceException
+     *                ILLEGAL_STATE
+     *                if the object is deleted
+     * @exception ServiceException
+     *                NOT_SUPPORTED
+     *                if the object has no such feature
+     * @exception ClassCastException
+     *                if the feature's value is not a list
      */
     @SuppressWarnings("unchecked")
     @Override
     public List<Object> objGetList(
         String feature
-    ) throws ServiceException {
-    	List<Object> flushable = getFlushable(feature, List.class);
-    	if(flushable == null) {
-    	    assertMultivalued(feature, Multiplicity.LIST);
+    )
+        throws ServiceException {
+        List<Object> flushable = getFlushable(feature, List.class);
+        if (flushable == null) {
+            assertMultivalued(feature, Multiplicity.LIST);
             return (List<Object>) Maps.putUnlessPresent(
                 this.flushableValues,
                 feature,
@@ -3287,26 +3427,30 @@ public class DataObject_1
      * This method never returns <code>null</code> as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
-     * @param       feature     List<Object> flushable = getFlushable(feature, List.class);
-
-     *              The feature's name.
+     * @param feature
+     *            List<Object> flushable = getFlushable(feature, List.class);
+     * 
+     *            The feature's name.
      *
-     * @return      a collection which may be empty but never null.
+     * @return a collection which may be empty but never null.
      *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if the object is deleted
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if the object has no such feature
-     * @exception   ClassCastException
-     *              if the feature's value is not a set
+     * @exception ServiceException
+     *                ILLEGAL_STATE
+     *                if the object is deleted
+     * @exception ServiceException
+     *                NOT_SUPPORTED
+     *                if the object has no such feature
+     * @exception ClassCastException
+     *                if the feature's value is not a set
      */
     @SuppressWarnings("unchecked")
     @Override
     public Set<Object> objGetSet(
         String feature
-    ) throws ServiceException {
-    	Set<Object> flushable = getFlushable(feature, Set.class);
-    	if(flushable == null) {
+    )
+        throws ServiceException {
+        Set<Object> flushable = getFlushable(feature, Set.class);
+        if (flushable == null) {
             assertMultivalued(feature, Multiplicity.SET);
             return (Set<Object>) Maps.putUnlessPresent(
                 this.flushableValues,
@@ -3327,27 +3471,30 @@ public class DataObject_1
      * This method never returns <code>null</code> as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
-     * @param       feature
-     *              The feature's name.
+     * @param feature
+     *            The feature's name.
      *
-     * @return      a collection which may be empty but never null.
+     * @return a collection which may be empty but never null.
      *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if the object is deleted
-     * @exception   ClassCastException
-     *              if the feature's value is not a sparse array
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if the object has no such feature
+     * @exception ServiceException
+     *                ILLEGAL_STATE
+     *                if the object is deleted
+     * @exception ClassCastException
+     *                if the feature's value is not a sparse array
+     * @exception ServiceException
+     *                NOT_SUPPORTED
+     *                if the object has no such feature
      */
     @SuppressWarnings("unchecked")
     @Override
-    public SortedMap<Integer,Object> objGetSparseArray(
+    public SortedMap<Integer, Object> objGetSparseArray(
         String feature
-    ) throws ServiceException {
-        SortedMap<Integer,Object> flushable = getFlushable(feature, SortedMap.class);
-        if(flushable == null) {
+    )
+        throws ServiceException {
+        SortedMap<Integer, Object> flushable = getFlushable(feature, SortedMap.class);
+        if (flushable == null) {
             assertMultivalued(feature, Multiplicity.SPARSEARRAY);
-            return (SortedMap<Integer,Object>) Maps.putUnlessPresent(
+            return (SortedMap<Integer, Object>) Maps.putUnlessPresent(
                 this.flushableValues,
                 feature,
                 new ManagedSortedMap(
@@ -3362,31 +3509,34 @@ public class DataObject_1
 
     /**
      * Get a Map attribute.
-     * <p> 
+     * <p>
      * This method never returns <code>null</code> as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
-     * @param       feature
-     *              The feature's name.
+     * @param feature
+     *            The feature's name.
      *
-     * @return      a map which may be empty but never null.
+     * @return a map which may be empty but never null.
      *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if the object is deleted
-     * @exception   ServiceException BAD_MEMBER_NAME
-     *              if the object has no such feature
-     * @exception   ClassCastException
-     *              if the feature's value is not a set
+     * @exception ServiceException
+     *                ILLEGAL_STATE
+     *                if the object is deleted
+     * @exception ServiceException
+     *                BAD_MEMBER_NAME
+     *                if the object has no such feature
+     * @exception ClassCastException
+     *                if the feature's value is not a set
      */
     @SuppressWarnings("unchecked")
     @Override
     public Map<String, Object> objGetMap(
         String feature
-    ) throws ServiceException {
-        Map<String,Object> flushable = getFlushable(feature, Map.class);
-        if(flushable == null) {
+    )
+        throws ServiceException {
+        Map<String, Object> flushable = getFlushable(feature, Map.class);
+        if (flushable == null) {
             assertMultivalued(feature, Multiplicity.MAP);
-            return (Map<String,Object>) Maps.putUnlessPresent(
+            return (Map<String, Object>) Maps.putUnlessPresent(
                 this.flushableValues,
                 feature,
                 new ManagedMap(
@@ -3405,49 +3555,56 @@ public class DataObject_1
      * This method never returns <code>null</code> as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
-     * @param       feature
-     *              The feature's name.
+     * @param feature
+     *            The feature's name.
      *
-     * @return      a collection which may be empty but never null.
+     * @return a collection which may be empty but never null.
      *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if the object is deleted
-     * @exception   ClassCastException
-     *              if the feature is not a reference
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if the object has no such feature
+     * @exception ServiceException
+     *                ILLEGAL_STATE
+     *                if the object is deleted
+     * @exception ClassCastException
+     *                if the feature is not a reference
+     * @exception ServiceException
+     *                NOT_SUPPORTED
+     *                if the object has no such feature
      */
     @Override
     public Container_1_0 objGetContainer(
         String feature
-    )  throws ServiceException {
+    )
+        throws ServiceException {
         Container_1_0 flushable = getFlushable(feature, Container_1_0.class);
         return flushable == null ? (Container_1_0) Maps.putUnlessPresent(
             this.flushableValues,
             feature,
-            new Container_1(this,feature)
+            new Container_1(this, feature)
         ) : flushable;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.cci.DataObject_1_0#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record,
+     * javax.resource.cci.Record)
      */
     @Override
     public boolean execute(
-        InteractionSpec ispec, 
-        Record input, 
+        InteractionSpec ispec,
+        Record input,
         Record output
-    ) throws ResourceException {
-        if(ispec instanceof MethodInvocationSpec) {
+    )
+        throws ResourceException {
+        if (ispec instanceof MethodInvocationSpec) {
             try {
                 MethodInvocationSpec methodInvocationSpec = (MethodInvocationSpec) ispec;
                 Operation entry = new Operation(
                     methodInvocationSpec.getFunctionName(),
-                    (MappedRecord)input,
-                    (MappedRecord)output
+                    (MappedRecord) input,
+                    (MappedRecord) output
                 );
-                boolean query = methodInvocationSpec.getInteractionVerb() == InteractionSpec.SYNC_SEND_RECEIVE;            
-                if(query) {
+                boolean query = methodInvocationSpec.getInteractionVerb() == InteractionSpec.SYNC_SEND_RECEIVE;
+                if (query) {
                     entry.invoke(this.dataObjectManager.getInteraction());
                 } else {
                     this.objMakeTransactional();
@@ -3477,14 +3634,14 @@ public class DataObject_1
         }
     }
 
-    Object noContent (
+    Object noContent(
         Object source
-    ){
-        if(source instanceof DataObject_1){
+    ) {
+        if (source instanceof DataObject_1) {
             DataObject_1 object = (DataObject_1) source;
             return AbstractDataObject_1.toString(
-                object, 
-                object.transactionalValuesRecordName, 
+                object,
+                object.transactionalValuesRecordName,
                 null
             );
         } else {
@@ -3493,49 +3650,39 @@ public class DataObject_1
     }
 
     @Override
-    public String toString(
-    ){
-        if(this.objIsInaccessible()) {
+    public String toString() {
+        if (this.objIsInaccessible()) {
             return AbstractDataObject_1.toString(this, this.notFound == null ? null : "No object found for '" + this.notFound + "'");
         } else {
             try {
-                Map<Object,Object> content = new HashMap<Object,Object>();
+                Map<Object, Object> content = new HashMap<Object, Object>();
                 TransactionalState_1 state = this.getState(true);
                 String description;
-                if(state == null) {
+                if (state == null) {
                     description = null;
                 } else {
-                    for(Map.Entry<String,Object> e : state.values(false).entrySet()) {
+                    for (Map.Entry<String, Object> e : state.values(false).entrySet()) {
                         Object v = e.getValue();
-                        if(v instanceof Collection) {
+                        if (v instanceof Collection) {
                             if (v instanceof List) {
                                 List<Object> t = new ArrayList<Object>();
-                                for(
-                                        Iterator<?> j = ((List<?>)v).iterator();
-                                        j.hasNext();
-                                ) {
+                                for (Iterator<?> j = ((List<?>) v).iterator(); j.hasNext();) {
                                     t.add(
                                         this.noContent(j.next())
                                     );
                                 }
                             } else if (v instanceof Set) {
                                 Set<Object> t = new HashSet<Object>();
-                                for(
-                                        Iterator<?> j = ((Set<?>)v).iterator();
-                                        j.hasNext();
-                                ) {
+                                for (Iterator<?> j = ((Set<?>) v).iterator(); j.hasNext();) {
                                     t.add(
                                         this.noContent(j.next())
                                     );
                                 }
                             } // else ignore
                         } else if (v instanceof SortedMap) {
-                            SortedMap<Object,Object> t = new TreeMap<Object,Object>();
-                            for(
-                                    Iterator<?> j = ((SortedMap<?,?>)v).entrySet().iterator();
-                                    j.hasNext();
-                            ){
-                                Map.Entry<?,?> k = (Map.Entry<?,?>)j.next();
+                            SortedMap<Object, Object> t = new TreeMap<Object, Object>();
+                            for (Iterator<?> j = ((SortedMap<?, ?>) v).entrySet().iterator(); j.hasNext();) {
+                                Map.Entry<?, ?> k = (Map.Entry<?, ?>) j.next();
                                 t.put(
                                     k.getKey(),
                                     this.noContent(k.getValue())
@@ -3548,16 +3695,16 @@ public class DataObject_1
                     description = state.isPrepared() ? "prepared" : "not prepared";
                 }
                 return AbstractDataObject_1.toString(
-                    this, 
-                    this.transactionalValuesRecordName, 
+                    this,
+                    this.transactionalValuesRecordName,
                     description
                 ) + ", attributes=" + IndentingFormatter.toString(
                     content
                 );
             } catch (Exception exception) {
                 return AbstractDataObject_1.toString(
-                    this, 
-                    this.transactionalValuesRecordName, 
+                    this,
+                    this.transactionalValuesRecordName,
                     exception.getMessage()
                 );
             }
@@ -3572,17 +3719,18 @@ public class DataObject_1
      */
     private synchronized void writeObject(
         java.io.ObjectOutputStream stream
-    ) throws java.io.IOException {
+    )
+        throws java.io.IOException {
         try {
             TransactionalState_1 state = this.getState(true);
             stream.defaultWriteObject();
-            if(state == null) {
+            if (state == null) {
                 stream.writeInt(0);
             } else {
                 Set<String> features = state.dirtyFeatures(true);
-                Map<String,Object> source = state.values(false);
+                Map<String, Object> source = state.values(false);
                 stream.writeInt(features.size());
-                for(String feature : features) {
+                for (String feature : features) {
                     stream.writeObject(feature);
                     stream.writeObject(source.get(feature));
                 }
@@ -3598,11 +3746,13 @@ public class DataObject_1
      */
     private void readObject(
         java.io.ObjectInputStream stream
-    ) throws java.io.IOException, ClassNotFoundException {
+    )
+        throws java.io.IOException,
+        ClassNotFoundException {
         stream.defaultReadObject();
         this.flushableValues = Maps.newMap(objThreadSafetyRequired());
         int count = stream.readInt();
-        if(count > 0) {
+        if (count > 0) {
             TransactionalState_1 state;
             try {
                 state = this.getState(false);
@@ -3610,8 +3760,8 @@ public class DataObject_1
                 throw (IOException) new IOException().initCause(exception);
             }
             Set<String> features = state.dirtyFeatures(false);
-            Map<String,Object> target = state.values(false);
-            for(int i = 0; i < count; i++) {
+            Map<String, Object> target = state.values(false);
+            for (int i = 0; i < count; i++) {
                 String feature = (String) stream.readObject();
                 features.add(feature);
                 target.put(feature, stream.readObject());
@@ -3624,8 +3774,9 @@ public class DataObject_1
     private final ModelElement_1_0 getAttribute(
         String featured,
         String feature
-    ) throws ServiceException{
-        Map<String,ModelElement_1_0> features = (Map<String, ModelElement_1_0>)getModel().getElement(
+    )
+        throws ServiceException {
+        Map<String, ModelElement_1_0> features = (Map<String, ModelElement_1_0>) getModel().getElement(
             featured
         ).objGetMap(
             "attribute"
@@ -3640,14 +3791,16 @@ public class DataObject_1
      * 
      * @return an object or datatype marshaller
      * 
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     private final Marshaller getMarshaller(
         ModelElement_1_0 feature
-    ) throws ServiceException{
-        Marshaller marshaller = feature == null ? null : DataObject_1.DATA_TYPE_MARSHALLER.get(
-            feature.getModel().getDereferencedType(feature.getType()).getQualifiedName()
-        );
+    )
+        throws ServiceException {
+        Marshaller marshaller = feature == null ? null
+            : DataObject_1.DATA_TYPE_MARSHALLER.get(
+                feature.getModel().getDereferencedType(feature.getType()).getQualifiedName()
+            );
         return marshaller == null ? this.dataObjectManager : marshaller;
     }
 
@@ -3662,32 +3815,32 @@ public class DataObject_1
      */
     private final ModelElement_1_0 getFeature(
         String feature
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         int i = feature.lastIndexOf(':');
-        if(i < 0) {
+        if (i < 0) {
             return this.getAttribute(
-                objGetClass(), 
+                objGetClass(),
                 feature
             );
         } else {
             this.objRetrieve(
                 false, // reload
-                this.dataObjectManager.getFetchPlan(), 
-                Collections.singleton(feature), 
-                false, 
+                this.dataObjectManager.getFetchPlan(),
+                Collections.singleton(feature),
+                false,
                 true // throwNotFoundException
             );
             Object raw = this.persistentValues.get(
                 feature.substring(0, ++i) + SystemAttributes.OBJECT_CLASS
             );
-            String embeddedClass = raw instanceof List<?> ?
-                (String) ((List<?>)raw).get(0) :
-                (String)raw;
+            String embeddedClass = raw instanceof List<?> ? (String) ((List<?>) raw).get(0) : (String) raw;
             String embeddedFeature = feature.substring(i);
-            return SystemAttributes.OBJECT_CLASS.equals(embeddedFeature) ? null : this.getAttribute(
-                embeddedClass, 
-                embeddedFeature
-            );
+            return SystemAttributes.OBJECT_CLASS.equals(embeddedFeature) ? null
+                : this.getAttribute(
+                    embeddedClass,
+                    embeddedFeature
+                );
         }
     }
 
@@ -3695,92 +3848,116 @@ public class DataObject_1
      * Determine the marshaller to be used
      * 
      * @param feature
-     *  
+     * 
      * @return an object or datatype marshaller
      * 
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     final Marshaller getMarshaller(
         String feature
-    ) throws ServiceException{
+    )
+        throws ServiceException {
         return this.getMarshaller(this.getFeature(feature));
     }
 
     /**
      * Retrieve a specific aspect
      * 
-     * @param aspectType the aspect type such as 
+     * @param aspectType
+     *            the aspect type such as
      * 
      * @return the specific aspect
      * 
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     @SuppressWarnings("unchecked")
     @Override
     public Map<String, DataObject_1_0> getAspect(
         String aspectType
-    ){
+    ) {
         Map<String, DataObject_1_0> flushable = (Map<String, DataObject_1_0>) this.flushableValues.get(aspectType);
-        return flushable != null ? flushable : (Map<String, DataObject_1_0>) Maps.putUnlessPresent(
-            this.flushableValues,
-            aspectType,
-            new ManagedAspect(this, aspectType)
-        );
+        return flushable != null ? flushable
+            : (Map<String, DataObject_1_0>) Maps.putUnlessPresent(
+                this.flushableValues,
+                aspectType,
+                new ManagedAspect(this, aspectType)
+            );
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.generic.spi.Object_1_5#getFactory()
      */
     @Override
-    public DataObjectManager_1 jdoGetPersistenceManager(
-    ) {
+    public DataObjectManager_1 jdoGetPersistenceManager() {
         return this.dataObjectManager;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object, int[])
      */
     @Override
-    public void jdoCopyFields(Object other, int[] fieldNumbers) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+    public void jdoCopyFields(
+        Object other,
+        int[] fieldNumbers
+    ) {
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer,
+     * java.lang.Object)
      */
     @Override
     public void jdoCopyKeyFieldsFromObjectId(
         ObjectIdFieldConsumer fm,
         Object oid
     ) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(java.lang.Object)
      */
     @Override
     public void jdoCopyKeyFieldsToObjectId(Object oid) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier,
+     * java.lang.Object)
      */
     @Override
-    public void jdoCopyKeyFieldsToObjectId(ObjectIdFieldSupplier fm, Object oid) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+    public void jdoCopyKeyFieldsToObjectId(
+        ObjectIdFieldSupplier fm,
+        Object oid
+    ) {
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
      */
     @Override
-    public Object jdoGetVersion() {
+    public byte[] jdoGetVersion() {
         return this.version;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDetached()
      */
     @Override
@@ -3788,156 +3965,183 @@ public class DataObject_1
         return this.detached;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoMakeDirty(java.lang.String)
      */
     @Override
     public void jdoMakeDirty(String fieldName) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager)
      */
     @Override
     public PersistenceCapable jdoNewInstance(StateManager sm) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager, java.lang.Object)
      */
     @Override
-    public PersistenceCapable jdoNewInstance(StateManager sm, Object oid) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+    public PersistenceCapable jdoNewInstance(
+        StateManager sm,
+        Object oid
+    ) {
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance()
      */
     @Override
     public Object jdoNewObjectIdInstance() {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance(java.lang.Object)
      */
     @Override
     public Object jdoNewObjectIdInstance(Object o) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideField(int)
      */
     @Override
     public void jdoProvideField(int fieldNumber) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideFields(int[])
      */
     @Override
     public void jdoProvideFields(int[] fieldNumbers) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceField(int)
      */
     @Override
     public void jdoReplaceField(int fieldNumber) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFields(int[])
      */
     @Override
     public void jdoReplaceFields(int[] fieldNumbers) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFlags()
      */
     @Override
     public void jdoReplaceFlags() {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
      */
     @Override
     public void jdoReplaceStateManager(StateManager sm)
         throws SecurityException {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
     /**
      * Create a record
      * 
-     * @param recordName the MOF class name
+     * @param recordName
+     *            the MOF class name
      * 
      * @return a new record
      * 
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     @SuppressWarnings("unchecked")
-	static <T extends Record> T newRecord(
-    	String recordName
-    ) throws ServiceException{
-    	try {
-			return (T) Records.getRecordFactory().createMappedRecord(recordName);
-		} catch (ResourceException exception) {
-			throw new ServiceException(exception);
-		}
-    }
-    
-    protected <T extends Collection<?>> void assertNonNullValue(
-    	Object value,
-    	Class<T> target
-    ) {
-    	if(value == null) {
-	        throw new JDOUserException(
-	            "Null values can't be inserted into such a JMI feature collection",
-	            new NullPointerException(target.getSimpleName() + " does not accept null values"),
-	            this
-	        );
-    	}
+    static <T extends Record> T newRecord(
+        String recordName
+    )
+        throws ServiceException {
+        try {
+            return (T) Records.getRecordFactory().createMappedRecord(recordName);
+        } catch (ResourceException exception) {
+            throw new ServiceException(exception);
+        }
     }
 
-    
+    protected <T extends Collection<?>> void assertNonNullValue(
+        Object value,
+        Class<T> target
+    ) {
+        if (value == null) {
+            throw new JDOUserException(
+                "Null values can't be inserted into such a JMI feature collection",
+                new NullPointerException(target.getSimpleName() + " does not accept null values"),
+                this
+            );
+        }
+    }
+
     //--------------------------------------------------------------------------
     // Class ManagedList
     //--------------------------------------------------------------------------
 
     /**
-     * The managed list delegates<ul>
+     * The managed list delegates
+     * <ul>
      * <li>to a unit of work local copy if the object is transactional
      * <li>to the persistent values if the object is non-transactional
      * </ul>
      */
     final class ManagedList
         extends AbstractList<Object>
-        implements Flushable
-    {
+        implements Flushable {
 
         /**
-         * Constructor 
+         * Constructor
          *
          * @param feature
-         * @param marshaller 
+         * @param marshaller
          * 
          * @throws ServiceException
          */
         ManagedList(
             String feature,
             Marshaller marshaller
-        ) throws ServiceException {
+        )
+            throws ServiceException {
             this.feature = feature;
             this.nonTransactional = new NonTransactional(marshaller);
         }
@@ -3954,36 +4158,36 @@ public class DataObject_1
 
         @SuppressWarnings("unchecked")
         private List<Object> getDelegate(
-            boolean makeDirty, 
+            boolean makeDirty,
             boolean clear
-        ){
+        ) {
             try {
-                UnitOfWork_1 unitOfWork = DataObject_1.this.getUnitOfWorkIfTransactional(makeDirty ? this.feature : null);
-                if(unitOfWork == null) {
-                    if(DataObject_1.this.transientValues != null) {
+                final UnitOfWork_1 unitOfWork = makeDirty ? getUnitOfWorkIfTransactional(this.feature) : getUnitOfWorkIfTransactional();
+                if (unitOfWork == null) {
+                    if (DataObject_1.this.transientValues != null) {
                         List<Object> transientValue = (List<Object>) DataObject_1.this.transientValues.get(this.feature);
-                        if(makeDirty && transientValue == null) {
+                        if (makeDirty && transientValue == null) {
                             transientValues.put(
                                 this.feature,
                                 transientValue = new ArrayList<Object>()
                             );
                             return transientValue;
                         }
-                        if(transientValue != null) {
-                            if(clear) {
+                        if (transientValue != null) {
+                            if (clear) {
                                 transientValue.clear();
                             }
                             return transientValue;
                         }
                     }
-                    if(clear) {
+                    if (clear) {
                         this.nonTransactional.clear();
                     }
                     return this.nonTransactional;
                 } else {
-                    Map<String,Object> transactionalValues = unitOfWork.getState(DataObject_1.this, false).values(false); 
+                    Map<String, Object> transactionalValues = unitOfWork.getState(DataObject_1.this, false).values(false);
                     List<Object> transactionalValue = (List<Object>) transactionalValues.get(this.feature);
-                    if(transactionalValue == null) {
+                    if (transactionalValue == null) {
                         transactionalValues.put(
                             this.feature,
                             transactionalValue = clear ? new ArrayList<Object>() : new ArrayList<Object>(this.nonTransactional)
@@ -4006,12 +4210,13 @@ public class DataObject_1
         }
 
         @Override
-        public int size(
-        ){
+        public int size() {
             return this.getDelegate(false, false).size();
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractCollection#isEmpty()
          */
         @Override
@@ -4023,8 +4228,8 @@ public class DataObject_1
         public Object set(
             int index,
             Object element
-        ){
-        	assertNonNullValue(element, List.class);
+        ) {
+            assertNonNullValue(element, List.class);
             return this.getDelegate(true, false).set(index, element);
         }
 
@@ -4032,19 +4237,21 @@ public class DataObject_1
         public void add(
             int index,
             Object element
-        ){
-        	assertNonNullValue(element, List.class);
+        ) {
+            assertNonNullValue(element, List.class);
             this.getDelegate(true, false).add(index, element);
         }
 
         @Override
         public Object remove(
             int index
-        ){
+        ) {
             return this.getDelegate(true, false).remove(index);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractList#clear()
          */
         @Override
@@ -4052,13 +4259,16 @@ public class DataObject_1
             this.getDelegate(true, true);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.io.Flushable#flush()
          */
         @Override
-        public void flush() throws IOException {
+        public void flush()
+            throws IOException {
             List<Object> source = this.getDelegate(false, false);
-            if(source != this.nonTransactional) {
+            if (source != this.nonTransactional) {
                 this.nonTransactional.clear();
                 this.nonTransactional.addAll(source);
             }
@@ -4070,17 +4280,18 @@ public class DataObject_1
         class NonTransactional extends MarshallingList<Object> {
 
             /**
-             * Constructor 
+             * Constructor
              * 
-             * @param marshaller 
+             * @param marshaller
              *
-             * @throws ServiceException 
+             * @throws ServiceException
              */
             NonTransactional(
                 Marshaller marshaller
-            ) throws ServiceException {
+            )
+                throws ServiceException {
                 super(
-                    marshaller, 
+                    marshaller,
                     null // delegate provided by getDelegate() method
                 );
             }
@@ -4090,38 +4301,40 @@ public class DataObject_1
              */
             private static final long serialVersionUID = -5790864813300543661L;
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see org.openmdx.base.collection.MarshallingList#getDelegate()
              */
             @Override
-            protected List<?> getDelegate(
-            ) {
+            protected List<?> getDelegate() {
                 try {
-                    return (List<?>)DataObject_1.this.getPersistentAttribute(
-                        ManagedList.this.feature, 
+                    return (List<?>) DataObject_1.this.getPersistentAttribute(
+                        ManagedList.this.feature,
                         false,
                         Multiplicity.LIST,
                         false
                     );
-                } catch(ServiceException e) {
+                } catch (ServiceException e) {
                     throw new RuntimeServiceException(e);
                 }
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see org.openmdx.base.collection.MarshallingList#clear()
              */
             @Override
-            public void clear(
-            ) {
+            public void clear() {
                 try {
                     DataObject_1.this.getPersistentAttribute(
-                        ManagedList.this.feature, 
+                        ManagedList.this.feature,
                         false,
                         Multiplicity.LIST,
                         true
                     );
-                } catch(ServiceException e) {
+                } catch (ServiceException e) {
                     throw new RuntimeServiceException(e);
                 }
             }
@@ -4130,34 +4343,34 @@ public class DataObject_1
 
     }
 
-
     //------------------------------------------------------------------------
     // Class ManagedSet
     //------------------------------------------------------------------------
 
     /**
-     * The managed set delegates<ul>
+     * The managed set delegates
+     * <ul>
      * <li>to a unit of work local copy if the object is transactional
      * <li>to the persistent values if the object is non-transactional
      * </ul>
      */
     final class ManagedSet
         extends AbstractSet<Object>
-        implements Flushable
-    {
+        implements Flushable {
 
         /**
-         * Constructor 
+         * Constructor
          *
          * @param feature
          * @param transactional
-         * @param marshaller 
+         * @param marshaller
          * @throws ServiceException
          */
         ManagedSet(
             String feature,
             Marshaller marshaller
-        ) throws ServiceException {
+        )
+            throws ServiceException {
             this.feature = feature;
             this.nonTransactional = new NonTransactional(marshaller);
         }
@@ -4174,37 +4387,36 @@ public class DataObject_1
 
         @SuppressWarnings("unchecked")
         protected Set<Object> getDelegate(
-            boolean makeDirty, 
+            boolean makeDirty,
             boolean clear
-        ){
+        ) {
             try {
-                UnitOfWork_1 unitOfWork = DataObject_1.this.getUnitOfWorkIfTransactional(makeDirty ? this.feature : null);
-                if(unitOfWork == null) {
-                    if(DataObject_1.this.transientValues != null) {
+                final UnitOfWork_1 unitOfWork = makeDirty ? getUnitOfWorkIfTransactional(this.feature) : getUnitOfWorkIfTransactional();
+                if (unitOfWork == null) {
+                    if (DataObject_1.this.transientValues != null) {
                         Set<Object> transientValue = (Set<Object>) DataObject_1.this.transientValues.get(this.feature);
-                        if(makeDirty && transientValue == null) {
+                        if (makeDirty && transientValue == null) {
                             transientValues.put(
                                 this.feature,
                                 transientValue = new HashSet<Object>()
                             );
                             return transientValue;
                         }
-                        if(transientValue != null) {
-                            if(clear) {
+                        if (transientValue != null) {
+                            if (clear) {
                                 transientValue.clear();
                             }
                             return transientValue;
                         }
                     }
-                    if(clear) {
+                    if (clear) {
                         this.nonTransactional.clear();
                     }
                     return this.nonTransactional;
-                } 
-                else {
-                    Map<String,Object> transactionalValues = unitOfWork.getState(DataObject_1.this, false).values(false); 
-                    Set<Object> transactionalValue = (Set<Object>)transactionalValues.get(this.feature);
-                    if(transactionalValue == null) {
+                } else {
+                    Map<String, Object> transactionalValues = unitOfWork.getState(DataObject_1.this, false).values(false);
+                    Set<Object> transactionalValue = (Set<Object>) transactionalValues.get(this.feature);
+                    if (transactionalValue == null) {
                         transactionalValues.put(
                             this.feature,
                             transactionalValue = clear ? new HashSet<Object>() : new HashSet<Object>(this.nonTransactional)
@@ -4219,7 +4431,9 @@ public class DataObject_1
             }
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractCollection#iterator()
          */
         @Override
@@ -4232,21 +4446,23 @@ public class DataObject_1
         }
 
         @Override
-        public void clear(
-        ) {
+        public void clear() {
             this.getDelegate(true, true);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractCollection#size()
          */
         @Override
-        public int size(
-        ) {
+        public int size() {
             return this.getDelegate(false, false).size();
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractCollection#isEmpty()
          */
         @Override
@@ -4254,22 +4470,27 @@ public class DataObject_1
             return this.getDelegate(false, false).isEmpty();
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractCollection#add(java.lang.Object)
          */
         @Override
         public boolean add(Object o) {
-        	assertNonNullValue(o, Set.class);
+            assertNonNullValue(o, Set.class);
             return this.getDelegate(true, false).add(o);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.io.Flushable#flush()
          */
         @Override
-        public void flush() throws IOException {
+        public void flush()
+            throws IOException {
             Set<Object> source = this.getDelegate(false, false);
-            if(source != this.nonTransactional) {
+            if (source != this.nonTransactional) {
                 this.nonTransactional.clear();
                 this.nonTransactional.addAll(source);
             }
@@ -4281,17 +4502,18 @@ public class DataObject_1
         class NonTransactional extends MarshallingSet<Object> {
 
             /**
-             * Constructor 
+             * Constructor
              * 
-             * @param marshaller 
+             * @param marshaller
              *
-             * @throws ServiceException 
+             * @throws ServiceException
              */
             NonTransactional(
                 Marshaller marshaller
-            ) throws ServiceException {
+            )
+                throws ServiceException {
                 super(
-                    marshaller, 
+                    marshaller,
                     null // delegate provided by getDelegate() method
                 );
             }
@@ -4301,38 +4523,40 @@ public class DataObject_1
              */
             private static final long serialVersionUID = -5790864813300543661L;
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see org.openmdx.base.collection.MarshallingCollection#getDelegate()
              */
             @Override
-            protected Collection<?> getDelegate(
-            ) {
+            protected Collection<?> getDelegate() {
                 try {
-                    return (Collection<?>)DataObject_1.this.getPersistentAttribute(
-                        ManagedSet.this.feature, 
+                    return (Collection<?>) DataObject_1.this.getPersistentAttribute(
+                        ManagedSet.this.feature,
                         false,
                         Multiplicity.LIST,
                         false
                     );
-                } catch(ServiceException e) {
+                } catch (ServiceException e) {
                     throw new RuntimeServiceException(e);
                 }
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see org.openmdx.base.collection.MarshallingCollection#clear()
              */
             @Override
-            public void clear(
-            ) {
+            public void clear() {
                 try {
                     DataObject_1.this.getPersistentAttribute(
-                        ManagedSet.this.feature, 
+                        ManagedSet.this.feature,
                         false,
                         Multiplicity.LIST,
                         true
                     );
-                } catch(ServiceException e) {
+                } catch (ServiceException e) {
                     throw new RuntimeServiceException(e);
                 }
             }
@@ -4347,7 +4571,7 @@ public class DataObject_1
             SetIterator(
                 Iterator<?> delegate,
                 boolean transactional
-            ){
+            ) {
                 this.delegate = delegate;
                 this.transactional = transactional;
             }
@@ -4367,7 +4591,9 @@ public class DataObject_1
              */
             private Object current = null;
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.Iterator#hasNext()
              */
             @Override
@@ -4375,7 +4601,9 @@ public class DataObject_1
                 return this.delegate.hasNext();
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.Iterator#next()
              */
             @Override
@@ -4383,15 +4611,16 @@ public class DataObject_1
                 return this.current = this.delegate.next();
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.Iterator#remove()
              */
             @Override
-            public void remove(
-            ) {
-                if(this.transactional) {
+            public void remove() {
+                if (this.transactional) {
                     this.delegate.remove();
-                } else if(this.current == null){
+                } else if (this.current == null) {
                     throw new IllegalStateException(
                         "There is no current element to be removed"
                     );
@@ -4404,38 +4633,38 @@ public class DataObject_1
         }
 
     }
-    
 
     //--------------------------------------------------------------------------
     // Class ManagedMap
     //--------------------------------------------------------------------------
 
     /**
-     * The managed map delegates<ul>
+     * The managed map delegates
+     * <ul>
      * <li>to a unit of work local copy if the object is transactional
      * <li>to the persistent values if the object is non-transactional
      * </ul>
      */
     final class ManagedMap
-        implements Map<String,Object>, Flushable
-    {
+        implements Map<String, Object>, Flushable {
 
         /**
-         * Constructor 
+         * Constructor
          *
          * @param feature
-         * @param marshaller 
+         * @param marshaller
          * 
          * @throws ServiceException
          */
         ManagedMap(
             final String feature,
             Marshaller marshaller
-        ) throws ServiceException {
+        )
+            throws ServiceException {
             this.feature = feature;
             this.nonTransactional = new NonTransactional(marshaller);
-        }        
-        
+        }
+
         /**
          * 
          */
@@ -4444,9 +4673,9 @@ public class DataObject_1
         /**
          * 
          */
-        private final Map<String,Object> nonTransactional;
+        private final Map<String, Object> nonTransactional;
 
-        private final Set<Map.Entry<String,Object>> entries = new AbstractSet<Map.Entry<String,Object>>(){
+        private final Set<Map.Entry<String, Object>> entries = new AbstractSet<Map.Entry<String, Object>>() {
 
             @Override
             public Iterator<Map.Entry<String, Object>> iterator() {
@@ -4455,46 +4684,46 @@ public class DataObject_1
 
             @Override
             public int size() {
-                return getDelegate(false,false).size();
+                return getDelegate(false, false).size();
             }
-            
+
         };
-        
+
         @SuppressWarnings("unchecked")
-        protected Map<String,Object> getDelegate(
-            boolean makeDirty, 
+        protected Map<String, Object> getDelegate(
+            boolean makeDirty,
             boolean clear
-        ){
+        ) {
             try {
-                UnitOfWork_1 unitOfWork = DataObject_1.this.getUnitOfWorkIfTransactional(makeDirty ? this.feature : null);
-                if(unitOfWork == null) {
-                    if(DataObject_1.this.transientValues != null) {
-                        Map<String,Object> transientValue = (Map<String,Object>) transientValues.get(this.feature);
-                        if(makeDirty && transientValue == null) {
+                final UnitOfWork_1 unitOfWork = makeDirty ? getUnitOfWorkIfTransactional(this.feature) : getUnitOfWorkIfTransactional();
+                if (unitOfWork == null) {
+                    if (DataObject_1.this.transientValues != null) {
+                        Map<String, Object> transientValue = (Map<String, Object>) transientValues.get(this.feature);
+                        if (makeDirty && transientValue == null) {
                             DataObject_1.this.transientValues.put(
                                 this.feature,
-                                transientValue = new HashMap<String,Object>()
+                                transientValue = new HashMap<String, Object>()
                             );
                             return transientValue;
                         }
-                        if(transientValue != null) {
-                            if(clear) {
+                        if (transientValue != null) {
+                            if (clear) {
                                 transientValue.clear();
                             }
                             return transientValue;
                         }
                     }
-                    if(clear) {
+                    if (clear) {
                         this.nonTransactional.clear();
                     }
                     return this.nonTransactional;
                 } else {
-                    Map<String,Object> transactionalValues = unitOfWork.getState(DataObject_1.this, false).values(false); 
-                    Map<String,Object> transactionalValue = (Map<String, Object>)transactionalValues.get(this.feature);
-                    if(transactionalValue == null) {
+                    Map<String, Object> transactionalValues = unitOfWork.getState(DataObject_1.this, false).values(false);
+                    Map<String, Object> transactionalValue = (Map<String, Object>) transactionalValues.get(this.feature);
+                    if (transactionalValue == null) {
                         transactionalValues.put(
                             this.feature,
-                            transactionalValue = clear ? new HashMap<String,Object>() : new HashMap<String,Object>(this.nonTransactional)
+                            transactionalValue = clear ? new HashMap<String, Object>() : new HashMap<String, Object>(this.nonTransactional)
                         );
                     } else if (clear) {
                         transactionalValue.clear();
@@ -4505,20 +4734,25 @@ public class DataObject_1
                 throw new RuntimeServiceException(exception);
             }
         }
-        
-        /* (non-Javadoc)
+
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.io.Flushable#flush()
          */
         @Override
-        public void flush() throws IOException {
-            Map<String,Object> source = ManagedMap.this.getDelegate(false, false);
-            if(source != this.nonTransactional) {
+        public void flush()
+            throws IOException {
+            Map<String, Object> source = ManagedMap.this.getDelegate(false, false);
+            if (source != this.nonTransactional) {
                 this.nonTransactional.clear();
                 this.nonTransactional.putAll(source);
             }
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#entrySet()
          */
         @Override
@@ -4526,138 +4760,169 @@ public class DataObject_1
             return this.entries;
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#clear()
          */
         @Override
         public void clear() {
-            ManagedMap.this.getDelegate(true,true);
+            ManagedMap.this.getDelegate(true, true);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#containsKey(java.lang.Object)
          */
         @Override
         public boolean containsKey(Object key) {
-            return ManagedMap.this.getDelegate(false,false).containsKey(key);
+            return ManagedMap.this.getDelegate(false, false).containsKey(key);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#containsValue(java.lang.Object)
          */
         public boolean containsValue(Object value) {
-            return ManagedMap.this.getDelegate(false,false).containsValue(value);
+            return ManagedMap.this.getDelegate(false, false).containsValue(value);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#get(java.lang.Object)
          */
         @Override
         public Object get(Object key) {
-            return ManagedMap.this.getDelegate(false,false).get(key);
+            return ManagedMap.this.getDelegate(false, false).get(key);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#isEmpty()
          */
         @Override
         public boolean isEmpty() {
-            return ManagedMap.this.getDelegate(false,false).isEmpty();
+            return ManagedMap.this.getDelegate(false, false).isEmpty();
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#keySet()
          */
         @Override
         public Set<String> keySet() {
-            return ManagedMap.this.getDelegate(false,false).keySet(); // TODO make it modifiable
+            return ManagedMap.this.getDelegate(false, false).keySet(); // TODO make it modifiable
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#put(java.lang.Object, java.lang.Object)
          */
         @Override
-        public Object put(String key, Object value) {
-            return ManagedMap.this.getDelegate(true,false).put(key, value);
+        public Object put(
+            String key,
+            Object value
+        ) {
+            return ManagedMap.this.getDelegate(true, false).put(key, value);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#putAll(java.util.Map)
          */
         @Override
         public void putAll(Map<? extends String, ? extends Object> t) {
-            ManagedMap.this.getDelegate(true,false).putAll(t);
+            ManagedMap.this.getDelegate(true, false).putAll(t);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#remove(java.lang.Object)
          */
         @Override
         public Object remove(Object key) {
-            return ManagedMap.this.getDelegate(true,false).remove(key);
+            return ManagedMap.this.getDelegate(true, false).remove(key);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#size()
          */
         @Override
         public int size() {
-            return ManagedMap.this.getDelegate(false,false).size();
+            return ManagedMap.this.getDelegate(false, false).size();
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#values()
          */
         @Override
         public Collection<Object> values() {
-            return ManagedMap.this.getDelegate(false,false).values();
+            return ManagedMap.this.getDelegate(false, false).values();
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.lang.Object#equals(java.lang.Object)
          */
         @Override
         public boolean equals(Object obj) {
-            return ManagedMap.this.getDelegate(false,false).equals(obj);
+            return ManagedMap.this.getDelegate(false, false).equals(obj);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.lang.Object#hashCode()
          */
         @Override
         public int hashCode() {
-            return ManagedMap.this.getDelegate(false,false).hashCode();
+            return ManagedMap.this.getDelegate(false, false).hashCode();
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.lang.Object#toString()
          */
         @Override
         public String toString() {
-            return ManagedMap.this.getDelegate(false,false).toString();
+            return ManagedMap.this.getDelegate(false, false).toString();
         }
 
         /**
          * Entry Iterator
          */
         class EntryIterator implements Iterator<Map.Entry<String, Object>> {
-            
-            private Map<String,Object> readOnly = ManagedMap.this.getDelegate(false,false);
-            
+
+            private Map<String, Object> readOnly = ManagedMap.this.getDelegate(false, false);
+
             private Iterator<Map.Entry<String, Object>> delegate = readOnly.entrySet().iterator();
 
             protected Map.Entry<String, Object> current = null;
-            
-            protected void makeDirty(){
-                if(this.readOnly != null) {
-                    Map<String,Object> forUpdate = ManagedMap.this.getDelegate(true,false);
-                    Map<String,Object> readOnly = this.readOnly;
+
+            protected void makeDirty() {
+                if (this.readOnly != null) {
+                    Map<String, Object> forUpdate = ManagedMap.this.getDelegate(true, false);
+                    Map<String, Object> readOnly = this.readOnly;
                     this.readOnly = null;
-                    if(forUpdate != readOnly) {
+                    if (forUpdate != readOnly) {
                         this.delegate = forUpdate.entrySet().iterator();
-                        while(this.delegate.hasNext()){
+                        while (this.delegate.hasNext()) {
                             Map.Entry<String, Object> candidate = this.delegate.next();
-                            if(this.current.getKey().equals(candidate.getKey())) {
+                            if (this.current.getKey().equals(candidate.getKey())) {
                                 this.current = candidate;
                                 return;
                             }
@@ -4668,8 +4933,10 @@ public class DataObject_1
                     }
                 }
             }
-            
-            /* (non-Javadoc)
+
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.Iterator#hasNext()
              */
             @Override
@@ -4677,7 +4944,9 @@ public class DataObject_1
                 return this.delegate.hasNext();
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.Iterator#next()
              */
             @Override
@@ -4697,11 +4966,13 @@ public class DataObject_1
                         EntryIterator.this.makeDirty();
                         return EntryIterator.this.current.setValue(value);
                     }
-                    
+
                 };
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.Iterator#remove()
              */
             @Override
@@ -4709,26 +4980,27 @@ public class DataObject_1
                 EntryIterator.this.makeDirty();
                 this.delegate.remove();
             }
-        
+
         }
-        
+
         /**
          * Persistent Values Accessor
          */
-        class NonTransactional extends MarshallingMap<String,Object> {
+        class NonTransactional extends MarshallingMap<String, Object> {
 
             /**
-             * Constructor 
+             * Constructor
              * 
-             * @param marshaller 
+             * @param marshaller
              *
-             * @throws ServiceException 
+             * @throws ServiceException
              */
             NonTransactional(
                 Marshaller marshaller
-            ) throws ServiceException {
+            )
+                throws ServiceException {
                 super(
-                    marshaller, 
+                    marshaller,
                     null // delegate provided by getDelegate() method
                 );
             }
@@ -4737,39 +5009,42 @@ public class DataObject_1
              * Implements <code>Serializable</code>
              */
             private static final long serialVersionUID = 4281239775781185351L;
-            
-            /* (non-Javadoc)
+
+            /*
+             * (non-Javadoc)
+             * 
              * @see org.openmdx.base.collection.MarshallingMap#getDelegate()
              */
             @SuppressWarnings("unchecked")
             @Override
             protected Map<String, Object> getDelegate() {
                 try {
-                    return (Map<String, Object> )DataObject_1.this.getPersistentAttribute(
-                        ManagedMap.this.feature, 
+                    return (Map<String, Object>) DataObject_1.this.getPersistentAttribute(
+                        ManagedMap.this.feature,
                         false,
                         Multiplicity.MAP,
                         false
                     );
-                } catch(ServiceException e) {
+                } catch (ServiceException e) {
                     throw new RuntimeServiceException(e);
                 }
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see org.openmdx.base.collection.MarshallingList#clear()
              */
             @Override
-            public void clear(
-            ) {
+            public void clear() {
                 try {
                     DataObject_1.this.getPersistentAttribute(
-                        ManagedMap.this.feature, 
+                        ManagedMap.this.feature,
                         false,
                         Multiplicity.MAP,
                         true
                     );
-                } catch(ServiceException e) {
+                } catch (ServiceException e) {
                     throw new RuntimeServiceException(e);
                 }
             }
@@ -4778,64 +5053,66 @@ public class DataObject_1
 
     }
 
-
     //------------------------------------------------------------------------
     // Class ManagedSortedMap
     //------------------------------------------------------------------------
 
     /**
-     * The managed sparse array delegates<ul>
+     * The managed sparse array delegates
+     * <ul>
      * <li>to a unit of work local copy if the object is transactional
      * <li>to the persistent values if the object is non-transactional
      * </ul>
      */
     final class ManagedSortedMap
-        implements SortedMap<Integer,Object>, Flushable
-    {
+        implements SortedMap<Integer, Object>, Flushable {
 
         /**
-         * Constructor 
+         * Constructor
          *
          * @param feature
          * @param transactional
-         * @param marshaller 
+         * @param marshaller
          * 
          * @throws ServiceException
          */
         ManagedSortedMap(
             final String feature,
             Marshaller marshaller
-        ) throws ServiceException {
+        )
+            throws ServiceException {
             this.feature = feature;
             this.nonTransactional = new MarshallingSortedMap(
                 marshaller,
-                new PopulationMap<Object>(){
+                new PopulationMap<Object>() {
 
-                    /* (non-Javadoc)
+                    /*
+                     * (non-Javadoc)
+                     * 
                      * @see org.openmdx.compatibility.base.collection.PopulationMap#getDelegate()
                      */
                     @SuppressWarnings("unchecked")
                     @Override
-                    protected SparseArray<Object> getDelegate(
-                    ) {
+                    protected SparseArray<Object> getDelegate() {
                         try {
-                            return (SparseArray<Object>)DataObject_1.this.getPersistentAttribute(
+                            return (SparseArray<Object>) DataObject_1.this.getPersistentAttribute(
                                 ManagedSortedMap.this.feature,
                                 false,
                                 Multiplicity.SPARSEARRAY,
                                 false
                             );
-                        } catch(ServiceException e) {
+                        } catch (ServiceException e) {
                             throw new RuntimeServiceException(e);
                         }
                     }
 
-                    /* (non-Javadoc)
+                    /*
+                     * (non-Javadoc)
+                     * 
                      * @see java.util.AbstractMap#clear()
                      */
                     @Override
-                    public void clear(
-                    ) {
+                    public void clear() {
                         try {
                             DataObject_1.this.getPersistentAttribute(
                                 ManagedSortedMap.this.feature,
@@ -4843,15 +5120,15 @@ public class DataObject_1
                                 Multiplicity.SPARSEARRAY,
                                 true
                             );
-                        } catch(ServiceException e) {
+                        } catch (ServiceException e) {
                             throw new RuntimeServiceException(e);
                         }
                     }
 
                 }
             );
-        }        
-        
+        }
+
         /**
          * 
          */
@@ -4860,9 +5137,9 @@ public class DataObject_1
         /**
          * 
          */
-        private final SortedMap<Integer,Object> nonTransactional;
+        private final SortedMap<Integer, Object> nonTransactional;
 
-        private final Set<Map.Entry<Integer,Object>> entries = new AbstractSet<Map.Entry<Integer,Object>>(){
+        private final Set<Map.Entry<Integer, Object>> entries = new AbstractSet<Map.Entry<Integer, Object>>() {
 
             @Override
             public Iterator<Map.Entry<Integer, Object>> iterator() {
@@ -4871,46 +5148,47 @@ public class DataObject_1
 
             @Override
             public int size() {
-                return getDelegate(false,false).size();
+                return getDelegate(false, false).size();
             }
-            
+
         };
-        
+
         @SuppressWarnings("unchecked")
-        protected SortedMap<Integer,Object> getDelegate(
-            boolean makeDirty, 
+        protected SortedMap<Integer, Object> getDelegate(
+            boolean makeDirty,
             boolean clear
-        ){
+        ) {
             try {
-                UnitOfWork_1 unitOfWork = DataObject_1.this.getUnitOfWorkIfTransactional(makeDirty ? this.feature : null);
-                if(unitOfWork == null) {
-                    if(DataObject_1.this.transientValues != null) {
-                        SortedMap<Integer,Object> transientValue = (SortedMap<Integer,Object>) transientValues.get(this.feature);
-                        if(makeDirty && transientValue == null) {
+                final UnitOfWork_1 unitOfWork = makeDirty ? getUnitOfWorkIfTransactional(this.feature) : getUnitOfWorkIfTransactional();
+                if (unitOfWork == null) {
+                    if (DataObject_1.this.transientValues != null) {
+                        SortedMap<Integer, Object> transientValue = (SortedMap<Integer, Object>) transientValues.get(this.feature);
+                        if (makeDirty && transientValue == null) {
                             DataObject_1.this.transientValues.put(
                                 this.feature,
-                                transientValue = new TreeMap<Integer,Object>()
+                                transientValue = new TreeMap<Integer, Object>()
                             );
                             return transientValue;
                         }
-                        if(transientValue != null) {
-                            if(clear) {
+                        if (transientValue != null) {
+                            if (clear) {
                                 transientValue.clear();
                             }
                             return transientValue;
                         }
                     }
-                    if(clear) {
+                    if (clear) {
                         this.nonTransactional.clear();
                     }
                     return this.nonTransactional;
                 } else {
-                    Map<String,Object> transactionalValues = unitOfWork.getState(DataObject_1.this, false).values(false); 
-                    SortedMap<Integer,Object> transactionalValue = (SortedMap<Integer, Object>)transactionalValues.get(this.feature);
-                    if(transactionalValue == null) {
+                    Map<String, Object> transactionalValues = unitOfWork.getState(DataObject_1.this, false).values(false);
+                    SortedMap<Integer, Object> transactionalValue = (SortedMap<Integer, Object>) transactionalValues.get(this.feature);
+                    if (transactionalValue == null) {
                         transactionalValues.put(
                             this.feature,
-                            transactionalValue = clear ? new TreeMap<Integer,Object>() : new TreeMap<Integer,Object>(this.nonTransactional)
+                            transactionalValue = clear ? new TreeMap<Integer, Object>()
+                                : new TreeMap<Integer, Object>(this.nonTransactional)
                         );
                     } else if (clear) {
                         transactionalValue.clear();
@@ -4921,20 +5199,25 @@ public class DataObject_1
                 throw new RuntimeServiceException(exception);
             }
         }
-        
-        /* (non-Javadoc)
+
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.io.Flushable#flush()
          */
         @Override
-        public void flush() throws IOException {
-            SortedMap<Integer,Object> source = ManagedSortedMap.this.getDelegate(false, false);
-            if(source != this.nonTransactional) {
+        public void flush()
+            throws IOException {
+            SortedMap<Integer, Object> source = ManagedSortedMap.this.getDelegate(false, false);
+            if (source != this.nonTransactional) {
                 this.nonTransactional.clear();
                 this.nonTransactional.putAll(source);
             }
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#entrySet()
          */
         @Override
@@ -4942,7 +5225,9 @@ public class DataObject_1
             return this.entries;
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.SortedMap#comparator()
          */
         @Override
@@ -4950,15 +5235,19 @@ public class DataObject_1
             return null;
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.SortedMap#firstKey()
          */
         @Override
         public Integer firstKey() {
-            return ManagedSortedMap.this.getDelegate(false,false).firstKey();
+            return ManagedSortedMap.this.getDelegate(false, false).firstKey();
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.SortedMap#headMap(java.lang.Object)
          */
         @Override
@@ -4966,23 +5255,32 @@ public class DataObject_1
             return new SubMap(null, toKey);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.SortedMap#lastKey()
          */
         @Override
         public Integer lastKey() {
-            return ManagedSortedMap.this.getDelegate(false,false).lastKey();
+            return ManagedSortedMap.this.getDelegate(false, false).lastKey();
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.SortedMap#subMap(java.lang.Object, java.lang.Object)
          */
         @Override
-        public SortedMap<Integer, Object> subMap(Integer fromKey, Integer toKey) {
+        public SortedMap<Integer, Object> subMap(
+            Integer fromKey,
+            Integer toKey
+        ) {
             return new SubMap(fromKey, toKey);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.SortedMap#tailMap(java.lang.Object)
          */
         @Override
@@ -4990,128 +5288,158 @@ public class DataObject_1
             return new SubMap(fromKey, null);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#clear()
          */
         @Override
         public void clear() {
-            ManagedSortedMap.this.getDelegate(true,true);
+            ManagedSortedMap.this.getDelegate(true, true);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#containsKey(java.lang.Object)
          */
         @Override
         public boolean containsKey(Object key) {
-            return ManagedSortedMap.this.getDelegate(false,false).containsKey(key);
+            return ManagedSortedMap.this.getDelegate(false, false).containsKey(key);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#containsValue(java.lang.Object)
          */
         @Override
         public boolean containsValue(Object value) {
-            return ManagedSortedMap.this.getDelegate(false,false).containsValue(value);
+            return ManagedSortedMap.this.getDelegate(false, false).containsValue(value);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#get(java.lang.Object)
          */
         @Override
         public Object get(Object key) {
-            return ManagedSortedMap.this.getDelegate(false,false).get(key);
+            return ManagedSortedMap.this.getDelegate(false, false).get(key);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#isEmpty()
          */
         @Override
         public boolean isEmpty() {
-            return ManagedSortedMap.this.getDelegate(false,false).isEmpty();
+            return ManagedSortedMap.this.getDelegate(false, false).isEmpty();
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#keySet()
          */
         @Override
         public Set<Integer> keySet() {
-            return ManagedSortedMap.this.getDelegate(false,false).keySet(); // TOD make it modifiable
+            return ManagedSortedMap.this.getDelegate(false, false).keySet(); // TOD make it modifiable
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#put(java.lang.Object, java.lang.Object)
          */
         @Override
-        public Object put(Integer key, Object value) {
-            return ManagedSortedMap.this.getDelegate(true,false).put(key, value);
+        public Object put(
+            Integer key,
+            Object value
+        ) {
+            return ManagedSortedMap.this.getDelegate(true, false).put(key, value);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#putAll(java.util.Map)
          */
         @Override
         public void putAll(Map<? extends Integer, ? extends Object> t) {
-            ManagedSortedMap.this.getDelegate(true,false).putAll(t);
+            ManagedSortedMap.this.getDelegate(true, false).putAll(t);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#remove(java.lang.Object)
          */
         @Override
         public Object remove(Object key) {
-            return ManagedSortedMap.this.getDelegate(true,false).remove(key);
+            return ManagedSortedMap.this.getDelegate(true, false).remove(key);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#size()
          */
         @Override
         public int size() {
-            return ManagedSortedMap.this.getDelegate(false,false).size();
+            return ManagedSortedMap.this.getDelegate(false, false).size();
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.AbstractMap#values()
          */
         @Override
         public Collection<Object> values() {
-            return ManagedSortedMap.this.getDelegate(false,false).values();
+            return ManagedSortedMap.this.getDelegate(false, false).values();
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.lang.Object#equals(java.lang.Object)
          */
         @Override
         public boolean equals(Object obj) {
-            return ManagedSortedMap.this.getDelegate(false,false).equals(obj);
+            return ManagedSortedMap.this.getDelegate(false, false).equals(obj);
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.lang.Object#hashCode()
          */
         @Override
         public int hashCode() {
-            return ManagedSortedMap.this.getDelegate(false,false).hashCode();
+            return ManagedSortedMap.this.getDelegate(false, false).hashCode();
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.lang.Object#toString()
          */
         @Override
         public String toString() {
-            return ManagedSortedMap.this.getDelegate(false,false).toString();
+            return ManagedSortedMap.this.getDelegate(false, false).toString();
         }
 
         /**
          * Head, tail and sub-mapes
          */
-        class SubMap 
-            extends AbstractMap<Integer,Object>
-            implements SortedMap<Integer,Object>
-        {
-            
+        class SubMap
+            extends AbstractMap<Integer, Object>
+            implements SortedMap<Integer, Object> {
+
             /**
-             * Constructor 
+             * Constructor
              *
              * @param from
              * @param to
@@ -5119,7 +5447,7 @@ public class DataObject_1
             SubMap(
                 Integer from,
                 Integer to
-            ){
+            ) {
                 this.from = from;
                 this.to = to;
             }
@@ -5128,13 +5456,14 @@ public class DataObject_1
              * The from-key, or <code>null</code> in case of a head-map
              */
             private final Integer from;
-            
-            /**                anotherPersistenceManager.currentTransaction().begin();
-                for(Map.Entry<Integer,String> e : anotherInfo.entrySet()) {
-                    e.setValue(e.getKey().toString());
-                }
-                anotherPersistenceManager.currentTransaction().commit();
 
+            /**
+             * anotherPersistenceManager.currentTransaction().begin();
+             * for(Map.Entry<Integer,String> e : anotherInfo.entrySet()) {
+             * e.setValue(e.getKey().toString());
+             * }
+             * anotherPersistenceManager.currentTransaction().commit();
+             * 
              * The to-key, or <code>null</code> in case of a tail-map
              */
             private final Integer to;
@@ -5142,15 +5471,14 @@ public class DataObject_1
             /**
              * Assert that the key is inside the sub-map's range
              * 
-             * @param key the key to be tested
+             * @param key
+             *            the key to be tested
              */
             private void validateKey(
                 int key
-            ){
-                if(
-                    (this.from != null && this.from.intValue() > key) ||
-                    (this.to != null && this.to.intValue() < key)
-                ){
+            ) {
+                if ((this.from != null && this.from.intValue() > key) ||
+                    (this.to != null && this.to.intValue() < key)) {
                     throw BasicException.initHolder(
                         new IllegalArgumentException(
                             "Key outside the sub-map's range",
@@ -5165,35 +5493,37 @@ public class DataObject_1
                     );
                 }
             }
-            
+
             /**
              * Retrieve the delegate sub-map
              * 
              * @return the delegate sub-map
              */
-            protected SortedMap<Integer,Object> getSubMap(){
-                SortedMap<Integer,Object> map = ManagedSortedMap.this.getDelegate(false,false);
-                if(from == null) {
-                    if(to == null) {
+            protected SortedMap<Integer, Object> getSubMap() {
+                SortedMap<Integer, Object> map = ManagedSortedMap.this.getDelegate(false, false);
+                if (from == null) {
+                    if (to == null) {
                         return map;
                     } else {
                         return map.headMap(to);
                     }
                 } else {
-                    if(to == null) {
+                    if (to == null) {
                         return map.tailMap(from);
                     } else {
                         return map.subMap(from, to);
                     }
                 }
             }
-            
+
             @Override
             public int size() {
                 return this.getSubMap().size();
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.AbstractMap#entrySet()
              */
             @Override
@@ -5201,7 +5531,9 @@ public class DataObject_1
                 return this.getSubMap().entrySet();
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.SortedMap#comparator()
              */
             @Override
@@ -5209,7 +5541,9 @@ public class DataObject_1
                 return null;
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.SortedMap#firstKey()
              */
             @Override
@@ -5217,7 +5551,9 @@ public class DataObject_1
                 return this.getSubMap().firstKey();
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.SortedMap#headMap(java.lang.Object)
              */
             @Override
@@ -5226,7 +5562,9 @@ public class DataObject_1
                 return new SubMap(this.from, toKey);
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.SortedMap#lastKey()
              */
             @Override
@@ -5234,7 +5572,9 @@ public class DataObject_1
                 return this.getSubMap().lastKey();
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.SortedMap#subMap(java.lang.Object, java.lang.Object)
              */
             @Override
@@ -5247,7 +5587,9 @@ public class DataObject_1
                 return new SubMap(fromKey, toKey);
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.SortedMap#tailMap(java.lang.Object)
              */
             @Override
@@ -5255,30 +5597,30 @@ public class DataObject_1
                 this.validateKey(fromKey.intValue());
                 return new SubMap(fromKey, null);
             }
-            
+
         }
-        
+
         /**
          * Entry Iterator
          */
         class EntryIterator implements Iterator<Map.Entry<Integer, Object>> {
-            
-            private SortedMap<Integer,Object> readOnly = ManagedSortedMap.this.getDelegate(false,false);
-            
+
+            private SortedMap<Integer, Object> readOnly = ManagedSortedMap.this.getDelegate(false, false);
+
             private Iterator<Map.Entry<Integer, Object>> delegate = readOnly.entrySet().iterator();
 
             protected Map.Entry<Integer, Object> current = null;
-            
-            protected void makeDirty(){
-                if(this.readOnly != null) {
-                    SortedMap<Integer,Object> forUpdate = ManagedSortedMap.this.getDelegate(true,false);
-                    SortedMap<Integer,Object> readOnly = this.readOnly;
+
+            protected void makeDirty() {
+                if (this.readOnly != null) {
+                    SortedMap<Integer, Object> forUpdate = ManagedSortedMap.this.getDelegate(true, false);
+                    SortedMap<Integer, Object> readOnly = this.readOnly;
                     this.readOnly = null;
-                    if(forUpdate != readOnly) {
+                    if (forUpdate != readOnly) {
                         this.delegate = forUpdate.entrySet().iterator();
-                        while(this.delegate.hasNext()){
+                        while (this.delegate.hasNext()) {
                             Map.Entry<Integer, Object> candidate = this.delegate.next();
-                            if(this.current.getKey().equals(candidate.getKey())) {
+                            if (this.current.getKey().equals(candidate.getKey())) {
                                 this.current = candidate;
                                 return;
                             }
@@ -5289,8 +5631,10 @@ public class DataObject_1
                     }
                 }
             }
-            
-            /* (non-Javadoc)
+
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.Iterator#hasNext()
              */
             @Override
@@ -5298,7 +5642,9 @@ public class DataObject_1
                 return this.delegate.hasNext();
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.Iterator#next()
              */
             @Override
@@ -5318,11 +5664,13 @@ public class DataObject_1
                         EntryIterator.this.makeDirty();
                         return EntryIterator.this.current.setValue(value);
                     }
-                    
+
                 };
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.Iterator#remove()
              */
             @Override
@@ -5330,12 +5678,11 @@ public class DataObject_1
                 EntryIterator.this.makeDirty();
                 this.delegate.remove();
             }
-        
+
         }
-        
+
     }
 
-    
     //------------------------------------------------------------------------
     // Class Operation
     //------------------------------------------------------------------------
@@ -5346,7 +5693,7 @@ public class DataObject_1
     final class Operation {
 
         /**
-         * Constructor 
+         * Constructor
          *
          * @param functionName
          * @param input
@@ -5356,7 +5703,7 @@ public class DataObject_1
             String functionName,
             MappedRecord input,
             MappedRecord output
-        ){
+        ) {
             this.operation = functionName;
             this.input = input;
             this.output = output;
@@ -5382,10 +5729,11 @@ public class DataObject_1
          * 
          * @throws ServiceException
          */
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({ "unchecked", "resource" })
         void invoke(
             Interaction interaction
-        ) throws ServiceException {
+        )
+            throws ServiceException {
             try {
                 MessageRecord input = DataObject_1.newRecord(MessageRecord.NAME);
                 input.setResourceIdentifier(identity.getDescendant(this.operation, UUIDs.newUUID().toString()));
@@ -5401,7 +5749,6 @@ public class DataObject_1
         }
 
     }
-    
 
     static {
         //
@@ -5424,7 +5771,11 @@ public class DataObject_1
         LIFECYCLE_LISTENER_CLASS[InstanceLifecycleEvent.DIRTY] = DirtyLifecycleListener.class;
         LIFECYCLE_LISTENER_CLASS[InstanceLifecycleEvent.DETACH] = DetachLifecycleListener.class;
         LIFECYCLE_LISTENER_CLASS[InstanceLifecycleEvent.ATTACH] = AttachLifecycleListener.class;
-
+        //
+        // clone fetch plan
+        //
+        CLONE_FETCH_PLAN.setGroup(FetchPlan.ALL);
     }
 
+    
 }

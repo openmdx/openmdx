@@ -381,7 +381,7 @@ function getSelectedGridRows(tableID, headerRows) {
   /* returns a string with objectIDs of selected rows (e.g. "a093847+b93837+f993838+")      */
   /* or empty string (if no rows are selected); individual objectIDs are terminated by " " */
   var tableEl = document.getElementById(tableID)
-  var selectedClass = 'info';
+  var selectedClass = 'alert-info';
   var tableRows = tableEl.rows;
   var selectedStr = '';
   var j = headerRows;
@@ -420,11 +420,11 @@ function selectGridRows(tableID, headerRows, select) {
 
 //---------------------------------------------------------------------------
 function selectGridRow(e) {
-	if(e.className == '') {
-		e.className = 'info';
+	if(!jQuery(e).hasClass('alert-info')) {
+		jQuery(e).addClass('alert-info');
 	} else {
-		e.className='';
-	};	
+		jQuery(e).removeClass('alert-info');
+	};
 }
 
 //---------------------------------------------------------------------------
@@ -481,29 +481,21 @@ function loadingIndicator(gridContent) {
 }
 
 //---------------------------------------------------------------------------
-function gTabSelect(aElt, expand) {
+function gTabSelect(e, expand) {
   try {
-    if (expand) {
-      var aElts = aElt.parentNode.parentNode.getElementsByTagName("li");
-      for(var i = 0; i < aElts.length; i++){
-        if (aElts[i].className == 'hidden') {
-          aElts[i].className = '';
-        }
-      }
-      aElt.style.display = 'none';
+    if(expand) {
+      jQuery(e).parent().siblings('.d-none').addClass('d-block');
+      jQuery(e).parent().siblings().removeClass('d-none');
+      e.style.display = 'none';
     } else {
-      var gridContent = aElt.parentNode.parentNode.nextElementSibling;
+      var gridContent = e.parentNode.parentNode.nextElementSibling;
       if(gridContent.tagName == 'DIV') {
         loadingIndicator(gridContent);
       }
-      // activate newly selected tab
-      var aElts = aElt.parentNode.parentNode.getElementsByTagName("li");
-      for(var i = 0; i < aElts.length; i++){
-        if(aElts[i].className != 'hidden') {
-          aElts[i].className='hidden-print';
-        }
-      }
-      aElt.parentNode.className = 'active';
+      // deactivate all tabs and re-activate newly selected tab
+      jQuery(e).parent().siblings(':not(.d-none)').addClass('d-print-none');
+      jQuery(e).parent().siblings().children('.active').removeClass('active');
+      jQuery(e).addClass('active');
     }
   } catch(e){};
 }
@@ -557,8 +549,8 @@ function toggleMenu(e) {
 //---------------------------------------------------------------------------
 function activateTab(e, tabId) {
 	try {
-		jQuery(e).siblings().removeClass("active");
-		jQuery(e).addClass('active');
+		jQuery(e).siblings('.nav-item').children('.nav-link').removeClass('active');
+		jQuery(e).children('.nav-link').addClass('active');
 		tab = jQuery(tabId);
 		tab.siblings().removeClass("active");
 		tab.addClass("active");
@@ -570,8 +562,8 @@ function activateTab(e, tabId) {
 //---------------------------------------------------------------------------
 function activateTabs(e, tabIdPrefix) {
 	try {
-		jQuery(e).siblings().removeClass("active");
-		jQuery(e).addClass('active');
+		jQuery(e).siblings('.nav-item').children('.nav-link').removeClass('active');
+		jQuery(e).children('.nav-link').addClass('active');
 		for(var i = 0; i < 10; i++) {
 			try {
 				tab = jQuery(tabIdPrefix.concat(i.toString()));

@@ -52,6 +52,7 @@ import java.util.Map;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.repository.cci.Repository;
 import org.openmdx.base.naming.Path;
 
 /**
@@ -83,8 +84,7 @@ public interface Model_1_0 {
     /**
      * Returns all elements of the model package.
      */
-    Collection<ModelElement_1_0> getContent(
-    ) throws ServiceException;
+    Collection<ModelElement_1_0> getContent();
 
     /**
      * Dereferences the given 'element', i.e. if 'element' is an alias type returns the
@@ -502,4 +502,11 @@ public interface Model_1_0 {
         boolean takeSubclassesIntoConsideration
     ) throws ServiceException;
 
+    /**
+     * Provide access to the underlying repository
+     * 
+     * @return the MOF repository's JCA API
+     */
+    Repository getRepository();
+    
 }

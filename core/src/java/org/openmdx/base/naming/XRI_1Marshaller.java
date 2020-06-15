@@ -52,9 +52,9 @@ import java.util.ArrayList;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.url.protocol.XRI_1Protocols;
-import org.openmdx.kernel.url.protocol.XRI_2Protocols;
-import org.openmdx.kernel.url.protocol.XriAuthorities;
+import org.openmdx.kernel.xri.XRI_1Protocols;
+import org.openmdx.kernel.xri.XRI_2Protocols;
+import org.openmdx.kernel.xri.XRIAuthorities;
 
 /**
  * Path/XRI Marshaller
@@ -122,7 +122,7 @@ implements Marshaller
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
                 "Path marshalling failed",
-                new BasicException.Parameter("path", charSequences)
+                new BasicException.Parameter(BasicException.Parameter.XRI, charSequences)
             );
         }
     }
@@ -252,8 +252,8 @@ implements Marshaller
         if(!source.toLowerCase().startsWith(XRI_1Protocols.OPENMDX_PREFIX)) throw new ServiceException (
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
-            "'xri' scheme and '" + XriAuthorities.OPENMDX_AUTHORITY + "' authority expected",
-            new BasicException.Parameter("xri",source)
+            "'xri' scheme and '" + XRIAuthorities.OPENMDX_AUTHORITY + "' authority expected",
+            new BasicException.Parameter(BasicException.Parameter.XRI,source)
         );
         ArrayList target = new ArrayList();
         if(source.length() == XRI_1Protocols.OPENMDX_PREFIX.length()) {
@@ -280,7 +280,7 @@ implements Marshaller
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.BAD_PARAMETER,
                             "More closing than opening parenthesis",
-                            new BasicException.Parameter("xri",source),
+                            new BasicException.Parameter(BasicException.Parameter.XRI,source),
                             new BasicException.Parameter("position",i)
                         );
                         segment.append(character);
@@ -313,7 +313,7 @@ implements Marshaller
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
                 "More opening than closing parenthesis",
-                new BasicException.Parameter("xri",source),
+                new BasicException.Parameter(BasicException.Parameter.XRI,source),
                 new BasicException.Parameter("position", source.length())
             );
             target.add(
@@ -329,7 +329,7 @@ implements Marshaller
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
                 "XRI to Path conversion failed",
-                new BasicException.Parameter("xri", charSequence)
+                new BasicException.Parameter(BasicException.Parameter.XRI, charSequence)
             );
         }
         return target.toArray(new String[target.size()]);
@@ -453,6 +453,6 @@ implements Marshaller
 
     private final static String XRI_XREF_PREFIX = XREF_BEGIN + XRI_2Protocols.SCHEME_PREFIX;
 
-    private final static String OPENMDX_XREF_PREFIX = XREF_BEGIN + XriAuthorities.OPENMDX_AUTHORITY + ":";
+    private final static String OPENMDX_XREF_PREFIX = XREF_BEGIN + XRIAuthorities.OPENMDX_AUTHORITY + ":";
 
 }

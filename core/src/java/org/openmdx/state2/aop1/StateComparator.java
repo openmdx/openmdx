@@ -60,8 +60,11 @@ import org.openmdx.state2.spi.Order;
 import org.openmdx.state2.spi.TechnicalAttributes;
 
 /**
- * StateComparator
+ * State Comparator
+ * 
+ * @deprecated as it is no longer used internally
  */
+@Deprecated
 public class StateComparator
     implements Comparator<DataObject_1_0>, Serializable
 {
@@ -76,7 +79,7 @@ public class StateComparator
     /**
      * A singleton
      */
-    private final static Comparator<DataObject_1_0> instance = new StateComparator();
+    private final static Comparator<DataObject_1_0> INSTANCE = new StateComparator();
     
     /**
      * Implements <code>Serializable</code>
@@ -120,7 +123,7 @@ public class StateComparator
      * @return the singleton
      */
     public static Comparator<DataObject_1_0> getInstance(){
-        return instance;
+        return INSTANCE;
     }
 
 }

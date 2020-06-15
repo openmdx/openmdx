@@ -683,6 +683,10 @@ public class EditObjectView extends ObjectView implements Serializable {
                 p.write("    </tr>");
                 count++;
             }
+            // Painting the attribute panes sets increments the tabIndex
+            int tabIndex = p.getProperty(ViewPort.PROPERTY_FIELD_GROUP_ID) != null
+            	? ((Integer)p.getProperty(ViewPort.PROPERTY_FIELD_GROUP_ID)).intValue()
+            	: 1000;
             if(!this.isEditMode()) {
                 boolean showQualifier = 
                     app.getPortalExtension().hasUserDefineableQualifier(
@@ -694,7 +698,7 @@ public class EditObjectView extends ObjectView implements Serializable {
                 if(showQualifier) {
                     p.write("        <span class=\"", CssClass.qualifierText.toString(), "\">", texts.getQualifierText(), "</span><br />");
                 }
-                p.write("        <input class=\"", CssClass.qualifier.toString(), "\" type=\"", (showQualifier ? "text" : "hidden"), "\" name=\"qualifier\" value=\"", org.openmdx.base.text.conversion.UUIDConversion.toUID(org.openmdx.kernel.id.UUIDs.newUUID()), "\">");
+                p.write("        <input class=\"", CssClass.qualifier.toString(), "\" type=\"", (showQualifier ? "text" : "hidden"), "\" name=\"qualifier\" tabindex=\"", Integer.toString(tabIndex++), "\" value=\"", org.openmdx.base.text.conversion.UUIDConversion.toUID(org.openmdx.kernel.id.UUIDs.newUUID()), "\">");
                 p.write("      </td>");
                 p.write("    </tr>");
             }
@@ -710,23 +714,23 @@ public class EditObjectView extends ObjectView implements Serializable {
                 : this.getContainerElementId();
             if(okAction != null) {
             	if(this.isEditMode()) {
-            		p.write("      <a id=\"editSave-", containerElementId, "\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" href=\"#\" onclick=\"javascript:$('event.submit').value='", Integer.toString(okAction.getEvent()), "';var editForm=document.forms['", formId, "'];var params=Form.serialize(editForm);jQuery.ajax({type: 'post', url: ", p.getEvalHRef(okAction), ", dataType: 'html', data: params, success: function(data){$('", containerElementId, "').innerHTML=data;evalScripts(data);}});return false;\">", okAction.getTitle(), "</a>");
+            		p.write("      <a id=\"editSave-", containerElementId, "\" tabindex=\"", Integer.toString(tabIndex++), "\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" href=\"#\" onclick=\"javascript:$('event.submit').value='", Integer.toString(okAction.getEvent()), "';var editForm=document.forms['", formId, "'];var params=Form.serialize(editForm);jQuery.ajax({type: 'post', url: ", p.getEvalHRef(okAction), ", dataType: 'html', data: params, success: function(data){$('", containerElementId, "').innerHTML=data;evalScripts(data);}});return false;\">", okAction.getTitle(), "</a>");
             	} else {
-            		p.write("      <a id=\"editSave-", containerElementId, "\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" href=\"#\" onclick=\"javascript:$('event.submit').value='", Integer.toString(okAction.getEvent()), "';document.forms['", formId, "'].submit();\">", okAction.getTitle(), "</a>");
+            		p.write("      <a id=\"editSave-", containerElementId, "\" tabindex=\"", Integer.toString(tabIndex++), "\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" href=\"#\" onclick=\"javascript:$('event.submit').value='", Integer.toString(okAction.getEvent()), "';document.forms['", formId, "'].submit();\">", okAction.getTitle(), "</a>");
             	}
             }
             if(createAction != null) {
             	if(this.isEditMode()) {
-            		p.write("      <a id=\"editCreate-", containerElementId, "\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" href=\"#\" onclick=\"javascript:$('event.submit').value='", Integer.toString(okAction.getEvent()), "';var editForm=document.forms['", formId, "'];var params=Form.serialize(editForm);jQuery.ajax({type: 'post', url: ",  p.getEvalHRef(createAction), ", dataType: 'html', data: params, success: function(data){$('", containerElementId, "').innerHTML=data;evalScripts(data);}});return false;\">", createAction.getTitle(), "</a>");
+            		p.write("      <a id=\"editCreate-", containerElementId, "\" tabindex=\"", Integer.toString(tabIndex++), "\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" href=\"#\" onclick=\"javascript:$('event.submit').value='", Integer.toString(okAction.getEvent()), "';var editForm=document.forms['", formId, "'];var params=Form.serialize(editForm);jQuery.ajax({type: 'post', url: ",  p.getEvalHRef(createAction), ", dataType: 'html', data: params, success: function(data){$('", containerElementId, "').innerHTML=data;evalScripts(data);}});return false;\">", createAction.getTitle(), "</a>");
             	} else {
-            		p.write("      <a id=\"editCreate-", containerElementId, "\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" href=\"#\" onclick=\"javascript:$('event.submit').value='", Integer.toString(createAction.getEvent()), "';document.forms['", formId, "'].submit();\">", createAction.getTitle(), "</a>");
+            		p.write("      <a id=\"editCreate-", containerElementId, "\" tabindex=\"", Integer.toString(tabIndex++), "\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" href=\"#\" onclick=\"javascript:$('event.submit').value='", Integer.toString(createAction.getEvent()), "';document.forms['", formId, "'].submit();\">", createAction.getTitle(), "</a>");
             	}
             }
             if(cancelAction != null) {
             	if(this.isEditMode()) {
-            		p.write("      <a id=\"editCancel-", containerElementId, "\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" href=\"#\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(cancelAction), ", dataType: 'html', success: function(data){$('", containerElementId, "').innerHTML=data;evalScripts(data);}});return false;\">", cancelAction.getTitle(), "</a>");            	
+            		p.write("      <a id=\"editCancel-", containerElementId, "\" tabindex=\"", Integer.toString(tabIndex++), "\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" href=\"#\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(cancelAction), ", dataType: 'html', success: function(data){$('", containerElementId, "').innerHTML=data;evalScripts(data);}});return false;\">", cancelAction.getTitle(), "</a>");
             	} else {
-            		p.write("      <a id=\"editCancel-", containerElementId, "\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" href=\"#\" onclick=\"javascript:this.href=", p.getEvalHRef(cancelAction), ";\">", cancelAction.getTitle(), "</a>");                                          	
+            		p.write("      <a id=\"editCancel-", containerElementId, "\" tabindex=\"", Integer.toString(tabIndex++), "\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" href=\"#\" onclick=\"javascript:this.href=", p.getEvalHRef(cancelAction), ";\">", cancelAction.getTitle(), "</a>");
             	}
             }
             p.write("    </td>");

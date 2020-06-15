@@ -389,9 +389,9 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                     qualifierTypes.size() == 1
                         && PrimitiveTypes.STRING.equals(((Path) qualifierTypes
 						.get(0)).getLastSegment().toClassicRepresentation()) ? Multiplicity.MAP.code()
-                        : ModelHelper.UNBOUND;
+                        : Multiplicity.UNBOUNDED;
                 SysLog.trace("Adjust multiplicity to "
-                    + ModelHelper.UNBOUND, newMultiplicity);
+                    + Multiplicity.UNBOUNDED, newMultiplicity);
                 // 0..n association set multiplicity to 0..n, 
                 // this ensures that the instance creator uses a multivalued parameter for this reference attribute
                 ReferenceRecord referenceAsAttributeRecord = (ReferenceRecord) referenceAsAttribute.getDelegate();

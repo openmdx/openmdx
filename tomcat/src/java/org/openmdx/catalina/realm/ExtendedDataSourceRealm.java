@@ -47,111 +47,17 @@
  */
 package org.openmdx.catalina.realm;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.security.MessageDigest;
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 import org.apache.catalina.realm.DataSourceRealm;
-import org.apache.catalina.realm.RealmBase;
-import org.apache.juli.logging.Log;
 
 /**
  * ExtendedDataSourceRealm
  *
  */
 public class ExtendedDataSourceRealm extends DataSourceRealm {
-
-    /**
-     * Returns the digest format.
-     *
-     * @return The format
-     */
-    public String getDigestFormat() {
-        return this.digestFormat;
-    }
-
-    /**
-     * Sets the digest format. Supported formats are <code>hex</code>, <code>base64</code>.
-     *
-     * @param digest format.
-     */
-    public void setDigestFormat(String format) {
-        this.digestFormat = format;
-    }
-
-    /**
-     * Digest the password using the specified algorithm and
-     * convert the result to a corresponding formatted string.
-     * If exception, the plain credentials string is returned.
-     *
-     * @param credentials Password or other credentials to use in
-     *        authenticating this username
-     */
-	protected String digest(
-        String credentials
-    ) {
-        super.getContainer().getRealm();
-        MessageDigest md = null;
-        try {
-	        Field mdField = RealmBase.class.getDeclaredField("md");
-	        md = (MessageDigest)mdField.get(this);
-        } catch(Exception ignore) {}
-        Log log = null;
-        try {
-	        Field logField = RealmBase.class.getDeclaredField("containerLog");
-	        log = (Log)logField.get(this);
-        } catch(Exception ignore) {}
-        String digestEncoding = null;
-        try {
-	        Method getDigestEncodingMethod = RealmBase.class.getMethod("getDigestEncoding");
-	        digestEncoding = (String)getDigestEncodingMethod.invoke(this);
-        } catch(Exception ignore) {}
-        String digest = null;
-        {
-            // If no MessageDigest instance is specified, return unchanged
-            if (hasMessageDigest() == false)
-                return (credentials);
-
-            // Digest the user credentials and return as hexadecimal
-            synchronized (this) {
-                try {
-                    md.reset();
-        
-                    byte[] bytes = null;
-                    if(digestEncoding == null) {
-                        bytes = credentials.getBytes();
-                    } else {
-                        try {
-                            bytes = credentials.getBytes(digestEncoding);
-                        } catch (UnsupportedEncodingException uee) {
-                            log.error("Illegal digestEncoding: " + digestEncoding, uee);
-                            throw new IllegalArgumentException(uee.getMessage());
-                        }
-                    }
-                    md.update(bytes);
-                    digest = (HexUtils.convert(md.digest()));
-                } catch (Exception e) {
-                    log.error(sm.getString("realmBase.digest"), e);
-                    return (credentials);
-                }
-            }        	
-        }
-        if("hex".equalsIgnoreCase(this.digestFormat)) {
-            return digest;
-        } else if("base64".equalsIgnoreCase(this.digestFormat)) {
-            String formattedDigest = "{MD5}" + Base64.getEncoder().encodeToString(HexUtils.convert(digest));
-            containerLog.debug("formatted digest " + formattedDigest);
-            return formattedDigest;
-        } else {
-            containerLog.error("Illegal digestFormat: " + getDigestFormat());
-            throw new IllegalArgumentException("Illegal digestFormat: " + getDigestFormat());
-        }
-    }
 
     /**
      * Normalize user name. Handle @, [] and {}
@@ -218,9 +124,5 @@ public class ExtendedDataSourceRealm extends DataSourceRealm {
 	//-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
-    /**
-     * The format for the digest (hex, base64)
-     */
-    protected String digestFormat = "hex";
 
 }

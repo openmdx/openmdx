@@ -4,6 +4,10 @@
 	<classpathentry kind="lib" path="src/resource"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Apache Ant (jre-1.8)"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 8"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 8">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="build/jre-1.8/eclipse"/>
 </classpath>

@@ -210,9 +210,10 @@ public class NumberValue extends AttributeValue implements Serializable {
      */
     @Override
     public Object getValue(
-    		boolean shortFormat
+    	ViewPort p,    		
+    	boolean shortFormat
     ) {
-    	Object value = super.getValue(shortFormat);
+    	Object value = super.getValue(p, shortFormat);
     	DecimalFormat formatter = this.getDecimalFormat();        
     	if(value == null) {
     		return "";

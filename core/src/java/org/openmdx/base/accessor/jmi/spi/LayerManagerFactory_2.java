@@ -49,14 +49,15 @@ package org.openmdx.base.accessor.jmi.spi;
 
 import java.util.Map;
 
-import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 
-import org.openmdx.application.configuration.Configuration;
 import org.openmdx.base.persistence.spi.DelegatingPersistenceManagerFactory;
+import org.openmdx.kernel.configuration.cci.Configuration;
+import org.openmdx.kernel.jdo.JDOPersistenceManager;
+import org.openmdx.kernel.jdo.JDOPersistenceManagerFactory;
 
 /**
- * Layer Manager Factory 
+ * Layer Manager Factory LayerManagerFactory_2
  */
 class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
 
@@ -66,15 +67,14 @@ class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
      * @param persistenceManagerFactory
      * @param plugInConfiguration
      */
-    @SuppressWarnings("unchecked")
     LayerManagerFactory_2 (
-        PersistenceManagerFactory persistenceManagerFactory,        
+        JDOPersistenceManagerFactory persistenceManagerFactory,        
         Configuration plugInConfiguration 
     ){
         this(
             persistenceManagerFactory,
-            (Map<String,String>)plugInConfiguration.values("implementationMap").get(Integer.valueOf(0)), 
-            (Map<String,Object>)plugInConfiguration.values("userObjects").get(Integer.valueOf(0))
+            plugInConfiguration.getMutableMap("implementationMap", String.class),
+            plugInConfiguration.getMutableMap("userObjects", Object.class)
         );
     }
 
@@ -86,7 +86,7 @@ class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
      * @param userObjects
      */
     private LayerManagerFactory_2 (
-        PersistenceManagerFactory delegate,
+        JDOPersistenceManagerFactory delegate,
         Map<String,String> implementationMap, 
         Map<String,Object> userObjects
     ){
@@ -116,7 +116,7 @@ class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
     /**
      * 
      */
-    private final PersistenceManagerFactory delegate;            
+    private final JDOPersistenceManagerFactory delegate;            
 
     /**
      * Retrieve the plug-in mapping
@@ -135,7 +135,7 @@ class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
      * @see org.openmdx.kernel.persistence.spi.DelegatingPersistenceManagerFactory#delegate()
      */
     @Override
-    protected PersistenceManagerFactory delegate() {
+    protected JDOPersistenceManagerFactory delegate() {
         return this.delegate;
     }
 
@@ -146,8 +146,8 @@ class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
      * 
      * @return a layer specific <code>PersistenceManager</code>
      */
-    protected PersistenceManager newLayerManager (
-        PersistenceManager delegate
+    protected JDOPersistenceManager newLayerManager (
+        JDOPersistenceManager delegate
     ){
         return new RefRootPackage_1(
           this, // persistenceManagerFactory
@@ -161,7 +161,7 @@ class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
      * @see org.openmdx.kernel.persistence.spi.DelegatingPersistenceManagerFactory#getPersistenceManager()
      */
     @Override
-    public final PersistenceManager getPersistenceManager() {
+    public final JDOPersistenceManager getPersistenceManager() {
         return this.newLayerManager(
             super.getPersistenceManager()
         );
@@ -171,7 +171,7 @@ class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
      * @see org.openmdx.kernel.persistence.spi.DelegatingPersistenceManagerFactory#getPersistenceManager(java.lang.String, java.lang.String)
      */
     @Override
-    public final PersistenceManager getPersistenceManager(
+    public final JDOPersistenceManager getPersistenceManager(
         String userid,
         String password
     ) {

@@ -53,7 +53,6 @@ import java.util.UUID;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
-import javax.resource.cci.Record;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -287,23 +286,6 @@ public class Query_2Facade {
     }
         
     /**
-     * Test whether the given record is an object facade delegate
-     * 
-     * @param record the record to be tested
-     * 
-     * @return <code>true</code> if the given record is an object facade delegate
-     * 
-     * @deprecated use {@link org.openmdx.base.rest.spi.QueryRecord#isCompatible(Record)}
-     */
-    @Deprecated
-    public static boolean isDelegate(
-        Record record
-    ){
-        return org.openmdx.base.rest.spi.QueryRecord.isCompatible(record);
-    }
-    
-    
-    /**
      * Retrieve resourceIdentifier.
      *
      * @return Returns the resourceIdentifier.
@@ -342,24 +324,6 @@ public class Query_2Facade {
         this.delegate.setQueryType(queryType);
     }
 
-    /**
-     * Retrieve query.
-     *
-     * @return Returns the query.
-     * 
-     * @deprecated use {@link #getQueryFilter()} 
-     */
-    @Deprecated
-    public final String getQuery() {
-        try {
-			QueryFilterRecord queryFilter = this.delegate.getQueryFilter();
-			return queryFilter == null ? this.delegate.getQuery() : JavaBeans.toXML(queryFilter);
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
-    }
-
-    
     /**
      * Set query.
      * 

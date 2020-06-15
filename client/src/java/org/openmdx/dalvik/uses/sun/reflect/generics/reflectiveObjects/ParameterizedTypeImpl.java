@@ -39,7 +39,7 @@ import java.util.Arrays;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 @SuppressWarnings({"rawtypes"})
@@ -118,7 +118,6 @@ public class ParameterizedTypeImpl implements ParameterizedType {
      * @throws <tt>MalformedParameterizedTypeException</tt> if any of the
      *     actual type parameters refer to a parameterized type that cannot
      *     be instantiated for any reason
-     * @since 1.5
      */
     public Type[] getActualTypeArguments() {
         return actualTypeArguments.clone();

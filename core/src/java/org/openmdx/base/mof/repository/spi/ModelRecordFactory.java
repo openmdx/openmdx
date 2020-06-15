@@ -48,6 +48,8 @@
 
 package org.openmdx.base.mof.repository.spi;
 
+import java.util.Optional;
+
 import javax.resource.cci.MappedRecord;
 
 /**
@@ -59,28 +61,24 @@ public class ModelRecordFactory {
         // Avoid instantiation
     }
     
-    private static String PREFIX = "org:omg:model1:";
-
-    public static boolean supports(String recordName) {
-        return recordName.startsWith(PREFIX);
-    }
-    
     /**
      * Create a record with the given name
      * 
      * @param recordName
      * 
-     * @return a record with the given name; or <code>null</code> if no specific 
-     *         implementation is provided by this factory;
+     * @return a record with the given name; or {@code Optional.empty()} if no specific 
+     *         implementation is provided by this factory
      */
-    public static MappedRecord createMappedRecord(String recordName) {
-        return
+    public static Optional<MappedRecord> createMappedRecord(String recordName) {
+        return Optional.ofNullable(
             org.openmdx.base.mof.repository.cci.AliasTypeRecord.NAME.equals(recordName) ? new AliasTypeRecord() :
             org.openmdx.base.mof.repository.cci.AssociationEndRecord.NAME.equals(recordName) ? new AssociationEndRecord() :
             org.openmdx.base.mof.repository.cci.AssociationRecord.NAME.equals(recordName) ? new AssociationRecord() :
             org.openmdx.base.mof.repository.cci.AttributeRecord.NAME.equals(recordName) ? new AttributeRecord() :
             org.openmdx.base.mof.repository.cci.ClassRecord.NAME.equals(recordName) ? new ClassRecord() :
+            org.openmdx.base.mof.repository.cci.CollectionTypeRecord.NAME.equals(recordName) ? new CollectionTypeRecord() :
             org.openmdx.base.mof.repository.cci.ExceptionRecord.NAME.equals(recordName) ? new ExceptionRecord() :
+            org.openmdx.base.mof.repository.cci.ImportRecord.NAME.equals(recordName) ? new ImportRecord() :    
             org.openmdx.base.mof.repository.cci.OperationRecord.NAME.equals(recordName) ? new OperationRecord() :
             org.openmdx.base.mof.repository.cci.PackageRecord.NAME.equals(recordName) ? new PackageRecord() :
             org.openmdx.base.mof.repository.cci.ParameterRecord.NAME.equals(recordName) ? new ParameterRecord() :
@@ -88,7 +86,8 @@ public class ModelRecordFactory {
             org.openmdx.base.mof.repository.cci.ReferenceRecord.NAME.equals(recordName) ? new ReferenceRecord() :
             org.openmdx.base.mof.repository.cci.StructureFieldRecord.NAME.equals(recordName) ? new StructureFieldRecord() :
             org.openmdx.base.mof.repository.cci.StructureTypeRecord.NAME.equals(recordName) ? new StructureTypeRecord() :
-            null;
+            null
+        );
     }
     
 }

@@ -611,7 +611,7 @@ public class JSONArray implements Serializable {
      * @return this.
      */
     public JSONArray put(double value) throws JSONException {
-        Double d = new Double(value);
+        Double d = Double.valueOf(value);
         JSONObject.testValidity(d);
         put(d);
         return this;
@@ -637,7 +637,7 @@ public class JSONArray implements Serializable {
      * @return this.
      */
     public JSONArray put(long value) {
-        put(new Long(value));
+        put(Long.valueOf(value));
         return this;
     }
 
@@ -713,7 +713,7 @@ public class JSONArray implements Serializable {
      * not finite.
      */
     public JSONArray put(int index, double value) throws JSONException {
-        put(index, new Double(value));
+        put(index, Double.valueOf(value));
         return this;
     }
 
@@ -743,7 +743,7 @@ public class JSONArray implements Serializable {
      * @throws JSONException If the index is negative.
      */
     public JSONArray put(int index, long value) throws JSONException {
-        put(index, new Long(value));
+        put(index, Long.valueOf(value));
         return this;
     }
 

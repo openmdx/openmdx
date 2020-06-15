@@ -1,109 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="20110701" xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_ulAPwN67EdmkJO73lqONhA" name="audit2">
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_ulAPwN67EdmkJO73lqONhA" name="audit2">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FF13E19007APP" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FF13E19007AP" name="openmdx">
       <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FF13E19007A" name="audit2">
         <packagedElement xmi:type="uml:Class" xmi:id="_6XAzQKamEd608rQJr4Jvxw" name="Segment">
-          <generalization xmi:id="_6XAzQ6amEd608rQJr4Jvxw">
+          <generalization xmi:type="uml:Generalization" xmi:id="_6XAzQ6amEd608rQJr4Jvxw">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D3FC487C80099"/>
           </generalization>
-          <ownedAttribute xmi:id="_6XAzRKamEd608rQJr4Jvxw" name="unitOfWork" type="_6XGS0KamEd608rQJr4Jvxw" isUnique="false" isReadOnly="true" aggregation="composite" isDerived="true" association="_6XMZcKamEd608rQJr4Jvxw">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_6XAzRKamEd608rQJr4Jvxw" name="unitOfWork" type="_6XGS0KamEd608rQJr4Jvxw" isUnique="false" isReadOnly="true" aggregation="composite" isDerived="true" association="_6XMZcKamEd608rQJr4Jvxw">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_6XAzRqamEd608rQJr4Jvxw"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_6XAzRaamEd608rQJr4Jvxw" value="1"/>
-            <qualifier xmi:id="_6XAzR6amEd608rQJr4Jvxw" name="id" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="_6XAzR6amEd608rQJr4Jvxw" name="id" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_6XDPgKamEd608rQJr4Jvxw" name="Involvement">
-          <generalization xmi:id="_nXHZwKaxEd608rQJr4Jvxw">
+          <generalization xmi:type="uml:Generalization" xmi:id="_nXHZwKaxEd608rQJr4Jvxw">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D403CAF5A0142"/>
           </generalization>
-          <ownedAttribute xmi:id="_6XDPhaamEd608rQJr4Jvxw" name="taskId" isReadOnly="true" isDerived="true">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_6XDPhaamEd608rQJr4Jvxw" name="taskId" isReadOnly="true" isDerived="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_6XDPh6amEd608rQJr4Jvxw"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_6XDPhqamEd608rQJr4Jvxw" value="1"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_8IQ1AKbTEd608rQJr4Jvxw" name="unitOfWorkId" visibility="public" isReadOnly="true" isDerived="true">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_8IQ1AKbTEd608rQJr4Jvxw" name="unitOfWorkId" visibility="public" isReadOnly="true" isDerived="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_vgPvIKbUEd608rQJr4Jvxw" name="objectId" visibility="public" isReadOnly="true" isDerived="true">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_vgPvIKbUEd608rQJr4Jvxw" name="objectId" visibility="public" isReadOnly="true" isDerived="true">
             <type xmi:type="uml:Class" href="org.oasis-open.uml#_3C7B8A60016D4022008801A4"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_6XDPgqamEd608rQJr4Jvxw" name="modifiedFeature" isReadOnly="true" isDerived="true">
-            <eAnnotations xmi:id="_6XDPg6amEd608rQJr4Jvxw" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_6XDPhKamEd608rQJr4Jvxw" key="set"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_6XDPgqamEd608rQJr4Jvxw" name="modifiedFeature" isReadOnly="true" isDerived="true">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_6XDPg6amEd608rQJr4Jvxw" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_6XDPhKamEd608rQJr4Jvxw" key="set"/>
             </eAnnotations>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_QvzA4KasEd608rQJr4Jvxw" name="beforeImage" visibility="public" association="_QvxLsKasEd608rQJr4Jvxw">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_QvzA4KasEd608rQJr4Jvxw" name="beforeImage" visibility="public" association="_QvxLsKasEd608rQJr4Jvxw">
             <type xmi:type="uml:Class" href="org.openmdx.base.uml#_jK4zQH8vEd2MQvsjduCbTg"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Qv0PAKasEd608rQJr4Jvxw"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Qv02EKasEd608rQJr4Jvxw" value="1"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_OOtkMKasEd608rQJr4Jvxw" name="afterImage" visibility="public" association="_OOgI0KasEd608rQJr4Jvxw">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_OOtkMKasEd608rQJr4Jvxw" name="afterImage" visibility="public" association="_OOgI0KasEd608rQJr4Jvxw">
             <type xmi:type="uml:Class" href="org.openmdx.base.uml#_jK4zQH8vEd2MQvsjduCbTg"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_OOycsKasEd608rQJr4Jvxw"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_OOzDwKasEd608rQJr4Jvxw" value="1"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_BaYOsKavEd608rQJr4Jvxw" name="object" visibility="public" isDerived="true" association="_BaXAkKavEd608rQJr4Jvxw">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_BaYOsKavEd608rQJr4Jvxw" name="object" visibility="public" isDerived="true" association="_BaXAkKavEd608rQJr4Jvxw">
             <type xmi:type="uml:Class" href="org.openmdx.base.uml#_jK4zQH8vEd2MQvsjduCbTg"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_BaY1wKavEd608rQJr4Jvxw"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_BaY1waavEd608rQJr4Jvxw" value="1"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_6XPcw6amEd608rQJr4Jvxw" name="unitOfWork" type="_6XGS0KamEd608rQJr4Jvxw" isUnique="false" association="_6XPcwKamEd608rQJr4Jvxw">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_6XPcw6amEd608rQJr4Jvxw" name="unitOfWork" type="_6XGS0KamEd608rQJr4Jvxw" isUnique="false" association="_6XPcwKamEd608rQJr4Jvxw">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_6XPcxaamEd608rQJr4Jvxw" value="1"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_6XPcxKamEd608rQJr4Jvxw" value="1"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_6XGS0KamEd608rQJr4Jvxw" name="UnitOfWork">
-          <ownedComment xmi:id="_6XGS0aamEd608rQJr4Jvxw" annotatedElement="_6XGS0KamEd608rQJr4Jvxw">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_6XGS0aamEd608rQJr4Jvxw" annotatedElement="_6XGS0KamEd608rQJr4Jvxw">
             <body>&lt;br /></body>
           </ownedComment>
-          <generalization xmi:id="_6XGS0qamEd608rQJr4Jvxw">
+          <generalization xmi:type="uml:Generalization" xmi:id="_6XGS0qamEd608rQJr4Jvxw">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_OdIx0H8vEd2MQvsjduCbTg"/>
           </generalization>
-          <ownedAttribute xmi:id="_6XGS06amEd608rQJr4Jvxw" name="unitOfWorkId" isReadOnly="true" isDerived="true">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_6XGS06amEd608rQJr4Jvxw" name="unitOfWorkId" isReadOnly="true" isDerived="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_6XGS1KamEd608rQJr4Jvxw" name="taskId" isReadOnly="true">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_6XGS1KamEd608rQJr4Jvxw" name="taskId" isReadOnly="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_6XGS1qamEd608rQJr4Jvxw"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_6XGS1aamEd608rQJr4Jvxw" value="1"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_6XFEs6amEd608rQJr4Jvxw" name="involvement" type="_6XDPgKamEd608rQJr4Jvxw" isUnique="false" isReadOnly="true" aggregation="composite" isDerived="true" association="_6XPcwKamEd608rQJr4Jvxw">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_6XFEs6amEd608rQJr4Jvxw" name="involvement" type="_6XDPgKamEd608rQJr4Jvxw" isUnique="false" isReadOnly="true" aggregation="composite" isDerived="true" association="_6XPcwKamEd608rQJr4Jvxw">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_6XFEtaamEd608rQJr4Jvxw"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_6XFEtKamEd608rQJr4Jvxw" value="1"/>
-            <qualifier xmi:id="_6XFEtqamEd608rQJr4Jvxw" name="id" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="_6XFEtqamEd608rQJr4Jvxw" name="id" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_6XMZcKamEd608rQJr4Jvxw" name="SegmentContainsUnitOfWork" memberEnd="_6XAzRKamEd608rQJr4Jvxw _6XNAgKamEd608rQJr4Jvxw">
-          <ownedEnd xmi:id="_6XNAgKamEd608rQJr4Jvxw" name="segment" type="_6XAzQKamEd608rQJr4Jvxw" isUnique="false" association="_6XMZcKamEd608rQJr4Jvxw">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_6XNAgKamEd608rQJr4Jvxw" name="segment" type="_6XAzQKamEd608rQJr4Jvxw" isUnique="false" association="_6XMZcKamEd608rQJr4Jvxw">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_6XNAgqamEd608rQJr4Jvxw" value="1"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_6XNAgaamEd608rQJr4Jvxw" value="1"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_6XPcwKamEd608rQJr4Jvxw" name="UnitOfWorkInvolvesObject" memberEnd="_6XFEs6amEd608rQJr4Jvxw _6XPcw6amEd608rQJr4Jvxw">
-          <ownedComment xmi:id="_63Y4QKatEd608rQJr4Jvxw" annotatedElement="_6XPcwKamEd608rQJr4Jvxw">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_63Y4QKatEd608rQJr4Jvxw" annotatedElement="_6XPcwKamEd608rQJr4Jvxw">
             <body>&lt;br /></body>
           </ownedComment>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_OOgI0KasEd608rQJr4Jvxw" name="AfterImage" memberEnd="_OOtkMKasEd608rQJr4Jvxw _OO048KasEd608rQJr4Jvxw">
-          <ownedEnd xmi:id="_OO048KasEd608rQJr4Jvxw" name="afterImageInvolvement" visibility="private" type="_6XDPgKamEd608rQJr4Jvxw" association="_OOgI0KasEd608rQJr4Jvxw">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_OO048KasEd608rQJr4Jvxw" name="afterImageInvolvement" visibility="private" type="_6XDPgKamEd608rQJr4Jvxw" association="_OOgI0KasEd608rQJr4Jvxw">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_OO2HEKasEd608rQJr4Jvxw"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_OO2uIKasEd608rQJr4Jvxw" value="1"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_QvxLsKasEd608rQJr4Jvxw" name="BeforeImage" memberEnd="_QvzA4KasEd608rQJr4Jvxw _Qv2EMKasEd608rQJr4Jvxw">
-          <ownedEnd xmi:id="_Qv2EMKasEd608rQJr4Jvxw" name="beforeImageInvolvement" visibility="private" type="_6XDPgKamEd608rQJr4Jvxw" association="_QvxLsKasEd608rQJr4Jvxw">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_Qv2EMKasEd608rQJr4Jvxw" name="beforeImageInvolvement" visibility="private" type="_6XDPgKamEd608rQJr4Jvxw" association="_QvxLsKasEd608rQJr4Jvxw">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Qv3SUKasEd608rQJr4Jvxw"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Qv35YKasEd608rQJr4Jvxw" value="1"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_BaXAkKavEd608rQJr4Jvxw" name="InvolvedObject" memberEnd="_BaYOsKavEd608rQJr4Jvxw _BaZc0KavEd608rQJr4Jvxw">
-          <ownedEnd xmi:id="_BaZc0KavEd608rQJr4Jvxw" name="involvement" visibility="private" type="_6XDPgKamEd608rQJr4Jvxw" association="_BaXAkKavEd608rQJr4Jvxw">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_BaZc0KavEd608rQJr4Jvxw" name="involvement" visibility="private" type="_6XDPgKamEd608rQJr4Jvxw" association="_BaXAkKavEd608rQJr4Jvxw">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_dBGrkKbaEd6lMKrv1y0JWA"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_dBJH0KbaEd6lMKrv1y0JWA" value="*"/>
           </ownedEnd>

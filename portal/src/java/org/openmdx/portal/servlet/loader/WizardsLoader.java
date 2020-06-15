@@ -144,7 +144,9 @@ public class WizardsLoader extends Loader {
 	                                        (short)j,
 	                                        context.getResourceAsStream(path)
 	                                    );
-	                                } catch(Exception e) {}
+	                                } catch(Exception ignore) {
+	                        			SysLog.trace("Exception ignored", ignore);
+	                                }
 	                                if(wizardDefinition != null) {
 	                                    wizardDefinitions.get(
 	                                        locale[j]

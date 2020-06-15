@@ -62,7 +62,7 @@ import java.net.URLClassLoader;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openmdx.kernel.url.protocol.XRI_2Protocols;
+import org.openmdx.kernel.xri.XRI_2Protocols;
 
 /**
  * Test XRI Protocol Handler
@@ -159,10 +159,11 @@ public class TestXRIProtocolHandler {
         String[] expected
     ) throws IOException{
         assertNotNull("Missing content in " + id, stream);
-        BufferedReader reader = new BufferedReader(
-            new InputStreamReader(stream, "UTF-8")
-        );
-        try {
+        try (
+            BufferedReader reader = new BufferedReader(
+                new InputStreamReader(stream, "UTF-8")
+            );
+        ) {
             assertEquals("Introductional character",0xFEFF, reader.read());
             int i = 0;
             for(
@@ -170,8 +171,6 @@ public class TestXRIProtocolHandler {
                 l != null;
                 l = reader.readLine()
             ) assertEquals(id + " at line " + i, expected[i++], l);
-        } finally {
-            reader.close();
         }
     }
 
@@ -361,10 +360,9 @@ public class TestXRIProtocolHandler {
 	 * @return
 	 */
 	private static String getHeader(URL url) throws IOException{
-	    BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-	    String line = reader.readLine();
-	    reader.close();
-	    return line;
+	    try(BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))){
+    	    return reader.readLine();
+	    }
 	}
 
 }

@@ -266,7 +266,7 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
           BasicException.Code.DEFAULT_DOMAIN,
           BasicException.Code.ASSERTION_FAILURE, 
           "sex 0 implies salutation [Herr|Mister|Monsieur]",
-          new BasicException.Parameter("xri", super.sameObject().refGetPath()),
+          new BasicException.Parameter(BasicException.Parameter.XRI, super.sameObject().refGetPath()),
           new BasicException.Parameter("Sex", sex),
           new BasicException.Parameter("salutation", salutation)
         );

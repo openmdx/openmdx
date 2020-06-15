@@ -36,7 +36,7 @@ package org.openmdx.uses.org.apache.commons.pool2.impl;
  *       not, therefore, be able to upgrade to a new minor or patch release
  *       without requiring code changes.
  *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public interface DefaultPooledObjectInfoMBean {
     /**
@@ -118,7 +118,7 @@ public interface DefaultPooledObjectInfoMBean {
     /**
      * Get the number of times this object has been borrowed.
      * @return The number of times this object has been borrowed.
-     * @since 2.1
+     * @since Commons Pool 2.1
      */
     long getBorrowedCount();
 }

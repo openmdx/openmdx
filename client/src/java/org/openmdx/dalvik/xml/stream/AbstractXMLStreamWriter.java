@@ -60,8 +60,6 @@ import javax.xml.namespace.NamespaceContext;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.UTF8Writer;
-import org.openmdx.dalvik.xml.stream.LargeObjectWriter;
-import org.openmdx.dalvik.xml.stream.NonRepairingNamespaceContext;
 import org.openmdx.dalvik.uses.javax.xml.stream.XMLStreamException;
 import org.openmdx.dalvik.uses.javax.xml.stream.XMLStreamWriter;
 import org.openmdx.kernel.exception.BasicException;

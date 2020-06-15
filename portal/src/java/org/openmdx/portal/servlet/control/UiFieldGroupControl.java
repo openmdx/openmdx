@@ -60,6 +60,7 @@ import java.util.List;
 import javax.jdo.JDOHelper;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
@@ -380,7 +381,7 @@ public class UiFieldGroupControl extends Control implements Serializable {
                 }
             }
         } catch(Exception e) {
-            new ServiceException(e).log();
+            Throwables.log(e);
         }
         return a;
     }
@@ -431,7 +432,7 @@ public class UiFieldGroupControl extends Control implements Serializable {
                 ((Integer)p.getProperty(ViewPort.PROPERTY_FIELD_GROUP_ID)).intValue() : 
                 1000;
             p.write("<div class=\"", CssClass.fieldGroupName.toString(), "\">", htmlEncoder.encode(this.getName(), false), "</div>");
-            p.write("<div class=\"", CssClass.containerFluid.toString(), "\">");
+            p.write("<div class=\"", CssClass.container_fluid.toString(), "\">");
             p.write("  <div class=\"", CssClass.row.toString(), "\">");
             for(int u = 0; u < nCols; u++) {
             	p.write("    <div class=\"", "col-lg-", Integer.toString(12 / nCols), "\">");
@@ -470,7 +471,7 @@ public class UiFieldGroupControl extends Control implements Serializable {
                        p,
                        forEditing,
                        // default is longText
-						cssClass != null && cssClass.contains(CssClass.shortText.toString())
+						cssClass != null && cssClass.contains(CssClass.short_text.toString())
                     );
                     boolean isRevokeShow = valueHolder.hasPermission(WebKeys.PERMISSION_REVOKE_SHOW);
                     boolean isRevokeEdit = valueHolder.hasPermission(WebKeys.PERMISSION_REVOKE_EDIT);

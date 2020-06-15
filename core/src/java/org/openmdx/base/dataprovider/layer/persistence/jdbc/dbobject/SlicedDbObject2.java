@@ -182,8 +182,6 @@ public class SlicedDbObject2 extends SlicedDbObject {
         List objectIdValues,
         Set excludeAttributes
     ) throws ServiceException {
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         String currentStatement = null;
         List statementParameters = new ArrayList();
         List statementParameterTypes = new ArrayList();
@@ -342,31 +340,40 @@ public class SlicedDbObject2 extends SlicedDbObject {
                             );
                             // Emulate SQL sequence
                             if(autonumValue == null) {
-                                String normalizedSequenceName = sequenceName.toUpperCase() + "_SEQ";                                
-                                ps = this.database.prepareStatement(
-                                    this.conn,
-                                    currentStatement = "SELECT nextval FROM " + normalizedSequenceName
-                                );
-                                rs = ps.executeQuery();
-                                if(rs.next()) {
-                                    autonumValue = rs.getString("nextval");
-                                    rs.close();
-                                    ps.close();
-                                    ps = this.database.prepareStatement(
+                                final String normalizedSequenceName = sequenceName.toUpperCase() + "_SEQ";  
+                                final boolean exists;
+                                try (
+                                    PreparedStatement ps = this.database.prepareStatement(
                                         this.conn,
-                                        currentStatement = "UPDATE " + normalizedSequenceName + " SET nextval = nextval + 1"
-                                    );
-                                    this.database.executeUpdate(ps, currentStatement, Collections.EMPTY_LIST);
-                                    ps.close();
+                                        currentStatement = "SELECT nextval FROM " + normalizedSequenceName
+                                    )
+                                ){
+                                    try(ResultSet rs = ps.executeQuery()) {
+                                        exists = rs.next();
+                                        if(exists) {
+                                            autonumValue = rs.getString("nextval");
+                                        }
+                                    }
                                 }
-                                else {
+                                if(exists) {
+                                    try (
+                                        PreparedStatement ps = this.database.prepareStatement(
+                                            this.conn,
+                                            currentStatement = "UPDATE " + normalizedSequenceName + " SET nextval = nextval + 1"
+                                        )
+                                    ){
+                                        this.database.executeUpdate(ps, currentStatement, Collections.EMPTY_LIST);
+                                    }
+                                } else {
                                     autonumValue = "0";
-                                    ps = this.database.prepareStatement(
-                                        this.conn,
-                                        currentStatement = "INSERT INTO " + normalizedSequenceName + " (nextval) VALUES (0)"
-                                    );                          
-                                    this.database.executeUpdate(ps, currentStatement, Collections.EMPTY_LIST);
-                                    ps.close();
+                                    try (
+                                        PreparedStatement  ps = this.database.prepareStatement(
+                                            this.conn,
+                                            currentStatement = "INSERT INTO " + normalizedSequenceName + " (nextval) VALUES (0)"
+                                        )
+                                    ){
+                                        this.database.executeUpdate(ps, currentStatement, Collections.EMPTY_LIST);
+                                    }
                                 }
                             }
                             if(autonumValues == null) {
@@ -474,24 +481,24 @@ public class SlicedDbObject2 extends SlicedDbObject {
                         }          
                     }
                     statement += ")";          
-                    // prepare
-                    ps = this.database.prepareStatement(
-                        this.conn, 
-                        currentStatement = statement.toString()
-                    );
-    
-                    // fill in values
-                    for(int i = 0; i < statementParameters.size(); i++) {
-                        Object value = statementParameters.get(i);
-                        this.database.setPreparedStatementValue(
-                            this.conn,
-                            ps,
-                            i+1,
-                            value
-                        );    
-                    }    
-                    this.database.executeUpdate(ps, currentStatement, statementParameters);
-                    ps.close(); ps = null;
+                    try (
+                        PreparedStatement  ps = this.database.prepareStatement(
+                            this.conn, 
+                            currentStatement = statement.toString()
+                        )
+                    ){
+                        // fill in values
+                        for(int i = 0; i < statementParameters.size(); i++) {
+                            Object value = statementParameters.get(i);
+                            this.database.setPreparedStatementValue(
+                                this.conn,
+                                ps,
+                                i+1,
+                                value
+                            );    
+                        }    
+                        this.database.executeUpdate(ps, currentStatement, statementParameters);
+                    }
                 }
             }
             if(!processedAttributes.containsAll(facade.getValue().keySet())) {
@@ -515,7 +522,7 @@ public class SlicedDbObject2 extends SlicedDbObject {
                 BasicException.Code.DEFAULT_DOMAIN,
                 "23000".equals(sqlState) || "23505".equals(sqlState) ? BasicException.Code.DUPLICATE : BasicException.Code.MEDIA_ACCESS_FAILURE, 
                 null,
-                new BasicException.Parameter("path", facade.getPath()),
+                new BasicException.Parameter(BasicException.Parameter.XRI, facade.getPath()),
                 new BasicException.Parameter("statement", currentStatement),
                 new BasicException.Parameter("values", statementParameters),
                 new BasicException.Parameter("types", statementParameterTypes),
@@ -523,29 +530,10 @@ public class SlicedDbObject2 extends SlicedDbObject {
                 new BasicException.Parameter("sqlState", sqlState)
             );
         }
-        finally {
-            try {
-                if(rs != null) rs.close();
-                if(ps != null) ps.close();
-            } catch(Throwable ex) {
-                // ignore
-            }
-        }
     }
 
     /**
      * Replace
-     * 
-     * @param index
-     * @param newObject
-     * @param oldObject
-     * @param referenceIdColumns
-     * @param referenceIdValues
-     * @param objectIdColumns
-     * @param objectIdValues
-     * @param excludeAttributes
-     * @param writeLock
-     * @param readLock
      * 
      * @throws ServiceException
      */
@@ -562,7 +550,6 @@ public class SlicedDbObject2 extends SlicedDbObject {
         String writeLock, 
         String readLock
     ) throws ServiceException {
-        PreparedStatement ps = null;
         String currentStatement = null;
         List<Object> statementParameters = new ArrayList<Object>();
         Set statementColumns = new HashSet();
@@ -758,12 +745,14 @@ public class SlicedDbObject2 extends SlicedDbObject {
                     	lock |= appendLockAssertion(statement, statementParameters, writeLock);
                     	lock |= appendLockAssertion(statement, statementParameters, readLock);
                     }
-                    ps = this.database.prepareStatement(
-                        this.conn, 
-                        currentStatement = statement.toString()
-                    );            
+                    final int rowCount;
+                    try(
+                        PreparedStatement ps = this.database.prepareStatement(
+                            this.conn, 
+                            currentStatement = statement.toString()
+                        )
+                    ){         
                     // fill in values
-                    {
                         int ii = 1;
                         for(Object statementParameter : statementParameters) {
                             this.database.setPreparedStatementValue(
@@ -773,8 +762,8 @@ public class SlicedDbObject2 extends SlicedDbObject {
                                 statementParameter
                             );               
                         }
+                        rowCount = this.database.executeUpdate(ps, currentStatement, statementParameters);
                     }
-                    int rowCount = this.database.executeUpdate(ps, currentStatement, statementParameters);
                     switch(rowCount) {
                         case 0:
                             if(lock) {
@@ -782,40 +771,42 @@ public class SlicedDbObject2 extends SlicedDbObject {
                                     BasicException.Code.DEFAULT_DOMAIN,
                                     BasicException.Code.CONCURRENT_ACCESS_FAILURE,
                                     "The object has been modified since it was read or the beginning of the unit of work",
-                                    new BasicException.Parameter("path", newObjectFacade.getPath()),
+                                    new BasicException.Parameter(BasicException.Parameter.XRI, newObjectFacade.getPath()),
                                     new BasicException.Parameter("assertion", writeLock, readLock), 
                                     new BasicException.Parameter("sqlStatement", currentStatement),
                                     new BasicException.Parameter("parameters", statementParameters),
                                     new BasicException.Parameter("sqlRowCount", rowCount)
                                 );
                             } else if(processAsSecondary)  {
-                                ps.close(); 
                                 String separator = ") VALUES (";
                                 for(Object statementParameter : statementParameters) {
                                     statement2.append(separator).append(this.database.getPlaceHolder(conn, statementParameter)); 
                                     separator = ", ";
                                 }
                                 statement2.append(")");
-                                ps = this.database.prepareStatement(
-                                    this.conn, 
-                                    currentStatement = statement2.toString()
-                                );
-                                int ii = 1;
-                                for(Object statementParameter : statementParameters) {
-                                    this.database.setPreparedStatementValue(
-                                        this.conn,
-                                        ps,
-                                        ii++,
-                                        statementParameter
-                                    );               
+                                try(
+                                    PreparedStatement ps = this.database.prepareStatement(
+                                        this.conn, 
+                                        currentStatement = statement2.toString()
+                                    )
+                                ){
+                                    int ii = 1;
+                                    for(Object statementParameter : statementParameters) {
+                                        this.database.setPreparedStatementValue(
+                                            this.conn,
+                                            ps,
+                                            ii++,
+                                            statementParameter
+                                        );               
+                                    }
+                                    this.database.executeUpdate(ps, currentStatement, statementParameters);
                                 }
-                                this.database.executeUpdate(ps, currentStatement, statementParameters);
                             } else {
                                 throw new ServiceException(
                                     BasicException.Code.DEFAULT_DOMAIN,
                                     BasicException.Code.NOT_FOUND,
                                     "The object to be updated could not be found",
-                                    new BasicException.Parameter("path", newObjectFacade.getPath()),
+                                    new BasicException.Parameter(BasicException.Parameter.XRI, newObjectFacade.getPath()),
                                     new BasicException.Parameter("assertion", (String)null), 
                                     new BasicException.Parameter("sqlStatement", currentStatement),
                                     new BasicException.Parameter("parameters", statementParameters),
@@ -831,14 +822,13 @@ public class SlicedDbObject2 extends SlicedDbObject {
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.ASSERTION_FAILURE,
                                 "More than one row has been updated at once",
-                                new BasicException.Parameter("path", newObjectFacade.getPath()),
+                                new BasicException.Parameter(BasicException.Parameter.XRI, newObjectFacade.getPath()),
                                 new BasicException.Parameter("assertion", lock ? writeLock : null), 
                                 new BasicException.Parameter("sqlStatement", currentStatement),
                                 new BasicException.Parameter("parameters", statementParameters),
                                 new BasicException.Parameter("sqlRowCount", rowCount)
                             );
                     }
-                    ps.close(); ps = null;
                 }
             }
             Set nonProcessedAttributes = new HashSet(newObjectFacade.getValue().keySet());
@@ -883,19 +873,12 @@ public class SlicedDbObject2 extends SlicedDbObject {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.MEDIA_ACCESS_FAILURE, 
                 null,
-                new BasicException.Parameter("path", newObjectFacade.getPath()),
+                new BasicException.Parameter(BasicException.Parameter.XRI, newObjectFacade.getPath()),
                 new BasicException.Parameter("statement", currentStatement),
                 new BasicException.Parameter("values", statementParameters),
                 new BasicException.Parameter("sqlErrorCode", ex.getErrorCode()), 
                 new BasicException.Parameter("sqlState", ex.getSQLState())
             );
-        }
-        finally {
-            try {
-                if(ps != null) ps.close();
-            } catch(Throwable ex) {
-                // ignore
-            }
         }
     }
 

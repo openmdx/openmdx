@@ -207,6 +207,7 @@ public abstract class DelegatingObject_1
      * @exception   ServiceException  
      *              if the information is unavailable
      */
+    @Override
     public String objGetClass(
     ) throws ServiceException {
         return this.getDelegate().objGetClass();
@@ -221,6 +222,7 @@ public abstract class DelegatingObject_1
      *
      * @return  the names of the features in the default fetch group
      */
+    @Override
     public Set<String> objDefaultFetchGroup(
     ) throws ServiceException {
         return this.getDelegate().objDefaultFetchGroup();
@@ -288,6 +290,7 @@ public abstract class DelegatingObject_1
      * @exception ServiceException  
      *            if the move operation fails.
      */
+    @Override
     public void objMove(
         Container_1_0 there,
         String criteria
@@ -309,6 +312,7 @@ public abstract class DelegatingObject_1
      * @return true if this instance has been modified in the current unit
      *         of work.
      */ 
+    @Override
     public boolean jdoIsDirty(
     ) {
         return this.getStateDelegate().jdoIsDirty();
@@ -320,6 +324,7 @@ public abstract class DelegatingObject_1
      * 
      * @return true if this instance is persistent.
      */
+    @Override
     public boolean jdoIsPersistent(
     ) {
         return this.getStateDelegate().jdoIsPersistent();
@@ -334,6 +339,7 @@ public abstract class DelegatingObject_1
      * @return  true if this instance was made persistent in the current unit
      *          of work. 
      */
+    @Override
     public boolean jdoIsNew(
     ){
         return this.getStateDelegate().jdoIsNew();
@@ -346,6 +352,7 @@ public abstract class DelegatingObject_1
      *
      * @return  true if this instance was deleted in the current unit of work.
      */
+    @Override
     public boolean jdoIsDeleted(
     ) {
         return this.getStateDelegate().jdoIsDeleted();
@@ -356,6 +363,7 @@ public abstract class DelegatingObject_1
      *
      * @return  true if this instance belongs to the current unit of work.
      */
+    @Override
     public boolean jdoIsTransactional(
     ) {
         return this.getStateDelegate().jdoIsTransactional();
@@ -364,6 +372,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Object_1_0#objIsContained()
      */
+    @Override
     public boolean objIsContained(
     ){
         return this.getStateDelegate().objIsContained();
@@ -372,6 +381,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#getContainer(boolean)
      */
+    @Override
     public Container_1_0 getContainer(
         boolean lazily
     ) {
@@ -397,6 +407,7 @@ public abstract class DelegatingObject_1
 	/* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object, int[])
      */
+    @Override
     public void jdoCopyFields(
         Object other, 
         int[] fieldNumbers
@@ -407,6 +418,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer, java.lang.Object)
      */
+    @Override
     public void jdoCopyKeyFieldsFromObjectId(
         ObjectIdFieldConsumer fm,
         Object oid
@@ -417,6 +429,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(java.lang.Object)
      */
+    @Override
     public void jdoCopyKeyFieldsToObjectId(
         Object oid
     ) {
@@ -426,6 +439,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier, java.lang.Object)
      */
+    @Override
     public void jdoCopyKeyFieldsToObjectId(
         ObjectIdFieldSupplier fm, 
         Object oid
@@ -436,6 +450,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetObjectId()
      */
+    @Override
     public Path jdoGetObjectId(
     ) {
         return this.delegate.jdoGetObjectId();
@@ -444,6 +459,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetTransactionalObjectId()
      */
+    @Override
     public UUID jdoGetTransactionalObjectId(
     ) {
         return this.delegate.jdoGetTransactionalObjectId();
@@ -452,7 +468,8 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
      */
-    public Object jdoGetVersion(
+    @Override
+    public byte[] jdoGetVersion(
     ) {
         return this.delegate.jdoGetVersion();
     }
@@ -460,6 +477,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDetached()
      */
+    @Override
     public boolean jdoIsDetached(
     ) {
         return getStateDelegate().jdoIsDetached();
@@ -468,6 +486,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoMakeDirty(java.lang.String)
      */
+    @Override
     public void jdoMakeDirty(
         String fieldName
     ) {
@@ -477,6 +496,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager)
      */
+    @Override
     public PersistenceCapable jdoNewInstance(
         StateManager sm
     ) {
@@ -486,6 +506,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager, java.lang.Object)
      */
+    @Override
     public PersistenceCapable jdoNewInstance(
         StateManager sm, 
         Object oid
@@ -496,6 +517,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance()
      */
+    @Override
     public Object jdoNewObjectIdInstance(
     ) {
         throw new UnsupportedOperationException("Operation not supported by DelegatingObject_1");
@@ -504,6 +526,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance(java.lang.Object)
      */
+    @Override
     public Object jdoNewObjectIdInstance(
         Object o
     ) {
@@ -513,6 +536,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideField(int)
      */
+    @Override
     public void jdoProvideField(
         int fieldNumber
     ) {
@@ -522,6 +546,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideFields(int[])
      */
+    @Override
     public void jdoProvideFields(
         int[] fieldNumbers
     ) {
@@ -531,6 +556,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceField(int)
      */
+    @Override
     public void jdoReplaceField(
         int fieldNumber
     ) {
@@ -540,6 +566,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFields(int[])
      */
+    @Override
     public void jdoReplaceFields(
         int[] fieldNumbers
     ) {
@@ -549,6 +576,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFlags()
      */
+    @Override
     public void jdoReplaceFlags(
     ) {
         throw new UnsupportedOperationException("Operation not supported by DelegatingObject_1");
@@ -557,6 +585,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
      */
+    @Override
     public void jdoReplaceStateManager(
         StateManager sm
     ) throws SecurityException {
@@ -566,6 +595,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.Cloneable#openmdxjdoClone()
      */
+    @Override
     public DataObject_1_0 openmdxjdoClone(String... exclude
     ) {
         throw new UnsupportedOperationException("Operation not supported by DelegatingObject_1");
@@ -596,6 +626,7 @@ public abstract class DelegatingObject_1
      * @exception   ServiceException 
      *              if the object is not accessible
      */
+    @Override
     public void objSetValue(
         String feature,
         Object to
@@ -617,6 +648,7 @@ public abstract class DelegatingObject_1
      * @exception   ServiceException 
      *              if the object is not accessible
      */
+    @Override
     public Object objGetValue(
         String feature
     ) throws ServiceException {
@@ -641,6 +673,7 @@ public abstract class DelegatingObject_1
      * @exception   ClassCastException
      *              if the feature's value is not a list
      */
+    @Override
     public List<Object> objGetList(
         String feature
     ) throws ServiceException {
@@ -665,6 +698,7 @@ public abstract class DelegatingObject_1
      * @exception   ClassCastException
      *              if the feature's value is not a set
      */
+    @Override
     public Set<Object> objGetSet(
         String feature
     ) throws ServiceException {
@@ -700,6 +734,7 @@ public abstract class DelegatingObject_1
      * @exception   ServiceException NOT_SUPPORTED
      *              if the object has no such feature
      */
+    @Override
     public SortedMap<Integer,Object> objGetSparseArray(
         String feature
     ) throws ServiceException {
@@ -724,12 +759,24 @@ public abstract class DelegatingObject_1
      * @exception   ServiceException NOT_SUPPORTED
      *              if the object has no such feature
      */
+    @Override
     public Container_1_0 objGetContainer(
         String feature
     ) throws ServiceException {
         return getDelegate().objGetContainer(feature);
     }
 
+    /**
+     * @throws ServiceException
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#touch()
+     */
+    @Override
+    public void touch()
+        throws ServiceException {
+        getDelegate().touch();
+    }
+    
+    
     //--------------------------------------------------------------------------
     // Operations
     //--------------------------------------------------------------------------
@@ -737,6 +784,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
      */
+    @Override
     public boolean execute(
         InteractionSpec ispec, 
         Record input, 

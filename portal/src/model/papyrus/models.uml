@@ -1,18 +1,2 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="20110701" xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_j-oNUEcKEd-o1OTPw_6HJg" name="models">  
-  <packageImport xmi:id="_8P4VQEcLEd-o1OTPw_6HJg">
-    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.w3c.uml#_3C7B8A60016D3C8B62D700DA"/>
-  </packageImport>
-  <packageImport xmi:id="_LeF0wEcgEd-o1OTPw_6HJg">
-    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.oasis-open.uml#_3C7B8A60016D4022002100C9"/>
-  </packageImport>
-  <packageImport xmi:id="_GEoM0EcMEd-o1OTPw_6HJg">
-    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.openmdx.base.uml#_3C7B8A60016D40A89A0D0015"/>
-  </packageImport>
-  <packageImport xmi:id="_nyRhQEcOEd-o1OTPw_6HJg">
-    <importedPackage href="../openMDX 2 ~ Portal (EMF)/org.openmdx.ui1.uml#_3C7B8A60016D3EE081A901C6"/>
-  </packageImport>
-  <packageImport xmi:id="_ldKCAEckEd-o1OTPw_6HJg">
-    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.iso.uml#_3C7B8A60016D3C8B7F0E0072"/>
-  </packageImport>
-</uml:Model>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_j-oNUEcKEd-o1OTPw_6HJg" name="models"/>

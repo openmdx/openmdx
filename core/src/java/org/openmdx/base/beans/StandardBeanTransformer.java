@@ -54,7 +54,6 @@ import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -82,7 +81,7 @@ import org.w3c.spi2.Datatypes;
 /**
  * Standard Java Beans Transformer
  *
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  */
 public class StandardBeanTransformer implements BeanTransformer {
 
@@ -107,59 +106,58 @@ public class StandardBeanTransformer implements BeanTransformer {
         Object javaBean,
         ExceptionListener exceptionListener
     ) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        XMLEncoder encoder = new XMLEncoder(out);
-        if(exceptionListener != null) {
-            encoder.setExceptionListener(
-                new ExceptionListenerAdapter(exceptionListener)
-            );
-        }
-        encoder.setPersistenceDelegate(
-            BigDecimal.class, 
-            bigDecimalPersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            Path.class, 
-            pathPersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            Date.class, 
-            datePersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            xmlGregorianCalendarClass, 
-            immutableDatePersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            ImmutableDate.class, 
-            immutableDatePersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            ImmutableDateTime.class, 
-            dateTimePersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            Duration.class, 
-            durationPersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            Quantifier.class, 
-            quantifierPersistenceDelegate
-        );
-        encoder.setPersistenceDelegate(
-            URI.class, 
-            uriPersistenceDelegate
-        );
-        encoder.writeObject(javaBean);
-        encoder.close();
-        try {
+        try(ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            try(XMLEncoder encoder = new XMLEncoder(out)){
+                if(exceptionListener != null) {
+                    encoder.setExceptionListener(
+                        new ExceptionListenerAdapter(exceptionListener)
+                    );
+                }
+                encoder.setPersistenceDelegate(
+                    BigDecimal.class, 
+                    bigDecimalPersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    Path.class, 
+                    pathPersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    Date.class, 
+                    datePersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    xmlGregorianCalendarClass, 
+                    immutableDatePersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    ImmutableDate.class, 
+                    immutableDatePersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    ImmutableDateTime.class, 
+                    dateTimePersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    Duration.class, 
+                    durationPersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    Quantifier.class, 
+                    quantifierPersistenceDelegate
+                );
+                encoder.setPersistenceDelegate(
+                    URI.class, 
+                    uriPersistenceDelegate
+                );
+                encoder.writeObject(javaBean);
+            }
             return out.toString("UTF-8");
-        } catch (UnsupportedEncodingException exception) {
+        } catch (IOException exception) {
             throw new RuntimeServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                "UTF-8 is expected to be supported"
+                "Unable to convert the output stream to an UTF-8 strung and to close it"
             );
         }
     }
@@ -172,70 +170,39 @@ public class StandardBeanTransformer implements BeanTransformer {
         CharSequence encodedJavaBean,
         ExceptionListener exceptionListener
     ) {
-        if(encodedJavaBean == null) {
-            return null;
-        } else {
-        	String stringifiedBean = encodedJavaBean.toString();
+        Object value = null;
+        if(encodedJavaBean != null) {
+        	final String stringifiedBean = encodedJavaBean.toString();
             if(xstreamFromXML != null && !stringifiedBean.startsWith("<?xml")) {
                 try {
                     return xstreamFromXML.invoke(xstream, stringifiedBean);
                 } catch(Exception e) {
                     throw new RuntimeServiceException(e);
                 }
-            } else {        	
-                StringInputStream source = new StringInputStream(
-                	stringifiedBean,
-                    "UTF-8"
-                );
-                XMLDecoder decoder = new XMLDecoder(
-                    source
-                );
-                if(exceptionListener != null) {
-                    decoder.setExceptionListener(
-                        new ExceptionListenerAdapter(exceptionListener)
+            } else {
+                try (
+                    StringInputStream source = new StringInputStream(
+                    	stringifiedBean,
+                        "UTF-8"
                     );
-                }
-                Object value = decoder.readObject();
-                try {
-                    source.close();
+                    XMLDecoder decoder = new XMLDecoder(
+                        source
+                    )
+                ){
+                    if(exceptionListener != null) {
+                        decoder.setExceptionListener(
+                            new ExceptionListenerAdapter(exceptionListener)
+                        );
+                    }
+                    value = decoder.readObject();
                 } catch (IOException ignored) {
                     SysLog.trace("Ignored close failure", ignored);
                 }
-                decoder.close();
-                return value;
             }
         }
+        return value;
     }
 
-    /**
-     * Decode a graph of java beans
-     * 
-     * @param xmlEncodedJavaBean an XML document 
-     * @return a graph of java beans; or <code>null</code> if
-     * the <code>xmlEncodedJavaBean</code> was <code>null</code>
-     * 
-     * @deprecated use fromXML(java.lang.CharSequence,org.openmdx.base.exception.ExceptionListener)
-     * 
-     * @see org.openmdx.base.text.conversion.JavaBeans#fromXML(java.lang.CharSequence,org.openmdx.base.exception.ExceptionListener)
-     */
-    @Deprecated
-    public static Object fromXML(
-        final CharSequence xmlEncodedJavaBean,
-        final java.beans.ExceptionListener exceptionListener
-    ){
-        return new StandardBeanTransformer().encode(
-            xmlEncodedJavaBean, 
-            new ExceptionListener() {
-                
-                @Override
-                public void exceptionThrown(Exception exception) {
-                    exceptionListener.exceptionThrown(exception);
-                }
-
-            }
-        );
-    }
-       
     protected abstract static class DefaultPersistenceDelegate extends PersistenceDelegate {
 
         protected DefaultPersistenceDelegate(){

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2019, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,40 +47,43 @@
  */
 package org.openmdx.base.accessor.view;
 
+import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
 import javax.jdo.FetchGroup;
-import javax.jdo.PersistenceManager;
-import javax.jdo.PersistenceManagerFactory;
-import javax.jdo.datastore.DataStoreCache;
 import javax.jdo.listener.InstanceLifecycleListener;
+import javax.jdo.metadata.JDOMetadata;
+import javax.jdo.metadata.TypeMetadata;
 
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.aop1.PlugIn_1_0;
-import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
-
+import org.openmdx.kernel.jdo.JDODataStoreCache;
+import org.openmdx.kernel.jdo.JDOPersistenceManager;
+import org.openmdx.kernel.jdo.JDOPersistenceManagerFactory;
 
 /**
  * View Manager Factory
  */
-@SuppressWarnings({"rawtypes"})
-public class ViewManagerFactory_1 implements PersistenceManagerFactory {
+@SuppressWarnings({ "rawtypes" })
+public class ViewManagerFactory_1 implements JDOPersistenceManagerFactory {
 
     /**
-     * Constructor 
+     * Constructor
      *
      * @param delegate
      */
     public ViewManagerFactory_1(
-        PersistenceManagerFactory delegate,
+        JDOPersistenceManagerFactory delegate,
         PlugIn_1_0... plugIns
-    ){
+    ) {
         this.delegate = delegate;
-        this.plugIns = plugIns;
+        this.plugIns = Arrays.asList(plugIns);
     }
-    
+
     /**
      * Implements {@link Serializable}
      */
@@ -89,12 +92,12 @@ public class ViewManagerFactory_1 implements PersistenceManagerFactory {
     /**
      * The View Manager Plug-Ins
      */
-    private final PlugIn_1_0[] plugIns;
-    
+    private final List<PlugIn_1_0> plugIns;
+
     /**
      * The Data Object Manager Factory
      */
-    private PersistenceManagerFactory delegate;
+    private JDOPersistenceManagerFactory delegate;
 
     public void addInstanceLifecycleListener(
         InstanceLifecycleListener listener,
@@ -135,7 +138,7 @@ public class ViewManagerFactory_1 implements PersistenceManagerFactory {
         throw new UnsupportedOperationException("Operation not supported by ViewManagerFactory_1");
     }
 
-    public DataStoreCache getDataStoreCache() {
+    public JDODataStoreCache getDataStoreCache() {
         return this.delegate.getDataStoreCache();
     }
 
@@ -147,7 +150,7 @@ public class ViewManagerFactory_1 implements PersistenceManagerFactory {
         throw new UnsupportedOperationException("Operation not supported by ViewManagerFactory_1");
     }
 
-    public PersistenceManager getPersistenceManager() {
+    public JDOPersistenceManager getPersistenceManager() {
         return new ViewManager_1(
             this,
             (DataObjectManager_1_0) this.delegate.getPersistenceManager(),
@@ -155,7 +158,7 @@ public class ViewManagerFactory_1 implements PersistenceManagerFactory {
         );
     }
 
-    public PersistenceManager getPersistenceManager(
+    public JDOPersistenceManager getPersistenceManager(
         String userid,
         String password
     ) {
@@ -166,7 +169,7 @@ public class ViewManagerFactory_1 implements PersistenceManagerFactory {
         );
     }
 
-    public PersistenceManager getPersistenceManagerProxy() {
+    public JDOPersistenceManager getPersistenceManagerProxy() {
         throw new UnsupportedOperationException("Operation not supported by ViewManagerFactory_1");
     }
 
@@ -240,7 +243,10 @@ public class ViewManagerFactory_1 implements PersistenceManagerFactory {
         return this.delegate.getDetachAllOnCommit();
     }
 
-    public FetchGroup getFetchGroup(Class cls, String name) {
+    public FetchGroup getFetchGroup(
+        Class cls,
+        String name
+    ) {
         return this.delegate.getFetchGroup(cls, name);
     }
 
@@ -361,20 +367,78 @@ public class ViewManagerFactory_1 implements PersistenceManagerFactory {
     }
 
     /**
-     * Tells whether the transactions are container managed
-     * 
-     * @param persistenceManagerFactory
-     * 
-     * @return <code>true</code> if the persistenceManagerFactory is an instance of
-     * <code>AbstractPersistenceManagerFactory</code> and its transactions are 
-     * container managed
+     * @param interval
+     * @see javax.jdo.PersistenceManagerFactory#setDatastoreReadTimeoutMillis(java.lang.Integer)
      */
-    public static boolean isTransactionContainerManaged(
-        PersistenceManagerFactory persistenceManagerFactory
-    ){
-        return 
-            persistenceManagerFactory instanceof ViewManagerFactory_1 &&
-            AbstractPersistenceManagerFactory.isTransactionContainerManaged(((ViewManagerFactory_1)persistenceManagerFactory).delegate);
+    public void setDatastoreReadTimeoutMillis(Integer interval) {
+        this.delegate.setDatastoreReadTimeoutMillis(interval);
     }
-    
+
+    /**
+     * @return
+     * @see javax.jdo.PersistenceManagerFactory#getDatastoreReadTimeoutMillis()
+     */
+    public Integer getDatastoreReadTimeoutMillis() {
+        return this.delegate.getDatastoreReadTimeoutMillis();
+    }
+
+    /**
+     * @param interval
+     * @see javax.jdo.PersistenceManagerFactory#setDatastoreWriteTimeoutMillis(java.lang.Integer)
+     */
+    public void setDatastoreWriteTimeoutMillis(Integer interval) {
+        this.delegate.setDatastoreWriteTimeoutMillis(interval);
+    }
+
+    /**
+     * @return
+     * @see javax.jdo.PersistenceManagerFactory#getDatastoreWriteTimeoutMillis()
+     */
+    public Integer getDatastoreWriteTimeoutMillis() {
+        return this.delegate.getDatastoreWriteTimeoutMillis();
+    }
+
+    /**
+     * @param metadata
+     * @see javax.jdo.PersistenceManagerFactory#registerMetadata(javax.jdo.metadata.JDOMetadata)
+     */
+    public void registerMetadata(JDOMetadata metadata) {
+        this.delegate.registerMetadata(metadata);
+    }
+
+    /**
+     * @return
+     * @see javax.jdo.PersistenceManagerFactory#newMetadata()
+     */
+    public JDOMetadata newMetadata() {
+        return this.delegate.newMetadata();
+    }
+
+    /**
+     * @param className
+     * @return
+     * @see javax.jdo.PersistenceManagerFactory#getMetadata(java.lang.String)
+     */
+    public TypeMetadata getMetadata(String className) {
+        return this.delegate.getMetadata(className);
+    }
+
+    /**
+     * @return
+     * @see javax.jdo.PersistenceManagerFactory#getManagedClasses()
+     */
+    public Collection<Class> getManagedClasses() {
+        return this.delegate.getManagedClasses();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.openmdx.kernel.jdo.JDOPersistenceManagerFactory#getContainerManaged()
+     */
+    @Override
+    public boolean getContainerManaged() {
+        return delegate.getContainerManaged();
+    }
+
 }

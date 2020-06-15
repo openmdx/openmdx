@@ -258,9 +258,9 @@ public class WBXMLPlugIn extends StandardPlugIn {
         }
 
         @Override
-        public Iterator<?> getPrefixes(String namespaceURI) {
+        public Iterator<String> getPrefixes(String namespaceURI) {
             String prefix = getPrefix(namespaceURI);
-            return (prefix == null ? Collections.emptySet() : Collections.singleton(prefix)).iterator();
+            return (prefix == null ? Collections.<String>emptySet() : Collections.<String>singleton(prefix)).iterator();
         }
         
     };

@@ -61,14 +61,14 @@ import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
+import org.openmdx.base.resource.Records;
+import org.openmdx.base.resource.cci.ExtendedRecordFactory;
+import org.openmdx.base.resource.cci.SparseArrayRecord;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.openmdx.base.resource.Records;
-import org.openmdx.base.resource.cci.ExtendedRecordFactory;
-
-@SuppressWarnings("unchecked")
 public class TestRecord extends TestCase {
 
 	private static boolean REFLECTIVE_EQUALITY = Boolean.FALSE; // to avoid dead code warning
@@ -81,8 +81,10 @@ public class TestRecord extends TestCase {
     /**
      * TODO Sparse array support is such a use case!
      */
-    private static boolean USE_INTEGERS_AS_KEYS = Boolean.FALSE; // to avoid dead code warning
+    private static boolean USE_INTEGERS_AS_KEYS = Boolean.TRUE; // to avoid dead code warning
 
+    private static final String S4711 = "s4711";
+    
     /**
      * Constructs a test case with the given name.
      */
@@ -202,7 +204,7 @@ public class TestRecord extends TestCase {
         "map2.equals(r2m)",
         map2.equals(r2m)
       );
-      assertTrue(
+      assertFalse(
         "r2m.equals(map2)",
         r2m.equals(map2)
       );
@@ -240,7 +242,7 @@ public class TestRecord extends TestCase {
         "map2.equals(r2md)",
         map2.equals(r2md)
       );
-      assertTrue(
+      assertFalse(
         "r2md.equals(map2)",
         r2md.equals(map2)
       );
@@ -270,17 +272,21 @@ public class TestRecord extends TestCase {
           MappedRecord r3 = factory.createMappedRecord("r3");
           r3.putAll(map3);
           m23.put(Integer.valueOf(3),r3);
-          MappedRecord r23 = factory.createMappedRecord("r23");
-          r23.setRecordShortDescription("Nested Utilities");
-          r23.putAll(m23);
+          MappedRecord r23 = factory.createMappedRecord(SparseArrayRecord.NAME);
+          try {
+              r23.setRecordShortDescription("Nested Utilities");
+              fail("UnsupportedOperationException expected");
+          } catch (UnsupportedOperationException expected) {
+              r23.putAll(m23);
+          }
           assertEquals(
             "r23",
-            "org.openmdx.base.resource.spi.VariableSizeMappedRecord",
+            "org.openmdx.base.resource.spi.SparseArrayRecord",
             r23.getClass().getName()
           );
           assertEquals(
             "r23", 
-            "r23 (Nested Utilities): {\n" +
+            "sparsearray: {\n" +
             "\t2 = r2 (Record 2): {\n" +
             "\t\tA = \"a\"\n" +
             "\t\tC = \"c\"\n" +
@@ -297,27 +303,17 @@ public class TestRecord extends TestCase {
             "map23.equals(r23)",
             map23.equals(r23)
           );
-          assertTrue(
+          assertFalse(
             "r23.equals(map23)",
             r23.equals(map23)
-          );
-          assertEquals(
-            "map23.hashCode()==r23.hashCode()",
-            map23.hashCode(),
-            r23.hashCode()
           );
           assertTrue(
             "m23.equals(r23)",
             m23.equals(r23)
           );
-          assertTrue(
+          assertFalse(
             "r23.equals(m23)",
             r23.equals(m23)
-          );
-          assertEquals(
-            "m23.hashCode()==r23.hashCode()",
-            m23.hashCode(),
-            r23.hashCode()
           );
       }
     }
@@ -375,7 +371,7 @@ public class TestRecord extends TestCase {
         "map2.equals(r2m)",
         map2.equals(r2m)
       );
-      assertTrue(
+      assertFalse(
         "r2m.equals(map2)",
         r2m.equals(map2)
       );
@@ -413,7 +409,7 @@ public class TestRecord extends TestCase {
         "map2.equals(r2md)",
         map2.equals(r2md)
       );
-      assertTrue(
+      assertFalse(
         "r2md.equals(map2)",
         r2md.equals(map2)
       );
@@ -438,20 +434,24 @@ public class TestRecord extends TestCase {
 
       if(USE_INTEGERS_AS_KEYS) {
             // Nested VariableSizeMappedRecords
-          MappedRecord r23 = factory.createMappedRecord("r23");
-          r23.setRecordShortDescription("Nested Utilities");
-          r23.put(new Integer(2),r2md);
+          MappedRecord r23 = factory.createMappedRecord(SparseArrayRecord.NAME);
+          try {
+              r23.setRecordShortDescription("Nested Utilities");
+              fail("UnsupportedOperationException expected");
+          } catch (UnsupportedOperationException expected) {
+              r23.put(new Integer(2),r2md);
+          }
           MappedRecord r3 = factory.createMappedRecord("r3");
           r3.putAll(map3);
           r23.put(new Integer(3),r3);
           assertEquals(
             "r23",
-            "org.openmdx.base.resource.spi.VariableSizeMappedRecord",
+            "org.openmdx.base.resource.spi.SparseArrayRecord",
             r23.getClass().getName()
           );
           assertEquals(
             "r23", 
-            "r23 (Nested Utilities): {\n" +
+            "sparsearray: {\n" +
             "\t2 = r2 (Record 2): {\n" +
             "\t\tA = \"a\"\n" +
             "\t\tC = \"c\"\n" +
@@ -468,14 +468,9 @@ public class TestRecord extends TestCase {
             "map23.equals(r23)",
             map23.equals(r23)
           );
-          assertTrue(
+          assertFalse(
             "r23.equals(map23)",
             r23.equals(map23)
-          );
-          assertEquals(
-            "map23.hashCode()==r23.hashCode()",
-            map23.hashCode(),
-            r23.hashCode()
           );
       }
     }
@@ -1035,18 +1030,6 @@ public class TestRecord extends TestCase {
         "[Ljava.lang.Integer;",
         a1id.getClass().getName()
       );
-
-for(
-    int t=0;
-    t<array1.length;
-    t++
-)System.out.println("array1["+t+"]="+array1[t]);
-for(
-    int t=0;
-    t<((Integer[])a1id).length;
-    t++
-)System.out.println("a1id["+t+"]="+((Integer[])a1id)[t]);
-
       assertTrue(
         "Arrays.equals(array1,a1id)",
         Arrays.equals(array1,(Integer[])a1id)
@@ -1135,7 +1118,8 @@ for(
     public void testStringInternalization(){
         String s0 = "s";
         s0 += "4711";
-        s0.intern();
+        assertNotSame("String internalization", S4711, s0);
+        assertSame("String internalization", S4711, s0.intern());
     }
 
     public void testNewString(){

@@ -35,7 +35,7 @@ import org.openmdx.uses.org.apache.commons.pool2.PooledObject;
  * Implementation of object that is used to provide information on pooled
  * objects via JMX.
  *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public class DefaultPooledObjectInfo implements DefaultPooledObjectInfoMBean {
 

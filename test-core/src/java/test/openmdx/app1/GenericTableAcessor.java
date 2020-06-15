@@ -57,7 +57,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import org.openmdx.base.collection.TreeSparseArray;
+import org.openmdx.kernel.collection.TreeSparseArray;
 import org.w3c.cci2.SparseArray;
 import org.w3c.format.DateTimeFormat;
 
@@ -110,8 +110,7 @@ class GenericTableAcessor implements AccessorToAnotherDatabase {
         String value
     ) throws SQLException{
         if(isEnabled()) {
-            Connection connection = getConnection();
-            try {
+            try (Connection connection = getConnection()) {
                 PreparedStatement statement = connection.prepareStatement(INSERT_STATEMENT);
                 statement.setString(1, rid);
                 statement.setString(2, oid);
@@ -119,8 +118,6 @@ class GenericTableAcessor implements AccessorToAnotherDatabase {
                 statement.setString(4, name);
                 statement.setString(5, value);
                 return statement.executeUpdate();
-            } finally {
-                connection.close();
             }
         } else {
             return 0;
@@ -132,10 +129,9 @@ class GenericTableAcessor implements AccessorToAnotherDatabase {
      */
     public SparseArray<String> retrieve(
     ) throws SQLException {
-        SparseArray<String> reply = new TreeSparseArray<String>();
+        final SparseArray<String> reply = new TreeSparseArray<String>();
         if(isEnabled()) {
-            Connection connection = getConnection();
-            try {
+            try (Connection connection = getConnection()) {
                 PreparedStatement statement = connection.prepareStatement(QUERY_STATEMENT);
                 statement.setString(1, rid);
                 statement.setString(2, oid);
@@ -146,9 +142,6 @@ class GenericTableAcessor implements AccessorToAnotherDatabase {
                         resultSet.getString("OBJECT_VAL_STRING")
                     );
                 }
-                return reply;
-            } finally {
-                connection.close();
             }
         }
         return reply;

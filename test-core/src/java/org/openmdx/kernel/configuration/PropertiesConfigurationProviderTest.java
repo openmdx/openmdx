@@ -48,35 +48,34 @@
 package org.openmdx.kernel.configuration;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openmdx.kernel.collection.TreeSparseArray;
+import org.openmdx.kernel.configuration.cci.Configuration;
+import org.openmdx.kernel.configuration.cci.ConfigurationProvider;
 import org.w3c.cci2.SparseArray;
-import org.w3c.spi.PrimitiveTypeParsers;
 
 public class PropertiesConfigurationProviderTest {
 
-	private static final char DELIMITER = '/';
-	
 	@Test
 	public void whenSectionIsEmptyThenReturnTopLevel() throws IOException{
 		// Arrange
 		final String sectionName = "";
 		final String entryName = "layerPlugIn";
 		final Properties source = new Properties();
-		final String value = "nothing" + DELIMITER + "to" + DELIMITER + "do";
+		final String value = "nothing/to/do";
 		source.put(entryName + "[0]", value);
-		final PropertiesConfigurationProvider testee = new PropertiesConfigurationProvider(
-			PrimitiveTypeParsers.getExtendedParser(),
-			DELIMITER,
+		final ConfigurationProvider testee = Configurations.getDataproviderConfigurationProvider(
 			source
 		);
 		// Act
-		final Configuration configuration = testee.getConfiguration(sectionName);
-		final SparseArray<String> values = configuration.getValues(entryName, String.class);
+		final Configuration configuration = testee.getSection(sectionName);
+		final SparseArray<String> values = configuration.getSparseArray(entryName, String.class);
 		// Assert
 		Assert.assertEquals(1, values.size());
 		Assert.assertEquals(value, values.get(0));
@@ -85,17 +84,15 @@ public class PropertiesConfigurationProviderTest {
 	@Test
 	public void whenEntryIsMissingThenReturnDefaultValue() throws IOException{
 		// Arrange
-		final String sectionName = "my" + DELIMITER + "plug-in";
+		final String sectionName = "my/plug-in";
 		final String entryName = "number";
 		final Properties source = new Properties();
-		final PropertiesConfigurationProvider testee = new PropertiesConfigurationProvider(
-			PrimitiveTypeParsers.getExtendedParser(),
-			DELIMITER,
-			source
-		);
+        final ConfigurationProvider testee = Configurations.getDataproviderConfigurationProvider(
+            source
+        );
 		// Act
-		final Configuration configuration = testee.getConfiguration(sectionName);
-		final Integer value = configuration.getValue(entryName, Integer.valueOf(7));
+		final Configuration configuration = testee.getSection(sectionName);
+		final Integer value = configuration.getOptionalValue(entryName, Integer.class).orElse(Integer.valueOf(7));
 		// Assert
 		Assert.assertEquals(Integer.valueOf(7), value);
 	}
@@ -103,18 +100,16 @@ public class PropertiesConfigurationProviderTest {
 	@Test
 	public void whenEntryExistsThenReturnParsedValue() throws IOException{
 		// Arrange
-		final String sectionName = "my" + DELIMITER + "plug-in";
+		final String sectionName = "my/plug-in";
 		final String entryName = "number";
 		final Properties source = new Properties();
-		source.put(sectionName + DELIMITER + entryName, "-5");
-		final PropertiesConfigurationProvider testee = new PropertiesConfigurationProvider(
-			PrimitiveTypeParsers.getExtendedParser(),
-			DELIMITER,
-			source
-		);
+		source.put(sectionName + '/' + entryName, "-5");
+        final ConfigurationProvider testee = Configurations.getDataproviderConfigurationProvider(
+            source
+        );
 		// Act
-		final Configuration configuration = testee.getConfiguration(sectionName);
-		final Integer value = configuration.getValue(entryName, Integer.valueOf(7));
+		final Configuration configuration = testee.getSection(sectionName);
+		final Integer value = configuration.getOptionalValue(entryName, Integer.class).orElse(Integer.valueOf(7));
 		// Assert
 		Assert.assertEquals(Integer.valueOf(-5), value);
 	}
@@ -122,20 +117,18 @@ public class PropertiesConfigurationProviderTest {
 	@Test
 	public void whenEntryIsOverriddenThenReturnOverriddenValue() throws IOException{
 		// Arrange
-		final String sectionName = "my" + DELIMITER + "plug-in";
+		final String sectionName = "my/plug-in";
 		final String entryName = "number";
 		final Properties source = new Properties();
-		source.put(sectionName + DELIMITER + entryName, "-5");
-		final PropertiesConfigurationProvider testee = new PropertiesConfigurationProvider(
-			PrimitiveTypeParsers.getExtendedParser(),
-			DELIMITER,
-			source
-		);
+		source.put(sectionName + '/' + entryName, "-5");
+        final ConfigurationProvider testee = Configurations.getDataproviderConfigurationProvider(
+            source
+        );
 		final Map<String,Object> override = new HashMap<String,Object>();
 		override.put(entryName, "8");
 		// Act
-		final Configuration configuration = testee.getConfiguration(sectionName, override);
-		final Integer value = configuration.getValue(entryName, Integer.valueOf(7));
+		final Configuration configuration = testee.getSection(override, sectionName, Collections.emptyMap());
+		final Integer value = configuration.getOptionalValue(entryName, Integer.class).orElse(Integer.valueOf(7));
 		// Assert
 		Assert.assertEquals(Integer.valueOf(8), value);
 	}
@@ -143,17 +136,15 @@ public class PropertiesConfigurationProviderTest {
 	@Test
 	public void whenEntryIsMissingThenReturnEmptyValues() throws IOException{
 		// Arrange
-		final String sectionName = "my" + DELIMITER + "plug-in";
+		final String sectionName = "my/plug-in";
 		final String entryName = "number";
 		final Properties source = new Properties();
-		final PropertiesConfigurationProvider testee = new PropertiesConfigurationProvider(
-			PrimitiveTypeParsers.getExtendedParser(),
-			DELIMITER,
-			source
-		);
+        final ConfigurationProvider testee = Configurations.getDataproviderConfigurationProvider(
+            source
+        );
 		// Act
-		final Configuration configuration = testee.getConfiguration(sectionName);
-		final SparseArray<Long> values = configuration.getValues(entryName, Long.class);
+		final Configuration configuration = testee.getSection(sectionName);
+		final SparseArray<Long> values = configuration.getSparseArray(entryName, Long.class);
 		// Assert
 		Assert.assertTrue(values.isEmpty());
 	}
@@ -161,45 +152,64 @@ public class PropertiesConfigurationProviderTest {
 	@Test
 	public void whenEntryExistsThenReturnParsedValues() throws IOException{
 		// Arrange
-		final String sectionName = "my" + DELIMITER + "plug-in";
+		final String sectionName = "my/plug-in";
 		final String entryName = "number";
 		final Properties source = new Properties();
-		source.put(sectionName + DELIMITER + entryName + "[2]", "-5");
-		final PropertiesConfigurationProvider testee = new PropertiesConfigurationProvider(
-			PrimitiveTypeParsers.getExtendedParser(),
-			DELIMITER,
-			source
-		);
+		source.put(sectionName + '/' + entryName + "[2]", "-5");
+        final ConfigurationProvider testee = Configurations.getDataproviderConfigurationProvider(
+            source
+        );
 		// Act
-		final Configuration configuration = testee.getConfiguration(sectionName);
-		final SparseArray<Long> values = configuration.getValues(entryName, Long.class);
+		final Configuration configuration = testee.getSection(sectionName);
+		final SparseArray<Long> values = configuration.getSparseArray(entryName, Long.class);
 		// Assert
 		Assert.assertEquals(1, values.size());
 		Assert.assertEquals(Long.valueOf(-5l), values.get(2));
 	}
 	
 	@Test
-	public void whenEntryIsOverriddenThenReturnOverriddenValues() throws IOException{
+	public void whenEntryIsAmendedThenReturnCombinedValues() throws IOException{
 		// Arrange
-		final String sectionName = "my" + DELIMITER + "plug-in";
+		final String sectionName = "my/plug-in";
 		final String entryName = "number";
 		final Properties source = new Properties();
-		source.put(sectionName + DELIMITER + entryName + "[2]", "-5");
-		final PropertiesConfigurationProvider testee = new PropertiesConfigurationProvider(
-			PrimitiveTypeParsers.getExtendedParser(),
-			DELIMITER,
-			source
-		);
+		source.put(sectionName + '/' + entryName + "[2]", "-5");
+        final ConfigurationProvider testee = Configurations.getDataproviderConfigurationProvider(
+            source
+        );
 		final Map<String,Object> override = new HashMap<String,Object>();
 		override.put(entryName + "[1]", "8");
 		// Act
-		final Configuration configuration = testee.getConfiguration(sectionName, override);
-		final SparseArray<Long> values = configuration.getValues(entryName, Long.class);
+		final Configuration configuration = testee.getSection(override, sectionName, Collections.emptyMap());
+		final SparseArray<Long> values = configuration.getSparseArray(entryName, Long.class);
 		// Assert
-		Assert.assertEquals(1, values.size());
+		Assert.assertEquals(2, values.size());
 		Assert.assertEquals(Long.valueOf(8l), values.get(1));
-		Assert.assertNull(values.get(2));
+        Assert.assertEquals(Long.valueOf(-5l), values.get(2));
 	}
+
+    @Test
+    public void whenEntryIsOverriddenThenReturnOverriddenValues() throws IOException{
+        // Arrange
+        final String sectionName = "my/plug-in";
+        final String entryName = "number";
+        final Properties source = new Properties();
+        source.put(sectionName + '/' + entryName + "[2]", "-5");
+        final ConfigurationProvider testee = Configurations.getDataproviderConfigurationProvider(
+            source
+        );
+        final Map<String,Object> override = new HashMap<String,Object>();
+        final SparseArray<Object> entryValue = new TreeSparseArray<>();
+        entryValue.put(Integer.valueOf(1),"8");
+        override.put(entryName, entryValue);
+        // Act
+        final Configuration configuration = testee.getSection(override, sectionName, Collections.emptyMap());
+        final SparseArray<Long> values = configuration.getSparseArray(entryName, Long.class);
+        // Assert
+        Assert.assertEquals(1, values.size());
+        Assert.assertEquals(Long.valueOf(8l), values.get(1));
+        Assert.assertNull(values.get(2));
+    }
 	
 	@Test
 	public void whenEntryInDefaultPropertiesIsNotOverriddenThenItIsVisible(
@@ -207,21 +217,19 @@ public class PropertiesConfigurationProviderTest {
 		// Arrange
 		final String sectionName = "my";
 		final Properties defaultProperties = new Properties();
-		defaultProperties.put("my" + DELIMITER + "valueA", "A");
-		defaultProperties.put("my" + DELIMITER + "valueB", "bbb");
+		defaultProperties.put("my/valueA", "A");
+		defaultProperties.put("my/valueB", "bbb");
 		final Properties source = new Properties(defaultProperties);
-		defaultProperties.put("my" + DELIMITER + "valueB", "B");
-		defaultProperties.put("my" + DELIMITER + "valueC", "C");
-		final PropertiesConfigurationProvider testee = new PropertiesConfigurationProvider(
-			PrimitiveTypeParsers.getExtendedParser(),
-			DELIMITER,
-			source
-		);
+		defaultProperties.put("my/valueB", "B");
+		defaultProperties.put("my/valueC", "C");
+        final ConfigurationProvider testee = Configurations.getDataproviderConfigurationProvider(
+            source
+        );
 		// Act
-		final Configuration configuration = testee.getConfiguration(sectionName);
-		final String valueA = configuration.getValue("valueA", "X");
-		final String valueB = configuration.getValue("valueB", "Y");
-		final String valueC = configuration.getValue("valueC", "Z");
+		final Configuration configuration = testee.getSection(sectionName);
+		final String valueA = configuration.getOptionalValue("valueA", String.class).orElse("X");
+		final String valueB = configuration.getOptionalValue("valueB", String.class).orElse("Y");
+		final String valueC = configuration.getOptionalValue("valueC", String.class).orElse("Z");
 		// Assert
 		Assert.assertEquals("A", valueA);
 		Assert.assertEquals("B", valueB);

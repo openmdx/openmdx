@@ -37,7 +37,7 @@ import java.lang.reflect.Type;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 @SuppressWarnings({"rawtypes"})
@@ -67,7 +67,6 @@ public class GenericArrayTypeImpl
      *
      * @return  a <tt>Type</tt> object representing the component type
      *     of this array
-     * @since 1.5
      */
     public Type getGenericComponentType() {
         return genericComponentType; // return cached component type

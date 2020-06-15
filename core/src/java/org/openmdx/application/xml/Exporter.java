@@ -83,6 +83,7 @@ import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.spi.Model_1Factory;
+import org.openmdx.base.naming.ClassicSegments;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.kernel.exception.BasicException;
@@ -164,7 +165,7 @@ public class Exporter {
         		return false;
         	} else {
         		int s = objectId.size();
-        		return s % 2 == 0 && s > 2 && objectId.getComponent(s - 2).isPrivate();
+        		return s % 2 == 0 && s > 2 && ClassicSegments.isPrivate(objectId.getSegment(s - 2));
         	}
         }
         

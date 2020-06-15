@@ -95,15 +95,15 @@ public class LegacyPlugIn_1 extends PlugIn_1 {
     }        
 	
 	
-	/**
-	 * Build the interceptor
-	 * 
-	 * @param view
-	 * @param interceptor
-	 * @param validTimeUnique
-	 * @return the amended interceptor
-	 * @throws ServiceException
-	 */
+    /**
+     * Build the interceptor
+     * 
+     * @param view the view creating the interceptor
+     * @param next the next layer's interceptor
+     * @param type the model element
+     * @return the amended intercegetInterceptorpptor
+     * @throws ServiceException in case of failure
+     */
 	@Override
     protected Interceptor_1 getInterceptor(
         ObjectView_1_0 view,

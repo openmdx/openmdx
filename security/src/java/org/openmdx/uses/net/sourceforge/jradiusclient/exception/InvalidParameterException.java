@@ -53,9 +53,7 @@ package org.openmdx.uses.net.sourceforge.jradiusclient.exception;
 
 import java.lang.Exception;
 /**
- *
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.5 $
  */
 
 public class InvalidParameterException extends Exception{

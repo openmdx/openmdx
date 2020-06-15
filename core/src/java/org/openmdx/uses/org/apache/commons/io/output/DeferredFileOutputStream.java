@@ -111,7 +111,7 @@ public class DeferredFileOutputStream
      * @param suffix Suffix to use for the temporary file.
      * @param directory Temporary file directory.
      *
-     * @since 1.4
+     * @since Commons I/O 1.4
      */
     public DeferredFileOutputStream(final int threshold, final String prefix, final String suffix, final File directory)
     {

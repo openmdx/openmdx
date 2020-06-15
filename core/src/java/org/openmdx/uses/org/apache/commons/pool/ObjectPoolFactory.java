@@ -1,10 +1,4 @@
 /*
- * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/ObjectPoolFactory.java,v $
- * $Revision: 1.3 $
- * $Date: 2004/06/29 10:33:53 $
- *
- * ====================================================================
- *
  * The Apache Software License, Version 1.1
  *
  * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
@@ -65,7 +59,6 @@ package org.openmdx.uses.org.apache.commons.pool;
  * A factory interface for creating {@link ObjectPool}s.
  *
  * @author Rodney Waldhoff
- * @version $Revision: 1.3 $ $Date: 2004/06/29 10:33:53 $ 
  *
  * @see ObjectPool
  */

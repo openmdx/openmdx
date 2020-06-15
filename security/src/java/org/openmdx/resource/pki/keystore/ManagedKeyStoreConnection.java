@@ -88,19 +88,17 @@ class ManagedKeyStoreConnection extends AbstractManagedConnection<ManagedConnect
 		
 	/**
      * Constructor
-	 * @param connectionRequestInfo TODO
      */
     ManagedKeyStoreConnection(
         ManagedConnectionFactory factory,
     	ConnectionType connectionType,
         PasswordCredential credential,
-        ConnectionRequestInfo connectionRequestInfo,
-        String alias, 
+        String alias,
         Certificate certificate, 
         Key key, 
         String algorithm
     ) {
-    	this(factory, connectionType, credential, connectionRequestInfo);
+    	this(factory, connectionType, credential, null);
     	this.alias = alias; 
         this.certificate = certificate;
         this.key = key;
@@ -116,11 +114,10 @@ class ManagedKeyStoreConnection extends AbstractManagedConnection<ManagedConnect
         ManagedConnectionFactory factory,
     	ConnectionType connectionType,
         PasswordCredential credential,
-        ConnectionRequestInfo connectionRequestInfo, 
         PKIXParameters parameters, 
         String algorithm
     ) throws NoSuchAlgorithmException {
-    	this(factory, connectionType, credential, connectionRequestInfo);
+    	this(factory, connectionType, credential, null);
         this.alias = null;
         this.certificate = null;
         this.key = null;
@@ -258,6 +255,15 @@ class ManagedKeyStoreConnection extends AbstractManagedConnection<ManagedConnect
 	    	default : 
 	    		return null;
     	}
+    }
+
+    @Override
+    protected boolean matches(
+        Object credential,
+        ConnectionRequestInfo connectionRequestInfo
+    ) {
+        // TODO Auto-generated method stub
+        return false;
     }
     
 }

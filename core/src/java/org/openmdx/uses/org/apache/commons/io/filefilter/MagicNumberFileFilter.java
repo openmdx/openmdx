@@ -32,8 +32,6 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import org.openmdx.uses.org.apache.commons.io.IOUtils;
-
 /**
  * <p>
  * File filter for matching files containing a "magic number". A magic number
@@ -69,7 +67,7 @@ import org.openmdx.uses.org.apache.commons.io.IOUtils;
  * }
  * </pre>
  *
- * @since 2.0
+ * @since Commons I/O 2.0
  * @see FileFilterUtils#magicNumberFileFilter(byte[])
  * @see FileFilterUtils#magicNumberFileFilter(String)
  * @see FileFilterUtils#magicNumberFileFilter(byte[], long)
@@ -243,10 +241,8 @@ public class MagicNumberFileFilter extends AbstractFileFilter implements
     @Override
     public boolean accept(final File file) {
         if (file != null && file.isFile() && file.canRead()) {
-            RandomAccessFile randomAccessFile = null;
-            try {
+            try (RandomAccessFile randomAccessFile  = new RandomAccessFile(file, "r")) {
                 final byte[] fileBytes = new byte[this.magicNumbers.length];
-                randomAccessFile = new RandomAccessFile(file, "r");
                 randomAccessFile.seek(byteOffset);
                 final int read = randomAccessFile.read(fileBytes);
                 if (read != magicNumbers.length) {
@@ -255,8 +251,6 @@ public class MagicNumberFileFilter extends AbstractFileFilter implements
                 return Arrays.equals(this.magicNumbers, fileBytes);
             } catch (final IOException ioe) {
                 // Do nothing, fall through and do not accept file
-            } finally {
-                IOUtils.closeQuietly(randomAccessFile);
             }
         }
 

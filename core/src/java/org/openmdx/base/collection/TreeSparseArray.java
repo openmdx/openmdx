@@ -50,87 +50,89 @@ package org.openmdx.base.collection;
 import java.util.Collection;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.TreeMap;
-
-import org.w3c.cci2.SortedMaps.AsSparseArray;
 
 /**
  * TreeSparseArray
+ * 
+ * @deprecated use {@link org.openmdx.kernel.collection.TreeSparseArray}
  */
-public class TreeSparseArray<E>
-    extends AsSparseArray<E>
-    implements Cloneable
-{
+@Deprecated
+public class TreeSparseArray<E> extends org.openmdx.kernel.collection.TreeSparseArray<E> {
 
     /**
-     * Constructor 
-     *
-     * @param delegate
+     * Constructor
+     *  
+     * @deprecated use {@link org.openmdx.kernel.collection.TreeSparseArray}
      */
+    @Deprecated
     public TreeSparseArray() {
-        super(
-            new TreeMap<Integer,E>()
-        );
+        super();
     }
 
     /**
      * Constructor 
      *
-     * @param sparseArray
+     * @param that another sparse array
+     *  
+     * @deprecated use {@link org.openmdx.kernel.collection.TreeSparseArray}
      */
+    @Deprecated
     public TreeSparseArray(
-        SortedMap<Integer,? extends E> sparseArray
+        SortedMap<Integer,? extends E> that
     ){
-        super(
-            new TreeMap<Integer,E>(sparseArray)
-        );
+        super(that);
     }
 
     /**
      * Constructor 
      *
-     * @param sparseArray
+     * @param that another sparse array
+     *  
+     * @deprecated use {@link org.openmdx.kernel.collection.TreeSparseArray}
      */
+    @Deprecated
     public TreeSparseArray(
-        Map<Integer,? extends E> sparseArray
+        Map<Integer,? extends E> that
     ){
-        super(
-            new TreeMap<Integer,E>(sparseArray)
-        );
+        super(that);
     }
 
     /**
      * Constructor 
      *
-     * @param sparseArray
+     * @param list the source
+     *  
+     * @deprecated use {@link org.openmdx.kernel.collection.TreeSparseArray}
      */
+    @Deprecated
     public TreeSparseArray(
         Collection<? extends E> list
     ){
-        this();
-        int i = 0;
-        for(E e : list){
-            put(Integer.valueOf(i++), e);
-        }
+        super(list);
     }
 
     /**
      * Implememts <code>Serializable</code>
      */
-    private static final long serialVersionUID = -4052326371211325827L;
+    private static final long serialVersionUID = 3594203027758389259L;
 
     
     //------------------------------------------------------------------------
     // Implements Cloneable
     //------------------------------------------------------------------------
 
-    /* (non-Javadoc)
-     * @see java.util.AbstractMap#clone()
+    /**
+     * Clone this sparse array
+     * 
+     * @return the clone
+     * 
+     * @deprecated use {@link org.openmdx.kernel.collection.TreeSparseArray#clone()}
      */
     @Override
-    protected Object clone(
+    @Deprecated
+    public TreeSparseArray<E> clone(
     ){
-        return new TreeSparseArray<E>(this);
+        return new TreeSparseArray<>(this);
     }    
     
 }

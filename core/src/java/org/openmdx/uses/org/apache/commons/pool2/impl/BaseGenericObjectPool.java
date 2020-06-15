@@ -55,9 +55,7 @@ import org.openmdx.uses.org.apache.commons.pool2.SwallowedExceptionListener;
  *
  * This class is intended to be thread-safe.
  *
- * @version $Revision: $
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public abstract class BaseGenericObjectPool<T> {
 
@@ -308,7 +306,7 @@ public abstract class BaseGenericObjectPool<T> {
      *
      * @see #setTestOnCreate
      *
-     * @since 2.2
+     * @since Commons Pool 2.2
      */
     public final boolean getTestOnCreate() {
         return testOnCreate;
@@ -327,7 +325,7 @@ public abstract class BaseGenericObjectPool<T> {
      *
      * @see #getTestOnCreate
      *
-     * @since 2.2
+     * @since Commons Pool 2.2
      */
     public final void setTestOnCreate(boolean testOnCreate) {
         this.testOnCreate = testOnCreate;
@@ -666,7 +664,7 @@ public abstract class BaseGenericObjectPool<T> {
      * Returns the {@link EvictionPolicy} defined for this pool.
      *
      * @return the eviction policy
-     * @since 2.4
+     * @since Commons Pool 2.4
      */
     protected EvictionPolicy<T> getEvictionPolicy() {
         return evictionPolicy;
@@ -1200,7 +1198,7 @@ public abstract class BaseGenericObjectPool<T> {
         @Override
         @SuppressWarnings("rawtypes")
         public boolean equals(Object other) {
-            return ((IdentityWrapper) other).instance == instance;
+            return other != null && ((IdentityWrapper) other).instance == instance;
         }
         
         /**

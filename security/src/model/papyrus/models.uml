@@ -1,21 +1,2 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="20110701" xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_4AqJsEc1Ed-o1OTPw_6HJg" name="models">
-  <packageImport xmi:type="uml:PackageImport" xmi:id="_-2WPIEc1Ed-o1OTPw_6HJg">
-    <importedPackage xmi:type="uml:Package" href="../openMDX 2 ~ Core (EMF)/org.w3c.uml#_3C7B8A60016D3C8B62D700DA"/>
-  </packageImport>
-  <packageImport xmi:type="uml:PackageImport" xmi:id="_Itky8Ec2Ed-o1OTPw_6HJg">
-    <importedPackage xmi:type="uml:Package" href="../openMDX 2 ~ Security (EMF)/org.openmdx.security.authentication1.uml#_3C7B8A60016D3FC4BEDF0244"/>
-  </packageImport>
-  <packageImport xmi:type="uml:PackageImport" xmi:id="_SrBTgEc2Ed-o1OTPw_6HJg">
-    <importedPackage xmi:type="uml:Package" href="../openMDX 2 ~ Security (EMF)/org.openmdx.security.authorization1.uml#_3C7B8A60016D417CB8E700AF"/>
-  </packageImport>
-  <packageImport xmi:type="uml:PackageImport" xmi:id="_XKERsEc2Ed-o1OTPw_6HJg">
-    <importedPackage xmi:type="uml:Package" href="../openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D3FB68C60019C"/>
-  </packageImport>
-  <packageImport xmi:type="uml:PackageImport" xmi:id="_1fcUsEc2Ed-o1OTPw_6HJg">
-    <importedPackage xmi:type="uml:Package" href="../openMDX 2 ~ Core (EMF)/org.openmdx.base.uml#_3C7B8A60016D40A89A0D0015"/>
-  </packageImport>
-  <packageImport xmi:type="uml:PackageImport" xmi:id="__kggMEc2Ed-o1OTPw_6HJg">
-    <importedPackage xmi:type="uml:Package" href="../openMDX 2 ~ Core (EMF)/org.oasis-open.uml#_3C7B8A60016D4022002100C9"/>
-  </packageImport>
-</uml:Model>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_4AqJsEc1Ed-o1OTPw_6HJg" name="models"/>

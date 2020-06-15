@@ -48,37 +48,30 @@
 package org.openmdx.base.collection;
 
 import java.io.Serializable;
+import java.util.SortedMap;
 
 import org.openmdx.base.marshalling.Marshaller;
+import org.w3c.cci2.AbstractSparseArray;
 import org.w3c.cci2.SparseArray;
-import org.w3c.cci2.SortedMaps.AsSparseArray;
 
 /**
  * A Marshalling Sparse Array
  */
 public class MarshallingSparseArray
-    extends AsSparseArray<Object> 
-    implements Serializable
+    extends AbstractSparseArray<Object>
+    implements Serializable 
 {
 
     /**
-     * 
-     */
-    private static final long serialVersionUID = 3760846753015871288L;
-
-    /**
      * Constructor
-     * 
-     * @param marshaller
-     * @param sparseArray
-     * @param unmarshalling 
-     */  
+     */
     public MarshallingSparseArray(
+        //ode 
         Marshaller marshaller,
-        SparseArray<Object> sparseArray, 
+        SparseArray<Object> sparseArray,
         Unmarshalling unmarshalling
     ) {
-        super(
+        this(
             new MarshallingSortedMap(
                 marshaller,
                 sparseArray,
@@ -89,20 +82,56 @@ public class MarshallingSparseArray
 
     /**
      * Constructor
-     * 
-     * @param marshaller
-     * @param sparseArray
-     */  
+     */
     public MarshallingSparseArray(
         Marshaller marshaller,
         SparseArray<Object> sparseArray
     ) {
-        super(
+        this(
             new MarshallingSortedMap(
                 marshaller,
                 sparseArray
             )
         );
     }
-  
+
+    /**
+     * Constructor
+     */
+    private MarshallingSparseArray(
+        final SortedMap<Integer, Object> delegate
+    ) {
+        this.delegate = delegate;
+    }
+
+    /**
+     * @serial The delegate
+     */
+    final SortedMap<Integer, Object> delegate;
+
+    /**
+     * Implements {@code Serializable}
+     */
+    private static final long serialVersionUID = 7471118298120297269L;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.w3c.cci2.AbstractSparseArray#delegate()
+     */
+    @Override
+    protected SortedMap<Integer, Object> delegate() {
+        return this.delegate;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.w3c.cci2.AbstractSparseArray#subArray(java.util.SortedMap)
+     */
+    @Override
+    protected SparseArray<Object> subArray(SortedMap<Integer, Object> delegate) {
+        return new MarshallingSparseArray(delegate);
+    }
+
 }

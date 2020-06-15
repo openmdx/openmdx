@@ -82,6 +82,7 @@ import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.mof.repository.cci.ClassRecord;
 import org.openmdx.base.mof.repository.cci.ElementRecord;
+import org.openmdx.base.mof.repository.cci.Repository;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
@@ -109,6 +110,7 @@ public class Model_1 implements Model_1_0 {
         this.associationDefMap = associationDefs;
         this.elementMarshaller = new ModelElementMarshaller(modelElements);
         this.recordMarshaller = new ModelRecordMarshaller(modelElements);
+        this.repository = new ModelAdapter(this);
     }
 
     /**
@@ -165,6 +167,11 @@ public class Model_1 implements Model_1_0 {
      * The element marshaller
      */
     private final TypeSafeMarshaller<Path, ElementRecord> recordMarshaller;
+
+    /** 
+     * The JCA Record based MOF repository
+     */
+    private ModelAdapter repository;
     
     /**
      * Returns the AssociationDefs matching the object path. result[0] contains
@@ -200,7 +207,7 @@ public class Model_1 implements Model_1_0 {
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE, 
                     "unknown reference in path.",
-                    new BasicException.Parameter("path", objectPath),
+                    new BasicException.Parameter(BasicException.Parameter.XRI, objectPath),
                     new BasicException.Parameter("reference", referenceName)
                 );
             }    
@@ -234,7 +241,7 @@ public class Model_1 implements Model_1_0 {
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE, 
                     "invalid reference. no matching association found",
-                    new BasicException.Parameter("path", objectPath),
+                    new BasicException.Parameter(BasicException.Parameter.XRI, objectPath),
                     new BasicException.Parameter("reference/operation", referenceName),
                     new BasicException.Parameter("exposing class", current.getExposedType() == null ? null : current.getExposedType().getQualifiedName())
                 );
@@ -268,7 +275,7 @@ public class Model_1 implements Model_1_0 {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE, 
                         "invalid reference. #matching referenced classifiers must be 1",
-                        new BasicException.Parameter("path", objectPath),
+                        new BasicException.Parameter(BasicException.Parameter.XRI, objectPath),
                         new BasicException.Parameter("reference/operation", referenceName),
                         new BasicException.Parameter("exposing class", current.getExposedType() == null ? null : current.getExposedType().getQualifiedName()),
                         new BasicException.Parameter("#matching referenced classifiers", matching),
@@ -698,7 +705,7 @@ public class Model_1 implements Model_1_0 {
                         DataObject_1_0 object = (DataObject_1_0)value;
                         if(
                             Multiplicity.LIST.code().equals(featureMultiplicity) ||
-                            org.openmdx.base.mof.cci.ModelHelper.UNBOUND.equals(featureMultiplicity) || (
+                            org.openmdx.base.mof.cci.Multiplicity.UNBOUNDED.equals(featureMultiplicity) || (
                                 this.isReferenceType(featureDef) &&
                                 this.referenceIsStoredAsAttribute(featureDef) &&
                                 Multiplicity.OPTIONAL.code().equals(featureMultiplicity)
@@ -763,7 +770,7 @@ public class Model_1 implements Model_1_0 {
                             featureDef.getReferencedEnd()
                         );
                         if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
-                            attributeMultiplicity = org.openmdx.base.mof.cci.ModelHelper.UNBOUND;
+                            attributeMultiplicity = org.openmdx.base.mof.cci.Multiplicity.UNBOUNDED;
                         }
                     }
                     this.verifyObject(
@@ -830,7 +837,7 @@ public class Model_1 implements Model_1_0 {
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.INVALID_CONFIGURATION,
-                        new BasicException.Parameter("xri",xri),
+                        new BasicException.Parameter(BasicException.Parameter.XRI,xri),
                         new BasicException.Parameter("qualifiedName",qualifiedName)
                    )
                )
@@ -851,7 +858,7 @@ public class Model_1 implements Model_1_0 {
 
     @Override
     public Collection<ModelElement_1_0> getContent(
-    ) throws ServiceException {
+    ){
         return this.modelElements.values();
     }  
 
@@ -1478,6 +1485,14 @@ public class Model_1 implements Model_1_0 {
      */
     Map<String, ModelElement_1_0> getModelElements() {
         return this.modelElements;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.Model_1_0#getDelegate()
+     */
+    @Override
+    public Repository getRepository() {
+        return this.repository;
     }
     
 }

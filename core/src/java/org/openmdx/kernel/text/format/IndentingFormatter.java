@@ -50,6 +50,8 @@ package org.openmdx.kernel.text.format;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.resource.cci.Record;
 
@@ -192,7 +194,7 @@ public class IndentingFormatter
      */
     protected static void appendEntry(
         StringBuilder target,
-        Object key,
+        String key,
         String separator,
         Object value
     ){
@@ -251,7 +253,14 @@ public class IndentingFormatter
     ){
         target.append('{');
         String terminator="}";
+        final SortedMap<String,Object> ordered = new TreeMap<>();
         for(Map.Entry<?,?> entry : source.entrySet()){
+            ordered.put(
+                String.valueOf(entry.getKey()), 
+                entry.getValue()
+            );
+        }
+        for(Map.Entry<String,?> entry : ordered.entrySet()){
             appendEntry(
                 target,
                 entry.getKey(),
@@ -260,6 +269,7 @@ public class IndentingFormatter
             );
             terminator="\n}";
         }
+        
         target.append(terminator);
     }
 

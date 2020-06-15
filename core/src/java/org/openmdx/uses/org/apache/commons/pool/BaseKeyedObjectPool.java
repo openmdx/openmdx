@@ -1,10 +1,4 @@
 /*
- * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/BaseKeyedObjectPool.java,v $
- * $Revision: 1.4 $
- * $Date: 2007/10/10 16:06:13 $
- *
- * ====================================================================
- *
  * The Apache Software License, Version 1.1
  *
  * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
@@ -67,7 +61,6 @@ package org.openmdx.uses.org.apache.commons.pool;
  * {@link UnsupportedOperationException}.
  *
  * @author Rodney Waldhoff
- * @version $Revision: 1.4 $ $Date: 2007/10/10 16:06:13 $
  */
 public abstract class BaseKeyedObjectPool implements KeyedObjectPool {
     public abstract Object borrowObject(Object key) throws Exception;

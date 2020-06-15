@@ -1,13 +1,13 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Description: Removable_1 
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Description: Segment_1 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2019, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,68 +52,31 @@ import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
 
+
 /**
- * Segment
+ * Segment_1
  */
-public abstract class Segment_1 extends Interceptor_1 {
+public class Segment_1 extends AbstractSegment_1 {
 
     /**
      * Constructor 
-     *
-     * @param self
-     * @param next
      */
-    protected Segment_1(
-        ObjectView_1_0 self, 
+    Segment_1(
+        ObjectView_1_0 self,
         Interceptor_1 next
     ) {
         super(self, next);
     }
 
-    /**
-     * Keep an aspect aware extent implementation
-     */
-    private transient Container_1_0 extent = null;
-
-    /**
-     * Create an aspect aware extent implementation
-     *  
-     * @param parent
-     * @param container
-     * 
-     * @return a new aspect aware extent implementation
-     * @throws ServiceException
-     */
-    protected abstract Container_1_0 newExtent(
-        ObjectView_1_0 parent,
-        Container_1_0 container
-    ) throws ServiceException;
-    
-    /**
-     * Retrieve the org::openmdx::base aware extent implementation
-     * 
-     * @return the org::openmdx::base aware extent implementation
-     * 
-     * @throws ServiceException 
-     */
-    private Container_1_0 getExtent() throws ServiceException{
-        if(this.extent == null) {
-            this.extent = newExtent(
-                this.self,
-                this.self.objGetDelegate().objGetContainer("extent")
-            );
-        }
-        return this.extent;
-    }
-    
     /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.spi.DelegatingObject_1#objGetContainer(java.lang.String)
+     * @see org.openmdx.base.aop1.AbstractSegment_1#newExtent(org.openmdx.base.accessor.view.ObjectView_1_0, org.openmdx.base.accessor.cci.Container_1_0)
      */
     @Override
-    public Container_1_0 objGetContainer(
-        String feature
+    protected Container_1_0 newExtent(
+        ObjectView_1_0 parent,
+        Container_1_0 container
     ) throws ServiceException {
-        return "extent".equals(feature) ? getExtent() : super.objGetContainer(feature);
+        return new Extent_1(parent, container);
     }
-    
+
 }

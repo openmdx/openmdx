@@ -38,7 +38,7 @@ import java.util.List;
  * Checking of the file filter list stops when the first filter returns
  * {@code true}.
  *
- * @since 1.0
+ * @since Commons I/O 1.0
  * @version $Id: OrFileFilter.java 1642757 2014-12-01 21:09:30Z sebb $
  * @see FileFilterUtils#or(IOFileFilter...)
  */
@@ -53,7 +53,7 @@ public class OrFileFilter
     /**
      * Constructs a new instance of <code>OrFileFilter</code>.
      *
-     * @since 1.1
+     * @since Commons I/O 1.1
      */
     public OrFileFilter() {
         this.fileFilters = new ArrayList<IOFileFilter>();
@@ -64,7 +64,7 @@ public class OrFileFilter
      * with the specified filters.
      *
      * @param fileFilters  the file filters for this filter, copied, null ignored
-     * @since 1.1
+     * @since Commons I/O 1.1
      */
     public OrFileFilter(final List<IOFileFilter> fileFilters) {
         if (fileFilters == null) {

@@ -58,20 +58,14 @@ import javax.resource.cci.Record;
 import javax.resource.spi.EISSystemException;
 import javax.resource.spi.LocalTransactionException;
 
-import org.openmdx.base.accessor.rest.spi.CacheAccessor_2_0;
-import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
-import org.openmdx.base.accessor.rest.spi.ManagedConnectionCache_2_0;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
-import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.AbstractInteraction;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.transaction.TransactionAttributeType;
-import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 
 /**
@@ -82,24 +76,18 @@ import org.openmdx.kernel.loading.Classes;
  * <li>This class caches the interaction for re-use.
  * </ul>
  */
-public class ConnectionAdapter extends AbstractConnection implements CacheAccessor_2_0 {
+public class ConnectionAdapter extends AbstractConnection {
 
 	/**
 	 * Constructor 
 	 */
     protected ConnectionAdapter(
-    	ConnectionFactoryAdapter connectionFactory,	
+    	RestConnectionFactory connectionFactory,	
         RestConnectionSpec connectionSpec
     ){
-    	super(connectionSpec);
-    	this.connectionFactory = connectionFactory;
+    	super(connectionFactory, connectionSpec);
         this.transactionProxy = newTransactionProxy();
     }
-
-    /**
-     * The Connection's Factory
-     */
-    private final ConnectionFactoryAdapter connectionFactory;
 
     /**
      * 
@@ -123,8 +111,16 @@ public class ConnectionAdapter extends AbstractConnection implements CacheAccess
         "xri://@openmdx*org.openmdx.kernel/transaction"
     );
 
-	protected LocalTransaction newTransactionProxy() {
-		return this.connectionFactory.isLocalTransactionDemarcationSupported() ?
+	/* (non-Javadoc)
+     * @see org.openmdx.base.rest.spi.AbstractConnection#getConnectionFactory()
+     */
+    @Override
+    public RestConnectionFactory getConnectionFactory() {
+        return (RestConnectionFactory) super.getConnectionFactory();
+    }
+
+    protected LocalTransaction newTransactionProxy() {
+		return getConnectionFactory().isLocalTransactionDemarcationSupported() ?
 			new LocalTransactionAdapter() : 
 			new NoTransactionAdapter();
 	}
@@ -158,7 +154,7 @@ public class ConnectionAdapter extends AbstractConnection implements CacheAccess
      * @throws ResourceException  
      */
     static RestConnection newInstance(
-        ConnectionFactoryAdapter connectionFactory, 
+        RestConnectionFactory connectionFactory, 
         RestConnectionSpec connectionSpec
     ) throws ResourceException{
         return isTransactionSuspensionRequired(connectionFactory) ? 
@@ -172,7 +168,7 @@ public class ConnectionAdapter extends AbstractConnection implements CacheAccess
     }
 
     private static boolean isTransactionSuspensionRequired(
-        ConnectionFactoryAdapter connectionFactory
+        RestConnectionFactory connectionFactory
     ){
     	return 
     		!connectionFactory.isLocalTransactionDemarcationSupported() &&
@@ -190,7 +186,7 @@ public class ConnectionAdapter extends AbstractConnection implements CacheAccess
     protected Interaction getDelegate(
     ) throws ResourceException {
         if(this.interaction == null) {
-            this.interaction = this.connectionFactory.getPort().getInteraction(this);
+            this.interaction = getConnectionFactory().getPort().getInteraction(this);
         }
         return this.interaction;
     }
@@ -214,55 +210,8 @@ public class ConnectionAdapter extends AbstractConnection implements CacheAccess
         return this.transactionProxy;
     }
 
-	@Override
-	public ConnectionFactory getConnectionFactory() {
-		return this.connectionFactory;
-	}
-    
-    
-    //------------------------------------------------------------------------
-    // Implements CacheProvider_2_0
-    //------------------------------------------------------------------------
 
-    private CacheAccessor_2_0 getCacheAccessor(
-    ) throws ServiceException {
-        try {
-            Interaction delegate = this.getDelegate();
-            if(delegate instanceof CacheAccessor_2_0) {
-                return (CacheAccessor_2_0)delegate;
-            }
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                "The delegate interaction is not a cache accessor",
-                new BasicException.Parameter("expected", CacheAccessor_2_0.class.getName()),
-                new BasicException.Parameter("actual", delegate.getClass().getName())
-            );
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.rest.spi.CacheAccessor_2_0#getDataStoreCache()
-     */
-    @Override
-    public DataStoreCache_2_0 getDataStoreCache(
-    ) throws ServiceException {
-        return this.getCacheAccessor().getDataStoreCache();
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.rest.spi.CacheProvider_2_0#getCache()
-     */
-    @Override
-    public ManagedConnectionCache_2_0 getManagedConnectionCache(
-    ) throws ServiceException {
-        return this.getCacheAccessor().getManagedConnectionCache();
-    }
-
-
-    //------------------------------------------------------------------------
+	//------------------------------------------------------------------------
     // Class LocalTransactionAdapter
     //------------------------------------------------------------------------
     

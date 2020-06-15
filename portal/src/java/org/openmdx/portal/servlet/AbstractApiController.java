@@ -207,7 +207,9 @@ public abstract class AbstractApiController {
 	) {
 		try {
 			request.setCharacterEncoding(encoding);
-		} catch(Exception ignore) {}
+		} catch(Exception ignore) {
+			SysLog.trace("Exception ignored", ignore);
+		}
 		this.request = request;
 		this.session = request.getSession();
 		this.app = (ApplicationContext)this.session.getAttribute(WebKeys.APPLICATION_KEY);
@@ -479,10 +481,12 @@ public abstract class AbstractApiController {
 		// PUT|POST
 		if("PUT".equalsIgnoreCase(this.request.getMethod()) || "POST".equalsIgnoreCase(this.request.getMethod())) {
 			SysLog.detail("PUT {0}", xri.toXRI());
-			Reader reader = null;
+			Reader reader;
 			try {
 				reader = new InputStreamReader(this.request.getInputStream(), "UTF-8");
-			} catch(Exception ignore) {}
+			} catch(Exception ignore) {
+				reader = null;
+			}
 			String command = xri.getLastSegment().toClassicRepresentation();
 			return this.forward(
 				command,

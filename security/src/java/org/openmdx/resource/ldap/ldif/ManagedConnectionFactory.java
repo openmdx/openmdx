@@ -49,16 +49,21 @@ package org.openmdx.resource.ldap.ldif;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import javax.resource.ResourceException;
+import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.InvalidPropertyException;
 import javax.security.auth.Subject;
 
-import org.openmdx.resource.ldap.spi.AbstractManagedConnectionFactory;
+import org.apache.directory.api.ldap.model.exception.LdapConfigurationException;
+import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.directory.ldap.client.api.LdapConnection;
+import org.apache.directory.ldap.client.api.LdapConnectionConfig;
+import org.apache.directory.ldap.client.template.exception.LdapRuntimeException;
+import org.openmdx.base.resource.spi.ResourceExceptions;
+import org.openmdx.resource.ldap.spi.ConnectionFactory;
 import org.openmdx.resource.ldap.spi.ManagedConnection;
+import org.openmdx.resource.spi.AbstractManagedConnectionFactory;
 
 
 /**
@@ -66,193 +71,94 @@ import org.openmdx.resource.ldap.spi.ManagedConnection;
  */
 public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 
-	/**
+    /**
      * Constructor
      */
     public ManagedConnectionFactory() {
 	    super();
     }
 
-	/**
-	 * Implements <code>Serializable</code>
-	 */
-    private static final long serialVersionUID = 2938157864507356478L;
+    /**
+     * The lazily initialized repository
+     */
+    private Repository repository;
+    
+    /**
+     * Implements {@code Serializable}
+     */
+    private static final long serialVersionUID = 1393224964772754034L;
+    
+    /**
+     * Set the LDAP protocol version
+     * 
+     * @param protocolVersion the LDAP protocol version
+     */
+    public void setProtocolVersion(
+        int protocolVersion
+    ) {
+        if(protocolVersion != LdapConnectionConfig.LDAP_V3) {
+            throw new LdapRuntimeException(
+                new LdapConfigurationException("Only LDAP version " + LdapConnectionConfig.LDAP_V3 + " is supported")
+            );
+        }
+    }
 
-	/**
-	 * The regular expression's groups are<ol>
-	 * <li>the LDAP entry's distinguished name
-	 * </ol>
-	 */
-	private String distinguishedNamePattern = "^dn: (.*)$";
+    /**
+     * Retrieve the LDAP protocol version
+     * 
+     * @return the LDAP protocol version
+     */
+    public int getProtocolVersion() {
+        return LdapConnectionConfig.LDAP_V3;
+    }
 
-	/**
-	 * The regular expression's groups are<ol>
-	 * <li>the attribute's name
-	 * <li>the attribute's value
-	 * </ol>
-	 */
-	private String attributePattern = "^([^:]+): (.*)$";
-
-	/**
-	 * The regular expression's groups are<ol>
-	 * <li>the attribute's name
-	 * <li>the attribute's value
-	 * </ol>
-	 */
-	private String binaryAttributePattern = "^([^:]+):: (.*)$";
-
-	/**
-	 * Tells whether string comparison is case sensitive or not
-	 */
-	private boolean caseSensitive = false;
-
-	/**
-	 * The regular expression's groups are<ol>
-	 * <li>the attribute's name
-	 * <li>the attribute's value
-	 * </ol>
-	 */
-	private String commentPattern = "^#(.*)$";
-	
     /* (non-Javadoc)
-     * @see org.openmdx.resource.spi.AbstractManagedConnectionFactory#isManagedConnectionShareable()
+     * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory(javax.resource.spi.ConnectionManager)
      */
     @Override
-    protected boolean isManagedConnectionShareable() {
-	    return true;
-    }
-
-    @Override
-	protected javax.resource.spi.ManagedConnection newManagedConnection(
-        Subject subject,
-        ConnectionRequestInfo connectionRequestInfo
+    public org.openmdx.resource.cci.ConnectionFactory<LdapConnection,LdapException> createConnectionFactory(
+        ConnectionManager connectionManager
     ) throws ResourceException {
-        return new ManagedConnection(
-            this,
-            getPasswordCredential(subject),
-            connectionRequestInfo, 
-            new Connection(
-                this.toURL("ConnectionURL", this.getConnectionURL()),
-                this.toPattern("DistinguishedNamePattern", this.getDistinguishedNamePattern()),
-                this.toPattern("AttributePattern", this.getAttributePattern()),
-                this.toPattern("BinaryAttributePattern", this.getBinaryAttributePattern()), 
-                this.toPattern("CommentPattern", this.getCommentPattern()), 
-                this.caseSensitive
-            )
-         );
+        return new ConnectionFactory(
+            this, 
+            connectionManager
+        );
     }
 
-    private Pattern toPattern(
-    	String property,
-    	String pattern
-    ) throws InvalidPropertyException {
-    	if(pattern == null) throw new InvalidPropertyException(
-    		"Missing " + property
-    	);
-    	try {
-	    	return Pattern.compile(pattern);
-    	} 
-    	catch (PatternSyntaxException exception) {
-			throw new InvalidPropertyException(
-				"Invalid " + property + ": " + pattern,
-				exception
-			);
-    	}
+    /* (non-Javadoc)
+     * @see org.openmdx.resource.spi.AbstractManagedConnectionFactory#createConnectionFactory()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public org.openmdx.resource.cci.ConnectionFactory<LdapConnection,LdapException> createConnectionFactory()
+        throws ResourceException {
+        return (org.openmdx.resource.cci.ConnectionFactory<LdapConnection, LdapException>) super.createConnectionFactory();
+    }
+
+    private Repository getRepository() throws ResourceException {
+        if(this.repository == null) {
+            this.repository = new Repository(toURL(getConnectionURL()));
+        }
+        return this.repository;
     }
 
     private URL toURL(
-    	String property,
-    	String value
-    ) throws InvalidPropertyException {    	
-    	if(value == null) throw new InvalidPropertyException(
-    		"Missing " + property
-    	);
-    	try {
-	    	return new URL(value);
-		} 
-    	catch (MalformedURLException exception) {
-			throw new InvalidPropertyException(
-				"Invalid " + property + ": " + value,
-				exception
-			);
-    	}
+        final String uri
+    ) throws ResourceException {
+        try {
+            return new URL(uri);
+        } catch (MalformedURLException e) {
+            throw ResourceExceptions.toResourceException(e);
+        }
     }
-    
-	/**
-	 * @return the distinguishedNamePattern
-	 */
-	public String getDistinguishedNamePattern() {
-		return this.distinguishedNamePattern;
-	}
+    @Override
+    protected javax.resource.spi.ManagedConnection newManagedConnection(
+        Subject subject,
+        ConnectionRequestInfo connectionRequestInfo
+    ) throws ResourceException {
+        return new ManagedConnection(this, null, getRepository());
+    }
 
-
-	/**
-	 * @param distinguishedNamePattern the distinguishedNamePattern to set
-	 */
-	public void setDistinguishedNamePattern(String distinguishedNamePattern) {
-		this.distinguishedNamePattern = distinguishedNamePattern;
-	}
-
-
-	/**
-	 * @return the attributePattern
-	 */
-	public String getAttributePattern() {
-		return this.attributePattern;
-	}
-
-
-	/**
-	 * @param attributePattern the attributePattern to set
-	 */
-	public void setAttributePattern(String attributePattern) {
-		this.attributePattern = attributePattern;
-	}
-
-	/**
-	 * @return the attributePattern
-	 */
-	public String getBinaryAttributePattern() {
-		return this.binaryAttributePattern;
-	}
-
-
-	/**
-	 * @param attributePattern the attributePattern to set
-	 */
-	public void setBinaryAttributePattern(String binaryAttributePattern) {
-		this.binaryAttributePattern = binaryAttributePattern;
-	}
-
-	/**
-	 * @return the commentPattern
-	 */
-	public String getCommentPattern() {
-		return this.commentPattern;
-	}
-
-	/**
-	 * @param commentPattern the commentPattern to set
-	 */
-	public void setCommentPattern(String commentPattern) {
-		this.commentPattern = commentPattern;
-	}
-
-	/**
-	 * @return the caseSensitive
-	 */
-	public Boolean getCaseSensitive() {
-		return this.caseSensitive;
-	}
-
-	/**
-	 * @param caseSensitive the caseSensitive to set
-	 */
-	public void setCaseSensitive(Boolean caseSensitive) {
-		this.caseSensitive = caseSensitive;
-	}
-
-	
     //------------------------------------------------------------------------
     // Extends AbstractManagedConnectionFactory
     //------------------------------------------------------------------------

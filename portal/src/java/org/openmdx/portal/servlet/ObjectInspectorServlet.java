@@ -130,6 +130,7 @@ import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
@@ -242,7 +243,7 @@ public class ObjectInspectorServlet extends HttpServlet {
             this.model = Model_1Factory.getModel();
         } catch(Exception e) {
             System.out.println("can not initialize model repository " + e.getMessage());
-            System.out.println(new ServiceException(e).getCause());
+            System.out.println(BasicException.toExceptionStack(e));
         }
         // Persistence manager factories
         try {
@@ -271,7 +272,7 @@ public class ObjectInspectorServlet extends HttpServlet {
         for(int i = 0; i < maxLocale; i++) {
             this.locales[i] = this.getInitParameter("locale[" + i + "]");
         }
-        SysLog.info("configured locale " + locales);
+        SysLog.info("configured locale", Arrays.asList(locales));
         // exception domain
         this.exceptionDomain = null;
         if(this.getInitParameter("exceptionDomain") != null) {
@@ -296,7 +297,9 @@ public class ObjectInspectorServlet extends HttpServlet {
         if(this.getInitParameter("realm") != null) {
             try {
                 this.realmIdentity = new Path(this.getInitParameter("realm"));
-            } catch(Exception e) {}
+            } catch(Exception ignore) {
+    			SysLog.trace("Exception ignored", ignore);
+            }
             SysLog.info("realm", this.realmIdentity);
         }
         // retrieve by path patterns
@@ -613,7 +616,7 @@ public class ObjectInspectorServlet extends HttpServlet {
             this.uiRefreshedAt = System.currentTimeMillis();
         }
         catch(Exception e) {
-        	new ServiceException(e).log();
+            Throwables.log(e);
         }
     }
 
@@ -775,9 +778,8 @@ public class ObjectInspectorServlet extends HttpServlet {
                                 item.getFieldName(),
                                 new String[]{item.getName()}
                             );              
-                        }
-                        // Add to parameter map if file received
-                        else if(item.getSize() > 0) {
+                        } else if(item.getSize() > 0) {
+                            // Add to parameter map if file received
                             parameterMap.put(
                                 item.getFieldName(),
                                 new String[]{item.getName()}
@@ -788,22 +790,22 @@ public class ObjectInspectorServlet extends HttpServlet {
                             try {
                                 item.write(outFile);
                             } catch(Exception e) {
-                                new ServiceException(e).log();
-                            }                        
+                                Throwables.log(e);
+                            }
                             // MimeType
-                            try {
+                            try (
                                 PrintWriter pw = new PrintWriter(
-                                  new FileOutputStream(location + ".INFO")
-                                );
+                                    new FileOutputStream(location + ".INFO")
+                                )
+                            ){
                                 pw.println(item.getContentType());
                                 int sep = item.getName().lastIndexOf("/");
                                 if(sep < 0) {
                                   sep = item.getName().lastIndexOf("\\");
                                 }
                                 pw.println(item.getName().substring(sep + 1));
-                                pw.close();
                             } catch(Exception e) {
-                                new ServiceException(e).log();
+                                Throwables.log(e);
                             }
                         }
                     }
@@ -914,9 +916,8 @@ public class ObjectInspectorServlet extends HttpServlet {
                 app.createPmControl();
                 app.createPmData();
             } catch(Exception e) {
-                ServiceException e0 = new ServiceException(e);
                 SysLog.warning("Unable to switch to requested role", Arrays.asList(requestedObjectIdentity.getSegment(4).toClassicRepresentation(), e.getMessage()));
-                SysLog.warning(e0.getMessage(), e0.getCause());
+                Throwables.log(e);
             }
         }
         if(
@@ -1017,9 +1018,8 @@ public class ObjectInspectorServlet extends HttpServlet {
                   return;
               }
           } catch(Exception e) {
-              ServiceException e0 = new ServiceException(e);
               SysLog.warning("can not create ShowObjectView", e.getMessage());
-              SysLog.warning(e0.getMessage(), e0.getCause());
+              Throwables.log(e);
               session.invalidate();
               response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
               ServletContext sc = this.getServletContext();
@@ -1120,24 +1120,21 @@ public class ObjectInspectorServlet extends HttpServlet {
             if(event == Action.EVENT_DOWNLOAD_FROM_LOCATION) {
                 String location = Action.getParameter(parameter, Action.PARAMETER_LOCATION);
                 SysLog.trace("location", location);
-                InputStream is = new FileInputStream(
-                    app.getTempFileName(location, "")
-                );
-                if(is != null) {
+                try(
+                    final InputStream is = new FileInputStream(
+                        app.getTempFileName(location, "")
+                    );
+                ){
                     int b = 0;
-                    try {
-                        int length = 0;
-                        while((b = is.read()) >= 0) {
-                            os.write(b);
-                            length++;
-                        }
-                        is.close();                  
-                        response.setContentLength(length);
-                    } catch(Exception e) {
-                        ServiceException e0 = new ServiceException(e);
-                        SysLog.warning("can not write stream");
-                        SysLog.warning(e0.getMessage(), e0.getCause());
+                    int length = 0;
+                    while((b = is.read()) >= 0) {
+                        os.write(b);
+                        length++;
                     }
+                    response.setContentLength(length);
+                } catch(Exception e) {
+                    SysLog.warning("can not write stream");
+                    Throwables.log(e);
                 }
             }
             // EVENT_DOWNLOAD_FROM_FEATURE
@@ -1162,9 +1159,8 @@ public class ObjectInspectorServlet extends HttpServlet {
                     }
                     pm.close();
                 } catch(Exception e) {
-                    ServiceException e0 = new ServiceException(e);
                     SysLog.warning("can not write stream");
-                    SysLog.warning(e0.getMessage(), e0.getCause());
+                    Throwables.log(e);
                 }
             }
             os.close();
@@ -1210,7 +1206,7 @@ public class ObjectInspectorServlet extends HttpServlet {
 	        		}
         		} catch(Exception e) {
                 	SysLog.warning("handleEvent throws exception", e.getMessage());
-                    new ServiceException(e).log();
+                    Throwables.log(e);
                 }
                 // PERFORMANCE
                 t1 = System.currentTimeMillis();
@@ -1241,7 +1237,7 @@ public class ObjectInspectorServlet extends HttpServlet {
                             );
                         } catch(Exception e) {
                         	SysLog.warning("Can not get default view", e.getMessage());
-                            new ServiceException(e).log();
+                            Throwables.log(e);
                         }
                     }
                     // Set next view

@@ -85,7 +85,7 @@ public class ModelElementMarshaller implements TypeSafeMarshaller<Path, ModelEle
                         BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.INVALID_CONFIGURATION,
-                        new BasicException.Parameter("xri",source),
+                        new BasicException.Parameter(BasicException.Parameter.XRI,source),
                         new BasicException.Parameter("qualifiedName",qualifiedName)
                         )
                     )

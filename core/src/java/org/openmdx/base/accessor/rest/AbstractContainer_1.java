@@ -1621,13 +1621,7 @@ abstract class AbstractContainer_1 extends AbstractConsumerAwareCollection {
                 query.setResourceIdentifier(AbstractContainer_1.this.container().jdoGetObjectId());
                 query.setQueryType(this.queryType);
                 query.setQueryFilter(this.queryFilter);
-                @SuppressWarnings("unchecked")
-                final Set<String> fetchGroups = fetchPlan == null ? this.fetchGroups : fetchPlan.getGroups();
-                query.setFetchGroupName(
-                    toFetchGroupName(
-                        fetchGroups
-                    )
-                );
+                query.setFetchGroupName(getFetchGroupName(fetchPlan));
                 dataObjectManager.getInteraction().execute(
                     dataObjectManager.getInteractionSpecs().GET,
                     query,
@@ -1637,6 +1631,16 @@ abstract class AbstractContainer_1 extends AbstractConsumerAwareCollection {
                 throw new RuntimeServiceException(exception);
             }
         }
+
+        private String getFetchGroupName(FetchPlan fetchPlan) {
+            return toFetchGroupName(getFetchGroups(fetchPlan));
+        }
+
+        @SuppressWarnings("unchecked")
+        private Set<String> getFetchGroups(FetchPlan fetchPlan) {
+            return fetchPlan == null ? this.fetchGroups : fetchPlan.getGroups();
+        }
+
 
         //--------------------------------------------------------------------
         // Class BatchingIterator

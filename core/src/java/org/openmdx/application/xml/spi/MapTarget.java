@@ -94,7 +94,7 @@ public class MapTarget implements ImportTarget {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND,
                         "There is no object with the given id in the map",
-                        new BasicException.Parameter("xri", objectId),
+                        new BasicException.Parameter(BasicException.Parameter.XRI, objectId),
                         new BasicException.Parameter("mode", mode)
                     );
                 }
@@ -117,7 +117,7 @@ public class MapTarget implements ImportTarget {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.DUPLICATE,
                         "There is already an object with the given id in the map",
-                        new BasicException.Parameter("xri", objectId),
+                        new BasicException.Parameter(BasicException.Parameter.XRI, objectId),
                         new BasicException.Parameter("mode", mode)
                     );
                 }

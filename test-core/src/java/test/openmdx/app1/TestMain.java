@@ -157,6 +157,7 @@ import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.jmi1.Segment;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.ClassicSegments;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
@@ -169,7 +170,7 @@ import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.rest.cci.ConditionRecord;
 import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.base.rest.connector.EntityManagerProxyFactory_2;
-import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
+import org.openmdx.base.rest.spi.RestConnectionFactory;
 import org.openmdx.base.transaction.Status;
 import org.openmdx.base.transaction.TransactionAttributeType;
 import org.openmdx.generic1.cci2.PropertyQuery;
@@ -1307,7 +1308,7 @@ public class TestMain {
                 query.thereExistsUriValue().equalTo(URI.create("xri://+ChangeRequest/20019533"));
                 List<UriProperty> properties = propertyHolder.<UriProperty>getProperty(query);
                 assertEquals(1, properties.size());
-                assertFalse("Plug-in-provided id", properties.get(0).refGetPath().getLastComponent().isPlaceHolder());
+                assertFalse("Plug-in-provided id", ClassicSegments.isPlaceholder(properties.get(0).refGetPath().getLastSegment()));
             } finally {
                 super.taskId = null;
             }
@@ -3435,7 +3436,7 @@ public class TestMain {
             //
             // 20019656 isEmpty()'s iteration
             //
-            SegmentHasPerson.Person<Person> allPeople = segment.getPerson();
+            final SegmentHasPerson.Person<Person> allPeople = segment.getPerson();
             try {
                 super.taskId = "CR20019656";
                 int count = 0;
@@ -3584,7 +3585,6 @@ public class TestMain {
                     segment.getPerson().size()
                 );
                 this.rollback();
-                allPeople = segment.getPerson();
                 maasteer = allPeople.getAll(personQuery);
                 {
                     assertTrue(
@@ -3602,7 +3602,7 @@ public class TestMain {
                     TEST_PERSON_COUNT + SIMILAR_NAME_COUNT,
                     numberOfPersons
                 );
-                Counter<Person> counter = new Counter<Person>();
+                Counter<Person> counter = new PackageValidator<Person>(segment.refOutermostPackage());
                 allPeople.processAll(personQuery, counter);
                 assertEquals(
                     "number of persons found with SOUNDS_LIKE",
@@ -3618,7 +3618,7 @@ public class TestMain {
                     remaining
                 );
                 if(PROXY_IS_DIRTY_COLLECTION_AWARE || !(this instanceof ProxyConnectionTest)) {
-                    counter = new Counter<Person>();
+                    counter = new PackageValidator<Person>(segment.refOutermostPackage());
                     allPeople.processAll(personQuery, counter);
                     assertEquals(
                         "container emptied",
@@ -3796,12 +3796,25 @@ public class TestMain {
             //
             // keep given name
             //
+//            try {
+//                super.taskId = "CR20081408";
+//                this.begin();
+//                DirtyObjects.touch(person);
+//                assertTrue("Touch", ReducedJDOHelper.isDirty(person));
+//                this.commit();
+//            } finally {
+//                super.taskId = null;
+//            }
+            //
+            // keep given name
+            //
             try {
                 super.taskId = "CR20019472";
                 this.begin();
                 List<String> givenName = person.getGivenName();
+//                givenName.set(0, "CR20019472");
                 givenName.set(0, new String(givenName.get(0)));
-                assertTrue("Phantom modification", ReducedJDOHelper.isDirty(person));
+//                assertTrue("Phantom modification", ReducedJDOHelper.isDirty(person));
                 this.commit();
             } finally {
                 super.taskId = null;
@@ -4354,17 +4367,17 @@ public class TestMain {
                     // test with input stream method
                     //
                     System.out.println("verifying content (with InputStream)");
-                    InputStream contentIs = binaryLargeObject.getContent();
-                    assertNotNull("A large object's stream", contentIs);
-                    for(
-                            int i = 0;
-                            i < binaryContent.length;
-                            i += 10
-                    ) {
-                        assertEquals("content at position " + i, i % 256, contentIs.read());
-                        contentIs.skip(9);
+                    try(InputStream contentIs = binaryLargeObject.getContent()){
+                        assertNotNull("A large object's stream", contentIs);
+                        for(
+                                int i = 0;
+                                i < binaryContent.length;
+                                i += 10
+                        ) {
+                            assertEquals("content at position " + i, i % 256, contentIs.read());
+                            contentIs.skip(9);
+                        }
                     }
-                    contentIs.close();
                     System.out.println("OK");
                 }
                 for(int r = 0; r < 2; r++) {
@@ -4372,19 +4385,21 @@ public class TestMain {
                     // test with output stream
                     //
                     System.out.println("verifying content (with OutputStream)");
-                    ByteArrayOutputStream contentOs = new ByteArrayOutputStream();
-                    binaryLargeObject.getContent(contentOs, 0);
-                    contentOs.close();
-                    InputStream contentIs = new ByteArrayInputStream(contentOs.toByteArray());
-                    for(
+                    final byte[] octets;
+                    try(ByteArrayOutputStream contentOs = new ByteArrayOutputStream()){
+                        binaryLargeObject.getContent(contentOs, 0);
+                        octets = contentOs.toByteArray();
+                    }
+                    try(InputStream contentIs = new ByteArrayInputStream(octets)){
+                        for(
                             int i = 0;
                             i < binaryContent.length;
                             i += 10
-                    ) {
-                        assertEquals("content at position " + i, i % 256, contentIs.read());
-                        contentIs.skip(9);
+                        ) {
+                            assertEquals("content at position " + i, i % 256, contentIs.read());
+                            contentIs.skip(9);
+                        }
                     }
-                    contentIs.close();
                     System.out.println("OK");
                 }
                 binaryDocument.setDescription("A test document");
@@ -4420,17 +4435,16 @@ public class TestMain {
                     // test with input stream method
                     //
                     System.out.println("verifying content (with InputStream)");
-                    InputStream contentIs = binaryLargeObject.getContent();
-    
-                    for(
-                            int i = 0;
-                            i < binaryContent.length;
-                            i += 10
-                    ) {
-                        assertEquals("Run " + r + ": content at position " + i, i % 137, contentIs.read());
-                        contentIs.skip(9);
+                    try(InputStream contentIs = binaryLargeObject.getContent()){
+                        for(
+                                int i = 0;
+                                i < binaryContent.length;
+                                i += 10
+                        ) {
+                            assertEquals("Run " + r + ": content at position " + i, i % 137, contentIs.read());
+                            contentIs.skip(9);
+                        }
                     }
-                    contentIs.close();
                     System.out.println("OK");
                 }
                 for(int r = 0; r < 2; r++) {
@@ -4438,19 +4452,21 @@ public class TestMain {
                     // test with output stream
                     //
                     System.out.println("verifying content (with OutputStream)");
-                    ByteArrayOutputStream contentOs = new ByteArrayOutputStream();
-                    binaryLargeObject.getContent(contentOs, 0);
-                    contentOs.close();
-                    InputStream contentIs = new ByteArrayInputStream(contentOs.toByteArray());
-                    for(
+                    final byte[] octets;
+                    try(ByteArrayOutputStream contentOs = new ByteArrayOutputStream()){
+                        binaryLargeObject.getContent(contentOs, 0);
+                        octets = contentOs.toByteArray();
+                    }
+                    try(InputStream contentIs = new ByteArrayInputStream(octets)){
+                        for(
                             int i = 0;
                             i < binaryContent.length;
                             i += 10
-                    ) {
-                        assertEquals("content at position " + i, i % 137, contentIs.read());
-                        contentIs.skip(9);
+                        ) {
+                            assertEquals("content at position " + i, i % 137, contentIs.read());
+                            contentIs.skip(9);
+                        }
                     }
-                    contentIs.close();
                     System.out.println("OK");
                 }
             } finally {
@@ -4506,17 +4522,17 @@ public class TestMain {
                     // test with reader method
                     //
                     System.out.println("verifying content (with Reader)");
-                    Reader contentIs = characterLargeObject.getContent();
-                    assertNotNull("A large object's stream", contentIs);
-                    for(
+                    try(Reader contentIs = characterLargeObject.getContent()){
+                        assertNotNull("A large object's stream", contentIs);
+                        for(
                             int i = 0;
                             i < characterContent.length;
                             i += 10
-                    ) {
-                        assertEquals("content at position " + i, Character.isLetterOrDigit(i) ? (char)i : '_', contentIs.read());
-                        contentIs.skip(9);
+                        ) {
+                            assertEquals("content at position " + i, Character.isLetterOrDigit(i) ? (char)i : '_', contentIs.read());
+                            contentIs.skip(9);
+                        }
                     }
-                    contentIs.close();
                     System.out.println("OK");
                 }
                 for(int r = 0; r < 2; r++) {
@@ -4524,19 +4540,21 @@ public class TestMain {
                     // test with writer
                     //
                     System.out.println("verifying content (with Writer)");
-                    CharArrayWriter contentOs = new CharArrayWriter();
-                    characterLargeObject.getContent(contentOs, 0);
-                    contentOs.close();
-                    Reader contentIs = new CharArrayReader(contentOs.toCharArray());
-                    for(
+                    final char[] octets;
+                    try(CharArrayWriter contentOs = new CharArrayWriter()){
+                        characterLargeObject.getContent(contentOs, 0);
+                        octets = contentOs.toCharArray();
+                    }
+                    try(Reader contentIs = new CharArrayReader(octets)){
+                        for(
                             int i = 0;
                             i < characterContent.length;
                             i += 10
-                    ) {
-                        assertEquals("content at position " + i, Character.isLetterOrDigit(i) ? (char)i : '_', contentIs.read());
-                        contentIs.skip(9);
+                        ) {
+                            assertEquals("content at position " + i, Character.isLetterOrDigit(i) ? (char)i : '_', contentIs.read());
+                            contentIs.skip(9);
+                        }
                     }
-                    contentIs.close();
                     System.out.println("OK");
                 }
                 textDocument.setDescription("A test document");
@@ -4572,17 +4590,16 @@ public class TestMain {
                     // test with reader method
                     //
                     System.out.println("verifying content (with Reader)");
-                    Reader contentIs = characterLargeObject.getContent();
-    
-                    for(
+                    try(Reader contentIs = characterLargeObject.getContent()){
+                        for(
                             int i = 0;
                             i < characterContent.length;
                             i += 10
-                    ) {
-                        assertEquals("Run " + r + ": content at position " + i, Character.isLetterOrDigit(2*i) ? (char)(2*i) : '_', contentIs.read());
-                        contentIs.skip(9);
+                        ) {
+                            assertEquals("Run " + r + ": content at position " + i, Character.isLetterOrDigit(2*i) ? (char)(2*i) : '_', contentIs.read());
+                            contentIs.skip(9);
+                        }
                     }
-                    contentIs.close();
                     System.out.println("OK");
                 }
                 for(int r = 0; r < 2; r++) {
@@ -4590,19 +4607,21 @@ public class TestMain {
                     // test with Writer
                     //
                     System.out.println("verifying content (with Writer)");
-                    CharArrayWriter contentOs = new CharArrayWriter();
-                    characterLargeObject.getContent(contentOs, 0);
-                    contentOs.close();
-                    Reader contentIs = new CharArrayReader(contentOs.toCharArray());
-                    for(
+                    final char[] text;
+                    try(CharArrayWriter contentOs = new CharArrayWriter()){
+                        characterLargeObject.getContent(contentOs, 0);
+                        text = contentOs.toCharArray();
+                    }
+                    try(Reader contentIs = new CharArrayReader(text)){
+                        for(
                             int i = 0;
                             i < characterContent.length;
                             i += 10
-                    ) {
-                        assertEquals("content at position " + i, Character.isLetterOrDigit(2*i) ? (char)(2*i) : '_', contentIs.read());
-                        contentIs.skip(9);
+                        ) {
+                            assertEquals("content at position " + i, Character.isLetterOrDigit(2*i) ? (char)(2*i) : '_', contentIs.read());
+                            contentIs.skip(9);
+                        }
                     }
-                    contentIs.close();
                     System.out.println("OK");
                 }
             } finally {
@@ -4707,25 +4726,28 @@ public class TestMain {
                         test.openmdx.app1.cci2.Document jpaDocument = (test.openmdx.app1.cci2.Document)super.entityManager.detachCopy(
                             segment.getDocument("myDoc")
                         );
-                        FileOutputStream fileOutputStream = new FileOutputStream(file);
-                        ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                        objectOutputStream.writeObject(jpaPeople);
-                        objectOutputStream.writeObject(jpaAddresses);
-                        objectOutputStream.writeObject(jpaDocument);
-                        objectOutputStream.close();
+                        try(FileOutputStream fileOutputStream = new FileOutputStream(file)){
+                            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                            objectOutputStream.writeObject(jpaPeople);
+                            objectOutputStream.writeObject(jpaAddresses);
+                            objectOutputStream.writeObject(jpaDocument);
+                        }
                     }
                 }
                 {
-                    FileInputStream fileInputStream = new FileInputStream(file);
-                    ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-                    @SuppressWarnings("unchecked")
-                    Collection<test.openmdx.app1.cci2.Person> jpaPeople = (Collection<test.openmdx.app1.cci2.Person>) objectInputStream.readObject();
-                    @SuppressWarnings("unchecked")
-                    Collection<test.openmdx.app1.cci2.Address> jpaAddresses = (Collection<test.openmdx.app1.cci2.Address>) objectInputStream.readObject();
-                    test.openmdx.app1.cci2.Document jpaDocument = (test.openmdx.app1.cci2.Document) objectInputStream.readObject();
-                    assertEquals("people", cardinality, jpaPeople.size());
-                    assertEquals("addresses", 1, jpaAddresses.size());
-                    objectInputStream.close();
+                    final Collection<test.openmdx.app1.cci2.Person> jpaPeople;
+                    final Collection<test.openmdx.app1.cci2.Address> jpaAddresses;
+                    final test.openmdx.app1.cci2.Document jpaDocument;
+                    try(
+                        FileInputStream fileInputStream = new FileInputStream(file);
+                        ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)
+                    ){
+                        jpaPeople = (Collection<test.openmdx.app1.cci2.Person>) objectInputStream.readObject();
+                        jpaAddresses = (Collection<test.openmdx.app1.cci2.Address>) objectInputStream.readObject();
+                        jpaDocument = (test.openmdx.app1.cci2.Document) objectInputStream.readObject();
+                        assertEquals("people", cardinality, jpaPeople.size());
+                        assertEquals("addresses", 1, jpaAddresses.size());
+                    }
                     this.begin();
                     for(test.openmdx.app1.cci2.Address jpaAddress : jpaAddresses) {
                         assertFalse("deleted", ReducedJDOHelper.isDeleted(jpaAddress));
@@ -4771,17 +4793,16 @@ public class TestMain {
                             // test with input stream method
                             //
                             System.out.println("verifying content (with InputStream)");
-                            InputStream contentIs = binaryLargeObject.getContent();
-            
-                            for(
+                            try(InputStream contentIs = binaryLargeObject.getContent()){
+                                for(
                                     int i = 0;
                                     i < binaryContent.length;
                                     i += 10
-                            ) {
-                                assertEquals("Run " + r + ": content at position " + i, i % 137, contentIs.read());
-                                contentIs.skip(9);
+                                ) {
+                                    assertEquals("Run " + r + ": content at position " + i, i % 137, contentIs.read());
+                                    contentIs.skip(9);
+                                }
                             }
-                            contentIs.close();
                             System.out.println("OK");
                         }
                         for(int r = 0; r < 2; r++) {
@@ -4789,19 +4810,21 @@ public class TestMain {
                             // test with output stream
                             //
                             System.out.println("verifying content (with OutputStream)");
-                            ByteArrayOutputStream contentOs = new ByteArrayOutputStream();
-                            binaryLargeObject.getContent(contentOs, 0);
-                            contentOs.close();
-                            InputStream contentIs = new ByteArrayInputStream(contentOs.toByteArray());
-                            for(
+                            final byte[] octets;
+                            try(ByteArrayOutputStream contentOs = new ByteArrayOutputStream()){
+                                binaryLargeObject.getContent(contentOs, 0);
+                                octets = contentOs.toByteArray();
+                            }
+                            try(InputStream contentIs = new ByteArrayInputStream(octets)){
+                                for(
                                     int i = 0;
                                     i < binaryContent.length;
                                     i += 10
-                            ) {
-                                assertEquals("content at position " + i, i % 137, contentIs.read());
-                                contentIs.skip(9);
+                                ) {
+                                    assertEquals("content at position " + i, i % 137, contentIs.read());
+                                    contentIs.skip(9);
+                                }
                             }
-                            contentIs.close();
                             System.out.println("OK");
                         }
                     }
@@ -4848,10 +4871,6 @@ public class TestMain {
             if(this instanceof ProxyConnectionTest) {
                 assertFalse("Mix-In interface should be absent", person20019366 instanceof NaturalPerson);
             } else {
-                if(!(person20019366 instanceof NaturalPerson)) {
-                    System.out.println("Expected " + NaturalPerson.class.getName() + ", found " + (person20019366 == null ? "null" : person20019366.getClass().getName()));
-                    System.out.println("Wait a moment");
-                }
                 assertTrue("Mix-In interface should be present", person20019366 instanceof NaturalPerson);
                 assertFalse("Person", ((NaturalPerson)person20019366).isRetired());
             }
@@ -5776,7 +5795,7 @@ public class TestMain {
         @Override
         protected PersistenceManagerFactory newEntityManagerFactory() {
             try {
-                ConnectionFactory inboundConnectionFactory = useServlet() ?  new ConnectionFactoryAdapter(
+                ConnectionFactory inboundConnectionFactory = useServlet() ?  new RestConnectionFactory(
                     new ServletPort(
                         Collections.singletonMap(
                             "entity-manager-factory-name",

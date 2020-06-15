@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Fast Result Set
+ * Description: FastResultSet
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2019, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,9 +51,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.oracle.Datums;
 
@@ -68,7 +66,13 @@ import org.openmdx.base.dataprovider.layer.persistence.jdbc.oracle.Datums;
  */
 public class FastResultSet {
 
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param database
+     * @param rs
+     * @throws SQLException
+     */
     public FastResultSet(
         Database_1_0 database,
         ResultSet rs
@@ -80,7 +84,14 @@ public class FastResultSet {
         );
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param database
+     * @param rs
+     * @param columnNames
+     * @throws SQLException
+     */
     public FastResultSet(
     	Database_1_0 database,
         ResultSet rs,
@@ -91,11 +102,17 @@ public class FastResultSet {
         this.columnNames = columnNames;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Prepare column names from meta data.
+     * 
+     * @param rsmd
+     * @return
+     * @throws SQLException
+     */
     static public List<String> getColumnNames(
         ResultSetMetaData rsmd
     ) throws SQLException {
-        List<String> columnNames = new ArrayList<String>();
+        List<String> columnNames = new ArrayList<String>(rsmd.getColumnCount());
         for(
             int columnIndex = 1, columnCount = rsmd.getColumnCount(); 
             columnIndex <= columnCount; 
@@ -108,53 +125,72 @@ public class FastResultSet {
         return columnNames;
     }
 
-    //-----------------------------------------------------------------------
     /**
      * Reads specified column from result set. Guarantees that columns 
      * OBJECT_OID, OBJECT_RID and OBJECT_IDX are read at most once otherwise
      * error 'ResultSet can not re-read row data for column' is thrown by
      * certain JDBC drivers.
+     * 
+     * @param columnName
+     * @return
+     * @throws SQLException
      */
     public Object getObject(
         String columnName
     ) throws SQLException {
-        String columnNameLowerCase = columnName.toLowerCase();
-        Object value = this.columnValues.get(columnNameLowerCase);
-        if(value == null) {
-            int index = this.columnNames.indexOf(columnNameLowerCase);
-            if(index < 0) {
-                throw new SQLException("AbstractDatabase_1: column " + columnName + " not found");
-            }
-            // get all column values up to requested index
-            while(this.currentColumnIndex < index) {
-                this.currentColumnIndex++;
-                this.columnValues.put(
-                    this.columnNames.get(this.currentColumnIndex),
-                    value = toJdbcObject(
-                        this.rs.getObject(this.currentColumnIndex+1)
+        int index = this.columnNames.indexOf(columnName.toLowerCase());
+        if(index < 0) {
+            throw new SQLException("unkown column name " + columnName);
+        }
+        return this.getObject(index);
+    }
+  
+    /**
+     * Get column value at given index.
+     * 
+     * @param index the first column has the index 0.
+     * @return
+     * @throws SQLException
+     */
+    public Object getObject(
+        int index
+    ) throws SQLException {
+        if(this.columnValues.isEmpty()) {
+            for(int i = 0; i < this.columnNames.size(); i++) {
+                this.columnValues.add(
+                    toJdbcObject(
+                        this.rs.getObject(i + 1)
                     )
                 );
             }
         }
+        Object value = this.columnValues.get(index);
         if(value instanceof String) {
             return this.database.internalizeStringValue(
-                columnName,
+                this.getColumnNames().get(index),
                 (String)value
             );
-        }
-        else {
+        } else {
             return value;
         }
     }
 
-    //-----------------------------------------------------------------------
-    public void reset(
+    /**
+     * Reset column values.
+     * 
+     * @throws SQLException
+     */
+    private void reset(
     ) throws SQLException {
         this.columnValues.clear();
-        this.currentColumnIndex = -1;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Skip to next row.
+     * 
+     * @return
+     * @throws SQLException
+     */
     public boolean next(
     ) throws SQLException {
         boolean hasMore = this.rs.next();
@@ -167,7 +203,13 @@ public class FastResultSet {
     	return this.rs.getType() != ResultSet.TYPE_FORWARD_ONLY;
     }
     
-    //-----------------------------------------------------------------------
+    /**
+     * Absolute positioning.
+     * 
+     * @param position
+     * @return
+     * @throws SQLException
+     */
     public boolean absolute(
         int position
     ) throws SQLException {
@@ -176,13 +218,23 @@ public class FastResultSet {
         return hasMore;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Get column names.
+     * 
+     * @return
+     */
     public List<String> getColumnNames(
     ) {
         return this.columnNames;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Convert to jdbc object.
+     * 
+     * @param nativeObject
+     * @return
+     * @throws SQLException
+     */
     protected Object toJdbcObject(
         Object nativeObject
     ) throws SQLException{
@@ -194,8 +246,7 @@ public class FastResultSet {
     //-----------------------------------------------------------------------
     private final ResultSet rs;
     private final Database_1_0 database;
-    private int currentColumnIndex = -1;
-    private final Map<String,Object> columnValues = new HashMap<String,Object>();
-    private final List<String> columnNames;
+    private final List<Object> columnValues = new ArrayList<Object>();
+    private List<String> columnNames;
 
 }

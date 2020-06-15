@@ -69,6 +69,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.text.conversion.JavaBeans;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.Filters;
@@ -244,39 +245,37 @@ public class FilterLoader
                 for(String path: filterResources) { 
                     try {
                         if(!path.endsWith("/")) {
-                            try {
-                            	ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        	try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
                                 BinaryLargeObjects.streamCopy(
                                 	this.context.getResourceAsStream(path), 
                                 	0L, 
                                 	bos
                                 );
-                                bos.close();
                                 Filters f = (Filters)JavaBeans.fromXML(
                                 	new String(bos.toByteArray(), "UTF-8")
                                 );
-                                // merge loaded filter with existing
-                                for(int j = 0; j < f.getForReference().length; j++) {
-                                    if(filterStore.get(f.getForReference()[j]) == null) {
-                                        filterStore.put(
-                                            f.getForReference()[j],
-                                            new Filters()
-                                        );
-                                    }
-                                    Filters existing = (Filters)filterStore.get(f.getForReference()[j]);
-                                    for(int k = 0; k < f.getFilter().length; k++) {
-                                        existing.addFilter(
-                                            f.getFilter(k)
-                                        );
-                                    }
-                                }
+	                            // merge loaded filter with existing
+	                            for(int j = 0; j < f.getForReference().length; j++) {
+	                                if(filterStore.get(f.getForReference()[j]) == null) {
+	                                    filterStore.put(
+	                                        f.getForReference()[j],
+	                                        new Filters()
+	                                    );
+	                                }
+	                                Filters existing = (Filters)filterStore.get(f.getForReference()[j]);
+	                                for(int k = 0; k < f.getFilter().length; k++) {
+	                                    existing.addFilter(
+	                                        f.getFilter(k)
+	                                    );
+	                                }
+	                            }
                             } catch(Exception e) {
-                            	new ServiceException(e).log();
+                                Throwables.log(e);
                                 System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
                             }
                         }
                     } catch(Exception e) {
-                    	new ServiceException(e).log();
+                        Throwables.log(e);
                         System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
                     }
                 }

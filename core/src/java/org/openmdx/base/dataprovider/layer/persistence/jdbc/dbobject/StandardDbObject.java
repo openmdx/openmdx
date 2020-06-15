@@ -229,8 +229,6 @@ public abstract class StandardDbObject extends DbObject {
     @Override
     public void remove(
     ) throws ServiceException {
-
-        PreparedStatement ps = null;
         String currentStatement = null;
         Path accessPath = this.getResourceIdentifier();
         Path type = this.getConfiguration().getType();
@@ -266,20 +264,22 @@ public abstract class StandardDbObject extends DbObject {
                     statement.append(this.createReferenceClause(referenceIdColumns, statementParameters, true)).append(" AND ");
                     statement.append(this.getObjectIdClause());
                     statementParameters.addAll(this.getObjectIdValues());
-                    ps = this.database.prepareStatement(
-                        conn,
-                        currentStatement = statement.toString()
-                    );
-                    for(int j = 0; j < statementParameters.size(); j++) {
-                        this.database.setPreparedStatementValue(
-                            this.conn,
-                            ps, 
-                            j+1, 
-                            statementParameters.get(j)
-                        );
+                    try (
+                        PreparedStatement ps = this.database.prepareStatement(
+                            conn,
+                            currentStatement = statement.toString()
+                        )
+                    ){
+                        for(int j = 0; j < statementParameters.size(); j++) {
+                            this.database.setPreparedStatementValue(
+                                this.conn,
+                                ps, 
+                                j+1, 
+                                statementParameters.get(j)
+                            );
+                        }
+                        this.database.executeUpdate(ps, currentStatement, statementParameters);
                     }
-                    this.database.executeUpdate(ps, currentStatement, statementParameters);
-                    ps.close(); ps = null;
                 }
             }
 
@@ -305,20 +305,22 @@ public abstract class StandardDbObject extends DbObject {
                         String statement =
                             "DELETE FROM " + dbObject + 
                             " WHERE " + this.database.getObjectRidColumnName() + " " + selectReferenceIdsClause;
-                        ps = this.database.prepareStatement(
-                            conn,
-                            currentStatement = statement
-                        );
-                        for(int j = 0; j < statementParameters.size(); j++) {
-                            this.database.setPreparedStatementValue(
-                                this.conn,
-                                ps, 
-                                j+1, 
-                                statementParameters.get(j)
-                            );
+                        try(
+                            PreparedStatement ps = this.database.prepareStatement(
+                                conn,
+                                currentStatement = statement
+                            )
+                        ){
+                            for(int j = 0; j < statementParameters.size(); j++) {
+                                this.database.setPreparedStatementValue(
+                                    this.conn,
+                                    ps, 
+                                    j+1, 
+                                    statementParameters.get(j)
+                                );
+                            }
+                            this.database.executeUpdate(ps, currentStatement, statementParameters);
                         }
-                        this.database.executeUpdate(ps, currentStatement, statementParameters);
-                        ps.close(); ps = null;
                     }
                 }
             }
@@ -329,7 +331,7 @@ public abstract class StandardDbObject extends DbObject {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.MEDIA_ACCESS_FAILURE, 
                 null,
-                new BasicException.Parameter("path", accessPath),
+                new BasicException.Parameter(BasicException.Parameter.XRI, accessPath),
                 new BasicException.Parameter("statement", currentStatement),
                 new BasicException.Parameter("parameters", statementParameters),
                 new BasicException.Parameter("sqlErrorCode", ex.getErrorCode()), 
@@ -348,12 +350,6 @@ public abstract class StandardDbObject extends DbObject {
                 BasicException.Code.GENERIC, 
                 exception.toString()
             );
-        } finally {
-            try {
-                if(ps != null) ps.close();
-            } catch(Throwable ex) {
-                // ignore
-            }
         }
     }
 

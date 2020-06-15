@@ -62,33 +62,29 @@ public final class NullValue
     extends AttributeValue
     implements Serializable {
   
-    //-------------------------------------------------------------------------
     public static AttributeValue createNullValue(
     ) {
         return new NullValue();
     }
     
-    //-------------------------------------------------------------------------
     protected NullValue(
     ) {
         super(null, null, null);
     }
 
-    //-------------------------------------------------------------------------
     public Object getDefaultValue(
     ) {
         return null;
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public Object getValue(
+    	ViewPort p,
         boolean forGrid
     ) {
         return null;
     }
 
-    //-------------------------------------------------------------------------
     public String getStringifiedValue(
         ViewPort p, 
         boolean multiLine, 
@@ -98,7 +94,6 @@ public final class NullValue
         return "";
     }
   
-    //-------------------------------------------------------------------------
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.attribute.AttributeValue#getBackColor()
      */
@@ -108,7 +103,6 @@ public final class NullValue
         return null;
     }
 
-    //-------------------------------------------------------------------------
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.attribute.AttributeValue#getColor()
      */
@@ -118,7 +112,6 @@ public final class NullValue
         return null;
     }
 
-    //-------------------------------------------------------------------------
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.attribute.AttributeValue#getIconKey()
      */
@@ -128,13 +121,11 @@ public final class NullValue
         return null;
     }
     
-    //-------------------------------------------------------------------------
     public boolean isChangeable(
     ) {
       return false;
     }
   
-    //-------------------------------------------------------------------------
     public Autocompleter_1_0 getAutocompleter(
         RefObject_1_0 target
     ) {
@@ -145,5 +136,3 @@ public final class NullValue
     private static final long serialVersionUID = 3906366047639647799L;
 
 }
-
-//--- End of File -----------------------------------------------------------

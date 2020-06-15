@@ -89,9 +89,11 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Level;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
+import javax.jdo.Transaction;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefStruct;
 import javax.servlet.ServletContext;
@@ -122,6 +124,7 @@ import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SoundsLikeCondition;
 import org.openmdx.base.text.conversion.UUIDConversion;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.action.AbstractAction;
@@ -616,7 +619,9 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 		      // only the first time a control is initialized)
 	          try { 
 	          	Thread.sleep(10); 
-	          } catch(Exception e0) {}
+	          } catch(Exception ignore) {
+	  			SysLog.trace("Exception ignored", ignore);
+	          }
 	          fieldIdentity = field.refGetPath();
 	      }
 	      SysLog.trace("mapping field", field);
@@ -1201,7 +1206,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
             }
         } catch(Exception e) {
             SysLog.warning("Error getting autocompleter", Arrays.asList(new String[]{context == null ? "N/A" : context.refMofId(), qualifiedFeatureName}));
-            new ServiceException(e).log();
+            Throwables.log(e);
         }
         return null;
     }
@@ -2058,16 +2063,12 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											);
 										}
 									}
-									Map<?,?> longTexts = ((CodeValue)valueHolder).getLongText(false, false);      
 									List<Object> mappedNewValues = new ArrayList<Object>();                        
 									for(Iterator<String> j = newValues.iterator(); j.hasNext(); ) {
 										try {
-											String longText = j.next().toString();
-											Short code = (Short)longTexts.get(longText);
-											if(code != null) {
-												mappedNewValues.add(
-													code
-												);
+											String codeAsString = j.next();
+											if(!codeAsString.isEmpty()) {
+												mappedNewValues.add(Short.parseShort(codeAsString));
 											}
 										} catch(Exception e) {
 											SysLog.detail(e.getMessage(), e.getCause());
@@ -2239,13 +2240,16 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 										boolean uploadStreamValid = true;
 										// get mimeType, name from .INFO
 										try {
-											BufferedReader reader =
-												new BufferedReader(
+										    final String mimeType;
+										    final String name;
+										    try(
+    											BufferedReader reader = new BufferedReader(
 													new InputStreamReader(new FileInputStream(fileNameInfo))
-												);
-											String mimeType = reader.readLine();
-											String name = reader.readLine();
-											reader.close();
+												)
+    										){
+    											mimeType = reader.readLine();
+    											name = reader.readLine();
+										    }
 											// set mimeType
 											try {
 												if(target instanceof RefObject) {
@@ -2264,7 +2268,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												}
 											} catch(Exception e) {
 												SysLog.warning("can not set mimeType for " + featureName);
-												new ServiceException(e).log();
+									            Throwables.log(e);
 											}
 											// set name
 											try {
@@ -2284,15 +2288,15 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												}
 											} catch(Exception e) {
 												SysLog.warning("can not set name for " + featureName);
-												new ServiceException(e).log();
+									            Throwables.log(e);
 											}
 										} catch(FileNotFoundException e) {
 											SysLog.error("can not open info of uploaded stream " + fileNameInfo);
-											new ServiceException(e).log();
+								            Throwables.log(e);
 											uploadStreamValid = false;
 										} catch(IOException e) {
 											SysLog.error("can not read info of uploaded stream " + fileNameInfo);
-											new ServiceException(e).log();
+								            Throwables.log(e);
 											uploadStreamValid = false;
 										}
 										// set bytes
@@ -2309,27 +2313,28 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 													);
 												} catch(Exception e) {
 													SysLog.error("Unable to upload binary content", location);
-													new ServiceException(e).log();
+										            Throwables.log(e);
 												}
 											} else {
 												try {
-													byte[] bytes = null;
-													InputStream is = new FileInputStream(location);
-													ByteArrayOutputStream os = new ByteArrayOutputStream();
-													int b = 0;
-													while((b = is.read()) != -1) {
-														os.write(b);
+													final byte[] bytes;
+													try(
+    													InputStream is = new FileInputStream(location);
+    													ByteArrayOutputStream os = new ByteArrayOutputStream();
+													){
+    													int b = 0;
+    													while((b = is.read()) != -1) {
+    														os.write(b);
+    													}
+    													bytes = os.toByteArray();
 													}
-													is.close();
-													os.close();
-													bytes = os.toByteArray();
 													targetAsValueMap(target).put(
 														featureName,
 														bytes
 													);
 												} catch(Exception e) {
 													SysLog.error("Unable to upload binary content", location);
-													new ServiceException(e).log();
+										            Throwables.log(e);
 												}
 											}
 										}
@@ -2397,8 +2402,15 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 	) throws ServiceException {
 		if(doCreate) {
 			PersistenceManager pm = JDOHelper.getPersistenceManager(parent);
+			Transaction tx = pm.currentTransaction();
 			try {
-				pm.currentTransaction().begin();
+				if(tx.isActive()) {
+					SysLog.log(Level.WARNING, "Transaction is active before creating {0}/{1}. Rolling back.", parent.refGetPath(), forReference);
+					try {
+						tx.rollback();
+					} catch(Exception ignore) {}
+				}
+				tx.begin();
 				this.updateObject(
 					object,
 				    parameterMap,
@@ -2440,23 +2452,32 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 						    object
 						);
 					}
-					pm.currentTransaction().commit();
+					tx.commit();
 					return true;
 				} else {
 					try {
-						pm.currentTransaction().rollback();
+						tx.rollback();
 					} catch(Exception e1) {}
 				}
 			} catch(Exception e) {
 				try {
-					pm.currentTransaction().rollback();				
-				} catch(Exception e1) {}
+					tx.rollback();				
+		        } catch(Exception ignore) {
+					SysLog.trace("Exception ignored", ignore);
+				}
 				throw new ServiceException(e);
 			}
 		} else {
 			PersistenceManager pm = JDOHelper.getPersistenceManager(object);
+			Transaction tx = pm.currentTransaction();
 			try {
-				pm.currentTransaction().begin();
+				if(tx.isActive()) {
+					SysLog.log(Level.WARNING, "Transaction is active before updating {0}. Rolling back", object.refGetPath());
+					try {
+						tx.rollback();
+					} catch(Exception ignore) {}
+				}
+				tx.begin();
 				app.getPortalExtension().updateObject(
 					object,
 				    parameterMap,
@@ -2464,16 +2485,16 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 				    app
 				);
 				if(app.getErrorMessages().isEmpty()) {
-					pm.currentTransaction().commit();
+					tx.commit();
 					return true;
 				} else {
 					try {
-						pm.currentTransaction().rollback();
+						tx.rollback();
 					} catch(Exception ignore) {}
 				}
 			} catch(Exception e) {
 				try {
-					pm.currentTransaction().rollback();
+					tx.rollback();
 				} catch(Exception e1) {}
 				throw new ServiceException(e);
 			}
@@ -3068,7 +3089,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     					Quantifier.THERE_EXISTS,
     					featureName,
     					true,
-    					(Object[])null
+    					new Object[]{}
     				);
     		} else if(token.startsWith("<=")) {
     			this.offset = 2;
@@ -3076,7 +3097,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				Quantifier.THERE_EXISTS,
     				featureName,
     				false,
-    				(Object[])null
+    				new Object[]{}
     			);
     		} else if(token.startsWith("<>")) {
     			this.offset = 2;
@@ -3084,7 +3105,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				Quantifier.THERE_EXISTS,
     				featureName,
     				false,
-    				(Object[])null
+    				new Object[]{}
     			);
     		} else if(token.startsWith("<")) {
     			this.offset = 1;
@@ -3092,7 +3113,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				Quantifier.THERE_EXISTS,
     				featureName,
     				false,
-    				(Object[])null
+    				new Object[]{}
     			);
     		} else if(token.startsWith(">")) {
     			this.offset = 1;
@@ -3100,7 +3121,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				Quantifier.THERE_EXISTS,
     				featureName,
     				true,
-    				(Object[])null
+    				new Object[]{}
     			);
     		} else if(token.startsWith("*")) {
     			this.offset = 1;
@@ -3108,7 +3129,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				Quantifier.THERE_EXISTS,
     				featureName,
     				true,
-    				(Object[])null
+    				new Object[]{}
     			);
     		} else if(token.startsWith("!*")) {
     			this.offset = 2;
@@ -3116,7 +3137,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				Quantifier.THERE_EXISTS,
     				featureName,
     				false,
-    				(Object[])null
+    				new Object[]{}
     			);
     		} else if(token.startsWith("%")) {
     			this.offset = 1;
@@ -3124,7 +3145,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				Quantifier.THERE_EXISTS,
     				featureName,
     				true,
-    				(Object[])null
+    				new Object[]{}
     			);
     		} else if(token.startsWith("!%")) {
     			this.offset = 2;
@@ -3132,7 +3153,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				Quantifier.THERE_EXISTS,
     				featureName,
     				false,
-    				(Object[])null
+    				new Object[]{}
     			);
     		} else if(token.startsWith("=")) {
     			this.offset = 1;
@@ -3140,7 +3161,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				Quantifier.THERE_EXISTS,
     				featureName,
     				true,
-    				(Object[])null
+    				new Object[]{}
     			);
     		} else if(token.startsWith("!=")) {
     			this.offset = 2;
@@ -3148,7 +3169,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				Quantifier.THERE_EXISTS,
     				featureName,
     				false,
-    				(Object[])null
+    				new Object[]{}
     			);
     		} else {
     			this.offset = 0;
@@ -3238,7 +3259,9 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 			ModelElement_1_0 referenceDef = null;
 			try {
 				referenceDef = model.getElement(qualifiedReferenceName);
-			} catch(Exception ignore) {}
+			} catch(Exception ignore) {
+				SysLog.trace("Exception ignored", ignore);
+			}
 			if(referenceDef != null && referenceDef.isReferenceType()) {
 				ModelElement_1_0 referencedType = model.getElement(referenceDef.getType());
 				if(referencedType != null && referencedType.isClassType()) {

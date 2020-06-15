@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2014, OMEX AG, Switzerland
+ * Copyright (c) 2009-2020, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,38 +51,42 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Optional;
 
 import javax.jdo.Constants;
 import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOFatalDataStoreException;
-import javax.jdo.PersistenceManagerFactory;
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.resource.spi.ResourceAllocationException;
 
-import org.openmdx.application.configuration.Configuration;
-import org.openmdx.application.spi.PropertiesConfigurationProvider;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.rest.DataObjectManager_1;
-import org.openmdx.base.accessor.rest.spi.BasicCache_2;
 import org.openmdx.base.accessor.rest.spi.Switch_2;
 import org.openmdx.base.aop0.PlugIn_1_0;
+import org.openmdx.base.caching.datastore.CacheAdapter;
+import org.openmdx.base.caching.datastore.NoSecondLevelCache;
+import org.openmdx.base.caching.port.StandardCachingPort;
+import org.openmdx.base.caching.virtualobjects.StandardVirtualObjects;
+import org.openmdx.base.caching.virtualobjects.VirtualObjectProvider;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
-import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.spi.ConnectionAdapter;
-import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
+import org.openmdx.base.rest.spi.RestConnectionFactory;
 import org.openmdx.base.transaction.TransactionAttributeType;
-import org.openmdx.kernel.configuration.PropertiesProvider;
+import org.openmdx.kernel.configuration.Configurations;
+import org.openmdx.kernel.configuration.cci.Configuration;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.EmptyJDODataStoreCache;
+import org.openmdx.kernel.jdo.JDODataStoreCache;
+import org.openmdx.kernel.jdo.JDOPersistenceManagerFactory;
 import org.openmdx.kernel.loading.BeanFactory;
 import org.openmdx.kernel.loading.Factory;
 import org.w3c.cci2.SparseArray;
@@ -93,64 +97,48 @@ import org.w3c.cci2.SparseArray;
 public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFactory<DataObjectManager_1_0> {
 
     /**
-     * Constructor 
+     * Constructor
      *
-     * @param configuration
+     * @param overrides the configuration properties
+     * @param configuration the configuration properties
+     * @param defaults for missing configuration and override properties
      */
     protected EntityManagerProxyFactory_2(
-        Map<?,?> configuration
-    ){
-        super(configuration);
-        //
-        // Data Manager Properties
-        // 
-        try {
-            Properties properties = PropertiesProvider.toProperties(configuration);
-            Configuration dataManagerConfiguration = PropertiesConfigurationProvider.getConfiguration(
-                properties,
-                "org", "openmdx", "jdo", "DataManager"
-            );
-            this.optimalFetchSize = (Integer) dataManagerConfiguration.values(
-                "optimalFetchSize"
-            ).get(Integer.valueOf(0));
-            this.cacheThreshold = (Integer) dataManagerConfiguration.values(
-                "cacheThreshold"
-            ).get(Integer.valueOf(0));
-            SparseArray<?> plugIns = dataManagerConfiguration.values(
-                "plugIn"
-            );
-            if(plugIns.isEmpty()) {
-                this.plugIns = DEFAULT_PLUG_INS;
-            } else {
-                this.plugIns = new PlugIn_1_0[plugIns.size()];
-                ListIterator<?> p = plugIns.populationIterator();
-                for(
-                    int i = 0;
-                    i < this.plugIns.length;
-                    i++
-                ){
-                    this.plugIns[i] = BeanFactory.newInstance(
-                    	PlugIn_1_0.class,
-                        PropertiesConfigurationProvider.getConfiguration(
-                            properties,
-                            toSection(p.next())
-                        )
-                    ).instantiate();
-                }
+        Map<?, ?> overrides,
+        Map<?, ?> configuration,
+        Map<?, ?> defaults
+    ) {
+        super(overrides, configuration, defaults);
+        final Configuration dataManagerConfiguration = getConfiguration(
+            "org.openmdx.jdo.DataManager"
+        );
+        this.optimalFetchSize = dataManagerConfiguration.getOptionalValue(
+            "optimalFetchSize",
+            Integer.class
+        );
+        this.cacheThreshold = dataManagerConfiguration.getOptionalValue(
+            "cacheThreshold",
+            Integer.class
+        );
+        SparseArray<String> plugIns = dataManagerConfiguration.getSparseArray(
+            "plugIn",
+            String.class
+        );
+        if(plugIns.isEmpty()) {
+            this.plugIns = DEFAULT_PLUG_INS;
+        } else {
+            this.plugIns = new PlugIn_1_0[plugIns.size()];
+            final ListIterator<String> p = plugIns.populationIterator();
+            for(
+                int i = 0;
+                i < this.plugIns.length;
+                i++
+            ){
+                this.plugIns[i] = BeanFactory.newInstance(
+                	PlugIn_1_0.class,
+                    getConfiguration(p.next())
+                ).instantiate();
             }
-            
-            
-        } catch (ServiceException exception) {
-            throw BasicException.initHolder(
-                new JDOFatalDataStoreException(
-                    "Data object manager factory set up failure",
-                    BasicException.newEmbeddedExceptionStack(
-                        exception,
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.INVALID_CONFIGURATION
-                    )
-                )
-            );
         }
         //
         // Connection Factory
@@ -197,7 +185,7 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 7461507288357096266L;
+    private static final long serialVersionUID = 6853221646431074355L;
 
     /**
      * The aop0 plug-ins
@@ -207,18 +195,23 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
     /**
      * The optimal fetch size
      */
-    private final Integer optimalFetchSize;
+    private final Optional<Integer> optimalFetchSize;
 
     /**
      * Collections smaller than this value are cached before being evaluated
      */
-    private final Integer cacheThreshold;
+    private final Optional<Integer> cacheThreshold;
     
     /**
      * The destinations
      */
     private final Map<Path,Port<RestConnection>> destinations;
 
+    /**
+     * The Data Store Cache
+     */
+    private final JDODataStoreCache dataStoreCache = createDataStoreCache();
+    
     /**
      * The standard plug-ins
      */
@@ -229,7 +222,22 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
     /**
      * Catch all proxied objects
      */
-    private static final Path PROXY_PATTERN = new Path("%");
+    private static final Path PROXY_PATTERN = new Path("xri://@openmdx*($...)");
+
+    /**
+     * The default configuration
+     */
+    protected static final Map<String, Object> DEFAULT_CONFIGURATION = createDefaultConfiguration(
+        Collections.singletonMap(
+            ConfigurableProperty.TransactionType.qualifiedName(),
+            Constants.RESOURCE_LOCAL
+        )
+    );
+
+    /**
+     * The connection driver configuration section
+     */
+    private static final String CONNECTION_DRIVER_CONFIGURATION_ENTRY = "org.openmdx.jdo.ConnectionDriver";
     
     /**
      * Acquire the connection factory by its URL and driver name
@@ -270,52 +278,39 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
                 )
             );
         } else {
-            Map<String,Object> connectionDriverProperties = new HashMap<String,Object>();
+            final Map<String, String> overrides = new HashMap<>();
+            overrides.put(
+                CONNECTION_DRIVER_CONFIGURATION_ENTRY + ".class",
+                connectionDriverName
+            );
             //
             // Standard Properties
             //
-            connectionDriverProperties.put(
-                "ConnectionURL",
+            overrides.put(
+                CONNECTION_DRIVER_CONFIGURATION_ENTRY + ".ConnectionURL",
                 connectionURL
             );
             String userName = super.getConnectionUserName();
             if(userName != null) {
-                connectionDriverProperties.put(
-                    "UserName",
+                overrides.put(
+                    CONNECTION_DRIVER_CONFIGURATION_ENTRY + ".UserName",
                     userName
                 );
             }
             String password = super.getConnectionPassword();
             if(password != null) {
-                connectionDriverProperties.put(
-                    "Password",
+                overrides.put(
+                    CONNECTION_DRIVER_CONFIGURATION_ENTRY + ".Password",
                     password
                 );
             }
-            //
-            // Specific Properties
-            //
-            try {
-                Configuration connectionDriverConfiguration = PropertiesConfigurationProvider.getConfiguration(
-                    PropertiesProvider.toProperties(configuration),
-                    "org", "openmdx", "jdo", "ConnectionDriver"
-                );
-                connectionDriverProperties.putAll(connectionDriverConfiguration.entries());
-            } catch (ServiceException exception) {
-                throw BasicException.initHolder(
-                    new JDOFatalDataStoreException(
-                        "Data object manager factory set up failure",
-                        BasicException.newEmbeddedExceptionStack(
-                            exception,
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.INVALID_CONFIGURATION
-                        )
-                    )
-                );
-            }
+            final Configuration connectionDriverConfiguration = Configurations.getConnectionDriverConfiguration(
+                overrides, 
+                configuration, 
+                CONNECTION_DRIVER_CONFIGURATION_ENTRY
+            );
             return BeanFactory.newInstance(
-                connectionDriverName,
-                connectionDriverProperties
+                connectionDriverConfiguration
             );
         }
     }
@@ -400,13 +395,6 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
     }
     
     /**
-     * The default configuration
-     */
-    protected static final Map<String, Object> DEFAULT_CONFIGURATION = new HashMap<String, Object>(
-        AbstractPersistenceManagerFactory.DEFAULT_CONFIGURATION
-    );
-
-    /**
      * The method is used by JDOHelper to construct an instance of 
      * <code>PersistenceManagerFactory</code> based on user-specified 
      * properties.
@@ -415,7 +403,7 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
      * 
      * @return a new <code>PersistenceManagerFactory</code>
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory (
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory (
         Map<?,?> props
     ){
         return getPersistenceManagerFactory(
@@ -434,16 +422,22 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
      * 
      * @return a new <code>PersistenceManagerFactory</code>
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory (
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory (
         Map<?,?> overrides, 
         Map<?,?> props
     ){
-        Map<Object,Object> configuration = new HashMap<Object,Object>(DEFAULT_CONFIGURATION);
-        configuration.putAll(props);
-        configuration.putAll(overrides);
-        return new EntityManagerProxyFactory_2(configuration);
+        return new EntityManagerProxyFactory_2(overrides, props, DEFAULT_CONFIGURATION);
     }
 
+    /* (non-Javadoc)
+     * @see org.openmdx.kernel.jdo.JDOPersistenceManagerFactory#getDataStoreCache()
+     */
+    @Override
+    public JDODataStoreCache getDataStoreCache() {
+        return dataStoreCache;
+    }
+
+    
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.AbstractPersistenceManagerFactory_1#newPersistenceManager(java.lang.String, java.lang.String)
      */
@@ -453,23 +447,11 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
         String password
     ) {
         try {
-            RestConnectionSpec connectionSpec = new RestConnectionSpec(userid, password);
-            final Switch_2 port = new Switch_2(
-			    new BasicCache_2(), 
-			    this.destinations
-			);
-            final ConnectionFactoryAdapter connectionFactory = new ConnectionFactoryAdapter(
-            	port,
-            	true, // supportsLocalTransactionDemarcation
-            	TransactionAttributeType.SUPPORTS
-            );
-			return new DataObjectManager_1(
+            final RestConnectionSpec connectionSpec = new RestConnectionSpec(userid, password);
+            return new DataObjectManager_1(
                 this,
                 true, // proxy
-                userid == null ? null : PersistenceManagers.toPrincipalChain(userid),
-                connectionFactory.getConnection(connectionSpec),
-                null, // connection2
-                this.plugIns, 
+                this.plugIns,
                 this.optimalFetchSize, 
                 this.cacheThreshold, 
                 getIsolateThreads(), 
@@ -489,6 +471,38 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
         }
     }
 
+    protected RestConnectionFactory createConnectionFactory(
+    ) throws ResourceException {
+        return new RestConnectionFactory(
+        	createPort(),
+        	true, // supportsLocalTransactionDemarcation
+        	TransactionAttributeType.SUPPORTS
+        );
+    }
+
+    protected Switch_2 createPort(
+    ) throws ResourceException {
+        return new Switch_2(
+            createCachingPort(), 
+            this.destinations
+        );
+    }
+
+    protected StandardCachingPort createCachingPort() {
+        final StandardCachingPort cachingPort = new StandardCachingPort();
+        cachingPort.setVirtualObjectProvider(createVirtualObjectProvider());
+        cachingPort.setCacheAdapter(createCacheAdapter());
+        return cachingPort;
+    }
+
+    protected CacheAdapter createCacheAdapter() {
+        return new NoSecondLevelCache();
+    }
+
+    protected VirtualObjectProvider createVirtualObjectProvider() {
+        return new StandardVirtualObjects();
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.AbstractPersistenceManagerFactory_1#newPersistenceManager(java.lang.String, java.lang.String)
      */
@@ -501,24 +515,8 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
         );
     }
 
-    /**
-     * Provide a configuration entry's section
-     * 
-     * @param name the configuration entry
-     * 
-     * @return the configuration entry's section
-     */
-    private static String[] toSection(
-        Object name
-    ){
-        return ((String)name).split("\\.");
-    }
-    
-    static {
-        EntityManagerProxyFactory_2.DEFAULT_CONFIGURATION.put(
-            ConfigurableProperty.TransactionType.qualifiedName(),
-            Constants.RESOURCE_LOCAL
-        );    
+    protected JDODataStoreCache createDataStoreCache() {
+        return new EmptyJDODataStoreCache();
     }
 
 }

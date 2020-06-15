@@ -87,6 +87,7 @@ import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.ResultRecord;
+import org.openmdx.base.rest.cci.VoidRecord;
 import org.openmdx.base.rest.spi.AbstractRestInteraction;
 import org.openmdx.base.rest.spi.AbstractRestPort;
 import org.openmdx.base.rest.spi.Facades;
@@ -1265,7 +1266,7 @@ public class Ui_1 extends AbstractRestPort {
             		output
             	);
             } catch(ResourceException e) {
-            	ServiceException e0 = new ServiceException(e);
+            	BasicException e0 = BasicException.toExceptionStack(e);
             	if(e0.getExceptionCode() != BasicException.Code.NOT_FOUND) {
             		throw e;
             	}
@@ -1301,7 +1302,7 @@ public class Ui_1 extends AbstractRestPort {
             		output
             	);
             } catch(ResourceException e) {
-            	ServiceException e0 = new ServiceException(e);
+            	BasicException e0 = BasicException.toExceptionStack(e);
             	if(e0.getExceptionCode() != BasicException.Code.NOT_FOUND) {
             		throw e;
             	}
@@ -3351,7 +3352,7 @@ public class Ui_1 extends AbstractRestPort {
 	            	requestPath.getDescendant(
 	                    new String[]{ "reply", UUIDs.newUUID().toString()}
 	                ),
-	                "org:openmdx:base:Void"
+	                VoidRecord.NAME
 	            );		            
 	            output.setResourceIdentifier(result.getPath());
 	            output.setBody(result.getValue());

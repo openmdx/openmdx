@@ -51,16 +51,16 @@ import java.security.PrivilegedExceptionAction;
 import java.util.UUID;
 
 import javax.jdo.JDODataStoreException;
-import javax.jdo.PersistenceManager;
 import javax.resource.cci.InteractionSpec;
 
-import org.openmdx.base.persistence.spi.UnitOfWork;
 import org.openmdx.base.persistence.spi.TransientContainerId;
+import org.openmdx.base.persistence.spi.UnitOfWork;
+import org.openmdx.kernel.jdo.JDOPersistenceManager;
 
 /**
  * Persistence Manager Interface 1.0
  */
-public interface PersistenceManager_1_0 extends PersistenceManager {
+public interface PersistenceManager_1_0 extends JDOPersistenceManager {
     
     /**
      * Retrieve an <code>InteractionSpec</code> specific persistence manager
@@ -89,10 +89,10 @@ public interface PersistenceManager_1_0 extends PersistenceManager {
     );
 
     /**
-     * Retrieve the object's default fetch group
+     * Tests whether the specified field is already loaded
      * 
-     * @param transientObjectId
-     * @param fieldName
+     * @param transientObjectId the object's id
+     * @param fieldName the name of the field to be tested
      * 
      * @return <code>true</code> if the field is already loaded
      * 

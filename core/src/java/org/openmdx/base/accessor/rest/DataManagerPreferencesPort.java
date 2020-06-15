@@ -271,7 +271,7 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND,
-                        new BasicException.Parameter("xri", input.getResourceIdentifier()),
+                        new BasicException.Parameter(BasicException.Parameter.XRI, input.getResourceIdentifier()),
                         new BasicException.Parameter("position", input.getPosition()),
                         new BasicException.Parameter("queryFilter", input.getQueryFilter())
                     )
@@ -301,7 +301,7 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
                         BasicException.newEmbeddedExceptionStack(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_IMPLEMENTED,
-                            new BasicException.Parameter("xri", input.getResourceIdentifier()),
+                            new BasicException.Parameter(BasicException.Parameter.XRI, input.getResourceIdentifier()),
                             new BasicException.Parameter("position", input.getPosition()),
                             new BasicException.Parameter("queryFilter", input.getQueryFilter())
                         )
@@ -316,7 +316,7 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
                         BasicException.newEmbeddedExceptionStack(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_FOUND,
-                            new BasicException.Parameter("xri", input.getResourceIdentifier()),
+                            new BasicException.Parameter(BasicException.Parameter.XRI, input.getResourceIdentifier()),
                             new BasicException.Parameter("position", input.getPosition()),
                             new BasicException.Parameter("queryFilter", input.getQueryFilter())
                         )

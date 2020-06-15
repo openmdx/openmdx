@@ -61,9 +61,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
-import org.openmdx.kernel.log.SysLog;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;
@@ -110,10 +110,7 @@ public class CreateAction extends BoundAction {
 	                    true
 	                );
 	            } catch(Exception e) {
-	                ServiceException e0 = new ServiceException(e);
-	                SysLog.warning(e0.getMessage(), e0.getMessage());
-	                SysLog.warning(e0.getMessage(), e0.getCause());
-	                editView.handleCanNotCommitException(e0.getCause());                    
+                    editView.handleCanNotCommitException(Throwables.log(BasicException.toExceptionStack(e)));                    
 	            }
 	            if(!success) {
 	                try {
@@ -179,7 +176,7 @@ public class CreateAction extends BoundAction {
                 	try {
                 		nextView.refresh(true, true);
                 	} catch(Exception e) {
-                		new ServiceException(e).log();
+                	    Throwables.log(e);
                 	}
 	                // Object is saved. EditObjectView is not required any more. Remove 
 	                // it from the set of open EditObjectViews.

@@ -58,7 +58,7 @@ import java.util.TreeMap;
  * </ul>
  * 
  * @see <a href="http://docs.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
- * @since 2.3
+ * @since Commons I/O 2.3
  * @version $Id: Charsets.java 1686747 2015-06-21 18:44:49Z krosenvold $
  */
 public class Charsets {
@@ -77,7 +77,7 @@ public class Charsets {
      * 
      * @return An immutable, case-insensitive map from canonical charset names to charset objects.
      * @see Charset#availableCharsets()
-     * @since 2.5
+     * @since Commons I/O 2.5
      */
     public static SortedMap<String, Charset> requiredCharsets() {
         // maybe cache?

@@ -74,9 +74,11 @@ import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.rest.cci.VoidRecord;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -87,11 +89,11 @@ import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.component.Grid;
 import org.openmdx.portal.servlet.component.ObjectView;
 import org.openmdx.portal.servlet.component.OperationPane;
-import org.openmdx.portal.servlet.component.UiOperationParam;
-import org.openmdx.portal.servlet.component.UiOperationTab;
 import org.openmdx.portal.servlet.component.ReferencePane;
 import org.openmdx.portal.servlet.component.ShowObjectView;
 import org.openmdx.portal.servlet.component.UiGrid;
+import org.openmdx.portal.servlet.component.UiOperationParam;
+import org.openmdx.portal.servlet.component.UiOperationTab;
 import org.openmdx.portal.servlet.control.ShowErrorsControl;
 
 public class InvokeOperationAction extends BoundAction {
@@ -234,7 +236,7 @@ public class InvokeOperationAction extends BoundAction {
 	                    }
 	                    // no input parameters --> Void
 	                    else {
-	                        paramDef = model.getElement("org:openmdx:base:Void");
+	                        paramDef = model.getElement(VoidRecord.NAME);
 	                    }
 	                    // prepare parameter values
 	                    List<Object> paramValues = new ArrayList<Object>();
@@ -302,22 +304,23 @@ public class InvokeOperationAction extends BoundAction {
 		                                );
 		                            }
 		                        } catch (Exception e) {
-		                            ServiceException e0 = new ServiceException(e);
-		                            SysLog.info(e0.getMessage(), e0.getCause());
+		                            Throwables.log(e);
 		                        }
 	                        }
 	                    } catch(Exception e) {
-	                        ServiceException e0 = new ServiceException(e);
-	                        if(e0.getExceptionCode() == BasicException.Code.CONCURRENT_ACCESS_FAILURE) {
-	                        	SysLog.detail(e0.getMessage(), e0.getCause());
+	                        ServiceException serviceException = new ServiceException(e);
+	                        if(serviceException.getExceptionCode() == BasicException.Code.CONCURRENT_ACCESS_FAILURE) {
+	                        	SysLog.detail(serviceException.getMessage(), serviceException.getCause());
 	                        } else {
-	                        	SysLog.warning(e0.getMessage(), e0.getCause());
+	                        	SysLog.warning(serviceException.getMessage(), serviceException.getCause());
 	                        }
 	                        try {
 	                            pm.currentTransaction().rollback();
-	                        } catch (Exception ignore) {}
+	                        } catch (Exception ignore) {
+	                			SysLog.trace("Exception ignored", ignore);
+	                        }
 	                        currentView.handleCanNotInvokeOperationException(
-	                            e0,
+	                            serviceException,
 	                            operationTab.getOperationName()
 	                        );
 	                    }
@@ -360,14 +363,12 @@ public class InvokeOperationAction extends BoundAction {
 		        		);
 		        	}
 		        } catch (Exception e) {
-		            ServiceException e0 = new ServiceException(e);
-		            SysLog.warning(e0.getMessage(), e0.getCause());
+		            Throwables.log(e);
 		        }
 		        try {
 		            p.close(true);
 		        } catch (Exception e) {
-		            ServiceException e0 = new ServiceException(e);
-		            SysLog.warning(e0.getMessage(), e0.getCause());
+                    Throwables.log(e);
 		        }
 		        return new ActionPerformResult(
 		            ActionPerformResult.StatusCode.DONE

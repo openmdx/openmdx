@@ -112,7 +112,7 @@ public class ShowErrorsControl extends Control implements Serializable {
            String separator = " | ";
            p.write("  <tr>");
            p.write("    <td>");
-           p.write("      <div class=\"", CssClass.alert.toString(), " ", CssClass.alertInfo.toString(), "\" style=\"margin-bottom:0px;\">");
+           p.write("      <div class=\"", CssClass.alert.toString(), " ", CssClass.alert_info.toString(), "\" style=\"margin-bottom:0px;\">");
            p.write(formattedDateTime.replace(" ", separator), separator, dateTimeFormat.getTimeZone().getID());
            p.write("      </div>");
            p.write("    </td>");
@@ -127,7 +127,7 @@ public class ShowErrorsControl extends Control implements Serializable {
         		   alertClass += message.substring(0, pos).trim();
         		   message = message.substring(pos + 1);
         	   } else {
-        		   alertClass += CssClass.alertDanger.toString();
+        		   alertClass += CssClass.alert_danger.toString();
         	   }
         	   p.write("      <div class=\"", alertClass, "\" style=\"margin-bottom:0px;\">");
         	   p.write("      " + message);

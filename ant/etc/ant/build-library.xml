@@ -8,7 +8,7 @@
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2004-2014, OMEX AG, Switzerland
+= Copyright (c) 2004-2019, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -67,9 +67,12 @@
 			<antcontrib:if>
 				<available file="${build.dir}/bin/org/openmdx/tools/ant/types/ManifestType.class"/>
 				<antcontrib:then>
-					<taskdef resource="org/openmdx/tools/ant/antlib.xml" uri="xri://(antlib:org.openmdx.tools.ant)">
+					<taskdef 
+						resource="org/openmdx/tools/ant/antlib.xml" 
+						uri="xri://(antlib:org.openmdx.tools.ant)"
+					>
 						<classpath>
-							<path refid="project.lib.classpath"/>
+							<path refid="project.bin.classpath"/>
 						</classpath>
 					</taskdef>
 					<property name="org.openmdx.tools.ant.is.available" value="true"/>
@@ -89,7 +92,8 @@
 				<propertyoperations/>
 			</propertyhelper>
 			<taskdef 
-				resource="org/openmdx/tools/ant/antlib.xml" uri="xri://(antlib:org.openmdx.tools.ant)"
+				resource="org/openmdx/tools/ant/antlib.xml" 
+				uri="xri://(antlib:org.openmdx.tools.ant)"
 				classpathref="openmdx.ant"
 			/>
 			<property name="org.openmdx.tools.ant.is.available" value="true"/>
@@ -189,75 +193,82 @@
 		<condition property="unix.distribution.is-set">
 			<isset property="unix.distribution"/>
 		</condition>
+		<available file="${env.JDK_11}" type="dir" value="[+] ${env.JDK_11}" property="JDK_11.info"/>
+		<property name="JDK_11.info" value="[-] ${env.JDK_11}"/>
+		<condition property="unix.distribution.is-set">
+			<isset property="unix.distribution"/>
+		</condition>
 		<property name="unix.distribution.is-set" value="not set"/>
 		<condition property="source.distribution.is-set">
 			<isset property="source.distribution"/>
 		</condition>
 		<property name="source.distribution.is-set" value="not set"/>
-		<echo message="user.build.properties          = [${user.build.properties.are.present}] ${user.build.properties}"/>
-		<echo message="java.vendor.properties         = [${java.vendor.properties.are.present}] ${java.vendor.properties}"/>
-		<echo message="target.platform.properties     = [${target.platform.properties.are.present}] ${target.platform.properties}"/>
-		<echo message="java.platform.properties       = [${java.platform.properties.are.present}] ${java.platform.properties}"/>
-		<echo message="project.build.properties       = [${project.build.properties.are.present}] ${project.build.properties}"/>
-		<echo message="project.version.properties     = [${project.version.properties.are.present}] ${project.version.properties}"/>
+		<echo message="user.build.properties               = [${user.build.properties.are.present}] ${user.build.properties}"/>
+		<echo message="java.vendor.properties              = [${java.vendor.properties.are.present}] ${java.vendor.properties}"/>
+		<echo message="target.platform.properties          = [${target.platform.properties.are.present}] ${target.platform.properties}"/>
+		<echo message="java.platform.properties            = [${java.platform.properties.are.present}] ${java.platform.properties}"/>
+		<echo message="project.build.properties            = [${project.build.properties.are.present}] ${project.build.properties}"/>
+		<echo message="project.version.properties          = [${project.version.properties.are.present}] ${project.version.properties}"/>
 		<echo/>
-		<echo message="ant.home                       = ${ant.home}"/>
-		<echo message="openmdx.home                   = ${openmdx.home}"/>
-		<echo message="java.home                      = ${java.home}"/>
-		<echo message="project.home                   = ${project.home}"/>
+		<echo message="ant.home                            = ${ant.home}"/>
+		<echo message="openmdx.home                        = ${openmdx.home}"/>
+		<echo message="java.home                           = ${java.home}"/>
+		<echo message="project.home                        = ${project.home}"/>
 		<echo/>
-		<echo message="build.target.jre               = [${build.target.jre.is.present}] ${build.target.jre}"/>
-		<echo message="JRE_12                         = ${JRE_12.info}"/>
-		<echo message="JRE_13                         = ${JRE_13.info}"/>
-		<echo message="JRE_14                         = ${JRE_14.info}"/>
-		<echo message="JRE_15                         = ${JRE_15.info}"/>
-		<echo message="JRE_16                         = ${JRE_16.info}"/>
-		<echo message="JRE_17                         = ${JRE_17.info}"/>
-		<echo message="JRE_18                         = ${JRE_18.info}"/>
+		<echo message="build.target.jre                    = [${build.target.jre.is.present}] ${build.target.jre}"/>
+		<echo message="JRE_12                              = ${JRE_12.info}"/>
+		<echo message="JRE_13                              = ${JRE_13.info}"/>
+		<echo message="JRE_14                              = ${JRE_14.info}"/>
+		<echo message="JRE_15                              = ${JRE_15.info}"/>
+		<echo message="JRE_16                              = ${JRE_16.info}"/>
+		<echo message="JRE_17                              = ${JRE_17.info}"/>
+		<echo message="JRE_18                              = ${JRE_18.info}"/>
+		<echo message="JDK_11                              = ${JDK_11.info}"/>
 		<echo/>
-		<echo message="ant.version                    = ${ant.version}"/>
-		<echo message="ant.java.version               = ${ant.java.version}"/>
-		<echo message="ant.project.name               = ${ant.project.name}"/>
+		<echo message="ant.version                         = ${ant.version}"/>
+		<echo message="ant.java.version                    = ${ant.java.version}"/>
+		<echo message="ant.project.name                    = ${ant.project.name}"/>
 		<echo/>
-		<echo message="basedir                        = ${basedir}"/>
-		<echo message="base.dir.name                  = ${base.dir.name}"/>
-		<echo message="build.dir                      = ${build.dir}"/>
-		<echo message="tmp.dir                        = ${tmp.dir}"/>
-		<echo message="log.dir                        = ${log.dir}"/>
-		<echo message="deliver.dir                    = ${deliver.dir}"/>
-		<echo message="distribution.dir               = ${distribution.dir}"/>
+		<echo message="basedir                             = ${basedir}"/>
+		<echo message="base.dir.name                       = ${base.dir.name}"/>
+		<echo message="build.dir                           = ${build.dir}"/>
+		<echo message="tmp.dir                             = ${tmp.dir}"/>
+		<echo message="log.dir                             = ${log.dir}"/>
+		<echo message="deliver.dir                         = ${deliver.dir}"/>
+		<echo message="distribution.dir                    = ${distribution.dir}"/>
 		<echo/>
-		<echo message="project.vendor.name            = ${project.vendor.name}"/>
-		<echo message="project.vendor.id              = ${project.vendor.id}"/>
-		<echo message="project.specification.title    = ${project.specification.title}"/>
-		<echo message="project.specification.version  = ${project.specification.version}"/>
-		<echo message="project.implementation.version = ${project.implementation.version}"/>
-		<echo message="project.implementation.prefix  = ${project.implementation.prefix}"/>
-		<echo message="project.platform.list          = ${project.platform.list}"/>
+		<echo message="project.vendor.name                 = ${project.vendor.name}"/>
+		<echo message="project.vendor.id                   = ${project.vendor.id}"/>
+		<echo message="project.specification.title         = ${project.specification.title}"/>
+		<echo message="project.specification.version       = ${project.specification.version}"/>
+		<echo message="project.implementation.version      = ${project.implementation.version}"/>
+		<echo message="project.implementation.prefix       = ${project.implementation.prefix}"/>
+		<echo message="project.platform.list               = ${project.platform.list}"/>
 		<echo/>
-		<echo message="build.target.platform          = [${build.target.platform.is.included}] ${build.target.platform}"/>
-		<echo message="build.java.platform            = ${build.java.platform}"/>
-		<echo message="build.target.version           = ${build.target.version}"/>
-		<echo message="build.source.version           = ${build.source.version}"/>
-		<echo message="build.debug                    = ${build.debug}"/>
-		<echo message="build.optimize                 = ${build.optimize}"/>
+		<echo message="build.target.platform               = [${build.target.platform.is.included}] ${build.target.platform}"/>
+		<echo message="build.java.platform                 = ${build.java.platform}"/>
+		<echo message="build.target.version                = ${build.target.version}"/>
+		<echo message="build.source.version                = ${build.source.version}"/>
+		<echo message="build.debug                         = ${build.debug}"/>
+		<echo message="build.optimize                      = ${build.optimize}"/>
 		<echo/>
-		<echo message="unix.distribution              = ${unix.distribution.is-set}"/>
-		<echo message="source.distribution            = ${source.distribution.is-set}"/>
-		<echo message="distribution.format            = ${distribution.format}"/>
+		<echo message="unix.distribution                   = ${unix.distribution.is-set}"/>
+		<echo message="source.distribution                 = ${source.distribution.is-set}"/>
+		<echo message="distribution.format                 = ${distribution.format}"/>
 		<echo/>
-		<echo message="junit.test.halt.on.error       = ${junit.test.halt.on.error}"/>
-		<echo message="junit.test.halt.on.failure     = ${junit.test.halt.on.failure}"/>
-		<echo message="junit.test.log.level           = ${junit.test.log.level}"/>
-		<echo message="junit.test.log.debug           = ${junit.test.log.debug}"/>
-		<echo message="junit.test.report              = ${junit.test.report}"/>
+		<echo message="junit.test.halt.on.error            = ${junit.test.halt.on.error}"/>
+		<echo message="junit.test.halt.on.failure          = ${junit.test.halt.on.failure}"/>
+		<echo message="junit.test.log.level                = ${junit.test.log.level}"/>
+		<echo message="junit.test.log.debug                = ${junit.test.log.debug}"/>
+		<echo message="junit.test.report                   = ${junit.test.report}"/>
 		<condition property="junit.test.timezone.info" value="${junit.test.timezone}">
 			<isset property="junit.test.timezone"/>
 		</condition>
 		<property name="junit.test.timezone.info" value="[-]"/>
-		<echo message="junit.test.timezone            = ${junit.test.timezone.info}"/>
-		<echo message="junit.test.datasource          = ${junit.test.datasource}"/>
-		<echo message="junit.test.datasource.name     = ${junit.test.datasource.name}"/>
+		<echo message="junit.test.timezone                 = ${junit.test.timezone.info}"/>
+		<echo message="junit.test.datasource               = ${junit.test.datasource}"/>
+		<echo message="junit.test.datasource.name          = ${junit.test.datasource.name}"/>
+		<echo message="org.openmdx.tools.ant.is.available  = ${org.openmdx.tools.ant.is.available}"/>
 	</target>
 
 	<!--*******************************************************************
@@ -274,7 +285,12 @@
 			<format property="build.year" pattern="yyyy"/>
 			<format property="build.starttime" pattern="${datetime.data.pattern}" timezone="UTC"/>
 		</tstamp>
-		<available property="source.distribution" file="${basedir}/src/java" type="dir"/>
+        <condition property="source.distribution">
+            <or>
+                <available file="${basedir}/src/java" type="dir"/>
+                <available file="${basedir}/src/main/java" type="dir"/>
+            </or>
+        </condition>
 		<condition property="unix.distribution">
 			<or>
 				<available file="${deliver.dir}/unix.distribution"/>
@@ -288,7 +304,10 @@
 		<available property="build.target.jre.found" file="${build.target.jre}" type="dir"/>
 	</target>
 	<target name="-ant-init" unless="org.openmdx.tools.ant.is.available">
-		<taskdef resource="org/openmdx/tools/ant/antlib.xml" uri="xri://(antlib:org.openmdx.tools.ant)">
+		<taskdef 
+			resource="org/openmdx/tools/ant/antlib.xml" 
+			uri="xri://(antlib:org.openmdx.tools.ant)"
+		>
 			<classpath>
 				<pathelement location="${openmdx.home}/apache/jre-1.5/ant/lib/ant.jar"/>
 				<pathelement location="${openmdx.home}/apache/jre-1.2/contribution/lib/ant-contrib.jar"/>
@@ -357,6 +376,8 @@
 				<equals arg1="${ant.java.version}" arg2="1.6"/>
 				<equals arg1="${ant.java.version}" arg2="1.7"/>
 				<equals arg1="${ant.java.version}" arg2="1.8"/>
+				<equals arg1="${ant.java.version}" arg2="11"/>
+				<equals arg1="${ant.java.version}" arg2="12"/>
 			</or>
 		</condition>
 		<fail 
@@ -377,6 +398,8 @@
 				<equals arg1="${ant.java.version}" arg2="1.6"/>
 				<equals arg1="${ant.java.version}" arg2="1.7"/>
 				<equals arg1="${ant.java.version}" arg2="1.8"/>
+				<equals arg1="${ant.java.version}" arg2="11"/>
+				<equals arg1="${ant.java.version}" arg2="12"/>
 			</or>
 		</condition>
 		<fail 
@@ -396,6 +419,8 @@
 				<equals arg1="${ant.java.version}" arg2="1.6"/>
 				<equals arg1="${ant.java.version}" arg2="1.7"/>
 				<equals arg1="${ant.java.version}" arg2="1.8"/>
+				<equals arg1="${ant.java.version}" arg2="11"/>
+				<equals arg1="${ant.java.version}" arg2="12"/>
 			</or>
 		</condition>
 		<fail 
@@ -414,6 +439,8 @@
 				<equals arg1="${ant.java.version}" arg2="1.6"/>
 				<equals arg1="${ant.java.version}" arg2="1.7"/>
 				<equals arg1="${ant.java.version}" arg2="1.8"/>
+				<equals arg1="${ant.java.version}" arg2="11"/>
+				<equals arg1="${ant.java.version}" arg2="12"/>
 			</or>
 		</condition>
 		<fail 
@@ -431,6 +458,8 @@
 			<or>
 				<equals arg1="${ant.java.version}" arg2="1.7"/>
 				<equals arg1="${ant.java.version}" arg2="1.8"/>
+				<equals arg1="${ant.java.version}" arg2="11"/>
+				<equals arg1="${ant.java.version}" arg2="12"/>
 			</or>
 		</condition>
 		<fail 
@@ -438,20 +467,42 @@
 			if="build.requires.jre17" 
 			unless="build.supports.jre17"
 		/>
-		<condition property="build.requires.jre17">
+		<condition property="build.requires.jre18">
 			<or>
 				<equals arg1="${build.source.version}" arg2="1.8"/>
 				<equals arg1="${build.target.version}" arg2="1.8"/>
 			</or>
 		</condition>
 		<condition property="build.supports.jre18">
-			<equals arg1="${ant.java.version}" arg2="1.8"/>
+			<or>
+				<equals arg1="${ant.java.version}" arg2="1.8"/>
+				<equals arg1="${ant.java.version}" arg2="11"/>
+				<equals arg1="${ant.java.version}" arg2="12"/>
+			</or>
 		</condition>
 		<fail 
 			message="Building for source version ${build.source.version} and target version ${build.target.version} requires Ant running under JRE 8 or later" 
 			if="build.requires.jre18" 
 			unless="build.supports.jre18"
 		/>
+		<condition property="build.requires.java11">
+			<or>
+				<equals arg1="${build.source.version}" arg2="11"/>
+				<equals arg1="${build.target.version}" arg2="11"/>
+			</or>
+		</condition>
+		<condition property="build.supports.java11">
+			<or>
+				<equals arg1="${ant.java.version}" arg2="11"/>
+				<equals arg1="${ant.java.version}" arg2="12"/>
+			</or>
+		</condition>
+		<fail 
+			message="Building for source version ${build.source.version} and target version ${build.target.version} requires Ant running under Java 11 or later" 
+			if="build.requires.java11" 
+			unless="build.supports.java11"
+		/>
+		
 		<condition property="build.requires.rmi.compiler">
 			<or>
 				<isreference refid="project.rmi.jrmp.classes"/>
@@ -662,24 +713,49 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 			    </echo>
 			</antcontrib:then>
 		</antcontrib:if>
-		<java 
-			classname="org.openmdx.application.mof.externalizer.xmi.XMIExternalizer" 
-			fork="true" 
-			failonerror="true" 
-			maxmemory="${build.memory.limit}" 
-			classpathref="${model.transformation.class.path}"
-		>
-			<sysproperty key="user.language" value="en"/>
-			<sysproperty key="user.region" value="US"/>
-			<sysproperty key="file.encoding" value="Cp1252"/>
-			<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/model/logging.properties"/>
-			<arg value="--url=file:src/model/poseidon/models.xmi"/>
-			<arg value="--xmi=poseidon"/>
-			<arg value="--out=${build.dir}/model/models.zip"/>
-			<arg value="--openmdxjdo=${basedir}/src/resource"/>
-			<arg line="${model.build.formats}"/>
-			<arg value="%"/>
-		</java>
+		<antcontrib:if>
+			<available file="${basedir}/src/main/resource" type="dir"/>
+			<antcontrib:then>
+				<java
+					classname="org.openmdx.application.mof.externalizer.xmi.XMIExternalizer"
+					fork="true"
+					failonerror="true"
+					maxmemory="${build.memory.limit}"
+					classpathref="${model.transformation.class.path}"
+				>
+					<sysproperty key="user.language" value="en"/>
+					<sysproperty key="user.region" value="US"/>
+					<sysproperty key="file.encoding" value="Cp1252"/>
+					<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/model/logging.properties"/>
+					<arg value="--url=file:src/model/poseidon/models.xmi"/>
+					<arg value="--xmi=poseidon"/>
+					<arg value="--out=${build.dir}/model/models.zip"/>
+					<arg value="--openmdxjdo=${basedir}/src/main/resource"/>
+					<arg line="${model.build.formats}"/>
+					<arg value="%"/>
+				</java>
+			</antcontrib:then>
+			<antcontrib:else>
+				<java
+					classname="org.openmdx.application.mof.externalizer.xmi.XMIExternalizer"
+					fork="true"
+					failonerror="true"
+					maxmemory="${build.memory.limit}"
+					classpathref="${model.transformation.class.path}"
+				>
+					<sysproperty key="user.language" value="en"/>
+					<sysproperty key="user.region" value="US"/>
+					<sysproperty key="file.encoding" value="Cp1252"/>
+					<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/model/logging.properties"/>
+					<arg value="--url=file:src/model/poseidon/models.xmi"/>
+					<arg value="--xmi=poseidon"/>
+					<arg value="--out=${build.dir}/model/models.zip"/>
+					<arg value="--openmdxjdo=${basedir}/src/resource"/>
+					<arg line="${model.build.formats}"/>
+					<arg value="%"/>
+				</java>
+			</antcontrib:else>
+		</antcontrib:if>
 	</target>
 	<target name="-preprocess-magicdraw-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-magicdraw">
 		<echo>Transforming Magicdraw models ${basedir}/src/model/magicdraw/models.xmi to ${build.dir}/model/models.zip...</echo>
@@ -700,54 +776,111 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 			    </echo>
 			</antcontrib:then>
 		</antcontrib:if>
-		<java 
-			classname="org.openmdx.application.mof.externalizer.xmi.XMIExternalizer" 
-			fork="true" 
-			failonerror="true" 
-			maxmemory="${build.memory.limit}" 
-			classpathref="${model.transformation.class.path}"
-		>
-			<sysproperty key="user.language" value="en"/>
-			<sysproperty key="user.region" value="US"/>
-			<sysproperty key="file.encoding" value="Cp1252"/>
-			<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/model/logging.properties"/>
-			<arg value="--url=file:src/model/magicdraw/models.xmi"/>
-			<arg value="--xmi=magicdraw"/>
-			<arg value="--out=${build.dir}/model/models.zip"/>
-			<arg value="--openmdxjdo=${basedir}/src/resource"/>
-			<arg line="${model.build.formats}"/>
-			<arg value="%"/>
-		</java>
+		<antcontrib:if>
+			<available file="${basedir}/src/main/resource" type="dir"/>
+			<antcontrib:then>
+				<java
+					classname="org.openmdx.application.mof.externalizer.xmi.XMIExternalizer"
+					fork="true"
+					failonerror="true"
+					maxmemory="${build.memory.limit}"
+					classpathref="${model.transformation.class.path}"
+				>
+					<sysproperty key="user.language" value="en"/>
+					<sysproperty key="user.region" value="US"/>
+					<sysproperty key="file.encoding" value="Cp1252"/>
+					<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/model/logging.properties"/>
+					<arg value="--url=file:src/model/magicdraw/models.xmi"/>
+					<arg value="--xmi=magicdraw"/>
+					<arg value="--out=${build.dir}/model/models.zip"/>
+					<arg value="--openmdxjdo=${basedir}/src/main/resource"/>
+					<arg line="${model.build.formats}"/>
+					<arg value="%"/>
+				</java>
+			</antcontrib:then>
+			<antcontrib:else>
+				<java
+					classname="org.openmdx.application.mof.externalizer.xmi.XMIExternalizer"
+					fork="true"
+					failonerror="true"
+					maxmemory="${build.memory.limit}"
+					classpathref="${model.transformation.class.path}"
+				>
+					<sysproperty key="user.language" value="en"/>
+					<sysproperty key="user.region" value="US"/>
+					<sysproperty key="file.encoding" value="Cp1252"/>
+					<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/model/logging.properties"/>
+					<arg value="--url=file:src/model/magicdraw/models.xmi"/>
+					<arg value="--xmi=magicdraw"/>
+					<arg value="--out=${build.dir}/model/models.zip"/>
+					<arg value="--openmdxjdo=${basedir}/src/resource"/>
+					<arg line="${model.build.formats}"/>
+					<arg value="%"/>
+				</java>
+			</antcontrib:else>
+		</antcontrib:if>
 	</target>
 	<target name="-preprocess-rose-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-rose">
 		<echo>Transforming Rose models ${model.transformation.rose.file} to ${build.dir}/model/models.zip...</echo>
 		<echo/>
 		<echo>Externalizing Rose models to ${build.dir}/model/models.zip ...</echo>
-		<java 
-			classname="org.openmdx.application.mof.externalizer.rose.RoseExternalizer" 
-			fork="true" 
-			failonerror="true" 
-			maxmemory="${build.memory.limit}" 
-			classpathref="${model.transformation.class.path}"
-		>
-			<sysproperty key="user.language" value="en"/>
-			<sysproperty key="user.region" value="US"/>
-			<sysproperty key="file.encoding" value="Cp1252"/>
-			<arg value="--pathMapSymbol=$$curdir"/>
-			<arg value="--pathMapPath=&amp;"/>
-			<arg value="--pathMapSymbol=$$${project.implementation.prefix}_opt_openmdx"/>
-			<arg value="--pathMapPath=${openmdx.home}"/>
-			<arg value="--pathMapSymbol=$$thirdparty_models"/>
-			<arg value="--pathMapPath=${model.transformation.rose.thirdparty}"/>
-			<arg value="--mdlDir=${model.transformation.rose.dir}"/>
-			<arg value="--pathMapSymbol=$$sandbox"/>
-			<arg value="--pathMapPath=${model.transformation.rose.sandbox}"/>
-			<arg value="--mdlFile=${model.transformation.rose.file}"/>
-			<arg value="--out=${build.dir}/model/models.zip"/>
-			<arg value="--openmdxjdoDir=${basedir}/src/resource"/>
-			<arg line="${model.build.formats}"/>
-			<arg value="%"/>
-		</java>
+		<antcontrib:if>
+			<available file="${basedir}/src/main/resource" type="dir"/>
+			<antcontrib:then>
+				<java
+					classname="org.openmdx.application.mof.externalizer.rose.RoseExternalizer"
+					fork="true"
+					failonerror="true"
+					maxmemory="${build.memory.limit}"
+					classpathref="${model.transformation.class.path}"
+				>
+					<sysproperty key="user.language" value="en"/>
+					<sysproperty key="user.region" value="US"/>
+					<sysproperty key="file.encoding" value="Cp1252"/>
+					<arg value="--pathMapSymbol=$$curdir"/>
+					<arg value="--pathMapPath=&amp;"/>
+					<arg value="--pathMapSymbol=$$${project.implementation.prefix}_opt_openmdx"/>
+					<arg value="--pathMapPath=${openmdx.home}"/>
+					<arg value="--pathMapSymbol=$$thirdparty_models"/>
+					<arg value="--pathMapPath=${model.transformation.rose.thirdparty}"/>
+					<arg value="--mdlDir=${model.transformation.rose.dir}"/>
+					<arg value="--pathMapSymbol=$$sandbox"/>
+					<arg value="--pathMapPath=${model.transformation.rose.sandbox}"/>
+					<arg value="--mdlFile=${model.transformation.rose.file}"/>
+					<arg value="--out=${build.dir}/model/models.zip"/>
+					<arg value="--openmdxjdoDir=${basedir}/src/main/resource"/>
+					<arg line="${model.build.formats}"/>
+					<arg value="%"/>
+				</java>
+			</antcontrib:then>
+			<antcontrib:else>
+				<java
+					classname="org.openmdx.application.mof.externalizer.rose.RoseExternalizer"
+					fork="true"
+					failonerror="true"
+					maxmemory="${build.memory.limit}"
+					classpathref="${model.transformation.class.path}"
+				>
+					<sysproperty key="user.language" value="en"/>
+					<sysproperty key="user.region" value="US"/>
+					<sysproperty key="file.encoding" value="Cp1252"/>
+					<arg value="--pathMapSymbol=$$curdir"/>
+					<arg value="--pathMapPath=&amp;"/>
+					<arg value="--pathMapSymbol=$$${project.implementation.prefix}_opt_openmdx"/>
+					<arg value="--pathMapPath=${openmdx.home}"/>
+					<arg value="--pathMapSymbol=$$thirdparty_models"/>
+					<arg value="--pathMapPath=${model.transformation.rose.thirdparty}"/>
+					<arg value="--mdlDir=${model.transformation.rose.dir}"/>
+					<arg value="--pathMapSymbol=$$sandbox"/>
+					<arg value="--pathMapPath=${model.transformation.rose.sandbox}"/>
+					<arg value="--mdlFile=${model.transformation.rose.file}"/>
+					<arg value="--out=${build.dir}/model/models.zip"/>
+					<arg value="--openmdxjdoDir=${basedir}/src/resource"/>
+					<arg line="${model.build.formats}"/>
+					<arg value="%"/>
+				</java>
+			</antcontrib:else>
+		</antcontrib:if>
 	</target>
 	<target name="-preprocess-rsm-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-rsm">
 		<property name="model.transformation.rsm.url" value="file:src/model/rsm/models.emx"/>
@@ -755,60 +888,122 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 		<!-- Externalizes the model metadata from an RSM model file -->
 		<echo/>
 		<echo>Externalizing RSM models to ${build.dir}/model/models.zip ...</echo>
-		<java 
-			classname="org.openmdx.application.mof.externalizer.xmi.XMIExternalizer" 
-			fork="true" 
-			failonerror="true" 
-			maxmemory="${build.memory.limit}" 
-			classpathref="${model.transformation.class.path}"
-		>
-			<sysproperty key="user.language" value="en"/>
-			<sysproperty key="user.region" value="US"/>
-			<sysproperty key="file.encoding" value="Cp1252"/>
-			<sysproperty key="org.openmdx.application.mof.externalizer.xmi.ignoreImportedPackage" value="true"/>
-			<arg value="--pathMapSymbol=openMDX 2 ~ Core (RSM)"/>
-			<arg value="--pathMapPath=file:${openmdx.home}/core/src/model/rsm/"/>
-			<arg value="--pathMapSymbol=openMDX 2 ~ Security (RSM)"/>
-			<arg value="--pathMapPath=file:${openmdx.home}/security/src/model/rsm/"/>
-			<arg value="--pathMapSymbol=${thirdparty.model.name}"/>
-			<arg value="--pathMapPath=file:${thirdparty.model.home}"/>
-			<arg value="--url=${model.transformation.rsm.url}"/>
-			<arg value="--xmi=rsm"/>
-			<arg value="--out=${build.dir}/model/models.zip"/>
-			<arg value="--openmdxjdo=${basedir}/src/resource"/>
-			<arg line="${model.build.formats}"/>
-			<arg value="%"/>
-		</java>
+		<antcontrib:if>
+			<available file="${basedir}/src/main/resource" type="dir"/>
+			<antcontrib:then>
+				<java
+					classname="org.openmdx.application.mof.externalizer.xmi.XMIExternalizer"
+					fork="true"
+					failonerror="true"
+					maxmemory="${build.memory.limit}"
+					classpathref="${model.transformation.class.path}"
+				>
+					<sysproperty key="user.language" value="en"/>
+					<sysproperty key="user.region" value="US"/>
+					<sysproperty key="file.encoding" value="Cp1252"/>
+					<sysproperty key="org.openmdx.application.mof.externalizer.xmi.ignoreImportedPackage" value="true"/>
+					<arg value="--pathMapSymbol=openMDX 2 ~ Core (RSM)"/>
+					<arg value="--pathMapPath=file:${openmdx.home}/core/src/model/rsm/"/>
+					<arg value="--pathMapSymbol=openMDX 2 ~ Security (RSM)"/>
+					<arg value="--pathMapPath=file:${openmdx.home}/security/src/model/rsm/"/>
+					<arg value="--pathMapSymbol=${thirdparty.model.name}"/>
+					<arg value="--pathMapPath=file:${thirdparty.model.home}"/>
+					<arg value="--url=${model.transformation.rsm.url}"/>
+					<arg value="--xmi=rsm"/>
+					<arg value="--out=${build.dir}/model/models.zip"/>
+					<arg value="--openmdxjdo=${basedir}/src/main/resource"/>
+					<arg line="${model.build.formats}"/>
+					<arg value="%"/>
+				</java>
+			</antcontrib:then>
+			<antcontrib:else>
+				<java
+					classname="org.openmdx.application.mof.externalizer.xmi.XMIExternalizer"
+					fork="true"
+					failonerror="true"
+					maxmemory="${build.memory.limit}"
+					classpathref="${model.transformation.class.path}"
+				>
+					<sysproperty key="user.language" value="en"/>
+					<sysproperty key="user.region" value="US"/>
+					<sysproperty key="file.encoding" value="Cp1252"/>
+					<sysproperty key="org.openmdx.application.mof.externalizer.xmi.ignoreImportedPackage" value="true"/>
+					<arg value="--pathMapSymbol=openMDX 2 ~ Core (RSM)"/>
+					<arg value="--pathMapPath=file:${openmdx.home}/core/src/model/rsm/"/>
+					<arg value="--pathMapSymbol=openMDX 2 ~ Security (RSM)"/>
+					<arg value="--pathMapPath=file:${openmdx.home}/security/src/model/rsm/"/>
+					<arg value="--pathMapSymbol=${thirdparty.model.name}"/>
+					<arg value="--pathMapPath=file:${thirdparty.model.home}"/>
+					<arg value="--url=${model.transformation.rsm.url}"/>
+					<arg value="--xmi=rsm"/>
+					<arg value="--out=${build.dir}/model/models.zip"/>
+					<arg value="--openmdxjdo=${basedir}/src/resource"/>
+					<arg line="${model.build.formats}"/>
+					<arg value="%"/>
+				</java>
+			</antcontrib:else>
+		</antcontrib:if>
 	</target>
 	<target name="-preprocess-emf-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-emf">
 		<echo>Transforming EMF models ${basedir}/src/model/emf/src/uml/models.uml to ${build.dir}/model/models.zip...</echo>
 		<!-- Externalizes the model metadata from a EMF model file -->
 		<echo/>
 		<echo>Externalizing EMF models to ${build.dir}/model/models.zip ...</echo>
-		<java 
-			classname="org.openmdx.application.mof.externalizer.xmi.XMIExternalizer" 
-			fork="true" 
-			failonerror="true" 
-			maxmemory="${build.memory.limit}" 
-			classpathref="${model.transformation.class.path}"
-		>
-			<sysproperty key="user.language" value="en"/>
-			<sysproperty key="user.region" value="US"/>
-			<sysproperty key="file.encoding" value="Cp1252"/>
-			<arg value="--pathMapSymbol=openMDX 2 ~ Core (EMF)"/>
-			<arg value="--pathMapPath=file:${openmdx.home}/core/src/model/emf/"/>
-			<arg value="--pathMapSymbol=openMDX 2 ~ Security (EMF)"/>
-			<arg value="--pathMapPath=file:${openmdx.home}/security/src/model/emf/"/>
-			<arg value="--pathMapSymbol=${thirdparty.model.name}"/>
-			<arg value="--pathMapPath=file:${thirdparty.model.home}"/>
-			<arg value="--url=file:src/model/emf/models.uml"/>
-			<arg value="--xmi=emf"/>
-			<arg value="--out=${build.dir}/model/models.zip"/>
-			<arg value="--openmdxjdo=${basedir}/src/resource"/>
-			<arg value="--dataproviderVersion=2"/> <!-- The dataproviderVersion default value is 1 -->
-			<arg line="${model.build.formats}"/>
-			<arg value="%"/>
-		</java>
+		<antcontrib:if>
+			<available file="${basedir}/src/main/resource" type="dir"/>
+			<antcontrib:then>
+				<java
+					classname="org.openmdx.application.mof.externalizer.xmi.XMIExternalizer"
+					fork="true"
+					failonerror="true"
+					maxmemory="${build.memory.limit}"
+					classpathref="${model.transformation.class.path}"
+				>
+					<sysproperty key="user.language" value="en"/>
+					<sysproperty key="user.region" value="US"/>
+					<sysproperty key="file.encoding" value="Cp1252"/>
+					<arg value="--pathMapSymbol=openMDX 2 ~ Core (EMF)"/>
+					<arg value="--pathMapPath=file:${openmdx.home}/core/src/model/emf/"/>
+					<arg value="--pathMapSymbol=openMDX 2 ~ Security (EMF)"/>
+					<arg value="--pathMapPath=file:${openmdx.home}/security/src/model/emf/"/>
+					<arg value="--pathMapSymbol=${thirdparty.model.name}"/>
+					<arg value="--pathMapPath=file:${thirdparty.model.home}"/>
+					<arg value="--url=file:src/model/emf/models.uml"/>
+					<arg value="--xmi=emf"/>
+					<arg value="--out=${build.dir}/model/models.zip"/>
+					<arg value="--openmdxjdo=${basedir}/src/main/resource"/>
+					<arg value="--dataproviderVersion=2"/> <!-- The dataproviderVersion default value is 1 -->
+					<arg line="${model.build.formats}"/>
+					<arg value="%"/>
+				</java>
+			</antcontrib:then>
+			<antcontrib:else>
+				<java
+					classname="org.openmdx.application.mof.externalizer.xmi.XMIExternalizer"
+					fork="true"
+					failonerror="true"
+					maxmemory="${build.memory.limit}"
+					classpathref="${model.transformation.class.path}"
+				>
+					<sysproperty key="user.language" value="en"/>
+					<sysproperty key="user.region" value="US"/>
+					<sysproperty key="file.encoding" value="Cp1252"/>
+					<arg value="--pathMapSymbol=openMDX 2 ~ Core (EMF)"/>
+					<arg value="--pathMapPath=file:${openmdx.home}/core/src/model/emf/"/>
+					<arg value="--pathMapSymbol=openMDX 2 ~ Security (EMF)"/>
+					<arg value="--pathMapPath=file:${openmdx.home}/security/src/model/emf/"/>
+					<arg value="--pathMapSymbol=${thirdparty.model.name}"/>
+					<arg value="--pathMapPath=file:${thirdparty.model.home}"/>
+					<arg value="--url=file:src/model/emf/models.uml"/>
+					<arg value="--xmi=emf"/>
+					<arg value="--out=${build.dir}/model/models.zip"/>
+					<arg value="--openmdxjdo=${basedir}/src/resource"/>
+					<arg value="--dataproviderVersion=2"/> <!-- The dataproviderVersion default value is 1 -->
+					<arg line="${model.build.formats}"/>
+					<arg value="%"/>
+				</java>
+			</antcontrib:else>
+		</antcontrib:if>
 	</target>
 	<target name="-preprocess-model-init">
 		<uptodate property="model-files.are.up-to-date" targetfile="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
@@ -1112,7 +1307,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 						>
 							<src>
 								<pathelement location="${build.dir}/src/java"/>
-								<pathelement location="${basedir}/src/java"/>
+                                <dirset dir="${basedir}/src" includes="java/** main/java**"/>
 							</src>
 							<patternset refid="build.exclude"/>
 						</javac>
@@ -1131,7 +1326,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 							includeantruntime="${build.include.ant.runtime}"
 						>
 							<src>
-								<pathelement location="${basedir}/src/java"/>
+                                <dirset dir="${basedir}/src" includes="java/** main/java**"/>
 							</src>
 							<patternset refid="build.exclude"/>
 						</javac>
@@ -1160,7 +1355,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 								>
 									<src>
 										<pathelement location="${build.dir}/src/java"/>
-										<pathelement location="${basedir}/src/java"/>
+                                        <dirset dir="${basedir}/src" includes="java/** main/java**"/>
 									</src>
 									<patternset refid="build.exclude"/>
 								</javac>
@@ -1181,7 +1376,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 									>
 										<src>
 											<pathelement location="${build.dir}/src/java"/>
-											<pathelement location="${basedir}/src/java"/>
+	                                        <dirset dir="${basedir}/src" includes="java/** main/java**"/>
 										</src>
 										<patternset refid="build.exclude"/>
 									</javac>
@@ -1203,7 +1398,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 								>
 									<src>
 										<pathelement location="${build.dir}/src/java"/>
-										<pathelement location="${basedir}/src/java"/>
+                                        <dirset dir="${basedir}/src" includes="java/** main/java**"/>
 									</src>
 									<patternset refid="build.exclude"/>
 								</javac>
@@ -1228,7 +1423,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 									includeantruntime="${build.include.ant.runtime}"
 								>
 									<src>
-										<pathelement location="${basedir}/src/java"/>
+                                        <dirset dir="${basedir}/src" includes="java/** main/java**"/>
 									</src>
 									<patternset refid="build.exclude"/>
 								</javac>
@@ -1247,14 +1442,38 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 										includeantruntime="${build.include.ant.runtime}"
 									>
 										<src>
-											<pathelement location="${basedir}/src/java"/>
+	                                        <dirset dir="${basedir}/src" includes="java/** main/java**"/>
+										</src>
+										<patternset refid="build.exclude"/>
+									</javac>
+								</antcontrib:then>
+							</antcontrib:elseif>
+							<antcontrib:elseif>
+								<istrue value="${build.requires.java11}"/>
+								<antcontrib:then>
+									<echo>JAVAC:standard</echo>
+									<javac 
+										destdir="${build.dir}/bin" 
+										debug="${build.debug}"
+										encoding="UTF-8"
+										optimize="${build.optimize}" 
+										fork="true" 
+										memoryMaximumSize="${build.memory.limit}" 
+										classpathref="project.lib.classpath" 
+										source="${build.source.version}" 
+										target="${build.target.version}" 
+										bootclasspathref="java.bootstrap.lib" 
+										includeantruntime="${build.include.ant.runtime}"
+									>
+										<src>
+	                                        <dirset dir="${basedir}/src" includes="java/** main/java**"/>
 										</src>
 										<patternset refid="build.exclude"/>
 									</javac>
 								</antcontrib:then>
 							</antcontrib:elseif>
 							<antcontrib:else>
-								<echo>JAVAC:standard</echo>
+								<echo>JAVAC:classic</echo>
 								<javac 
 									destdir="${build.dir}/bin" 
 									debug="${build.debug}"
@@ -1270,7 +1489,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 									includeantruntime="${build.include.ant.runtime}"
 								>
 									<src>
-										<pathelement location="${basedir}/src/java"/>
+                                        <dirset dir="${basedir}/src" includes="java/** main/java**"/>
 									</src>
 									<patternset refid="build.exclude"/>
 								</javac>

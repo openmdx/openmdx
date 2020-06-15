@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: SingletonMappedRecord 
+ * Description: Singleton Indexed Record 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
@@ -52,8 +52,9 @@ import java.util.AbstractList;
 import javax.resource.cci.IndexedRecord;
 
 /**
- * SingletonMappedRecord
+ * Singleton Indexed Record
  */
+@Deprecated
 @SuppressWarnings("rawtypes")
 final class SingletonIndexedRecord
     extends AbstractList
@@ -62,10 +63,6 @@ final class SingletonIndexedRecord
 
     /**
      * Constructor 
-     *
-     * @param name
-     * @param description
-     * @param value
      */
     SingletonIndexedRecord(
         String name,

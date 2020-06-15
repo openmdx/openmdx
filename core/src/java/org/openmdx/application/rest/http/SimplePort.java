@@ -105,30 +105,6 @@ public class SimplePort extends HttpPort {
     }
 
     /**
-     * Retrieve uri.
-     *
-     * @return Returns the uri.
-     * @deprecated Use {@link #getConnectionURL()} instead
-     */
-    @Deprecated
-    public String getUri() {
-        return getConnectionURL();
-    }
-
-    /**
-     * Set uri.
-     * 
-     * @param contextURL The uri to set.
-     * @deprecated Use {@link #setConnectionURL(String)} instead
-     */
-    @Deprecated
-    public void setUri(
-        String contextURL
-    ) {
-        setConnectionURL(contextURL);
-    }
-
-    /**
      * Retrieve userName.
      *
      * @return Returns the userName.
@@ -214,9 +190,6 @@ public class SimplePort extends HttpPort {
 
         /**
          * Constructor 
-         *
-         * @param connection
-         * @param contextURL
          * 
          * @throws ResourceException 
          */

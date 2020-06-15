@@ -149,8 +149,8 @@ org.openmdx.kernel.log.*
 					<input id="<%= WebKeys.REQUEST_ID %>" name="<%= Action.PARAMETER_REQUEST_ID %>" type="hidden" value="<%= requestId %>" />
 					<input id="<%= WebKeys.REQUEST_PARAMETER %>" name="<%= WebKeys.REQUEST_PARAMETER %>" type="hidden" value="<%= parameters %>" />
 					<div>
-						<div class="<%= CssClass.sidebarNav %>">
-						<ul class="<%= CssClass.nav + " " + CssClass.navList %>">
+						<div class="<%= CssClass.sidebar_nav %>">
+						<ul class="<%= CssClass.nav + " " + CssClass.nav_list %>">
 <%							
 							for(Object entry: menuEntries.values()) {
 								String menuEntry = (String)entry;

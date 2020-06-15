@@ -60,7 +60,6 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.exception.InvalidParameter
  * The most basic representation of an attribute to be used in the request attributes
  * section of the outgoing RadiusPackets. (see known direct known subclasses)
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.2 $
  */
 public class RadiusAttribute {
     private static final int HEADER_LENGTH = 2;
@@ -81,18 +80,15 @@ public class RadiusAttribute {
         //  This implementation is oriented towards slow construction but fast retrieval
         //  of the bytes at send time.
         int length = HEADER_LENGTH + value.length;// 2 byte header
-        ByteArrayOutputStream temp = new ByteArrayOutputStream(length);
-        try{
+        try (ByteArrayOutputStream temp = new ByteArrayOutputStream(length)) {
             temp.write(type);
             temp.write(length);
             temp.write(value);
             temp.flush();
-        }catch(IOException ioex){//this should never happen
+            this.packetBytes = temp.toByteArray();
+        } catch(IOException ioex){//this should never happen
             throw new InvalidParameterException("Error constructing RadiusAttribute");
         }
-        this.packetBytes = temp.toByteArray();
-        //we don't want to abort the constructor if we fail to close temp
-        try{temp.close();}catch(IOException ignore){}
     }
     /**
      * get the Radius Type for this Attribute( see rfc 2865 and 2866)

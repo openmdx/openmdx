@@ -344,7 +344,7 @@ public abstract class AbstractDashboardControl extends Control implements Serial
 							p.write("                      </table>");
 							p.write("                    </td>");
 							p.write("                    <td style=\"horizontal-align:right;vertical-align:bottom;\">");
-							p.write("                      <input type=\"submit\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" name=\"Delete.", dashletId, "\" value=\"-\" onclick=\"javascript:$('Command').value=this.name;\" />");
+							p.write("                      <input type=\"submit\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" name=\"Delete.", dashletId, "\" value=\"-\" onclick=\"javascript:$('Command').value=this.name;\" />");
 							p.write("                    </td>");
 							p.write("                  </tr>");
 							p.write("                </table>");

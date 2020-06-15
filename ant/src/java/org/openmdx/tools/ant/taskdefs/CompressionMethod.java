@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CompressionMethod.java,v 1.2 2010/06/04 22:22:48 hburger Exp $
  * Description: Ant Compression Method
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:22:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

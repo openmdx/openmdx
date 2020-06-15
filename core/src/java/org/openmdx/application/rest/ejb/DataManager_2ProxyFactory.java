@@ -48,16 +48,14 @@
 package org.openmdx.application.rest.ejb;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-
-import javax.jdo.PersistenceManagerFactory;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.connector.EntityManagerProxyFactory_2;
+import org.openmdx.kernel.jdo.JDOPersistenceManagerFactory;
 
 /**
  * Data Manager Proxy Factory
@@ -65,14 +63,18 @@ import org.openmdx.base.rest.connector.EntityManagerProxyFactory_2;
 public class DataManager_2ProxyFactory extends EntityManagerProxyFactory_2 {
 
     /**
-     * Constructor 
+     * Constructor
      *
-     * @param configuration
+     * @param overrides the configuration properties
+     * @param configuration the configuration properties
+     * @param defaults for missing configuration and override properties
      */
     protected DataManager_2ProxyFactory(
-        Map<?,?> configuration
-    ){
-        super(configuration);
+        Map<?, ?> overrides,
+        Map<?, ?> configuration,
+        Map<?, ?> defaults
+    ) {
+        super(overrides, configuration, defaults);
     }
     
     /**
@@ -89,7 +91,7 @@ public class DataManager_2ProxyFactory extends EntityManagerProxyFactory_2 {
      * 
      * @return a new <code>PersistenceManagerFactory</code>
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory (
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory (
         Map<?,?> props
     ){
         return getPersistenceManagerFactory(
@@ -99,23 +101,19 @@ public class DataManager_2ProxyFactory extends EntityManagerProxyFactory_2 {
     }
 
     /**
-     * The method is used by JDOHelper to construct an instance of 
-     * <code>PersistenceManagerFactory</code> based on user-specified 
-     * properties.
+     * The method is used by {@code JDOHelper} to construct an instance of 
+     * {@code PersistenceManagerFactory} based on user-specified properties.
      * 
      * @param overrides
      * @param props
      * 
      * @return a new <code>PersistenceManagerFactory</code>
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory (
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory (
         Map<?,?> overrides, 
         Map<?,?> props
     ){
-        Map<Object,Object> configuration = new HashMap<Object,Object>(DEFAULT_CONFIGURATION);
-        configuration.putAll(props);
-        configuration.putAll(overrides);
-        return new DataManager_2ProxyFactory(configuration);
+        return new DataManager_2ProxyFactory(overrides, props, DEFAULT_CONFIGURATION);
     }
 
     /**

@@ -40,9 +40,7 @@ import java.util.Map;
  *
  * @param <K> The type of keys maintained by the pool.
  *
- * @version $Revision: $
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public interface GenericKeyedObjectPoolMXBean<K> {
     // Expose getters for configuration settings
@@ -109,7 +107,7 @@ public interface GenericKeyedObjectPoolMXBean<K> {
     /**
      * See {@link GenericKeyedObjectPool#getTestOnCreate()}
      * @return See {@link GenericKeyedObjectPool#getTestOnCreate()}
-     * @since 2.2
+     * @since Commons Pool 2.2
      */
     boolean getTestOnCreate();
     /**

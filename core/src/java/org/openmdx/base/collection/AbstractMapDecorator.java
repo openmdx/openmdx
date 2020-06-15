@@ -34,7 +34,7 @@ import java.util.Set;
  * But, you might want that loophole, so this class is kept simple.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.4 $ $Date: 2011/04/12 12:19:18 $
+ * @version Revision: 1.4 Date: 2011/04/12 12:19:18
  * 
  * @author Daniel Rall
  * @author Stephen Colebourne

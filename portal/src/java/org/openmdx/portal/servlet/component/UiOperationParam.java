@@ -56,6 +56,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -154,8 +155,7 @@ public class UiOperationParam extends UiFieldGroup implements Serializable {
                                 false
                             );
                         } catch (Exception e) {
-                            ServiceException e0 = new ServiceException(e);
-                            SysLog.warning(e0.getMessage(), e0.getCause());
+                            Throwables.log(e);
                         }
                         p.write("<td class=\"", CssClass.fieldLabel.toString(), "\"><span class=\"", CssClass.nw.toString(), "\">", label, "</span></td>");
                         // single-valued
@@ -169,7 +169,7 @@ public class UiOperationParam extends UiFieldGroup implements Serializable {
                                 p.write("<td>");
                                 p.write("  <select class=\"", CssClass.valueL.toString(), "\" name=\"", fieldId, "\" tabindex=\"", Integer.toString(index), "\">");
                                 for(Map.Entry<Short,String> option: longTextsT.entrySet()) {
-                                    String selectedModifier = option.getKey().equals(valueHolder.getValue(false)) ? "selected" : "";
+                                    String selectedModifier = option.getKey().equals(valueHolder.getValue(p, false)) ? "selected" : "";
                                     Short codeValue = (Short)option.getKey();
                                     String codeText = (String)option.getValue();
                                     p.write("<option ", selectedModifier, " value=\"", Short.toString(codeValue), "\">", codeText);
@@ -216,8 +216,10 @@ public class UiOperationParam extends UiFieldGroup implements Serializable {
                             } else if(valueHolder instanceof ObjectReferenceValue) {
                                 ObjectReference objectReference = null;
                                 try {
-                                    objectReference = (ObjectReference)valueHolder.getValue(false);
-                                } catch (Exception e) {}
+                                    objectReference = (ObjectReference)valueHolder.getValue(p, false);
+                                } catch (Exception e) {
+                        			SysLog.trace("Exception ignored", e);
+                                }
                                 Autocompleter_1_0 autocompleter = ((ObjectReferenceValue)valueHolder).getAutocompleter(
                                     view.getLookupObject()
                                 );
@@ -359,7 +361,7 @@ public class UiOperationParam extends UiFieldGroup implements Serializable {
         int nCols = attributes.length;
         int nRows = nCols > 0 ? attributes[0].length : 0;
         if((nCols > 0) && (nRows > 0)) {
-            p.write("<div class=\"", CssClass.panelResult.toString(), " ", CssClass.alert.toString(), " ", CssClass.alertSuccess.toString(), "\" style=\"display: block;\">");
+            p.write("<div class=\"", CssClass.panelResult.toString(), " ", CssClass.alert.toString(), " ", CssClass.alert_success.toString(), "\" style=\"display: block;\">");
             p.write("  <table class=\"", CssClass.fieldGroup.toString(), "\">");
             for(int v = 0; v < nRows; v++) {
                 p.write("<tr>");
@@ -371,7 +373,7 @@ public class UiOperationParam extends UiFieldGroup implements Serializable {
                     } else {
                         String label = attribute.getLabel();
                         AttributeValue valueHolder = attribute.getValue();
-                        Object value = valueHolder.getValue(false);
+                        Object value = valueHolder.getValue(p, false);
                         String stringifiedValue = attribute.getStringifiedValue(
                             p, 
                             false, 
@@ -421,10 +423,17 @@ public class UiOperationParam extends UiFieldGroup implements Serializable {
                 p.write("</tr>");
             }
             p.write("  </table>");
+            if(p.getView() instanceof ShowObjectView) {
+                p.write("<script>");
+	            ShowObjectView selectedObjectView = (ShowObjectView)p.getView();
+	            Action getAttributesAction = selectedObjectView.getObjectReference().getObjectGetAttributesAction();
+	            p.write("  jQuery.ajax({type: 'get', url: '", p.getResourcePathPrefix(), "'+", selectedObjectView.getEvalHRef(getAttributesAction), ", dataType: 'html', success: function(data){$('aPanel').innerHTML=data;evalScripts(data);}});");
+	            p.write("</script>");
+            }
             p.write("</div>");
         } else {
         	p.write("<div />");
-        }    	
+        }
     }
 
 	//-------------------------------------------------------------------------

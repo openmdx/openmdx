@@ -50,7 +50,7 @@ package org.openmdx.kernel.resource.spi;
 /**
  * Close Callback
  * 
- * @since 1.9.8
+ * @since openMDX 1.9
  */
 public interface CloseCallback {
 

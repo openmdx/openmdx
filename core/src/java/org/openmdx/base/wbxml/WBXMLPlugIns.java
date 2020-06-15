@@ -144,10 +144,8 @@ public class WBXMLPlugIns {
 
     static {
         for(URL url : Resources.getMetaInfResources(WBXMLPlugIns.class.getClassLoader(), "openmdx-wbxml-plugin.properties")) {
-            try {
-                InputStream source = url.openStream();       
+            try (InputStream source = url.openStream()) {
                 configuration.load(source);
-                source.close();
             } catch (IOException exception) {
                 SysLog.warning("WBXML plug-in configuration failure: " + url, exception);
             }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_g9PZkN67EdmkJO73lqONhA" name="oasis-open">
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_g9PZkN67EdmkJO73lqONhA" name="oasis-open">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D4022002100C9P" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D4022002100C9" name="oasis-open">
       <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D4022008801A4" name="xri">

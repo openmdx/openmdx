@@ -1,11 +1,8 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: $
- * Description: UnitOfWork_1Test 
- * Revision:    $Revision: $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: UnitOfWork_1 Test 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

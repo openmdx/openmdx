@@ -39,7 +39,7 @@ import java.lang.reflect.Constructor;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 @SuppressWarnings({"rawtypes","unchecked"})
@@ -158,8 +158,6 @@ public class PropertyDescriptor extends FeatureDescriptor {
      * @param read   the method used for reading the property value
      * @param write  the method used for writing the property value
      * @exception IntrospectionException if an exception occurs during introspection
-     *
-     * @since 1.7
      */
     PropertyDescriptor(Class<?> bean, String base, Method read, Method write) throws IntrospectionException {
         if (bean == null) {
@@ -435,7 +433,6 @@ public class PropertyDescriptor extends FeatureDescriptor {
      * @param bean the source object
      * @return a property editor instance or null if a property editor has
      *         not been defined or cannot be created
-     * @since 1.5
      */
     public PropertyEditor createPropertyEditor(Object bean) {
         Object editor = null;
@@ -472,8 +469,6 @@ public class PropertyDescriptor extends FeatureDescriptor {
      * Returns true if the objects are the same. Two <code>PropertyDescriptor</code>s
      * are the same if the read, write, property types, property editor and
      * flags  are equivalent.
-     *
-     * @since 1.4
      */
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -495,8 +490,8 @@ public class PropertyDescriptor extends FeatureDescriptor {
             if (getPropertyType() == other.getPropertyType() &&
                 getPropertyEditorClass() == other.getPropertyEditorClass() &&
                 bound == other.isBound() && constrained == other.isConstrained() &&
-                writeMethodName == other.writeMethodName &&
-                readMethodName == other.readMethodName) {
+                writeMethodName.equals(other.writeMethodName) &&
+                readMethodName.equals(other.readMethodName)) {
                 return true;
             }
         }
@@ -679,7 +674,6 @@ public class PropertyDescriptor extends FeatureDescriptor {
      * See {@link java.lang.Object#hashCode} for a complete description.
      *
      * @return a hash code value for this object.
-     * @since 1.5
      */
     public int hashCode() {
         int result = 7;

@@ -53,7 +53,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.naming.PathComponent;
 
 @SuppressWarnings("deprecation")
 public class WildcardTest {
@@ -68,9 +67,7 @@ public class WildcardTest {
      */
     protected String[] xris;
 
-    private static final PathComponent AUTHORITY = new PathComponent(
-        new String[]{"test","openmdx","naming"}
-    );
+    private static final String AUTHORITY = "test:openmdx:naming";
 
     /**
      * Sets up the fixture, for example, open a network connection.
@@ -79,17 +76,17 @@ public class WildcardTest {
     @Before
     public void setUp() {
         paths = new Path[]{
-            new Path(new String[]{AUTHORITY.toString(), "provider", "test*openmdx*naming!wildcard"}),
-            new Path(new String[]{AUTHORITY.toString(), "provider", "test*($.*open)*($.)*($.!wild)"}),
-            new Path(new String[]{AUTHORITY.toString(), "provider", "test*openmdx*($.)*($.)"}),
-            new Path(new String[]{AUTHORITY.toString(), "provider", ":*"}),
-            new Path(new String[]{AUTHORITY.toString(), "provider", ":test*"}),
-            new Path(new String[]{AUTHORITY.toString(), "provider", ":test*openmdx*naming*"}),
-            new Path(new String[]{AUTHORITY.toString(), "provider", "test*($..)"}),
-            new Path(new String[]{AUTHORITY.toString(), "provider", "test*openmdx*naming!wildcard*($..)"}),
-            toPath("", "*"),
-            new Path(new String[]{AUTHORITY.toString(), "%"}),
-            new Path(new String[]{AUTHORITY.toString(), "prov%"}),
+            new Path(new String[]{AUTHORITY, "provider", "test*openmdx*naming!wildcard"}),
+            new Path(new String[]{AUTHORITY, "provider", "test*($.*open)*($.)*($.!wild)"}),
+            new Path(new String[]{AUTHORITY, "provider", "test*openmdx*($.)*($.)"}),
+            new Path(new String[]{AUTHORITY, "provider", ":*"}),
+            new Path(new String[]{AUTHORITY, "provider", ":test*"}),
+            new Path(new String[]{AUTHORITY, "provider", ":test*openmdx*naming*"}),
+            new Path(new String[]{AUTHORITY, "provider", "test*($..)"}),
+            new Path(new String[]{AUTHORITY, "provider", "test*openmdx*naming!wildcard*($..)"}),
+            toPath(":*"),
+            new Path(new String[]{AUTHORITY, "%"}),
+            new Path(new String[]{AUTHORITY, "prov%"}),
             toPath("%"),
             new Path(new String[]{":*", "provider", "%"})
         };
@@ -111,13 +108,13 @@ public class WildcardTest {
     }
 
     private static Path toPath(
-        String... suffix
+        String provider
     ){
         return new Path(
             new String[]{
-                AUTHORITY.toString(),
+                AUTHORITY,
                 "provider",
-                new PathComponent(suffix).toString()
+                provider
             }
         );
     }
@@ -204,7 +201,7 @@ public class WildcardTest {
 
     @Test
     public void testAuthority(){
-        Path authorityPath = new Path(new String[]{AUTHORITY.toString()});
+        Path authorityPath = new Path(new String[]{AUTHORITY});
         Path[] authorityPattern = {
             new Path(new String[]{":*"}),
             new Path("::*"),

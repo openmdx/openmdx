@@ -55,7 +55,7 @@ package org.openmdx.kernel.text;
  * <p>
  * The new-line character ('\n') is used to separate the lines
  * and tab characters ('\t') at the beginning of a line are used
- * for intendation, one tab character per intendation level.
+ * for indentation, one tab character per indentation level.
  */
 public interface MultiLineStringRepresentation {
     //

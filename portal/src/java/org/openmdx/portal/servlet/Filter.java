@@ -58,8 +58,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.ConditionRecord;
 import org.openmdx.base.rest.cci.FeatureOrderRecord;
@@ -77,15 +75,6 @@ implements Serializable {
 
     /**
      * Constructor 
-     *
-     * @param name
-     * @param labels
-     * @param groupName
-     * @param iconKey
-     * @param order
-     * @param condition
-     * @param orderSpecifier
-     * @param context
      */
     public Filter(
         String name,
@@ -110,42 +99,6 @@ implements Serializable {
         this.order = order;
     }
 
-    /**
-     * Constructor 
-     *
-     * @param name
-     * @param labels
-     * @param groupName
-     * @param iconKey
-     * @param order
-     * @param condition
-     * @param orderSpecifier
-     * @param context
-     * 
-     * @deprecated use {@link Filter#Filter(String, String[], String, String, Integer[], List, List, Object...)}
-     */
-    public Filter(
-        String name,
-        String[] labels,
-        String groupName,
-        String iconKey,
-        Integer[] order,
-        Condition[] condition,
-        OrderSpecifier[] orderSpecifier,
-        Object[] context
-    ) {
-    	this(
-    		name,
-    		labels,
-    		groupName,
-    		iconKey,
-    		order,
-    		Arrays.asList(condition),
-    		Arrays.asList(orderSpecifier), 
-    		null, // extension
-    		context
-    	);
-    }
     
     //-------------------------------------------------------------------------
     private static List<FeatureOrderRecord> removeDuplicateOrderSpecifiers(
@@ -298,7 +251,7 @@ implements Serializable {
     ) {
         return Records.getRecordFactory().asMappedRecord(
             this.getClass().getName(), 
-            this.groupName + '-' + this.labels,
+            this.groupName + '-' + Arrays.asList(this.labels),
             TO_STRING_FIELDS,
             new Object[]{
                 this.name,

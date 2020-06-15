@@ -60,8 +60,8 @@ import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.text.conversion.URITransformation;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.url.protocol.XRI_2Protocols;
-import org.openmdx.kernel.url.protocol.XriAuthorities;
+import org.openmdx.kernel.xri.XRI_2Protocols;
+import org.openmdx.kernel.xri.XRIAuthorities;
 
 /**
  * XRI 2 Marshaller
@@ -89,7 +89,7 @@ public final class XRI_2Marshaller
      * 
      */
     final Pattern OPENMDX_OBJECT_AUTHORITY = Pattern.compile(
-        XriAuthorities.OPENMDX_AUTHORITY + "[*][A-Za-z0-9\\-]+([.][A-Za-z0-9\\-]+)*"
+        XRIAuthorities.OPENMDX_AUTHORITY + "[*][A-Za-z0-9\\-]+([.][A-Za-z0-9\\-]+)*"
     );
     
     /**
@@ -363,7 +363,7 @@ public final class XRI_2Marshaller
             boolean treeWildcard = xriString.endsWith(")/($...)");
             List<Segment> segments = getObjectIdentifier(false, xriString);
             String authority = segments.get(0).toString();
-            if(XriAuthorities.OPENMDX_AUTHORITY.equals(authority)) return ROOT;
+            if(XRIAuthorities.OPENMDX_AUTHORITY.equals(authority)) return ROOT;
             String[] reply = new String[
                 segments.size() - (treeWildcard ? 1 : 0)
             ];
@@ -503,7 +503,7 @@ public final class XRI_2Marshaller
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
                 "Input is not a valid resource identifier",
-                new BasicException.Parameter("xri", xriString)
+                new BasicException.Parameter(BasicException.Parameter.XRI, xriString)
             );
         }
     }
@@ -651,7 +651,7 @@ public final class XRI_2Marshaller
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.TRANSFORMATION_FAILURE,
                         "The global context symbol '!' must be followed by a non-empty authority segment",
-                        new BasicException.Parameter("xri", xri),
+                        new BasicException.Parameter(BasicException.Parameter.XRI, xri),
                         new BasicException.Parameter("position", 0)
                     );
                 }
@@ -675,7 +675,7 @@ public final class XRI_2Marshaller
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.TRANSFORMATION_FAILURE,
                     "The XRI should start with a valid context symbol",
-                    new BasicException.Parameter("xri", xri),
+                    new BasicException.Parameter(BasicException.Parameter.XRI, xri),
                     new BasicException.Parameter("position", 0),
                     new BasicException.Parameter("expected", "!", "=", "@", "+", "$")
                 );
@@ -726,7 +726,7 @@ public final class XRI_2Marshaller
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.TRANSFORMATION_FAILURE,
                             "The XRI contains a closing parenthesis without matching opening parenthesis",
-                            new BasicException.Parameter("xri", path),
+                            new BasicException.Parameter(BasicException.Parameter.XRI, path),
                             new BasicException.Parameter("position", i)
                         );
                     }

@@ -1,10 +1,4 @@
 /*
- * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/GenericKeyedObjectPool.java,v $
- * $Revision: 1.9 $
- * $Date: 2011/04/12 15:30:21 $
- *
- * ====================================================================
- *
  * The Apache Software License, Version 1.1
  *
  * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
@@ -166,7 +160,6 @@ hould sleep before "runs" of examining
  * @see GenericObjectPool
  * @author Rodney Waldhoff
  * @author Dirk Verbeeck
- * @version $Revision: 1.9 $ $Date: 2011/04/12 15:30:21 $
  */
 @SuppressWarnings({"rawtypes","unchecked"})
 public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements KeyedObjectPool {
@@ -1135,9 +1128,9 @@ public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements Keyed
         _totalActive++;
         Integer active = (Integer)(_activeMap.get(key));
         if(null == active) {
-            _activeMap.put(key,new Integer(1));
+            _activeMap.put(key,Integer.valueOf(1));
         } else {
-            _activeMap.put(key,new Integer(active.intValue() + 1));
+            _activeMap.put(key,Integer.valueOf(active.intValue() + 1));
         }
     }
 
@@ -1149,7 +1142,7 @@ public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements Keyed
         } else if(active.intValue() <= 1) {
             _activeMap.remove(key);
         } else {
-            _activeMap.put(key, new Integer(active.intValue() - 1));
+            _activeMap.put(key, Integer.valueOf(active.intValue() - 1));
         }
     }
 

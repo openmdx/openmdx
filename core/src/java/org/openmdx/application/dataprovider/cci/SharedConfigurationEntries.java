@@ -68,37 +68,13 @@ public class SharedConfigurationEntries {
   static public final String NAMESPACE_ID = "namespaceId";
 
   /**
-   * The DATABASE_CONNECTION_FACTORY configuration entry  
-   */
-  static public final String DATABASE_CONNECTION_FACTORY = "datasource";
-
-  /**
    * The DATABASE_CONNECTION_FACTORY_NAME configuration entry  
    */
   static public final String DATABASE_CONNECTION_FACTORY_NAME = "datasourceName";
   
   /**
-   * Key for a JCA <code>ConnectionFactory</code> instance  
-   * 
-   * @deprecated will not be supported by the dataprovider 2 stack
-   */
-  @Deprecated
-  static public final String DATAPROVIDER_CONNECTION_FACTORY = "dataprovider";
-
-  /**
    * Java bean plug-in enumeration
    */
   static public final String PLUG_IN = "plugIn";
 
-  /**
-   * Tells whether the plug-ins deployed as Java beans or not:<ul>
-   * <li><code>true</code> the plug-ins are deployed as legacy layers
-   * <li><code>false</code> the plug-ins are deployed as Java beans
-   * </ul>
-   * @deprecated the dataprovider 2 stack will use the Java Bean pattern
-   * to configure its layer plug-ins.
-   */
-  @Deprecated
-  static public final String LEGACY_CONFIGURATION = "legacyConfiguration";
-  
 }

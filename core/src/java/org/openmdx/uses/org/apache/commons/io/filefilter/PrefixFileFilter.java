@@ -45,7 +45,7 @@ import org.openmdx.uses.org.apache.commons.io.IOCase;
  * }
  * </pre>
  *
- * @since 1.0
+ * @since Commons I/O 1.0
  * @version $Id: PrefixFileFilter.java 1642757 2014-12-01 21:09:30Z sebb $
  * @see FileFilterUtils#prefixFileFilter(String)
  * @see FileFilterUtils#prefixFileFilter(String, IOCase)
@@ -77,7 +77,7 @@ public class PrefixFileFilter extends AbstractFileFilter implements Serializable
      * @param prefix  the prefix to allow, must not be null
      * @param caseSensitivity  how to handle case sensitivity, null means case-sensitive
      * @throws IllegalArgumentException if the prefix is null
-     * @since 1.4
+     * @since Commons I/O 1.4
      */
     public PrefixFileFilter(final String prefix, final IOCase caseSensitivity) {
         if (prefix == null) {
@@ -107,7 +107,7 @@ public class PrefixFileFilter extends AbstractFileFilter implements Serializable
      * @param prefixes  the prefixes to allow, must not be null
      * @param caseSensitivity  how to handle case sensitivity, null means case-sensitive
      * @throws IllegalArgumentException if the prefix is null
-     * @since 1.4
+     * @since Commons I/O 1.4
      */
     public PrefixFileFilter(final String[] prefixes, final IOCase caseSensitivity) {
         if (prefixes == null) {
@@ -137,7 +137,7 @@ public class PrefixFileFilter extends AbstractFileFilter implements Serializable
      * @param caseSensitivity  how to handle case sensitivity, null means case-sensitive
      * @throws IllegalArgumentException if the prefix list is null
      * @throws ClassCastException if the list does not contain Strings
-     * @since 1.4
+     * @since Commons I/O 1.4
      */
     public PrefixFileFilter(final List<String> prefixes, final IOCase caseSensitivity) {
         if (prefixes == null) {

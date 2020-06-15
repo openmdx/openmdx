@@ -43,7 +43,7 @@ import java.lang.reflect.Method;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 @SuppressWarnings({"rawtypes"})
@@ -161,8 +161,6 @@ perty.
      * @param readIndexed   the method used for reading an indexed property value
      * @param writeIndexed  the method used for writing an indexed property value
      * @exception IntrospectionException if an exception occurs during introspection
-     *
-     * @since 1.7
      */
     IndexedPropertyDescriptor(Class<?> bean, String base, Method read, Method write, Method readIndexed, Method writeIndexed) throws IntrospectionException {
         super(bean, base, read, write);
@@ -405,8 +403,6 @@ perty.
      * Returns true if the objects are the same. Two <code>PropertyDescriptor</code>s
      * are the same if the read, write, property types, property editor and
      * flags  are equivalent.
-     *
-     * @since 1.4
      */
     public boolean equals(Object obj) {
         // Note: This would be identical to PropertyDescriptor but they don't
@@ -501,7 +497,6 @@ perty.
      * See {@link java.lang.Object#hashCode} for a complete description.
      *
      * @return a hash code value for this object.
-     * @since 1.5
      */
     public int hashCode() {
         int result = super.hashCode();

@@ -59,7 +59,6 @@ import org.omg.mof.cci.VisibilityKind;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.text.conversion.XMLEncoder;
@@ -842,7 +841,7 @@ public class Uml1ModelMapper {
     pw.write("\t\t\t<UML:Namespace.ownedElement>\n");
     this.writeStereotype(Multiplicity.OPTIONAL.code(), "Attribute");
     this.writeStereotype(Multiplicity.SINGLE_VALUE.code(), "Attribute");
-    this.writeStereotype(ModelHelper.UNBOUND, "Attribute");
+    this.writeStereotype(Multiplicity.UNBOUNDED, "Attribute");
     this.writeStereotype(Multiplicity.LIST.code(), "Attribute");
     this.writeStereotype(Multiplicity.SET.code(), "Attribute");
     this.writeStereotype(Multiplicity.SPARSEARRAY.code(), "Attribute");
@@ -850,7 +849,7 @@ public class Uml1ModelMapper {
     this.writeStereotype(Multiplicity.MAP.code(), "Attribute");
     this.writeStereotype(Multiplicity.OPTIONAL.code(), "Parameter");
     this.writeStereotype(Multiplicity.SINGLE_VALUE.code(), "Parameter");
-    this.writeStereotype(ModelHelper.UNBOUND, "Parameter");
+    this.writeStereotype(Multiplicity.UNBOUNDED, "Parameter");
     this.writeStereotype(Multiplicity.LIST.code(), "Parameter");
     this.writeStereotype(Multiplicity.SET.code(), "Parameter");
     this.writeStereotype(Multiplicity.SPARSEARRAY.code(), "Parameter");

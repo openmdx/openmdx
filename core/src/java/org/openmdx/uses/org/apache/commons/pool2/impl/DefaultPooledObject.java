@@ -42,9 +42,7 @@ import org.openmdx.uses.org.apache.commons.pool2.TrackedUse;
  *
  * @param <T> the type of object in the pool
  *
- * @version $Revision: $
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public class DefaultPooledObject<T> implements PooledObject<T> {
 
@@ -114,7 +112,7 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
     /**
      * Get the number of times this object has been borrowed.
      * @return The number of times this object has been borrowed.
-     * @since 2.1
+     * @since Commons Pool 2.1
      */
     public long getBorrowedCount() {
         return borrowedCount;

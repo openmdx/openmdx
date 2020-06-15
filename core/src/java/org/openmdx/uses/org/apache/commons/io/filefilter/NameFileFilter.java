@@ -45,7 +45,7 @@ import org.openmdx.uses.org.apache.commons.io.IOCase;
  * }
  * </pre>
  *
- * @since 1.0
+ * @since Commons I/O 1.0
  * @version $Id: NameFileFilter.java 1642757 2014-12-01 21:09:30Z sebb $
  * @see FileFilterUtils#nameFileFilter(String)
  * @see FileFilterUtils#nameFileFilter(String, IOCase)

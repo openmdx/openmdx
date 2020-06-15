@@ -216,7 +216,7 @@ org.openmdx.portal.servlet.*
 		);
 	}
   </script>
-  <div id="header" style="height:90px;">
+  <div id="header">
     <div id="logoTable">
       <table dir="ltr" id="headerlayout" style="position:relative;">
         <tr id="headRow">
@@ -229,7 +229,7 @@ org.openmdx.portal.servlet.*
                     <tr>
                       <td style="width:50px;" />
                       <td style="vertical-align: middle; padding-right:5px;white-space:nowrap;">
-                        <ul dir="ltr" id="<%=CssClass.ssfNav %>" class="<%=CssClass.ssfNav %>" style="width:220px;" onmouseover="sfinit(this);">
+                        <ul dir="ltr" id="<%=CssClass.ssf_nav %>" class="<%=CssClass.ssf_nav %>" style="width:220px;" onmouseover="sfinit(this);">
                           <li id="flyout"><a href="#"><img src="<%=request.getContextPath()%>/images/panel_down.gif" alt="" style="border:none 0px white;float:right;top:-20px;" /><%= localeStr %> - <%= texts.get("LocaleTitle") %>&nbsp;</a>
                             <ul onclick="this.style.left='-999em';" onmouseout="this.style.left='';">
 <%

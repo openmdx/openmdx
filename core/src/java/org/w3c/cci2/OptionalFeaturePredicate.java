@@ -64,7 +64,7 @@ public interface OptionalFeaturePredicate {
     
     /**
      * This method is deprecated in order to avoid its erroneous use in lieu of
-     * equalTo().
+     * {@code equalTo()}.
      * 
      * @deprecated to avoid erroneous use 
      * 

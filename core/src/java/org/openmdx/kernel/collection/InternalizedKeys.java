@@ -47,8 +47,8 @@
  */
 package org.openmdx.kernel.collection;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.openmdx.kernel.exception.BasicException;
 
@@ -67,24 +67,35 @@ public class InternalizedKeys {
     /**
      * Short Cache extension
      */
-    private static final Map<Short, Short> shortCacheExtension = new HashMap<Short, Short>();
+    private static final ConcurrentMap<Short, Short> shortCacheExtension = new ConcurrentHashMap<Short, Short>();
     private static final short JDK_SHORT_CACHE_LOWER_BOUND = -128;
     private static final short JDK_SHORT_CACHE_UPPER_BOUND = 127;
 
     /**
      * Integer Cache Extension
      */
-    private static final Map<Integer, Integer> integerCacheExtension = new HashMap<Integer, Integer>();
+    private static final ConcurrentMap<Integer, Integer> integerCacheExtension = new ConcurrentHashMap<Integer, Integer>();
     private static final int JDK_INTEGER_CACHE_LOWER_BOUND = -128;
     private static final int JDK_INTEGER_CACHE_UPPER_BOUND = 127;
 
     /**
      * Long Cache Extension
      */
-    private static Map<Long, Long> longCache = new HashMap<Long, Long>();
+    private static ConcurrentMap<Long, Long> longCache = new ConcurrentHashMap<Long, Long>();
+    private static final long JDK_LONG_CACHE_LOWER_BOUND;
+    private static final long JDK_LONG_CACHE_UPPER_BOUND;
 
+    static {
+        JDK_LONG_CACHE_LOWER_BOUND = isCached(-128L) ? -128L : Long.MAX_VALUE;
+        JDK_LONG_CACHE_UPPER_BOUND = isCached(127L) ? 127L : Long.MIN_VALUE;
+    }
+
+    private static boolean isCached(long candidate) {
+        return Long.valueOf(candidate) == Long.valueOf(candidate);
+    }
+    
     /**
-     * Dertermines whether the given key is internalizable
+     * Determines whether the given key is internalizable
      * 
      * @param key
      * 
@@ -158,7 +169,7 @@ public class InternalizedKeys {
     }
 
     /**
-     * Internalize an Short
+     * Internalize a Short
      * 
      * @param actual
      *            the actual value
@@ -169,28 +180,16 @@ public class InternalizedKeys {
         Short actual
     ) {
         final short value = actual.shortValue();
-        final Short internalized;
-        if (value >= JDK_SHORT_CACHE_LOWER_BOUND && value <= JDK_SHORT_CACHE_UPPER_BOUND) {
-            internalized = Short.valueOf(value);
-        } else {
-            synchronized (shortCacheExtension) {
-                final Short cached = shortCacheExtension.get(actual);
-                if (cached == null) {
-                    internalized = Short.valueOf(value);
-                    shortCacheExtension.put(internalized, internalized);
-                } else {
-                    internalized = cached;
-                }
-            }
-        }
-        return internalized;
+        return 
+            value >= JDK_SHORT_CACHE_LOWER_BOUND && value <= JDK_SHORT_CACHE_UPPER_BOUND ? Short.valueOf(value) :
+            shortCacheExtension.computeIfAbsent(actual, key -> key);
     }
 
     /**
      * Internalize an Integer
      * 
      * @param actual
-     *            the actual value
+     *            the actual value()
      * 
      * @return an internalized Integer
      */
@@ -198,21 +197,9 @@ public class InternalizedKeys {
         Integer actual
     ) {
         final int value = actual.intValue();
-        final Integer internalized;
-        if (value >= JDK_INTEGER_CACHE_LOWER_BOUND && value <= JDK_INTEGER_CACHE_UPPER_BOUND) {
-            internalized = Integer.valueOf(value);
-        } else {
-            synchronized (integerCacheExtension) {
-                final Integer cached = integerCacheExtension.get(actual);
-                if (cached == null) {
-                    internalized = Integer.valueOf(value);
-                    integerCacheExtension.put(internalized, internalized);
-                } else {
-                    internalized = cached;
-                }
-            }
-        }
-        return internalized;
+        return 
+            value >= JDK_INTEGER_CACHE_LOWER_BOUND && value <= JDK_INTEGER_CACHE_UPPER_BOUND ? Integer.valueOf(value) :
+            integerCacheExtension.computeIfAbsent(actual, key -> key);
     }
 
     /**
@@ -227,18 +214,9 @@ public class InternalizedKeys {
         Long actual
     ) {
         final long value = actual.longValue();
-        final Long internalized;
-        // There is no requirement for the JDK to cache any long values
-        synchronized (longCache) {
-            final Long cached = longCache.get(actual);
-            if (cached == null) {
-                internalized = Long.valueOf(value);
-                longCache.put(internalized, internalized);
-            } else {
-                internalized = cached;
-            }
-        }
-        return internalized;
+        return 
+            value >= JDK_LONG_CACHE_LOWER_BOUND && value <= JDK_LONG_CACHE_UPPER_BOUND ? Long.valueOf(value) :
+            longCache.computeIfAbsent(actual, key -> key);
     }
 
 }

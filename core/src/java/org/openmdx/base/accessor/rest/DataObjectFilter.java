@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: $
  * Description: DataObjectFilter 
- * Revision:    $Revision: $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: $
  * ====================================================================
  *
  * This software is published under the BSD license

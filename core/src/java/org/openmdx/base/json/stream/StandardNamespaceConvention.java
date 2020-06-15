@@ -72,7 +72,7 @@ import javax.xml.namespace.QName;
 
 public class StandardNamespaceConvention implements Convention, NamespaceContext {
     private Map<?,?> xnsToJns = new HashMap<Object,Object>();
-    private Map<Object,Object> jnsToXns = new HashMap<Object,Object>();
+    private Map<String,Object> jnsToXns = new HashMap<>();
     private List<?> attributesAsElements;
     private List<Object> jsonAttributesAsElements;
     private boolean supressAtAttributes;
@@ -96,7 +96,7 @@ public class StandardNamespaceConvention implements Convention, NamespaceContext
         
         for (Iterator<?> itr = xnsToJns.entrySet().iterator(); itr.hasNext();) {
             Map.Entry<?,?> entry = (Map.Entry<?,?>) itr.next();
-            jnsToXns.put(entry.getValue(), entry.getKey());
+            jnsToXns.put((String)entry.getValue(), entry.getKey());
         }
         
         jsonAttributesAsElements = new ArrayList<Object>();
@@ -208,10 +208,10 @@ public class StandardNamespaceConvention implements Convention, NamespaceContext
         }
     }
 
-    public Iterator<?> getPrefixes( String arg0 ) {
+    public Iterator<String> getPrefixes( String arg0 ) {
 
         if ( ignoreNamespaces ) {
-            return Collections.EMPTY_SET.iterator();
+            return Collections.<String>emptySet().iterator();
         }
         else {
             return jnsToXns.keySet().iterator();

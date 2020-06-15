@@ -50,8 +50,7 @@ package org.openmdx.base.query.spi;
 import java.io.Serializable;
 
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.spi.EmbeddedFlags;
-import org.openmdx.kernel.url.protocol.XRI_1Protocols;
+import org.openmdx.kernel.xri.XRI_1Protocols;
 import org.w3c.cci2.RegularExpressionFlag;
 
 /**

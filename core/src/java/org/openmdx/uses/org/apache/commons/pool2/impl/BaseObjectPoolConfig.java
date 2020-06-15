@@ -32,9 +32,7 @@ package org.openmdx.uses.org.apache.commons.pool2.impl;
  * <p>
  * This class is not thread-safe.
  *
- * @version $Revision: $
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public abstract class BaseObjectPoolConfig implements Cloneable {
 
@@ -89,7 +87,7 @@ public abstract class BaseObjectPoolConfig implements Cloneable {
      * @see GenericObjectPool#getTestOnCreate()
      * @see GenericKeyedObjectPool#getTestOnCreate()
      *
-     * @since 2.2
+     * @since Commons Pool 2.2
      */
     public static final boolean DEFAULT_TEST_ON_CREATE = false;
 
@@ -383,7 +381,7 @@ public abstract class BaseObjectPoolConfig implements Cloneable {
      * @see GenericObjectPool#getTestOnCreate()
      * @see GenericKeyedObjectPool#getTestOnCreate()
      *
-     * @since 2.2
+     * @since Commons Pool 2.2
      */
     public boolean getTestOnCreate() {
         return testOnCreate;
@@ -399,7 +397,7 @@ public abstract class BaseObjectPoolConfig implements Cloneable {
      * @see GenericObjectPool#getTestOnCreate()
      * @see GenericKeyedObjectPool#getTestOnCreate()
      *
-     * @since 2.2
+     * @since Commons Pool 2.2
      */
     public void setTestOnCreate(boolean testOnCreate) {
         this.testOnCreate = testOnCreate;

@@ -137,15 +137,12 @@ public class Loader {
         ) {
           String path = i.next();
           if(!path.endsWith("/")) {
-            try {
-              InputStream is = context.getResourceAsStream(path);
+            try (InputStream is = context.getResourceAsStream(path)) {
               int b;
               while((b = is.read()) >= 0) {
                 crc.update(b);
               }
-              is.close();
-            }
-            catch(IOException e) {}
+            } catch(IOException e) {}
           }
         }
     }

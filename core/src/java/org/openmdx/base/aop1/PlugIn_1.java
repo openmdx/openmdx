@@ -49,7 +49,6 @@ package org.openmdx.base.aop1;
 
 import javax.resource.cci.InteractionSpec;
 
-import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
@@ -134,7 +133,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
         // Removable Capability
         //
         if(isRemovable(view, next, type)) {
-            interceptor = new org.openmdx.base.aop1.Removable_1(
+            interceptor = new Removable_1(
                 view,
                 interceptor
             );
@@ -146,19 +145,9 @@ public class PlugIn_1 implements PlugIn_1_0 {
             interceptor = new Segment_1(
                 view,
                 interceptor
-            ){
-
-                @Override
-                protected Container_1_0 newExtent(
-                    ObjectView_1_0 parent,
-                    Container_1_0 container
-                ) throws ServiceException {
-                    return new Extent_1(parent, container);
-                }
-               
-            };
+            );
         } else if (isExtentCapable(view, next, type)) {
-            interceptor = new org.openmdx.base.aop1.ExtentCapable_1(
+            interceptor = new ExtentCapable_1(
                 view,
                 interceptor
             );
@@ -169,7 +158,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.aop1.PlugIn_1_0#propagatedEagerly(org.openmdx.base.accessor.rest.DataObject_1, java.lang.String, java.lang.Object)
 	 */
-//  @Override
+    @Override
 	public boolean propagatedEagerly(
 		DataObject_1 object, 
 		String feature,
@@ -181,7 +170,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.aop1.PlugIn_1_0#resolveObjectClass(java.lang.String, javax.resource.cci.InteractionSpec)
      */
-//  @Override
+    @Override
     public String resolveObjectClass(
         String objectClass,
         InteractionSpec interactionSpec

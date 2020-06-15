@@ -47,6 +47,7 @@
  */
 package org.openmdx.application.persistence.adapter;
 
+import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
@@ -61,11 +62,11 @@ import org.openmdx.base.transaction.Status;
 class TransactionAdapter implements Transaction, javax.transaction.Synchronization {
 
     /**
-     * Constructor 
+     * Constructor
      *
      * @param unitOfWork
      */
-    TransactionAdapter (
+    TransactionAdapter(
         UnitOfWork unitOfWork
     ) {
         this.unitOfWork = unitOfWork;
@@ -73,199 +74,188 @@ class TransactionAdapter implements Transaction, javax.transaction.Synchronizati
 
     private final UnitOfWork unitOfWork;
 
-    /**
-     * 
-     * @see org.openmdx.kernel.jdo.LocalTransaction#begin()
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#begin()
      */
+    @Override
     public void begin() {
         this.unitOfWork.begin();
     }
 
-    /**
-     * 
-     * @see org.openmdx.kernel.jdo.LocalTransaction#commit()
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#commit()
      */
+    @Override
     public void commit() {
         this.unitOfWork.commit();
     }
 
-    /**
-     * 
-     * @see org.openmdx.kernel.jdo.LocalTransaction#rollback()
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#rollback()
      */
+    @Override
     public void rollback() {
         this.unitOfWork.rollback();
     }
 
-    /**
-     * @return
-     * @see org.openmdx.kernel.jdo.LocalTransaction#isActive()
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#isActive()
      */
+    @Override
     public boolean isActive() {
         return this.unitOfWork.isActive();
     }
 
-    /**
-     * @return
-     * @see org.openmdx.kernel.jdo.LocalTransaction#getRollbackOnly()
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#getRollbackOnly()
      */
+    @Override
     public boolean getRollbackOnly() {
         return this.unitOfWork.getRollbackOnly();
     }
 
-    /**
-     * 
-     * @see org.openmdx.kernel.jdo.LocalTransaction#setRollbackOnly()
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#setRollbackOnly()
      */
+    @Override
     public void setRollbackOnly() {
         this.unitOfWork.setRollbackOnly();
     }
 
-    /**
-     * @param nontransactionalRead
-     * @see org.openmdx.kernel.jdo.LocalTransaction#setNontransactionalRead(boolean)
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#setNontransactionalRead(boolean)
      */
+    @Override
     public void setNontransactionalRead(boolean nontransactionalRead) {
         this.unitOfWork.setNontransactionalRead(nontransactionalRead);
     }
 
-    /**
-     * @return
-     * @see org.openmdx.kernel.jdo.LocalTransaction#getNontransactionalRead()
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#getNontransactionalRead()
      */
+    @Override
     public boolean getNontransactionalRead() {
         return this.unitOfWork.getNontransactionalRead();
     }
 
-    /**
-     * @param nontransactionalWrite
-     * @see org.openmdx.kernel.jdo.LocalTransaction#setNontransactionalWrite(boolean)
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#setNontransactionalWrite(boolean)
      */
+    @Override
     public void setNontransactionalWrite(boolean nontransactionalWrite) {
         this.unitOfWork.setNontransactionalWrite(nontransactionalWrite);
     }
 
-    /**
-     * @return
-     * @see org.openmdx.kernel.jdo.LocalTransaction#getNontransactionalWrite()
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#getNontransactionalWrite()
      */
+    @Override
     public boolean getNontransactionalWrite() {
         return this.unitOfWork.getNontransactionalWrite();
     }
 
-    /**
-     * @param retainValues
-     * @see org.openmdx.kernel.jdo.LocalTransaction#setRetainValues(boolean)
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#setRetainValues(boolean)
      */
+    @Override
     public void setRetainValues(boolean retainValues) {
         this.unitOfWork.setRetainValues(retainValues);
     }
 
-    /**
-     * @return
-     * @see org.openmdx.kernel.jdo.LocalTransaction#getRetainValues()
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#getRetainValues()
      */
+    @Override
     public boolean getRetainValues() {
         return this.unitOfWork.getRetainValues();
     }
 
-    /**
-     * @param restoreValues
-     * @see org.openmdx.kernel.jdo.LocalTransaction#setRestoreValues(boolean)
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#setRestoreValues(boolean)
      */
+    @Override
     public void setRestoreValues(boolean restoreValues) {
         this.unitOfWork.setRestoreValues(restoreValues);
     }
 
-    /**
-     * @return
-     * @see org.openmdx.kernel.jdo.LocalTransaction#getRestoreValues()
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#getRestoreValues()
      */
+    @Override
     public boolean getRestoreValues() {
         return this.unitOfWork.getRestoreValues();
     }
 
-    /**
-     * @param optimistic
-     * @see org.openmdx.kernel.jdo.LocalTransaction#setOptimistic(boolean)
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#setOptimistic(boolean)
      */
+    @Override
     public void setOptimistic(boolean optimistic) {
         this.unitOfWork.setOptimistic(optimistic);
     }
 
-    /**
-     * @return
-     * @see org.openmdx.kernel.jdo.LocalTransaction#getOptimistic()
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#getOptimistic()
      */
+    @Override
     public boolean getOptimistic() {
         return this.unitOfWork.getOptimistic();
     }
 
-    /**
-     * @return
-     * @see org.openmdx.kernel.jdo.LocalTransaction#getIsolationLevel()
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#getIsolationLevel()
      */
+    @Override
     public String getIsolationLevel() {
         return this.unitOfWork.getIsolationLevel();
     }
 
-    /**
-     * @param level
-     * @see org.openmdx.kernel.jdo.LocalTransaction#setIsolationLevel(java.lang.String)
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#setIsolationLevel(String)
      */
+    @Override
     public void setIsolationLevel(String level) {
         this.unitOfWork.setIsolationLevel(level);
     }
 
-    /**
-     * @param sync
-     * @see org.openmdx.kernel.jdo.LocalTransaction#setSynchronization(org.openmdx.base.persistence.cci.Synchronization)
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#getPersistenceManager()
      */
-    public void setSynchronization(
-        org.openmdx.base.persistence.cci.Synchronization sync) {
-        this.unitOfWork.setSynchronization(sync);
-    }
-
-    /**
-     * @return
-     * @see org.openmdx.kernel.jdo.LocalTransaction#getPersistenceManager()
-     */
+    @Override
     public PersistenceManager getPersistenceManager() {
         return this.unitOfWork.getPersistenceManager();
     }
 
     /* (non-Javadoc)
-     * @see javax.jdo.Transaction#setSynchronization(javax.transaction.Synchronization)
+     * @see javax.transaction.Synchronization#getSynchronization(Synchronization)
      */
     @Override
     public void setSynchronization(Synchronization sync) {
         this.unitOfWork.setSynchronization(
-            new SynchronizationAdapter(sync)
+            new UnitOfWorkSynchronizationAdapter(sync)
         );
     }
 
     /* (non-Javadoc)
-     * @see javax.jdo.Transaction#getSynchronization()
+     * @see javax.transaction.Synchronization#getSynchronization()
      */
     @Override
     public Synchronization getSynchronization() {
-        org.openmdx.base.persistence.cci.Synchronization synchronization =
-            this.unitOfWork.getSynchronization();
-        if(synchronization == null) {
+        org.openmdx.base.persistence.cci.Synchronization synchronization = this.unitOfWork.getSynchronization();
+        if (synchronization == null) {
             return null;
-        } else if (synchronization instanceof SynchronizationAdapter) {
-            return ((SynchronizationAdapter)synchronization).getDelegate();
+        } else if (synchronization instanceof UnitOfWorkSynchronizationAdapter) {
+            return ((UnitOfWorkSynchronizationAdapter) synchronization).getDelegate();
         } else {
             throw new JDOUserException(
                 "A synchronization object set to org.openmdx.kernel.jdo.LocalTransaction " +
-                "can't be retrieved through javax.jdo.Transaction"
+                    "can't be retrieved through javax.jdo.Transaction"
             );
         }
     }
 
-    /**
-     * 
-     * @see org.openmdx.base.persistence.cci.Synchronization#beforeCompletion()
+    /* (non-Javadoc)
+     * @see javax.transaction.Synchronization#beforeCompletion()
      */
     @Override
     public void beforeCompletion() {
@@ -280,54 +270,22 @@ class TransactionAdapter implements Transaction, javax.transaction.Synchronizati
         this.unitOfWork.afterCompletion(Status.valueOf(status));
     }
 
-
-    //------------------------------------------------------------------------
-    // Class Synchronization Adapter
-    //------------------------------------------------------------------------
-    
-    /**
-     * Synchronization Adapter
+    /* (non-Javadoc)
+     * @see javax.jdo.Transaction#setSerializeRead(java.lang.Boolean)
      */
-    static class SynchronizationAdapter implements org.openmdx.base.persistence.cci.Synchronization {
-
-        /**
-         * Constructor 
-         *
-         * @param delegate
-         */
-        SynchronizationAdapter(
-            Synchronization delegate
-        ) {
-            this.delegate = delegate;
+    @Override
+    public void setSerializeRead(Boolean serialize) {
+        if(Boolean.TRUE.equals(serialize)) {
+            throw new JDOFatalDataStoreException("openMDX does not support read serialization");
         }
+    }
 
-        private final Synchronization delegate;
-        
-        /* (non-Javadoc)
-         * @see javax.transaction.Synchronization#afterCompletion(int)
-         */
-        @Override
-        public void afterCompletion(Status status) {
-            this.delegate.afterCompletion(status.ordinal());
-        }
-
-        /* (non-Javadoc)
-         * @see javax.transaction.Synchronization#beforeCompletion()
-         */
-        @Override
-        public void beforeCompletion() {
-            this.delegate.beforeCompletion();
-        }
-        
-        /**
-         * Retrieve delegate.
-         *
-         * @return Returns the delegate.
-         */
-        Synchronization getDelegate() {
-            return this.delegate;
-        }
-
+    /* (non-Javadoc)
+     * @see javax.jdo.Transaction#getSerializeRead()
+     */
+    @Override
+    public Boolean getSerializeRead() {
+        return null;
     }
 
 }

@@ -38,7 +38,7 @@ import java.util.List;
  * Checking of the file filter list stops when the first filter returns
  * {@code false}.
  *
- * @since 1.0
+ * @since Commons I/O 1.0
  * @version $Id: AndFileFilter.java 1642757 2014-12-01 21:09:30Z sebb $
  *
  * @see FileFilterUtils#and(IOFileFilter...)
@@ -55,7 +55,7 @@ public class AndFileFilter
     /**
      * Constructs a new instance of <code>AndFileFilter</code>.
      *
-     * @since 1.1
+     * @since Commons I/O 1.1
      */
     public AndFileFilter() {
         this.fileFilters = new ArrayList<IOFileFilter>();
@@ -66,7 +66,7 @@ public class AndFileFilter
      * with the specified list of filters.
      *
      * @param fileFilters  a List of IOFileFilter instances, copied, null ignored
-     * @since 1.1
+     * @since Commons I/O 1.1
      */
     public AndFileFilter(final List<IOFileFilter> fileFilters) {
         if (fileFilters == null) {

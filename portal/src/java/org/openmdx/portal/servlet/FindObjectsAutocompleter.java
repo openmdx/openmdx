@@ -210,12 +210,12 @@ public class FindObjectsAutocompleter implements Autocompleter_1_0, Serializable
             (currentValue != null) &&
             (currentValue instanceof ObjectReferenceValue)
         ) {
-            objectReference = (ObjectReference)currentValue.getValue(false);
+            objectReference = (ObjectReference)currentValue.getValue(p, false);
         }
         // Generate id if none is specified
         String acName = "ac_" + fieldName.replace(':', '_').replace('!', '_').replace('*', '_') + Integer.toString(tabIndex);
         p.write("<div class=\"", CssClass.autocompleterMenu.toString(), "\">");
-        p.write("  <ul id=\"", CssClass.ssfNav.toString(), "\" class=\"", CssClass.ssfNav.toString(), "\" onmouseover=\"sfinit(this);\" >");
+        p.write("  <ul id=\"", CssClass.ssf_nav.toString(), "\" class=\"", CssClass.ssf_nav.toString(), "\" onmouseover=\"sfinit(this);\" >");
         p.write("    <li><a href=\"#\">", p.getImg("border=\"0\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_AUTOCOMPLETE_SELECT, "\""), "</a>");
         p.write("      <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
         for(int i = 0; i < findObjectsActions.length; i++) {

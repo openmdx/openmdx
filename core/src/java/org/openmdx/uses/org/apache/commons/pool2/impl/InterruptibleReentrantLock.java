@@ -36,7 +36,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p>
  * This class is intended to be thread-safe.
  *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 class InterruptibleReentrantLock extends ReentrantLock {
 

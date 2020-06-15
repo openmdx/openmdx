@@ -105,7 +105,6 @@ import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.Persistency;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsInCondition;
@@ -204,24 +203,6 @@ class RefObject_1
     	PrimitiveTypes.LONG
     );
     
-    @Deprecated
-    private static final List<String> excludeFromInitialization = Arrays.asList(
-        "org:openmdx:base:Aspect:core",
-        "org:openmdx:base:Creatable:createdAt",
-        "org:openmdx:base:Creatable:createdBy",
-        "org:openmdx:base:Modifiable:modifiedAt",
-        "org:openmdx:base:Modifiable:modifiedBy",
-        "org:openmdx:base:Removable:removedAt",
-        "org:openmdx:base:Removable:removedBy",
-        "org:openmdx:state2:DateState:stateValidFrom",
-        "org:openmdx:state2:DateState:stateValidTo",
-        "org:openmdx:state2:DateTimeState:stateValidFrom",
-        "org:openmdx:state2:DateTimeState:stateInvalidFrom",
-        "org:openmdx:state2:Legacy:validTimeUnique",
-        "org:openmdx:state2:StateCapable:stateVersion",
-        "org:openmdx:state2:StateCapable:transactionTimeUnique"
-    );
- 
     // -------------------------------------------------------------------------
     final private void assertStructuralFeature(
         ModelElement_1_0 elementDef
@@ -372,7 +353,7 @@ class RefObject_1
 							BasicException.Code.DEFAULT_DOMAIN,
 							BasicException.Code.ILLEGAL_STATE,
 							new BasicException.Parameter("interaction-spec", this.object.getInteractionSpec()),
-							new BasicException.Parameter("xri", this.object.jdoGetObjectId()),
+							new BasicException.Parameter(BasicException.Parameter.XRI, this.object.jdoGetObjectId()),
 							new BasicException.Parameter("transactional-object-id", this.object.jdoGetTransactionalObjectId()),
 							new BasicException.Parameter("object-class", this.object.objGetClass()),
 							new BasicException.Parameter("feature-name", featureName),
@@ -1562,42 +1543,6 @@ class RefObject_1
                             // not initialized
                             break;
                     }
-                }
-            }
-        } catch (ServiceException e) {
-            throw new JmiServiceException(e, this);
-        }
-    }
-
-    /**
-     * Initializes the object based on the source object. The source object
-     * must be of the same class or a subtype of the target.
-     * 
-     * @param existing existing object.
-     * @throws JmiServiceException thrown if object can not be initialized. 
-     * 
-     * @deprecated use {@link PersistenceHelper#clone(Object, String...)}
-     */
-    @Deprecated
-    final public void refInitialize(
-        RefObject source
-    ) {
-        try {
-            ModelElement_1_0 elementDef = ((RefMetaObject_1) this.refMetaObject()).getElementDef();
-            for (
-                Iterator<ModelElement_1_0> i = elementDef.objGetMap("allFeature").values().iterator(); 
-                i.hasNext();
-            ) {
-                ModelElement_1_0 featureDef = i.next();
-                if (
-                    !RefObject_1.excludeFromInitialization.contains(featureDef.jdoGetObjectId().getLastSegment().toClassicRepresentation()) &&
-                    this.isAttributeOrReferenceStoredAsAttribute(featureDef) && 
-                    Boolean.TRUE.equals(featureDef.isChangeable()) 
-                ) {
-                    this.setValue(
-                        featureDef, 
-                        source.refGetValue(featureDef.getName())
-                    );
                 }
             }
         } catch (ServiceException e) {

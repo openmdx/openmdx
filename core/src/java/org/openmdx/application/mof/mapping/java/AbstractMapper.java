@@ -71,6 +71,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.cci.Stereotypes;
+import org.openmdx.base.rest.cci.VoidRecord;
 import org.openmdx.kernel.exception.BasicException;
 
 // ---------------------------------------------------------------------------
@@ -693,7 +694,7 @@ public abstract class AbstractMapper
     protected String cciType(
         OperationDef operationDef
     ) throws ServiceException {
-        return "org:openmdx:base:Void".equals(operationDef.getQualifiedReturnTypeName()) ?
+        return VoidRecord.NAME.equals(operationDef.getQualifiedReturnTypeName()) ?
             "void" :
             interfaceType(operationDef.getQualifiedReturnTypeName(), org.openmdx.application.mof.mapping.java.metadata.Visibility.CCI, false);
     }

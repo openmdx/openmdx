@@ -39,7 +39,7 @@ import org.openmdx.uses.org.apache.commons.fileupload.FileItemHeaders;
 /**
  * Default implementation of the {@link FileItemHeaders} interface.
  *
- * @since 1.2.1
+ * @since FileUpload 1.2
  *
  * @version $Id: FileItemHeadersImpl.java 1458379 2013-03-19 16:16:47Z britter $
  */

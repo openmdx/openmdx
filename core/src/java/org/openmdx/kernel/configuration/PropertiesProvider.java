@@ -61,7 +61,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.openmdx.base.collection.TreeSparseArray;
+import org.openmdx.kernel.collection.TreeSparseArray;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Classes;
@@ -100,7 +100,10 @@ public class PropertiesProvider {
      * @param source a Map
      * 
      * @return corresponding properties
+     * 
+     * @deprecated without replacement
      */
+    @Deprecated
     public static Properties toProperties(
         Map<?,?> source
     ){
@@ -116,9 +119,10 @@ public class PropertiesProvider {
     }
     
     /**
-     * Retrieve the properties by resolving URIs 
+     * Retrieve the properties by resolving the URI. All matching resources
+     * are taken into account in case of a resource XRI. 
      * 
-     * @param uri
+     * @param uri either a resource XRI or a standard URL.
      * 
      * @return the properties retrieved for the given URI
      * 
@@ -127,7 +131,7 @@ public class PropertiesProvider {
     public static Properties getProperties(
         String uri
     ) throws IOException {
-        List<URL> urls = uri == null || uri.length() == 0 ? Collections.<URL>emptyList(
+        final List<URL> urls = uri == null || uri.length() == 0 ? Collections.<URL>emptyList(
         ) : uri.startsWith(RESOURCE_XRI_PREFIX) ? Collections.list(
             Classes.getResources(uri.substring(RESOURCE_XRI_PREFIX.length()))
         ) : Collections.singletonList(
@@ -195,11 +199,8 @@ public class PropertiesProvider {
         URL url
     ) throws IOException {
         Properties properties = new Properties();
-        InputStream source = url.openStream();
-        try {
+        try (InputStream source = url.openStream()){
             properties.load(source);
-        } finally {
-            source.close();
         }
         String defaultsURI = (String) properties.remove(DEFAULTS);
         if(defaultsURI != null) {

@@ -49,6 +49,7 @@ package test.mock.clock1.aop2;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.text.ParseException;
+import java.util.Date;
 
 import org.openmdx.base.aop2.AbstractObject;
 import org.w3c.format.DateTimeFormat;
@@ -56,9 +57,9 @@ import org.w3c.format.DateTimeFormat;
 import test.openmdx.clock1.jmi1.Clock1Package;
 
 /**
- * SegmentImpl
+ * AOP 2 Segment Plugin-In
  */
-public class SegmentImpl extends AbstractObject<test.openmdx.clock1.jmi1.Segment,test.openmdx.clock1.cci2.Segment,Void> {
+public class SegmentImpl extends AbstractObject<test.openmdx.clock1.jmi1.Segment,test.openmdx.clock1.cci2.Segment,Date> {
 
     /**
      * Constructor 
@@ -71,22 +72,52 @@ public class SegmentImpl extends AbstractObject<test.openmdx.clock1.jmi1.Segment
         test.openmdx.clock1.cci2.Segment next
     ) {
         super(same, next);
+        
     }
         
+    /* (non-Javadoc)
+     * @see org.openmdx.base.aop2.AbstractObject#newContext()
+     */
+    @Override
+    protected Date newContext(
+    ) {
+        try {
+            return DateTimeFormat.BASIC_UTC_FORMAT.parse("20000401T120000.000Z");
+        } catch (ParseException exception) {
+            throw new UndeclaredThrowableException(exception);
+        }        
+    }
+
     public test.openmdx.clock1.jmi1.Time currentDateAndTime(
     ){
         Clock1Package clock1Package = (Clock1Package) this.sameObject().refImmediatePackage();
-        try {
-            return clock1Package.createTime(DateTimeFormat.BASIC_UTC_FORMAT.parse("20000401T120000.000Z"));
-        } catch (ParseException exception) {
-            throw new UndeclaredThrowableException(exception);
-        }
+        return clock1Package.createTime(thisContext());
+    }
+    
+    public org.openmdx.base.jmi1.Void setDateAndTime(
+        test.openmdx.clock1.jmi1.Time in
+    ){
+        final Date utc = in.getUtc();
+        thisContext().setTime(utc.getTime());
+        AsAdmin.notifyDateAndTimeChange(sameObject(), utc);
+        return super.newVoid();
     }
     
     public java.lang.String getDescription(
     ){
         throw new ArrayIndexOutOfBoundsException("Mocked behaviour");
     }
+    
+    /**
+     * Sets a new value for the attribute <code>description</code>.
+     * @param description The possibly null new value for attribute <code>description</code>.
+     */
+    public void setDescription(
+      java.lang.String description
+    ) {
+        System.out.println(sameObject().refMofId() + ": " + description);
+    }
+    
     
     public org.openmdx.base.cci2.Provider getProvider(
     ){

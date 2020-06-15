@@ -51,8 +51,9 @@ package org.openmdx.base.rest.spi;
 import java.io.Closeable;
 import java.io.IOException;
 
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.base.naming.URLDecoder;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -69,7 +70,7 @@ public class RestSource implements Closeable {
     RestSource(
         InputSource body
     ){
-        this.contextURL = ".";
+        this.urlDecoder = new URLDecoder(".");
         this.body = body;
         this.format = Format.WBXML;
         this.exhaust = false;
@@ -90,7 +91,7 @@ public class RestSource implements Closeable {
         String mimeType, 
         Closeable closeable
     ) {
-        this.contextURL = contextURL;
+        this.urlDecoder = new URLDecoder(contextURL);
         this.body = body;
         this.format = Format.fromMimeType(mimeType);
         this.exhaust = true;
@@ -98,9 +99,9 @@ public class RestSource implements Closeable {
     }
     
     /**
-     * The HREF prefix
+     * The URL decoder
      */
-    protected final String contextURL;
+    protected final URLDecoder urlDecoder;
 
     /**
      * The input source
@@ -132,22 +133,11 @@ public class RestSource implements Closeable {
     protected Path getXRI(
         String hrefURL
     ) throws SAXException {
-        if (hrefURL.startsWith(this.contextURL)) {
-            return RestParser.toResourceIdentifier(
-                hrefURL.substring(this.contextURL.length())
-            );
+        try {
+            return urlDecoder.decode(hrefURL);
+        } catch (RuntimeException exception) {
+            throw new SAXException(exception);
         }
-        throw BasicException.initHolder(
-        	new SAXException(
-                "The URL does not start with the expected base URL",
-                BasicException.newEmbeddedExceptionStack(
-            		BasicException.Code.DEFAULT_DOMAIN,
-            		BasicException.Code.BAD_PARAMETER,
-            		new BasicException.Parameter("contextURL", this.contextURL),
-            		new BasicException.Parameter("url", hrefURL)
-        		)
-        	)
-        );		
     }
 
     /**

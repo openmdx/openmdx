@@ -41,14 +41,14 @@
 
 /* Header part -- contains navigation buttons and day names. */
 
-.calendar .button { /* "<<", "<", ">", ">>" buttons have this class */
+.calendar .calbutton { /* "<<", "<", ">", ">>" buttons have this class */
   text-align: center;
   padding: 0px;
   border: 1px solid #ddd;
   background: #ddd;
 }
 
-.calendar .nav {
+.calendar .calnav {
   /*background: transparent url(menuarrow.gif) no-repeat 100% 100%;*/
   background: #eee;
   border: 1px solid #ddd;

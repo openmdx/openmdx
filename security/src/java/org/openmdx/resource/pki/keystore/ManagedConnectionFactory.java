@@ -75,13 +75,6 @@ import org.openmdx.resource.spi.AbstractManagedConnectionFactory;
 public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 
 	/**
-     * Constructor
-     */
-    public ManagedConnectionFactory() {
-	    super();
-    }
-
-	/**
      * Implements <code>java.io.Serializable</code>
      */
     private static final long serialVersionUID = 8198549417001170970L;
@@ -116,24 +109,26 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
      */
     private ConnectionType connectionType = ConnectionType.CERTIFICATE_PROVIDER;
     
-    /* (non-Javadoc)
-     * @see org.openmdx.resource.spi.AbstractManagedConnectionFactory#isManagedConnectionShareable()
-     */
-    @Override
-    protected boolean isManagedConnectionShareable() {
-	    return this.connectionType != ConnectionType.CERTIFICATE_VALIDATOR;
-    }
-
 	/* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory(javax.resource.spi.ConnectionManager)
      */
-    public Object createConnectionFactory(
+    public org.openmdx.resource.cci.ConnectionFactory<KeyStoreConnection, GeneralSecurityException> createConnectionFactory(
         ConnectionManager connectionManager
     ) throws ResourceException {
         return new ConnectionFactory(
         	this,
         	connectionManager
         );
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.resource.spi.AbstractManagedConnectionFactory#createConnectionFactory()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public org.openmdx.resource.cci.ConnectionFactory<KeyStoreConnection, GeneralSecurityException> createConnectionFactory(
+    ) throws ResourceException {
+        return (org.openmdx.resource.cci.ConnectionFactory<KeyStoreConnection, GeneralSecurityException>) super.createConnectionFactory();
     }
 
     /**
@@ -314,7 +309,6 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 		            	    this,
 		            		this.connectionType,
 		                	credential,
-		                	connectionRequestInfo, 
 		                	parameters, 
 		                	getAlgorithm()
 		                );
@@ -339,8 +333,7 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 			            	    this,
 			            		this.connectionType,
 			                    credential,
-			                    connectionRequestInfo,
-			                    alias, 
+			                    alias,
 			                    keyStore.getCertificate(alias), 
 			                    null, 
 			                    getAlgorithm()
@@ -366,10 +359,10 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 			            	    this,
 			            		this.connectionType,
 			                    credential,
-			                    connectionRequestInfo,
-			                    alias, 
+			                    alias,
 			                    keyStore.getCertificate(alias), 
-			                    keyStore.getKey(alias, passPhrases[1]), getAlgorithm()
+			                    keyStore.getKey(alias, passPhrases[1]), 
+			                    getAlgorithm()
 			                 );
 		            	}
 	            }

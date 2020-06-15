@@ -190,10 +190,12 @@ public class UiGridControl extends Control implements Serializable {
               )
           );
           // columnTitle.isSortable() may throw NullPointer. Ignore it
-          boolean columnTitleIsSortable = false;
+          boolean columnTitleIsSortable;
           try {
               columnTitleIsSortable = columnDef.isSortable(); 
-          } catch(Exception e) {}
+          } catch(Exception e) {
+        	  columnTitleIsSortable = false;
+          }
           if(!columnTitleIsSortable) {
               this.initialColumnSortOrders.put(
                   columnDef.getFeatureName(),

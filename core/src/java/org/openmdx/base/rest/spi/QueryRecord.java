@@ -474,10 +474,8 @@ public class QueryRecord
     public void writeExternal(
         ObjectOutput out
     ) throws IOException {
-        try {
-            Target target = restFormatter.asTarget(out); 
+        try (Target target = restFormatter.asTarget(out)){
             restFormatter.format(target, this);
-            target.close();
         } catch (Exception exception) {
             throw Throwables.initCause(
                 new NotSerializableException(exception.getMessage()),

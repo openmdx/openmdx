@@ -127,7 +127,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter {
      */
     @Deprecated
     public void seriliazeAsArray(String name) {
-    	serializedAsArrays.add(name);
+        serializeAsArray(name);
     }
     
     public ArrayList<String> getSerializedAsArrays() {

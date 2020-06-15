@@ -78,6 +78,7 @@ import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
 
@@ -221,7 +222,7 @@ public class DataLoader
 	                                }
 	                                store.currentTransaction().commit();
                                 } catch(Exception e) {
-                                	new ServiceException(e).log();
+                                    Throwables.log(e);
                                 	try {
                                 		store.currentTransaction().rollback();
                                 	} catch(Exception ignore) {
@@ -229,7 +230,7 @@ public class DataLoader
                                 	}
                                 }
                             } catch(Exception e) {
-                                new ServiceException(e).log();
+                                Throwables.log(e);
                                 System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
                             }
                         }

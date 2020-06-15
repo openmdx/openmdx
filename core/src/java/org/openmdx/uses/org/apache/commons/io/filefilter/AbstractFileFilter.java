@@ -34,7 +34,7 @@ import java.io.File;
  * Note that a subclass <b>must</b> override one of the accept methods,
  * otherwise your class will infinitely loop.
  *
- * @since 1.0
+ * @since Commons I/O 1.0
  * @version $Id: AbstractFileFilter.java 1415850 2012-11-30 20:51:39Z ggregory $
  */
 public abstract class AbstractFileFilter implements IOFileFilter {

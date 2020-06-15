@@ -88,7 +88,7 @@ abstract class AbstractTarget implements Target {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.MEDIA_ACCESS_FAILURE,
                 "Result contains duplicates",
-                new BasicException.Parameter("xri", xri));
+                new BasicException.Parameter(BasicException.Parameter.XRI, xri));
         }
         if(completer != null) {
             completer.completeObject(object);

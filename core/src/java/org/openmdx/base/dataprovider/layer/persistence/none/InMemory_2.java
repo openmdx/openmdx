@@ -56,6 +56,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -162,24 +163,29 @@ public class InMemory_2 implements Port<RestConnection> {
     }
 
     /**
-     * Stll used by some configurations
-     * 
-     * @param datasourceName
+     * @deprecated shall not be used anymore
      */
     @Deprecated
     public void setDatasourceName(
         String datasourceName
     ) {
-        // nothing to do
+        SysLog.warning(
+            "The 'datasourceName' configuration is no longer supported and will be removed soon", 
+            getClass().getName()
+        );
     }
 
     /**
-     * Stll used by some configurations
+     * @return {@code null}
      * 
-     * @return <code>null</code>
+     * @deprecated shall not be used anymore
      */
     @Deprecated
     public String getDatasourceName() {
+        SysLog.warning(
+            "The 'datasourceName' configuration is no longer supported and will be removed soon", 
+            getClass().getName()
+        );
         return null;
     }
 
@@ -650,10 +656,10 @@ public class InMemory_2 implements Port<RestConnection> {
             ObjectRecord beforeImage
         )
             throws ResourceException {
-            final Object beforeImageVersion = beforeImage.getVersion();
+            final byte[] beforeImageVersion = beforeImage.getVersion();
             if (beforeImageVersion != null) {
-                final Object expectedVersion = input.getVersion();
-                if (!expectedVersion.equals(beforeImageVersion)) {
+                final byte[] expectedVersion = input.getVersion();
+                if (!Arrays.equals(expectedVersion, beforeImageVersion)) {
                     throw ResourceExceptions.initHolder(
                         new ResourceException(
                             "Validation failed",
@@ -876,7 +882,7 @@ public class InMemory_2 implements Port<RestConnection> {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.BAD_PARAMETER,
                         "Unresolvable resource identifier",
-                        new BasicException.Parameter("xri", xri));
+                        new BasicException.Parameter(BasicException.Parameter.XRI, xri));
                 }
                 return getValuesIterator(objectRecord, condition.getFeature());
             }
@@ -914,7 +920,7 @@ public class InMemory_2 implements Port<RestConnection> {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.BAD_PARAMETER,
                         "Unable to retrieve the given feature's values",
-                        new BasicException.Parameter("xri", candidate.getResourceIdentifier()),
+                        new BasicException.Parameter(BasicException.Parameter.XRI, candidate.getResourceIdentifier()),
                         new BasicException.Parameter("feature", feature));
                 }
         }

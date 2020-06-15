@@ -47,50 +47,50 @@
  */
 package org.openmdx.resource.ldap.spi;
 
+import java.io.IOException;
+
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.EISSystemException;
 import javax.resource.spi.ManagedConnectionFactory;
+import javax.resource.spi.SecurityException;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
+import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.directory.ldap.client.api.LdapConnection;
+import org.apache.directory.ldap.client.api.LdapConnectionConfig;
 import org.openmdx.resource.spi.AbstractManagedConnection;
 import org.openmdx.resource.spi.PasswordCredentials;
-
-import netscape.ldap.LDAPConnection;
-import netscape.ldap.LDAPException;
-import netscape.ldap.LDAPv3;
-
 
 /**
  * Managed LDAP Connection
  */
-public class ManagedConnection extends AbstractManagedConnection<AbstractManagedConnectionFactory> {
+public class ManagedConnection extends AbstractManagedConnection<ManagedConnectionFactory> {
 
     /**
      * Constructor 
      */
     public ManagedConnection(
-        AbstractManagedConnectionFactory factory,
+        ManagedConnectionFactory factory,
     	PasswordCredential credential,
-        ConnectionRequestInfo connectionRequestInfo, 
-        LDAPv3 physicalConnection
+        LdapConnection physicalConnection
     ) throws ResourceException {
-    	super(factory,"LDAP", String.valueOf(factory.getProtocolVersion()), credential, connectionRequestInfo);
+    	super(factory,"LDAP", String.valueOf(LdapConnectionConfig.LDAP_V3), credential, null);
     	this.physicalConnection = physicalConnection;
     }
 
     /**
      * The physical connection
      */
-    private LDAPv3 physicalConnection;
+    private LdapConnection physicalConnection;
 
     @Override
     public void destroy(
     ) throws ResourceException {
     	try {
-			this.physicalConnection.disconnect();
-		} catch (LDAPException exception) {
+			this.physicalConnection.close();
+		} catch (IOException exception) {
 			throw this.log(
 				new EISSystemException(
 					"LDAP disconnection failure",
@@ -104,6 +104,23 @@ public class ManagedConnection extends AbstractManagedConnection<AbstractManaged
 		}
     }
 
+    public boolean isInvalid() {
+        if(this.physicalConnection == null) {
+            log("Prune closed connection");
+            return true;
+        }
+        if(this.physicalConnection.isConnected()) {
+            return false;
+        }
+        try {
+            this.physicalConnection.connect();
+            return false;
+        } catch (LdapException e) {
+            log("Prune managed connection upon connect failure");
+            return true;
+        }
+    }
+    
     /* (non-Javadoc)
      * @see org.openmdx.resource.spi.AbstractManagedConnection#newConnection()
      */
@@ -112,87 +129,57 @@ public class ManagedConnection extends AbstractManagedConnection<AbstractManaged
         Subject subject, 
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
-        final LDAPv3 delegate;
-        if(this.physicalConnection instanceof Cloneable) {
-            // LDAP v3
-            delegate = (LDAPv3) ((LDAPConnection)this.physicalConnection).clone();
-            final PasswordCredential credential = subject == null ?
-                getCredential() :
-                PasswordCredentials.getPasswordCredential(getManagedConnectionFactory(), subject);
-            if(credential != null) {
-                bind(delegate, credential);
+        final Connection connection = new Connection(this.physicalConnection);
+        try {
+            bind(getCredential(subject, connectionRequestInfo));
+            return connection;
+        } catch (ResourceException exception) {
+            try {
+                connection.close();
+            } catch (IOException closeException) {
+                log(
+                    new EISSystemException(
+                        "Unable to close connection after authenication failure", 
+                        closeException
+                    ), 
+                    false
+               );
             }
-        } else {
-            // LDIF
-            delegate = this.physicalConnection;
+            throw exception;
         }
-	    return new Connection(delegate);
+    }
+
+    private void bind(
+        final PasswordCredential passwordCredential
+    ) throws ResourceException {
+        try {
+            if(passwordCredential == null) {
+                this.physicalConnection.anonymousBind();
+            } else if (PasswordCredentials.isPasswordEmpty(passwordCredential)){
+                this.physicalConnection.bind(
+                    passwordCredential.getUserName()
+                );
+            } else {
+                this.physicalConnection.bind(
+                    passwordCredential.getUserName(), 
+                    new String(passwordCredential.getPassword())
+                );
+            }
+        } catch (LdapException authenticationException) {
+            throw new SecurityException("Authentication failure", authenticationException);
+        }
     }
 
     /**
-     * Authenticate 
-     * 
-     * @param physicalConnection
-     *            the physical connection
-     * @param credential
-     *            the credential
-     * 
-     * @throws ResourceException
-     */
-    private void bind(
-        final LDAPv3 physicalConnection,
-        final PasswordCredential credential
-    ) throws ResourceException {
-        final String distinguishedName = credential.getUserName();
-        final String password = new String(credential.getPassword());
-        try {
-            physicalConnection.authenticate(getManagedConnectionFactory().getProtocolVersion(), distinguishedName, password);
-        } catch (LDAPException exception) {
-            switch (exception.getLDAPResultCode()) {
-                case LDAPException.NO_SUCH_OBJECT:
-                    log(
-                        "LDAP authentication failed, user '{0}' does not exist",
-                        credential.getUserName()
-                    );
-                    throw new EISSystemException(
-                        "LDAP authentication failed, user does not exist",
-                        exception
-                    );
-                case LDAPException.INVALID_CREDENTIALS:
-                    log(
-                        "LDAP authentication failed, invalid password for user '{0}'",
-                        credential.getUserName()
-                    );
-                    throw new EISSystemException(
-                        "LDAP authentication failed, invalid password",
-                        exception
-                    );
-                default:
-                    log(
-                        "LDAP authentication failed, invalid password for user '{0}'",
-                        credential.getUserName()
-                    );
-                    throw log(
-                        new EISSystemException(
-                            "LDAP authentication failed, invalid password",
-                            exception
-                        ),
-                        true
-                    );
-            }
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.resource.spi.AbstractManagedConnection#matches(javax.resource.spi.ManagedConnectionFactory, java.lang.Object, javax.resource.spi.ConnectionRequestInfo)
+     * The credentials are not applied to the managed connection itself 
+     * but upon its association with a connection handle.
      */
     @Override
     protected boolean matches(
-        ManagedConnectionFactory factory,
         Object credential,
         ConnectionRequestInfo connectionRequestInfo
     ) {
-        return factory == getManagedConnectionFactory();
+        return true;
     }
 
 }

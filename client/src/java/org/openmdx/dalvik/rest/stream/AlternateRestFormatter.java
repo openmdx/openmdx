@@ -203,7 +203,7 @@ public class AlternateRestFormatter implements RestFormatter {
             0,
             resourceIdentifier,
             transientObjectId == null ? null : transientObjectId.toString(),
-            (byte[]) source.getVersion(),
+            source.getVersion(),
             null, // index
             source.getValue(),
             serializeNulls
@@ -291,7 +291,7 @@ public class AlternateRestFormatter implements RestFormatter {
                     1, 
                     object.getResourceIdentifier(), 
                     null, 
-                    (byte[]) object.getVersion(), 
+                    object.getVersion(), 
                     null, // index
                     object.getValue(),
                     serializeNulls
@@ -699,7 +699,7 @@ public class AlternateRestFormatter implements RestFormatter {
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.TRANSFORMATION_FAILURE,
-	                    new BasicException.Parameter("xri", xri),
+	                    new BasicException.Parameter(BasicException.Parameter.XRI, xri),
 	                    new BasicException.Parameter("id", id),
 	                    new BasicException.Parameter("type", record.getRecordName()),
 	                    new BasicException.Parameter("index", index),
@@ -762,7 +762,7 @@ public class AlternateRestFormatter implements RestFormatter {
                         BasicException.Code.PROCESSING_FAILURE,
                         "Unable to retrieve feature value",
                         new BasicException.Parameter("hrefContext", target.getBase()),
-                        new BasicException.Parameter("xri", xri),
+                        new BasicException.Parameter(BasicException.Parameter.XRI, xri),
                         new BasicException.Parameter("id", id),
                         new BasicException.Parameter("feature", feature)
                     )
@@ -840,7 +840,7 @@ public class AlternateRestFormatter implements RestFormatter {
                                     "hrefContext",
                                     target.getBase()
                                 ),
-                                new BasicException.Parameter("xri", xri),
+                                new BasicException.Parameter(BasicException.Parameter.XRI, xri),
                                 new BasicException.Parameter("feature", feature)
                             )
                         );
@@ -898,7 +898,7 @@ public class AlternateRestFormatter implements RestFormatter {
                                         "hrefContext",
                                         target.getBase()
                                     ),
-                                    new BasicException.Parameter("xri", xri),
+                                    new BasicException.Parameter(BasicException.Parameter.XRI, xri),
                                     new BasicException.Parameter("feature", feature)
                                  )
                              );

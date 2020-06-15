@@ -50,12 +50,17 @@ package org.openmdx.base.mof.repository.spi;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 
 import org.openmdx.base.collection.Sets;
-import org.openmdx.base.mof.cci.Multiplicity;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.resource.Records;
+import org.openmdx.base.resource.cci.SetRecord;
 import org.openmdx.base.rest.spi.AbstractMappedRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
@@ -171,8 +176,30 @@ abstract class ElementRecord<M extends Enum<M>>
         this.createdAt = newValue == null ? NULL_DATE : newValue.getTime();
     }
 
-    protected IndexedRecord createdBy(){
-        return toIndexedRecord(Multiplicity.SET, this.createdBy);
+    protected IndexedRecord createdBy() {
+        try {
+            return Records.getRecordFactory().indexedRecordFacade(
+                SetRecord.class, 
+                new Supplier<Object>() {
+
+                    @Override
+                    public Object get() {
+                        return createdBy;
+                    }
+                },
+                new Consumer<Object>() {
+
+                    @Override
+                    public void accept(Object t) {
+                        assertMutability();                    
+                        createdBy = (String) t;
+                    }
+                    
+                }
+            );
+        } catch (ResourceException exception) {
+            throw new RuntimeServiceException(exception);
+        }
     }
     
     protected void setCreatedBy(
@@ -192,7 +219,29 @@ abstract class ElementRecord<M extends Enum<M>>
     }
 
     protected IndexedRecord modifiedBy(){
-        return toIndexedRecord(Multiplicity.SET, this.modifiedBy);
+        try {
+            return Records.getRecordFactory().indexedRecordFacade(
+                SetRecord.class,
+                new Supplier<Object>() {
+
+                    @Override
+                    public Object get() {
+                        return modifiedBy;
+                    }
+                },
+                new Consumer<Object>() {
+
+                    @Override
+                    public void accept(Object t) {
+                        assertMutability();                    
+                        modifiedBy = (String) t;
+                    }
+                    
+                }
+            );
+        } catch (ResourceException exception) {
+            throw new RuntimeServiceException(exception);
+        }
     }
     
     protected void setModifiedBy(

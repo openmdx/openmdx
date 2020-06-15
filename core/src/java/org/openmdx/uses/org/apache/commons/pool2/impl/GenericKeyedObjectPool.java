@@ -80,9 +80,7 @@ import org.openmdx.uses.org.apache.commons.pool2.SwallowedExceptionListener;
  * @param <K> The type of keys maintained by this pool.
  * @param <T> Type of element pooled in this pool.
  *
- * @version $Revision: 1679561 $
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public class GenericKeyedObjectPool<K,T> extends BaseGenericObjectPool<T>
         implements KeyedObjectPool<K,T>, GenericKeyedObjectPoolMXBean<K> {

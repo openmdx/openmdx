@@ -1,15 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: $
  * Description: FilteringList 
- * Revision:    $Revision: $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2018, OMEX AG, Switzerland
  * All rights reserved.
@@ -210,7 +206,7 @@ abstract class FilteringList extends AbstractSequentialList<DataObject_1_0> {
 
         @Override
         public DataObject_1_0 next() {
-            return this.delegate.next();
+            return this.current = this.delegate.next();
         }
 
         @Override
@@ -221,7 +217,7 @@ abstract class FilteringList extends AbstractSequentialList<DataObject_1_0> {
         @Override
         public DataObject_1_0 previous(
         ){
-            return this.delegate.previous();
+            return this.current = this.delegate.previous();
         }
 
         @Override

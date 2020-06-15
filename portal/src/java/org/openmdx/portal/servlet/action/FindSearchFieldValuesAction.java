@@ -62,8 +62,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.CssClass;
@@ -93,39 +93,41 @@ public class FindSearchFieldValuesAction extends UnboundAction {
         String qualifiedReferenceName = Action.getParameter(parameter, Action.PARAMETER_NAME);
         String featureName = Action.getParameter(parameter, Action.PARAMETER_FILTER_BY_FEATURE);
         String[] filterValues = (String[])requestParameters.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES);
-        PrintWriter pw = this.getWriter(
-            request, 
-            response
-        );
-        PersistenceManager pm = null;
-        try {
-        	RefObject_1_0 object = null;
-        	if(objectXri != null && !objectXri.isEmpty()) {
-	            Path objectIdentity = new Path(objectXri);
-	            pm = app.getNewPmData();
-	            object = (RefObject_1_0)pm.getObjectById(objectIdentity);
-        	}
-        	if(qualifiedReferenceName != null && featureName != null && filterValues != null && filterValues.length > 0) {
-        		PortalExtension_1_0.SearchFieldDef searchFieldDef = app.getPortalExtension().getSearchFieldDef(qualifiedReferenceName, featureName, app);
-        		if(searchFieldDef != null) {
-        			List<String> values = searchFieldDef.findValues(object, filterValues[0], app);
-                    pw.print("<ul class=\"" + CssClass.dropdownMenu.toString() + "\" style=\"display:block;\">\n");
-                    for(String value: values) {
-                    	pw.write("<li>");
-                    	pw.write(app.getHtmlEncoder().encode(value, false));
-                    	pw.write("</li>\n");
-                    }
-                    pw.print("</ul>\n");
-        		}
-        	}
-        } catch(Exception e) {
-            new ServiceException(e).log();
-        } finally {
-        	if(pm != null) {
-        		pm.close();
-        	}        	
+        try(
+            PrintWriter pw = this.getWriter(
+                request, 
+                response
+            )
+        ){
+            PersistenceManager pm = null;
+            try {
+            	RefObject_1_0 object = null;
+            	if(objectXri != null && !objectXri.isEmpty()) {
+    	            Path objectIdentity = new Path(objectXri);
+    	            pm = app.getNewPmData();
+    	            object = (RefObject_1_0)pm.getObjectById(objectIdentity);
+            	}
+            	if(qualifiedReferenceName != null && featureName != null && filterValues != null && filterValues.length > 0) {
+            		PortalExtension_1_0.SearchFieldDef searchFieldDef = app.getPortalExtension().getSearchFieldDef(qualifiedReferenceName, featureName, app);
+            		if(searchFieldDef != null) {
+            			List<String> values = searchFieldDef.findValues(object, filterValues[0], app);
+                        pw.print("<ul class=\"" + CssClass.dropdown_menu.toString() + "\" style=\"display:block;\">\n");
+                        for(String value: values) {
+                        	pw.write("<li>");
+                        	pw.write(app.getHtmlEncoder().encode(value, false));
+                        	pw.write("</li>\n");
+                        }
+                        pw.print("</ul>\n");
+            		}
+            	}
+            } catch(Exception e) {
+                Throwables.log(e);
+            } finally {
+            	if(pm != null) {
+            		pm.close();
+            	}        	
+            }
         }
-        pw.close();  
         return new ActionPerformResult(
             ActionPerformResult.StatusCode.DONE
         );

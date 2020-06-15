@@ -47,175 +47,197 @@
  */
 package org.openmdx.base.resource.cci;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.RecordFactory;
 
 /**
- * The ExtendedRecordFactory interface is used for creating 
- * <code>MappedRecord</code> and <code>IndexedRecord</code> instances wrapping 
+ * The ExtendedRecordFactory interface is used for creating
+ * <code>MappedRecord</code> and <code>IndexedRecord</code> instances wrapping
  * the given data.
  */
 public interface ExtendedRecordFactory extends RecordFactory {
 
-  //--------------------------------------------------------------------------
-  // MappedRecord Factory
-  //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // MappedRecord Factory
+    //--------------------------------------------------------------------------
 
-  /** 
-   * Creates an <code>MappedRecord</code> of the given type.
-   *  
-   *  @param typedInterface the interface the record shall implement, one of<ul>
-   *  <li>{@link org.openmdx.base.rest.cci.ConditionRecord}
-   *  <li>{@link org.openmdx.base.rest.cci.MessageRecord}
-   *  <li>{@link org.openmdx.base.rest.cci.FeatureOrderRecord}
-   *  <li>{@link org.openmdx.base.rest.cci.ObjectRecord}
-   *  <li>{@link org.openmdx.base.rest.cci.QueryFilterRecord}
-   *  <li>{@link org.openmdx.base.rest.spi.QueryFilterRecord}
-   *  <li>{@link org.openmdx.base.rest.cci.QueryExtensionRecord}
-   *  <li>{@link org.openmdx.base.rest.cci.QueryRecord}
-   *  <li>{@link org.openmdx.base.rest.cci.VoidRecord}
-   *  </ul>
-   *  
-   *  @return a new record of the given type
-   *  @throws ResourceException  Failed to create a MappedRecord.
-   */
-  <T extends MappedRecord> T createMappedRecord(
-	Class<T> typedInterface
-  ) throws ResourceException;
-	
-  /**
-   * Creates a MappedRecord with the given name, short description and
-   * content.  
-   * <p>
-   * The MappedRecord is backed up by the given arrays.
-   *
-   * @param     recordName
-   *            The name of the record acts as a pointer to the meta
-   *            information (stored in the metadata repository) for a specific 
-   *            record type. 
-   * @param     recordShortDescription
-   *            The short description of the Record; or null.
-   * @param     keys
-   *            The keys of the mapped record
-   * @param     values
-   *            The values of the mapped record sorted according to the keys
-   *
-   * @exception ResourceException
-   *            Failed to create an initialized MappedRecord.
-   *            Example error cases are:<ul>
-   *            <li>Invalid specification of record name</li>
-   *            <li>Resource adapter internal error</li>
-   *            <li>Failed to access metadata repository</li>
-   *            </ul>
-   */
-  MappedRecord asMappedRecord(
-    String recordName,
-    String recordShortDescription,
-    Object[] keys,
-    Object[] values
-  );
-  	
-  /**
-   * Creates a MappedRecord with the given name, short description and
-   * content.  
-   * 
-   * @param     recordName
-   *            The name of the record acts as a pointer to the meta
-   *            information (stored in the metadata repository) for a specific 
-   *            record type. 
-   * @param     recordShortDescription
-   *            The short description of the Record; or <code>null</null>.
-   * @param     key
-   *            The key of the single mapped record entry
-   * @param     value
-   *            The value of the single mapped record entry
-   */
-  MappedRecord singletonMappedRecord(
-    String recordName,
-    String recordShortDescription,
-    Object key,
-    Object value
-  );
+    /**
+     * Creates an <code>MappedRecord</code> of the given type.
+     * 
+     * @param typedInterface
+     *            the interface the record shall implement, one of
+     *            <ul>
+     *            <li>{@link org.openmdx.base.resource.cci.SparseArrayRecord}
+     *            <li>{@link org.openmdx.base.rest.cci.ConditionRecord}
+     *            <li>{@link org.openmdx.base.rest.cci.MessageRecord}
+     *            <li>{@link org.openmdx.base.rest.cci.FeatureOrderRecord}
+     *            <li>{@link org.openmdx.base.rest.cci.ObjectRecord}
+     *            <li>{@link org.openmdx.base.rest.cci.QueryFilterRecord}
+     *            <li>{@link org.openmdx.base.rest.spi.QueryFilterRecord}
+     *            <li>{@link org.openmdx.base.rest.cci.QueryExtensionRecord}
+     *            <li>{@link org.openmdx.base.rest.cci.QueryRecord}
+     *            <li>{@link org.openmdx.base.rest.cci.VoidRecord}
+     *            </ul>
+     * 
+     * @return a new record of the given type
+     * @throws ResourceException
+     *             Failed to create a MappedRecord.
+     */
+    <T extends MappedRecord> T createMappedRecord(
+        Class<T> typedInterface
+    )
+        throws ResourceException;
 
-  
-  //--------------------------------------------------------------------------
-  // IndexedRecord Factory
-  //--------------------------------------------------------------------------
+    /**
+     * Creates a MappedRecord with the given name, short description and
+     * content.
+     * <p>
+     * The MappedRecord is backed up by the given arrays.
+     *
+     * @param recordName
+     *            The name of the record acts as a pointer to the meta
+     *            information (stored in the metadata repository) for a specific
+     *            record type.
+     * @param recordShortDescription
+     *            The short description of the Record; or null.
+     * @param keys
+     *            The keys of the mapped record
+     * @param values
+     *            The values of the mapped record sorted according to the keys
+     *
+     * @exception ResourceException
+     *                Failed to create an initialized MappedRecord.
+     *                Example error cases are:
+     *                <ul>
+     *                <li>Invalid specification of record name</li>
+     *                <li>Resource adapter internal error</li>
+     *                <li>Failed to access metadata repository</li>
+     *                </ul>
+     */
+    MappedRecord asMappedRecord(
+        String recordName,
+        String recordShortDescription,
+        Object[] keys,
+        Object[] values
+    );
 
-  /** 
-   * Creates an <code>IndexdRecord</code> of the given type.
-   *  
-   *  @param typedInterface the interface the record shall implement, one of<ul>
-   *  <li>{@link org.openmdx.base.rest.cci.ResultRecord}
-   *  </ul>
-   *  
-   *  @return a new record of the given type
-   *  
-   *  @throws ResourceException  Failed to create a MappedRecord.
-   */
-  <T extends IndexedRecord> T createIndexedRecord(
-	Class<T> typedInterface
-  ) throws ResourceException;
-	
-  /**
-   * Creates an IndexedRecord with the given name, description and content.  
-   * <p>
-   * The Record is backed up by the given array.
-   *
-   * @param     recordName
-   *            The name of the record acts as a pointer to the meta 
-   *            information (stored in the metadata repository) for a specific
-   *            record type. 
-   * @param     recordShortDescription
-   *            The short description of the Record; or <code>null</null>.
-   * @param     values
-   *            The values of the indexed record represented by a List or an 
-   *            array of objects or primitive types.
-   */
-  IndexedRecord asIndexedRecord(
-    String recordName,
-    String recordShortDescription,
-    Object values
-  );
+    /**
+     * Creates a MappedRecord with the given name, short description and
+     * content.
+     * 
+     * @param recordName
+     *            The name of the record acts as a pointer to the meta
+     *            information (stored in the metadata repository) for a specific
+     *            record type.
+     * @param recordShortDescription
+     *            The short description of the Record; or <code>null</null>.
+     * @param key
+     *            The key of the single mapped record entry
+     * @param value
+     *            The value of the single mapped record entry
+     */
+    MappedRecord singletonMappedRecord(
+        String recordName,
+        String recordShortDescription,
+        Object key,
+        Object value
+    );
 
-  /**
-   * Creates an IndexedRecord with the given name, description and content.  
-   *
-   * @param     recordName
-   *            The name of the record acts as a pointer to the meta 
-   *            information (stored in the metadata repository) for a specific
-   *            record type. 
-   * @param     recordShortDescription
-   *            The short description of the Record; or <code>null</null>.
-   * @param     value
-   *            The single value of the indexed record.
-   */
-  IndexedRecord singletonIndexedRecord(
-    String recordName,
-    String recordShortDescription,
-    Object value
-  );
+    //--------------------------------------------------------------------------
+    // IndexedRecord Factory
+    //--------------------------------------------------------------------------
 
-  /**
-   * Creates a variable size IndexedRecord with the given name, short 
-   * description and content. The size will always be in the range 0 to 1.  
-   * 
-   * @param     recordName
-   *            The name of the record acts as a pointer to the meta
-   *            information (stored in the metadata repository) for a specific 
-   *            record type. 
-   * @param     recordShortDescription
-   *            The short description of the Record; or <code>null</null>.
-   * @param     value
-   *            The single value of the tiny indexed record; or 
-   *            <code>null</null> for an empty record
-   */
-  IndexedRecord tinyIndexedRecord(
-    String recordName,
-    String recordShortDescription,
-    Object value
-  );
-  
+    /**
+     * Creates an <code>IndexdRecord</code> of the given type.
+     * 
+     * @param typedInterface
+     *            the interface the record shall implement, one of
+     *            <ul>
+     *            <li>{@link org.openmdx.base.resource.cci.ListRecord}
+     *            <li>{@link org.openmdx.base.resource.cci.SetRecord}
+     *            <li>{@link org.openmdx.base.rest.cci.ResultRecord}
+     *            </ul>
+     * 
+     * @return a new record of the given type
+     * 
+     * @throws ResourceException
+     *             Failed to create a MappedRecord.
+     */
+    <T extends IndexedRecord> T createIndexedRecord(
+        Class<T> typedInterface
+    )
+        throws ResourceException;
+
+    /**
+     * Creates an IndexedRecord with the given name, description and content.
+     * <p>
+     * The Record is backed up by the given array.
+     *
+     * @param recordName
+     *            The name of the record acts as a pointer to the meta
+     *            information (stored in the metadata repository) for a specific
+     *            record type.
+     * @param recordShortDescription
+     *            The short description of the Record; or <code>null</null>.
+     * @param values
+     *            The values of the indexed record represented by a List or an
+     *            array of objects or primitive types.
+     */
+    IndexedRecord asIndexedRecord(
+        String recordName,
+        String recordShortDescription,
+        Object values
+    );
+
+    /**
+     * Creates an IndexedRecord with the given name, description and content.
+     *
+     * @param recordName
+     *            The name of the record acts as a pointer to the meta
+     *            information (stored in the metadata repository) for a specific
+     *            record type.
+     * @param recordShortDescription
+     *            The short description of the Record; or <code>null</null>.
+     * @param value
+     *            The single value of the indexed record.
+     *            
+     * @deprecated as it's semantic (set or list) is unknown           
+     */
+    @Deprecated
+    IndexedRecord singletonIndexedRecord(
+        String recordName,
+        String recordShortDescription,
+        Object value
+    );
+
+    /**
+     * Creates an <code>MappedRecord</code> of the given type.
+     * 
+     * @param typedInterface
+     *            the interface the record shall implement, one of
+     *            <ul>
+     *            <li>{@link org.openmdx.base.resource.cci.ListRecord}
+     *            <li>{@link org.openmdx.base.resource.cci.SetRecord}
+     *            </ul>
+     * @param getter
+     *            The getter for the tiny indexed record's optional value.
+     * @param setter
+     *            The setter for the tiny indexed record's optional value.
+     * 
+     * @return a new record of the given type
+     * 
+     * @throws ResourceException
+     *             Failed to create a MappedRecord.
+     */
+    <T extends IndexedRecord> T indexedRecordFacade(
+        Class<T> typedInterface,
+        Supplier<Object> getter,
+        Consumer<Object> setter
+    ) throws ResourceException;
+
 }

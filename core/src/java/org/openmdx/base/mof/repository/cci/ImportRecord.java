@@ -47,11 +47,33 @@
  */
 package org.openmdx.base.mof.repository.cci;
 
+import org.openmdx.base.naming.Path;
+
 /**
  * org::omg::model1::Import Record
  */
 public interface ImportRecord extends ElementRecord {
 
   String NAME = "org:omg:model1:Import";
+
+  enum Member {
+      isClustered,
+      modifiedAt,
+      visibility,
+      modifiedBy,
+      qualifiedName,
+      annotation,
+      identity,
+      importedNamespace,
+      createdBy,
+      stereotype,
+      container,
+      createdAt,
+      name
+    }
+  
+  String getVisibility();
+  boolean isClustered();
+  Path getImportedNamespace();   
 
 }

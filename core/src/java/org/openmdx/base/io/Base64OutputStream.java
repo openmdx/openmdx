@@ -77,13 +77,12 @@ public class Base64OutputStream extends ByteArrayOutputStream {
     	if(data == null) {
     		return "";
     	} else {
-    	    try {
+    	    try (
         		Base64OutputStream target = new Base64OutputStream();
-        		java.io.ObjectOutputStream objectOutputStream = new java.io.ObjectOutputStream(target);
+        		java.io.ObjectOutputStream objectOutputStream = new java.io.ObjectOutputStream(target)
+            ){
                 objectOutputStream.writeObject(data);
-        		String encodedValue = target.toString();
-        		objectOutputStream.close();
-                return encodedValue;
+        		return target.toString();
     		} catch (Exception exception) {
     			throw new ServiceException(
     				exception,

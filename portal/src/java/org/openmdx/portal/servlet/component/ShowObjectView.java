@@ -66,6 +66,7 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -200,7 +201,7 @@ public class ShowObjectView extends ObjectView implements Serializable {
             }
         } catch(ServiceException e) {
         	SysLog.detail("can not refresh", e.getMessage());
-            new ServiceException(e).log();
+        	Throwables.log(e);
         }
         return oldPm;
     }
@@ -367,8 +368,9 @@ public class ShowObjectView extends ObjectView implements Serializable {
             org.openmdx.ui1.jmi1.Segment uiSegment = null;
             try {
                 uiSegment = this.getApplicationContext().getUiContext().getUiSegment(ii);
-            } 
-            catch(Exception e) {}
+            } catch(Exception ignore) {
+    			SysLog.trace("Exception ignored", ignore);
+            }
             boolean isRevokeShow = this.app.getPortalExtension().hasPermission(
             	uiSegment, 
             	this.app,

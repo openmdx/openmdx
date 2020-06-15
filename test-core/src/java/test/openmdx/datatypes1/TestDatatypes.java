@@ -154,6 +154,7 @@ public class TestDatatypes  {
     protected static final int VALUE11b = VALUE_COUNT++;
     protected static final int COUNTRY = VALUE_COUNT++;
     protected static final int SLICE_COUNT = 3;
+    private static final int FETCH_SIZE_HUGE = 10000;
 
     protected static PersistenceManagerFactory entityManagerFactory;
     private Object[][] values;
@@ -338,7 +339,7 @@ public class TestDatatypes  {
             exportDatatypes("Persistent", "Default");
             importDatatypes("Persistent", "Default");
             removeOptionalData("Persistent", "Default");
-            retrieveOptionalData("Persistent", "Default");
+            doNotTouchWhenApplyingCurrentValue(retrieveData("Persistent", "Default"));
         } catch(Exception exception) {
             SysLog.error("Exception", exception);
             throw exception;
@@ -352,7 +353,7 @@ public class TestDatatypes  {
             storeDatatypes("Persistent", "Numeric");
             retrieveDatatypes("Persistent", "Numeric");
             removeOptionalData("Persistent", "Numeric");
-            retrieveOptionalData("Persistent", "Numeric");
+            doNotTouchWhenApplyingCurrentValue(retrieveData("Persistent", "Numeric"));
         } catch(Exception exception) {
             SysLog.error("Exception", exception);
             throw exception;
@@ -366,7 +367,7 @@ public class TestDatatypes  {
             storeDatatypes("Persistent", "Native");
             retrieveDatatypes("Persistent", "Native");
             removeOptionalData("Persistent", "Native");
-            retrieveOptionalData("Persistent", "Native");
+            doNotTouchWhenApplyingCurrentValue(retrieveData("Persistent", "Native"));
         } catch(Exception exception) {
             SysLog.error("Exception", exception);
             throw exception;
@@ -403,7 +404,7 @@ public class TestDatatypes  {
             Datatypes.create(XMLGregorianCalendar.class, "2012-09-09"), // Wed Sep 09 2009
             Datatypes.create(XMLGregorianCalendar.class, "2012-09-09"), // Wed Sep 09 2009
             24 * 60 / 3,
-            Integer.valueOf(500000)
+            Integer.valueOf(FETCH_SIZE_HUGE)
         );
         validateBulk(
             "Persistent", 
@@ -679,7 +680,7 @@ public class TestDatatypes  {
      * 
      * @throws Exception
      */
-    protected void retrieveOptionalData(
+    protected NonStated retrieveData(
         String providerName, 
         String segmentName
     ) throws Exception {
@@ -697,8 +698,47 @@ public class TestDatatypes  {
         Segment segment = (Segment) provider.getSegment(segmentName);
         NonStated nonStated = segment.getNonStated("0");
         this.validateOptionalData(nonStated, true);
+        return nonStated;
     }
     
+    private void doNotTouchWhenApplyingCurrentValue(
+        NonStated nonStated        
+    ) throws Exception {
+        final Transaction currentTransaction = JDOHelper.getPersistenceManager(nonStated).currentTransaction();
+        Assert.assertFalse(JDOHelper.isDirty(nonStated));
+        System.out.println("Touch with same value");
+        currentTransaction.begin();
+        touchEvenWhenApplyingCurrentRequiredValue(nonStated);
+        currentTransaction.rollback();
+        Assert.assertFalse(JDOHelper.isDirty(nonStated));
+        currentTransaction.begin();
+        doNotTouchWhenApplyingCurrentListValue(nonStated);
+        currentTransaction.rollback();
+        Assert.assertFalse(JDOHelper.isDirty(nonStated));
+    }
+
+    /**
+     * @param nonStated
+     */
+    private void touchEvenWhenApplyingCurrentRequiredValue(
+        NonStated nonStated
+    ) {
+        final boolean oldValue = nonStated.isValue1();
+        nonStated.setValue1(oldValue);
+        Assert.assertTrue(JDOHelper.isDirty(nonStated));
+    }
+
+    /**
+     * @param nonStated
+     */
+    private void doNotTouchWhenApplyingCurrentListValue(
+        NonStated nonStated
+    ) {
+        final List<Integer> value = nonStated.getValue3();
+        value.remove(Integer.valueOf(47));
+        Assert.assertFalse(JDOHelper.isDirty(nonStated));
+        value.remove(Integer.valueOf(12));
+    }
     
     /**
      * Populate Data objects

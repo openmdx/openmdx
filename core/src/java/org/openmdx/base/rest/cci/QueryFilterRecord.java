@@ -51,10 +51,12 @@ import java.util.List;
 
 import javax.resource.cci.MappedRecord;
 
+import org.w3c.cci2.AnyTypePredicate;
+
 /**
  * <code>org::openmdx::kernel::QueryFilter</code>
  */
-public interface QueryFilterRecord extends MappedRecord {
+public interface QueryFilterRecord extends MappedRecord, AnyTypePredicate {
     
     /**
      * An object record's name

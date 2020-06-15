@@ -52,7 +52,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.openmdx.kernel.url.protocol.XRI_2Protocols;
+import org.openmdx.kernel.xri.XRI_2Protocols;
 
 public class MapperUtils {
 

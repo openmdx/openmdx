@@ -53,7 +53,7 @@ import java.lang.reflect.Method;
 /**
  * Java Bean Introspector
  *
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  */
 public interface BeanIntrospector {
 

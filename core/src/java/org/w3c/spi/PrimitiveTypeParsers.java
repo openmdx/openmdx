@@ -61,6 +61,7 @@ import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.text.parsing.DelegatingParser;
 import org.openmdx.kernel.text.parsing.StandardPrimitiveTypeParser;
+import org.openmdx.kernel.text.spi.Decoder;
 import org.openmdx.kernel.text.spi.Parser;
 
 /**
@@ -76,12 +77,21 @@ public class PrimitiveTypeParsers {
 	}
 
 	/**
-	 * This parser contains the standard parsers
+	 * This array is for private use only!
 	 */
-	private static Parser STANDARD_PARSER;
+	private static final Parser[] STANDARD_PARSERS = {
+        StandardPrimitiveTypeParser.getInstance(),  
+        ImmutablePrimitiveTypeParser.getInstance()
+	};
 	
 	/**
-	 * This parser combines the standard parsers with the configured ones.
+	 * The eagerly provided standard parser.
+	 */
+	private static final Parser STANDARD_PARSER = new DelegatingParser(STANDARD_PARSERS);
+
+	
+	/**
+	 * The lazily provided extended parser
 	 */
     private static Parser EXTENDED_PARSER;
 
@@ -92,12 +102,6 @@ public class PrimitiveTypeParsers {
 	 */
     public static Parser getStandardParser(
     ){
-    	if(STANDARD_PARSER == null) {
-    		STANDARD_PARSER = new DelegatingParser(
-				StandardPrimitiveTypeParser.getInstance(),	
-				ImmutablePrimitiveTypeParser.getInstance()
-			);    	
-    	}
     	return STANDARD_PARSER;
     }
 
@@ -110,28 +114,26 @@ public class PrimitiveTypeParsers {
     public static Parser getExtendedParser(
     ){
     	if(EXTENDED_PARSER == null) {
-    		EXTENDED_PARSER = new DelegatingParser(
-		    	combineParsers(
-			    	StandardPrimitiveTypeParser.getInstance(),	
-			        ImmutablePrimitiveTypeParser.getInstance()
-			    )
-		    );
+    		EXTENDED_PARSER = new DelegatingParser(getExtendedParsers());
     	}
     	return EXTENDED_PARSER;
+    }
+    
+    public static Decoder getDecoder(
+        Parser parser
+    ) {
+       return new PrimitiveTypeDecoder(parser); 
     }
     
     /**
      * Combine the standard parsers with the configured parsers
      * 
-     * @param standardParsers the standard parsers
-     * 
-     * @return the standard parsers amended by the configured parsers
+     * @return the extended parser array
      */
-    private static Parser[] combineParsers(
-        Parser... standardParsers
+    private static Parser[] getExtendedParsers(
     ){
         final List<Parser> parsers = new ArrayList<Parser>(
-            Arrays.asList(standardParsers)
+            Arrays.asList(STANDARD_PARSERS)
         );
         addConfiguredParsers(parsers);
     	return parsers.toArray(new Parser[parsers.size()]);
@@ -146,9 +148,9 @@ public class PrimitiveTypeParsers {
 	private static void addConfiguredParsers(final List<Parser> parsers) {
 		try {
             for(URL resource : Resources.getMetaInfResources("openmdx-primitive-types.properties")) {
-                Properties properties = new Properties();
+                final Properties properties = new Properties();
                 properties.load(resource.openStream());
-                String parserClassName = properties.getProperty("parser");
+                final String parserClassName = properties.getProperty("parser");
                 try {
                     parsers.add(Classes.newApplicationInstance(Parser.class, parserClassName));
                 } catch (Exception exception) {

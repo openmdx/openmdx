@@ -104,11 +104,12 @@ public class MultiDeleteAction extends BoundAction {
         }
         catch (Exception e) {
             ServiceException e0 = new ServiceException(e);
-            SysLog.warning(e0.getMessage(), e0.getCause());
             try {
                 pm.currentTransaction().rollback();
             } 
-            catch (Exception e1) {}
+            catch (Exception ignore) {
+    			SysLog.trace("Exception ignored", ignore);
+            }
             currentView.handleCanNotCommitException(e0.getCause());
         }
         return new ActionPerformResult(

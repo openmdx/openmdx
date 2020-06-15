@@ -6,7 +6,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2014, OMEX AG, Switzerland
+ * Copyright (c) 2004-2019, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -83,10 +83,10 @@ import org.w3c.cci2.SortedMaps;
  * Registers the the delegates with their manager
  */
 class ObjectView_1 
-    extends MarshallingObject_1<ViewManager_1> 
+    extends MarshallingObject_1<ViewManager_1_0> 
     implements ObjectView_1_0, Serializable, ClearCallback, DeleteCallback, StoreCallback
 {
-
+        
     /**
      * Constructor 
      * 
@@ -97,7 +97,7 @@ class ObjectView_1
      * @throws ServiceException
      */
     ObjectView_1(
-        ViewManager_1 marshaller,
+        ViewManager_1_0 marshaller,
         DataObject_1_0 dataObject
     ) throws ServiceException{
         super(
@@ -105,14 +105,7 @@ class ObjectView_1
             marshaller
         );
         this.dataObject = dataObject;
-        this.hollow = true;
     }
-
-    /**
-     * This flag tells whether the object is hollow or not, i.e. whether its
-     * plug-ins are already set up or not.
-     */
-    private transient boolean hollow;
 
     /**
      * The associated data object
@@ -120,28 +113,23 @@ class ObjectView_1
     private DataObject_1_0 dataObject;
     
     /**
-     * 
-     */
-    private transient Interceptor_1 interceptor;
-    
-    /**
      * Implements <code>Serializable</code>
      */
     private static final long serialVersionUID = -7826608051595033293L;
 
     /**
-     * Tells whether the instance is hollow
+     * Tells whether the instance is prepared or not
      * 
-     * @return <code>true</code> if this instance is hollow
+     * @return <code>true</code> if this instance is prepared
      */
-    boolean isHollow(){
-        return this.hollow;
+    boolean isInitialized(){
+        return this.delegate != null;
     }
     
     /* (non-Javadoc)
 	 * @see org.openmdx.base.accessor.view.ObjectView_1_0#getFeatureReplaceingObjectById(java.lang.String)
 	 */
-//	@Override
+	@Override
 	public Object getFeatureReplaceingObjectById(
 		ModelElement_1_0 featureDef
 	) throws ServiceException {
@@ -203,6 +191,7 @@ class ObjectView_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.Delegating_1_0#objGetDelegate()
      */
+    @Override
     public DataObject_1_0 objGetDelegate(
     ) {
         return this.dataObject;
@@ -213,7 +202,7 @@ class ObjectView_1
      */
     @Override
     protected DataObject_1_0 getStateDelegate() {
-        return this.hollow ? this.dataObject : this.delegate;
+        return isInitialized() ? this.delegate : this.dataObject;
     }
 
     
@@ -224,26 +213,33 @@ class ObjectView_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.Object_1_6#objSetDelegate(org.openmdx.base.accessor.generic.cci.Object_1_0)
      */
+    @Override
     public void objSetDelegate(
         DataObject_1_0 delegate
     ) throws ServiceException {
         this.setInaccessibilityReason(null);
         this.marshaller.register(delegate, this);
         this.dataObject = delegate;
-        Interceptor_1 terminalPlugIn = null;
-        for(
-            Interceptor_1 nextPlugIn = this.interceptor == null ? getDelegate() : this.interceptor;
-            nextPlugIn != null;
-            nextPlugIn = nextPlugIn.getNext()
-        ){
-            terminalPlugIn = nextPlugIn;
+        getTerminalPlugIn().setDelegate(delegate);
+    }
+
+    /**
+     * @return
+     * @throws ServiceException
+     */
+    private Interceptor_1 getTerminalPlugIn(
+    ) throws ServiceException {
+        Interceptor_1 plugIn = getDelegate();
+        for(Interceptor_1 next = plugIn.getNext(); next != null; next = plugIn.getNext()) {
+            plugIn = next;
         }
-        terminalPlugIn.setDelegate(delegate);
+        return plugIn;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.Object_1_6#getInteractionSpec()
      */
+    @Override
     public final InteractionSpec getInteractionSpec(
     ){
         return getMarshaller().getInteractionSpec();
@@ -262,6 +258,7 @@ class ObjectView_1
      * @exception   ServiceException 
      *              if the object can't be removed
      */
+    @Override
     public void objDelete(
     ) throws ServiceException {
         getDelegate().objDelete();
@@ -273,6 +270,7 @@ class ObjectView_1
      * @exception   ServiceException 
      *              if the object can't be synchronized
      */
+    @Override
     public void objRefresh(
     ) throws ServiceException {
         getDelegate().objRefresh();
@@ -337,6 +335,7 @@ class ObjectView_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.Object_1_5#getFactory()
      */
+    @Override
     public DataObjectManager_1_0 jdoGetPersistenceManager(
     ) {
         return this.getMarshaller();
@@ -411,7 +410,7 @@ class ObjectView_1
 	 */
 	@Override
 	public void objSetValue(String feature, Object to) throws ServiceException {
-		if(this.hollow && this.dataObject instanceof DataObject_1) {
+		if(!isInitialized() && this.dataObject instanceof DataObject_1) {
 			DataObject_1 object = (DataObject_1)this.dataObject;
 			for(PlugIn_1_0 plugIn : super.marshaller.getPlugIn()) {
 				if(plugIn.propagatedEagerly(object, feature, to)) return;
@@ -426,28 +425,29 @@ class ObjectView_1
     //--------------------------------------------------------------------------
 
 	/**
-     * Hollow -> Persistent-Clean Transition
+     * Installs the interceptors
      */
-    protected synchronized void initialize(
+    private void initialize(
     ) throws ServiceException {
-        if(this.hollow) {
-            this.interceptor = new Interceptor_1(this);
-            for(PlugIn_1_0 plugIn : super.marshaller.getPlugIn()) {
-                this.interceptor = plugIn.getInterceptor(this, this.interceptor);
-            }
-            super.setDelegate(this.interceptor);
-            this.interceptor = null;
-            this.hollow = false;
+        if(!isInitialized()) {
+            setDelegate(Interceptor_1.newStack(this, super.marshaller.getPlugIn()));
         }
     }
     
+    @Override
+    protected synchronized void setDelegate(DataObject_1_0 delegate) {
+        if(!isInitialized()) {
+            super.setDelegate(delegate);
+        }
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.DynamicallyDelegatingObject_1#getDelegate()
      */
     @Override
     protected Interceptor_1 getDelegate(
     ) throws ServiceException {
-        if(this.hollow) {
+        if(!isInitialized()) {
             this.initialize();
         }
         return (Interceptor_1) super.getDelegate();
@@ -463,7 +463,7 @@ class ObjectView_1
      *
      * @serialData The objects data
      */
-    private synchronized void writeObject(
+    private void writeObject(
         java.io.ObjectOutputStream stream
     ) throws java.io.IOException {
         // stream.defaultWriteObject(); has nothing to do
@@ -477,7 +477,6 @@ class ObjectView_1
         java.io.ObjectInputStream stream
     ) throws java.io.IOException, ClassNotFoundException {
         // stream.defaultReadObject(); has nothing to do
-        this.hollow = true;
         try {
             getMarshaller().register(getDelegate(), this);
         } catch (Exception exception) {
@@ -510,6 +509,7 @@ class ObjectView_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.StoreCallback#jdoPreStore()
      */
+    @Override
     public void jdoPreStore() {
         next().jdoPreStore();
     }
@@ -517,6 +517,7 @@ class ObjectView_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.DeleteCallback#jdoPreDelete()
      */
+    @Override
     public void jdoPreDelete() {
         next().jdoPreDelete();
     }
@@ -524,8 +525,9 @@ class ObjectView_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.ClearCallback#jdoPreClear()
      */
+    @Override
     public void jdoPreClear() {
         next().jdoPreClear();
     }
-
+   
 }

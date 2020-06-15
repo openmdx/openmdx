@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ArchiveFileSet.java,v 1.10 2010/06/04 22:24:36 hburger Exp $
  * Description: Archive File Set
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:24:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

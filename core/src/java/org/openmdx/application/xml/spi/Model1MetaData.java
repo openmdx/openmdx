@@ -1,15 +1,11 @@
 /*
  * ====================================================================
  * Project: openMDX/Core, http://www.openmdx.org/
- * Name:$Id: $
  * Description: Model1Types 
- * Revision:$Revision: $
- * Owner:", "OMEX AG, Switzerland, http://www.omex.ch
- * Date:$Date: $
+ * Owner: OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2013, OMEX AG, Switzerland
  * All rights reserved.

@@ -48,186 +48,87 @@
 package org.openmdx.base.accessor.rest;
 
 import static org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.DATABASE_CONNECTION_FACTORY_NAME;
-import static org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.DATAPROVIDER_CONNECTION_FACTORY;
 
-import java.net.URL;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Optional;
 
 import javax.jdo.Constants;
 import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOFatalDataStoreException;
-import javax.jdo.PersistenceManagerFactory;
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 
-import org.openmdx.application.configuration.Configuration;
-import org.openmdx.application.spi.PropertiesConfigurationProvider;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
-import org.openmdx.base.accessor.rest.spi.BasicCache_2;
-import org.openmdx.base.accessor.rest.spi.ConnectionCacheProvider_2_0;
-import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
-import org.openmdx.base.accessor.rest.spi.PinningCache_2;
 import org.openmdx.base.accessor.rest.spi.Switch_2;
 import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.aop0.UpdateAvoidance_1;
+import org.openmdx.base.caching.datastore.CacheAdapter;
+import org.openmdx.base.caching.datastore.NoSecondLevelCache;
+import org.openmdx.base.caching.port.CachingPort;
+import org.openmdx.base.caching.port.StandardCachingPort;
+import org.openmdx.base.caching.virtualobjects.StandardVirtualObjects;
+import org.openmdx.base.caching.virtualobjects.VirtualObjectProvider;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
-import org.openmdx.base.persistence.spi.PersistenceManagers;
-import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
-import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
+import org.openmdx.base.rest.spi.RestConnectionFactory;
 import org.openmdx.base.transaction.TransactionAttributeType;
-import org.openmdx.kernel.configuration.PropertiesProvider;
+import org.openmdx.kernel.configuration.cci.Configuration;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.JDOPersistenceManagerFactory;
 import org.openmdx.kernel.loading.BeanFactory;
-import org.openmdx.kernel.loading.Resources;
 import org.w3c.cci2.SparseArray;
-
 
 /**
  * Data Object Manager Factory
  */
-public class DataManagerFactory_1 
-    extends AbstractPersistenceManagerFactory<DataObjectManager_1_0> 
-    implements ConnectionCacheProvider_2_0
-{
+public class DataManagerFactory_1
+    extends AbstractPersistenceManagerFactory<DataObjectManager_1_0> {
 
     /**
-     * Constructor 
+     * Constructor
      *
+     * @param overrides
+     *            the configuration properties
      * @param configuration
+     *            the configuration properties
+     * @param defaults
+     *            for missing configuration and override properties
+     * @exception JDOFatalDataStoreException
+     *                in case of failure
      */
-    @SuppressWarnings("unchecked")
-	protected DataManagerFactory_1(
-        final Map<?,?> configuration
-    ){
-        super(configuration);
+    protected DataManagerFactory_1(
+        Map<?, ?> overrides,
+        Map<?, ?> configuration,
+        Map<?, ?> defaults
+    ) {
+        super(overrides, configuration, defaults);
         try {
-            Properties properties = PropertiesProvider.toProperties(configuration);
-            Configuration persistenceManagerConfiguration = PropertiesConfigurationProvider.getConfiguration(
-                properties,
-                "org", "openmdx", "jdo", "DataManager"
-            );
-            this.optimalFetchSize = (Integer) persistenceManagerConfiguration.values(
-                "optimalFetchSize"
-            ).get(Integer.valueOf(0));
-            this.cacheThreshold = (Integer) persistenceManagerConfiguration.values(
-                "cacheThreshold"
-            ).get(Integer.valueOf(0));
-            Object connectionFactory = super.getConnectionFactory();
-            // TODO Android
-            if(connectionFactory instanceof ConnectionFactoryAdapter) {
-            	this.connectionFactory = (ConnectionFactory) connectionFactory;
-            	this.connectionFactory2 = (ConnectionFactory) super.getConnectionFactory2();
-            	this.cachePlugIn = null; // TODO
-            	this.plugIns = DEFAULT_PLUG_INS;
+            if (getConnectionFactory() != null) {
+                this.cacheAdapter = new EmptyCacheAdapter();
+                this.optimalFetchSize = Optional.empty();
+                this.cacheThreshold = Optional.empty();
+                this.plugIns = DEFAULT_PLUG_INS;
             } else {
-                SparseArray<?> plugIns = persistenceManagerConfiguration.values(
-                    "plugIn"
+                final Configuration persistenceManagerConfiguration = getConfiguration(
+                    "org.openmdx.jdo.DataManager"
                 );
-                if(plugIns.isEmpty()) {
-                    this.plugIns = DEFAULT_PLUG_INS;
-                } else {
-                    this.plugIns = new PlugIn_1_0[plugIns.size()];
-                    for(
-                        int i = 0;
-                        i < this.plugIns.length;
-                        i++
-                    ){
-                        this.plugIns[i] = BeanFactory.newInstance(
-                    		PlugIn_1_0.class,
-                            PropertiesConfigurationProvider.getConfiguration(
-                                properties,
-                                toSection(plugIns.get(Integer.valueOf(i)))
-                            )
-                        ).instantiate();
-                    }
-                }
-                String cachePlugIn = persistenceManagerConfiguration.getFirstValue("cachePlugIn");
-                this.cachePlugIn = cachePlugIn == null ? new PinningCache_2(
-                ) : BeanFactory.newInstance(
-                	BasicCache_2.class,
-                    PropertiesConfigurationProvider.getConfiguration(
-                        properties,
-                        cachePlugIn.split("\\.")
-                    )
-                ).instantiate();
-                String connectionFactoryName = super.getConnectionFactoryName();
-                Map<Path,Port<RestConnection>> destinations = new LinkedHashMap<Path,Port<RestConnection>>();
-                Port<RestConnection> port = new Switch_2(
-                    this.cachePlugIn, 
-                    destinations
+                this.optimalFetchSize = persistenceManagerConfiguration.getOptionalValue(
+                    "optimalFetchSize",
+                    Integer.class
                 );
-                boolean supportsLocalTransaction = Constants.RESOURCE_LOCAL.equals(super.getTransactionType()); 
-                this.connectionFactory = new ConnectionFactoryAdapter(
-                    port,
-                    supportsLocalTransaction,
-                    TransactionAttributeType.MANDATORY
+                this.cacheThreshold = persistenceManagerConfiguration.getOptionalValue(
+                    "cacheThreshold",
+                    Integer.class
                 );
-                this.connectionFactory2 = new ConnectionFactoryAdapter(
-                    port,
-                    supportsLocalTransaction,
-                    TransactionAttributeType.REQUIRES_NEW
-                );
-                Map<String,Port<RestConnection>> raw = new LinkedHashMap<String,Port<RestConnection>>();
-                SparseArray<?> restPlugIns = persistenceManagerConfiguration.values(
-                    "restPlugIn"
-                );
-                for(
-                    ListIterator<?> i = persistenceManagerConfiguration.values(
-                        "xriPattern"
-                    ).populationIterator();
-                    i.hasNext();
-                ){
-                    int index = i.nextIndex();
-                    String pattern = i.next().toString();
-                    String restPlugIn = (String) restPlugIns.get(Integer.valueOf(index));
-                    Port<RestConnection> destination = raw.get(restPlugIn);
-                    if(destination == null){
-                        Configuration plugInConfiguration = PropertiesConfigurationProvider.getConfiguration(
-                            properties,
-                            restPlugIn.split("\\.")
-                        );
-                        plugInConfiguration.values(
-                            DATAPROVIDER_CONNECTION_FACTORY
-                        ).put(
-                            Integer.valueOf(0), 
-                            this.connectionFactory
-                        );
-                        if(connectionFactoryName != null) {
-                            SparseArray<Object> datasourceNames = plugInConfiguration.values(
-                            	DATABASE_CONNECTION_FACTORY_NAME
-                            );
-                            if(datasourceNames.isEmpty()) {
-                                datasourceNames.put(Integer.valueOf(0),connectionFactoryName);
-                            }
-                        }
-                        destination = BeanFactory.newInstance(
-                        	Port.class,
-                            plugInConfiguration
-                        ).instantiate();
-                        raw.put(
-                            restPlugIn,
-                            destination 
-                        );
-                    }
-                    destinations.put(
-                        new Path(pattern),
-                        destination
-                    );
-                }
-                DataManagerPreferencesPort.discloseConfiguration(
-                    destinations, 
-                    raw
-                );
+                this.plugIns = createPlugIns(persistenceManagerConfiguration);
+                this.cacheAdapter = createCacheAdapter();
+                configureConnectionFactories(persistenceManagerConfiguration);
             }
         } catch (Exception exception) {
             throw BasicException.initHolder(
@@ -241,15 +142,12 @@ public class DataManagerFactory_1
                 )
             );
         }
-
     }
 
     /**
      * The default configuration
      */
-    protected static final Map<String, Object> DEFAULT_CONFIGURATION = new HashMap<String, Object>(
-        AbstractPersistenceManagerFactory.DEFAULT_CONFIGURATION
-    );
+    protected static final Map<String, Object> DEFAULT_CONFIGURATION = createDefaultConfiguration(Collections.emptyMap());
 
     /**
      * 
@@ -257,7 +155,7 @@ public class DataManagerFactory_1
     private static final PlugIn_1_0[] DEFAULT_PLUG_INS = {
         new UpdateAvoidance_1()
     };
-    
+
     /**
      * Implements <code>Serializabel</code>
      */
@@ -266,36 +164,220 @@ public class DataManagerFactory_1
     /**
      * The optimal fetch size
      */
-    private final Integer optimalFetchSize;
+    private final Optional<Integer> optimalFetchSize;
 
     /**
      * Collections smaller than this value are cached before being evaluated
      */
-    private final Integer cacheThreshold;
+    private final Optional<Integer> cacheThreshold;
 
-    /**
-     * 
-     */
-    private final BasicCache_2 cachePlugIn;
-    
     /**
      * 
      */
     private final PlugIn_1_0[] plugIns;
-    
-    /**
-     * Standard REST Connection Factory
-     */
-    private final ConnectionFactory connectionFactory;
 
     /**
-     * Standard REST Connection Factory
+     * The Data Store Cache Adapter
      */
-    private final ConnectionFactory connectionFactory2;
-    
+    private final CacheAdapter cacheAdapter;
+
+    private void configureConnectionFactories(
+        final Configuration persistenceManagerConfiguration
+    )
+        throws ResourceException,
+        ServiceException {
+        final Map<Path, Port<RestConnection>> destinations = new LinkedHashMap<Path, Port<RestConnection>>();
+        createConnectionFactories(createPort(destinations));
+        configurePlugIns(persistenceManagerConfiguration, destinations);
+    }
+
+    private Port<RestConnection> createPort(final Map<Path, Port<RestConnection>> destinations)
+        throws ResourceException,
+        ServiceException {
+        final Port<RestConnection> port = new Switch_2(
+            createCachingPort(
+                createVirtualObjectProvider(),
+                this.cacheAdapter
+            ),
+            destinations
+        );
+        return port;
+    }
+
+    private void configurePlugIns(
+        final Configuration persistenceManagerConfiguration,
+        final Map<Path, Port<RestConnection>> destinations
+    ) {
+        final Map<String, Port<RestConnection>> raw = new LinkedHashMap<String, Port<RestConnection>>();
+        final SparseArray<String> restPlugIns = persistenceManagerConfiguration.getSparseArray(
+            "restPlugIn",
+            String.class
+        );
+        for (ListIterator<String> i = persistenceManagerConfiguration.getSparseArray(
+            "xriPattern",
+            String.class
+        ).populationIterator(); i.hasNext();) {
+            final int index = i.nextIndex();
+            final String pattern = i.next();
+            final String restPlugIn = restPlugIns.get(Integer.valueOf(index));
+            Port<RestConnection> destination = raw.get(restPlugIn);
+            if (destination == null) {
+                destination = createDestination(
+                    getConfiguration(
+                        createPlugInConfigurationDefaults(),
+                        restPlugIn,
+                        Collections.emptyMap()
+                    )
+                );
+                raw.put(
+                    restPlugIn,
+                    destination
+                );
+            }
+            destinations.put(
+                new Path(pattern),
+                destination
+            );
+        }
+        DataManagerPreferencesPort.discloseConfiguration(
+            destinations,
+            raw
+        );
+    }
+
+    private void createConnectionFactories(final Port<RestConnection> port) {
+        final boolean supportsLocalTransaction = Constants.RESOURCE_LOCAL.equals(super.getTransactionType());
+        setConnectionFactory(
+            new RestConnectionFactory(
+                port,
+                supportsLocalTransaction,
+                TransactionAttributeType.MANDATORY
+            )
+        );
+        setConnectionFactory2(
+            new RestConnectionFactory(
+                port,
+                supportsLocalTransaction,
+                TransactionAttributeType.REQUIRES_NEW
+            )
+        );
+    }
+
     /**
-     * The method is used by JDOHelper to construct an instance of 
-     * <code>PersistenceManagerFactory</code> based on user-specified 
+     * Provide the plug-in configuration default entries
+     * 
+     * @return the plug-in configuration default entries
+     */
+    private Map<String, ?> createPlugInConfigurationDefaults() {
+        final String connectionFactoryName = super.getConnectionFactoryName();
+        return connectionFactoryName == null ? Collections.emptyMap()
+            : Collections.singletonMap(
+                DATABASE_CONNECTION_FACTORY_NAME,
+                connectionFactoryName
+            );
+    }
+
+    @SuppressWarnings("unchecked")
+    private Port<RestConnection> createDestination(Configuration plugInConfiguration) {
+        return BeanFactory.newInstance(
+            Port.class,
+            plugInConfiguration
+        ).instantiate();
+    }
+
+    /**
+     * To create the plug-ins eagerly
+     * 
+     * @param properties
+     * @param persistenceManagerConfiguration
+     * 
+     * @return the plug-ins
+     * 
+     * @throws ServiceException
+     *             in case of failure
+     */
+    private PlugIn_1_0[] createPlugIns(
+        Configuration persistenceManagerConfiguration
+    )
+        throws ServiceException {
+        final SparseArray<String> plugInConfiguration = persistenceManagerConfiguration.getSparseArray(
+            "plugIn",
+            String.class
+        );
+        if (plugInConfiguration.isEmpty()) {
+            return DEFAULT_PLUG_INS;
+        }
+        final PlugIn_1_0[] plugInStack = new PlugIn_1_0[plugInConfiguration.size()];
+        for (int i = 0; i < plugInStack.length; i++) {
+            final String section = plugInConfiguration.get(Integer.valueOf(i));
+            plugInStack[i] = BeanFactory.newInstance(
+                PlugIn_1_0.class,
+                getConfiguration(section)
+            ).instantiate();
+        }
+        return plugInStack;
+    }
+
+    /**
+     * To create the virtual object provider eagerly
+     * 
+     * @return the newly created virtual object provider
+     * 
+     * @throws ServiceException
+     *             in case of configuration failure
+     */
+    private VirtualObjectProvider createVirtualObjectProvider()
+        throws ServiceException {
+        return BeanFactory.newInstance(
+            VirtualObjectProvider.class,
+            getConfiguration("org.openmdx.base.caching.virtualobjects.VirtualObjectProvider"),
+            StandardVirtualObjects.class
+        ).instantiate();
+    }
+
+    /**
+     * To create the caching port eagerly
+     * 
+     * @return the newly created caching port
+     * 
+     * @throws ServiceException
+     *             in case of configuration failure
+     */
+    private CachingPort createCachingPort(
+        VirtualObjectProvider virtualObjectProvider,
+        CacheAdapter cacheAdapter
+    )
+        throws ServiceException {
+        final CachingPort cachingPort = BeanFactory.newInstance(
+            CachingPort.class,
+            getConfiguration("org.openmdx.base.caching.port.CachingPort"),
+            StandardCachingPort.class
+        ).instantiate();
+        cachingPort.setVirtualObjectProvider(virtualObjectProvider);
+        cachingPort.setCacheAdapter(cacheAdapter);
+        return cachingPort;
+    }
+
+    /**
+     * To create the cache adapter eagerly
+     * 
+     * @return the newly created cache adapter
+     * 
+     * @throws ServiceException
+     *             in case of configuration failure
+     */
+    private CacheAdapter createCacheAdapter()
+        throws ServiceException {
+        return BeanFactory.newInstance(
+            CacheAdapter.class,
+            getConfiguration("org.openmdx.base.caching.datastore.CacheAdapter"),
+            NoSecondLevelCache.class
+        ).instantiate();
+    }
+
+    /**
+     * The method is used by JDOHelper to construct an instance of
+     * <code>PersistenceManagerFactory</code> based on user-specified
      * properties.
      * 
      * @param props
@@ -303,9 +385,9 @@ public class DataManagerFactory_1
      * @return a new <code>PersistenceManagerFactory</code>
      */
     @SuppressWarnings("rawtypes")
-	public static PersistenceManagerFactory getPersistenceManagerFactory (
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory(
         Map props
-    ){
+    ) {
         return getPersistenceManagerFactory(
             Collections.EMPTY_MAP,
             props
@@ -313,8 +395,8 @@ public class DataManagerFactory_1
     }
 
     /**
-     * The method is used by JDOHelper to construct an instance of 
-     * <code>PersistenceManagerFactory</code> based on user-specified 
+     * The method is used by JDOHelper to construct an instance of
+     * <code>PersistenceManagerFactory</code> based on user-specified
      * properties.
      * 
      * @param overrides
@@ -322,72 +404,17 @@ public class DataManagerFactory_1
      * 
      * @return a new <code>PersistenceManagerFactory</code>
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static PersistenceManagerFactory getPersistenceManagerFactory (
-        Map overrides, 
+    @SuppressWarnings({ "rawtypes" })
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory(
+        Map overrides,
         Map props
-    ){
-        Map<Object,Object> configuration = new HashMap<Object,Object>(DEFAULT_CONFIGURATION);
-        configuration.putAll(props);
-        try {
-            String dataObjectManagerName = (String)props.get(ConfigurableProperty.Name.qualifiedName());
-            if(dataObjectManagerName != null) {
-                for(URL resource : Resources.getMetaInfResources(dataObjectManagerName + ".properties")) {
-                    Properties properties = new Properties();
-                    properties.load(resource.openStream());
-                    configuration.putAll(properties);
-                }
-            }
-        } catch(
-        	Exception e
-        ) {
-        	// ignore configuration exceptions
-        }        
-        configuration.putAll(overrides);
-        return new DataManagerFactory_1(configuration);
+    ) {
+        return new DataManagerFactory_1(overrides, props, DEFAULT_CONFIGURATION);
     }
 
-    /**
-     * Provide a configuration entry's section
+    /*
+     * (non-Javadoc)
      * 
-     * @param name the configuration entry
-     * 
-     * @return the configuration entry's section
-     */
-    private static String[] toSection(
-        Object name
-    ){
-        return ((String)name).split("\\.");
-    }
-    
-    /**
-     * Retrieve the connection for non-transactional read operations
-     * 
-     * @param connectionSpec
-     * 
-     * @return a connection for non-transactional read operations or <code>null</code>
-     * 
-     * @throws ResourceException
-     */
-    private Connection getConnection2(
-    	RestConnectionSpec connectionSpec
-    ) throws ResourceException{
-    	if(
-    		this.connectionFactory2 != null && (
-    			getOptimistic() || (
-    				!getContainerManaged() && (
-    					this.getNontransactionalRead() || this.getNontransactionalWrite()
-    				)
-    			)
-    		)
-    	) {
-    		return this.connectionFactory2.getConnection(connectionSpec);
-    	} else {
-    		return null;
-    	}
-    }
-    
-    /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.AbstractPersistenceManagerFactory_1#newPersistenceManager(java.lang.String, java.lang.String)
      */
     @Override
@@ -396,21 +423,17 @@ public class DataManagerFactory_1
         String password
     ) {
         try {
-            RestConnectionSpec connectionSpec = new RestConnectionSpec(
-                userid,
-                password
-            );
             return new DataObjectManager_1(
                 this,
                 false,
-                userid == null ? null : PersistenceManagers.toPrincipalChain(userid),
-                this.connectionFactory.getConnection(connectionSpec),
-                getConnection2(connectionSpec),
-                this.plugIns, 
-                this.optimalFetchSize, 
-                this.cacheThreshold, 
-                getIsolateThreads(), 
-                connectionSpec  
+                this.plugIns,
+                this.optimalFetchSize,
+                this.cacheThreshold,
+                getIsolateThreads(),
+                new RestConnectionSpec(
+                    userid,
+                    password
+                )
             );
         } catch (ResourceException exception) {
             throw BasicException.initHolder(
@@ -426,26 +449,27 @@ public class DataManagerFactory_1
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.spi.AbstractPersistenceManagerFactory_1#newPersistenceManager(java.lang.String, java.lang.String)
      */
     @Override
-    protected DataObjectManager_1_0 newPersistenceManager(
-    ) {
+    protected DataObjectManager_1_0 newPersistenceManager() {
         return newPersistenceManager(
-            System.getProperty("user.name"), 
+            System.getProperty("user.name"),
             null
         );
     }
 
-    /**
-     * Retrieve the data store cache
+    /*
+     * (non-Javadoc)
      * 
-     * @return the data store cache
+     * @see org.openmdx.kernel.jdo.JDOPersistenceManagerFactory#getDataStoreCache()
      */
-    public DataStoreCache_2_0 getConnectionCache(
-    ){
-        return this.cachePlugIn;
+    @Override
+    public CacheAdapter getDataStoreCache() {
+        return this.cacheAdapter;
     }
-    
+
 }

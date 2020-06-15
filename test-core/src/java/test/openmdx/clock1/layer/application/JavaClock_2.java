@@ -63,9 +63,11 @@ import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.ResultRecord;
+import org.openmdx.base.rest.cci.VoidRecord;
 import org.openmdx.base.rest.spi.AbstractRestInteraction;
 import org.openmdx.base.rest.spi.AbstractRestPort;
 import org.openmdx.base.rest.spi.Object_2Facade;
@@ -95,10 +97,11 @@ public class JavaClock_2 extends AbstractRestPort {
         );
         if(stream == null) {
             return "n/a";
-        } else try {
+        } else try (
             BufferedReader in = new BufferedReader(
                 new InputStreamReader(stream)
-            );
+            )
+        ){
             return in.readLine();
         } catch (IOException exception) {
             throw ResourceExceptions.toResourceException(
@@ -157,8 +160,8 @@ public class JavaClock_2 extends AbstractRestPort {
         protected boolean get(
             RestInteractionSpec ispec,
             QueryRecord input,
-            ResultRecord output)
-            throws ResourceException {
+            ResultRecord output
+        ) throws ResourceException {
             final Path xri = input.getResourceIdentifier();
             if (xri.isLike(A_SEGMENT_PATH)) {
                 Object_2Facade segment = Object_2Facade
@@ -185,25 +188,45 @@ public class JavaClock_2 extends AbstractRestPort {
         protected boolean invoke(
             RestInteractionSpec ispec,
             MessageRecord input,
-            MessageRecord output)
-            throws ResourceException {
+            MessageRecord output
+        ) throws ResourceException {
             final Path xri = input.getTarget();
             final String operationName = xri
                 .getLastSegment()
                 .toClassicRepresentation();
             final Path accessPath = xri.getParent();
-            if (!accessPath.isLike(A_SEGMENT_PATH)
-                || !"currentDateAndTime".equals(operationName)) {
-                super.invoke(ispec, input, output);
-                return true;
+            if (accessPath.isLike(A_SEGMENT_PATH)) {
+                if("currentDateAndTime".equals(operationName)) {
+                    output.setResourceIdentifier(
+                        super.newResponseId(input.getResourceIdentifier()));
+                    final MappedRecord body = Records.getRecordFactory().createMappedRecord(
+                        "test:openmdx:clock1:Time");
+                    body.put("utc", new Date());
+                    output.setBody(body);
+                    return true;
+                } else if("setDateAndTime".equals(operationName)) {
+                    // This method does nothing on purpose
+                    output.setResourceIdentifier(
+                        super.newResponseId(input.getResourceIdentifier()));
+                    output.setBody(Records.getRecordFactory().createMappedRecord(VoidRecord.NAME));
+                    return true;
+                }
             }
-            output.setResourceIdentifier(
-                super.newResponseId(input.getResourceIdentifier()));
-            MappedRecord body = Records.getRecordFactory().createMappedRecord(
-                "test:openmdx:clock1:Time");
-            output.setBody(body);
-            body.put("utc", new Date());
-            return true;
+            return super.invoke(ispec, input, output);
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#update(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.cci.ObjectRecord, org.openmdx.base.rest.cci.ResultRecord)
+         */
+        @Override
+        protected boolean update(
+            RestInteractionSpec ispec,
+            ObjectRecord input,
+            ResultRecord output
+        ) throws ResourceException {
+            final Path xir = input.getResourceIdentifier();
+            return xir.isLike(A_SEGMENT_PATH) ||
+                super.update(ispec, input, output);
         }
 
     }

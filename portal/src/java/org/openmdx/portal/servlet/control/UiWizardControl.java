@@ -182,9 +182,11 @@ public class UiWizardControl extends WizardControl implements Serializable {
         // Wizard menu entries
         if(frame == null) {
         	String id = this.getId();
-        	List<UiWizardTabControl> children = this.getChildren(UiWizardTabControl.class);          
-            p.write("<li id=\"", id, "-dropdown\" class=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\">", texts.getWizardsMenuTitle(), "</a>");
-            p.write("  <ul id=\"", id, "-menu\" class=\"", CssClass.dropdownMenu.toString(), "\" style=\"z-index:1010;\">");
+        	List<UiWizardTabControl> children = this.getChildren(UiWizardTabControl.class);
+        	p.write("<li class=\"", CssClass.nav_item.toString(), "\">");
+            p.write("<div id=\"", id, "-dropdown\" class=\"", CssClass.dropdown.toString(), "\">");
+            p.write("  <button type=\"button\" class=\"", CssClass.btn.toString(), "\" data-toggle=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:this.parentNode.hide=function(){};\">", texts.getWizardsMenuTitle(), "</button>");
+            p.write("  <div id=\"", id, "-menu\" class=\"", CssClass.dropdown_menu.toString(), "\" style=\"z-index:1010;\">");
             for(UiWizardTabControl tab: children) {
                 tab.paint(
                     p,
@@ -192,7 +194,8 @@ public class UiWizardControl extends WizardControl implements Serializable {
                     forEditing
                );
             }
-            p.write("  </ul>");
+            p.write("  </div>");
+            p.write("</div>");
             p.write("</li>");
             p.write("<script language=\"javascript\" type=\"text/javascript\">");
             p.write("  if($('", id, "-menu').innerHTML.trim()==''){$('", id, "-dropdown').style.display='none'};");

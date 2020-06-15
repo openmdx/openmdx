@@ -186,7 +186,8 @@ public class DirtyObjects {
      * 
      * @return the names of the modified features
      * 
-     * @throws ServiceException
+     * @throws NullPointerException if {@code refObject} is {@code null}
+     * @throws ServiceException in case of failure
      */
     public static Set<String> getModifiedFeatures(
         RefObject refObject
@@ -195,17 +196,17 @@ public class DirtyObjects {
     }
     
     /** 
-    * Touches a given JMI object 
+    * Touches a given JMI object explicitely
     * 
     * @param the object to be touched 
     * 
-    * @throws ServiceException 
+    * @throws NullPointerException if {@code refObject} is {@code null}
+    * @throws ServiceException if touching fails
     */ 
     public static void touch( 
         RefObject refObject 
     ) throws ServiceException { 
-        final DataObject_1 dataObject = (DataObject_1) DataObjects.getDataObject(refObject);
-		dataObject.touch(); 
+        DataObjects.getDataObject(refObject).touch(); 
     } 
  
 }

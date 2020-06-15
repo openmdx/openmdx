@@ -1,10 +1,4 @@
 /*
- * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/StackKeyedObjectPool.java,v $
- * $Revision: 1.7 $
- * $Date: 2011/04/12 15:30:21 $
- *
- * ====================================================================
- *
  * The Apache Software License, Version 1.1
  *
  * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
@@ -353,9 +347,9 @@ public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedOb
         _totActive++;
         Integer old = (Integer)(_activeCount.get(key));
         if(null == old) { 
-            _activeCount.put(key,new Integer(1));
+            _activeCount.put(key,Integer.valueOf(1));
         } else {
-            _activeCount.put(key,new Integer(old.intValue() + 1));
+            _activeCount.put(key,Integer.valueOf(old.intValue() + 1));
         }
     }
 
@@ -367,7 +361,7 @@ public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedOb
         } else if(active.intValue() <= 1) {
             _activeCount.remove(key);
         } else {
-            _activeCount.put(key, new Integer(active.intValue() - 1));
+            _activeCount.put(key, Integer.valueOf(active.intValue() - 1));
         }
     }
 

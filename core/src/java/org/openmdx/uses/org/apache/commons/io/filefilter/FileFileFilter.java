@@ -42,7 +42,7 @@ import java.io.Serializable;
  * }
  * </pre>
  *
- * @since 1.3
+ * @since Commons I/O 1.3
  * @version $Id: FileFileFilter.java 1642757 2014-12-01 21:09:30Z sebb $
  * @see FileFilterUtils#fileFileFilter()
  */

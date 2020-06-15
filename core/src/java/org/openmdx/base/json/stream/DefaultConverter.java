@@ -62,7 +62,6 @@ package org.openmdx.base.json.stream;
  * Default converter that tries to convert value to appropriate primitive (if fails, returns original string)
  *
  * @author <a href="mailto:dejan@nighttale.net">Dejan Bosanac</a>
- * @since 1.1
  */
 public class DefaultConverter implements TypeConverter {
     /* Were there a constants class, this key would live there. */

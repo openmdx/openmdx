@@ -134,7 +134,7 @@ public class BasicImportPlugIn implements ImportPlugIn {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_FOUND,
                 "Class mismatch",
-                new BasicException.Parameter("xri", externalId),
+                new BasicException.Parameter(BasicException.Parameter.XRI, externalId),
                 new BasicException.Parameter("existing", refObject.getClass().getName()),
                 new BasicException.Parameter("imported", objectClass.getName())
             );

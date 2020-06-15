@@ -20,8 +20,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-import org.openmdx.kernel.url.protocol.XRI_2Protocols;
-import org.openmdx.kernel.url.protocol.XriAuthorities;
+import org.openmdx.kernel.xri.XRI_2Protocols;
+import org.openmdx.kernel.xri.XRIAuthorities;
 
 /**
  * An delegating URLConnection support class.
@@ -77,7 +77,7 @@ public class ZipURLConnection extends JarURLConnection {
             "No separator ('" + XRI_2Protocols.ZIP_SEPARATOR + "' found in url " + path
         );
         return new URL(
-            JAR_PREFIX + path.substring(XriAuthorities.ZIP_AUTHORITY.length() + 2, i) + 
+            JAR_PREFIX + path.substring(XRIAuthorities.ZIP_AUTHORITY.length() + 2, i) + 
             JAR_SEPARATOR + path.substring(i + XRI_2Protocols.ZIP_SEPARATOR.length())
         );
     }

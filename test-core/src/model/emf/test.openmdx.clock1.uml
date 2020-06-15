@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_riP6UN7EEdmkJO73lqONhA" name="test-clock1">
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_riP6UN7EEdmkJO73lqONhA" name="test-clock1">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D40F55E5800B8PP" name="test">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D40F55E5800B8P" name="openmdx">
       <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D40F55E5800B8" name="clock1">
@@ -9,6 +9,12 @@
           </generalization>
           <ownedOperation xmi:id="_3C7B8A60016D40F560180207" name="currentDateAndTime" isQuery="true">
             <ownedParameter xmi:id="_q8mhht7CEdmkJO73lqONhA" type="_3C7B8A60016D40F560B70043" direction="return"/>
+          </ownedOperation>
+          <ownedOperation xmi:id="_tUXBcI0nEeq5Q-nNbKUJnw" name="setDateAndTime">
+            <ownedParameter xmi:id="_z1FvQI1CEeq5Q-nNbKUJnw" name="in" type="_3C7B8A60016D40F560B70043"/>
+            <ownedParameter xmi:id="_Xu7D4I1EEeq5Q-nNbKUJnw" direction="return">
+              <type xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3E40433402E1"/>
+            </ownedParameter>
           </ownedOperation>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D40F560B70043" name="Time">

@@ -64,7 +64,6 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.util.ChapUtil;
 /**
  * Released under the LGPL<BR>
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.4 $
  */
 public class ChapAccessRequest extends RadiusPacket {
     private static final ChapUtil chapUtil = new ChapUtil();

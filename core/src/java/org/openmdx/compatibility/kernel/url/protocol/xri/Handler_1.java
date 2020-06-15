@@ -56,7 +56,7 @@ import java.net.URLStreamHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.openmdx.kernel.url.protocol.XriAuthorities;
+import org.openmdx.kernel.xri.XRIAuthorities;
 
 /**
  * To handle version 1 XRIs.
@@ -111,11 +111,11 @@ public abstract class Handler_1
     /**
      *
      */
-    private final static String ZIP_PREFIX = XriAuthorities.ZIP_AUTHORITY + ".(";
+    private final static String ZIP_PREFIX = XRIAuthorities.ZIP_AUTHORITY + ".(";
 
     /**
      * 
      */
-    private final static String RESOURCE_PREFIX = XriAuthorities.RESOURCE_AUTHORITY + '/';
+    private final static String RESOURCE_PREFIX = XRIAuthorities.RESOURCE_AUTHORITY + '/';
     
 }

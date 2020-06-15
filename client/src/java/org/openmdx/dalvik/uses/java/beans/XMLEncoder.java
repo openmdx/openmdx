@@ -176,13 +176,13 @@ import java.util.Vector;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  *
  * @author Philip Milne
  */
 @SuppressWarnings({"rawtypes","unchecked"})
-public class XMLEncoder extends Encoder {
+public class XMLEncoder extends Encoder implements AutoCloseable {
 
     private static String encoding = "UTF-8";
 
@@ -421,6 +421,7 @@ public class XMLEncoder extends Encoder {
      * postamble and then closes the output stream associated
      * with this stream.
      */
+    @Override
     public void close() {
         flush();
         writeln("</java>");

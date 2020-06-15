@@ -46,7 +46,7 @@ import org.openmdx.uses.org.apache.commons.io.IOCase;
  * }
  * </pre>
  *
- * @since 1.0
+ * @since Commons I/O 1.0
  * @version $Id: SuffixFileFilter.java 1642757 2014-12-01 21:09:30Z sebb $
  * @see FileFilterUtils#suffixFileFilter(String)
  * @see FileFilterUtils#suffixFileFilter(String, IOCase)
@@ -78,7 +78,7 @@ public class SuffixFileFilter extends AbstractFileFilter implements Serializable
      * @param suffix  the suffix to allow, must not be null
      * @param caseSensitivity  how to handle case sensitivity, null means case-sensitive
      * @throws IllegalArgumentException if the suffix is null
-     * @since 1.4
+     * @since Commons I/O 1.4
      */
     public SuffixFileFilter(final String suffix, final IOCase caseSensitivity) {
         if (suffix == null) {
@@ -108,7 +108,7 @@ public class SuffixFileFilter extends AbstractFileFilter implements Serializable
      * @param suffixes  the suffixes to allow, must not be null
      * @param caseSensitivity  how to handle case sensitivity, null means case-sensitive
      * @throws IllegalArgumentException if the suffix array is null
-     * @since 1.4
+     * @since Commons I/O 1.4
      */
     public SuffixFileFilter(final String[] suffixes, final IOCase caseSensitivity) {
         if (suffixes == null) {
@@ -138,7 +138,7 @@ public class SuffixFileFilter extends AbstractFileFilter implements Serializable
      * @param caseSensitivity  how to handle case sensitivity, null means case-sensitive
      * @throws IllegalArgumentException if the suffix list is null
      * @throws ClassCastException if the list does not contain Strings
-     * @since 1.4
+     * @since Commons I/O 1.4
      */
     public SuffixFileFilter(final List<String> suffixes, final IOCase caseSensitivity) {
         if (suffixes == null) {

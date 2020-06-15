@@ -86,17 +86,18 @@
 	<patternset id="jdo-api.content">
 		<include name="javax/jdo/**"/>
 	</patternset>
-	<patternset id="jcache.content">
+	<patternset id="cache-api.content">
 		<include name="javax/cache/**"/>
 	</patternset>
 	<patternset id="openmdx-system.content">
 		<include name="org/openmdx/compatibility/kernel/url/protocol/**"/>
-		<include name="org/openmdx/kernel/url/protocol/**"/>
 		<include name="org/openmdx/kernel/logging/**"/>
+		<include name="org/openmdx/kernel/url/protocol/**"/>
+		<include name="org/openmdx/kernel/xri/*"/>
 		<include name="org/openmdx/system/**"/>
 	</patternset>
 	<patternset id="openmdx-base.content">					
-		<patternset refid="jcache.content"/>
+		<patternset refid="cache-api.content"/>
 		<patternset refid="jdo-api.content"/>
 		<include name="javax/jmi/**"/>
 		<include name="net/*/NetPackage*"/>
@@ -205,6 +206,28 @@
 					</javac>
 				</antcontrib:then>
 			</antcontrib:elseif>
+			<antcontrib:elseif>
+				<istrue value="${build.supports.java11}"/>
+				<antcontrib:then>
+					<javac 
+						destdir="${build.dir}/bin" 
+						debug="${build.debug}" 
+						optimize="${build.optimize}" 
+						fork="true" 
+						memoryMaximumSize="256m" 
+						classpathref="project.lib.classpath"
+						source="${build.source.version}"
+						target="${build.target.version}"
+						bootclasspathref="java.bootstrap.lib"
+						includeantruntime="${build.include.ant.runtime}"
+					>
+						<src path="${build.dir}/src/java"/>
+						<src path="${basedir}/src/java"/>		    
+						<patternset refid="openmdx-bootstrap.content"/>
+						<compilerarg value="-implicit:class"/>
+					</javac>
+				</antcontrib:then>
+			</antcontrib:elseif>
 			<antcontrib:else>
 				<javac 
 					destdir="${build.dir}/bin" 
@@ -261,8 +284,8 @@
 			</openmdx:archivefileset>
 		</openmdx:archive>
         <openmdx:archive
-			destfile="${deliver.dir}/source-archive/openmdx-system.java-sources.zip"
-			format="zip"
+			destfile="${deliver.dir}/lib/openmdx-system-sources.jar"
+			format="jar"
 		>
 			<openmdx:archivefileset dir="${basedir}/src/java">
 				<patternset refid="openmdx-system.content"/>
@@ -293,16 +316,16 @@
 			<openmdx:archivefileset src="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
 				<patternset refid="openmdx-base.content"/>
 			</openmdx:archivefileset>						
-			<openmdx:archivefileset src="${openmdx.home}/osgi/${build.target.platform}/extension/lib/jdo2-api.jar">
+			<openmdx:archivefileset src="${openmdx.home}/osgi/${build.target.platform}/extension/lib/jdo-api.jar">
 				<patternset refid="jdo-api.content"/>
 			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${openmdx.home}/osgi/${build.target.platform}/extension/lib/jcache.jar">
-				<patternset refid="jcache.content"/>
+			<openmdx:archivefileset src="${openmdx.home}/osgi/${build.target.platform}/extension/lib/cache-api.jar">
+				<patternset refid="cache-api.content"/>
 			</openmdx:archivefileset>
 		</openmdx:archive>
         <openmdx:archive
-			destfile="${deliver.dir}/source-archive/openmdx-base.java-sources.zip"
-			format="zip"
+			destfile="${deliver.dir}/lib/openmdx-base-sources.jar"
+			format="jar"
 		>
 			<openmdx:archivefileset dir="${basedir}/src/java">
 				<patternset refid="openmdx-base.content"/>

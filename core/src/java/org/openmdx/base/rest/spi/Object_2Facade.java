@@ -63,9 +63,7 @@ import java.util.UUID;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
-import javax.resource.cci.Record;
 
-import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -76,6 +74,7 @@ import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.kernel.collection.TreeSparseArray;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.SparseArray;
 
@@ -190,22 +189,6 @@ public class Object_2Facade {
     }
     
     /**
-     * Test whether the given record is an object facade delegate
-     * 
-     * @param record the record to be tested
-     * 
-     * @return <code>true</code> if the given record is an object facade delegate
-     * 
-     * @deprecated use {@link org.openmdx.base.rest.spi.ObjectRecord#isCompatible(Record)}
-     */
-    @Deprecated
-    public static boolean isDelegate(
-        Record record
-    ){
-        return org.openmdx.base.rest.spi.ObjectRecord.isCompatible(record);
-    }
-    
-    /**
      * Retrieve the delegate
      * 
      * @return the delegate
@@ -229,7 +212,7 @@ public class Object_2Facade {
     ) {
         return delegate instanceof ObjectRecord ? 
             ((ObjectRecord)delegate).getResourceIdentifier() :
-            (Path)delegate.get("path");
+            (Path)delegate.get("resourceIdentifier");
     }
     
     public String getObjectClass(
@@ -563,17 +546,17 @@ public class Object_2Facade {
      *
      * @return Returns the version.
      */
-    public final Object getVersion(
+    public final byte[] getVersion(
     ) {
         return getVersion(this.delegate);
     }
 
-    public static Object getVersion(
+    public static byte[] getVersion(
         MappedRecord delegate
     ) {
         return delegate instanceof ObjectRecord ? 
             ((ObjectRecord)delegate).getVersion() :
-            delegate.get("version");
+            (byte[])delegate.get("version");
     }
     
     /**
@@ -581,7 +564,7 @@ public class Object_2Facade {
      * 
      * @param version The version to set.
      */
-    public final void setVersion(Object version) {
+    public final void setVersion(byte[] version) {
         this.delegate.setVersion(version);
     }
 
@@ -634,7 +617,7 @@ public class Object_2Facade {
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
                     "Unexpected value type to be cloned",
-                    new BasicException.Parameter("xri", this.getPath()),
+                    new BasicException.Parameter(BasicException.Parameter.XRI, this.getPath()),
                     new BasicException.Parameter("key", key),
                     new BasicException.Parameter("type", source == null ? null : source.getClass().getName())
                 ).log();

@@ -47,7 +47,7 @@
  */
 package org.openmdx.kernel.loading;
 
-import org.openmdx.kernel.configuration.Configuration;
+import org.openmdx.kernel.configuration.cci.Configuration;
 
 /**
  * An Alternative

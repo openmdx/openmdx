@@ -217,7 +217,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
 	            BasicException.newEmbeddedExceptionStack(
 	                BasicException.Code.DEFAULT_DOMAIN,
 	                BasicException.Code.BAD_PARAMETER,
-	                new BasicException.Parameter("xri", value)
+	                new BasicException.Parameter(BasicException.Parameter.XRI, value)
 	                )
 	            )
 	        );
@@ -246,7 +246,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
                 BasicException.newEmbeddedExceptionStack(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
-                    new BasicException.Parameter("xri", value)
+                    new BasicException.Parameter(BasicException.Parameter.XRI, value)
                 )
             )
         );
@@ -272,7 +272,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
             BasicException.newEmbeddedExceptionStack(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter("xri", value))));
+                new BasicException.Parameter(BasicException.Parameter.XRI, value))));
     }
 
     /**

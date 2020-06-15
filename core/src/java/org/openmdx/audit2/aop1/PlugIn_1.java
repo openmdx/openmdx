@@ -93,13 +93,13 @@ public class PlugIn_1 implements PlugIn_1_0 {
      * @see org.openmdx.base.aop1.PlugIn#getInterceptor(org.openmdx.base.accessor.view.Interceptor_1)
      */
     public Interceptor_1 getInterceptor(
-        ObjectView_1_0 view,
-        Interceptor_1 next
+        final ObjectView_1_0 view,
+        final Interceptor_1 next
     ) throws ServiceException {
-        DataObject_1_0 dataObject = view.objGetDelegate();
+        final DataObject_1_0 dataObject = view.objGetDelegate();
         if(dataObject.jdoIsPersistent()) {
-            Path objectId = view.jdoGetObjectId();
-            Configuration configuration = this.getConfiguration(dataObject);
+            final Path objectId = view.jdoGetObjectId();
+            final Configuration configuration = this.getConfiguration(dataObject);
             if(objectId.startsWith(configuration.getAuditSegmentId(view.jdoGetPersistenceManager()))) {
                 String type = objectId.getSegment(objectId.size() - 2).toClassicRepresentation();
                 //
@@ -111,7 +111,6 @@ public class PlugIn_1 implements PlugIn_1_0 {
                 if("involvement".equals(type)) {
                     return new Involvement_1(view, next);
                 }
-                
             }
         }
         return next;
@@ -120,7 +119,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.aop1.PlugIn_1_0#propagatedEagerly(org.openmdx.base.accessor.rest.DataObject_1, java.lang.String, java.lang.Object)
 	 */
-//  @Override
+    @Override
 	public boolean propagatedEagerly(
 		DataObject_1 object, 
 		String feature,
@@ -132,7 +131,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.aop1.PlugIn_1_0#resolveObjectClass(java.lang.String, javax.resource.cci.InteractionSpec)
      */
-//  @Override
+    @Override
     public String resolveObjectClass(
         String objectClass,
         InteractionSpec interactionSpec

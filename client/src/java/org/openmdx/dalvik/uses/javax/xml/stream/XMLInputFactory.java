@@ -77,13 +77,12 @@ import org.openmdx.dalvik.uses.javax.xml.stream.util.XMLEventAllocator;
  * @see XMLReporter
  * @see XMLResolver
  * @see org.openmdx.dalvik.uses.javax.xml.stream.util.XMLEventAllocator
- * @since 1.6
  * 
  * openMDX/Dalvik Notice (February 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  *
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 public abstract class XMLInputFactory {

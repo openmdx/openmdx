@@ -59,7 +59,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.openmdx.compatibility.kernel.url.protocol.xri.Handler_1;
-import org.openmdx.kernel.url.protocol.XriAuthorities;
+import org.openmdx.kernel.xri.XRIAuthorities;
 
 /**
  * A protocol handler for the 'xri' protocol. 
@@ -71,7 +71,7 @@ public class Handler
     /**
      *
      */
-    private final static String ZIP_PREFIX = XriAuthorities.ZIP_AUTHORITY + "*(";
+    private final static String ZIP_PREFIX = XRIAuthorities.ZIP_AUTHORITY + "*(";
 
     /* (non-Javadoc)
      * @see java.net.URLStreamHandler#openConnection(java.net.URL)
@@ -83,7 +83,7 @@ public class Handler
         String authority = url.getAuthority();
         if(authority == null) {
             return super.openConnection(url);
-        } else if(XriAuthorities.RESOURCE_AUTHORITY.equals(authority)) {
+        } else if(XRIAuthorities.RESOURCE_AUTHORITY.equals(authority)) {
             return new ResourceURLConnection(url);
         } else if(authority.startsWith(ZIP_PREFIX)){
             return new ZipURLConnection(url);
@@ -355,8 +355,8 @@ public class Handler
         return new MalformedURLException(
             getClass().getName() + 
             " supports only XRI authorities starting with " + 
-            XriAuthorities.RESOURCE_AUTHORITY + " or " + 
-            XriAuthorities.ZIP_AUTHORITY + ": " + url
+            XRIAuthorities.RESOURCE_AUTHORITY + " or " + 
+            XRIAuthorities.ZIP_AUTHORITY + ": " + url
         );
     }
 

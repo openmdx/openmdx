@@ -48,50 +48,260 @@
 package org.openmdx.resource.ldap.v3;
 
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.resource.ResourceException;
+import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.EISSystemException;
+import javax.resource.spi.ValidatingManagedConnectionFactory;
 import javax.security.auth.Subject;
 
-import org.openmdx.resource.ldap.spi.AbstractManagedConnectionFactory;
+import org.apache.directory.api.ldap.model.exception.LdapConfigurationException;
+import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.directory.ldap.client.api.DefaultLdapConnectionFactory;
+import org.apache.directory.ldap.client.api.LdapConnection;
+import org.apache.directory.ldap.client.api.LdapConnectionConfig;
+import org.apache.directory.ldap.client.api.LdapConnectionFactory;
+import org.apache.directory.ldap.client.template.exception.LdapRuntimeException;
+import org.openmdx.resource.ldap.spi.ConnectionFactory;
 import org.openmdx.resource.ldap.spi.ManagedConnection;
-
-import netscape.ldap.LDAPConnection;
-import netscape.ldap.LDAPException;
-import netscape.ldap.LDAPv3;
-import netscape.ldap.factory.JSSESocketFactory;
-
+import org.openmdx.resource.spi.AbstractManagedConnectionFactory;
 
 /**
  * Managed LDAP Connection Factory
  */
-public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
+public class ManagedConnectionFactory 
+    extends AbstractManagedConnectionFactory 
+    implements ValidatingManagedConnectionFactory
+{
 
     /**
      * Constructor
      */
     public ManagedConnectionFactory() {
-	    super();
+        this.ldapConnectionConfig = new LdapConnectionConfig();
+        this.ldapConnectionFactory = new DefaultLdapConnectionFactory(ldapConnectionConfig);
     }
 
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
-    private static final long serialVersionUID = 5970793592667548449L;
+    private static final long serialVersionUID = -8107927475529647385L;
 
     /**
-     * LDAP over SSL port
+     * The LDAP connection configuration is initialized by the managed connection factory's setters.
      */
-    private static final int DEFAULT_SSL_PORT = 636;
+    private final LdapConnectionConfig ldapConnectionConfig;
     
-    /* (non-Javadoc)
-     * @see org.openmdx.resource.spi.AbstractManagedConnectionFactory#isManagedConnectionShareable()
+    /**
+     * The LDAP connection factory's configuration is used by reference. 
      */
-    @Override
-    protected boolean isManagedConnectionShareable() {
-	    return true;
+    private final LdapConnectionFactory ldapConnectionFactory;
+    
+    /**
+     * @deprecated use {@link #setServerName(String)},
+     * {@link #setPortNumber(int)} and {@link #setUseSsl(boolean)}
+     */
+    @Deprecated
+    public void setConnectionURL(
+        String connectionURL
+    ){
+        final URI connectionURI = URI.create(connectionURL);
+        final String ldapScheme = connectionURI.getScheme();
+        if(ldapScheme != null) {
+            this.ldapConnectionConfig.setUseSsl("ldaps".equalsIgnoreCase(ldapScheme));
+        }
+        final int ldapPort = connectionURI.getPort();
+        if(ldapPort >= 0) {
+            this.ldapConnectionConfig.setLdapPort(ldapPort);
+        } else if (isUseSsl()) {
+            this.ldapConnectionConfig.setLdapPort(ldapConnectionConfig.getDefaultLdapsPort());
+        } else {
+            this.ldapConnectionConfig.setLdapPort(ldapConnectionConfig.getDefaultLdapPort());
+        }
+        final String ldapHost = connectionURI.getHost();
+        if(ldapHost != null) {
+            this.ldapConnectionConfig.setLdapHost(ldapHost);
+        }
+        super.setConnectionURL(connectionURL);
+    }
+    
+    /**
+     * Set the LDAP protocol version
+     * 
+     * @param protocolVersion the LDAP protocol version
+     */
+    public void setProtocolVersion(
+        int protocolVersion
+    ) {
+        if(protocolVersion != LdapConnectionConfig.LDAP_V3) {
+            throw new LdapRuntimeException(
+                new LdapConfigurationException("Only LDAP version " + LdapConnectionConfig.LDAP_V3 + " is supported")
+            );
+        }
+    }
+
+    /**
+     * Retrieve the LDAP protocol version
+     * 
+     * @return the LDAP protocol version
+     */
+    public int getProtocolVersion() {
+        return LdapConnectionConfig.LDAP_V3;
+    }
+
+    /**
+     * @param useSsl
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#setUseSsl(boolean)
+     */
+    public void setUseSsl(
+        boolean useSsl
+    ) {
+        ldapConnectionConfig.setUseSsl(useSsl);
+    }
+
+    /**
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#isUseSsl()
+     */
+    public boolean isUseSsl(
+        ) {
+        return ldapConnectionConfig.isUseSsl();
+    }
+    
+    /**
+     * @param ldapPort
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#setLdapPort(int)
+     */
+    public void setPortNumber(
+        int ldapPort
+    ) {
+        ldapConnectionConfig.setLdapPort(ldapPort);
+    }
+
+    /**
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#getLdapPort()
+     */
+    public int getPortNumber(
+        ) {
+        return ldapConnectionConfig.getLdapPort();
+    }
+    
+    /**
+     * @param ldapHost
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#setLdapHost(java.lang.String)
+     */
+    public void setServerName(
+        String ldapHost
+    ) {
+        ldapConnectionConfig.setLdapHost(ldapHost);
+    }
+
+    /**
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#getLdapHost()
+     */
+    public String getServerName(
+        ) {
+        return ldapConnectionConfig.getLdapHost();
+    }
+    
+    /**
+     * @param timeout
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#setTimeout(long)
+     */
+    public void setTimeout(
+        long timeout
+    ) {
+        ldapConnectionConfig.setTimeout(timeout);
+    }
+
+    /**
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#getTimeout()
+     */
+    public long getTimeout(
+    ) {
+        return ldapConnectionConfig.getTimeout();
+    }
+
+    /**
+     * @param sslProtocol
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#setSslProtocol(java.lang.String)
+     */
+    public void setSslProtocol(
+        String sslProtocol
+    ) {
+        ldapConnectionConfig.setSslProtocol(sslProtocol);
+    }
+
+    /**
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#getSslProtocol()
+     */
+    public String getSslProtocol(
+    ) {
+        return ldapConnectionConfig.getSslProtocol();
+    }
+
+    /**
+     * @param useTls
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#setUseTls(boolean)
+     */
+    public void setUseTls(
+        boolean useTls
+    ) {
+        ldapConnectionConfig.setUseTls(useTls);
+    }
+
+    /**
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#isUseTls()
+     */
+    public boolean isUseTls(
+        ) {
+        return ldapConnectionConfig.isUseTls();
+    }
+
+    /**
+     * @param name
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#setName(java.lang.String)
+     */
+    public void setName(
+        String name
+    ) {
+        ldapConnectionConfig.setName(name);
+    }
+
+    /**
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#getName()
+     */
+    public String getName(
+        ) {
+        return ldapConnectionConfig.getName();
+    }
+    
+    /**
+     * @param credentials
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#setCredentials(java.lang.String)
+     */
+    public void setCredentials(
+        String credentials
+    ) {
+        ldapConnectionConfig.setCredentials(credentials);
+    }
+
+    /**
+     * @return
+     * @see org.apache.directory.ldap.client.api.LdapConnectionConfig#getCredentials()
+     */
+    public String getCredentials(
+    ) {
+        return ldapConnectionConfig.getCredentials();
     }
 
     @Override
@@ -102,58 +312,56 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 		return new ManagedConnection(
             this,
             getPasswordCredential(subject),
-            connectionRequestInfo, 
-            createPhysicalConnection(getConnectionURI())
+            ldapConnectionFactory.newUnboundLdapConnection()
          );
     }
 
-    /**
-     * Create (and validate) the connection URI
+    /* (non-Javadoc)
+     * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory(javax.resource.spi.ConnectionManager)
      */
-    private URI getConnectionURI() throws ResourceException {
-        final String connectionURL = this.getConnectionURL();
-        try {
-            return new URI(connectionURL);
-        } catch (URISyntaxException exception) {
-            throw this.log(
-                new EISSystemException(
-                    "Could not connect to LDAP host \"" + connectionURL + "\". Invalid connection URL.",
-                    exception
-                ), 
-                true
-            );
-        }
+    @Override
+    public org.openmdx.resource.cci.ConnectionFactory<LdapConnection,LdapException> createConnectionFactory(
+        ConnectionManager cxManager
+    ) throws ResourceException {
+        return new ConnectionFactory(this, cxManager);
     }
-
-    /**
-     * Create the physical connection
-     * 
-     * @param uri the connection URI
-     * 
-     * @return the {@code Cloneable} physical connection
-     * 
-     * @throws ResourceException 
+    
+    /* (non-Javadoc)
+     * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory(javax.resource.spi.ConnectionManager)
      */
-    private LDAPv3 createPhysicalConnection(final URI uri) throws ResourceException {
-        final boolean useSSL = "ldaps".equalsIgnoreCase(uri.getScheme());
-        int port = uri.getPort();
-        if(port < 0) {
-        	port = useSSL ? DEFAULT_SSL_PORT : LDAPConnection.DEFAULT_PORT;
+    @Override
+    public org.openmdx.resource.cci.ConnectionFactory<LdapConnection,LdapException> createConnectionFactory(
+    ) throws ResourceException {
+        return (ConnectionFactory) super.createConnectionFactory();
+    }
+    
+    //------------------------------------------------------------------------
+    // Implements ValidatingManagedConnectionFactory
+    //------------------------------------------------------------------------
+    
+    @SuppressWarnings("rawtypes")
+    @Override
+    public Set getInvalidConnections(
+        Set connectionSet
+    ) throws ResourceException {
+        if(connectionSet.size() == 1) {
+            for(Object connection : connectionSet) {
+                if(connection instanceof ManagedConnection) {
+                    final ManagedConnection candidate = (ManagedConnection) connection;
+                    return candidate.isInvalid() ? Collections.singleton(candidate) : Collections.emptySet();
+                }
+            }
         }
-        final String host = uri.getHost();
-        final LDAPv3 physicalConnection = useSSL ? new LDAPConnection(new JSSESocketFactory())  : new LDAPConnection();
-        try {
-            physicalConnection.connect(host, port);
-        } catch (LDAPException exception) {
-            throw this.log(
-               new EISSystemException(
-                   "Could not connect to LDAP host \"" + uri + "\". ",
-                   exception
-               ),
-               true
-           );
+        final Set<ManagedConnection> invalidConnections = new HashSet<>();
+        for(Object connection : connectionSet) {
+            if(connection instanceof ManagedConnection) {
+                final ManagedConnection candidate = (ManagedConnection) connection;
+                if(candidate.isInvalid()) {
+                    invalidConnections.add(candidate);
+                }
+            }
         }
-        return physicalConnection;
+        return invalidConnections;
     }
 
     
@@ -163,24 +371,20 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
     
     /**
      * Overriding required for Oracle WebLogic
-     * 
-     * @see org.openmdx.resource.spi.AbstractManagedConnectionFactory#equals(java.lang.Object)
      */
     @Override
     public boolean equals(
     	Object that
     ) {
-        return super.equals(that);
+        return this == that;
     }
 
 	/**
      * Overriding required for Oracle WebLogic
-     * 
-     * @see org.openmdx.resource.spi.AbstractManagedConnectionFactory#hashCode()
      */
     @Override
     public int hashCode() {
         return super.hashCode();
     }
-    
+
 }

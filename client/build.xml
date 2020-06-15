@@ -241,8 +241,8 @@
 			</openmdx:archivefileset>
 		</openmdx:archive>
         <openmdx:archive
-			destfile="${deliver.dir}/source-archive/openmdx-client.java-sources.zip"
-			format="zip"
+			destfile="${deliver.dir}/lib/openmdx-client-sources.jar"
+			format="jar"
 		>
 			<openmdx:archivefileset dir="${basedir}/src/java">
 				<patternset refid="openmdx-client.content" />
@@ -250,13 +250,13 @@
 			<!-- openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
 				<patternset refid="openmdx-client.content" />
 			</openmdx:archivefileset -->
-			<openmdx:archivefileset src="${project.home}/${build.target.platform}/security/source-archive/openmdx-security.java-sources.zip">
+			<openmdx:archivefileset src="${project.home}/${build.target.platform}/security/lib/openmdx-security-sources.jar">
 				<patternset refid="openmdx-common.content" />
 			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${project.home}/${build.target.platform}/core/source-archive/openmdx-system.java-sources.zip">
+			<openmdx:archivefileset src="${project.home}/${build.target.platform}/core/lib/openmdx-system-sources.jar">
 				<patternset refid="openmdx-common.content" />
 			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${project.home}/${build.target.platform}/core/source-archive/openmdx-base.java-sources.zip">
+			<openmdx:archivefileset src="${project.home}/${build.target.platform}/core/lib/openmdx-base-sources.jar">
 				<patternset refid="openmdx-common.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
@@ -289,8 +289,8 @@
 		</openmdx:archive>
 		<mkdir dir="${build.dir}/src/java"/> <!-- work around for whenmissing failure -->
         <openmdx:archive
-			destfile="${deliver.dir}/source-archive/openmdx-dalvik.java-sources.zip"
-			format="zip"
+			destfile="${deliver.dir}/lib/openmdx-dalvik-sources.jar"
+			format="jar"
 		>
 			<openmdx:archivefileset dir="${basedir}/src/java">
 				<patternset refid="openmdx-dalvik.content" />
@@ -298,7 +298,7 @@
 			<openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
 				<patternset refid="openmdx-dalvik.content" />
 			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${deliver.dir}/source-archive/openmdx-client.java-sources.zip">
+			<openmdx:archivefileset src="${deliver.dir}/lib/openmdx-client-sources.jar">
 				<patternset refid="openmdx-dalvik.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>

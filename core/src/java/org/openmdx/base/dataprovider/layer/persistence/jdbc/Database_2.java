@@ -65,6 +65,7 @@ import java.io.Writer;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -84,7 +85,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -113,7 +113,6 @@ import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.spi.URIMarshaller;
 import org.openmdx.base.aop1.Aspects;
 import org.openmdx.base.collection.Sets;
-import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.BooleanMarshaller;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.DurationMarshaller;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.LargeObjectMarshaller;
@@ -168,12 +167,14 @@ import org.openmdx.base.rest.spi.Numbers;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.text.conversion.SQLWildcards;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
+import org.openmdx.kernel.collection.TreeSparseArray;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.url.protocol.XRI_1Protocols;
+import org.openmdx.kernel.xri.XRI_1Protocols;
+import org.openmdx.kernel.xri.XRI_2Protocols;
 import org.openmdx.state2.spi.TechnicalAttributes;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
@@ -877,86 +878,6 @@ public class Database_2
     }
 
     /**
-     * @deprecated in favour of {@link #getOptimalFetchSize()}
-     */
-    @Deprecated
-    public int getFetchSizeOptimal() {
-        SysLog.warning(
-            "The configuration key '" +
-                org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries.FETCH_SIZE +
-                "' is deprecated and has been replaced by '" +
-                org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries.OPTIMAL_FETCH_SIZE +
-                "'. Please adapt you configuration accordingly!"
-        );
-        return this.getOptimalFetchSize();
-    }
-
-    /**
-     * @deprecated in favour of {@link #setOptimalFetchSize(int)}
-     */
-    @Deprecated
-    public void setFetchSizeOptimal(int fetchSizeOptimal) {
-        SysLog.warning(
-            "The configuration key '" +
-                org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries.FETCH_SIZE +
-                "' is deprecated and has been replaced by '" +
-                org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries.OPTIMAL_FETCH_SIZE +
-                "'. Please adapt you configuration accordingly!"
-        );
-        setOptimalFetchSize(fetchSizeOptimal);
-    }
-
-    /**
-     * @deprecated without replacement
-     */
-    @Deprecated
-    public int getFetchSize() {
-        SysLog.warning(
-            "The configuration key '" +
-                org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries.FETCH_SIZE +
-                "' is deprecated and unused. Please remove it from you configuration!"
-        );
-        return Integer.MIN_VALUE;
-    }
-
-    /**
-     * @deprecated without replacement
-     */
-    @Deprecated
-    public void setFetchSize(int fetchSize) {
-        SysLog.warning(
-            "The configuration key '" +
-                org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries.FETCH_SIZE +
-                "' is deprecated and unused. Please remove it from you configuration!"
-        );
-    }
-
-    /**
-     * @deprecated without replacement
-     */
-    @Deprecated
-    public int getFetchSizeGreedy() {
-        SysLog.warning(
-            "The configuration key '" +
-                org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries.FETCH_SIZE_GREEDY +
-                "' is deprecated and unused. Please remove it from you configuration!"
-        );
-        return Integer.MIN_VALUE;
-    }
-
-    /**
-     * @deprecated without replacement
-     */
-    @Deprecated
-    public void setFetchSizeGreedy(int fetchSizeGreedy) {
-        SysLog.warning(
-            "The configuration key '" +
-                org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries.FETCH_SIZE_GREEDY +
-                "' is deprecated and unused. Please remove it from you configuration!"
-        );
-    }
-
-    /**
      * Get referenceIdFormat.
      * 
      * @return
@@ -1121,7 +1042,7 @@ public class Database_2
      *
      * @return Returns the dataSource.
      */
-    public SparseArray<DataSource> getDataSource() {
+    public DataSource getDataSource() {
         return this.dataSource;
     }
 
@@ -1131,7 +1052,7 @@ public class Database_2
      * @param dataSource
      *            The dataSource to set.
      */
-    public void setDataSource(SparseArray<DataSource> dataSource) {
+    public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -1140,7 +1061,7 @@ public class Database_2
      *
      * @return Returns the datasourceName.
      */
-    public SparseArray<String> getDatasourceName() {
+    public String getDatasourceName() {
         return this.datasourceName;
     }
 
@@ -1150,7 +1071,7 @@ public class Database_2
      * @param datasourceName
      *            The datasourceName to set.
      */
-    public void setDatasourceName(SparseArray<String> datasourceName) {
+    public void setDatasourceName(String datasourceName) {
         this.datasourceName = datasourceName;
     }
 
@@ -1164,27 +1085,18 @@ public class Database_2
     protected DataSource getDataSource(
         RestInteractionSpec ispec,
         RequestRecord request
-    )
-        throws ServiceException {
+    ) throws ServiceException {
         if (this.dataSource == null) {
-            final SparseArray<DataSource> dataSource = new TreeSparseArray<>();
-            if (this.datasourceName != null) {
-                for(ListIterator<String> i = datasourceName.populationIterator(); i.hasNext(); ) {
-                    final Integer index = Integer.valueOf(i.nextIndex());
-                    final String jndiName = i.next();
-                    dataSource.put(index, new LateBindingDataSource(jndiName));
-                }
-            }
-            this.dataSource = dataSource;
+            if (this.datasourceName == null) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION,
+                    "Neither data source nor datasource name are configured"
+                );
+            }   
+            this.dataSource = new LateBindingDataSource(datasourceName);
         }
-        if (this.dataSource.isEmpty()) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                "can not get connection manager"
-            );
-        }
-        return this.dataSource.get(Integer.valueOf(0));
+        return this.dataSource;
     }
 
     /**
@@ -1434,6 +1346,28 @@ public class Database_2
      */
     public void setColumnNameTo(SparseArray<String> columnNameTo) {
         this.columnNameTo = columnNameTo;
+    }
+
+    @Override
+    public SparseArray<Path> getExcludeType() {
+        return this.excludeType;
+    }
+
+    public void setExcludeType(
+        SparseArray<Path> excludeType
+    ) {
+        this.excludeType = excludeType;
+    }
+
+    @Override
+    public SparseArray<Path> getIncludeType() {
+        return this.includeType;
+    }
+
+    public void setIncludeType(
+        SparseArray<Path> includeType
+    ) {
+        this.includeType = includeType;
     }
 
     /**
@@ -1921,7 +1855,7 @@ public class Database_2
         String columnName,
         String value
     ) {
-        if(value != null) {
+        if (value != null) {
             final MacroHandler macroHandler = getMacroConfiguration().getMacroHandler();
             return macroHandler.internalizeString(toSimpleColumnName(columnName), value);
         } else {
@@ -1994,7 +1928,12 @@ public class Database_2
     )
         throws SQLException {
         int fetchSize = this.getRowBatchSize();
-        ps.setFetchSize(fetchSize);
+        if(maxRows > fetchSize) {
+            ps.setFetchSize(2 * maxRows);
+        } else {
+            ps.setFetchSize(fetchSize);
+        }
+        ps.setQueryTimeout(0);
         ps.setMaxRows(maxRows);
         ps.setFetchDirection(ResultSet.FETCH_FORWARD);
         SysLog.detail("statement", statement);
@@ -2047,6 +1986,30 @@ public class Database_2
             this.getReferenceId(conn, dbObject.getReference(), true);
         }
         return dbObjectForQuery;
+    }
+
+    private String getDbObjectForUpdate1(
+        Connection conn,
+        DbObject dbObject,
+        String dbObjectHint
+    )
+        throws ServiceException {
+        DbObjectConfiguration entry = dbObject.getConfiguration();
+        String dbObjectForUpdate = entry.getDbObjectForUpdate1();
+        if (dbObjectHint != null) {
+            if (dbObjectHint.startsWith(XRI_1Protocols.SCHEME_PREFIX)) {
+                Path path = new Path(dbObjectHint);
+                DbObject referencedDbObject = this.createDbObject(conn, path, true);
+                dbObjectForUpdate += referencedDbObject.getTableName();
+            } else {
+                dbObjectForUpdate += dbObjectHint;
+            }
+        }
+        if (!dbObject.getReferencedType().isPattern()) {
+            // Assert existence of reference id
+            this.getReferenceId(conn, dbObject.getReference(), true);
+        }
+        return dbObjectForUpdate;
     }
 
     /**
@@ -2157,7 +2120,7 @@ public class Database_2
             if (typeConfiguration.getDbObjectForQuery1() != null) {
                 dbObjectForQuery1 = this.getDbObjectForQuery1(conn, dbObject, dbObjectHint);
             } else {
-                dbObjectForQuery1 = typeConfiguration.getDbObjectForUpdate1();
+                dbObjectForQuery1 = this.getDbObjectForUpdate1(conn, dbObject, dbObjectHint);
             }
             dbObjectForQuery2 = typeConfiguration.getDbObjectForQuery2() == null
                 ? typeConfiguration.getDbObjectForUpdate2()
@@ -2626,7 +2589,8 @@ public class Database_2
         PreparedStatement ps,
         int column,
         Object val
-    ) throws SQLException,
+    )
+        throws SQLException,
         ServiceException {
         if (val instanceof String) {
             String value = (String) val;
@@ -2704,7 +2668,8 @@ public class Database_2
         PreparedStatement ps,
         int column,
         Object val
-    ) throws SQLException,
+    )
+        throws SQLException,
         ServiceException {
         if (val instanceof byte[]) {
             ps.setBytes(column, (byte[]) val);
@@ -2715,10 +2680,8 @@ public class Database_2
                 : (BinaryLargeObject) val;
             try {
                 SetLargeObjectMethod setLargeObjectMethod = howToSetBinaryLargeObject(ps.getConnection());
-                if(
-                    blob.getLength() == null &&
-                    this.getLargeObjectMarshaller().isTallyingRequired(setLargeObjectMethod)
-                ) {
+                if (blob.getLength() == null &&
+                    this.getLargeObjectMarshaller().isTallyingRequired(setLargeObjectMethod)) {
                     blob = this.tallyLargeObject(blob.getContent());
                 }
                 this.getLargeObjectMarshaller().setBinaryColumnValue(
@@ -3030,12 +2993,32 @@ public class Database_2
      * 
      * @throws ServiceException
      */
-    private String getTimestampWithTimzoneExpression(Connection connection)
-        throws ServiceException {
+    private String getTimestampWithTimzoneExpression(
+        Connection connection
+    ) throws ServiceException {
         return getDriverProperty(
             connection,
             "TIMESTAMP.WITH.TIMEZONE.EXPRESSION",
             "?"
+        );
+    }
+
+    /**
+     * Get is in clause for large string sets. If defined replace "column IN (?, ?, ...)" with configured clause.
+     * 
+     * @param connection
+     * 
+     * @return equals clause
+     * 
+     * @throws ServiceException
+     */
+    private String getIsInClauseLargeStringSet(
+        Connection connection
+    ) throws ServiceException {
+        return this.getDriverProperty(
+            connection,
+            "ISIN.CLAUSE.LARGE.STRINGSET",
+            null
         );
     }
 
@@ -3315,11 +3298,9 @@ public class Database_2
         PreparedStatement ps,
         int position,
         Object value
-    )
-        throws ServiceException,
-        SQLException {
+    ) throws ServiceException, SQLException {
         Object normalizedValue;
-        if (value instanceof java.util.Date) {
+        if(value instanceof java.util.Date) {
             normalizedValue = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(
                 DateTimeFormat.EXTENDED_UTC_FORMAT
                     .format((java.util.Date) value)
@@ -3327,28 +3308,28 @@ public class Database_2
         } else {
             normalizedValue = value;
         }
-        if (normalizedValue instanceof URI) {
+        if(normalizedValue instanceof URI) {
             ps.setString(position, normalizedValue.toString());
-        } else if (normalizedValue instanceof Short) {
+        } else if(normalizedValue instanceof Short) {
             ps.setShort(position, ((Short) normalizedValue).shortValue());
-        } else if (normalizedValue instanceof Integer) {
+        } else if(normalizedValue instanceof Integer) {
             ps.setInt(position, ((Integer) normalizedValue).intValue());
-        } else if (normalizedValue instanceof Long) {
+        } else if(normalizedValue instanceof Long) {
             ps.setLong(position, ((Long) normalizedValue).longValue());
-        } else if (normalizedValue instanceof BigDecimal) {
+        } else if(normalizedValue instanceof BigDecimal) {
             ps.setBigDecimal(
                 position,
                 ((BigDecimal) normalizedValue)
-                    .setScale(ROUND_UP_TO_MAX_SCALE, BigDecimal.ROUND_UP)
+                    .setScale(ROUND_UP_TO_MAX_SCALE, RoundingMode.UP)
             );
-        } else if (normalizedValue instanceof Number) {
+        } else if(normalizedValue instanceof Number) {
             ps.setString(position, normalizedValue.toString());
         } else if (normalizedValue instanceof Path) {
             ps.setString(
                 position,
                 this.externalizePathValue(conn, (Path) normalizedValue)
             );
-        } else if (normalizedValue instanceof Boolean) {
+        } else if(normalizedValue instanceof Boolean) {
             Object sqlValue = this.getBooleanMarshaller().marshal(normalizedValue, conn);
             if (sqlValue instanceof Boolean) {
                 ps.setBoolean(position, ((Boolean) sqlValue).booleanValue());
@@ -3357,7 +3338,7 @@ public class Database_2
             } else {
                 ps.setString(position, sqlValue.toString());
             }
-        } else if (normalizedValue instanceof Duration) {
+        } else if(normalizedValue instanceof Duration) {
             Object sqlValue = this.getDurationMarshaller().marshal(normalizedValue);
             if (sqlValue instanceof BigDecimal) {
                 ps.setBigDecimal(position, (BigDecimal) sqlValue);
@@ -3371,7 +3352,7 @@ public class Database_2
             } else {
                 ps.setObject(position, sqlValue);
             }
-        } else if (normalizedValue instanceof XMLGregorianCalendar) {
+        } else if(normalizedValue instanceof XMLGregorianCalendar) {
             Object sqlValue = this.getCalendarMarshaller().marshal(normalizedValue, conn);
             if (sqlValue instanceof Time) {
                 ps.setTime(position, (Time) sqlValue);
@@ -3385,14 +3366,23 @@ public class Database_2
             } else {
                 ps.setObject(position, sqlValue);
             }
-        } else if ((normalizedValue instanceof String)
-            || (normalizedValue instanceof Reader)
-            || (normalizedValue instanceof CharacterLargeObject)) {
+        } else if(
+            (normalizedValue instanceof String) || 
+            (normalizedValue instanceof Reader) || 
+            (normalizedValue instanceof CharacterLargeObject)
+        ) {
             this.setClobColumnValue(ps, position, normalizedValue);
-        } else if ((normalizedValue instanceof byte[])
-            || (normalizedValue instanceof InputStream)
-            || (normalizedValue instanceof BinaryLargeObject)) {
+        } else if(
+            (normalizedValue instanceof byte[]) || 
+            (normalizedValue instanceof InputStream) || 
+            (normalizedValue instanceof BinaryLargeObject)
+        ) {
             this.setBlobColumnValue(ps, position, normalizedValue);
+        } else if(normalizedValue instanceof String[]) {
+            ps.setArray(
+                position,
+                conn.createArrayOf("VARCHAR", (String[])normalizedValue)
+            );
         } else {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -3573,7 +3563,15 @@ public class Database_2
         Object_2Facade facade = Facades.asObject(object);
         ModelElement_1_0 featureDef = getFeatureDef(facade.getObjectClass(), featureName);
         if (featureDef != null && isPersistent(featureDef)) {
-            facade.attributeValues(featureDef.getName(), multiplicity);
+            Object value = facade.attributeValues(featureDef.getName(), multiplicity);
+            if(
+                value instanceof Collection &&
+                multiplicity != null &&
+                multiplicity.isMultiValued()
+            ) {
+                ((Collection)value).addAll(Collections.singletonList(Boolean.TRUE));
+                ((Collection)value).clear();
+            }
         }
     }
 
@@ -3691,7 +3689,8 @@ public class Database_2
                     featureDefs
                 );
                 // Iterate through object attributes and add values
-                for (String columnName : frs.getColumnNames()) {
+                for(int i = 0; i < frs.getColumnNames().size(); i++) {
+                    String columnName = frs.getColumnNames().get(i);
                     String featureName = this.getFeatureName(columnName);
                     ModelElement_1_0 featureDef = featureDefs == null ? null
                         : featureDefs.get(featureName);
@@ -3766,7 +3765,7 @@ public class Database_2
                                         )
                                     );
                                 }
-                            Object val = frs.getObject(columnName);
+                            Object val = frs.getObject(i);
                             // Embedded attribute? If yes derive idx from column
                             // name suffix (instead of slice index)
                             int valueIdx = idx;
@@ -3799,17 +3798,9 @@ public class Database_2
                                 } else if (
                                 // class type || PrimitiveTypes.PATH
                                 isReferenceFeature(conn, frs, featureName)
-                                    || ((featureType == null)
-                                        && ((String) val).startsWith(
-                                            URI_1Marshaller.OPENMDX_PREFIX
-                                        ))
-                                    || ((featureType == null)
-                                        && ((String) val).startsWith("xri:"))
-                                    || ((featureType != null)
-                                        && (PrimitiveTypes.OBJECT_ID
-                                            .equals(featureType)
-                                            || getModel()
-                                                .isClassType(featureType)))) {
+                                    || isOpenmdxResourceIdentifier(featureType, val)
+                                    || isObjectId(featureType)
+                                ){
                                     if (this.isUseNormalizedReferences()) {
                                         //
                                         // Get path from normalized form
@@ -4085,6 +4076,34 @@ public class Database_2
         return false;
     }
 
+    /**
+     * @param featureType
+     * @return
+     * @throws ServiceException
+     */
+    private boolean isObjectId(String featureType)
+        throws ServiceException {
+        return (featureType != null)
+            && (PrimitiveTypes.OBJECT_ID
+                .equals(featureType)
+                || getModel()
+                    .isClassType(featureType));
+    }
+
+    /**
+     * @param featureType
+     * @param val
+     * @return
+     */
+    private boolean isOpenmdxResourceIdentifier(
+        String featureType,
+        Object val
+    ) {
+        return (featureType == null) && (((String) val).startsWith(URI_1Marshaller.OPENMDX_PREFIX) ||
+            ((String) val).startsWith(XRI_1Protocols.OPENMDX_PREFIX) ||
+            ((String) val).startsWith(XRI_2Protocols.OPENMDX_PREFIX));
+    }
+
     private void propagate(
         final Target target,
         final Connection conn,
@@ -4095,11 +4114,10 @@ public class Database_2
     )
         throws ServiceException {
         if (!objects.isEmpty()) {
-            completeRequestedAttributes(
+            this.completeRequestedAttributes(
                 conn,
                 attributeSelector,
                 attributeSpecifiersAsMap.keySet(),
-                dbObject.getConfiguration(),
                 objects
             );
         }
@@ -4132,124 +4150,137 @@ public class Database_2
         return false;
     }
 
+    /**
+     * Complete requested attributes.
+     * 
+     * @param conn
+     * @param attributeSelector
+     * @param attributeSpecifierNames
+     * @param objects
+     * @throws ServiceException
+     */
     private void completeRequestedAttributes(
         Connection conn,
         short attributeSelector,
         Set<String> attributeSpecifierNames,
-        DbObjectConfiguration dbObjectConfiguration,
         List<ObjectRecord> objects
-    )
-        throws ServiceException {
-        Object_2Facade facade2 = Facades.asObject(objects.get(0));
-        if (fetchAll(attributeSelector, attributeSpecifierNames, facade2)) {
-            final List<Object> statementParameters2 = new ArrayList<Object>();
+    ) throws ServiceException {
+        Object_2Facade facade = Facades.asObject(objects.get(0));
+        if (fetchAll(attributeSelector, attributeSpecifierNames, facade)) {
+            final List<Object> statementParameters = new ArrayList<Object>();
             String currentStatement = null;
-            PreparedStatement ps2 = null;
-            ResultSet rs2 = null;
-            try {
-                DbObject dbObject2 = createDbObject(
-                    conn,
-                    facade2.getPath(),
-                    true
-                );
-                // Additional fetch only if secondary dbObject is available
-                boolean hasSecondaryDbObject = (dbObject2.getConfiguration().getDbObjectForQuery2() != null) ||
-                    (dbObject2.getConfiguration().getDbObjectForUpdate2() != null);
-                if (hasSecondaryDbObject) {
-                    // Query to retrieve the secondary columns
-                    // SELECT v.* FROM secondary table WHERE (object id clause 0) OR (object id clause 1) ... ORDER BY object ids, idx
-                    String statement2 = "SELECT v.* FROM "
-                        + (dbObject2.getConfiguration().getDbObjectForQuery2() == null ? dbObject2.getConfiguration()
-                            .getDbObjectForUpdate2() : dbObjectConfiguration.getDbObjectForQuery2()) + " v"
-                        + " WHERE (";
-                    String separator = "";
-                    for (ObjectRecord object : objects) {
-                        dbObject2 = createDbObject(
+            DbObject dbObject = createDbObject(
+                conn,
+                facade.getPath(),
+                true
+            );
+            // Additional fetch only if secondary dbObject is available
+            boolean hasSecondaryDbObject = (dbObject.getConfiguration().getDbObjectForQuery2() != null) ||
+                (dbObject.getConfiguration().getDbObjectForUpdate2() != null);
+            if(hasSecondaryDbObject) {
+                DbObjectConfiguration dbObjectConfiguration = dbObject.getConfiguration();
+                // Query to retrieve the secondary columns
+                // SELECT v.* FROM {primary table} v WHERE (object id clause 0) OR (object id clause 1) ... ORDER BY object ids, idx
+                String statement = "SELECT v.* FROM "
+                    + (dbObjectConfiguration.getDbObjectForQuery2() == null ? dbObjectConfiguration.getDbObjectForUpdate2() : dbObjectConfiguration.getDbObjectForQuery2()) + " v"
+                    + " WHERE (";
+                String separator = "";
+                for(ObjectRecord object: objects) {
+                    Path object2Identity = dbObject.getConfiguration().getDbObjectsForQueryJoinColumn() == null
+                        ? object.getResourceIdentifier()
+                        : (Path)Object_2Facade.getValue(object).get(this.getFeatureName(dbObjectConfiguration.getDbObjectsForQueryJoinColumn().split(" ")[0]));
+                    if(object2Identity != null) {
+                        DbObject dbObject2 = createDbObject(
                             conn,
-                            object.getResourceIdentifier(),
+                            object2Identity,
                             true
                         );
-                        statement2 += separator;
-                        statement2 += dbObject2.getObjectIdClause();
-                        statementParameters2.addAll(
+                        statement += separator;
+                        statement += dbObject2.getObjectIdClause();
+                        statementParameters.addAll(
                             dbObject2.getObjectIdValues()
                         );
                         separator = " OR ";
                     }
-                    statement2 += ") ORDER BY ";
-                    separator = "";
-                    for (Object objectIdColumn : dbObject2.getObjectIdColumn()) {
-                        statement2 += separator;
-                        statement2 += "v." + objectIdColumn;
-                        separator = ",";
-                    }
-                    statement2 += ", v." + getObjectIdxColumnName();
-                    ps2 = prepareStatement(
+                }
+                statement += ") ORDER BY ";
+                separator = "";
+                for(Object objectIdColumn : dbObject.getObjectIdColumn()) {
+                    statement += separator;
+                    statement += "v." + objectIdColumn;
+                    separator = ",";
+                }
+                statement += ", v." + getObjectIdxColumnName();
+                try (
+                    PreparedStatement ps = prepareStatement(
                         conn,
-                        currentStatement = statement2.toString()
-                    );
-                    for (int i = 0, iLimit = statementParameters2.size(); i < iLimit; i++) {
+                        currentStatement = statement.toString()
+                    )) {
+                    for (int i = 0, iLimit = statementParameters.size(); i < iLimit; i++) {
                         setPreparedStatementValue(
                             conn,
-                            ps2,
+                            ps,
                             i + 1,
-                            statementParameters2.get(i)
+                            statementParameters.get(i)
                         );
                     }
-                    rs2 = this.executeQuery(
-                        ps2,
-                        statement2.toString(),
-                        statementParameters2,
-                        0 // no limit for maxRows
-                    );
-                    List<ObjectRecord> objects2 = new ArrayList<ObjectRecord>();
-                    getObjects(
-                        conn,
-                        dbObject2,
-                        rs2,
-                        objects2,
-                        AttributeSelectors.ALL_ATTRIBUTES,
-                        Collections.<String, AttributeSpecifier>emptyMap(),
-                        false, // objectClassAsAttribute
-                        0,
-                        FETCH_SIZE_GREEDY,
-                        facade2.getObjectClass(),
-                        null
-                    );
-                    // Add attributes of objects2 to objects
-                    Map<Path, ObjectRecord> objects2AsMap = new HashMap<Path, ObjectRecord>();
-                    for (ObjectRecord object2 : objects2) {
-                        objects2AsMap.put(
-                            object2.getResourceIdentifier(),
-                            object2
+                    try (
+                        ResultSet rs = this.executeQuery(
+                            ps,
+                            statement.toString(),
+                            statementParameters,
+                            0 // no limit for maxRows
+                        )) {
+                        List<ObjectRecord> objects2 = new ArrayList<ObjectRecord>();
+                        getObjects(
+                            conn,
+                            dbObject,
+                            rs,
+                            objects2,
+                            AttributeSelectors.ALL_ATTRIBUTES,
+                            Collections.<String, AttributeSpecifier>emptyMap(),
+                            false, // objectClassAsAttribute
+                            0,
+                            FETCH_SIZE_GREEDY,
+                            facade.getObjectClass(),
+                            null
                         );
-                    }
-                    for (ObjectRecord object : objects) {
-                        ObjectRecord object2 = objects2AsMap.get(object.getResourceIdentifier());
-                        if (object2 != null) {
-                            Object_2Facade.getValue(object2).keySet().removeAll(
-                                object.keySet()
-                            );
-                            Object_2Facade.getValue(object).putAll(
-                                Object_2Facade.getValue(object2)
+                        // Add attributes of objects2 to objects
+                        Map<Path, ObjectRecord> objects2AsMap = new HashMap<Path, ObjectRecord>();
+                        for(ObjectRecord object2 : objects2) {
+                            objects2AsMap.put(
+                                object2.getResourceIdentifier(),
+                                object2
                             );
                         }
+                        for(ObjectRecord object : objects) {                            
+                            ObjectRecord object2 = objects2AsMap.get(
+                                dbObject.getConfiguration().getDbObjectsForQueryJoinColumn() == null || objects2AsMap.containsKey(object.getResourceIdentifier())
+                                    ? object.getResourceIdentifier()
+                                    : (Path)Object_2Facade.getValue(object).get(this.getFeatureName(dbObjectConfiguration.getDbObjectsForQueryJoinColumn().split(" ")[0]))
+                            );
+                            if(object2 != null) {
+                                Object_2Facade.getValue(object2).keySet().removeAll(
+                                    object.keySet()
+                                );
+                                Object_2Facade.getValue(object).putAll(
+                                    Object_2Facade.getValue(object2)
+                                );
+                            }
+                        }
                     }
+                } catch (SQLException exception) {
+                    throw new ServiceException(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.MEDIA_ACCESS_FAILURE,
+                        "Error when executing SQL statement",
+                        new BasicException.Parameter("statement", currentStatement),
+                        new BasicException.Parameter("parameters", statementParameters),
+                        new BasicException.Parameter("sqlErrorCode", exception.getErrorCode()),
+                        new BasicException.Parameter("sqlState", exception.getSQLState())
+                    );
                 }
-            } catch (SQLException exception) {
-                throw new ServiceException(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.MEDIA_ACCESS_FAILURE,
-                    "Error when executing SQL statement",
-                    new BasicException.Parameter("statement", currentStatement),
-                    new BasicException.Parameter("parameters", statementParameters2),
-                    new BasicException.Parameter("sqlErrorCode", exception.getErrorCode()),
-                    new BasicException.Parameter("sqlState", exception.getSQLState())
-                );
-            } finally {
-                Closeables.close(rs2);
-                Closeables.close(ps2);
             }
         }
     }
@@ -4474,9 +4505,9 @@ public class Database_2
         List<String> includingClauses,
         List<List<Object>> includingClausesValues,
         List<String> exludingClauses,
-        List<List<Object>> exludingClausesValues
-    )
-        throws ServiceException {
+        List<List<Object>> exludingClausesValues,
+        Map<String,Object> context
+    ) throws ServiceException {
         List<Object> filterValues = new ArrayList<Object>();
         // Positive single-valued filter
         includingClauses.add(
@@ -4494,7 +4525,8 @@ public class Database_2
                 referencedType,
                 primaryFilterProperties,
                 false, // negate
-                filterValues
+                filterValues,
+                context
             )
         );
         includingClausesValues.add(filterValues);
@@ -4515,11 +4547,11 @@ public class Database_2
                 referencedType,
                 primaryFilterProperties,
                 true, // negate
-                filterValues
+                filterValues,
+                context
             )
         );
         includingClausesValues.add(filterValues);
-
         // WHERE clauses for multi-valued filter properties
         for (Iterator<FilterProperty> i = allFilterProperties.iterator(); i
             .hasNext();) {
@@ -4542,7 +4574,8 @@ public class Database_2
                         referencedType,
                         Collections.singletonList(p),
                         false, // negate
-                        filterValues
+                        filterValues,
+                        context
                     )
                 );
                 includingClausesValues.add(filterValues);
@@ -4565,7 +4598,8 @@ public class Database_2
                     referencedType,
                     Collections.singletonList(p),
                     true, // negate
-                    filterValues
+                    filterValues,
+                    context
                 );
                 if (!excludingClause.isEmpty()) {
                     exludingClauses.add(excludingClause);
@@ -4632,9 +4666,9 @@ public class Database_2
         ModelElement_1_0 referencedType,
         List<FilterProperty> filterProperties,
         boolean negate,
-        List<Object> statementParameters
-    )
-        throws ServiceException {
+        List<Object> statementParameters,
+        Map<String,Object> context
+    ) throws ServiceException {
         StringBuilder clause = new StringBuilder();
         List<Object> clauseValues = new ArrayList<Object>();
         boolean hasProperties = false;
@@ -4644,7 +4678,7 @@ public class Database_2
          * negate(expr0) OR negate(expr1) ... If !negate --> expr0 AND expr1 ...
          */
         List<ModelElement_1_0> filterPropertyDefs = Database_2.this.getFilterPropertyDefs(referencedType, filterProperties);
-        for (int i = 0; i < filterProperties.size(); i++) {
+        for(int i = 0; i < filterProperties.size(); i++) {
             FilterProperty filterProperty = filterProperties.get(i);
             ModelElement_1_0 filterPropertyDef = filterPropertyDefs.get(i);
             /**
@@ -4688,7 +4722,8 @@ public class Database_2
                             negate && !viewIsPrimary,
                             columnName,
                             clauseValues,
-                            referencedType
+                            referencedType,
+                            context
                         )
                     );
                     if (viewIsPrimary &&
@@ -4798,37 +4833,145 @@ public class Database_2
     }
 
     /**
+     * Handling of format 0 for EQUALS.CLAUSE.LARGE.STRINGSET
+     * 
+     * @param conn
+     * @param equalsClauseLargeStringSet
+     * @param externalizedValues
+     * @param context
+     * @throws ServiceException
+     */
+    protected String isInToSqlClauseLargeStringSet0(
+        Connection conn,
+        String equalsClauseLargeStringSet,
+        List<Object> externalizedValues,
+        List<Object> clauseValues,
+        Map<String,Object> context
+    ) throws ServiceException {
+        // Format ?0: values as string array
+        clauseValues.add(externalizedValues.toArray(new String[externalizedValues.size()]));
+        return equalsClauseLargeStringSet.replace("?0", "?");
+    }
+
+    /**
+     * Handling of format 1 for EQUALS.CLAUSE.LARGE.STRINGSET
+     * 
+     * @param conn
+     * @param equalsClauseLargeStringSet
+     * @param externalizedValues
+     * @param context
+     * @throws ServiceException
+     */
+    protected String isInToSqlClauseLargeStringSet1(
+        Connection conn,
+        String equalsClauseLargeStringSet,
+        List<Object> externalizedValues,
+        List<Object> clauseValues,
+        Map<String,Object> context
+    ) throws ServiceException {
+        // Format ?1: string_split
+        StringBuilder clauseValue = new StringBuilder();
+        String sep = "";
+        for(Object externalizedValue : externalizedValues) {
+            clauseValue.append(sep).append(externalizedValue.toString());
+            sep = "\t";
+        }
+        clauseValues.add(clauseValue.toString());
+        clauseValues.add(sep);
+        return equalsClauseLargeStringSet.replace("?1", "?");
+    }
+
+    /**
      * Add an IS_IN or IS_NOT_IN clause
      * 
-     * @param connection
+     * @param conn
      * @param dbObject
      * @param columnName
-     * @param negation
-     *            true for IS_NOT_IN, false for IS_IN,
+     * @param negation true for IS_NOT_IN, false for IS_IN,
      * @param filterPropertyDef
      * @param clause
      * @param clauseValues
      * @param values
+     * @param context
      */
     protected void isInToSqlClause(
-        Connection connection,
+        Connection conn,
         DbObject dbObject,
         String columnName,
         boolean negation,
         ModelElement_1_0 filterPropertyDef,
         StringBuilder clause,
         List<Object> clauseValues,
-        Object[] values
-    )
-        throws ServiceException {
-        clause.append(columnName).append(negation ? " NOT IN (" : " IN (");
-        String separator = "";
-        for (Object value : values) {
-            clause.append(separator).append(getPlaceHolder(connection, value));
-            clauseValues.add(this.externalizeStringValue(columnName, value));
-            separator = ", ";
+        Object[] values,
+        Map<String,Object> context
+    ) throws ServiceException {
+        List<Object> externalizedValues = new ArrayList<Object>();
+        boolean isStringSet = true;
+        boolean isPathSet = true;
+        for(Object value : values) {
+            Object externalizedValue = this.externalizeStringValue(columnName, value);
+            isStringSet &= externalizedValue instanceof String;
+            isPathSet &= externalizedValue instanceof Path;
+            externalizedValues.add(externalizedValue);
         }
-        clause.append(")");
+        String isInClauseLargeStringSet = this.getIsInClauseLargeStringSet(conn);
+        Integer isInClauseLargeStringSetThreshold = Integer.parseInt(System.getProperty(
+            "org.openmdx.persistence.jdbc.isInClauseLargeStringSetThreshold",
+            "128"
+        ));
+        // Use IS IN clause for large string sets
+        if(
+            (isStringSet || isPathSet) &&
+            externalizedValues.size() >= isInClauseLargeStringSetThreshold &&
+            (isInClauseLargeStringSet != null && !isInClauseLargeStringSet.isEmpty())
+        ) {
+            List<Object> externalizedPathValues = new ArrayList<Object>();
+            if(isPathSet) {
+                for(Object externalizedValue: externalizedValues) {
+                    externalizedPathValues.add(
+                        this.externalizePathValue(conn, (Path)externalizedValue)
+                    );
+                }
+            }
+            if(isInClauseLargeStringSet.indexOf("?0") > 0) {
+                isInClauseLargeStringSet = this.isInToSqlClauseLargeStringSet0(
+                    conn,
+                    isInClauseLargeStringSet,
+                    isPathSet ? externalizedPathValues : externalizedValues,
+                    clauseValues,
+                    context
+                );
+            } else if (isInClauseLargeStringSet.indexOf("?1") > 0) {
+                isInClauseLargeStringSet = this.isInToSqlClauseLargeStringSet1(
+                    conn,
+                    isInClauseLargeStringSet,
+                    isPathSet ? externalizedPathValues : externalizedValues,
+                    clauseValues,
+                    context
+                );
+            } else {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION,
+                    "Invalid EQUALS.CLAUSE.LARGE.STRINGSET. Supported string array place holders are: ?0, ?1",
+                    new BasicException.Parameter("clause", isInClauseLargeStringSet)
+                );
+            }
+            if(negation) {
+                clause.append("NOT (").append(columnName).append(" ").append(isInClauseLargeStringSet).append(")");
+            } else {
+                clause.append(columnName).append(" ").append(isInClauseLargeStringSet);
+            }
+        } else {
+            clause.append(columnName).append(negation ? " NOT IN (" : " IN (");
+            String separator = "";
+            for (int i = 0; i < values.length; i++) {
+                clause.append(separator).append(getPlaceHolder(conn, values[i]));
+                clauseValues.add(externalizedValues.get(i));
+                separator = ", ";
+            }
+            clause.append(")");
+        }
     }
 
     /**
@@ -4958,7 +5101,7 @@ public class Database_2
                             BasicException.Code.NOT_SUPPORTED,
                             "only (***|%) wildcards at the end supported",
                             new BasicException.Parameter("value", value),
-                            new BasicException.Parameter("path", externalized),
+                            new BasicException.Parameter("externalized", externalized),
                             new BasicException.Parameter("position", pos)
                         );
                 }
@@ -4970,7 +5113,7 @@ public class Database_2
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_SUPPORTED,
                             "path component pattern ':<pattern>*' not supported",
-                            new BasicException.Parameter("path", externalized)
+                            new BasicException.Parameter("externalized", externalized)
                         );
                     }
                 }
@@ -5030,9 +5173,9 @@ public class Database_2
         boolean negate,
         String columnName,
         List<Object> clauseValues,
-        ModelElement_1_0 referencedType
-    )
-        throws ServiceException {
+        ModelElement_1_0 referencedType,
+        Map<String,Object> context
+    ) throws ServiceException {
         StringBuilder clause = new StringBuilder();
         final ConditionType operator;
         final Quantifier quantor;
@@ -5070,7 +5213,7 @@ public class Database_2
                         && (filterProperty
                             .getValue(0) instanceof QueryFilterRecord)) {
                         if (filterPropertyDef.isReferenceType()) {
-                            addComplexFilter(
+                            this.addComplexFilter(
                                 conn,
                                 dbObject,
                                 statedObject,
@@ -5081,7 +5224,8 @@ public class Database_2
                                 columnName,
                                 ConditionType.IS_NOT_IN,
                                 clauseValues,
-                                clause
+                                clause,
+                                context
                             );
                         } else {
                             throw new ServiceException(
@@ -5113,7 +5257,8 @@ public class Database_2
                             filterPropertyDef,
                             clause,
                             clauseValues,
-                            filterProperty.getValues()
+                            filterProperty.getValues(),
+                            context
                         );
                         clause.append(")");
 
@@ -5179,7 +5324,7 @@ public class Database_2
                         && (filterProperty
                             .getValue(0) instanceof QueryFilterRecord)) {
                         if (filterPropertyDef.isReferenceType()) {
-                            addComplexFilter(
+                            this.addComplexFilter(
                                 conn,
                                 dbObject,
                                 statedObject,
@@ -5190,7 +5335,8 @@ public class Database_2
                                 columnName,
                                 ConditionType.IS_IN,
                                 clauseValues,
-                                clause
+                                clause,
+                                context
                             );
                         } else {
                             throw new ServiceException(
@@ -5222,7 +5368,8 @@ public class Database_2
                             filterPropertyDef,
                             clause,
                             clauseValues,
-                            filterProperty.getValues()
+                            filterProperty.getValues(),
+                            context
                         );
                         clause.append(")");
 
@@ -5442,7 +5589,7 @@ public class Database_2
                                             BasicException.Code.NOT_SUPPORTED,
                                             "path component pattern ':<pattern>*' not supported",
                                             new BasicException.Parameter(
-                                                "path",
+                                                "externalized",
                                                 externalized
                                             ),
                                             new BasicException.Parameter(
@@ -5706,9 +5853,9 @@ public class Database_2
         String columnName,
         ConditionType condition,
         List<Object> clauseValues,
-        StringBuilder clause
-    )
-        throws ServiceException {
+        StringBuilder clause,
+        Map<String,Object> context
+    ) throws ServiceException {
         final Model_1_0 model = filterPropertyDef.getModel();
         final ModelElement_1_0 referencedType = getReferenceType(filterPropertyDef);
         final boolean joinWithState = false; // TODO to be evaluated and USED for non RID/OID DBs, too!
@@ -5952,7 +6099,8 @@ public class Database_2
             includingFilterClauses,
             includingFilterValues,
             excludingFilterClauses,
-            excludingFilterValues
+            excludingFilterValues,
+            context
         );
 
         final Membership membership = new Membership(
@@ -5995,7 +6143,8 @@ public class Database_2
             includingFilterClauses,
             includingFilterValues,
             excludingFilterClauses,
-            excludingFilterValues
+            excludingFilterValues,
+            context
         );
         if (!excludingFilterClauses.isEmpty()) {
             throw new ServiceException(
@@ -6473,7 +6622,10 @@ public class Database_2
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.MEDIA_ACCESS_FAILURE,
                     "can not create DbObject",
-                    new BasicException.Parameter("path", adjustedAccessPath),
+                    new BasicException.Parameter(
+                        BasicException.Parameter.XRI, 
+                        adjustedAccessPath
+                    ),
                     new BasicException.Parameter(
                         "type",
                         configuration.getDbObjectFormat()
@@ -6527,9 +6679,7 @@ public class Database_2
         boolean throwNotFoundException
     )
         throws ServiceException {
-        PreparedStatement ps = null;
         String currentStatement = null;
-        ResultSet rs = null;
         List<Object> statementParameters = null;
         try {
             String view1 = Database_2.this.getView(
@@ -6572,9 +6722,7 @@ public class Database_2
             }
             // Secondary columns
             else {
-                if (dbObject
-                    .getConfiguration()
-                    .getDbObjectsForQueryJoinColumn() == null) {
+                if (dbObject.getConfiguration().getDbObjectsForQueryJoinColumn() == null) {
                     statement = view1.startsWith("SELECT") ? view2 + " AND "
                         : "SELECT " + dbObject.getHint() + " * FROM " + view2
                             + " v WHERE ";
@@ -6592,9 +6740,8 @@ public class Database_2
                     statement += view1.startsWith("SELECT")
                         ? "(" + view1 + ") v"
                         : view1 + " v";
-                    statement += " ON vm." + OBJECT_OID + " = v." + dbObject
-                        .getConfiguration()
-                        .getDbObjectsForQueryJoinColumn();
+                    statement += " ON vm." + OBJECT_OID + " = v." +
+                        dbObject.getConfiguration().getDbObjectsForQueryJoinColumn().replace("${v2}.", "vm.").replace("${v}.", "v.");
                     statement += " WHERE ";
                     statement += "("
                         + (useReferenceClause ? referenceClause + " AND " : "")
@@ -6611,54 +6758,56 @@ public class Database_2
             } else {
                 statement += " ORDER BY " + prefix + OBJECT_IDX;
             }
-            ps = this.prepareStatement(conn, currentStatement = statement);
-            statementParameters = new ArrayList<Object>();
-            int pos = 1;
-            if (useReferenceClause) {
-                List<Object> referenceValues = dbObject.getReferenceValues();
-                statementParameters.addAll(referenceValues);
-                for (Object referenceValue : referenceValues) {
-                    Database_2.this.setPreparedStatementValue(
-                        conn,
+            try (PreparedStatement ps = this.prepareStatement(conn, currentStatement = statement)) {
+                statementParameters = new ArrayList<Object>();
+                int pos = 1;
+                if (useReferenceClause) {
+                    List<Object> referenceValues = dbObject.getReferenceValues();
+                    statementParameters.addAll(referenceValues);
+                    for (Object referenceValue : referenceValues) {
+                        Database_2.this.setPreparedStatementValue(
+                            conn,
+                            ps,
+                            pos++,
+                            referenceValue
+                        );
+                    }
+                }
+                List<Object> objectIdValues = dbObject.getObjectIdValues();
+                statementParameters.addAll(objectIdValues);
+                for (Object objectIdValue : objectIdValues) {
+                    Database_2.this
+                        .setPreparedStatementValue(conn, ps, pos++, objectIdValue);
+                }
+                try (
+                    ResultSet rs = Database_2.this.executeQuery(
                         ps,
-                        pos++,
-                        referenceValue
+                        currentStatement,
+                        statementParameters,
+                        0 // no limit for maxRows
+                    )) {
+                    return Database_2.this.getObject(
+                        conn,
+                        path,
+                        attributeSelector,
+                        attributeSpecifiers,
+                        objectClassAsAttribute,
+                        dbObject,
+                        rs,
+                        objectClass,
+                        primaryColumns, // check for valid identity only when primary
+                        // columns are fetched
+                        throwNotFoundException
                     );
                 }
             }
-            List<Object> objectIdValues = dbObject.getObjectIdValues();
-            statementParameters.addAll(objectIdValues);
-            for (Object objectIdValue : objectIdValues) {
-                Database_2.this
-                    .setPreparedStatementValue(conn, ps, pos++, objectIdValue);
-            }
-            rs = Database_2.this.executeQuery(
-                ps,
-                currentStatement,
-                statementParameters,
-                0 // no limit for maxRows
-            );
-            ObjectRecord replyObj = Database_2.this.getObject(
-                conn,
-                path,
-                attributeSelector,
-                attributeSpecifiers,
-                objectClassAsAttribute,
-                dbObject,
-                rs,
-                objectClass,
-                primaryColumns, // check for valid identity only when primary
-                // columns are fetched
-                throwNotFoundException
-            );
-            return replyObj;
         } catch (SQLException exception) {
             throw new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.MEDIA_ACCESS_FAILURE,
                 null,
-                new BasicException.Parameter("xri", path),
+                new BasicException.Parameter(BasicException.Parameter.XRI, path),
                 new BasicException.Parameter("statement", currentStatement),
                 new BasicException.Parameter("parameters", statementParameters),
                 new BasicException.Parameter(
@@ -6670,9 +6819,6 @@ public class Database_2
                     exception.getSQLState()
                 )
             );
-        } finally {
-            Closeables.close(rs);
-            Closeables.close(ps);
         }
     }
 
@@ -6740,7 +6886,7 @@ public class Database_2
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND,
                         "object not found",
-                        new BasicException.Parameter("path", path)
+                        new BasicException.Parameter(BasicException.Parameter.XRI, path)
                     );
                 }
             } else {
@@ -6788,7 +6934,7 @@ public class Database_2
             BasicException.Code.DUPLICATE,
             "duplicate object",
             new BasicException.Parameter(
-                "path",
+                BasicException.Parameter.XRI,
                 request.getResourceIdentifier()
             )
         );
@@ -6932,15 +7078,13 @@ public class Database_2
     @Deprecated
     protected BinaryLargeObject tallyLargeObject(InputStream stream)
         throws IOException {
-        File file = newTemporaryFile();
-        OutputStream target = new FileOutputStream(file);
-        long length;
-        try {
+        final File file = newTemporaryFile();
+        final long length;
+        try (OutputStream target = new FileOutputStream(file)) {
             length = BinaryLargeObjects.streamCopy(stream, 0, target);
+            target.flush();
         } finally {
             stream.close();
-            target.flush();
-            target.close();
         }
         return BinaryLargeObjects
             .valueOf(new FileInputStream(file), Long.valueOf(length));
@@ -6960,15 +7104,13 @@ public class Database_2
     @Deprecated
     protected CharacterLargeObject tallyLargeObject(Reader stream)
         throws IOException {
-        File file = newTemporaryFile();
-        Writer target = new OutputStreamWriter(new FileOutputStream(file), "UTF-16");
-        long length;
-        try {
+        final File file = newTemporaryFile();
+        final long length;
+        try (Writer target = new OutputStreamWriter(new FileOutputStream(file), "UTF-16")) {
             length = CharacterLargeObjects.streamCopy(stream, 0, target);
+            target.flush();
         } finally {
             stream.close();
-            target.flush();
-            target.close();
         }
         return CharacterLargeObjects.valueOf(
             new InputStreamReader(new FileInputStream(file), "UTF-16"),
@@ -7108,7 +7250,8 @@ public class Database_2
     private SetLargeObjectMethod howToSetLargeObject(
         Connection connection,
         String id
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         return SetLargeObjectMethod.valueOf(
             getDriverProperty(
                 connection,
@@ -7223,7 +7366,7 @@ public class Database_2
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                "Unsupported write lock class",
+                "Unsupported read lock class",
                 new BasicException.Parameter(
                     "expected",
                     String.class.getName()
@@ -7257,98 +7400,56 @@ public class Database_2
     // ---------------------------------------------------------------------------
     // Variables
     // ---------------------------------------------------------------------------
-
     protected static final String UNDEF_OBJECT_CLASS = "#undef";
-
     protected static final String SIZE_SUFFIX = "_";
-
     protected static final int ROUND_UP_TO_MAX_SCALE = 15;
 
     protected BooleanMarshaller booleanMarshaller;
-
     protected Marshaller durationMarshaller;
-
     protected XMLGregorianCalendarMarshaller calendarMarshaller;
-
     protected String booleanType = LayerConfigurationEntries.BOOLEAN_TYPE_CHARACTER;
-
     protected String booleanFalse = null;
-
     protected String booleanTrue = null;
-
     protected String durationType = LayerConfigurationEntries.DURATION_TYPE_CHARACTER;
-
     protected String dateTimeType = LayerConfigurationEntries.DATETIME_TYPE_CHARACTER;
-
     protected String timeType = LayerConfigurationEntries.TIME_TYPE_CHARACTER;
-
     protected String dateType = LayerConfigurationEntries.DATE_TYPE_CHARACTER;
-
     protected String dateTimeZone = TimeZone.getDefault().getID();
-
     protected String dateTimeDaylightZone = null;
-
     protected String dateTimePrecision = TimeUnit.MICROSECONDS.name();
-
     protected boolean normalizeObjectIds = false;
-
     protected boolean useViewsForRedundantColumns = true;
-
     protected boolean usePreferencesTable = true;
-
     protected boolean cascadeDeletes = true;
-
     protected boolean orderNullsAsEmpty = false;
-
     protected SparseArray<String> columnNameFrom = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> columnNameTo = SortedMaps.emptySparseArray();
-
+    protected SparseArray<Path> excludeType = SortedMaps.emptySparseArray();
+    protected SparseArray<Path> includeType = SortedMaps.emptySparseArray();
     protected SparseArray<Path> type = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> typeName = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> dbObject = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> dbObject2 = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> dbObjectFormat = SortedMaps.emptySparseArray();
-
     protected SparseArray<Integer> pathNormalizeLevel = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> dbObjectForQuery = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> dbObjectForQuery2 = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> dbObjectsForQueryJoinColumn = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> dbObjectHint = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> objectIdPattern = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> joinTable = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> joinColumnEnd1 = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> joinColumnEnd2 = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> unitOfWorkProvider = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> removableReferenceIdPrefix = SortedMaps.emptySparseArray();
-
     protected SparseArray<Boolean> disableAbsolutePositioning = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> referenceIdPattern = SortedMaps.emptySparseArray();
-
     protected SparseArray<String> autonumColumn = SortedMaps.emptySparseArray();
-
     protected boolean getLargeObjectByValue = true;
 
     // VIEW_MODE
     protected static final short VIEW_MODE_ADD_MIXIN_COLUMNS_TO_PRIMARY = 0;
-
     protected static final short VIEW_MODE_SECONDARY_COLUMNS = 1;
-
     protected static final Set<String> SYSTEM_ATTRIBUTES = Sets.asSet(
         SystemAttributes.OBJECT_CLASS,
         SystemAttributes.CREATED_AT,
@@ -7359,30 +7460,20 @@ public class Database_2
         SystemAttributes.REMOVED_BY,
         TechnicalAttributes.STATE_VERSION
     );
-
     public static final String DEFAULT_OID_SUFFIX = "_objectid";
-
     public static final String DEFAULT_RID_SUFFIX = "_referenceid";
-
     public static final String DEFAULT_RSX_SUFFIX = "_referenceIdSuffix";
-
     public static final String DEFAULT_COLUMN_SELECTOR = "v.*";
-
     public static final String DEFAULT_PRIVATE_ATTRIBUTE_PREFIX = "p$$";
 
     private String privateAttributesPrefix = DEFAULT_PRIVATE_ATTRIBUTE_PREFIX;
-
     private String objectIdAttributesSuffix = DEFAULT_OID_SUFFIX;
-
     private String referenceIdAttributesSuffix = DEFAULT_RID_SUFFIX;
-
     private String referenceIdSuffixAttributesSuffix = DEFAULT_RID_SUFFIX;
 
     // Reserved words
     protected static final Set<String> RESERVED_WORDS_HSQLDB = Sets.asSet("position", "POSITION");
-
     protected static final Set<String> RESERVED_WORDS_ORACLE = Sets.asSet("resource", "RESOURCE", "comment", "COMMENT");
-
     // JDO case insensitive flag
     protected static final String JDO_CASE_INSENSITIVE_FLAG = "(?i)";
 
@@ -7394,13 +7485,14 @@ public class Database_2
     protected String namespaceId;
 
     /**
-     * List of DbConnectionManagers. getConnection() returns as default
-     * connectionManagers at position 0. A user-defined implementation of
-     * getConnection() may return any of the configured connection managers.
+     * he (now single-valued) data source
      */
-    protected SparseArray<DataSource> dataSource = null;
+    protected DataSource dataSource;
 
-    protected SparseArray<String> datasourceName = null;
+    /**
+     * The (now single-valued) data source name
+     */
+    protected String datasourceName;
 
     /**
      * Configuration of plugin.
@@ -7427,7 +7519,7 @@ public class Database_2
      * configured single-valued filter properties. Allows optimization of find
      * operations
      */
-    protected Set<String> singleValueAttributes = new HashSet<String>(
+    protected Set<String> singleValueAttributes = new HashSet<>(
         Arrays.asList(SystemAttributes.OBJECT_CLASS, "object_stateId")
     );
 
@@ -7464,11 +7556,8 @@ public class Database_2
      * column names and vice versa is expensive. Therefore it is cached.
      */
     protected final ConcurrentMap<String, String> featureNames = new ConcurrentHashMap<String, String>();
-
     protected final ConcurrentMap<String, String> publicColumnNames = new ConcurrentHashMap<String, String>();
-
     protected final ConcurrentMap<String, String> privateColumnNames = new ConcurrentHashMap<String, String>();
-
     protected final ConcurrentMap<String, String> databaseProductNames = new ConcurrentHashMap<String, String>();
 
     private Set<String> nonPersistentFeatures = Collections.emptySet();

@@ -16,13 +16,13 @@ org.openmdx.portal.servlet.control.*,
 org.openmdx.portal.servlet.wizards.*,
 org.openmdx.base.naming.*"
 %>
-<%@attribute name="controller" type="AbstractWizardController"%>
+<%@attribute name="controller" type="JspWizardController"%>
 <%@attribute name="command"%>
 <%@attribute name="defaultCommand"%>
 <%@attribute name="assertRequestId" type="java.lang.Boolean"%>
 <%@attribute name="assertObjectXri" type="java.lang.Boolean"%>
 <%
-	AbstractWizardController wc = (AbstractWizardController)jspContext.findAttribute("controller");
+	JspWizardController wc = (JspWizardController)jspContext.findAttribute("controller");
 	String commandAttribute = (String)jspContext.findAttribute("commandAttribute");
 	if(commandAttribute == null) {
 		commandAttribute = "Command";

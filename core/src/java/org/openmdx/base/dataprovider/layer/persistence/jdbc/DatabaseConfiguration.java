@@ -447,7 +447,21 @@ public class DatabaseConfiguration {
         for(DbObjectConfiguration dbObjectConfiguration: this.dbObjectConfigurations.values()) {
             Path typePattern = dbObjectConfiguration.getType();
             if(objectPattern.isLike(typePattern)) {
-                replies.add(dbObjectConfiguration);
+                Boolean exclude = null;
+                for(Path excludeType: this.database.getExcludeType()) {
+                    if(objectPattern.isLike(excludeType)) {
+                        exclude = true;
+                    }
+                }
+                Boolean include = null;
+                for(Path includeType: this.database.getIncludeType()) {
+                    if(objectPattern.isLike(includeType)) {
+                        include = true;
+                    }
+                }
+                if(!Boolean.TRUE.equals(exclude) || Boolean.TRUE.equals(include)) {
+                    replies.add(dbObjectConfiguration);
+                }
             }
         }
         if(replies.isEmpty()) {
@@ -461,7 +475,7 @@ public class DatabaseConfiguration {
         }
         return replies;
     }
-
+    
     /**
      * Get a single DB object configuration
      * 
@@ -481,7 +495,7 @@ public class DatabaseConfiguration {
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.INVALID_CARDINALITY, 
                     "No type configuration found for the given path",
-                    new BasicException.Parameter("path", path),            
+                    new BasicException.Parameter(BasicException.Parameter.XRI, path),            
                     new BasicException.Parameter("mismatching", this.dbObjectConfigurations)
                 );
             case 1:
@@ -491,7 +505,7 @@ public class DatabaseConfiguration {
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.INVALID_CARDINALITY, 
                     "There is more than one type for the given path (maybe by ignoring the authority)",
-                    new BasicException.Parameter("path", path),            
+                    new BasicException.Parameter(BasicException.Parameter.XRI, path),            
                     new BasicException.Parameter("matching", replies)
                 ); 
         } 

@@ -415,14 +415,12 @@ public class ReplaceArchive
     log("     includeTypes=<" + this.includeTypes + ">", Project.MSG_INFO);
     
     // replace
-    try {
+    try (
 	    ZipInputStream source = new ZipInputStream(new FileInputStream(this.srcArchive));
-	    ZipOutputStream dest = new ZipOutputStream(new FileOutputStream(this.destArchive));
+	    ZipOutputStream dest = new ZipOutputStream(new FileOutputStream(this.destArchive))
+	){
 	    this.replaceInArchive("", source, dest);
-	    source.close();
-	    dest.close();
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
         throw new BuildException(e);
     }
   }
@@ -489,22 +487,21 @@ public class ReplaceArchive
                   log(indent + "processing nested archive " + sourceEntry.getName(), Project.MSG_INFO);
                   
                   // source nested
-                  ByteArrayOutputStream sourceNested = new ByteArrayOutputStream();
-                  this.writeAndReplace(source, sourceNested, false);
-                  sourceNested.close();
-                  
-                  // dest nested
-                  ByteArrayOutputStream destNestedOs = new ByteArrayOutputStream();
-                  ZipOutputStream destNested = new ZipOutputStream(destNestedOs);
-                  
-                  // replace nested
-                  this.replaceInArchive(
-                      indent + "  ",
-                      new ZipInputStream(new ByteArrayInputStream(sourceNested.toByteArray())),
-                      destNested
-                  );
-                  destNested.close();
-                  dest.write(destNestedOs.toByteArray());
+                  try (ByteArrayOutputStream sourceNested = new ByteArrayOutputStream()){
+                      this.writeAndReplace(source, sourceNested, false);
+                      // dest nested
+                      try (ByteArrayOutputStream destNestedOs = new ByteArrayOutputStream()){
+                          try (ZipOutputStream destNested = new ZipOutputStream(destNestedOs)){
+                              // replace nested
+                              this.replaceInArchive(
+                                  indent + "  ",
+                                  new ZipInputStream(new ByteArrayInputStream(sourceNested.toByteArray())),
+                                  destNested
+                              );
+                          }
+                          dest.write(destNestedOs.toByteArray());
+                      }
+                  }
               }
               else {
                   boolean include = false;

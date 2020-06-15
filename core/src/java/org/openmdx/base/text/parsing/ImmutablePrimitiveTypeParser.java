@@ -48,8 +48,8 @@
 package org.openmdx.base.text.parsing;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -79,7 +79,7 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
     /**
      * The supported types
      */
-    private static final List<Class<?>> SUPPORTED_TYPES = Arrays.<Class<?>>asList(
+    private static final Collection<Class<?>> SUPPORTED_TYPES = Arrays.<Class<?>>asList(
         Date.class,
         Duration.class,
         XMLGregorianCalendar.class,
@@ -95,13 +95,19 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
         return INSTANCE;
     }
         
+    
+    
+
     /* (non-Javadoc)
-     * @see org.w3c.spi.Parser#handles(java.lang.Class)
+     * @see org.openmdx.kernel.text.parsing.AbstractParser#supportedTypes()
      */
     @Override
-    public boolean handles(Class<?> type) {
-        return SUPPORTED_TYPES.contains(type);
+    protected Collection<Class<?>> supportedTypes() {
+        return SUPPORTED_TYPES;
     }
+
+
+
 
     /* (non-Javadoc)
 	 * @see org.openmdx.kernel.text.parse.AbstractParser#parseAs(java.lang.Class, java.lang.String)

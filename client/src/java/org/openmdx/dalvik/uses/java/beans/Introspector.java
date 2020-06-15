@@ -102,7 +102,7 @@ import org.openmdx.dalvik.uses.sun.reflect.misc.ReflectUtil;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 @SuppressWarnings({"rawtypes","unchecked"})
@@ -1220,7 +1220,7 @@ public class Introspector {
         if (p1.length == p2.length) {
             match = true;
             for (int i = 0; i < p1.length; i++) {
-                if (p1[i] != p2[i]) {
+                if (!p1[i].equals(p2[i])) {
                     match = false;
                     break;
                 }

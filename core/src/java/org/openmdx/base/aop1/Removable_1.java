@@ -155,14 +155,10 @@ public class Removable_1 extends Interceptor_1 {
          */
         private transient List<Object> delegate;
 
-        /**
-         * 
-         * @return
-         */
-        @SuppressWarnings("synthetic-access")
         private List<Object> getDelegate(
         ){
             try {
+                objGetValue(REMOVED_AT);
                 return 
                     Removable_1.super.objGetValue(REMOVED_AT) == null ? Collections.emptyList() :
                     this.delegate == null ? this.delegate = Removable_1.super.objGetList(REMOVED_BY) :

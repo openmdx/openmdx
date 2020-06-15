@@ -47,25 +47,19 @@
  */
 package org.openmdx.state2.aop0;
 
-import org.openmdx.base.naming.PathComponent;
+import org.openmdx.base.naming.ClassicSegments;
 
 /**
  * Apply colon policy to state qualifiers
  */
 public class ColonPlugIn_1 extends AbstractPlugIn_1 {
 
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.aop0.PlugIn_1#toQualifier(org.openmdx.base.naming.PathComponent, java.lang.Integer)
-     */
     @Override
     protected String newBasicStateQualifier(
-        PathComponent coreQualifier,
+        String coreQualifier,
         Integer stateQualifier
     ) {
-        return coreQualifier.getDescendant(
-            stateQualifier.toString(),
-            ""
-        ).toString();
+        return ClassicSegments.createPrivateSegment(coreQualifier, stateQualifier);
     }
 
 }

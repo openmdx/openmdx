@@ -723,7 +723,7 @@ public class StandardRestFormatter implements RestFormatter {
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.TRANSFORMATION_FAILURE,
-	                    new BasicException.Parameter("xri", xri),
+	                    new BasicException.Parameter(BasicException.Parameter.XRI, xri),
 	                    new BasicException.Parameter("id", id),
 	                    new BasicException.Parameter("type", record.getRecordName()),
 	                    new BasicException.Parameter("index", index),
@@ -786,7 +786,7 @@ public class StandardRestFormatter implements RestFormatter {
                         BasicException.Code.PROCESSING_FAILURE,
                         "Unable to retrieve feature value",
                         new BasicException.Parameter("hrefContext", target.getBase()),
-                        new BasicException.Parameter("xri", xri),
+                        new BasicException.Parameter(BasicException.Parameter.XRI, xri),
                         new BasicException.Parameter("id", id),
                         new BasicException.Parameter("feature", feature)
                     )
@@ -864,7 +864,7 @@ public class StandardRestFormatter implements RestFormatter {
                                     "hrefContext",
                                     target.getBase()
                                 ),
-                                new BasicException.Parameter("xri", xri),
+                                new BasicException.Parameter(BasicException.Parameter.XRI, xri),
                                 new BasicException.Parameter("feature", feature)
                             )
                         );
@@ -922,7 +922,7 @@ public class StandardRestFormatter implements RestFormatter {
                                         "hrefContext",
                                         target.getBase()
                                     ),
-                                    new BasicException.Parameter("xri", xri),
+                                    new BasicException.Parameter(BasicException.Parameter.XRI, xri),
                                     new BasicException.Parameter("feature", feature)
                                  )
                              );

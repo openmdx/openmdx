@@ -1,0 +1,140 @@
+
+******************************************************************************************************************************************
+                                                              LDAP Search v1.2
+                                                                       by Nagareshwar Y Talekar (tnagareshwar@gmail.com)
+
+******************************************************************************************************************************************
+
+LDAP Search started ....
+  Host = ldap.openldap.org 
+  Port = 389 
+  Connection Type = Non SSL 
+  Timeout = 10 
+
+STEP 1 => Performing LDAP initialization
+LDAP initialization completed
+
+STEP 2 => Performing LDAP simple bind...
+LDAP bind completed successfully.
+
+STEP 3 => Searching on the server ...
+
+******************************************************************************************************************************************
+Enumerating attributes for DN : dc=OpenLDAP,dc=Org 
+objectClass = top
+objectClass = organization
+objectClass = OpenLDAPorg
+objectClass = dcObject
+objectClass = domainRelatedObject
+dc = OpenLDAP
+displayName = OpenLDAP Project
+o = OpenLDAP Project
+o = OpenLDAP Foundation
+o = OpenLDAP
+l = Internet
+description = OpenLDAP - community developed software
+labeledURI = http://www.OpenLDAP.org/ The OpenLDAP Project
+labeledURI = mailto:info@OpenLDAP.org The OpenLDAP Project
+associatedDomain = OpenLDAP.org
+******************************************************************************************************************************************
+Enumerating attributes for DN : cn=Directory Manager,dc=OpenLDAP,dc=Org 
+cn = Directory Manager
+cn = Manager
+cn = Directory Administrator
+cn = Administrator
+displayName = Directory Manager
+roleOccupant = uid=kurt,ou=People,dc=OpenLDAP,dc=Org
+labeledURI = mailto:manager@OpenLDAP.org Directory Manager
+seeAlso = dc=OpenLDAP,dc=Org
+objectClass = top
+objectClass = organizationalRole
+objectClass = OpenLDAPdisplayableObject
+objectClass = labeledURIObject
+description = manages OpenLDAP directories
+******************************************************************************************************************************************
+Enumerating attributes for DN : ou=People,dc=OpenLDAP,dc=Org 
+ou = People
+description = OpenLDAP People
+objectClass = top
+objectClass = organizationalUnit
+objectClass = OpenLDAPou
+******************************************************************************************************************************************
+Enumerating attributes for DN : ou=Groups,dc=OpenLDAP,dc=Org 
+ou = Groups
+description = OpenLDAP Groups
+objectClass = top
+objectClass = organizationalUnit
+objectClass = OpenLDAPou
+******************************************************************************************************************************************
+Enumerating attributes for DN : uid=kurt,ou=People,dc=OpenLDAP,dc=Org 
+objectClass = top
+objectClass = person
+objectClass = organizationalPerson
+objectClass = inetOrgPerson
+objectClass = pilotPerson
+objectClass = OpenLDAPperson
+uid = kurt
+uid = kdz
+displayName = Kurt Zeilenga
+cn = Kurt D. Zeilenga
+cn = Kurt Zeilenga
+sn = Zeilenga
+givenName = Kurt
+o = OpenLDAP
+ou = Project
+ou = Foundation
+mail = kurt@OpenLDAP.org
+description = Pagan
+drink = beer
+drink = coke
+seeAlso = uid=kurt,dc=boolean,dc=net
+labeledURI = http://www.OpenLDAP.org/project/kurt/
+initials = KDZ
+title = Executive Director
+title = Founder
+st = Nevada
+l = Minden
+******************************************************************************************************************************************
+Enumerating attributes for DN : uid=kdz,ou=People,dc=OpenLDAP,dc=Org 
+objectClass = top
+objectClass = alias
+objectClass = extensibleObject
+uid = kdz
+aliasedObjectName = uid=kurt,ou=People,dc=OpenLDAP,dc=Org
+******************************************************************************************************************************************
+Enumerating attributes for DN : uid=hyc,ou=People,dc=OpenLDAP,dc=Org 
+objectClass = top
+objectClass = person
+objectClass = organizationalPerson
+objectClass = inetOrgPerson
+objectClass = pilotPerson
+objectClass = OpenLDAPperson
+uid = hyc
+displayName = Howard Chu
+cn = Howard Chu
+sn = Chu
+givenName = Howard
+o = OpenLDAP
+ou = Project
+title = Chief Architect
+******************************************************************************************************************************************
+Enumerating attributes for DN : uid=venaas,ou=People,dc=OpenLDAP,dc=Org 
+objectClass = top
+objectClass = person
+objectClass = organizationalPerson
+objectClass = inetOrgPerson
+objectClass = pilotPerson
+objectClass = OpenLDAPperson
+uid = venaas
+displayName = Stig Venås
+cn = Stig Venås
+cn = Stig Venaas
+sn = Venås
+givenName = Stig
+o = OpenLDAP
+ou = Project
+mail = venaas@OpenLDAP.org
+
+LDAP search completed
+
+******************************************************************************************************************************************

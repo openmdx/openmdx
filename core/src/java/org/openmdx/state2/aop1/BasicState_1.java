@@ -47,6 +47,7 @@
  */
 package org.openmdx.state2.aop1;
 
+import static org.openmdx.base.accessor.cci.SystemAttributes.CORE;
 import static org.openmdx.base.accessor.cci.SystemAttributes.CREATED_AT;
 import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_AT;
 import static org.openmdx.base.persistence.cci.Queries.ASPECT_QUERY;
@@ -68,7 +69,6 @@ import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.spi.ExceptionHelper;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
@@ -194,18 +194,19 @@ public abstract class BasicState_1<C extends StateContext<?>>
         AccessMode accessMode
     ) throws ServiceException {
         if(!candidate.jdoIsDeleted() && getModel().isInstanceof(candidate, "org:openmdx:state2:BasicState")) {
-    		Date removedAt = (Date) candidate.objGetValue(REMOVED_AT); 
+    		final Date removedAt = (Date) candidate.objGetValue(REMOVED_AT); 
         	switch(context.getViewKind()) {
 	        	case TIME_POINT_VIEW:
 	        		if(context.getExistsAt() == null) {
 		        		return removedAt == null;
 	        		} else {
-	                    return 
+	                    final Date createdAt = (Date)candidate.objGetValue(CREATED_AT);
+                        return 
 	                    	candidate.jdoIsPersistent() && 
 	                    	!candidate.jdoIsNew() &&
 	                    	StateViewContext.compareTransactionTime(
 	                    		context.getExistsAt(), 
-	                    		((Date)candidate.objGetValue(CREATED_AT)), 
+	                    		createdAt, 
 	                    		removedAt
 	                    	);
 	        		}
@@ -268,7 +269,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
             core
         );
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.state2.aop2.core.AbstractState_1#getStates()
      */
@@ -282,9 +283,33 @@ public abstract class BasicState_1<C extends StateContext<?>>
     ) throws ServiceException{
         return 
             !state.jdoIsDeleted() && 
-            state.objGetValue(SystemAttributes.REMOVED_AT) == null;
+            state.objGetValue(REMOVED_AT) == null;
     }
 
+    protected boolean isNew(
+        DataObject_1_0 state
+    ) throws ServiceException{
+        return 
+            !state.jdoIsDeleted() && 
+            state.jdoIsNew();
+    }
+    
+    /**
+     * Tells whether the state is to be removed when this unit of work completes
+     * 
+     * @param state the state to be inspected
+     * @return {@code true} if the state is to be removed when this unit of work completes
+     * 
+     * @throws ServiceException if retrieving the {@code REMOVED_AT} value fails
+     */
+    protected boolean isToBeRemoved(
+        DataObject_1_0 state
+    ) throws ServiceException{
+        return 
+            !state.jdoIsDeleted() && 
+            IN_THE_FUTURE.equals(state.objGetValue(REMOVED_AT));
+    }
+    
     protected abstract boolean interfersWith(
         DataObject_1_0 state
     ) throws ServiceException;
@@ -443,7 +468,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
         String feature
     ) throws ServiceException {
         if(isViewFeature(feature)) {
-            if(SystemAttributes.CORE.equals(feature)) {
+            if(CORE.equals(feature)) {
                 return this.self.objGetDelegate();
             } else {
                 UniqueValue<Object> reply = new UniqueValue<Object>();
@@ -458,7 +483,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ILLEGAL_STATE,
                         "The underlaying states do not allow the determination of a unique feature value",
-                        ExceptionHelper.newObjectIdParameter("xri", this)
+                        ExceptionHelper.newObjectIdParameter(BasicException.Parameter.XRI, this)
                     );
                 }
                 
@@ -483,7 +508,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
         Object to
     ) throws ServiceException {
         if (isViewFeature(feature)) {
-            if(SystemAttributes.CORE.equals(feature)) {
+            if(CORE.equals(feature)) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ILLEGAL_STATE,
@@ -507,7 +532,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
                 }
             }
         } else {
-            if(SystemAttributes.CORE.equals(feature)) {
+            if(CORE.equals(feature)) {
                 if(to != null) { // do nothing during refInitialize()
                     DataObject_1_0 core = (DataObject_1_0) to;
                     DataObject_1_0 delegate = this.self.objGetDelegate();
@@ -841,7 +866,52 @@ public abstract class BasicState_1<C extends StateContext<?>>
 		return stateVersion == null ? Integer.MIN_VALUE : stateVersion.intValue();
 	}
 
-	
+	/**
+	 * Invalidate the given state. {@code Persistent-new} states are deleted 
+	 * immediately, while {@code persistent} states will be removed at the
+	 * end of the current unit of work.
+	 * 
+	 * @param state the state to be invalidated
+	 * 
+	 * @throws ServiceException
+	 */
+    protected void invalidate(
+        DataObject_1_0 state
+    ) throws ServiceException {
+        if(state.jdoIsNew()) {
+            ReducedJDOHelper.getPersistenceManager(state).deletePersistent(state);
+        } else {
+            state.objSetValue(REMOVED_AT, IN_THE_FUTURE);
+        }
+    }
+
+    /**
+     * Invalidate the given state. {@code Persistent-new} states are deleted 
+     * immediately, while {@code persistent} states will be removed at the
+     * end of the current unit of work.
+     * 
+     * @param state the state to be invalidated
+     * 
+     * @throws ServiceException
+     */
+    protected void reactivate(
+        DataObject_1_0 state
+    ) throws ServiceException {
+        if(isToBeRemoved(state)) {
+            state.objSetValue(REMOVED_AT, null);
+        } else {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                "Only states to be removed at the end of the current transaction can be re-activated",
+                new BasicException.Parameter(BasicException.Parameter.XRI, ReducedJDOHelper.getAnyObjectId(state)),
+                new BasicException.Parameter("jdo-state", ReducedJDOHelper.getObjectState(state)),
+                new BasicException.Parameter(REMOVED_AT, ReducedJDOHelper.getObjectState(state))
+            );
+        }
+    }
+
+
     //------------------------------------------------------------------------
     // Class InvolvedStatesIterator
     //------------------------------------------------------------------------    

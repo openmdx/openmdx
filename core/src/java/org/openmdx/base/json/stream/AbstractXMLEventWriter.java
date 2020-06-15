@@ -76,7 +76,7 @@ import javax.xml.stream.events.XMLEvent;
  * An XMLEventWriter that delegates to an XMLStreamWriter.
  * 
  * @author Thomas.Diesler@jboss.com
- * @since 21-Mar-2008
+ * @since 2008-03-21
  */
 public class AbstractXMLEventWriter implements XMLEventWriter {
 	private XMLStreamWriter streamWriter;

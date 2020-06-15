@@ -157,6 +157,12 @@ public interface DataObject_1_0
      */
     UUID jdoGetTransactionalObjectId();
     
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
+     */
+    @Override
+    byte[] jdoGetVersion();
+
     /**
      * Returns the object's model class.
      *
@@ -484,5 +490,13 @@ public interface DataObject_1_0
      * nor thread isolating
      */
     boolean objThreadSafetyRequired();
+
+    /**
+     * An object is touched either explicitly or when a non query operation is invoked
+     * 
+     * @throws ServiceException in case of failure
+     */
+    void touch(
+    ) throws ServiceException;
     
 }

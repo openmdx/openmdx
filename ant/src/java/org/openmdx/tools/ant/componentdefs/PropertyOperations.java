@@ -1,9 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX/Ant, http://www.openmdx.org/
- * Name:        $Id: PropertyOperations.java,v 1.2 2010/09/13 09:44:35 hburger Exp $
  * Description: Ant Property Operations
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * Date:        $Date: 2010/09/13 09:44:35 $
  * ====================================================================

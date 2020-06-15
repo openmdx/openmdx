@@ -51,9 +51,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
-import org.openmdx.dalvik.xml.stream.AbstractXMLOutputFactory;
-import org.openmdx.dalvik.xml.stream.AbstractXMLStreamWriter;
-import org.openmdx.dalvik.xml.stream.StandardXMLStreamWriter;
 import org.openmdx.dalvik.uses.javax.xml.stream.XMLStreamException;
 import org.openmdx.dalvik.uses.javax.xml.stream.XMLStreamWriter;
 

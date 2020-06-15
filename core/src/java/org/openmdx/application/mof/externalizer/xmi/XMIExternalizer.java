@@ -114,9 +114,6 @@ public class XMIExternalizer {
                 case 'o':
                     outFileName = g.getOptarg();
                     break;
-                case 'd':
-                	// deprecated - TODO to be eliminated
-                    break;
             }
         }
         
@@ -205,16 +202,14 @@ public class XMIExternalizer {
     
     private void exportModel(
 	) throws IOException, ResourceException {
-    	FileOutputStream fos = new FileOutputStream(
-			new File(outFileName)
-		);
-    	fos.write(
-			modelExternalizer.externalizePackageAsJar(
-				modelNames.get(0),
-				formats
-			)
-		);  
-    	fos.close();
+        try (FileOutputStream fos = new FileOutputStream(new File(outFileName))){
+        	fos.write(
+    			modelExternalizer.externalizePackageAsJar(
+    				modelNames.get(0),
+    				formats
+    			)
+    		);  
+        }
     }
     
 	private static short toFormat(

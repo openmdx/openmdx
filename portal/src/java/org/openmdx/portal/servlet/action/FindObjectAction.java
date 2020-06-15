@@ -62,9 +62,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -130,7 +130,7 @@ public class FindObjectAction extends BoundAction {
 				);
 			}
 			catch (Exception e) {
-				new ServiceException(e).log();
+			    Throwables.log(e);
 				app.addErrorMessage(
 					app.getTexts().getErrorTextCanNotLookupObject(), 
 					new String[] { 
@@ -180,7 +180,7 @@ public class FindObjectAction extends BoundAction {
 							);
 			}
 			catch(Exception e) {
-				new ServiceException(e).log();
+			    Throwables.log(e);
 				String lookupTypeName = null;
 				try {
 					lookupTypeName = lookupType == null ? 

@@ -22,7 +22,7 @@ p.write("    <tr id=\"headRow\">");
 p.write("      <td id=\"head\" colspan=\"2\">");
 p.write("        <table id=\"info\">");
 p.write("          <tr>");
-p.write("            <td id=\"headerCellLeft\"><img id=\"logoLeft\" class=\"hidden-xs\" src=\"", p.getResourcePath("images/"), "logoLeft.gif\" alt=\"", app.getApplicationName(), "\" title=\"\" /><img id=\"logoLeft\" class=\"visible-xs\" style=\"width:100px;\" src=\"", p.getResourcePath("images/"), "logoLeft.gif\" alt=\"", app.getApplicationName(), "\" title=\"\" /></td>");
+p.write("            <td id=\"headerCellLeft\"><img id=\"logoLeft\" class=\"d-xs-none\" src=\"", p.getResourcePath("images/"), "logoLeft.gif\" alt=\"", app.getApplicationName(), "\" title=\"\" /><img id=\"logoLeft\" class=\"d-none d-xs-block\" style=\"width:100px;\" src=\"", p.getResourcePath("images/"), "logoLeft.gif\" alt=\"", app.getApplicationName(), "\" title=\"\" /></td>");
 p.write("            <td id=\"headerCellSpacerLeft\"></td>");
 p.write("            <td id=\"headerCellMiddle\">");
 p.write("              <table id=\"headerMiddleLayout\">");

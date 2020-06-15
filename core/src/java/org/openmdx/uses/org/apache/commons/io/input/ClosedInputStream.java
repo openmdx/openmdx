@@ -29,7 +29,7 @@ import java.io.InputStream;
  * {@code null} input stream.
  *
  * @version $Id: ClosedInputStream.java 1586350 2014-04-10 15:57:20Z ggregory $
- * @since 1.4
+ * @since Commons I/O 1.4
  */
 public class ClosedInputStream extends InputStream {
 

@@ -114,7 +114,7 @@ public class Strict_2 extends AbstractLayer {
                                             BasicException.Code.DEFAULT_DOMAIN,
                                             BasicException.Code.BAD_PARAMETER,
                                             "UNRECOVERABLE MULTIPLICITY FAILURE: Missing mandatory value",
-                                            new BasicException.Parameter("xri", object.getResourceIdentifier()),
+                                            new BasicException.Parameter(BasicException.Parameter.XRI, object.getResourceIdentifier()),
                                             new BasicException.Parameter("modelClass", valueMap.getRecordName()),
                                             new BasicException.Parameter("featureName", featureName),
                                             new BasicException.Parameter("value", value)
@@ -136,7 +136,7 @@ public class Strict_2 extends AbstractLayer {
                                                     BasicException.Code.DEFAULT_DOMAIN,
                                                     BasicException.Code.BAD_PARAMETER,
                                                     "UNRECOVERABLE MULTIPLICITY FAILURE: Too many values for a single valued attribute",
-                                                    new BasicException.Parameter("xri", object.getResourceIdentifier()),
+                                                    new BasicException.Parameter(BasicException.Parameter.XRI, object.getResourceIdentifier()),
                                                     new BasicException.Parameter("modelClass", valueMap.getRecordName()),
                                                     new BasicException.Parameter("featureName", featureName),
                                                     new BasicException.Parameter("value", collection)
@@ -150,7 +150,7 @@ public class Strict_2 extends AbstractLayer {
                                             BasicException.Code.DEFAULT_DOMAIN,
                                             BasicException.Code.BAD_PARAMETER,
                                             "UNRECOVERABLE MULTIPLICITY FAILURE: Missing mandatory value",
-                                            new BasicException.Parameter("xri", object.getResourceIdentifier()),
+                                            new BasicException.Parameter(BasicException.Parameter.XRI, object.getResourceIdentifier()),
                                             new BasicException.Parameter("modelClass", valueMap.getRecordName()),
                                             new BasicException.Parameter("featureName", featureName),
                                             new BasicException.Parameter("value", collection)
@@ -162,7 +162,7 @@ public class Strict_2 extends AbstractLayer {
                                             BasicException.Code.DEFAULT_DOMAIN,
                                             BasicException.Code.BAD_PARAMETER,
                                             "RECOVERABLE MULTIPLICITY FAILURE: Too many values for a single valued feature",
-                                            new BasicException.Parameter("xri", object.getResourceIdentifier()),
+                                            new BasicException.Parameter(BasicException.Parameter.XRI, object.getResourceIdentifier()),
                                             new BasicException.Parameter("modelClass", valueMap.getRecordName()),
                                             new BasicException.Parameter("featureName", featureName),
                                             new BasicException.Parameter("value", collection)

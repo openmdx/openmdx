@@ -188,7 +188,7 @@ class ResultTarget extends AbstractTarget {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
                 "Unsupported fetch size",
-                new BasicException.Parameter("path", request.getResourceIdentifier()),
+                new BasicException.Parameter(BasicException.Parameter.XRI, request.getResourceIdentifier()),
                 new BasicException.Parameter("fetchSize", fetchSize),
                 new BasicException.Parameter(
                     "supported",

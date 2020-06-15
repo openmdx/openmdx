@@ -47,6 +47,7 @@
  */
 package org.openmdx.application.rest.http;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 
 import javax.resource.ResourceException;
@@ -57,7 +58,6 @@ import javax.resource.spi.CommException;
 
 import org.openmdx.application.rest.http.spi.Message;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.io.Closeables;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.cci.RestFunction;
 import org.openmdx.base.resource.spi.ResourceExceptions;
@@ -71,8 +71,10 @@ import org.openmdx.base.rest.spi.AbstractRestInteraction;
 import org.openmdx.base.rest.spi.RestFormatter;
 import org.openmdx.base.rest.spi.RestFormatters;
 import org.openmdx.base.rest.spi.RestParser;
+import org.openmdx.base.rest.spi.RestSource;
 import org.openmdx.base.text.conversion.URITransformation;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 import org.xml.sax.SAXException;
 
 /**
@@ -234,11 +236,12 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         Record output
     ) throws ResourceException {
         int status = message.execute();
+        final RestSource responseBody = message.getResponseBody();
         if(status == HttpURLConnection.HTTP_OK){
             try {
 				RestParser.parseResponse(
 				    output,
-				    message.getResponseBody()
+				    responseBody
 				);
 			} catch (SAXException exception) {
 				throw ResourceExceptions.initHolder(
@@ -249,37 +252,29 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
 				);
 			}
         } else if (status >= 400) {
-        	throw getResourceException(status, message);
-        } else {
-            Closeables.close(message.getResponseBody());
+        	throw getResourceException(status, responseBody);
+        } else if(responseBody != null) {
+            try {
+                responseBody.close();
+            } catch (IOException ignored) {
+                SysLog.trace("Ignored close failure", ignored);
+            }
         }
         return status >= 200 && status < 300;
     }
 
 	private ResourceException getResourceException(
 		int status, 
-		Message message
+		RestSource responseBody
 	){
 		try {
 			return ResourceExceptions.toResourceException(
-				RestParser.parseException(message.getResponseBody())
+				RestParser.parseException(responseBody)
 			);
 		} catch (SAXException exception) {
 		    return ResourceExceptions.initHolder(
 	    		new ResourceException(
     				"HTTP REST request failed",
-    				BasicException.newEmbeddedExceptionStack(
-						BasicException.toExceptionStack(exception),
-						BasicException.Code.DEFAULT_DOMAIN,
-						toExceptionCode(status),
-						new BasicException.Parameter("status", status)
-					)
-				)
-    		);
-		} catch (ResourceException exception) {
-		    return ResourceExceptions.initHolder(
-	    		new ResourceException(
-    				"HTTP REST request failed as well as retrieving the remote exception",
     				BasicException.newEmbeddedExceptionStack(
 						BasicException.toExceptionStack(exception),
 						BasicException.Code.DEFAULT_DOMAIN,

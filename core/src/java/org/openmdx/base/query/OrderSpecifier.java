@@ -76,25 +76,6 @@ public class OrderSpecifier extends FeatureOrderRecord {
     }
 
     /**
-     * Constructor 
-     *
-     * @param feature
-     * @param order
-     * 
-     * @deprecated
-     */
-    @Deprecated
-    public OrderSpecifier(
-        String feature,
-        short order
-    ) {
-        this(
-            feature,
-            SortOrder.valueOf(order)
-        );
-    }
-
-    /**
      * Constructor for Clone
      * 
      * @param that the template

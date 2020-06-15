@@ -252,37 +252,37 @@ public class UiOperationTab extends Component implements Serializable {
                     );
                     if(Ui_1.EDIT_OBJECT_OPERATION_NAME.equals(control.getOperationName())) {
                     	if(invokeOperationAction.isEnabled()) {
-                    		p.write("    <li><a href=\"javascript:void(0)\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(invokeOperationAction), ", dataType: 'html', success: function(data){$('aPanel').innerHTML=data;evalScripts(data);}});return false;\" id=\"opTab", operationId, "\" >", control.getName(), "</a></li>");
+                    		p.write("    <a href=\"#\" class=\"" + CssClass.dropdown_item.toString() + "\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(invokeOperationAction), ", dataType: 'html', success: function(data){$('aPanel').innerHTML=data;evalScripts(data);}});return false;\" id=\"opTab", operationId, "\" >", control.getName(), "</a>");
                     	} else {
-                    		p.write("    <li class=\"" + CssClass.disabled.toString() + "\"", "><a href=\"javascript:void(0)\" id=\"opTab", operationId, "\" >", control.getName(), "</a></li>");
+                    		p.write("    <a href=\"#\" class=\"" + CssClass.disabled.toString() + " " + CssClass.dropdown_item.toString() + "\" id=\"opTab", operationId, "\" >", control.getName(), "</a>");
                     	}
                     } else {
                     	if(invokeOperationAction.isEnabled()) {
-                    		p.write("    <li><a href=\"javascript:void(0)\" onmouseover=\"javascript:this.href=", p.getEvalHRef(invokeOperationAction), ";onmouseover=function(){};\" id=\"opTab", operationId, "\" >", control.getName(), "</a></li>");
+                    		p.write("    <a href=\"#\" class=\"" + CssClass.dropdown_item.toString() + "\" onmouseover=\"javascript:this.href=", p.getEvalHRef(invokeOperationAction), ";onmouseover=function(){};\" id=\"opTab", operationId, "\" >", control.getName(), "</a>");
                     	} else {
-                    		p.write("    <li class=\"" + CssClass.disabled.toString() + "\"", "><a href=\"javascript:void(0)\" id=\"opTab", operationId, "\" >", control.getName(), "</a></li>");                    		
+                    		p.write("    <a href=\"#\" class=\"" + CssClass.disabled.toString() + " " + CssClass.dropdown_item.toString() + "\" id=\"opTab", operationId, "\" >", control.getName(), "</a>");                    		
                     	}
                     }
-                } else {                                         
+                } else {
                     // Standard operation with input parameters. Retrieve operation dialog with async request.
                     Action getOperationDialogAction = control.getGetOperationDialogAction(
                         view,
                         app
                     );
                     if(getOperationDialogAction.isEnabled()) {
-                    	p.write("    <li><a href=\"javascript:void(0)\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(getOperationDialogAction), ", dataType: 'html', success: function(data){$('OperationDialog').innerHTML=data;evalScripts(data);}});return false;\" id=\"op", operationId, "\" >", control.getName(), "...</a></li>");
+                    	p.write("    <a href=\"#\" class=\"" + CssClass.dropdown_item.toString() + "\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(getOperationDialogAction), ", dataType: 'html', success: function(data){$('OperationDialog').innerHTML=data;evalScripts(data);}});return false;\" id=\"op", operationId, "\" >", control.getName(), "...</a>");
                     } else {
-                    	p.write("    <li class=\"" + CssClass.disabled.toString() + "\"", "><a href=\"javascript:void(0)\" id=\"op", operationId, "\" >", control.getName(), "...</a></li>");                    	
+                    	p.write("    <a href=\"#\" class=\"" + CssClass.disabled.toString() + " " + CssClass.dropdown_item.toString() + "\" id=\"op", operationId, "\">", control.getName(), "...</a>");                    	
                     }
                 }
             } else if(!isRevokeShow) {
                 // Operation can not be invoked. Do not generate onclick or href actions
                 // no input parameters
                 if(operationParams.isEmpty()) {
-                    p.write("    <li class=\"", CssClass.disabled.toString(),"\"><a href=\"javascript:void(0)\" id=\"opTab", operationId, "\" ><span>", control.getName(), "</span></a></li>");
+                    p.write("    <a href=\"#\" class=\"", CssClass.disabled.toString() + " " + CssClass.dropdown_item.toString(), "\" id=\"opTab", operationId, "\"><span>", control.getName(), "</span></a>");
                 } else {
                     // standard operation with input parameters
-                    p.write("    <li class=\"", CssClass.disabled.toString(),"\"><a href=\"javascript:void(0)\" id=\"opTab", operationId, "\" ><span>", control.getName(), "...</span></a></li>");
+                    p.write("    <a href=\"#\" class=\"", CssClass.disabled.toString() + " " + CssClass.dropdown_item.toString(),"\" id=\"opTab", operationId, "\" ><span>", control.getName(), "...</span></a>");
                 }
             } else {
                 // Operation is hidden

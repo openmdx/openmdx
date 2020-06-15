@@ -80,8 +80,10 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.repository.cci.ClassifierRecord;
 import org.openmdx.base.mof.repository.cci.ElementRecord;
 import org.openmdx.base.mof.repository.cci.FeatureRecord;
+import org.openmdx.base.mof.repository.cci.NamespaceRecord;
 import org.openmdx.base.mof.repository.cci.OperationRecord;
 import org.openmdx.base.mof.repository.cci.ReferenceRecord;
+import org.openmdx.base.mof.repository.spi.NamespaceRecords;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.Quantifier;
@@ -436,44 +438,55 @@ public class Model_2 extends AbstractRestPort {
 	     * Set feature 'content' of namespaces
 	     * @throws ResourceException 
 	     */
-	    @SuppressWarnings("rawtypes")
-        private void setContent(
+	    private void setContent(
 	        Map<Path,ObjectRecord> elements
 	    ) throws ResourceException {    
-	        // clear feature subtype
-	        for(ObjectRecord element : elements.values()){
-	        	final List<?> values = (List<?>) element.getValue().get("content");
-	        	if(values != null) {
-	        		values.clear();
-	        	}
-	        }
-	        // recalc content
-	        for(ObjectRecord content : elements.values()) {
-	        	final Path containerId = (Path) content.getValue().get("container");
-	            if(containerId != null) {
-	                ObjectRecord container = elements.get(containerId);
-	                if(container == null) {
-	                    SysLog.error("container " + containerId + " of element " + content.getResourceIdentifier() + " not found in repository");
-	                } else { 
-	                	addToSet(
-                			container,
-                			"content",
-                			content.getResourceIdentifier()
-                        );
-	                }
-	            }      
-	        } 
+	        clearContentOfNamespaces(elements);
+	        calculateContentOfNamespaces(elements);
 
 	        // sort content by path
 	        // TODO: sort content by order as defined in model
-	        for(ObjectRecord container : elements.values())  {
-	        	final List values = (List<?>) container.getValue().get("content");
-	            if(values != null) {
-	                Collections.sort(values);
-	            }
-	        }
+	        sortContentOfNamespaces(elements);
 
 	    }
+
+        /**
+         * This method just sorts the namespaces' content by XRI
+         */
+        private void sortContentOfNamespaces(Map<Path, ObjectRecord> elements) {
+            for(ObjectRecord elementHolder : elements.values()){
+                final ElementRecord element = (ElementRecord) elementHolder.getValue();
+                if(element instanceof NamespaceRecord) {
+                    final NamespaceRecord namespace = (NamespaceRecord) element;
+                    NamespaceRecords.sortContent(namespace, null);
+                }
+            }
+        }
+
+        private void calculateContentOfNamespaces(Map<Path, ObjectRecord> elements){
+            for(ObjectRecord elementHolder : elements.values()) {
+                final ElementRecord element = (ElementRecord) elementHolder.getValue();
+	        	final Path containerId = element.getContainer();
+	            if(containerId != null) {
+	                final ObjectRecord containerHolder = elements.get(containerId);
+	                if(containerHolder == null) {
+	                    SysLog.error("Container " + containerId + " of element " + elementHolder.getResourceIdentifier() + " not found in repository");
+	                } else { 
+	                    final NamespaceRecord namespace = (NamespaceRecord) containerHolder.getValue();
+	                    namespace.getContent().add(elementHolder.getResourceIdentifier());
+	                }
+	            }      
+	        }
+        }
+
+        private void clearContentOfNamespaces(Map<Path, ObjectRecord> elements) {
+            for(ObjectRecord elementHolder : elements.values()){
+	        	final ElementRecord element = (ElementRecord) elementHolder.getValue();
+	        	if(element instanceof NamespaceRecord) {
+	        	    ((NamespaceRecord)element).getContent().clear();
+	        	}
+	        }
+        }
 
 	    /**
 	     * When object is of type ModelClass completes the features allOperations,
@@ -656,7 +669,7 @@ public class Model_2 extends AbstractRestPort {
 			    			BasicException.newEmbeddedExceptionStack(
 						        BasicException.Code.DEFAULT_DOMAIN,
 						        BasicException.Code.NOT_FOUND, 
-						        new BasicException.Parameter("path", accessPath)
+						        new BasicException.Parameter(BasicException.Parameter.XRI, accessPath)
 						    )
 					     )
 				    );
@@ -768,7 +781,7 @@ public class Model_2 extends AbstractRestPort {
     				BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE, 
-                        new BasicException.Parameter("xri", input.getResourceIdentifier()),
+                        new BasicException.Parameter(BasicException.Parameter.XRI, input.getResourceIdentifier()),
                         new BasicException.Parameter("target", input.getTarget()),
                         new BasicException.Parameter("id", input.getMessageId()),
                         new BasicException.Parameter("operation", operation)
@@ -865,39 +878,38 @@ public class Model_2 extends AbstractRestPort {
 			        );
 			    }
 			    SysLog.trace("Verify model constraints");
-			    new ModelConstraintsChecker_1(model).verify();
-			    ByteArrayOutputStream bs = null;
-			    ZipOutputStream zip = new ZipOutputStream(
-			        bs = new ByteArrayOutputStream()         
-			    );
-                final List requestedFormat = (List) input.getBody().get("format");
-			    List<String> formats = requestedFormat.isEmpty() ? STANDARD_FORMAT : requestedFormat;
-			    for(String format : formats) {
-			        Mapper_1_0 mapper = MapperFactory_1.create(format);
-			        if(
-			            Model_2.this.openmdxjdoMetadataDirectory != null && 
-			            mapper instanceof Mapper_1_1
-			        ){
-			            ((Mapper_1_1)mapper).externalize(
-			                modelPackagePath.getLastSegment().toClassicRepresentation(),
-			                model,
-			                zip,
-			                Model_2.this.openmdxjdoMetadataDirectory
-			            );
-			        } 
-			        else {
-			            mapper.externalize(
-			                modelPackagePath.getLastSegment().toClassicRepresentation(),
-			                model,
-			                zip
-			            );
-			        }
-			    }
-			    zip.close();
-			    output.setResourceIdentifier(input.getResourceIdentifier());
-			    MappedRecord body = Records.getRecordFactory().createMappedRecord("org:omg:model1:PackageExternalizeResult");
-			    output.setBody(body);
-			    body.put("packageAsJar", bs.toByteArray());
+			    new ModelConstraintsChecker_2(model.getRepository()).verify();
+                try(ByteArrayOutputStream bs = new ByteArrayOutputStream()){
+    			    try(ZipOutputStream zip = new ZipOutputStream(bs)){
+                        final List requestedFormat = (List) input.getBody().get("format");
+        			    List<String> formats = requestedFormat.isEmpty() ? STANDARD_FORMAT : requestedFormat;
+        			    for(String format : formats) {
+        			        Mapper_1_0 mapper = MapperFactory_1.create(format);
+        			        if(
+        			            Model_2.this.openmdxjdoMetadataDirectory != null && 
+        			            mapper instanceof Mapper_1_1
+        			        ){
+        			            ((Mapper_1_1)mapper).externalize(
+        			                modelPackagePath.getLastSegment().toClassicRepresentation(),
+        			                model,
+        			                zip,
+        			                Model_2.this.openmdxjdoMetadataDirectory
+        			            );
+        			        } 
+        			        else {
+        			            mapper.externalize(
+        			                modelPackagePath.getLastSegment().toClassicRepresentation(),
+        			                model,
+        			                zip
+        			            );
+        			        }
+        			    }
+    			    }
+    			    output.setResourceIdentifier(input.getResourceIdentifier());
+    			    MappedRecord body = Records.getRecordFactory().createMappedRecord("org:omg:model1:PackageExternalizeResult");
+    			    output.setBody(body);
+    			    body.put("packageAsJar", bs.toByteArray());
+                }
 			    return true;
 			} catch (ServiceException exception) {
 				throw ResourceExceptions.toResourceException(exception);

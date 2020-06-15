@@ -33,7 +33,7 @@ import java.io.Serializable;
  * wrapped exception. Both the tag and the original exception can be used
  * to determine further processing when this exception is caught.
  *
- * @since 2.0
+ * @since Commons I/O 2.0
  */
 @SuppressWarnings("deprecation") // needs to extend deprecated IOExceptionWithCause to preserve binary compatibility 
 public class TaggedIOException extends IOExceptionWithCause {

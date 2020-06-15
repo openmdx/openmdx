@@ -393,7 +393,7 @@ public abstract class FileUploadBase {
      * @throws FileUploadException if there are problems reading/parsing
      *                             the request or storing files.
      *
-     * @since 1.3
+     * @since FileUpload 1.3
      */
     public Map<String, List<FileItem>> parseParameterMap(RequestContext ctx)
             throws FileUploadException {
@@ -1217,7 +1217,7 @@ public abstract class FileUploadBase {
          * @param msg The detail message.
          * @param cause the original cause
          *
-         * @since 1.3.1
+         * @since FileUpload 1.3
          */
         public InvalidContentTypeException(String msg, Throwable cause) {
             super(msg, cause);
@@ -1302,7 +1302,7 @@ public abstract class FileUploadBase {
          * Retrieves the actual size of the request.
          *
          * @return The actual size of the request.
-         * @since 1.3
+         * @since FileUpload 1.3
          */
         public long getActualSize() {
             return actual;

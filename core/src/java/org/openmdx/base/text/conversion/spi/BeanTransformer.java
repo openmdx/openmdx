@@ -52,7 +52,7 @@ import org.openmdx.base.exception.ExceptionListener;
 /**
  * Java Bean Transformer
  *
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  */
 public interface BeanTransformer {
     

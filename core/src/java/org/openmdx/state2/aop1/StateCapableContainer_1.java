@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -80,8 +81,8 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.ClassicSegments;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.naming.PathComponent;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
@@ -795,18 +796,11 @@ public class StateCapableContainer_1
     private String toKey(
         String qualifier
     ){
-        if(PathComponent.isPlaceHolder(qualifier)) {
-            final PathComponent component = new PathComponent(qualifier);
-            if(component.size() == 3){
-            	return component.get(1);
-            }
+        Optional<String> coreComponent = ClassicSegments.getCoreComponentFromAspectQualifierPlaceholder(qualifier);
+        if(!coreComponent.isPresent()) {
+            coreComponent = ClassicSegments.getCoreComponentFromAspectQualifier(qualifier);
         }
-        if (PathComponent.isPrivate(qualifier)) {
-        	final PathComponent component = new PathComponent(qualifier);
-            return component.getPrefix(component.size() - 2).toString();
-        }
-        // TODO support aspect specific PathComponent patterns
-        return qualifier;
+        return coreComponent.isPresent() ? coreComponent.get() : qualifier;
     }
 
     /**

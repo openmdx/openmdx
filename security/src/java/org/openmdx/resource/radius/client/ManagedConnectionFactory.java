@@ -68,6 +68,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.logging.ClassicFormatter;
 import org.openmdx.resource.spi.AbstractManagedConnectionFactory;
 import org.openmdx.uses.net.sourceforge.jradiusclient.RadiusClient;
+import org.openmdx.uses.net.sourceforge.jradiusclient.RadiusConnection;
 import org.openmdx.uses.net.sourceforge.jradiusclient.exception.InvalidParameterException;
 import org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException;
 
@@ -151,14 +152,6 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 	 */
 	private boolean trace = false;
 	
-	/* (non-Javadoc)
-     * @see org.openmdx.resource.spi.AbstractManagedConnectionFactory#isManagedConnectionShareable()
-     */
-    @Override
-    protected boolean isManagedConnectionShareable() {
-	    return false;
-    }
-
 	/**
      * @return the trace
      */
@@ -274,8 +267,8 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory(javax.resource.spi.ConnectionManager)
      */
-//	Override
-    public Object createConnectionFactory(
+	@Override
+    public org.openmdx.resource.cci.ConnectionFactory<RadiusConnection,RadiusException> createConnectionFactory(
         ConnectionManager connectionManager
     ) throws ResourceException {
         return new ConnectionFactory(
@@ -284,8 +277,17 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
         );
     }
 
+	/* (non-Javadoc)
+     * @see org.openmdx.resource.spi.AbstractManagedConnectionFactory#createConnectionFactory()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public org.openmdx.resource.cci.ConnectionFactory<RadiusConnection,RadiusException> createConnectionFactory(
+    ) throws ResourceException {
+        return (org.openmdx.resource.cci.ConnectionFactory<RadiusConnection, RadiusException>) super.createConnectionFactory();
+    }
 
-	@Override
+    @Override
     protected ManagedConnection newManagedConnection(
     	Subject subject, 
     	ConnectionRequestInfo connectionRequestInfo
@@ -294,12 +296,11 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 	    try {
 	        return new ManagedConnection(
 	        	this,
-	        	credential, connectionRequestInfo, 
-	        	new RadiusClient(
+	        	credential, new RadiusClient(
 	                this.hosts, 
 	                this.authenticationPorts, 
 	                this.accountingPorts, 
-	                credential == null || credential.getPassword() == null ? this.getPassword() : new String(credential.getPassword()),
+	                credential == null ? this.getPassword() : new String(credential.getPassword()),
 	                this.socketTimeout, 
 	                this.logger,
 	                this.trace, 

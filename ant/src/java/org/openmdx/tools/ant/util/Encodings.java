@@ -1,11 +1,8 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Encodings.java,v 1.1 2005/08/24 20:17:02 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: Encodings
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/08/24 20:17:02 $
  * ====================================================================
  *
  * This software is published under the BSD license

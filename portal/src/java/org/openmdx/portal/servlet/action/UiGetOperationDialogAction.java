@@ -60,8 +60,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.kernel.log.SysLog;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.CssClass;
@@ -125,18 +124,18 @@ public class UiGetOperationDialogAction extends BoundAction {
 	                        p.write("<div id=\"op", operationId, "Dialog\">");
 	                        p.write("  <div class=\"", CssClass.OperationDialogTitle.toString(), "\">", texts.getAssertExecutionText(), "</div> <!-- name of operation -->");
 	                        p.write("  <div class=\"", CssClass.bd.toString(), "\">");                        
-	                        p.write("    <form id=\"", formId, "\" name=\"", formId, "\" action=\"\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\"", (operationTab.displayOperationResult() ? " target=\"OperationDialogResponse\"" : ""), " method=\"post\" >");
+	                        p.write("    <form id=\"", formId, "\" name=\"", formId, "\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\"", (operationTab.displayOperationResult() ? " target=\"OperationDialogResponse\"" : ""), " method=\"post\">");
 	                        p.write("      <input type=\"hidden\" name=\"requestId.submit\" value=\"", view.getRequestId(), "\" />");
 	                        p.write("      <input type=\"hidden\" name=\"event.submit\" value=\"", Integer.toString(invokeOperationAction.getEvent()), "\" />");
 	                        p.write("      <input type=\"hidden\" name=\"parameter\" value=\"", invokeOperationAction.getParameter(), "\" />");
 	                        p.write("      <div id=\"opWaitArea", operationId, "\" style=\"width:50px;height:24px;\" class=\"", CssClass.wait.toString(), "\">&nbsp;</div>");
 	                        p.write("      <div>&nbsp;</div>");
 	                        p.write("      <div id=\"opSubmitArea", operationId, "\" style=\"display:none;\">");
-	                        p.write("        <input type=\"submit\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getOkTitle(), "\" onclick=\"javascript:$('opWaitArea", operationId, "').style.display='block';$('opSubmitArea", operationId, "').style.display='none';\" />");
-	                        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:$('OperationDialogHolder').style.display='none';$('OperationDialog').innerHTML='';\" />");
+	                        p.write("        <input type=\"submit\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getOkTitle(), "\" onclick=\"javascript:$('opWaitArea", operationId, "').style.display='block';$('opSubmitArea", operationId, "').style.display='none';\" />");
+	                        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:$('OperationDialogHolder').style.display='none';$('OperationDialog').innerHTML='';\" />");
 	                        p.write("      </div>");
 	                        p.write("    </form>");
-	                        p.write("    <script language=\"javascript\" type=\"text/javascript\">");
+		                    p.write("    <script language=\"javascript\" type=\"text/javascript\">");
 	                        p.write("      $('opWaitArea", operationId, "').style.display='none';");
 	                        p.write("      $('opSubmitArea", operationId, "').style.display='block';");
 	                        p.write("      $('OperationDialogHolder').style.zIndex=", Integer.toString(OPERATION_DIALOG_ZINDEX), ";");
@@ -151,7 +150,7 @@ public class UiGetOperationDialogAction extends BoundAction {
 	                    p.write("<div id=\"op", operationId, "Dialog\">");
 	                    p.write("  <div class=\"", CssClass.OperationDialogTitle.toString(), "\">", operationTab.getToolTip(), "</div> <!-- name of operation -->");
 	                    p.write("  <div class=\"", CssClass.bd.toString(), "\">");                        
-	                    p.write("    <form id=\"", formId, "\" name=\"", formId, "\" action=\"\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\"", (operationTab.displayOperationResult() ? " target=\"OperationDialogResponse\"" : ""), " method=\"post\" >");
+	                    p.write("    <form id=\"", formId, "\" name=\"", formId, "\" action=\"\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\"", (operationTab.displayOperationResult() ? " target=\"OperationDialogResponse\"" : ""), " method=\"post\">");
 	                    // only show field group for input fields
 	                    for(int k = 0; k < 1; k++) {
 	                        UiOperationParam operationParam = operationTab.getChildren(UiOperationParam.class).get(k);
@@ -167,8 +166,8 @@ public class UiGetOperationDialogAction extends BoundAction {
 	                    p.write("      <div id=\"opWaitArea", operationId, "\" style=\"width:50px;height:24px;\" class=\"", CssClass.wait.toString(), "\">&nbsp;</div>");
 	                    p.write("      <div>&nbsp;</div>");
 	                    p.write("      <div id=\"opSubmitArea", operationId, "\" style=\"display:none;\">");
-	                    p.write("        <input type=\"submit\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getOkTitle(), "\" onclick=\"javascript:$('opWaitArea", operationId, "').style.display='block';$('opSubmitArea", operationId, "').style.display='none';\" />");
-	                    p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:$('OperationDialogHolder').style.display='none';$('OperationDialog').innerHTML='';\" />");
+	                    p.write("        <input type=\"submit\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getOkTitle(), "\" onclick=\"javascript:$('opWaitArea", operationId, "').style.display='block';$('opSubmitArea", operationId, "').style.display='none';\" />");
+	                    p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:$('OperationDialogHolder').style.display='none';$('OperationDialog').innerHTML='';\" />");
 	                    p.write("      </div>");
 	                    p.write("    </form>");
 	                    p.write("    <script language=\"javascript\" type=\"text/javascript\">");
@@ -183,14 +182,12 @@ public class UiGetOperationDialogAction extends BoundAction {
 	                }
                 }
             } catch (Exception e) {
-                ServiceException e0 = new ServiceException(e);
-                SysLog.warning(e0.getMessage(), e0.getCause());
+                Throwables.log(e);
             }
             try {
                 p.close(true);
             } catch (Exception e) {
-                ServiceException e0 = new ServiceException(e);
-                SysLog.warning(e0.getMessage(), e0.getCause());
+                Throwables.log(e);
             }
         }
         return new ActionPerformResult(

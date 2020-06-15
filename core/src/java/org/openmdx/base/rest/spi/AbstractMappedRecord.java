@@ -66,14 +66,12 @@ import org.openmdx.base.collection.Sets;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Code;
-import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.Freezable;
 import org.openmdx.base.resource.spi.StandardRecordFactory;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
-
 
 /**
  * Abstract Mapped Record
@@ -655,14 +653,6 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
     	return target;
     }
 
-    protected IndexedRecord toIndexedRecord(Multiplicity multiplicity, Object element) {
-        return Records.getRecordFactory().tinyIndexedRecord(
-            multiplicity.code(), // recordName
-            null, // recordShortDescription
-            element
-         );
-    }
-    
     /**
      * Extract the first element from a set
      * 

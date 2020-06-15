@@ -58,7 +58,6 @@ import java.util.Set;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.text.conversion.HtmlEncoder;
@@ -348,7 +347,7 @@ public class Uml2ModelMapper {
             this.printAttribute("xmi:type", "uml:LiteralInteger");
             pw.println("/>");                        
         }
-        else if(ModelHelper.UNBOUND.equals(multiplicity)) {
+        else if(Multiplicity.UNBOUNDED.equals(multiplicity)) {
             // Upper value
             pw.write(indent, 0, nTabs);
             pw.print("\t<upperValue");

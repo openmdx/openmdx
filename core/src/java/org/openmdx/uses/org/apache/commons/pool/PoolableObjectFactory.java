@@ -1,10 +1,4 @@
 /*
- * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/PoolableObjectFactory.java,v $
- * $Revision: 1.3 $
- * $Date: 2004/06/29 21:35:49 $
- *
- * ====================================================================
- *
  * The Apache Software License, Version 1.1
  *
  * Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
@@ -100,7 +94,6 @@ package org.openmdx.uses.org.apache.commons.pool;
  * </ol>
  *
  * @author Rodney Waldhoff
- * @version $Revision: 1.3 $ $Date: 2004/06/29 21:35:49 $ 
  *
  * @see ObjectPool
  */

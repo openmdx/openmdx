@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="20110701" xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_kF5MkN67EdmkJO73lqONhA" name="model1">
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_kF5MkN67EdmkJO73lqONhA" name="model1">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3C3238A3033APP" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3C3238A3033AP" name="omg">
       <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3C3238A3033A" name="model1">
-        <ownedComment xmi:id="_MdqB4N65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3238A3033A">
+        <ownedComment xmi:type="uml:Comment" xmi:id="_MdqB4N65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3238A3033A">
           <body>$Id: org.omg.model1.uml,v 1.1 2010/04/13 14:58:13 wfro Exp $ 
 
     Name: org::omex::model1
@@ -20,79 +20,79 @@
     </body>
         </ownedComment>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C2F3E0A0143" name="Class">
-          <ownedComment xmi:id="_MdqB5N65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C2F3E0A0143">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MdqB5N65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C2F3E0A0143">
             <body>A Class defines a classification over a set of object instances by defining the behavior they exhibit. This behavior is represented through operations, attributes, references, participation in associations, nested classes, constants, and constraints. Although the same or similar elements are used in other environments for representing Classes and their implementations, in the MOF these elements specify the class characteristics in an implementation-independent manner. For instance, defining a Class as having an attribute does not require the implementation of the Class (the software which provides the conformant behavior) to have an attribute, to hold the attribute value, etc. The implementation simply must insure that the behavior conforms to the definition of the attribute. The use of all the additional elements beyond operations provides a much richer environment for defining Class Behavior. Likewise, this construct is not an interface. Its expressibility goes beyond interface representations. The MOF's IDL translation capabilities map a single Class onto two interfaces. It would be possible to define transformations to alternate interface presentations, such as Java's interfaces.&lt;p>
     There are, and probably always will be, divergent views among industry leaders on the definition of the concepts of Class, Type, and Interface. As a domain-specific modeling environment, so long as the MOF is clear about the meaning of Class within the MOF, it should remain immune from such concerns.
     </body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C333F7B0266" general="_3C7B8A60016D3C333F5A0237"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C3354C200B0" name="isSingleton">
-            <ownedComment xmi:id="_MdqB6d65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3354C200B0">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333F7B0266" general="_3C7B8A60016D3C333F5A0237"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C3354C200B0" name="isSingleton">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MdqB6d65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3354C200B0">
               <body>When isSingleton is true, at most one M1 level instance of this Class may exist within the M1-level extent of the Class.</body>
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_8-h5sJrFEeKTAKNHZzBQKg" name="allFeatureWithSubtype" type="_3C7B8A60016D3C333D700188" isUnique="false" isReadOnly="true" isDerived="true" association="_CYjEoJrBEeKTAKNHZzBQKg">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_8-h5sJrFEeKTAKNHZzBQKg" name="allFeatureWithSubtype" type="_3C7B8A60016D3C333D700188" isUnique="false" isReadOnly="true" isDerived="true" association="_CYjEoJrBEeKTAKNHZzBQKg">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_DQ7E0JrGEeKTAKNHZzBQKg"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_qU-vMJrGEeKTAKNHZzBQKg" value="1"/>
-            <qualifier xmi:id="_FsG4YJrHEeKTAKNHZzBQKg" name="simpleName" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="_FsG4YJrHEeKTAKNHZzBQKg" name="simpleName" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_SPAmAJrMEeKTAKNHZzBQKg" name="allFeature" type="_3C7B8A60016D3C333D700188" isReadOnly="true" isDerived="true" association="_u87YcJrLEeKTAKNHZzBQKg">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_SPAmAJrMEeKTAKNHZzBQKg" name="allFeature" type="_3C7B8A60016D3C333D700188" isReadOnly="true" isDerived="true" association="_u87YcJrLEeKTAKNHZzBQKg">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_ZFsxAJrMEeKTAKNHZzBQKg"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_cQ13UJrMEeKTAKNHZzBQKg" value="1"/>
-            <qualifier xmi:id="_d_kC8JrMEeKTAKNHZzBQKg" name="simpleName" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="_d_kC8JrMEeKTAKNHZzBQKg" name="simpleName" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333D1401B8" name="Segment">
-          <ownedComment xmi:id="_MdwIhN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D1401B8">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MdwIhN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D1401B8">
             <body>Each segment contains exactly one model package.</body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3FF405B40322">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3FF405B40322">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D3FC487C80099"/>
           </generalization>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C333D490268" name="element" type="_3C7B8A60016D3C333D3F03A4" isUnique="false" aggregation="composite" association="_3C7B8A60016D3C333D48036B">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C333D490268" name="element" type="_3C7B8A60016D3C333D3F03A4" isUnique="false" aggregation="composite" association="_3C7B8A60016D3C333D48036B">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MghIpN65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MghIpd65EdmrtKJSXC0_FQ" value="1"/>
-            <qualifier xmi:id="_3C7B8A60016D3C3340FD02ED" name="qualifiedName" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C3340FD02ED" name="qualifiedName" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
-          <ownedOperation xmi:id="_3C7B8A60016D3EE3A9F40147" name="beginImport">
-            <ownedParameter xmi:id="_MdwIid65EdmrtKJSXC0_FQ" direction="return">
+          <ownedOperation xmi:type="uml:Operation" xmi:id="_3C7B8A60016D3EE3A9F40147" name="beginImport">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="_MdwIid65EdmrtKJSXC0_FQ" direction="return">
               <type xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D3E40433402E1"/>
             </ownedParameter>
-            <ownedParameter xmi:id="_3C7B8A60016D3FF411D001D5" name="in">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="_3C7B8A60016D3FF411D001D5" name="in">
               <type xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D3E40433402E1"/>
             </ownedParameter>
           </ownedOperation>
-          <ownedOperation xmi:id="_3C7B8A60016D3EE3AA0F00CE" name="endImport">
-            <ownedParameter xmi:id="_MdwIjN65EdmrtKJSXC0_FQ" direction="return">
+          <ownedOperation xmi:type="uml:Operation" xmi:id="_3C7B8A60016D3EE3AA0F00CE" name="endImport">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="_MdwIjN65EdmrtKJSXC0_FQ" direction="return">
               <type xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D3E40433402E1"/>
             </ownedParameter>
-            <ownedParameter xmi:id="_3C7B8A60016D3FF411D40181" name="in">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="_3C7B8A60016D3FF411D40181" name="in">
               <type xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D3E40433402E1"/>
             </ownedParameter>
           </ownedOperation>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333D3F03A4" name="Element" isAbstract="true">
-          <ownedComment xmi:id="_MdwIj965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D3F03A4">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MdwIj965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D3F03A4">
             <body>Element classifies the elementary, atomic constructs of models. Element is the root Class within the MOF Model.</body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3FF405E3006D">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3FF405E3006D">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
           </generalization>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C33754001FB" name="name" isReadOnly="true" isDerived="true">
-            <ownedComment xmi:id="_MdwIlN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C33754001FB">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C33754001FB" name="name" isReadOnly="true" isDerived="true">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MdwIlN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C33754001FB">
               <body>Provides a meta-modeler supplied name that uniquely identifies the Element in the context of the ModelElements containing Namespace. When choosing an Elements name, the meta-modeler should consider the rules for translating names into identifiers in the relevant mappings.</body>
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C33479300D5" name="qualifiedName" isReadOnly="true" isDerived="true">
-            <ownedComment xmi:id="_Md8VwN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C33479300D5">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C33479300D5" name="qualifiedName" isReadOnly="true" isDerived="true">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_Md8VwN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C33479300D5">
               <body>Provides a unique name for the Element within the context of its outermost containing Package. The qualifiedName is a list of NameType values consisting of
     the names of the Element, its container, its containers container and so on until a non-contained element is reached. The first member of the list is the name
     of the non-contained element.
@@ -106,39 +106,39 @@
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C3347A10202" name="annotation">
-            <ownedComment xmi:id="_MeCcY965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3347A10202">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C3347A10202" name="annotation">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MeCcY965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3347A10202">
               <body>Provides an informal description of the Element.</body>
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MeCcZt65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MeCcZ965EdmrtKJSXC0_FQ" value="1"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C478A100359" name="stereotype">
-            <eAnnotations xmi:id="_MeCca965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_MeCcbN65EdmrtKJSXC0_FQ" key="set"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C478A100359" name="stereotype">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MeCca965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MeCcbN65EdmrtKJSXC0_FQ" key="set"/>
             </eAnnotations>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C333D490269" name="segment" type="_3C7B8A60016D3C333D1401B8" isUnique="false" association="_3C7B8A60016D3C333D48036B">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C333D490269" name="segment" type="_3C7B8A60016D3C333D1401B8" isUnique="false" association="_3C7B8A60016D3C333D48036B">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MghIqN65EdmrtKJSXC0_FQ" value="1"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MghIqd65EdmrtKJSXC0_FQ" value="1"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3D00573703D6" name="container" type="_3C7B8A60016D3C333D6701DF" isUnique="false" association="_3C7B8A60016D3D0057370191">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3D00573703D6" name="container" type="_3C7B8A60016D3C333D6701DF" isUnique="false" association="_3C7B8A60016D3D0057370191">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwgd65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwgt65EdmrtKJSXC0_FQ" value="1"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333D52021B" name="Tag">
-          <generalization xmi:id="_3C7B8A60016D3C333ED30070" general="_3C7B8A60016D3C333D3F03A4"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334F0400D4" name="tagValue">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333ED30070" general="_3C7B8A60016D3C333D3F03A4"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334F0400D4" name="tagValue">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MeIjA965EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MeIjBN65EdmrtKJSXC0_FQ" value="*"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333D580242" name="Constraint">
-          <ownedComment xmi:id="_MeIjBt65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D580242">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MeIjBt65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D580242">
             <body>A Constraint defines a rule that restricts the state or behavior of one or more elements in the meta-model. When a Constraint is attached to a ModelElement, the rule it encodes applies to all relevant instances of the ModelElement in a model.
     &lt;p>
     A Constraint rule, represented by the 'expression' attribute, may be encoded in any form. The 'language' attribute may be used to denote the language and encoding scheme used.
@@ -149,21 +149,21 @@
     A Constraint cannot over-ride structural integrity rules defined by other parts of a meta-model (e.g., multiplicity specifications) or the integrity rules defined by a particular mapping of the meta-model to implementation technology.
     </body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C33409F01EE" general="_3C7B8A60016D3C333D3F03A4"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C3353A501F1" name="expression">
-            <ownedComment xmi:id="_MeIjC965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3353A501F1">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C33409F01EE" general="_3C7B8A60016D3C333D3F03A4"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C3353A501F1" name="expression">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MeIjC965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3353A501F1">
               <body>The Constraint's expression attribute provides a representation of the constraint. The MOF has no specific requirement to interpret this expression, or to validate it against the language attribute. The specific handling of the expression will necessarily vary with the language used. However, it is expected that for any language an implementation accepts, it will enforce the constraints expressed in that language. The expression can be represented in any format, including text or a composition of objects.</body>
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C3353B3007E" name="language">
-            <ownedComment xmi:id="_MeIjD965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3353B3007E">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C3353B3007E" name="language">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MeIjD965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3353B3007E">
               <body>The language representing this Constraint's expression is defined in this attribute. Since it is a string, most any language can be represented, including format variances in a language (e.g., OCL as text verses OCL as a parse tree).</body>
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C3353DA0189" name="evaluationPolicy">
-            <ownedComment xmi:id="_MeOpo965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3353DA0189">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C3353DA0189" name="evaluationPolicy">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MeOpo965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3353DA0189">
               <body>Each constraint can be defined as immediate or deferred. For immediate Constraints, the constraint violation will be detected and reported within an operation in the chain of operations between the operation initiated by the MOF user and the operation that caused the constraint violation. The effect of an operation that violates an immediate constraint on the state of the object or objects being altered is implementation specific, and possibly undefined. However, if possible, an implementation should reverse the effects of the operation.
     &lt;p>
     For deferred Constraints, the constraint violation can only be detected when the Constraint is explicitly evaluated. The MOF defines an operation for such constraint evaluation, the verify operation. When the verify operation is invoked on a Constraint's container, the constraint is evaluated and a constraint violation is
@@ -174,28 +174,28 @@
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333D61037B" name="Import">
-          <ownedComment xmi:id="_MeOpp965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D61037B">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MeOpp965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D61037B">
             <body>An Import allows a Package to make use of Elements defined in some other Namespace. An Import object is related to another Namespace via the Aliases association. When a Package contains an Import object, it imports the associated
     Namespace. This means that ModelElements defined within the imported Namespace are visible in the importing Package.
     &lt;p>
     An Import allows the visibility of the imported Package's contained ModelElements to be further restricted. An Import object represents either Package importing or Package clustering, depending on the 'isClustered' attribute.
     </body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C333EDF021C" general="_3C7B8A60016D3C333D3F03A4"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334FBE01D6" name="visibility">
-            <ownedComment xmi:id="_MeOprN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334FBE01D6">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333EDF021C" general="_3C7B8A60016D3C333D3F03A4"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334FBE01D6" name="visibility">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MeOprN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334FBE01D6">
               <body>In the future, this Attribute will modify the visibility of imported Elements in the context of the importing Namespace.  The MOF rules of visibility are not currently specified.</body>
             </ownedComment>
             <type xmi:type="uml:Class" href="org.omg.PrimitiveTypes.uml#_3C7B8A60016D3C94B88601B3"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334FC6030E" name="isClustered">
-            <ownedComment xmi:id="_MeUwQ965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334FC6030E">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334FC6030E" name="isClustered">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MeUwQ965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334FC6030E">
               <body>The isClustered flags determines whether the Import object represents simple Package importation, or Package clustering.</body>
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3CC1EB5C011F" name="importedNamespace" type="_3C7B8A60016D3C333D6701DF" isUnique="false" association="_3C7B8A60016D3CC1EB5B023E">
-            <ownedComment xmi:id="_MgnPXN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1EB5C011F">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CC1EB5C011F" name="importedNamespace" type="_3C7B8A60016D3C333D6701DF" isUnique="false" association="_3C7B8A60016D3CC1EB5B023E">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MgnPXN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1EB5C011F">
               <body>The Import knows about the Namespace that it references.</body>
             </ownedComment>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MgtV4t65EdmrtKJSXC0_FQ" value="1"/>
@@ -203,7 +203,7 @@
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333D6701DF" name="Namespace" isAbstract="true">
-          <ownedComment xmi:id="_MeUwR965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D6701DF">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MeUwR965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D6701DF">
             <body>The Namespace Class classifies and characterizes Elements that can contain other Elements. Along with containing the Elements, a Namespace defines a namespace, the allowable set of names and the naming constraints, for these elements.&lt;p>
 
     Subclasses of the Namespace Class have mechanisms for effectively extending their namespace, without actually containing additional Elements. Thus Namespace can be viewed in terms of its two roles, as a container and as a namespace mechanism. Because only subclasses extend the namespace, the namespace and contents are coincident in the definition of the Namespace Class. Each Namespace has four collections (the latter three derivable) that are used in the MOF Models Constraints. These collections are:
@@ -218,68 +218,68 @@
     &lt;/ul>
     </body>
           </ownedComment>
-          <ownedRule xmi:id="_MgnPRd65EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3C937008029F">
+          <ownedRule xmi:type="uml:Constraint" xmi:id="_MgnPRd65EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3C937008029F">
             <specification xmi:type="uml:OpaqueExpression" xmi:id="_MgnPRt65EdmrtKJSXC0_FQ">
               <body>isFrozen</body>
             </specification>
           </ownedRule>
-          <ownedRule xmi:id="_MhFwd965EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3D0055740048">
+          <ownedRule xmi:type="uml:Constraint" xmi:id="_MhFwd965EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3D0055740048">
             <specification xmi:type="uml:OpaqueExpression" xmi:id="_MhFweN65EdmrtKJSXC0_FQ">
               <body>isFrozen</body>
             </specification>
           </ownedRule>
-          <ownedRule xmi:id="_MhFwot65EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3D162FC30270">
+          <ownedRule xmi:type="uml:Constraint" xmi:id="_MhFwot65EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3D162FC30270">
             <specification xmi:type="uml:OpaqueExpression" xmi:id="_MhFwo965EdmrtKJSXC0_FQ">
               <body>isFrozen</body>
             </specification>
           </ownedRule>
-          <generalization xmi:id="_3C7B8A60016D3C333EE7037C" general="_3C7B8A60016D3C333D3F03A4"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C937008029F" name="allNamespaceContent" type="_3C7B8A60016D3C333D3F03A4" isUnique="false" isReadOnly="true" aggregation="shared" isDerived="true" association="_3C7B8A60016D3C93700702E4">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333EE7037C" general="_3C7B8A60016D3C333D3F03A4"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C937008029F" name="allNamespaceContent" type="_3C7B8A60016D3C333D3F03A4" isUnique="false" isReadOnly="true" aggregation="shared" isDerived="true" association="_3C7B8A60016D3C93700702E4">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MgnPQ965EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MgnPRN65EdmrtKJSXC0_FQ" value="1"/>
-            <qualifier xmi:id="_3C7B8A60016D3C9479B30289" name="qualifiedName" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C9479B30289" name="qualifiedName" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3D0055740048" name="content" type="_3C7B8A60016D3C333D3F03A4" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3D0055730033">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3D0055740048" name="content" type="_3C7B8A60016D3C333D3F03A4" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3D0055730033">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwdd65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwdt65EdmrtKJSXC0_FQ" value="*"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3D162FC30270" name="namespaceContent" type="_3C7B8A60016D3C333D3F03A4" isUnique="false" isReadOnly="true" aggregation="shared" isDerived="true" association="_3C7B8A60016D3D162FC202FB">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3D162FC30270" name="namespaceContent" type="_3C7B8A60016D3C333D3F03A4" isUnique="false" isReadOnly="true" aggregation="shared" isDerived="true" association="_3C7B8A60016D3D162FC202FB">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwoN65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwod65EdmrtKJSXC0_FQ" value="1"/>
-            <qualifier xmi:id="_3C7B8A60016D3D162FCD0116" name="qualifiedName" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="_3C7B8A60016D3D162FCD0116" name="qualifiedName" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333D700188" name="Feature" isAbstract="true">
-          <ownedComment xmi:id="_MetKw965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D700188">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MetKw965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D700188">
             <body>A Feature defines a characteristic of the ModelElement that contains it. Specifically, Classifiers are defined largely by a composition of Features.</body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C333EEB0060" general="_3C7B8A60016D3C333D3F03A4"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334E2C03B9" name="scope">
-            <ownedComment xmi:id="_MetKyN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334E2C03B9">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333EEB0060" general="_3C7B8A60016D3C333D3F03A4"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334E2C03B9" name="scope">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MetKyN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334E2C03B9">
               <body>The scope defines whether a Feature supports the definition of instances of the Classifier owning the Feature or of the Classifier as a whole. When scope is instanceLevel, the Feature is accessed through instances of the Feature's owning Classifier; when scope is classifier, the Feature is accessed through the Classifier itself (or through its instances). For StructuralFeatures, a scope of instanceLevel indicates that a value represented by the StructuralFeature is associated with each instance of the Classifier; a scope of classifierLevel indicates that the
     StructuralFeature value is shared by the Classifier and all its instances.
     </body>
             </ownedComment>
             <type xmi:type="uml:Class" href="org.omg.PrimitiveTypes.uml#_3C7B8A60016D3C94B8F30304"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334E3500C3" name="visibility">
-            <ownedComment xmi:id="_MetKzN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334E3500C3">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334E3500C3" name="visibility">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MetKzN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334E3500C3">
               <body>In the future, this Attribute will be used to limit the ability of Elements outside of this Features container to make use of it. The rules of visibility of MOF Elements are not currently specified.</body>
             </ownedComment>
             <type xmi:type="uml:Class" href="org.omg.PrimitiveTypes.uml#_3C7B8A60016D3C94B88601B3"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333D770110" name="TypedElement" isAbstract="true">
-          <ownedComment xmi:id="_MezRY965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D770110">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MezRY965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D770110">
             <body>The TypedElement type is an abstraction of Elements that require a type as part of their definition. A TypedElement does not itself define a type, but is associated with a Classifier.</body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C333EEE0097" general="_3C7B8A60016D3C333D3F03A4"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3CC1ECC001DD" name="type" type="_3C7B8A60016D3C333F5A0237" isUnique="false" association="_3C7B8A60016D3CC1ECBF011D">
-            <ownedComment xmi:id="_MgtV7965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1ECC001DD">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333EEE0097" general="_3C7B8A60016D3C333D3F03A4"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CC1ECC001DD" name="type" type="_3C7B8A60016D3C333F5A0237" isUnique="false" association="_3C7B8A60016D3CC1ECBF011D">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MgtV7965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1ECC001DD">
               <body>The type defining the TypedElement. Provides the representation of the type supporting the TypedElement through this reference.</body>
             </ownedComment>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Mgzcgt65EdmrtKJSXC0_FQ" value="1"/>
@@ -287,19 +287,19 @@
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333D81006A" name="StructuralFeature" isAbstract="true">
-          <ownedComment xmi:id="_Me_eod65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D81006A">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_Me_eod65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D81006A">
             <body>A StructuralFeature defines a static characteristic of the ModelElement that contains it. The attributes and references of a Class define structural properties, which provide for the representation of the state of its instances.</body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C333D8A0244" general="_3C7B8A60016D3C333D700188"/>
-          <generalization xmi:id="_3C7B8A60016D3C333D8D0021" general="_3C7B8A60016D3C333D770110"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334E6F01B6" name="multiplicity">
-            <ownedComment xmi:id="_Me_ep965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334E6F01B6">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333D8A0244" general="_3C7B8A60016D3C333D700188"/>
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333D8D0021" general="_3C7B8A60016D3C333D770110"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334E6F01B6" name="multiplicity">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_Me_ep965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334E6F01B6">
               <body>Multiplicity defines constraints on the collection of instances or values that a StructuralFeature can hold. Multiplicity defines a lower and upper bound to the cardinality of the collection, although the upper bound can be specified as Unbounded.</body>
             </ownedComment>
             <type xmi:type="uml:Class" href="org.omg.PrimitiveTypes.uml#_3C7B8A60016D3C94B68001E0"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334E7E026C" name="isChangeable">
-            <ownedComment xmi:id="_Me_eq965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334E7E026C">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334E7E026C" name="isChangeable">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_Me_eq965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334E7E026C">
               <body>The isChangeable attribute places restrictions on the use of certain operations, which could change the set of values or instances of the StructuralFeature, and on the operations that will get generated in IDL or other language generation. For any elaboration, no means are automatically created which provides a means of altering the attribute value. When IDL is generated, for instance, the operations,
     which are normally generated for changing the StructuralFeature, will not be generated. However, isChangeable does not actually constrain the StructuralFeature to make it immutable. Any operations explicitly defined in a model may change the StructuralFeature values or instances (assuming the operation would have otherwise been able to do so).
     </body>
@@ -308,14 +308,14 @@
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333D910334" name="AssociationEnd">
-          <ownedComment xmi:id="_MfFlQ965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D910334">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MfFlQ965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333D910334">
             <body>An association is composed of two AssociationEnds. Each AssociationEnd defines a Classifier participant in the Association, the role it plays, and constraints on sets of the Classifier instances participating. An instance of an AssociationEnd is a LinkEnd,
     which defines a relationship between a link, in instance of an Association, and an instance of the AssociationEnd's Classifier, provided in its type attribute.
     </body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C333D9A028D" general="_3C7B8A60016D3C333D770110"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334C5C0339" name="isNavigable">
-            <ownedComment xmi:id="_MfFlSN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334C5C0339">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333D9A028D" general="_3C7B8A60016D3C333D770110"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334C5C0339" name="isNavigable">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MfFlSN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334C5C0339">
               <body>The isNavigable attribute determines whether or not the AssociationEnd supports link 'navigation'. This has two implications:
     &lt;ul>
     &lt;li>A Class defined with an appropriate Reference supports navigation of links from one Class instance to another. If isNavigable is false for an AssociationEnd, no such References may be created.&lt;/li>
@@ -326,97 +326,97 @@
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334C680156" name="aggregation">
-            <ownedComment xmi:id="_MfFlTN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334C680156">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334C680156" name="aggregation">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MfFlTN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334C680156">
               <body>Certain associations define aggregations - directed associations with additional semantics. When an AssociationEnd is defined as composite or shared, the instance at 'this' end of a Link is the composite or aggregate, and the instance at the 'other' end is the component or subordinate..</body>
             </ownedComment>
             <type xmi:type="uml:Class" href="org.omg.PrimitiveTypes.uml#_3C7B8A60016D3C94B8630375"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334C8F0148" name="multiplicity">
-            <ownedComment xmi:id="_MfLr4965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334C8F0148">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334C8F0148" name="multiplicity">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MfLr4965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334C8F0148">
               <body>Multiplicity defines constraints on sets of instances. Each instance of the Classifier defined by the opposite AssociationEnd's type defines a set which this multiplicity attribute constrains. Given one of those instances, x, the set is defined as the instances connected by LinkEnds of this AssociationEnd to that instance x. In its use is describing AssociationEnds, isUnique has been constrained to be true, as a simplification. This constraint means that the same two instances cannot participate in more than one Link while participating under the same AssociationEnd. Normally, two instances cannot be linked by more than one Link of an Association at all. But when the AssociationEnd types allow the two instances switch ends, they can form a second
     Link without violating the isUnique constraint.
     </body>
             </ownedComment>
             <type xmi:type="uml:Class" href="org.omg.PrimitiveTypes.uml#_3C7B8A60016D3C94B68001E0"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334CA50262" name="isChangeable">
-            <ownedComment xmi:id="_MfLr5965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334CA50262">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334CA50262" name="isChangeable">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MfLr5965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334CA50262">
               <body>The isChangeable attribute restricts the capability to perform actions that would modify sets of instances corresponding to this AssociationEnd (the same sets to which multiplicity is applied). Specifically, the set may be created when the
     instance defining the set - the instance at the opposite end of the Links - is created. This attribute does not make the set immutable. Instead, it affects the generation of operations in Model Elaboration which would allow modification of the set. For IDL generation, the only operation that allows the set to be modified would be one or more factory operations that create the instance and create the set. The modeler is free to define specific operations that allow modification of the set. Note that defining this AssociationEnd with isChangeable equals false places restrictions on the changeability of the other AssociationEnd, due to their interdependence.
     </body>
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C85648301F2" name="qualifierName">
-            <eAnnotations xmi:id="_MfLr6965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_MfLr7N65EdmrtKJSXC0_FQ" key="list"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C85648301F2" name="qualifierName">
+            <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MfLr6965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MfLr7N65EdmrtKJSXC0_FQ" key="list"/>
             </eAnnotations>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3E15726E0386" name="qualifierType" type="_3C7B8A60016D3C333F5A0237" isUnique="false" association="_3C7B8A60016D3E15726D03D5">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E15726E0386" name="qualifierType" type="_3C7B8A60016D3C333F5A0237" isUnique="false" association="_3C7B8A60016D3E15726D03D5">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhL3B965EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhL3CN65EdmrtKJSXC0_FQ" value="1"/>
-            <qualifier xmi:id="_3C7B8A60016D3E1572B50125" name="index" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E1572B50125" name="index" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3CC6A34B0011"/>
             </qualifier>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333DB2031D" name="CollectionType">
-          <generalization xmi:id="_3C7B8A60016D3C333DC80080" general="_3C7B8A60016D3C333D770110"/>
-          <generalization xmi:id="_3C7B8A60016D3C333FDE0092" general="_3C7B8A60016D3C333F810052"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334DFE01B4" name="multiplicity">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333DC80080" general="_3C7B8A60016D3C333D770110"/>
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333FDE0092" general="_3C7B8A60016D3C333F810052"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334DFE01B4" name="multiplicity">
             <type xmi:type="uml:Class" href="org.omg.PrimitiveTypes.uml#_3C7B8A60016D3C94B68001E0"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333DBA0166" name="AliasType">
-          <generalization xmi:id="_3C7B8A60016D3C333DCA028C" general="_3C7B8A60016D3C333D770110"/>
-          <generalization xmi:id="_3C7B8A60016D3C333FE400B9" general="_3C7B8A60016D3C333F810052"/>
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333DCA028C" general="_3C7B8A60016D3C333D770110"/>
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333FE400B9" general="_3C7B8A60016D3C333F810052"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333DD1001F" name="Parameter">
-          <ownedComment xmi:id="_MfLr9d65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333DD1001F">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MfLr9d65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333DD1001F">
             <body>A parameter provides a means of communication with operations and other BehavioralFeatures. A parameter passes or communicates values of its defined type.</body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C333DD90084" general="_3C7B8A60016D3C333D770110"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C33561B0265" name="direction">
-            <ownedComment xmi:id="_MfRyhN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C33561B0265">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333DD90084" general="_3C7B8A60016D3C333D770110"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C33561B0265" name="direction">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MfRyhN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C33561B0265">
               <body>This attribute specifies the purpose of the parameter; to input a value, to output a value, both purposes, or to provide an operation return value.</body>
             </ownedComment>
             <type xmi:type="uml:Class" href="org.omg.PrimitiveTypes.uml#_3C7B8A60016D3C94B8B8018C"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C3356260094" name="multiplicity">
-            <ownedComment xmi:id="_MfRyiN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3356260094">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C3356260094" name="multiplicity">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MfRyiN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3356260094">
               <body>Multiplicity defines cardinality constraints on the set of instances or values that a Parameter can hold. Multiplicity defines a lower and upper bound on the set, although the upper bound can be specified as Unbounded.</body>
             </ownedComment>
             <type xmi:type="uml:Class" href="org.omg.PrimitiveTypes.uml#_3C7B8A60016D3C94B68001E0"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333DDB0376" name="Constant">
-          <ownedComment xmi:id="_MfRyjN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333DDB0376">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MfRyjN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333DDB0376">
             <body>This Class provides a mechanism for defining constant values of simple data types, in the support of model development.</body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C333EAF03CB" general="_3C7B8A60016D3C333D770110"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C3355D500BF" name="constValue">
-            <ownedComment xmi:id="_MfX5JN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3355D500BF">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333EAF03CB" general="_3C7B8A60016D3C333D770110"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C3355D500BF" name="constValue">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MfX5JN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3355D500BF">
               <body>This Attribute gives the value of the constant.</body>
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333E08021D" name="StructureField">
-          <ownedComment xmi:id="_MfX5KN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333E08021D">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MfX5KN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333E08021D">
             <body>The StructureField class is used to specifiy the fields of a StructureType instance.</body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C333EB20221" general="_3C7B8A60016D3C333D770110"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3CE2DEE803E6" name="multiplicity">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333EB20221" general="_3C7B8A60016D3C333D770110"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CE2DEE803E6" name="multiplicity">
             <type xmi:type="uml:Class" href="org.omg.PrimitiveTypes.uml#_3C7B8A60016D3C94B68001E0"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3CE2E43B0332" name="maxLength">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CE2E43B0332" name="maxLength">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3CC6A34B0011"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333EF70343" name="GeneralizableElement" isAbstract="true">
-          <ownedComment xmi:id="_Mfd_wN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333EF70343">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_Mfd_wN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333EF70343">
             <body>The GeneralizableElement Class classifies and characterizes Elements that can be generalized through supertyping and specialized through subtyping. A GeneralizableElement inherits the features of each of its supertypes, the features of the supertypes of the immediate supertypes, and so on (in other words all the features of the transitive closure of all the supertypes of the GeneralizableElement).
     &lt;p>
     When a GeneralizableElement inherits a feature, that feature name effectively becomes part of the namespace for the GeneralizableElement and the feature is considered part of the extended namespace of the Namespace. Therefore, a GeneralizableElement cannot have a superclass if it causes an inherited feature to have a namespace collision with its own features [The names of the contents of a GeneralizableElement should not collide with the names of the contents of any direct or indirect supertype.].
@@ -424,89 +424,89 @@
     To the degree that a GeneralizableElement is defined by its features, the superclass/subclass association defines substitutability. Any instance of a GeneralizableElement can be supplied wherever an instance of a superclass of that GeneralizableElement is expected.
     </body>
           </ownedComment>
-          <ownedRule xmi:id="_MgnPVd65EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3C9476F20221">
+          <ownedRule xmi:type="uml:Constraint" xmi:id="_MgnPVd65EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3C9476F20221">
             <specification xmi:type="uml:OpaqueExpression" xmi:id="_MgnPVt65EdmrtKJSXC0_FQ">
               <body>isFrozen</body>
             </specification>
           </ownedRule>
-          <ownedRule xmi:id="_MhFwit65EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3D0058BD0369">
+          <ownedRule xmi:type="uml:Constraint" xmi:id="_MhFwit65EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3D0058BD0369">
             <specification xmi:type="uml:OpaqueExpression" xmi:id="_MhFwi965EdmrtKJSXC0_FQ">
               <body>isFrozen</body>
             </specification>
           </ownedRule>
-          <ownedRule xmi:id="_MhFwk965EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3D00790F015E">
+          <ownedRule xmi:type="uml:Constraint" xmi:id="_MhFwk965EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3D00790F015E">
             <specification xmi:type="uml:OpaqueExpression" xmi:id="_MhFwlN65EdmrtKJSXC0_FQ">
               <body>isFrozen</body>
             </specification>
           </ownedRule>
-          <ownedRule xmi:id="_MhFwnN65EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3D007B8903E0">
+          <ownedRule xmi:type="uml:Constraint" xmi:id="_MhFwnN65EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3D007B8903E0">
             <specification xmi:type="uml:OpaqueExpression" xmi:id="_MhFwnd65EdmrtKJSXC0_FQ">
               <body>isFrozen</body>
             </specification>
           </ownedRule>
-          <generalization xmi:id="_3C7B8A60016D3C333F0B0297" general="_3C7B8A60016D3C333D6701DF"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C33494E03D5" name="isAbstract">
-            <ownedComment xmi:id="_Mfd_xd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C33494E03D5">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333F0B0297" general="_3C7B8A60016D3C333D6701DF"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C33494E03D5" name="isAbstract">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_Mfd_xd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C33494E03D5">
               <body>Indicates whether the GeneralizableElement is expected to have instances. When isAbstract is true, any instance that is represented or classified by this GeneralizableElement is additionally an instance of some specialization of this GeneralizableElement. No operation that supports creation of instances of this GeneralizableElement should be available.</body>
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C3349600377" name="visibility">
-            <ownedComment xmi:id="_Mfd_yd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3349600377">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C3349600377" name="visibility">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_Mfd_yd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3349600377">
               <body>In the future, this Attribute will be used to limit the ability of Elements outside of this GeneralizableElements container to depend on it. The rules of visibility of MOF Elements are not currently specified.</body>
             </ownedComment>
             <type xmi:type="uml:Class" href="org.omg.PrimitiveTypes.uml#_3C7B8A60016D3C94B88601B3"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C9476F20221" name="allSubtype" type="_3C7B8A60016D3C333EF70343" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3C9476EF033F">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C9476F20221" name="allSubtype" type="_3C7B8A60016D3C333EF70343" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3C9476EF033F">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MgnPU965EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MgnPVN65EdmrtKJSXC0_FQ" value="*"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3CC28D1502EC" name="supertype" type="_3C7B8A60016D3C333EF70343" isUnique="false" association="_3C7B8A60016D3CC28D140132">
-            <ownedComment xmi:id="_Mg_py965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC28D1502EC">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CC28D1502EC" name="supertype" type="_3C7B8A60016D3C333EF70343" isUnique="false" association="_3C7B8A60016D3CC28D140132">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_Mg_py965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC28D1502EC">
               <body>The subtype is the GeneralizableElement that is more specific. The supertype Generalizes the subtype.</body>
             </ownedComment>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Mg_pzt65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Mg_pz965EdmrtKJSXC0_FQ" value="*"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3D0058BD0369" name="feature" type="_3C7B8A60016D3C333D700188" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3D0058BD00C0">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3D0058BD0369" name="feature" type="_3C7B8A60016D3C333D700188" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3D0058BD00C0">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwiN65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwid65EdmrtKJSXC0_FQ" value="*"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3D00790F015E" name="allSupertype" type="_3C7B8A60016D3C333EF70343" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3D00790D01E7">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3D00790F015E" name="allSupertype" type="_3C7B8A60016D3C333EF70343" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3D00790D01E7">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwkd65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwkt65EdmrtKJSXC0_FQ" value="*"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3D007B8903E0" name="subtype" type="_3C7B8A60016D3C333EF70343" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3D007B88023A">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3D007B8903E0" name="subtype" type="_3C7B8A60016D3C333EF70343" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3D007B88023A">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwmt65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwm965EdmrtKJSXC0_FQ" value="*"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333F11023C" name="BehaviouralFeature" isAbstract="true">
-          <ownedComment xmi:id="_MfkGY965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333F11023C">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MfkGY965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333F11023C">
             <body>A BehavioralFeature defines a dynamic characteristic of the ModelElement that contains it. Because a BehavioralFeature is partially defined by the Parameters it contains, it is both a Feature and a Namespace.</body>
           </ownedComment>
-          <ownedRule xmi:id="_MhFwcN65EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3CEC360C02D3">
+          <ownedRule xmi:type="uml:Constraint" xmi:id="_MhFwcN65EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3CEC360C02D3">
             <specification xmi:type="uml:OpaqueExpression" xmi:id="_MhFwcd65EdmrtKJSXC0_FQ">
               <body>isFrozen</body>
             </specification>
           </ownedRule>
-          <generalization xmi:id="_3C7B8A60016D3C333F1B01B4" general="_3C7B8A60016D3C333D6701DF"/>
-          <generalization xmi:id="_3C7B8A60016D3C333F290060" general="_3C7B8A60016D3C333D700188"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3CEC360C02D3" name="parameter" type="_3C7B8A60016D3C333DD1001F" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3CEC360B0096">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333F1B01B4" general="_3C7B8A60016D3C333D6701DF"/>
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333F290060" general="_3C7B8A60016D3C333D700188"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CEC360C02D3" name="parameter" type="_3C7B8A60016D3C333DD1001F" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3CEC360B0096">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwbt65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwb965EdmrtKJSXC0_FQ" value="1"/>
-            <qualifier xmi:id="_3C7B8A60016D3CEC36500262" name="index" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CEC36500262" name="index" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3CC6A34B0011"/>
             </qualifier>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333F3302B3" name="Operation">
-          <ownedComment xmi:id="_MfkGad65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333F3302B3">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MfkGad65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333F3302B3">
             <body>An Operation defines a dynamic feature which offers a service. The behavior of an operation is activated through the invocation of the operation.</body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C333F45022C" general="_3C7B8A60016D3C333F11023C"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334EBA0218" name="isQuery">
-            <ownedComment xmi:id="_MfkGbt65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334EBA0218">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333F45022C" general="_3C7B8A60016D3C333F11023C"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334EBA0218" name="isQuery">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MfkGbt65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334EBA0218">
               <body>Defining an Operation with an isQuery value of true denotes that the behavior of the operation will not alter the state of the object. The state of a Classifier, for this definition, is the set of values of all of the Classifier's class-scope and instance-scope StructuralFeatures.
     &lt;p>
     For instance, an Operation of a Class, defined with a scope of instance, will not change the values or instances of any instance-scope StructuralFeature of the Class instance, as a result of invoking this Operation. An Operation of a Class with a
@@ -517,94 +517,94 @@
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C335C9C0183" name="semantics">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C335C9C0183" name="semantics">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MfqNA965EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MfqNBN65EdmrtKJSXC0_FQ" value="1"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3E1180F50207" name="exception" type="_3C7B8A60016D3C333F3A0281" isUnique="false" association="_3C7B8A60016D3E1180F403A0">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E1180F50207" name="exception" type="_3C7B8A60016D3C333F3A0281" isUnique="false" association="_3C7B8A60016D3E1180F403A0">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhL3AN65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhL3Ad65EdmrtKJSXC0_FQ" value="*"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333F3A0281" name="Exception">
-          <generalization xmi:id="_3C7B8A60016D3C333F480231" general="_3C7B8A60016D3C333F11023C"/>
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333F480231" general="_3C7B8A60016D3C333F11023C"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333F4F0367" name="Package">
-          <ownedComment xmi:id="_MfqNCN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333F4F0367">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MfqNCN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333F4F0367">
             <body>A package is formed as a composition of ModelElements. A package defines a modeling unit, models are constructed and presented as packages. A model is a package. Packages are also uses as organizational constructs in modeling. Nesting,
     importation, and generalization are used to manage the complexity of models.
     </body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C333F580111" general="_3C7B8A60016D3C333EF70343"/>
-          <ownedOperation xmi:id="_3C7B8A60016D3C8741A00319" name="externalizePackage" isQuery="true">
-            <ownedComment xmi:id="_MfqNDd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C8741A00319">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333F580111" general="_3C7B8A60016D3C333EF70343"/>
+          <ownedOperation xmi:type="uml:Operation" xmi:id="_3C7B8A60016D3C8741A00319" name="externalizePackage" isQuery="true">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MfqNDd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C8741A00319">
               <body>Externalize the Package and all of its Elements (transitive closure on the containment hierarchy) into a Java Archive byte stream.</body>
             </ownedComment>
-            <ownedParameter xmi:id="_MfqNEN65EdmrtKJSXC0_FQ" type="_3C7B8A60016D3C8742220103" direction="return"/>
-            <ownedParameter xmi:id="_3C7B8A60016D3FF411FD0053" name="in" type="_DpPt8Gv7EdqJBq-MobMKjQ"/>
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="_MfqNEN65EdmrtKJSXC0_FQ" type="_3C7B8A60016D3C8742220103" direction="return"/>
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="_3C7B8A60016D3FF411FD0053" name="in" type="_DpPt8Gv7EdqJBq-MobMKjQ"/>
           </ownedOperation>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333F5A0237" name="Classifier" isAbstract="true">
-          <ownedComment xmi:id="_MfwTpN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333F5A0237">
-            <ownedComment xmi:id="_MfOBAJpxEeKWgKidX7bLSA" annotatedElement="_3C7B8A60016D3C333F5A0237">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MfwTpN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333F5A0237">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MfOBAJpxEeKWgKidX7bLSA" annotatedElement="_3C7B8A60016D3C333F5A0237">
               <body>A classifier provides a classification of instances through a set of Features it contains.</body>
             </ownedComment>
             <body>A classifier provides a classification of instances through a set of Features it contains.</body>
           </ownedComment>
-          <ownedRule xmi:id="_MhFwZ965EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3CC7F8FB0014">
+          <ownedRule xmi:type="uml:Constraint" xmi:id="_MhFwZ965EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3CC7F8FB0014">
             <specification xmi:type="uml:OpaqueExpression" xmi:id="_MhFwaN65EdmrtKJSXC0_FQ">
               <body>isFrozen</body>
             </specification>
           </ownedRule>
-          <generalization xmi:id="_3C7B8A60016D3C333F620288" general="_3C7B8A60016D3C333EF70343"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3CC7F8FB0014" name="compositeReference" type="_3C7B8A60016D3C3340050369" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3CC7F8F9033C">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333F620288" general="_3C7B8A60016D3C333EF70343"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CC7F8FB0014" name="compositeReference" type="_3C7B8A60016D3C3340050369" isUnique="false" isReadOnly="true" isDerived="true" association="_3C7B8A60016D3CC7F8F9033C">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwZd65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwZt65EdmrtKJSXC0_FQ" value="1"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_f_QSIJpxEeKWgKidX7bLSA" name="field" type="_3C7B8A60016D3C333E08021D" isUnique="false" isReadOnly="true" isDerived="true" association="_jb_RAJpsEeKWgKidX7bLSA">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_f_QSIJpxEeKWgKidX7bLSA" name="field" type="_3C7B8A60016D3C333E08021D" isUnique="false" isReadOnly="true" isDerived="true" association="_jb_RAJpsEeKWgKidX7bLSA">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_sV2bYJpxEeKWgKidX7bLSA"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_rr97cJpyEeKWgKidX7bLSA" value="1"/>
-            <qualifier xmi:id="_Gfh6AJpyEeKWgKidX7bLSA" name="simpleName" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="_Gfh6AJpyEeKWgKidX7bLSA" name="simpleName" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_fHl7oJrEEeKTAKNHZzBQKg" name="operation" type="_3C7B8A60016D3C333F3302B3" isUnique="false" isReadOnly="true" isDerived="true" association="_Hc92MJrAEeKTAKNHZzBQKg">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_fHl7oJrEEeKTAKNHZzBQKg" name="operation" type="_3C7B8A60016D3C333F3302B3" isUnique="false" isReadOnly="true" isDerived="true" association="_Hc92MJrAEeKTAKNHZzBQKg">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_urfuYJrEEeKTAKNHZzBQKg"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_WkWdUJrGEeKTAKNHZzBQKg" value="1"/>
-            <qualifier xmi:id="_vzdKEJrGEeKTAKNHZzBQKg" name="simpleName" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="_vzdKEJrGEeKTAKNHZzBQKg" name="simpleName" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_1fH-UJrEEeKTAKNHZzBQKg" name="reference" type="_3C7B8A60016D3C3340050369" isUnique="false" isReadOnly="true" isDerived="true" association="_sOvxYJq_EeKTAKNHZzBQKg">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_1fH-UJrEEeKTAKNHZzBQKg" name="reference" type="_3C7B8A60016D3C3340050369" isUnique="false" isReadOnly="true" isDerived="true" association="_sOvxYJq_EeKTAKNHZzBQKg">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_G-0IUJrFEeKTAKNHZzBQKg"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_eGVBAJrGEeKTAKNHZzBQKg" value="1"/>
-            <qualifier xmi:id="_3XBpMJrGEeKTAKNHZzBQKg" name="simpleName" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="_3XBpMJrGEeKTAKNHZzBQKg" name="simpleName" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_cTKPsJrFEeKTAKNHZzBQKg" name="attribute" type="_3C7B8A60016D3C333FFB0007" isUnique="false" isReadOnly="true" isDerived="true" association="_0ttXMJq-EeKTAKNHZzBQKg">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_cTKPsJrFEeKTAKNHZzBQKg" name="attribute" type="_3C7B8A60016D3C333FFB0007" isUnique="false" isReadOnly="true" isDerived="true" association="_0ttXMJq-EeKTAKNHZzBQKg">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_eJI54JrFEeKTAKNHZzBQKg"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_nWHKUJrGEeKTAKNHZzBQKg" value="1"/>
-            <qualifier xmi:id="_BAmykJrHEeKTAKNHZzBQKg" name="simpleName" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="_BAmykJrHEeKTAKNHZzBQKg" name="simpleName" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333F810052" name="Datatype" isAbstract="true">
-          <generalization xmi:id="_3C7B8A60016D3C333F950169" general="_3C7B8A60016D3C333F5A0237"/>
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333F950169" general="_3C7B8A60016D3C333F5A0237"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333F8B0147" name="Association">
-          <ownedComment xmi:id="_Mf2aRt65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333F8B0147">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_Mf2aRt65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333F8B0147">
             <body>An association defines a classification over a set of links, through a relationship between Classifiers. Each link which is an instance of the association denotes a connection between object instances of the Classifiers of the Association. The MOF restricts associations to binary, restricting each link to two participating objects. This restriction also means that the association is defined between two Classifiers (which may be the same Classifier). The name of the Association is considered directional if it
     provides a clearer or more accurate representation of the association when stated with one participating class first rather than the other. For instance, Operation CanRaise Exception is correct; Exception CanRaise Operation is incorrect. 
     &lt;p>
     The definition of an Association requires two AssociationEnds. If the name of the association is directional, the name is understood to read in the order: first contained element; association name; second contained element. These contained elements are AssociationEnd instances, and the reading of the subject; verb; object uses either the AssociationEnd name or the AssociationEnd's class name. The onus is on the MOF user to determine whether the name is directional, and to place the AssociationEnds in proper order within the Association's contents to support the name direction. The representation of a Classifier's knowledge of its participation in an association requires the use of a Reference.
     </body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C333F980055" general="_3C7B8A60016D3C333F5A0237"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334D5C028D" name="isDerived">
-            <ownedComment xmi:id="_Mf2aS965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334D5C028D">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333F980055" general="_3C7B8A60016D3C333F5A0237"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334D5C028D" name="isDerived">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_Mf2aS965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334D5C028D">
               <body>A derived association has no Links as instances. Instead, its Links are derived from other information in a meta-model. The addition, removal, or modification of a derived Association's Link causes the information upon which the Association is
     derived to be updated. The results of such an update are expected to appear, upon subsequent access of the derived Association's Links, to have the same effect as an equivalent operation on an Association which is not derived.
     </body>
@@ -613,55 +613,55 @@
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333FA7031E" name="PrimitiveType">
-          <generalization xmi:id="_3C7B8A60016D3C333FB30375" general="_3C7B8A60016D3C333F810052"/>
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333FB30375" general="_3C7B8A60016D3C333F810052"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333FB900DF" name="EnumerationType">
-          <generalization xmi:id="_3C7B8A60016D3C333FC20182" general="_3C7B8A60016D3C333F810052"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334DE500AA" name="label">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333FC20182" general="_3C7B8A60016D3C333F810052"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334DE500AA" name="label">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Mf8g5d65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Mf8g5t65EdmrtKJSXC0_FQ" value="*"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333FCA010B" name="StructureType">
-          <generalization xmi:id="_3C7B8A60016D3C333FD40336" general="_3C7B8A60016D3C333F810052"/>
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C333FD40336" general="_3C7B8A60016D3C333F810052"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C333FFB0007" name="Attribute">
-          <ownedComment xmi:id="_Mf8g6t65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333FFB0007">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_Mf8g6t65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C333FFB0007">
             <body>An Attribute defines a StructuralFeature which contains values for Classifiers or their instances.</body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C3340030135" general="_3C7B8A60016D3C333D81006A"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C334E9F0332" name="isDerived">
-            <ownedComment xmi:id="_Mf8g7965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334E9F0332">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C3340030135" general="_3C7B8A60016D3C333D81006A"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C334E9F0332" name="isDerived">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_Mf8g7965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C334E9F0332">
               <body>A derived attribute is one whose values are not part of the state of the object instance, but whose values can be determined or computed. In a sense, all attributes are derived, since it is up to the class's implementation to hold or calculate the values. However, by convention, isDerived indicates that the derived state is based on other information in the model. Modification of the derived Attribute causes the information upon which the Attribute is derived to be updated.</body>
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C34F85B0051" name="maxLength">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C34F85B0051" name="maxLength">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3CC6A34B0011"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C3340050369" name="Reference">
-          <ownedComment xmi:id="_Mf8g9N65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3340050369">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_Mf8g9N65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3340050369">
             <body>A Reference defines a Classifier's knowledge of, and access to, links and their instances defined by an Association. Although a Reference derives much of its state from a corresponding AssociationEnd, it provides additional information; therefore, the MOF cannot adequately represent some meta-models without this mechanism. The inherited attributes defined in StructuralFeature (multiplicity and isChangeable) are constrained to match the values of its corresponding AssociationEnd. However, it has its own visibility, name, and annotation defined.
     &lt;p>
     &lt;h6>Note&lt;/h6> 
     When creating a Reference, values for the inherited attributes of multiplicity and isChangeable must be supplied. These must be the same as the corresponding attributes on the AssociationEnd to which the Reference will subsequently be linked. 
     </body>
           </ownedComment>
-          <generalization xmi:id="_3C7B8A60016D3C33400D02AC" general="_3C7B8A60016D3C333D81006A"/>
-          <ownedAttribute xmi:id="_3C7B8A60016D3CC7FC1A0063" name="referencedEndIsNavigable" isReadOnly="true" isDerived="true">
+          <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3C33400D02AC" general="_3C7B8A60016D3C333D81006A"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CC7FC1A0063" name="referencedEndIsNavigable" isReadOnly="true" isDerived="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3CC1F2BE0181" name="exposedEnd" type="_3C7B8A60016D3C333D910334" isUnique="false" association="_3C7B8A60016D3CC1F2BD02DC">
-            <ownedComment xmi:id="_Mgzcj965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1F2BE0181">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CC1F2BE0181" name="exposedEnd" type="_3C7B8A60016D3C333D910334" isUnique="false" association="_3C7B8A60016D3CC1F2BD02DC">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_Mgzcj965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1F2BE0181">
               <body>The exposedEnd of a Reference is the AssociationEnd representing the end of the Reference's owning Classifier within the defining Association.</body>
             </ownedComment>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Mg5jIt65EdmrtKJSXC0_FQ" value="1"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Mg5jI965EdmrtKJSXC0_FQ" value="1"/>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3CC1F2C40388" name="referencedEnd" type="_3C7B8A60016D3C333D910334" isUnique="false" association="_3C7B8A60016D3CC1F2C401A5">
-            <ownedComment xmi:id="_Mg5jL965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1F2C40388">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CC1F2C40388" name="referencedEnd" type="_3C7B8A60016D3C333D910334" isUnique="false" association="_3C7B8A60016D3CC1F2C401A5">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_Mg5jL965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1F2C40388">
               <body>The referencedEnd of a Reference is the end representing the set of LinkEnds of principle interest to the Reference. The Reference provides access to the instances of that AssociationEnd's class, which are participants in that AssociationEnd's Association, connected through that AssociationEnd's LinkEnds. In addition, the Reference derives the majority of its state information - multiplicity, etc., from that Reference.</body>
             </ownedComment>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Mg5jMt65EdmrtKJSXC0_FQ" value="1"/>
@@ -669,48 +669,48 @@
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C334A0302DB" name="NamespaceLookupElementResult">
-          <eAnnotations xmi:id="_MgIuIt65EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MgIuI965EdmrtKJSXC0_FQ" key="struct"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MgIuIt65EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MgIuI965EdmrtKJSXC0_FQ" key="struct"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C335A590311" name="result" type="_3C7B8A60016D3C333D3F03A4" isReadOnly="true">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C335A590311" name="result" type="_3C7B8A60016D3C333D3F03A4" isReadOnly="true">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MgCniN65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MgCnid65EdmrtKJSXC0_FQ" value="1"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C334A1802EF" name="NamespaceResolveQualifiedNameResult">
-          <eAnnotations xmi:id="_MgIuKt65EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MgIuK965EdmrtKJSXC0_FQ" key="struct"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MgIuKt65EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MgIuK965EdmrtKJSXC0_FQ" key="struct"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C335AC6015F" name="result" type="_3C7B8A60016D3C333D3F03A4" isReadOnly="true">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C335AC6015F" name="result" type="_3C7B8A60016D3C333D3F03A4" isReadOnly="true">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MgIuJt65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MgIuJ965EdmrtKJSXC0_FQ" value="1"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C8742220103" name="PackageExternalizeResult">
-          <eAnnotations xmi:id="_MghIoN65EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MghIod65EdmrtKJSXC0_FQ" key="struct"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MghIoN65EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MghIod65EdmrtKJSXC0_FQ" key="struct"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3C874239030F" name="packageAsJar" isReadOnly="true">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C874239030F" name="packageAsJar" isReadOnly="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3E0F6F8900AB"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3C333D48036B" name="SegmentContainsElement" memberEnd="_3C7B8A60016D3C333D490268 _3C7B8A60016D3C333D490269"/>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3C93700702E4" name="NamespaceContainsAllElement" isDerived="true" memberEnd="_3C7B8A60016D3C937008029F _3C7B8A60016D3C93700802A9">
-          <ownedComment xmi:id="_MghIq965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C93700702E4">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MghIq965EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C93700702E4">
             <body>Delivers all model elements which are in the recursive closure of the package:
     - all elements contained in the package
     - all elements imported from another package
     - all referenced classes (supertype, etc) which are not imported by a package import.
     </body>
           </ownedComment>
-          <ownedEnd xmi:id="_3C7B8A60016D3C93700802A9" name="allNamespace" type="_3C7B8A60016D3C333D6701DF" isUnique="false" association="_3C7B8A60016D3C93700702E4">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C93700802A9" name="allNamespace" type="_3C7B8A60016D3C333D6701DF" isUnique="false" association="_3C7B8A60016D3C93700702E4">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MgnPSd65EdmrtKJSXC0_FQ" value="1"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MgnPSt65EdmrtKJSXC0_FQ" value="1"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3C9476EF033F" name="GeneralizableElementHasAllSupertype" isDerived="true" memberEnd="_3C7B8A60016D3C9476F20126 _3C7B8A60016D3C9476F20221">
-          <ownedEnd xmi:id="_3C7B8A60016D3C9476F20126" name="allSupertypeEnd" type="_3C7B8A60016D3C333EF70343" isUnique="false" association="_3C7B8A60016D3C9476EF033F">
-            <ownedComment xmi:id="_MgnPTd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C9476F20126">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3C9476F20126" name="allSupertypeEnd" type="_3C7B8A60016D3C333EF70343" isUnique="false" association="_3C7B8A60016D3C9476EF033F">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MgnPTd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C9476F20126">
               <body>Identifies the set of superclasses for a GeneralizableElement.</body>
             </ownedComment>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MgnPUN65EdmrtKJSXC0_FQ"/>
@@ -718,17 +718,17 @@
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3CC1EB5B023E" name="NamespaceImportedBy" memberEnd="_3C7B8A60016D3CC1EB5C011D _3C7B8A60016D3CC1EB5C011F">
-          <ownedEnd xmi:id="_3C7B8A60016D3CC1EB5C011D" name="importedByNamespace" type="_3C7B8A60016D3C333D61037B" isUnique="false" association="_3C7B8A60016D3CC1EB5B023E">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CC1EB5C011D" name="importedByNamespace" type="_3C7B8A60016D3C333D61037B" isUnique="false" association="_3C7B8A60016D3CC1EB5B023E">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MgnPWd65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MgnPWt65EdmrtKJSXC0_FQ" value="*"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3CC1ECBF011D" name="ClassifierDefinesTypedElement" memberEnd="_3C7B8A60016D3CC1ECC001D3 _3C7B8A60016D3CC1ECC001DD">
-          <ownedComment xmi:id="_MgtV5d65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1ECBF011D">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_MgtV5d65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1ECBF011D">
             <body>A Link between a TypedElement subclass and a Classifier supports the definition of the TypedElement.</body>
           </ownedComment>
-          <ownedEnd xmi:id="_3C7B8A60016D3CC1ECC001D3" name="classifies" type="_3C7B8A60016D3C333D770110" isUnique="false" association="_3C7B8A60016D3CC1ECBF011D">
-            <ownedComment xmi:id="_MgtV6d65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1ECC001D3">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CC1ECC001D3" name="classifies" type="_3C7B8A60016D3C333D770110" isUnique="false" association="_3C7B8A60016D3CC1ECBF011D">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_MgtV6d65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1ECC001D3">
               <body>The set of typed elements supported by a Classifier.</body>
             </ownedComment>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MgtV7N65EdmrtKJSXC0_FQ"/>
@@ -736,11 +736,11 @@
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3CC1F2BD02DC" name="Exposes" memberEnd="_3C7B8A60016D3CC1F2BE017F _3C7B8A60016D3CC1F2BE0181">
-          <ownedComment xmi:id="_Mgzchd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1F2BD02DC">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_Mgzchd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1F2BD02DC">
             <body>A Reference defines a reference for a Class. For an instance of that class, which holds one or more links to some object or objects conforming to the reference, the instance will be playing the role (end) defined by the AssociationEnd in this Association. Although this association can be derived in the current MOF, the use of n-ary associations, where a single Class has multiple ends specification of this Association, is necessary.</body>
           </ownedComment>
-          <ownedEnd xmi:id="_3C7B8A60016D3CC1F2BE017F" name="referrer" type="_3C7B8A60016D3C3340050369" isUnique="false" association="_3C7B8A60016D3CC1F2BD02DC">
-            <ownedComment xmi:id="_Mgzcid65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1F2BE017F">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CC1F2BE017F" name="referrer" type="_3C7B8A60016D3C3340050369" isUnique="false" association="_3C7B8A60016D3CC1F2BD02DC">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_Mgzcid65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1F2BE017F">
               <body>The Reference that is providing the exposedEnds class instances within the References Classifier.</body>
             </ownedComment>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MgzcjN65EdmrtKJSXC0_FQ"/>
@@ -748,11 +748,11 @@
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3CC1F2C401A5" name="RefersTo" memberEnd="_3C7B8A60016D3CC1F2C40386 _3C7B8A60016D3CC1F2C40388">
-          <ownedComment xmi:id="_Mg5jJd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1F2C401A5">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_Mg5jJd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1F2C401A5">
             <body>A Reference derives most of its state from the AssociationEnd that it is linked to, based on this Association. For a Class defined with a Reference, each of its instances can be used to access the referenced object or objects. Those referenced objects will be of the Class defined by this referencedEnd AssociationEnd, playing the defined end.</body>
           </ownedComment>
-          <ownedEnd xmi:id="_3C7B8A60016D3CC1F2C40386" name="referent" type="_3C7B8A60016D3C3340050369" isUnique="false" association="_3C7B8A60016D3CC1F2C401A5">
-            <ownedComment xmi:id="_Mg5jKd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1F2C40386">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CC1F2C40386" name="referent" type="_3C7B8A60016D3C3340050369" isUnique="false" association="_3C7B8A60016D3CC1F2C401A5">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_Mg5jKd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC1F2C40386">
               <body>The Reference which is providing the reference through which instances playing the end-defined by the AssociationEnd can be accessed.</body>
             </ownedComment>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Mg5jLN65EdmrtKJSXC0_FQ"/>
@@ -760,11 +760,11 @@
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3CC28D140132" name="Generalizes" isDerived="true" memberEnd="_3C7B8A60016D3CC28D1502E2 _3C7B8A60016D3CC28D1502EC">
-          <ownedComment xmi:id="_Mg_pwd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC28D140132">
+          <ownedComment xmi:type="uml:Comment" xmi:id="_Mg_pwd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC28D140132">
             <body>The Association defined on GeneralizableElement. A Link of this Association represents a supertype/subtype relationship (or a generalizes/specializes relationship).</body>
           </ownedComment>
-          <ownedEnd xmi:id="_3C7B8A60016D3CC28D1502E2" name="subtypeEnd" type="_3C7B8A60016D3C333EF70343" isUnique="false" association="_3C7B8A60016D3CC28D140132">
-            <ownedComment xmi:id="_Mg_pxd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC28D1502E2">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CC28D1502E2" name="subtypeEnd" type="_3C7B8A60016D3C333EF70343" isUnique="false" association="_3C7B8A60016D3CC28D140132">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_Mg_pxd65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3CC28D1502E2">
               <body>The subtype is the GeneralizableElement that is more specific. The supertype Generalizes the subtype.</body>
             </ownedComment>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Mg_pyN65EdmrtKJSXC0_FQ"/>
@@ -772,107 +772,107 @@
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3CC7F8F9033C" name="ReferencesByComposition" isDerived="true" memberEnd="_3C7B8A60016D3CC7F8FB000A _3C7B8A60016D3CC7F8FB0014">
-          <ownedEnd xmi:id="_3C7B8A60016D3CC7F8FB000A" name="classifier" type="_3C7B8A60016D3C333F5A0237" isUnique="false" association="_3C7B8A60016D3CC7F8F9033C">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CC7F8FB000A" name="classifier" type="_3C7B8A60016D3C333F5A0237" isUnique="false" association="_3C7B8A60016D3CC7F8F9033C">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwYt65EdmrtKJSXC0_FQ" value="1"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwY965EdmrtKJSXC0_FQ" value="1"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3CEC360B0096" name="IsParameterOf" isDerived="true" memberEnd="_3C7B8A60016D3CEC360C02C9 _3C7B8A60016D3CEC360C02D3">
-          <ownedEnd xmi:id="_3C7B8A60016D3CEC360C02C9" name="operation" type="_3C7B8A60016D3C333F11023C" isUnique="false" association="_3C7B8A60016D3CEC360B0096">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3CEC360C02C9" name="operation" type="_3C7B8A60016D3C333F11023C" isUnique="false" association="_3C7B8A60016D3CEC360B0096">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwa965EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwbN65EdmrtKJSXC0_FQ" value="*"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3D0055730033" name="Contains" isDerived="true" memberEnd="_3C7B8A60016D3D0055740048 _3C7B8A60016D3D005574004A">
-          <ownedEnd xmi:id="_3C7B8A60016D3D005574004A" name="containerEnd" type="_3C7B8A60016D3C333D6701DF" isUnique="false" association="_3C7B8A60016D3D0055730033">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3D005574004A" name="containerEnd" type="_3C7B8A60016D3C333D6701DF" isUnique="false" association="_3C7B8A60016D3D0055730033">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwet65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwe965EdmrtKJSXC0_FQ" value="1"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3D0057370191" name="ElementContainedIn" memberEnd="_3C7B8A60016D3D00573703CC _3C7B8A60016D3D00573703D6">
-          <ownedEnd xmi:id="_3C7B8A60016D3D00573703CC" name="contentEnd" type="_3C7B8A60016D3C333D3F03A4" isUnique="false" association="_3C7B8A60016D3D0057370191">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3D00573703CC" name="contentEnd" type="_3C7B8A60016D3C333D3F03A4" isUnique="false" association="_3C7B8A60016D3D0057370191">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwft65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwf965EdmrtKJSXC0_FQ" value="*"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3D0058BD00C0" name="FeatureDefinedBy" isDerived="true" memberEnd="_3C7B8A60016D3D0058BD035F _3C7B8A60016D3D0058BD0369">
-          <ownedEnd xmi:id="_3C7B8A60016D3D0058BD035F" name="generalizableElement" type="_3C7B8A60016D3C333EF70343" isUnique="false" association="_3C7B8A60016D3D0058BD00C0">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3D0058BD035F" name="generalizableElement" type="_3C7B8A60016D3C333EF70343" isUnique="false" association="_3C7B8A60016D3D0058BD00C0">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwhd65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwht65EdmrtKJSXC0_FQ" value="*"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3D00790D01E7" name="GeneralizableElementHasAllSubtype" isDerived="true" memberEnd="_3C7B8A60016D3D00790F0154 _3C7B8A60016D3D00790F015E">
-          <ownedEnd xmi:id="_3C7B8A60016D3D00790F0154" name="allSubtypeEnd" type="_3C7B8A60016D3C333EF70343" isUnique="false" association="_3C7B8A60016D3D00790D01E7">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3D00790F0154" name="allSubtypeEnd" type="_3C7B8A60016D3C333EF70343" isUnique="false" association="_3C7B8A60016D3D00790D01E7">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwjt65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwj965EdmrtKJSXC0_FQ" value="*"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3D007B88023A" name="Specializes" isDerived="true" memberEnd="_3C7B8A60016D3D007B8903D6 _3C7B8A60016D3D007B8903E0">
-          <ownedEnd xmi:id="_3C7B8A60016D3D007B8903D6" name="supertypeEnd" type="_3C7B8A60016D3C333EF70343" isUnique="false" association="_3C7B8A60016D3D007B88023A">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3D007B8903D6" name="supertypeEnd" type="_3C7B8A60016D3C333EF70343" isUnique="false" association="_3C7B8A60016D3D007B88023A">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwl965EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwmN65EdmrtKJSXC0_FQ" value="*"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3D162FC202FB" name="NamespaceContainsElement" isDerived="true" memberEnd="_3C7B8A60016D3D162FC30270 _3C7B8A60016D3D162FC3027A">
-          <ownedEnd xmi:id="_3C7B8A60016D3D162FC3027A" name="namespace" type="_3C7B8A60016D3C333D6701DF" isUnique="false" association="_3C7B8A60016D3D162FC202FB">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3D162FC3027A" name="namespace" type="_3C7B8A60016D3C333D6701DF" isUnique="false" association="_3C7B8A60016D3D162FC202FB">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhFwpt65EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhFwp965EdmrtKJSXC0_FQ" value="1"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3E1180F403A0" name="CanRaise" memberEnd="_3C7B8A60016D3E1180F50207 _3C7B8A60016D3E1180F50209">
-          <ownedEnd xmi:id="_3C7B8A60016D3E1180F50209" name="operation" type="_3C7B8A60016D3C333F3302B3" isUnique="false" association="_3C7B8A60016D3E1180F403A0">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E1180F50209" name="operation" type="_3C7B8A60016D3C333F3302B3" isUnique="false" association="_3C7B8A60016D3E1180F403A0">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhL3A965EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhL3BN65EdmrtKJSXC0_FQ" value="*"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3E15726D03D5" name="IsQualifiedByType" memberEnd="_3C7B8A60016D3E15726E0386 _3C7B8A60016D3E15726E0390">
-          <ownedEnd xmi:id="_3C7B8A60016D3E15726E0390" name="associationEnd" type="_3C7B8A60016D3C333D910334" isUnique="false" association="_3C7B8A60016D3E15726D03D5">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E15726E0390" name="associationEnd" type="_3C7B8A60016D3C333D910334" isUnique="false" association="_3C7B8A60016D3E15726D03D5">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MhL3C965EdmrtKJSXC0_FQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MhL3DN65EdmrtKJSXC0_FQ" value="*"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_jb_RAJpsEeKWgKidX7bLSA" name="ClassifierHasField" isDerived="true" memberEnd="_jcBGMJpsEeKWgKidX7bLSA _f_QSIJpxEeKWgKidX7bLSA">
-          <ownedEnd xmi:id="_jcBGMJpsEeKWgKidX7bLSA" name="classifier" type="_3C7B8A60016D3C333F5A0237" isUnique="false" isReadOnly="true" association="_jb_RAJpsEeKWgKidX7bLSA">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_jcBGMJpsEeKWgKidX7bLSA" name="classifier" type="_3C7B8A60016D3C333F5A0237" isUnique="false" isReadOnly="true" association="_jb_RAJpsEeKWgKidX7bLSA">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_jcBGMZpsEeKWgKidX7bLSA" value="1"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_jcBtQJpsEeKWgKidX7bLSA" value="1"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_0ttXMJq-EeKTAKNHZzBQKg" name="ClassifierHasAttribute" isDerived="true" memberEnd="_0txBkJq-EeKTAKNHZzBQKg _cTKPsJrFEeKTAKNHZzBQKg">
-          <ownedEnd xmi:id="_0txBkJq-EeKTAKNHZzBQKg" name="classifier" type="_3C7B8A60016D3C333F5A0237" isReadOnly="true" association="_0ttXMJq-EeKTAKNHZzBQKg">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_0txBkJq-EeKTAKNHZzBQKg" name="classifier" type="_3C7B8A60016D3C333F5A0237" isReadOnly="true" association="_0ttXMJq-EeKTAKNHZzBQKg">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_0txooJq-EeKTAKNHZzBQKg" value="1"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_0txooZq-EeKTAKNHZzBQKg" value="1"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_sOvxYJq_EeKTAKNHZzBQKg" name="ClassifierHasReference" isDerived="true" memberEnd="_sOwYcJq_EeKTAKNHZzBQKg _1fH-UJrEEeKTAKNHZzBQKg">
-          <ownedEnd xmi:id="_sOwYcJq_EeKTAKNHZzBQKg" name="classifier" type="_3C7B8A60016D3C333F5A0237" isUnique="false" isReadOnly="true" association="_sOvxYJq_EeKTAKNHZzBQKg">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_sOwYcJq_EeKTAKNHZzBQKg" name="classifier" type="_3C7B8A60016D3C333F5A0237" isUnique="false" isReadOnly="true" association="_sOvxYJq_EeKTAKNHZzBQKg">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_sOw_gJq_EeKTAKNHZzBQKg"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_sOw_gZq_EeKTAKNHZzBQKg" value="1"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_Hc92MJrAEeKTAKNHZzBQKg" name="ClassifierHasOperation" isDerived="true" memberEnd="_Hc_rYJrAEeKTAKNHZzBQKg _fHl7oJrEEeKTAKNHZzBQKg">
-          <ownedEnd xmi:id="_Hc_rYJrAEeKTAKNHZzBQKg" name="classifier" type="_3C7B8A60016D3C333F5A0237" isUnique="false" isReadOnly="true" association="_Hc92MJrAEeKTAKNHZzBQKg">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_Hc_rYJrAEeKTAKNHZzBQKg" name="classifier" type="_3C7B8A60016D3C333F5A0237" isUnique="false" isReadOnly="true" association="_Hc92MJrAEeKTAKNHZzBQKg">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_HdAScJrAEeKTAKNHZzBQKg" value="1"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_HdA5gJrAEeKTAKNHZzBQKg" value="1"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_CYjEoJrBEeKTAKNHZzBQKg" name="ClassHasAllFeatureWithSubtype" isDerived="true" memberEnd="_CYk50JrBEeKTAKNHZzBQKg _8-h5sJrFEeKTAKNHZzBQKg">
-          <ownedEnd xmi:id="_CYk50JrBEeKTAKNHZzBQKg" name="class" type="_3C7B8A60016D3C2F3E0A0143" isUnique="false" isReadOnly="true" association="_CYjEoJrBEeKTAKNHZzBQKg">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_CYk50JrBEeKTAKNHZzBQKg" name="class" type="_3C7B8A60016D3C2F3E0A0143" isUnique="false" isReadOnly="true" association="_CYjEoJrBEeKTAKNHZzBQKg">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_CYlg4JrBEeKTAKNHZzBQKg"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_CYmH8JrBEeKTAKNHZzBQKg" value="1"/>
           </ownedEnd>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_DpPt8Gv7EdqJBq-MobMKjQ" name="PackageExternalizeParams">
-          <eAnnotations xmi:id="_HclcsGv7EdqJBq-MobMKjQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_HclcsWv7EdqJBq-MobMKjQ" key="struct"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_HclcsGv7EdqJBq-MobMKjQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_HclcsWv7EdqJBq-MobMKjQ" key="struct"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_KgX90Gv7EdqJBq-MobMKjQ" name="format">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_KgX90Gv7EdqJBq-MobMKjQ" name="format">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_NueRgGv7EdqJBq-MobMKjQ"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_NueRgWv7EdqJBq-MobMKjQ" value="*"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_u87YcJrLEeKTAKNHZzBQKg" name="ClassHasAllFeature" isDerived="true" memberEnd="_u890sJrLEeKTAKNHZzBQKg _SPAmAJrMEeKTAKNHZzBQKg">
-          <ownedEnd xmi:id="_u890sJrLEeKTAKNHZzBQKg" name="class" type="_3C7B8A60016D3C2F3E0A0143" isUnique="false" isReadOnly="true" association="_u87YcJrLEeKTAKNHZzBQKg">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_u890sJrLEeKTAKNHZzBQKg" name="class" type="_3C7B8A60016D3C2F3E0A0143" isUnique="false" isReadOnly="true" association="_u87YcJrLEeKTAKNHZzBQKg">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_u8-bwJrLEeKTAKNHZzBQKg"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_u8-bwZrLEeKTAKNHZzBQKg" value="1"/>
           </ownedEnd>

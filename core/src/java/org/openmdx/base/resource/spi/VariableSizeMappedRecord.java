@@ -109,14 +109,14 @@ class VariableSizeMappedRecord
     private String recordShortDescription;
 
     /**
+     * @serial
+     */
+    private boolean immutable = false;
+    
+    /**
      * The values are serialized explicitly
      */
     private transient Map<Object,Object> values;
-    
-    /**
-     * Implements <code>Freezable</code>
-     */
-    private boolean immutable = false;
     
     /**
      * Implements <code>Serializable</code>
@@ -131,10 +131,9 @@ class VariableSizeMappedRecord
     /**
      * Serialize
      * 
-     * @param out
+     * @param out the output stream
+     * 
      * @throws IOException
-            // TODO Auto-generated method stub
-            return null
      */
     private void writeObject(
         ObjectOutputStream out
@@ -151,7 +150,7 @@ class VariableSizeMappedRecord
     /**
      * De-serialize
      * 
-     * @param in
+     * @param in the input stream
      * 
      * @throws IOException
      * @throws ClassNotFoundException
@@ -409,36 +408,51 @@ class VariableSizeMappedRecord
      */
     @Override
     public boolean equals(
-        Object other
+        Object that
     ){
-        if (other == this) return true;
-        if (!(other instanceof Map)) return false;
-        Map that = (Map) other;
-        if (that.size() != size()) return false;
+        return this == that || (
+            that instanceof MappedRecord && areEqual(this, (MappedRecord)that)
+        );
+    }
+    
+    /**
+     * Check two MappedRecords instances have the same content
+     * <p>
+     * The Record's short description is ignored.
+     *
+     * @return  true if two instances are equal
+     */
+    static boolean areEqual(
+        MappedRecord left, MappedRecord right
+    ){
+        if (
+            !left.getRecordName().equals(right.getRecordName()) ||
+            left.size() != right.size()
+        ) return false;
         for(
-            Iterator i = entrySet().iterator();
+            Iterator i = left.entrySet().iterator();
             i.hasNext();
         ) {
             Entry e = (Entry) i.next();
             Object key = e.getKey();
-            Object thisValue = e.getValue();
-            Object thatValue = that.get(key);
-			if (thisValue == null) {
-                if (!(thatValue==null && that.containsKey(key))) return false;
-            } else if (thisValue instanceof List<?> && thatValue instanceof List<?>){
-                List<?> thisList = (List<?>) thisValue;
-                List<?> thatList = (List<?>) thatValue;
-                int thisSize = thisList.size();
-                int thatSize = thatList.size();
-                if(thisSize == thatSize) {
-                    for(int j = 0; j < thisSize; j++) {
-                        if(!areEqual(thisList.get(j), thatList.get(j))) return false;
+            Object leftValue = e.getValue();
+            Object rightValue = right.get(key);
+			if (leftValue == null) {
+                if (!(rightValue==null && right.containsKey(key))) return false;
+            } else if (leftValue instanceof List<?> && rightValue instanceof List<?>){
+                List<?> leftList = (List<?>) leftValue;
+                List<?> rightList = (List<?>) rightValue;
+                int leftSize = leftList.size();
+                int rightSize = rightList.size();
+                if(leftSize == rightSize) {
+                    for(int j = 0; j < leftSize; j++) {
+                        if(!areEqual(leftList.get(j), rightList.get(j))) return false;
                     }
                 } else {
                     return false;
                 }
             } else {
-                if(!areEqual(thisValue, thatValue)) return false;
+                if(!areEqual(leftValue, rightValue)) return false;
             }
         }
         return true;
@@ -494,7 +508,6 @@ class VariableSizeMappedRecord
     /**
      * Entry Set
      */
-    @SuppressWarnings("synthetic-access")
     class EntrySet extends AbstractSet {
         
         /* (non-Javadoc)Kbje
@@ -594,5 +607,5 @@ class VariableSizeMappedRecord
         }
         
     }
-    
+
 }

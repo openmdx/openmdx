@@ -115,26 +115,19 @@ public class ContainerManagedUnitOfWorkSynchronization implements Synchronizatio
         if (delegate.isClosed()) {
             SysLog.detail("No after completion callback invoked as the persistence manager is already closed", transactionStatus);
         } else {
-            SysLog.detail("Invoking the unit of work's after completion callback", transactionStatus);
             final ClassLoader originalClassLoader = setCallbackClassLoader();
             try {
+                SysLog.detail("Invoking the unit of work's after completion callback", transactionStatus);
                 delegate.afterCompletion(transactionStatus);
-            } catch (RuntimeException exception) {
-                SysLog.detail(
+                SysLog.detail("After completion callback successfully completed");
+            } catch (RuntimeException afterCompletionException) {
+                SysLog.info(
                     "After completion callback threw an exception",
-                    exception.getMessage()
+                    afterCompletionException
                 );
-                throw new RuntimeServiceException(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.GENERIC,
-                    "After completion callback threw an exception",
-                    new BasicException.Parameter("status", transactionStatus)
-                );    
             } finally {
                 resetOriginalClassLoader(originalClassLoader);
             }
-            SysLog.detail("After completion callback successfully completed");
         }
     }
 
@@ -147,31 +140,56 @@ public class ContainerManagedUnitOfWorkSynchronization implements Synchronizatio
     public void beforeCompletion() {
         if (delegate.isClosed()) {
             SysLog.detail(
-                "No before completion callback invoked as the persistence manager is already closed"
+                "Before completion callback not invoked as the persistence manager has already been closed"
             );
         } else {
-            SysLog.detail("Invoking the unit of work's before completion callback");
             final ClassLoader originalClassLoader = setCallbackClassLoader();
             try {
+                SysLog.detail("Invoking the unit of work's before completion callback");
                 delegate.beforeCompletion();
-            } catch (RuntimeException exception) {
-                SysLog.detail(
-                    "Transaction is expected to be set to rollback-only due this before completion failure",
-                    exception.getMessage()
-                );
-                throw new RuntimeServiceException(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ROLLBACK,
-                    "Transaction is expected to be set to rollback-only due this before completion failure"
-                );    
+                SysLog.detail("Before completion callback successfully completed");
+            } catch (RuntimeException beforeCompletionException) {
+                setRollbackOnly(beforeCompletionException);
             } finally {
                 resetOriginalClassLoader(originalClassLoader);
             }
-            SysLog.detail("Before completion callback successfully completed");
         }
     }
 
+    /**
+     * Set transaction into rollback-only mode in case of a before completion failure
+     * 
+     * @param beforeCompletionException the before completion failure causing the rollback-only mode
+     */
+    private void setRollbackOnly(RuntimeException beforeCompletionException) {
+        try {
+            final TransactionSynchronizationRegistry transactionSynchronizationRegistry = TransactionSynchronizationRegistryFinder.getTransactionSynchronizationRegistry();
+            if(transactionSynchronizationRegistry.getRollbackOnly()) {
+                SysLog.info(
+                    "Before completion callback threw an exception and the transaction is already in rollback-only mode",
+                    beforeCompletionException
+                );
+            } else {
+                transactionSynchronizationRegistry.setRollbackOnly();
+                SysLog.info(
+                    "Before completion callback threw an exception and, therefore, the transaction has been put into rollback-only mode",
+                    beforeCompletionException
+                );
+            }
+        } catch (RuntimeException rollbackOnlyException) {
+            SysLog.error(
+                "There was a before completion failure but the transaction could not be put into rollback-only mode",
+                rollbackOnlyException
+            );
+            throw new RuntimeServiceException(
+                beforeCompletionException,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.TRANSACTION_FAILURE,
+                "There was a before completion failure but the transaction could not be put into rollback-only mode"
+            ).log();    
+        }
+    }
+    
     /**
      * Set the current thread's context class loader to the callback class loader
      * 

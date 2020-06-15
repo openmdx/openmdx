@@ -62,9 +62,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.kernel.log.SysLog;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.CssClass;
@@ -135,7 +134,7 @@ public class UiGridGetRowMenuAction extends BoundAction {
                     );
                     HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
                     p.write("<span class=\"", CssClass.gridMenu.toString(), "\" onclick=\"try{this.parentNode.parentNode.onclick();}catch(e){};\">");
-                    p.write("  <ul id=\"", CssClass.ssfNav.toString(), "\" class=\"", CssClass.ssfNav.toString(), "\">");
+                    p.write("  <ul id=\"", CssClass.ssf_nav.toString(), "\" class=\"", CssClass.ssf_nav.toString(), "\">");
                     p.write("    <li><a href=\"#\" onclick=\"javascript:return false;\"><img id=\"", rowId, "_details-opener\" border=\"0\" height=\"16\" width=\"15\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" /></a>");
                     p.write("      <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
                     // 000 - Show
@@ -198,14 +197,12 @@ public class UiGridGetRowMenuAction extends BoundAction {
                     p.write("</span>");
                 }
             } catch (Exception e) {
-                ServiceException e0 = new ServiceException(e);
-                SysLog.warning(e0.getMessage(), e0.getCause());
+                Throwables.log(e);
             }
             try {
                 p.close(true);
             } catch (Exception e) {
-                ServiceException e0 = new ServiceException(e);
-                SysLog.warning(e0.getMessage(), e0.getCause());
+                Throwables.log(e);
             }            
         }       
         return new ActionPerformResult(

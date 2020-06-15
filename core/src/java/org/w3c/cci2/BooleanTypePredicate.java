@@ -75,7 +75,7 @@ public interface BooleanTypePredicate {
 
     /**
      * This method is deprecated in order to avoid its erroneous use in 
-     * lieu of equalTo().
+     * lieu of {@link #equalTo(boolean)}.
      * 
      * @deprecated to avoid erroneous use 
      * 

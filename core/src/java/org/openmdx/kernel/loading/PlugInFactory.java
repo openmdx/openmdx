@@ -70,9 +70,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
-import org.openmdx.kernel.configuration.Configuration;
-import org.openmdx.kernel.configuration.MapConfiguration;
-import org.w3c.spi.PrimitiveTypeParsers;
+import org.openmdx.kernel.configuration.Configurations;
+import org.openmdx.kernel.configuration.cci.Configuration;
 
 /**
  * Bean Factory
@@ -139,16 +138,22 @@ public class PlugInFactory<T> extends BeanFactory<T> {
     public static Factory<?> newInstance(
 		Configuration configuration
 	){
-    	Class<Object> instanceClass = getClass(configuration, "interface", false);
-    	Class<Object> beanClass = getClass(configuration, "class", true);
-		return configuration.getOptionalValue("interface", String.class) != null ? new PlugInFactory<Object>(
-			instanceClass,
-			beanClass,
-			configuration
-		) : new PlugInFactory<Object>(
-			beanClass,
-			configuration
-		);
+    	final Class<Object> beanClass = getClass(configuration, "class");
+    	return getOptionalClass(
+    	    configuration, 
+    	    "interface"
+    	).map(
+    	    interfaceClass -> new PlugInFactory<Object>(
+                interfaceClass,
+                beanClass,
+                configuration
+            )
+    	).orElseGet(
+    	    () -> new PlugInFactory<Object>(
+                beanClass,
+                configuration
+            )
+    	);
     }
 
     
@@ -170,7 +175,7 @@ public class PlugInFactory<T> extends BeanFactory<T> {
 	){
         return new PlugInFactory<T>(
 		    instanceClass,
-		    BeanFactory.<T>getClass(configuration, "class", true),
+		    BeanFactory.<T>getClass(configuration, "class"),
 		    configuration
 		);
     }
@@ -198,18 +203,18 @@ public class PlugInFactory<T> extends BeanFactory<T> {
      * Create a factory for the given Java Bean class
      * 
      * @param beanClassName
-     * @param properties
+     * @param configuration the Java Bean configuration
      * 
      * @return a factory for the given class
      */
     public static Factory<?> newInstance(
         String beanClassName,
-        Map<String, ?> properties
+        Map<String, ?> configuration
     ){
         return newInstance(
         	Object.class,
         	beanClassName, 
-            new MapConfiguration(properties, PrimitiveTypeParsers.getExtendedParser())
+            Configurations.getBeanConfiguration(configuration)
         );
     }
 
@@ -240,7 +245,7 @@ public class PlugInFactory<T> extends BeanFactory<T> {
      * 
      * @param instanceClass
      * @param beanClassName
-     * @param configuration the Java Bean settings
+     * @param configuration the Java Bean configuration
      * 
      * @return a factory for the given class
      */
@@ -252,7 +257,7 @@ public class PlugInFactory<T> extends BeanFactory<T> {
     	return newInstance(
     		instanceClass, 
     		beanClassName, 
-            new MapConfiguration(configuration, PrimitiveTypeParsers.getExtendedParser())
+            Configurations.getBeanConfiguration(configuration)
     	);
     }
 

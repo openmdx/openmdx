@@ -75,16 +75,17 @@ public class TestAdaptiveInputStreamReader {
 			i++
 		) try {
 			System.out.println("Testing " + RESOURCES[i]);
-			AdaptiveInputStreamReader r = new AdaptiveInputStreamReader(
-				TestAdaptiveInputStreamReader.class.getClassLoader().getResourceAsStream(
-					resourcePrefix + RESOURCES[i]
-				),
-				null,
-				true,
-				true,
-				null
-			);
-			try {
+			try (
+			    AdaptiveInputStreamReader r = new AdaptiveInputStreamReader(
+    				TestAdaptiveInputStreamReader.class.getClassLoader().getResourceAsStream(
+    					resourcePrefix + RESOURCES[i]
+    				),
+    				null,
+    				true,
+    				true,
+    				null
+			    )
+			){
     			System.out.println("ByteOrderMark = " + r.getByteOrderMark());
     			System.out.println("XMLDeclaration = " + r.getXMLDclaration());
     			System.out.print("Document: ");
@@ -94,8 +95,6 @@ public class TestAdaptiveInputStreamReader {
     				c = r.read()
     			) System.out.print((char)c);
     			System.out.println('\n');
-			} finally {
-			    r.close();
 			}
 		} catch (IOException exception) {
 			exception.printStackTrace();

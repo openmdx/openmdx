@@ -103,6 +103,16 @@ public class LayerConfigurationEntries {
   static public final String TYPE = "type";
 
   /**
+   * EXCLUDE_TYPE list of types. List of exclude types.
+   */
+  static public final String EXCLUDE_TYPE = "excludeType";
+
+  /**
+   * INCLUDE_TYPE list of types. List of include types.
+   */
+  static public final String INCLUDE_TYPE = "includeType";
+
+  /**
      * TYPE_NAME list of type names. Path references are stored as
      * <typeName>{"/" <path-component[i]>} where path-component[i] is
      * non-wildcard.

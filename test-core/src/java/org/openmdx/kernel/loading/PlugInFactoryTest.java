@@ -53,8 +53,8 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openmdx.kernel.configuration.MapConfiguration;
-import org.w3c.spi.PrimitiveTypeParsers;
+import org.openmdx.kernel.configuration.Configurations;
+import org.openmdx.kernel.configuration.cci.Configuration;
 
 /**
  * Bean Factory Test
@@ -71,7 +71,7 @@ public class PlugInFactoryTest {
 		properties.put("integer", "4711");
 		properties.put("longs[1]", "10");
 		properties.put("longs[3]", "1000");
-		final MapConfiguration configuration = new MapConfiguration(properties, PrimitiveTypeParsers.getExtendedParser());	
+		final Configuration configuration = Configurations.getBeanConfiguration(properties);	
 		final Factory<AnInterface> testee = PlugInFactory.newInstance(
 			AnInterface.class,
 			configuration
@@ -94,11 +94,10 @@ public class PlugInFactoryTest {
 		Assert.assertEquals(1000l, longs[3]);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void whenConstructorWithConfigurationThenJustCreateInstance(){
 		// Arrange
-		final MapConfiguration configuration = new MapConfiguration(Collections.<String,Object>emptyMap(), PrimitiveTypeParsers.getExtendedParser());	
+		final Configuration configuration = Configurations.getBeanConfiguration(Collections.emptyMap());	
 		final Factory<AnAlternative> factory = (Factory<AnAlternative>) PlugInFactory.newInstance(
 			AnAlternative.class.getName(),
 			configuration

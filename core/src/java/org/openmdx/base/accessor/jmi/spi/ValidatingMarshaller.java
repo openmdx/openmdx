@@ -119,7 +119,7 @@ public class ValidatingMarshaller implements Marshaller {
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.ASSERTION_FAILURE,
 					"RefPackage mismatch, the object does not have the expected outermost package",
-					new BasicException.Parameter("xri", object.refMofId())
+					new BasicException.Parameter(BasicException.Parameter.XRI, object.refMofId())
 				).log();
 			}
 		}

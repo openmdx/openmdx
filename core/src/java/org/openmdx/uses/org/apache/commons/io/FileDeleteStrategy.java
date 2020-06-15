@@ -38,7 +38,7 @@ import java.io.IOException;
  * This class captures the strategy to use and is designed for user subclassing.
  *
  * @version $Id: FileDeleteStrategy.java 1563227 2014-01-31 19:45:30Z ggregory $
- * @since 1.3
+ * @since Commons I/O 1.3
  */
 public class FileDeleteStrategy {
 

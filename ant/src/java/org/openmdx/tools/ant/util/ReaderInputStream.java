@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ReaderInputStream.java,v 1.4 2010/06/04 22:27:36 hburger Exp $
  * Description: Reader InputStream
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:27:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

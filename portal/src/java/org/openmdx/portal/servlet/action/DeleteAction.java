@@ -95,11 +95,12 @@ public class DeleteAction extends BoundAction {
             nextView = currentView.getPreviousView(null);
         }
         catch (Exception e) {
-            ServiceException e0 = new ServiceException(e);
-            SysLog.warning(e0.getMessage(), e0.getCause());
+            ServiceException e0 = new ServiceException(e);        	
             try {
                 pm.currentTransaction().rollback();
-            } catch (Exception e1) {}
+            } catch (Exception ignore) {
+    			SysLog.trace("Exception ignored", ignore);
+            }
             currentView.handleCanNotCommitException(e0.getCause());
         }
         return new ActionPerformResult(
@@ -107,5 +108,5 @@ public class DeleteAction extends BoundAction {
             nextViewPortType
         );
     }
-        
+
 }

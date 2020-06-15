@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.jdo.Constants;
+import javax.jdo.JDOEnhancer;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalInternalException;
 import javax.jdo.JDOFatalUserException;
@@ -91,7 +92,6 @@ import org.xml.sax.SAXParseException;
  * <li>does not provide an instance
  * </ul>
  */
-@SuppressWarnings({"rawtypes","unchecked"})
 public class ReducedJDOHelper implements Constants {
 
     /**
@@ -99,7 +99,7 @@ public class ReducedJDOHelper implements Constants {
      * the name of an implementation of {@link PersistenceManagerFactory}.
      * Constant value is <code>META-INF/services/javax.jdo.PersistenceManagerFactory</code>.
      *
-     * @since 2.1
+     * @since JDO 2.1
      */
     static String SERVICE_LOOKUP_PMF_RESOURCE_NAME
         = Resources.toMetaInfPath("services/javax.jdo.PersistenceManagerFactory");
@@ -116,7 +116,7 @@ public class ReducedJDOHelper implements Constants {
     /**
      * A mapping from jdoconfig.xsd element attributes to PMF properties.
      */
-    static final Map ATTRIBUTE_PROPERTY_XREF
+    static final Map<String, String> ATTRIBUTE_PROPERTY_XREF
         = createAttributePropertyXref();
 
     /** The Internationalization message helper.
@@ -129,8 +129,8 @@ public class ReducedJDOHelper implements Constants {
      * @return An unmodifiable Map of jdoconfig.xsd element attributes to PMF
      * properties.
      */
-    static Map createAttributePropertyXref() {
-        Map xref = new HashMap();
+    static Map<String, String> createAttributePropertyXref() {
+        Map<String, String> xref = new HashMap<String,String>();
 
         xref.put(
             PMF_ATTRIBUTE_CLASS,
@@ -189,6 +189,12 @@ public class ReducedJDOHelper implements Constants {
         xref.put(
             PMF_ATTRIBUTE_SERVER_TIME_ZONE_ID,
             PROPERTY_SERVER_TIME_ZONE_ID);
+        xref.put(
+            PMF_ATTRIBUTE_DATASTORE_READ_TIMEOUT_MILLIS,
+            PROPERTY_DATASTORE_READ_TIMEOUT_MILLIS);
+        xref.put(
+            PMF_ATTRIBUTE_DATASTORE_WRITE_TIMEOUT_MILLIS,
+            PROPERTY_DATASTORE_WRITE_TIMEOUT_MILLIS);
 
         return Collections.unmodifiableMap(xref);
     }
@@ -198,18 +204,12 @@ public class ReducedJDOHelper implements Constants {
      */
     private static JDOImplHelper implHelper = (JDOImplHelper)
         AccessController.doPrivileged(
-            new PrivilegedAction () {
-                public Object run () {
+            new PrivilegedAction<JDOImplHelper> () {
+                public JDOImplHelper run () {
                     return JDOImplHelper.getInstance();
                 }
             }
         );
-
-    /** Some applications might prefer to use instance
-     * methods instead of static methods.
-     * @since 2.1
-     */
-    public ReducedJDOHelper() {}
 
     /** The stateless instance used for handling non-binary-compatible
     *  implementations of getPersistenceManager.
@@ -401,11 +401,11 @@ public class ReducedJDOHelper implements Constants {
      * @return the object ids of the parameters
      * @see #getObjectId(Object pc)
      * @see #getObjectIds(Object[] pcs)
-     * @since 2.0
+     * @since JDO 2.0
      */
-    public static Collection getObjectIds(Collection pcs) {
-        ArrayList result = new ArrayList();
-        for (Iterator it = pcs.iterator(); it.hasNext();) {
+    public static Collection<Object> getObjectIds(Collection<?> pcs) {
+        ArrayList<Object> result = new ArrayList<Object>();
+        for (Iterator<?> it = pcs.iterator(); it.hasNext();) {
             result.add(getObjectId(it.next()));
         }
         return result;
@@ -421,7 +421,7 @@ public class ReducedJDOHelper implements Constants {
      * @return the object ids of the parameters
      * @see #getObjectId(Object pc)
      * @see #getObjectIds(Collection pcs)
-     * @since 2.0
+     * @since JDO 2.0
      */
     public static Object[] getObjectIds(Object[] pcs) {
         Object[] result = new Object[pcs.length];
@@ -451,7 +451,7 @@ public class ReducedJDOHelper implements Constants {
     
     /**
      * Return the version of the instance.
-     * @since 2.0
+     * @since JDO 2.0
      * @param pc the instance
      * @return the version of the instance
      */
@@ -578,7 +578,7 @@ public class ReducedJDOHelper implements Constants {
      * <P>
      * @see PersistenceCapable#jdoIsDetached()
      * @return <code>true</code> if this instance is detached.
-     * @since 2.0
+     * @since JDO 2.0
      * @param pc the instance
      */
     public static boolean isDetached(Object pc) {
@@ -592,7 +592,7 @@ public class ReducedJDOHelper implements Constants {
     /** Accessor for the state of the passed object.
      * @param pc The object
      * @return The object state
-     * @since 2.1
+     * @since JDO 2.1
      */
     public static ObjectState getObjectState(Object pc) {
         if (pc == null) {
@@ -669,10 +669,10 @@ public class ReducedJDOHelper implements Constants {
      * the current thread's context class loader
      * to locate the configuration file resource(s).
      * @return the anonymous <code>PersistenceManagerFactory</code>.
-     * @since 2.1
+     * @since openMDX 2.17
      * @see #getPersistenceManagerFactory(Map,String,ClassLoader,ClassLoader)
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory() {
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory() {
         ClassLoader cl = getContextClassLoader();
         return getPersistenceManagerFactory(
                 null, ANONYMOUS_PERSISTENCE_MANAGER_FACTORY_NAME, cl, cl);
@@ -683,10 +683,10 @@ public class ReducedJDOHelper implements Constants {
      * the given class loader.
      * @return the anonymous <code>PersistenceManagerFactory</code>.
      * @param pmfClassLoader the ClassLoader used to load resources and classes
-     * @since 2.1
+     * @since openMDX 2.17
      * @see #getPersistenceManagerFactory(Map,String,ClassLoader,ClassLoader)
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory(
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory(
             ClassLoader pmfClassLoader) {
         return getPersistenceManagerFactory(
                 null,
@@ -701,9 +701,10 @@ public class ReducedJDOHelper implements Constants {
      * @param props a <code>Properties</code> instance with properties of the
      * <code>PersistenceManagerFactory</code>.
      * @see #getPersistenceManagerFactory(java.util.Map,ClassLoader)
+     * @since openMDX 2.17
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory
-            (Map props) {
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory
+            (Map<?, ?> props) {
         return getPersistenceManagerFactory(
                 null, props, getContextClassLoader());
     }
@@ -720,10 +721,10 @@ public class ReducedJDOHelper implements Constants {
      * <code>PersistenceManagerFactory</code>.
      * @param pmfClassLoader the class loader used to load the
      * <code>PersistenceManagerFactory</code> class
-     * @since 1.0
+     * @since openMDX 2.17
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory
-            (Map props, ClassLoader pmfClassLoader) {
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory
+            (Map<?, ?> props, ClassLoader pmfClassLoader) {
         return getPersistenceManagerFactory(
                 null, props, pmfClassLoader);
     }
@@ -756,6 +757,8 @@ public class ReducedJDOHelper implements Constants {
      * <BR>"javax.jdo.option.TransactionIsolationLevel",
      * <BR>"javax.jdo.option.TransactionType",
      * <BR>"javax.jdo.option.ServerTimeZoneID",
+     * <BR>"javax.jdo.option.DatastoreReadTimeoutMillis",
+     * <BR>"javax.jdo.option.DatastoreWriteTimeoutMillis",
      * <BR>"javax.jdo.option.Name".
      * </code>
      * and properties of the form
@@ -794,23 +797,27 @@ public class ReducedJDOHelper implements Constants {
      * (an entry in META-INF/services/javax.jdo.PersistenceManagerFactory); or
      * </li><li>all implementations throw an exception.
      * </li></ul>
-     * @since 2.1
+     * @since openMDX 2.17
      */
-    protected static PersistenceManagerFactory getPersistenceManagerFactory
-            (Map overrides, Map props, ClassLoader pmfClassLoader) {
-        List exceptions = new ArrayList();
+    protected static JDOPersistenceManagerFactory getPersistenceManagerFactory
+            (Map<?, ?> overrides, Map<?, ?> props, ClassLoader pmfClassLoader) {
+        
+        List<Throwable> exceptions = new ArrayList<Throwable>();
         if (pmfClassLoader == null)
             throw new JDOFatalUserException (msg.msg (
                 "EXC_GetPMFNullLoader")); //NOI18N
 
+        JDOImplHelper.assertOnlyKnownStandardProperties(overrides);
+        JDOImplHelper.assertOnlyKnownStandardProperties(props);
+        
         // first try to get the class name from the properties object.
         String pmfClassName = (String) props.get (
                 PROPERTY_PERSISTENCE_MANAGER_FACTORY_CLASS);
 
         if (!isNullOrBlank(pmfClassName)) {
-        // a valid name was returned from the properties.
+            // a valid name was returned from the properties.
             return invokeGetPersistenceManagerFactoryOnImplementation(
-                        pmfClassName, overrides, props, pmfClassLoader);
+                    pmfClassName, overrides, props, pmfClassLoader);
 
         } else {
             /*
@@ -829,7 +836,7 @@ public class ReducedJDOHelper implements Constants {
              * Otherwise add the exception thrown to 
              * an exception list.
              */
-            Enumeration urls = null;
+            Enumeration<URL> urls = null;
             try {
                 urls = getResources(pmfClassLoader,
                         SERVICE_LOOKUP_PMF_RESOURCE_NAME);
@@ -845,7 +852,7 @@ public class ReducedJDOHelper implements Constants {
                                 (URL) urls.nextElement());
 
                         // return the implementation that is valid.
-                        PersistenceManagerFactory pmf = 
+                        JDOPersistenceManagerFactory pmf = 
                             invokeGetPersistenceManagerFactoryOnImplementation(
                                 pmfClassName, overrides, props, pmfClassLoader);
                         return pmf;
@@ -875,7 +882,7 @@ public class ReducedJDOHelper implements Constants {
      * @param url the URL of the services file
      * @return the name of the class contained in the file
      * @throws java.io.IOException
-     * @since 2.1
+     * @since JDO 2.1
      */
 
     protected static String getClassNameFromURL (URL url) 
@@ -914,10 +921,10 @@ public class ReducedJDOHelper implements Constants {
      * Returns a named {@link PersistenceManagerFactory} or persistence
      * unit.
      *
-     * @since 2.1
+     * @since openMDX 2.17
      * @see #getPersistenceManagerFactory(Map,String,ClassLoader,ClassLoader)
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory
         (String name) {
         ClassLoader cl = getContextClassLoader();
         return getPersistenceManagerFactory(null, name, cl, cl);
@@ -927,10 +934,10 @@ public class ReducedJDOHelper implements Constants {
      * Returns a named {@link PersistenceManagerFactory} or persistence
      * unit.
      *
-     * @since 1.0
+     * @since openMDX 2.17
      * @see #getPersistenceManagerFactory(Map,String,ClassLoader,ClassLoader)
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory
         (String name, ClassLoader loader) {
         
         return getPersistenceManagerFactory(null, name, loader, loader);
@@ -940,10 +947,10 @@ public class ReducedJDOHelper implements Constants {
      * Returns a named {@link PersistenceManagerFactory} or persistence
      * unit.
      *
-     * @since 2.0
+     * @since openMDX 2.17
      * @see #getPersistenceManagerFactory(Map,String,ClassLoader,ClassLoader)
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory
         (String name, ClassLoader resourceLoader, ClassLoader pmfLoader) {
 
         return getPersistenceManagerFactory(
@@ -954,11 +961,11 @@ public class ReducedJDOHelper implements Constants {
      * Returns a named {@link PersistenceManagerFactory} or persistence
      * unit.
      *
-     * @since 2.1
+     * @since openMDX 2.17
      * @see #getPersistenceManagerFactory(Map,String,ClassLoader,ClassLoader)
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory
-            (Map overrides, String name) {
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory
+            (Map<?, ?> overrides, String name) {
 
         ClassLoader cl = getContextClassLoader();
         return getPersistenceManagerFactory(overrides, name, cl, cl);
@@ -968,11 +975,11 @@ public class ReducedJDOHelper implements Constants {
      * Returns a named {@link PersistenceManagerFactory} or persistence
      * unit.
      *
-     * @since 2.1
+     * @since openMDX 2.17
      * @see #getPersistenceManagerFactory(Map,String,ClassLoader,ClassLoader)
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory
-            (Map overrides, String name, ClassLoader resourceLoader) {
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory
+            (Map<?, ?> overrides, String name, ClassLoader resourceLoader) {
 
         return getPersistenceManagerFactory(
                 overrides, name, resourceLoader, resourceLoader);
@@ -1011,6 +1018,8 @@ public class ReducedJDOHelper implements Constants {
      * <BR>"javax.jdo.option.CopyOnAttach".
      * <BR>"javax.jdo.option.TransactionType".
      * <BR>"javax.jdo.option.ServerTimeZoneID".
+     * <BR>"javax.jdo.option.DatastoreReadTimeoutMillis",
+     * <BR>"javax.jdo.option.DatastoreWriteTimeoutMillis",
      * <BR>"javax.jdo.option.Name".
      * </code>
      * and properties of the form
@@ -1039,7 +1048,7 @@ public class ReducedJDOHelper implements Constants {
      * be wrapped in a {@link JDOFatalUserException}.
      * If multiple PMFs with the requested name are found, a
      * {@link JDOFatalUserException} is thrown.
-     * @since 2.1
+     * @since openMDX 2.17
      * @param overrides a Map containing properties that override properties
      * defined in any resources loaded according to the "name" parameter
      * @param name interpreted as the name of the resource containing the PMF
@@ -1056,12 +1065,11 @@ public class ReducedJDOHelper implements Constants {
      * name
      * @see Constants#ANONYMOUS_PERSISTENCE_MANAGER_FACTORY_NAME
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory(
-            Map overrides,
-            String rawName,
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory(
+            Map<?, ?> overrides,
+            String name,
             ClassLoader resourceLoader,
-            ClassLoader pmfLoader
-    ){
+            ClassLoader pmfLoader) {
         if (pmfLoader == null)
             throw new JDOFatalUserException (msg.msg (
                 "EXC_GetPMFNullPMFLoader")); //NOI18N
@@ -1070,9 +1078,9 @@ public class ReducedJDOHelper implements Constants {
                 "EXC_GetPMFNullPropsLoader")); //NOI18N
         }
 
-        Map props = null;
+        Map<Object,Object> props = null;
         // trim spaces from name and ensure non-null
-        String name = (rawName == null?ANONYMOUS_PERSISTENCE_MANAGER_FACTORY_NAME:rawName.trim());
+        name = (name == null?ANONYMOUS_PERSISTENCE_MANAGER_FACTORY_NAME:name.trim());
         if (!ANONYMOUS_PERSISTENCE_MANAGER_FACTORY_NAME.equals(name)) {
             props = loadPropertiesFromResource(resourceLoader, name);
         }
@@ -1117,19 +1125,20 @@ public class ReducedJDOHelper implements Constants {
      * @param properties a Map of properties
      * @param cl the class loader to use to load the implementation class
      * @return the PersistenceManagerFactory
+     * @since openMDX 2.17
      */
-    protected static PersistenceManagerFactory
+    protected static JDOPersistenceManagerFactory
         invokeGetPersistenceManagerFactoryOnImplementation(
-            String pmfClassName, Map overrides, Map properties, ClassLoader cl) {
+            String pmfClassName, Map<?, ?> overrides, Map<?, ?> properties, ClassLoader cl) {
         if (overrides != null) {
             // overrides is not null; use getPersistenceManagerFactory(Map overrides, Map props)
             try {
-                Class implClass = forName(pmfClassName, true, cl);
+                Class<?> implClass = forName(pmfClassName, true, cl);
                 Method m = getMethod(implClass,
                         "getPersistenceManagerFactory", //NOI18N
                         new Class[]{Map.class, Map.class});
-                PersistenceManagerFactory pmf = 
-                    (PersistenceManagerFactory) invoke(m,
+                JDOPersistenceManagerFactory pmf = 
+                    (JDOPersistenceManagerFactory) invoke(m,
                         null, new Object[]{overrides, properties});
                 if (pmf == null) {
                         throw new JDOFatalInternalException(msg.msg (
@@ -1162,12 +1171,12 @@ public class ReducedJDOHelper implements Constants {
         } else {
             // overrides is null; use getPersistenceManagerFactory(Map props)
             try {
-                Class implClass = forName(pmfClassName, true, cl);
+                Class<?> implClass = forName(pmfClassName, true, cl);
                 Method m = getMethod(implClass,
                         "getPersistenceManagerFactory", //NOI18N
                         new Class[]{Map.class});
-                PersistenceManagerFactory pmf = 
-                    (PersistenceManagerFactory) invoke(m,
+                JDOPersistenceManagerFactory pmf = 
+                    (JDOPersistenceManagerFactory) invoke(m,
                         null, new Object[]{properties});
                 if (pmf == null) {
                         throw new JDOFatalInternalException(msg.msg (
@@ -1205,8 +1214,7 @@ public class ReducedJDOHelper implements Constants {
      * @param name the name of the resource
      * @return a Properties instance or null if no resource is found
      */
-    @SuppressWarnings("cast")
-    protected static Map loadPropertiesFromResource(
+    protected static Map<Object,Object> loadPropertiesFromResource(
             ClassLoader resourceLoader, String name) {
         InputStream in = null;
         Properties props = null;
@@ -1227,7 +1235,6 @@ public class ReducedJDOHelper implements Constants {
                 try {
                     in.close();
                 } catch (IOException ioe) {
-                    // Ignored close failure
                 }
             }
         }
@@ -1236,9 +1243,9 @@ public class ReducedJDOHelper implements Constants {
 
     /**
      * @see #getNamedPMFProperties(String,ClassLoader,String)
-     * @since 2.1
+     * @since JDO 2.1
      */
-    protected static Map getPropertiesFromJdoconfig(
+    protected static Map<Object,Object> getPropertiesFromJdoconfig(
             String name,
             ClassLoader resourceLoader) {
         return getNamedPMFProperties(
@@ -1253,41 +1260,41 @@ public class ReducedJDOHelper implements Constants {
      * {@link JDOFatalUserException}.
      * This method is here only to facilitate testing; the parameter
      * "jdoconfigResourceName" in public usage should always have the value
-     * given in the constant {@link ReducedJDOHelper#JDOCONFIG_RESOURCE_NAME}.
+     * given in the constant {@link Constants#JDOCONFIG_RESOURCE_NAME}.
      *
      * @param name The persistence unit name; null is disallowed.
      * @param resourceLoader The ClassLoader used to load the standard JDO
      * configuration file.
      * @param jdoconfigResourceName The name of the configuration file to read.
      * In public usage, this should always be the value of
-     * {@link ReducedJDOHelper#JDOCONFIG_RESOURCE_NAME}.
+     * {@link Constants#JDOCONFIG_RESOURCE_NAME}.
      * @return The named <code>PersistenceManagerFactory</code> properties if
      * found, null if not.
-     * @since 2.1
+     * @since JDO 2.1
      * @throws JDOFatalUserException if multiple named PMF property sets are
      * found with the given name, or any other exception is encountered.
      */
-    protected static Map getNamedPMFProperties(
+    protected static Map<Object,Object> getNamedPMFProperties(
             String name,
             ClassLoader resourceLoader,
             String jdoconfigResourceName) {
         // key is PU name, value is Map of PU properties
-        Map/*<String,Map>*/ propertiesByNameInAllConfigs
-                = new HashMap/*<String,Map>*/();
+        Map<String,Map<Object,Object>> propertiesByNameInAllConfigs
+                = new HashMap<String,Map<Object,Object>>();
         try {
             URL firstFoundConfigURL = null;
 
             // get all JDO configurations
-            Enumeration resources =
+            Enumeration<URL> resources =
                 getResources(resourceLoader, jdoconfigResourceName);
 
             if (resources.hasMoreElements()) {
-                ArrayList processedResources = new ArrayList();
+                ArrayList<URL> processedResources = new ArrayList<URL>();
 
                 // get ready to parse XML
                 DocumentBuilderFactory factory = getDocumentBuilderFactory();
                 do {
-                    URL currentConfigURL = (URL) resources.nextElement();
+                    URL currentConfigURL = resources.nextElement();
                     if (processedResources.contains(currentConfigURL)) {
                         continue;
                     }
@@ -1295,7 +1302,7 @@ public class ReducedJDOHelper implements Constants {
                         processedResources.add(currentConfigURL);
                     }
                     
-                    Map/*<String,Map>*/ propertiesByNameInCurrentConfig =
+                    Map<String,Map<Object,Object>> propertiesByNameInCurrentConfig =
                         readNamedPMFProperties(
                             currentConfigURL,
                             name,
@@ -1334,12 +1341,12 @@ public class ReducedJDOHelper implements Constants {
 
         // done with reading all config resources;
         // return what we found, which may very well be null
-        return (Map) propertiesByNameInAllConfigs.get(name);
+        return (Map<Object,Object>) propertiesByNameInAllConfigs.get(name);
     }
 
 
-    @SuppressWarnings("static-access")
     protected static DocumentBuilderFactory getDocumentBuilderFactory() {
+        @SuppressWarnings("static-access")
         DocumentBuilderFactory factory =
                 implHelper.getRegisteredDocumentBuilderFactory();
         if (factory == null) {
@@ -1359,8 +1366,8 @@ public class ReducedJDOHelper implements Constants {
         return factory;
     }
 
-    @SuppressWarnings("static-access")
     protected static ErrorHandler getErrorHandler() {
+        @SuppressWarnings("static-access")
         ErrorHandler handler = implHelper.getRegisteredErrorHandler();
         if (handler == null) {
             handler = getDefaultErrorHandler();
@@ -1400,13 +1407,16 @@ public class ReducedJDOHelper implements Constants {
      * the anonymous persistence unit, the
      * value of the String key is the empty string, "".
      */
-    protected static Map/*<String,Map>*/ readNamedPMFProperties(
-        URL url,
-        String rawRequestedPMFName,
-        DocumentBuilderFactory factory
-    ) {
-        String requestedPMFName = rawRequestedPMFName == null ? "" : rawRequestedPMFName.trim();
-        Map propertiesByName = new HashMap();
+    protected static Map<String,Map<Object,Object>> readNamedPMFProperties(
+            URL url,
+            String requestedPMFName,
+            DocumentBuilderFactory factory) {
+        requestedPMFName = requestedPMFName == null
+            ? ""
+            : requestedPMFName.trim();
+
+        Map<String,Map<Object,Object>>
+                propertiesByName = new HashMap<String,Map<Object,Object>>();
         InputStream in = null;
         try {
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -1469,7 +1479,7 @@ public class ReducedJDOHelper implements Constants {
 
                 // check for duplicate properties among atts & elems
                 if (requestedPMFName.equals(pmfName)) {
-                    Iterator it =
+                    Iterator<?> it =
                         pmfPropertiesFromAttributes.keySet().iterator();
                     while (it.hasNext()) {
                         String property = (String) it.next();
@@ -1518,8 +1528,8 @@ public class ReducedJDOHelper implements Constants {
                 msg.msg(
                     "EXC_SAXParseException",
                     url.toExternalForm(),
-                    new Integer(e.getLineNumber()),
-                    new Integer(e.getColumnNumber())),
+                    Integer.valueOf(e.getLineNumber()),
+                    Integer.valueOf(e.getColumnNumber())),
                 e);
         }
         catch (SAXException e) {
@@ -1626,8 +1636,6 @@ public class ReducedJDOHelper implements Constants {
                 Node valueAtt = attributes.getNamedItem(
                     PROPERTY_ATTRIBUTE_VALUE);
                 if(valueAtt != null) {
-                    // The original implementation tried to
-                    // put null into a HashTable
                     String value = valueAtt.getNodeValue().trim();
                     p.put(propertyName, value);
                 }
@@ -1682,11 +1690,11 @@ public class ReducedJDOHelper implements Constants {
      * #getPersistenceManagerFactory(File,ClassLoader)} with
      * <code>Thread.currentThread().getContextClassLoader()</code> as
      * the <code>loader</code> argument.
-     * @since 2.0
+     * @since openMDX 2.17
      * @param propsFile the file containing the Properties
      * @return the PersistenceManagerFactory
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory
             (File propsFile) {
         return getPersistenceManagerFactory(
                 propsFile, getContextClassLoader());
@@ -1700,13 +1708,13 @@ public class ReducedJDOHelper implements Constants {
      * <code>IOException</code>s or
      * <code>FileNotFoundException</code>s thrown during resource
      * loading will be wrapped in a {@link JDOFatalUserException}.
-     * @since 2.0
+     * @since openMDX 2.17
      * @param propsFile the file containing the Properties
      * @param loader the class loader to use to load the 
      * <code>PersistenceManagerFactory</code> class
      * @return the PersistenceManagerFactory
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory
             (File propsFile, ClassLoader loader) {
         if (propsFile == null)
             throw new JDOFatalUserException (msg.msg (
@@ -1723,9 +1731,7 @@ public class ReducedJDOHelper implements Constants {
             if (in != null)
                 try { 
                     in.close (); 
-                } catch (IOException ioe) { 
-                    // Ignored close failure
-                }
+                } catch (IOException ioe) { }
         }
     }
 
@@ -1737,11 +1743,11 @@ public class ReducedJDOHelper implements Constants {
      * #getPersistenceManagerFactory(InputStream,ClassLoader)} with
      * <code>Thread.currentThread().getContextClassLoader()</code> as
      * the <code>loader</code> argument.
-     * @since 2.0
+     * @since openMDX 2.17
      * @param stream the stream containing the Properties
      * @return the PersistenceManagerFactory
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory
             (InputStream stream) {
         return getPersistenceManagerFactory(
                 stream, getContextClassLoader());
@@ -1754,13 +1760,13 @@ public class ReducedJDOHelper implements Constants {
      * PersistenceManagerFactory} with <code>loader</code>. Any
      * <code>IOException</code>s thrown during resource
      * loading will be wrapped in a {@link JDOFatalUserException}.
-     * @since 2.0
+     * @since openMDX 2.17
      * @param stream the stream containing the Properties
      * @param loader the class loader to use to load the 
      * <code>PersistenceManagerFactory</code> class
      * @return the PersistenceManagerFactory
      */
-    public static PersistenceManagerFactory getPersistenceManagerFactory
+    public static JDOPersistenceManagerFactory getPersistenceManagerFactory
             (InputStream stream, ClassLoader loader) {
         if (stream == null)
             throw new JDOFatalUserException (msg.msg (
@@ -1776,15 +1782,77 @@ public class ReducedJDOHelper implements Constants {
         return getPersistenceManagerFactory (props, loader);
     }
 
+    /**
+     * Get a <code>JDOEnhancer</code> using the available enhancer(s) specified in
+     * "META-INF/services/JDOEnhancer" using the context class loader.
+     * @return the <code>JDOEnhancer</code>.
+     * @throws JDOFatalUserException if no available enhancer
+     * @since JDO 3.0
+     */
+    public static JDOEnhancer getEnhancer() {
+        return getEnhancer(getContextClassLoader());
+    }
+
+    /**
+     * Get a <code>JDOEnhancer</code> using the available enhancer(s) specified in
+     * "META-INF/services/JDOEnhancer"
+     * @param loader the loader to use for loading the JDOEnhancer class (if any)
+     * @return the <code>JDOEnhancer</code>.
+     * @throws JDOFatalUserException if no available enhancer
+     * @since JDO 3.0
+     */
+    public static JDOEnhancer getEnhancer(ClassLoader loader) {
+            ClassLoader ctrLoader = loader;
+        if (ctrLoader == null) {
+            ctrLoader = Thread.currentThread().getContextClassLoader();
+        }
+
+    /*
+     * If you have a jar file that provides the jdo enhancer implementation,
+     * a file naming the implementation goes into the file 
+     * packaged into the jar file, called "META-INF/services/javax.jdo.JDOEnhancer".
+     * The contents of the file is a string that is the enhancer class name.
+     * For each file in the class loader named "META-INF/services/javax.jdo.JDOEnhancer",
+     * this method will invoke the default constructor of the implementation class.
+     * Return the enhancer if a valid class name is extracted from resources and
+     * the invocation returns an instance.
+     * Otherwise add the exception thrown to an exception list.
+     */
+        ArrayList<Throwable> exceptions = new ArrayList<Throwable>();
+        int numberOfJDOEnhancers = 0;
+        try {
+            Enumeration<URL> urls = getResources(loader, SERVICE_LOOKUP_ENHANCER_RESOURCE_NAME);
+            if (urls != null) {
+                while (urls.hasMoreElements()) {
+                    numberOfJDOEnhancers++;
+                    try {
+                        String enhancerClassName = getClassNameFromURL((URL)urls.nextElement());
+                        Class<?> enhancerClass = forName(enhancerClassName, true, ctrLoader);
+                        JDOEnhancer enhancer = (JDOEnhancer)enhancerClass.newInstance();
+                        return enhancer;
+                    } catch (Throwable ex) {
+                        // remember exceptions from failed enhancer invocations
+                        exceptions.add(ex);
+                    }
+                }
+            }
+        } catch (Throwable ex) {
+            exceptions.add(ex);
+        }
+
+        throw new JDOFatalUserException(msg.msg("EXC_GetEnhancerNoValidEnhancerAvailable", numberOfJDOEnhancers),
+                (Throwable[])exceptions.toArray(new Throwable[exceptions.size()]));
+    }
+
     /** Get the context class loader associated with the current thread. 
      * This is done in a doPrivileged block because it is a secure method.
      * @return the current thread's context class loader.
-     * @since 2.0
+     * @since JDO 2.0
      */
     private static ClassLoader getContextClassLoader() {
-        return (ClassLoader)AccessController.doPrivileged(
-            new PrivilegedAction () {
-                public Object run () {
+        return AccessController.doPrivileged(
+            new PrivilegedAction<ClassLoader> () {
+                public ClassLoader run () {
                     return Thread.currentThread().getContextClassLoader();
                 }
             }
@@ -1796,9 +1864,9 @@ public class ReducedJDOHelper implements Constants {
      */
     private static InputStream getResourceAsStream(
             final ClassLoader resourceLoader, final String name) {
-        return (InputStream)AccessController.doPrivileged(
-            new PrivilegedAction() {
-                public Object run() {
+        return AccessController.doPrivileged(
+            new PrivilegedAction<InputStream>() {
+                public InputStream run() {
                     return resourceLoader.getResourceAsStream(name);
                 }
             }
@@ -1815,14 +1883,14 @@ public class ReducedJDOHelper implements Constants {
      * @return the Method instance
      */
     private static Method getMethod(
-            final Class implClass, 
+            final Class<?> implClass, 
             final String methodName, 
-            final Class[] parameterTypes) 
+            final Class<?>[] parameterTypes) 
                 throws NoSuchMethodException {
         try {
-            return (Method) AccessController.doPrivileged(
-                new PrivilegedExceptionAction() {
-                    public Object run() throws NoSuchMethodException {
+            return AccessController.doPrivileged(
+                new PrivilegedExceptionAction<Method>() {
+                    public Method run() throws NoSuchMethodException {
                         return implClass.getMethod(methodName, parameterTypes);
                     }
                 }
@@ -1839,8 +1907,8 @@ public class ReducedJDOHelper implements Constants {
             final Object instance, final Object[] parameters) 
                 throws IllegalAccessException, InvocationTargetException {
         try {
-            return AccessController.doPrivileged(
-                new PrivilegedExceptionAction() {
+            return (Object) AccessController.doPrivileged(
+                new PrivilegedExceptionAction<Object>() {
                     public Object run() 
                         throws IllegalAccessException, 
                             InvocationTargetException {
@@ -1849,7 +1917,7 @@ public class ReducedJDOHelper implements Constants {
                 }
             );
         } catch (PrivilegedActionException ex) {
-            Exception cause = ex.getException();
+            Exception cause = (Exception)ex.getException();
             if (cause instanceof IllegalAccessException)
                 throw (IllegalAccessException)cause;
             else //if (cause instanceof InvocationTargetException)
@@ -1863,14 +1931,14 @@ public class ReducedJDOHelper implements Constants {
      * @param resourceName
      * @return the resources
      */
-    protected static Enumeration getResources(
+    protected static Enumeration<URL> getResources(
             final ClassLoader resourceLoader, 
             final String resourceName) 
                 throws IOException {
         try {
-            return (Enumeration) AccessController.doPrivileged(
-                new PrivilegedExceptionAction() {
-                    public Object run() throws IOException {
+            return AccessController.doPrivileged(
+                new PrivilegedExceptionAction<Enumeration<URL>>() {
+                    public Enumeration<URL> run() throws IOException {
                         return resourceLoader.getResources(resourceName);
                     }
                 }
@@ -1888,15 +1956,15 @@ public class ReducedJDOHelper implements Constants {
      * @param loader which class loader to use
      * @return the class
      */
-    private static Class forName(
+    private static Class<?> forName(
             final String name, 
             final boolean init, 
             final ClassLoader loader) 
                 throws ClassNotFoundException {
         try {
-            return (Class) AccessController.doPrivileged(
-                new PrivilegedExceptionAction() {
-                    public Object run() throws ClassNotFoundException {
+            return AccessController.doPrivileged(
+                new PrivilegedExceptionAction<Class<?>>() {
+                    public Class<?> run() throws ClassNotFoundException {
                         return Class.forName(name, init, loader);
                     }
                 }
@@ -1915,9 +1983,9 @@ public class ReducedJDOHelper implements Constants {
     private static InputStream openStream(final URL url) 
             throws IOException {
         try {
-            return (InputStream) AccessController.doPrivileged(
-                new PrivilegedExceptionAction() {
-                    public Object run() throws IOException {
+            return AccessController.doPrivileged(
+                new PrivilegedExceptionAction<InputStream>() {
+                    public InputStream run() throws IOException {
                         return url.openStream();
                     }
                 }

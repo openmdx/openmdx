@@ -62,8 +62,6 @@ public class ModelHelper {
 		// Avoid instantiation
 	}
 
-	public static String UNBOUND = "0..n";
-
 	/**
 	 * Determine multiplicity of feature. In case of an attribute it is the
 	 * modeled multiplicity. In case of a reference with a qualifier the
@@ -82,12 +80,11 @@ public class ModelHelper {
 			if (!referencedEnd.objGetList("qualifierType").isEmpty()) {
 				ModelElement_1_0 qualifierType = model.getDereferencedType(referencedEnd.getQualifierType());
 				return model.isNumericType(qualifierType) ? Multiplicity.LIST : Multiplicity.MAP;
-			} else if (UNBOUND.equals(multiplicity)) {
-				// map aggregation none, multiplicity 0..n, no qualifier to
-				// <<set>>
+			} else if (Multiplicity.UNBOUNDED.equals(multiplicity)) {
+				// map aggregation none, multiplicity 0..n, no qualifier to <<set>>
 				return Multiplicity.SET;
 			}
-		} else if (UNBOUND.equals(multiplicity)) {
+		} else if (Multiplicity.UNBOUNDED.equals(multiplicity)) {
 			// map 0..n for primitive types to <<list>> (deprecated)
 			return Multiplicity.LIST;
 		}
@@ -170,7 +167,7 @@ public class ModelHelper {
 	public static Multiplicity toMultiplicity(String value) {
 		if (value == null) {
 			return null;
-		} else if (UNBOUND.equals(value)) {
+		} else if (Multiplicity.UNBOUNDED.equals(value)) {
 			return Multiplicity.LIST;
 		} else {
 			for (Multiplicity candidate : Multiplicity.values()) {

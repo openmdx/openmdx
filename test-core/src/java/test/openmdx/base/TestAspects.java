@@ -49,7 +49,6 @@ package test.openmdx.base;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
@@ -63,8 +62,6 @@ import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
 import javax.resource.ResourceException;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -73,6 +70,7 @@ import org.junit.Test;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 
+import junit.framework.JUnit4TestAdapter;
 import test.openmdx.base.cci2.AnAspectQuery;
 import test.openmdx.base.jmi1.AnAspect;
 import test.openmdx.base.jmi1.BasePackage;
@@ -265,11 +263,7 @@ public class TestAspects {
         aspectQuery.core().equalTo(core);
         List<AnAspect> aspects = segment.getObject(aspectQuery);
         System.out.println("Created by " + core.getCreatedBy() + " at " + core.getCreatedAt());
-        if(principalName == null) {
-            assertTrue("core.createdBy", core.getCreatedBy().isEmpty());
-        } else {
-            assertEquals("core.createdBy", Collections.singleton(principalName), core.getCreatedBy());
-        }
+        assertEquals("core.createdBy", Collections.singleton(principalName), core.getCreatedBy());
         assertEquals("aspects.size", aspects.size(), 1);
         assertEquals("aspect.string", "eins", aspects.get(0).getString());
         assertEquals("aspect.createdBy", core.getCreatedBy(), aspects.get(0).getCreatedBy());

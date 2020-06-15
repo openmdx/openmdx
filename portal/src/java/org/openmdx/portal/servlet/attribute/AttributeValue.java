@@ -274,13 +274,15 @@ public abstract class AttributeValue implements Serializable {
      * @return
      */
     public Object getRawValue(
+    	ViewPort p     		
     ) {
     	return this.getValue(
+    		p,
     		this.fieldDef.qualifiedFeatureName,
     		true
     	);
     }
- 
+
     /**
      * Get feature value.
      * 
@@ -289,6 +291,7 @@ public abstract class AttributeValue implements Serializable {
      * @return
      */
     protected Object getValue(
+    	ViewPort p,
         String feature,
         boolean shortFormat
     ) {
@@ -317,21 +320,8 @@ public abstract class AttributeValue implements Serializable {
                 } else {
                     return value;
                 }
-            } catch(JmiServiceException e) {
-                if(
-                    (e.getExceptionCode() == BasicException.Code.NOT_FOUND) ||
-                    (e.getExceptionCode() == BasicException.Code.AUTHORIZATION_FAILURE)
-                ) {
-                    return e.getCause();
-                } else {
-                	SysLog.detail("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
-                	SysLog.detail(e.getMessage(), e.getCause());
-                    return null;
-                }
             } catch(Exception e) {
-            	SysLog.detail("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
-                ServiceException e0 = new ServiceException(e);
-                SysLog.detail(e0.getMessage(), e0.getCause());
+            	this.logNotAccessible(p, e, 0);
                 return null;
             }
         } else {
@@ -347,9 +337,11 @@ public abstract class AttributeValue implements Serializable {
      * @return
      */
     public Object getValue(
+    	ViewPort p,
         boolean shortFormat
     ) {
         return this.getValue(
+        	p,
             this.fieldDef.qualifiedFeatureName,
             shortFormat
         );
@@ -363,10 +355,11 @@ public abstract class AttributeValue implements Serializable {
      */
     @SuppressWarnings("unchecked")
     protected Collection<?> getValues(
+    	ViewPort p,
         boolean shortFormat
     ) {
         Collection<Object> values = null;
-        Object value = this.getValue(shortFormat);
+        Object value = this.getValue(p, shortFormat);
         if(value instanceof Collection) {
             values = (Collection<Object>)value;
         }
@@ -408,10 +401,12 @@ public abstract class AttributeValue implements Serializable {
      * @return
      */
     public String getString(
+    	ViewPort p,     		
         String feature,
         boolean shortFormat
     ) {
         Object value = this.getValue(
+        	p,
             feature,
             shortFormat
         );
@@ -422,10 +417,38 @@ public abstract class AttributeValue implements Serializable {
             } else {
                 return null;
             }
-        }
-        else {
+        } else {
             return value == null ? null : value.toString();
         }
+    }
+
+    /**
+     * Log if value is not accessible.
+     * 
+     * @param p
+     * @param e
+     * @param index
+     */
+    protected void logNotAccessible(
+    	ViewPort p,
+    	Exception e,
+    	int index
+    ) {
+    	RefObject_1_0 viewObject = null;
+    	if(p != null && p.getView() != null) {
+    		viewObject = p.getView().getObject() instanceof RefObject_1_0 ? (RefObject_1_0)p.getView().getObject() : null;
+    	}
+    	ServiceException e0 = new ServiceException(
+    		e,
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_AVAILABLE,
+            "Unable to access feature value",
+    		new BasicException.Parameter("view.xri", viewObject == null ? null : viewObject.refGetPath()),
+    		new BasicException.Parameter("object.xri", this.getObject() instanceof RefObject_1_0 ? ((RefObject_1_0)this.getObject()).refGetPath() : null),
+    		new BasicException.Parameter("feature", this.fieldDef.qualifiedFeatureName),
+    		new BasicException.Parameter("index", index)
+    	);
+    	e0.log();
     }
 
     /** 
@@ -443,9 +466,10 @@ public abstract class AttributeValue implements Serializable {
         boolean forEditing,
         boolean shortFormat
     ) {    
-        Object value = this.getValue(shortFormat);
+        Object value = this.getValue(p, shortFormat);
         StringBuilder stringifiedValue = new StringBuilder();
         if(value instanceof Collection) {
+        	int index = 0;
             for(
                 Iterator<?> i = ((Collection<?>)value).iterator(); 
                 i.hasNext(); 
@@ -454,8 +478,7 @@ public abstract class AttributeValue implements Serializable {
                 try {
                     v = i.next();
                 } catch(Exception e) {
-                    ServiceException e0 = new ServiceException(e);
-                    SysLog.detail(e0.getMessage(), e0.getCause());
+                	this.logNotAccessible(p, e, index);
                 }
                 boolean hasDivTag = false;
                 if(!this.isSingleValued()) {
@@ -466,13 +489,12 @@ public abstract class AttributeValue implements Serializable {
                     } else if(multiLine)  {
                         stringifiedValue.append("<div>");
                         hasDivTag = true;
-                    }
-                    // multi-valued, non-spanned
-                    else {
+                    } else {
+                        // multi-valued, non-spanned
                         if(stringifiedValue.length() > 0) {
                             stringifiedValue.append("; ");
                         }
-                    }              
+                    }             
                 }
                 if(v != null) {
                 	String internalValue = this.getStringifiedValueInternal(
@@ -491,6 +513,7 @@ public abstract class AttributeValue implements Serializable {
                         stringifiedValue.append("</div>");
                     }                
                 }
+                index++;
             }
         } else {
             if(value != null) {
@@ -534,7 +557,7 @@ public abstract class AttributeValue implements Serializable {
     @Override
     public String toString(
     ) {
-        Object value = this.getValue(false);
+        Object value = this.getValue(null, false);
         return value == null
             ? null
             : value.toString();
@@ -643,7 +666,9 @@ public abstract class AttributeValue implements Serializable {
     		String upper = multiplicity.substring(multiplicity.indexOf("..") + 2);
     		Integer.parseInt(upper);
     		upperBound = upper;
-    	} catch(Exception e) {}        		
+        } catch(Exception ignore) {
+			SysLog.trace("Exception ignored", ignore);
+    	}        		
         return upperBound;        
     }
 

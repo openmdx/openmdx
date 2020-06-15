@@ -339,16 +339,22 @@ public class TestSparseArray {
         
 	    // Test Add()/Set
 	    array.asList().add("ZZZZ");
-	    subArray.asList().add("ZZZZ");
-	    subArray.asList().add("XXXX");
+	    try {
+            subArray.asList().add("ZZZZ");
+            fail("IndexOutOfBoundsException expected");
+	    } catch (IndexOutOfBoundsException expected) {
+	        subArray.asList().set(102, "ZZZZ");
+	    }
+        subArray.asList().add("XXXX");
+	    
 	    subArray.put(104, "YYYY");
 	    assertTrue(subArray.values().remove("ZZZZ"));
 
         assertEquals("array.toString()", "{100=The, 101=quick, 103=XXXX, 104=YYYY, 112=CCCC, 113=DDDD, 114=ZZZZ}", array.toString());
         assertEquals("subArray.toString()", "{103=XXXX, 104=YYYY}", subArray.toString());
 
-        assertEquals("subArray.indexOf('XXXX')", 1, subArray.asList().indexOf("XXXX"));
-        assertEquals("subArray.indexOf('YYYY')", 2, subArray.asList().indexOf("YYYY"));
+        assertEquals("subArray.indexOf('XXXX')", 103, subArray.asList().indexOf("XXXX"));
+        assertEquals("subArray.indexOf('YYYY')", 104, subArray.asList().indexOf("YYYY"));
         assertEquals("subArray.indexOf('ZZZZ')",  -1, subArray.asList().indexOf("ZZZZ"));
         assertEquals("array.indexOf('XXXX')", 103, array.asList().indexOf("XXXX"));
         assertEquals("array.indexOf('YYYY')", 104, array.asList().indexOf("YYYY"));
@@ -356,9 +362,9 @@ public class TestSparseArray {
 
         // Test asList()
         List<String> list = subArray.asList();
-        assertEquals("subArray.asList().size()", 3, list.size());
+        assertEquals("subArray.asList().size() " + subArray, 105, list.size());
         for(int i=0; i<list.size(); i++) {
-            if ( i == 1 || i == 2 ) {
+            if ( i == 103 || i == 104 ) {
                 assertNotNull("subArray.asList().get(" + i + ")", list.get(i));
             }
             else {
@@ -452,8 +458,8 @@ public class TestSparseArray {
                      
         SparseArray<String> cloneSubSubArray = newStringSparseArray(subSubArray);
 
-        assertEquals("subArray.indexOf('Hallo')", 11, subArray.asList().indexOf("Hallo"));
-        assertEquals("subSubArray.indexOf('Hallo')", 1, subSubArray.asList().indexOf("Hallo"));
+        assertEquals("subArray.indexOf('Hallo')", 113, subArray.asList().indexOf("Hallo"));
+        assertEquals("subSubArray.indexOf('Hallo')", 113, subSubArray.asList().indexOf("Hallo"));
         subSubArray.values().remove("Hallo");
         assertEquals("array.toString()",
                      "{100=The, 101=quick, 102=brown, 103=Fox, 110=AAAA, 111=BBBB, 114=Joe, 115=FFFF, 116=GGGG, 117=HHHH}",
@@ -511,9 +517,16 @@ public class TestSparseArray {
 	// Verify method
 	//------------------------------------------------------------------------
 
+    public void verifySparseArray(SparseArray<String> array,
+        int expectedStartValue,
+        int expectedListSize) {
+        verifySparseArray(array, expectedStartValue, expectedListSize - 1, expectedListSize);
+    }
+    
 	public void verifySparseArray(SparseArray<String> array,
                                   int expectedStartValue,
-                                  int expectedEndValue) {
+                                  int expectedEndValue,
+                                  int expectedListSize) {
         // Test GetEnumerator
         StringBuffer sb = new StringBuffer();
         for (Iterator<String> iter = array.values().iterator(); iter.hasNext();) {
@@ -527,9 +540,9 @@ public class TestSparseArray {
             assertEquals("SparseArray.start()", expectedStartValue, array.firstKey().intValue());
         }
         if(expectedEndValue > 0) {
-            assertEquals("SparseArray.end()",   expectedEndValue,   array.lastKey().intValue() + 1);
+            assertEquals("SparseArray.end()",   expectedEndValue,   array.lastKey().intValue());
         }
-        assertEquals( "SortedMap.AsList().Count", expectedEndValue, array.asList().size() );
+        assertEquals( "SortedMap.AsList().Count " + array, expectedListSize, array.asList().size() );
     }
 	
 }

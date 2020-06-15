@@ -1,15 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ArchiveTask.java,v 1.2 2005/12/06 16:47:04 hburger Exp $
  * Description: Ant Cleaning-Up Task
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/12/06 16:47:04 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2005, OMEX AG, Switzerland
  * All rights reserved.

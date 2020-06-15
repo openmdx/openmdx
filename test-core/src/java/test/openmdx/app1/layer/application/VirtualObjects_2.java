@@ -178,7 +178,7 @@ public class VirtualObjects_2
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
                         "Virtual objects can't be created",
-                        new BasicException.Parameter("xri", xri))
+                        new BasicException.Parameter(BasicException.Parameter.XRI, xri))
 
                 );
             } else {
@@ -205,7 +205,7 @@ public class VirtualObjects_2
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
                         "Virtual objects can't be removed",
-                        new BasicException.Parameter("xri", xri)));
+                        new BasicException.Parameter(BasicException.Parameter.XRI, xri)));
             } else {
                 //
                 // non-virtual objects
@@ -233,7 +233,7 @@ public class VirtualObjects_2
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
                         "Virtual objects can't be replaced",
-                        new BasicException.Parameter("xri", xri)));
+                        new BasicException.Parameter(BasicException.Parameter.XRI, xri)));
             } else {
                 //
                 // non-virtual objects

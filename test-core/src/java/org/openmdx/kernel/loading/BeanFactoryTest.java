@@ -52,8 +52,8 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openmdx.kernel.configuration.MapConfiguration;
-import org.w3c.spi.PrimitiveTypeParsers;
+import org.openmdx.kernel.configuration.Configurations;
+import org.openmdx.kernel.configuration.cci.Configuration;
 
 /**
  * Bean Factory Test
@@ -70,7 +70,7 @@ public class BeanFactoryTest {
 		properties.put("integer", "4711");
 		properties.put("longs[1]", "10");
 		properties.put("longs[3]", "1000");
-		final MapConfiguration configuration = new MapConfiguration(properties, PrimitiveTypeParsers.getExtendedParser());	
+		final Configuration configuration = Configurations.getBeanConfiguration(properties);
 		// Act
 		final Factory<AnInterface> factory = BeanFactory.newInstance(
 			AnInterface.class,

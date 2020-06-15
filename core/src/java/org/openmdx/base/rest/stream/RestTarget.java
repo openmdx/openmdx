@@ -54,6 +54,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.naming.URLEncoder;
 import org.openmdx.base.rest.spi.Target;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
@@ -69,7 +70,7 @@ public abstract class RestTarget implements Target {
      * @param uri
      */
     protected RestTarget(String uri) {
-        this.base = uri;
+        this.urlEncoder = new URLEncoder(uri);
     }
 
     /**
@@ -88,9 +89,9 @@ public abstract class RestTarget implements Target {
     }
 
     /**
-     * The HREF prefix
+     * The URL encoder
      */
-    private final String base;
+    private final URLEncoder urlEncoder;
 
     /**
      * The XML output stream
@@ -103,7 +104,7 @@ public abstract class RestTarget implements Target {
      * @return the HREF prefix
      */
     protected String getBase() {
-        return this.base;
+        return this.urlEncoder.getContextURL();
     }
 
     /**
@@ -162,13 +163,10 @@ public abstract class RestTarget implements Target {
      * 
      * @return the href URL for the given XRI
      */
-    protected String toURL(Path xri) {
-        if (xri == null) {
-            return this.base + "/!" + UUIDs.newUUID();
-        } else {
-            String uri = xri.toXRI();
-            return this.base + "/" + uri.substring(uri.charAt(14) == '!' ? 14 : 15);
-        }
+    protected String toURL(
+        Path xri
+    ) {
+        return xri != null ? urlEncoder.encode(xri) : getBase() + "/!" + UUIDs.newUUID();
     }
 
 }

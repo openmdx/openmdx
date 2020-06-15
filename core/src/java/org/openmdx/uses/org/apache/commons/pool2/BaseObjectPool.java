@@ -34,9 +34,7 @@ package org.openmdx.uses.org.apache.commons.pool2;
  *
  * @param <T> Type of element pooled in this pool.
  *
- * @version $Revision: 1566605 $
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public abstract class BaseObjectPool<T> implements ObjectPool<T> {
 

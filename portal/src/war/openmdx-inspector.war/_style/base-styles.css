@@ -7,53 +7,53 @@
  *
  * ====================================================================
  */
-
+ 
 /**
  * Bootstrap styles
  *
  */
-.table {
-  margin-bottom: 0px;
-  border-collapse: separate;
-  border-spacing: 0 2px;
+body {
+  font-size:0.9rem;
 }
-.table thead th {
-  background-color: #EEEEEE;
+.dropdown-menu {
+  margin-top: -2px;
+  padding: .2rem 0.15rem 0.2rem 0.75rem;
+  z-index:1002;
 }
-.table tr td:first-child,
-.table tr th:first-child {
-  border-top-left-radius: 6px;
-  border-bottom-left-radius: 6px;
+.dropdown-item {
+  padding: .4rem 1.5rem 0.4rem 0;
 }
-.table tr td:last-child,
-.table tr th:last-child {
-  border-top-right-radius: 6px;
-  border-bottom-right-radius: 6px;
+.table th {
+  padding: .1rem .1rem;
+  border-top: 0px;
+  background-color:#F4F4F4 ;
 }
-.table > tbody > tr {
-    page-break-inside:auto;
+.table td {
+  padding: .5rem .5rem;
+  border-top: 0px;
 }
-.table > tbody > tr > td {
-    border-bottom: 1px solid #DDDDDD;
-    border-top: 0px;
+span.nav-link a b {
+  font-size:85%;
 }
-.nav-tabs > li.active > a {
-  border-left-color:#E5E5E5;
-  border-top-color:#E5E5E5;
-  border-right-color:#E5E5E5;
-  border-bottom-color:#FFFFFF;
-  background-color:#FFFFFF;
+.nav-tabs .nav-link {
+  border: 1px solid #E5E5E5 ;
+  background-color:#F4F4F4 ;
+  margin-right:2px;
 }
-.nav-tabs > li > a {
-  border-color:#E5E5E5;
-  background-color:#F4F4F4;
+.nav-tabs .nav-link:hover {
+  background-color:#ddd ;
 }
-.nav-pills > li.active > a {
-  background-color:#EEEEEE;
+.nav-link.active {
+  font-weight:bold;
 }
-.nav-condensed > li > a {
-   padding-top: 6px; 
-   padding-bottom: 6px; 
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+  background-color:white !important;
+}
+span.nav-link {
+  padding: .05rem .1rem;
+}
+.breadcrumb {
+  padding: .5rem 1rem;
 }
 @media print { 
   .table-responsive {
@@ -159,9 +159,15 @@ html>body #econtent {
   border: 1px solid rgba(0, 0, 0, 0.05);
   border-collapse: collapse;
   border-radius: 5px;
+  font-size:100%;
+}
+.workspaceDashboard .nav-link {
+  font-size:110%;
 }
 .dashlet {
 	/* border-bottom:1px solid #DDDDDD; */
+	max-width:165px;
+  overflow:hidden;
 }
 .dashletTitle {
   font-weight:bold;
@@ -171,9 +177,6 @@ html>body #econtent {
   border-radius:5px;
   border-collapse:collapse;
   padding:4px;
-}
-#breadcrum a {
-  font-size:11pt;
 }
 #etitle {
   padding:11px 0px 25px 7px;
@@ -280,7 +283,7 @@ a:hover {
 }
 *, * td, * ul {
   text-decoration: none;
-  line-height: 1.3em;
+  line-height: 1.3rem;
 }
 .smallFont {
   font-size:7pt;
@@ -344,8 +347,8 @@ img {
 #SearchInput {
 }
 #searchExpression {
+  font-size:smaller;
   margin:1px 0px 0px 0px;
-  height:18px;
 }
 #segmentLogo {
   text-align:center;
@@ -465,7 +468,7 @@ img {
 }
 #reloadIcon {
   float:left;
-  padding:10px;
+  padding:.5rem 1rem;
   cursor:pointer;
 }
 #toggleViewPort {
@@ -476,7 +479,7 @@ img {
   color:#888;
   background-color:#F5F5F5;
   width:36px;
-  margin: 7px 8px 0;  
+  margin: 2px 8px 0;  
   padding-right:22px;
   padding-top:0px;
   float: right;
@@ -512,9 +515,6 @@ img {
   background-image: url('../images/print.gif');
   background-repeat: no-repeat;
   background-position: left;
-}
-#printButton:hover {
-  background-image: url('../images/printSelected.gif');
 }
 #nextButton {
   background-color:#F5F5F5;
@@ -555,9 +555,6 @@ img {
   background-repeat: no-repeat;
   background-position: left;
 }
-#headerShown:hover {
-  background-image: url('../images/headerHide.gif');
-}
 #headerHidden {
   background-color:#F5F5F5;
   width:16px;
@@ -571,12 +568,9 @@ img {
   background-repeat: no-repeat;
   background-position: left;
 }
-#headerHidden:hover {
-  background-image: url('../images/headerShow.gif');
-}
 #perspectiveSelector {
-  margin:0px 10px 0px 10px;
-  padding-top:5px;
+  margin:0px 5px 0px 5px;
+  padding-top:2px;
   color:#888;
   background-color:#F5F5F5;
   float: right;
@@ -597,9 +591,6 @@ img {
   background-image: url('../images/closeInsp.gif');
   background-repeat: no-repeat;
   background-position: left;
-}
-#closeButton:hover {
-  background-image: url('../images/closeInspSelected.gif');
 }
 .tab-content{
   display:none;
@@ -643,7 +634,7 @@ img {
   width: 100%;
   vertical-align: absbottom;
  }
-.tablePanel td {
+.tablePanel > tbody > tr > td {
   vertical-align: absbottom;
   padding: 0px 4px 0px 2px;
 }
@@ -675,6 +666,10 @@ img {
  }
 .tableError td {
    padding: 5px;
+}
+.table-row-striped {
+  border-top: 1px solid #E5E5E5;
+  border-bottom: 1px solid #E5E5E5;
 }
 .cellErrorLeft {
   font-weight: bold;
@@ -1207,6 +1202,9 @@ input.selimgsubmithover { /* IE :hover workaround */
   padding:0;
   border:0;
 }
+#gm img {
+  width: 14px;
+}
 .opFieldGroupName {
   text-align: left;
   text-decoration: none;
@@ -1223,7 +1221,7 @@ input.selimgsubmithover { /* IE :hover workaround */
 .fieldGroupName {
   text-align: left;
   text-decoration: none;
-  font-size: 9px;
+  font-size: 80%;
   border-style: solid;
   border-width: 1px 0px 0px 0px;
 }
@@ -1445,24 +1443,22 @@ form #inspector {
   background-color:white;
   margin:2px 5px 0 0px;
 }
-.menuOpPanelActions {
+.gridNav {
+  width:100%;
+  border-spacing:0;
+  margin: 3px 0px 3px 0px;
 }
-.menuOpPanel {
-  margin:0;
-  border-right: solid 1px #ccc;
-  border-left:  solid 1px #ccc;
-  padding:0 2px 0 2px;
+.gridNav td, .gridNav th {
+  padding:0;
 }
-.menuOpPanelMenus {
+.gridNavActions {
+}
+.gridNavMenus {
   padding-bottom: 3px;
 }
-.menuOpPanelInfo{
-  padding-right:5px;
-  text-align:right;
-  font-size: 9px;
-  font-weight: bold;
-  color:#888888;
-  white-space:nowrap;
+.gridNavInfo{
+  white-space: nowrap;
+  font-size: 80%;
 }
 .filterTable {
   width: 100%;

@@ -58,7 +58,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
-import org.openmdx.kernel.text.parsing.StandardPrimitiveTypeParser;
 import org.openmdx.kernel.text.spi.Parser;
 
 /**

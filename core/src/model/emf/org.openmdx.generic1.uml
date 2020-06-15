@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_tjGt4N67EdmkJO73lqONhA" name="generic1">
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_tjGt4N67EdmkJO73lqONhA" name="generic1">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FF13E0E02A5PP" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FF13E0E02A5P" name="openmdx">
       <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FF13E0E02A5" name="generic1">
@@ -83,4 +83,10 @@
       </packagedElement>
     </packagedElement>
   </packagedElement>
+  <profileApplication xmi:id="_-ZzGoBZlEemGMr2sON_HWQ">
+    <eAnnotations xmi:id="_-ZzGoRZlEemGMr2sON_HWQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+      <references xmi:type="ecore:EPackage" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"/>
+    </eAnnotations>
+    <appliedProfile href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#ActionLanguage"/>
+  </profileApplication>
 </uml:Model>

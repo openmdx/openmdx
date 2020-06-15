@@ -48,7 +48,6 @@
 package org.openmdx.resource.spi;
 
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
@@ -105,15 +104,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
     /**
      * The resource adapter's internal connection manager
      */
-    private ConnectionManager connectionManager;
-    
-    /**
-     * Tells whether this factory creates shareable connections
-     * 
-     * @return <code>true</code> if this factory creates shareable connections
-     */
-    protected abstract boolean isManagedConnectionShareable(
-    );
+    private ConnectionManager defaultConnectionManager;
     
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnectionFactory#matchManagedConnections(java.util.Set, javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
@@ -129,7 +120,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
         for(Object managedConnection : managedConnections) {
             if(managedConnection instanceof AbstractManagedConnection) {
             	AbstractManagedConnection candidate = (AbstractManagedConnection) managedConnection;
-            	if(candidate.matches(this, credential, connectionRequestInfo)) {
+            	if(candidate.getManagedConnectionFactory() == this  && candidate.matches(credential, connectionRequestInfo)) {
             		return candidate;
             	}
             }
@@ -137,35 +128,15 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
         return null;
     }
     
-    /**
-     * Retrieve the resource adapter's internal connection manager
-     * 
-     * @return the resource adapter's internal connection manager
-     */
-	private ConnectionManager getConnectionManager(
-    ){
-        if(this.connectionManager == null) {
-            final String password = this.getPassword();
-            final String userName = this.getUserName();
-            final Set<PasswordCredential> credentials =  password != null || userName != null ? Collections.singleton(
-                PasswordCredentials.newPasswordCredential(this, userName, password)
-            ) : Collections.emptySet(
-            );
-            this.connectionManager = this.isManagedConnectionShareable() ? new ShareableConnectionManager(
-                credentials
-            ) : new SimpleConnectionManager(
-                credentials
-            );
-        }
-        return this.connectionManager;
-    }
-    
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory()
      */
     public Object createConnectionFactory(
     ) throws ResourceException {
-        return createConnectionFactory(getConnectionManager());
+        if(this.defaultConnectionManager == null) {
+            this.defaultConnectionManager = new DefaultConnectionManager();
+        }
+        return createConnectionFactory(defaultConnectionManager);
     }
 
 	/* (non-Javadoc)

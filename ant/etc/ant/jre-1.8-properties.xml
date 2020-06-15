@@ -94,8 +94,8 @@
 	<path id="osgi.extension.lib">
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/commons-collections.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/commons-lang.jar"/>
-		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/jcache.jar"/>
-		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/jdo2-api.jar"/>
+		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/cache-api.jar"/>
+		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/jdo-api.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/junit.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/hamcrest-core.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/openjpa.jar"/>		

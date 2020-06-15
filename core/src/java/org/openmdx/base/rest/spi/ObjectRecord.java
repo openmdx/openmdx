@@ -105,7 +105,7 @@ public class ObjectRecord
     /**
      * The <code>"version"</code> entry
      */
-    private Object version;
+    private byte[] version;
 
     /**
      * The <code>"lock"</code> entry
@@ -155,7 +155,7 @@ public class ObjectRecord
      * @see org.openmdx.base.resource.cci.ObjectRecord#getVersion()
      */
     @Override
-    public Object getVersion() {
+    public byte[] getVersion() {
         return this.version;
     }
 
@@ -181,7 +181,7 @@ public class ObjectRecord
      * @see org.openmdx.base.resource.cci.ObjectRecord#setVersion(java.lang.Object)
      */
     @Override
-    public void setVersion(Object version) {
+    public void setVersion(byte[] version) {
         this.version = version;
     }
 
@@ -272,7 +272,7 @@ public class ObjectRecord
                 setValue((MappedRecord) value);
                 break;
             case version:
-                setVersion(value);
+                setVersion((byte[])value);
                 break;
             default:
             	super.put(index, value);

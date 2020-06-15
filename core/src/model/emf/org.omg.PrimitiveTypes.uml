@@ -1,73 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="20110701" xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_lL_5AN67EdmkJO73lqONhA" name="PrimitiveTypes">
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_lL_5AN67EdmkJO73lqONhA" name="PrimitiveTypes">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3D0C708700E2PP" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3D0C708700E2P" name="omg">
       <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3D0C708700E2" name="PrimitiveTypes">
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C94B8630375" name="AggregationKind">
-          <eAnnotations xmi:id="_MhYER965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MhYESN65EdmrtKJSXC0_FQ" key="alias"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MhYER965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MhYESN65EdmrtKJSXC0_FQ" key="alias"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3E6671C30242" name="org::w3c::string"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E6671C30242" name="org::w3c::string"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C8B7F810212" name="any">
-          <eAnnotations xmi:id="_MhYES965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MhYETN65EdmrtKJSXC0_FQ" key="alias"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MhYES965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MhYETN65EdmrtKJSXC0_FQ" key="alias"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3E66718400B1" name="org::w3c::string"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E66718400B1" name="org::w3c::string"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C94BB40012A" name="AttributeMode">
-          <eAnnotations xmi:id="_MhYET965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MhYEUN65EdmrtKJSXC0_FQ" key="alias"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MhYET965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MhYEUN65EdmrtKJSXC0_FQ" key="alias"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3E6671CF0203" name="org::w3c::string"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E6671CF0203" name="org::w3c::string"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C94BB5F01CF" name="DefinitionKind">
-          <eAnnotations xmi:id="_MhYEU965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MhYEVN65EdmrtKJSXC0_FQ" key="alias"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MhYEU965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MhYEVN65EdmrtKJSXC0_FQ" key="alias"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3E6671D100DA" name="org::w3c::string"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E6671D100DA" name="org::w3c::string"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C94B8D70390" name="EvaluationKind">
-          <eAnnotations xmi:id="_MhYEV965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MhYEWN65EdmrtKJSXC0_FQ" key="alias"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MhYEV965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MhYEWN65EdmrtKJSXC0_FQ" key="alias"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3E6671C903A9" name="org::w3c::string"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E6671C903A9" name="org::w3c::string"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C94B68001E0" name="MultiplicityType">
-          <eAnnotations xmi:id="_MhYEW965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MhYEXN65EdmrtKJSXC0_FQ" key="alias"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MhYEW965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MhYEXN65EdmrtKJSXC0_FQ" key="alias"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3E6671C00139" name="org::w3c::string"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E6671C00139" name="org::w3c::string"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C94BAD70007" name="OperationMode">
-          <eAnnotations xmi:id="_MhYEX965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MhYEYN65EdmrtKJSXC0_FQ" key="alias"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MhYEX965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MhYEYN65EdmrtKJSXC0_FQ" key="alias"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3E6671CD01D8" name="org::w3c::string"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E6671CD01D8" name="org::w3c::string"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C94B8B8018C" name="ParameterDirection">
-          <eAnnotations xmi:id="_MhYEY965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MhYEZN65EdmrtKJSXC0_FQ" key="alias"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MhYEY965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MhYEZN65EdmrtKJSXC0_FQ" key="alias"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3E6671C70360" name="org::w3c::string"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E6671C70360" name="org::w3c::string"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C94BBC701BA" name="PrimitiveKind">
-          <eAnnotations xmi:id="_MhYEZ965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MhYEaN65EdmrtKJSXC0_FQ" key="alias"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MhYEZ965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MhYEaN65EdmrtKJSXC0_FQ" key="alias"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3E6671DD0221" name="org::w3c::string"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E6671DD0221" name="org::w3c::string"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C94B8F30304" name="ScopeKind">
-          <eAnnotations xmi:id="_MhYEa965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MhYEbN65EdmrtKJSXC0_FQ" key="alias"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MhYEa965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MhYEbN65EdmrtKJSXC0_FQ" key="alias"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3E6671CB02DA" name="org::w3c::string"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E6671CB02DA" name="org::w3c::string"/>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C94B88601B3" name="VisibilityKind">
-          <eAnnotations xmi:id="_MhYEb965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MhYEcN65EdmrtKJSXC0_FQ" key="alias"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_MhYEb965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_MhYEcN65EdmrtKJSXC0_FQ" key="alias"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D3E6671C503C1" name="org::w3c::string"/>
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E6671C503C1" name="org::w3c::string"/>
         </packagedElement>
       </packagedElement>
     </packagedElement>

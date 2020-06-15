@@ -63,11 +63,8 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 /**
- * Title:
- * Description:
  * Copyright:    Copyright (c) 2003
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.3 $
  */
 public class RadiusLoginHandler implements CallbackHandler {
 

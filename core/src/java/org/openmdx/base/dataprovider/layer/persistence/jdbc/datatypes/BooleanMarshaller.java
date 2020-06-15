@@ -122,7 +122,7 @@ public class BooleanMarshaller {
         } 
         else if(LayerConfigurationEntries.BOOLEAN_TYPE_NUMERIC.equals(booleanType)) {
             return this.configuredBooleanFalse == null
-            ? new Integer(0)
+            ? Integer.valueOf(0)
             : Integer.valueOf(this.configuredBooleanFalse);
         } 
         else {
@@ -167,7 +167,7 @@ public class BooleanMarshaller {
         } 
         else if(LayerConfigurationEntries.BOOLEAN_TYPE_NUMERIC.equals(booleanType)) {
             return this.configuredBooleanTrue == null
-            ? new Integer(1)
+            ? Integer.valueOf(1)
             : Integer.valueOf(this.configuredBooleanTrue);
         } 
         else {

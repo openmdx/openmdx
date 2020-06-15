@@ -65,8 +65,6 @@ import java.util.logging.SimpleFormatter;
  * Implementation of <b>Handler</b> that appends log messages to a file
  * named {prefix}.{date}.{suffix} in a configured directory, with an
  * optional preceding timestamp.
- *
- * @version $Revision: 1.2 $ $Date: 2010/06/02 13:46:07 $
  */
 public class JULIFileHandler extends Handler {
 

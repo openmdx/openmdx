@@ -285,7 +285,7 @@ public abstract class ObjectView extends View implements Serializable {
                     }
                     parentReference = reference;
                 } catch(Exception e) {
-                    ServiceException e0 = new ServiceException(e);
+                    BasicException e0 = BasicException.toExceptionStack(e);
                     if(e0.getExceptionCode() != BasicException.Code.AUTHORIZATION_FAILURE) {
                     	SysLog.warning("can not get parent", e);
                     }

@@ -31,7 +31,7 @@ package org.openmdx.uses.org.apache.commons.pool2;
  * The listener should not throw an exception when called but pools calling
  * listeners should protect themselves against exceptions anyway.
  *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public interface SwallowedExceptionListener {
 

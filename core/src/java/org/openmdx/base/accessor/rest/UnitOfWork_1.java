@@ -63,13 +63,11 @@ import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.JDOUserCallbackException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
-import javax.jdo.PersistenceManagerFactory;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
-import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
 import org.openmdx.base.accessor.rest.spi.LocalUserTransactionAdapters;
 import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.collection.Maps;
@@ -78,7 +76,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.Synchronization;
 import org.openmdx.base.persistence.cci.UserObjects;
-import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
 import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.persistence.spi.UnitOfWork;
@@ -88,6 +85,7 @@ import org.openmdx.base.transaction.Status;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.id.UUIDs;
+import org.openmdx.kernel.jdo.JDOPersistenceManagerFactory;
 import org.openmdx.kernel.loading.Factory;
 import org.openmdx.kernel.log.SysLog;
 
@@ -117,11 +115,9 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
         this.dataObjectManager = persistenceManager;
         this.connection = connection;
         this.aspectSpecificContexts = aspectSpecificContexts;
-        final PersistenceManagerFactory persistenceManagerFactory = persistenceManager.getPersistenceManagerFactory();
+        final JDOPersistenceManagerFactory persistenceManagerFactory = persistenceManager.getPersistenceManagerFactory();
         this.optimistic = persistenceManagerFactory.getOptimistic();
-        this.containerManaged = AbstractPersistenceManagerFactory.isTransactionContainerManaged(
-            persistenceManagerFactory
-        );
+        this.containerManaged = persistenceManagerFactory.getContainerManaged();
         this.resourceLocalTransaction = Constants.RESOURCE_LOCAL.equals(
             persistenceManagerFactory.getTransactionType()
         );
@@ -277,8 +273,12 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
     private Object getFailedObject(
         BasicException initialCause
     ) {
+        final String xri = initialCause.getParameter(BasicException.Parameter.XRI);
+        if(xri == null) {
+            return null;
+        }
         try {
-            return this.getPersistenceManager().getObjectById(new Path(initialCause.getParameter("path")), false);
+            return getPersistenceManager().getObjectById(new Path(xri), false);
         } catch (RuntimeException ignored) {
             return null; // Must no prevent us from creating a fatal data store exception
         }
@@ -1139,7 +1139,7 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
             this.taskId = null;
             this.aspectSpecificContexts.clear();
             if (status == Status.STATUS_COMMITTED) {
-                SharedObjects.getPlugInObject(this.dataObjectManager, DataStoreCache_2_0.class).evictAll();
+                // TODO §SharedObjects.getPlugInObject(this.dataObjectManager, DataStoreCache_2_0.class).evictAll();
             }
             if (!this.dataObjectManager.isRetainValues()) {
                 this.dataObjectManager.evictAll();

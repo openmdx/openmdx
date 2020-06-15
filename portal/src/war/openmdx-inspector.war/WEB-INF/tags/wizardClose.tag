@@ -16,8 +16,8 @@ org.openmdx.portal.servlet.control.*,
 org.openmdx.portal.servlet.wizards.*,
 org.openmdx.base.naming.*" 
 %>
-<%@attribute name="controller" type="AbstractWizardController"%>
+<%@attribute name="controller" type="JspWizardController"%>
 <%
-	AbstractWizardController wc = (AbstractWizardController)jspContext.findAttribute("controller");
+	JspWizardController wc = (JspWizardController)jspContext.findAttribute("controller");
 	wc.close();
 %>

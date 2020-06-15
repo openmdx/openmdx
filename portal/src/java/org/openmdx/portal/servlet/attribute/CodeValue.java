@@ -58,7 +58,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -181,7 +180,7 @@ public class CodeValue extends AttributeValue implements Serializable {
     public String getBackColor(
     ) {
         String backColor = null;
-        Object value = super.getValue(false);      
+        Object value = super.getValue(null, false);      
         if(value instanceof Short) {
             backColor = (String)this.app.getCodes().getBackColors(
                 this.containerName,
@@ -201,12 +200,12 @@ public class CodeValue extends AttributeValue implements Serializable {
     public String getColor(
     ) {
         String color = null;
-        Object value = super.getValue(false);      
+        Object value = super.getValue(null, false);      
         if(value instanceof Short) {
             color = (String)this.app.getCodes().getColors(
                 this.containerName,
                 true
-            ).get(value);          
+            ).get(value);
         }
         return color == null
             ? super.getColor()
@@ -221,7 +220,7 @@ public class CodeValue extends AttributeValue implements Serializable {
     public String getIconKey(
     ) {
         String iconKey = null;
-        Object value = super.getValue(false);      
+        Object value = super.getValue(null, false);      
         if(value instanceof Short) {
             iconKey = (String)this.app.getCodes().getIconKeys(
                 this.containerName,
@@ -255,10 +254,11 @@ public class CodeValue extends AttributeValue implements Serializable {
      * @return
      */
     public Object getValue(
+    	ViewPort p,
     	boolean shortFormat,
     	boolean encode
     ) {
-    	Object value = super.getValue(shortFormat);
+    	Object value = super.getValue(p, shortFormat);
     	if(value == null) {
     		return null;
     	} else if(value instanceof Collection) {
@@ -306,9 +306,11 @@ public class CodeValue extends AttributeValue implements Serializable {
 	 */
     @Override
     public Object getValue(
+    	ViewPort p,
     	boolean shortFormat
     ) {
     	return this.getValue(
+    		p,
     		shortFormat, 
     		false // encode
     	);
@@ -394,16 +396,16 @@ public class CodeValue extends AttributeValue implements Serializable {
     	HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();    
     	label = this.getLabel(attribute, p, label);
     	String title = this.getTitle(attribute, label);
+		String feature = this.getName();
+		id = (id == null) || (id.length() == 0)
+			? feature + "[" + Integer.toString(tabIndex) + "]"
+			: id;
     	// Edit
     	if(forEditing) {
-    		String feature = this.getName();
-    		id = (id == null) || (id.length() == 0)
-    			? feature + "[" + Integer.toString(tabIndex) + "]"
-    			: id;
     		p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");
             Map<?,?> longTextsT = this.getLongText(false, false);
     		if(this.isSingleValued()) {
-    			Object value = super.getValue(false);
+    			Object value = super.getValue(p, false);
     			Number codeValue = null;
     			if(value instanceof Collection) {
     				Collection<?> values = (Collection<?>)value;
@@ -485,23 +487,39 @@ public class CodeValue extends AttributeValue implements Serializable {
     			p.write("</td>");
     			p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, "></td>");
     		} else {
-        		StringBuilder longTextsAsJsArray = new StringBuilder();
-        		Set<?> optionTexts = longTextsT.keySet();
-        		for(Object optionText: optionTexts) {
-        			(longTextsAsJsArray.length() > 0 
-        				? longTextsAsJsArray.append(",") 
-        				: longTextsAsJsArray
-        			).append(
-        				"'"
-        			).append(
-        				((String)optionText).replaceAll("'", "\\\\'")
-        			).append(
-        				"'"
-        			);
+    			StringBuilder stringifiedCodes = new StringBuilder();
+    			{
+    				Object values = super.getValue(p, true);
+    				if(values instanceof Collection) {
+    					String sep = "";
+    					for(Object value: ((Collection<?>)values)) {
+    						stringifiedCodes.append(sep);
+    						stringifiedCodes.append(value);
+    						sep = "\n";
+    					}
+    				}
+    			}
+        		StringBuilder optionsAsJson = new StringBuilder("[");
+        		{
+        			String sep = "";
+	        		for(Map.Entry<?,?> option: longTextsT.entrySet()) {
+	        			optionsAsJson
+	        			.append(sep)
+	        			.append("{\"value\":")
+	        			.append(option.getValue())
+	        			.append(",\"text\":")
+	        			.append("\"")
+	        			.append(((String)option.getKey()).replace("'", "&#39;"))
+	        			.append("\"")
+	        			.append("}");
+	        			sep = ",";
+	        		}
         		}
+        		optionsAsJson.append("]");
     			p.write("<td ", rowSpanModifier, ">");
     			if(readonlyModifier.isEmpty()) {
-    				p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"", CssClass.multiStringLocked.toString(), "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
+    				p.write("  <textarea id=\"", id, ".Title\" class=\"", CssClass.multiStringLocked.toString(), "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
+    				p.write("  <textarea id=\"", id, "\" class=\"", CssClass.d_none.toString(), "\" name=\"", id, "\" readonly >", stringifiedCodes, "</textarea>");
     			} else {
     				// In case of read-only render as input field. However, without id and name attributes                        	
     				p.write("  <textarea class=\"", CssClass.multiStringLocked.toString(), "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");                	
@@ -509,7 +527,7 @@ public class CodeValue extends AttributeValue implements Serializable {
     			p.write("</td>");
     			p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, ">");
     			if(readonlyModifier.isEmpty()) {
-    				p.write("<a role=\"button\" data-toggle=\"modal\" href=\"#popup_", EditInspectorControl.EDIT_CODES, "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; ", EditInspectorControl.EDIT_CODES, "_showPopup(event, this.id, popup_", EditInspectorControl.EDIT_CODES, ", 'popup_", EditInspectorControl.EDIT_CODES, "', $('", id, "'), new Array(", longTextsAsJsArray.toString(), "));\">");
+    				p.write("<a role=\"button\" data-toggle=\"modal\" href=\"#popup_", EditInspectorControl.EDIT_CODES, "\" onclick='javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; ", EditInspectorControl.EDIT_CODES, "_showPopup(event, this.id, popup_", EditInspectorControl.EDIT_CODES, ", \"popup_", EditInspectorControl.EDIT_CODES, "\", $(\"", id, "\"), ", optionsAsJson.toString(), ");'>");
     				p.write("    ", p.getImg("class=\"", CssClass.popUpButton.toString(), "\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" "));
     				p.write("</a>");
     			}
@@ -549,9 +567,9 @@ public class CodeValue extends AttributeValue implements Serializable {
 				p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");
 				p.write("<td class=\"", cssClass, "\" ", rowSpanModifier, " ", widthModifier, " ", styleModifier, ">");
 				if(!this.isSingleValued()) {
-					p.write("  <div class=\"", CssClass.valueMulti.toString(), "\" ", styleModifier, ">");
+					p.write("  <div id=\"", id, "\" class=\"", CssClass.valueMulti.toString(), "\" ", styleModifier, ">");
 				}
-    			Object v = super.getValue(false);
+    			Object v = super.getValue(p, false);
     			Collection<Object> values = new ArrayList<Object>();
     			if(v instanceof Collection) {
     				values.addAll((Collection<?>)v);
@@ -574,9 +592,9 @@ public class CodeValue extends AttributeValue implements Serializable {
     					true
     				).get(codeValue);
     				if((color != null) && (backColor != null)) {
-    					p.write("<div style=\"color:", color, ";background-color:", backColor, ";\">");
+    					p.write("<div id=\"", id, (this.isSingleValued() ? "" : "-" + codeValue.toString()), "\" style=\"color:", color, ";background-color:", backColor, ";\">");
     				} else {
-    					p.write("<div>");
+    					p.write("<div id=\"", id, (this.isSingleValued() ? "" : "-" + codeValue.toString()), "\">");
     				}
     				if(iconKey != null) {
     					p.write("<img src=\"", p.getResourcePath("images/"), iconKey, "\" align=\"bottom\" border=\"0\" alt=\"\" />");

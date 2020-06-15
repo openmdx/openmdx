@@ -87,7 +87,7 @@ import java.util.Stack;
  * Origin of code: Excalibur, Alexandria, Tomcat, Commons-Utils.
  *
  * @version $Id: FilenameUtils.java 1702170 2015-09-10 06:35:02Z krosenvold $
- * @since 1.1
+ * @since Commons I/O 1.1
  */
 public class FilenameUtils {
 
@@ -95,13 +95,13 @@ public class FilenameUtils {
 
     /**
      * The extension separator character.
-     * @since 1.4
+     * @since Commons I/O 1.4
      */
     public static final char EXTENSION_SEPARATOR = '.';
 
     /**
      * The extension separator String.
-     * @since 1.4
+     * @since Commons I/O 1.4
      */
     public static final String EXTENSION_SEPARATOR_STR = Character.toString(EXTENSION_SEPARATOR);
 
@@ -246,7 +246,7 @@ public class FilenameUtils {
      * @param unixSeparator {@code true} if a unix separator should
      * be used or {@code false} if a windows separator should be used.
      * @return the normalized filename, or null if invalid. Null bytes inside string will be removed
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static String normalize(final String filename, final boolean unixSeparator) {
         final char separator = unixSeparator ? UNIX_SEPARATOR : WINDOWS_SEPARATOR;
@@ -340,7 +340,7 @@ public class FilenameUtils {
      * @param unixSeparator {@code true} if a unix separator should
      * be used or {@code false} if a windows separtor should be used.
      * @return the normalized filename, or null if invalid. Null bytes inside string will be removed
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public static String normalizeNoEndSeparator(final String filename, final boolean unixSeparator) {
          final char separator = unixSeparator ? UNIX_SEPARATOR : WINDOWS_SEPARATOR;
@@ -535,7 +535,7 @@ public class FilenameUtils {
      * @return true is the candidate leaf is under by the specified composite. False otherwise.
      * @throws IOException
      *             if an IO error occurs while checking the files.
-     * @since 2.2
+     * @since Commons I/O 2.2
      * @see FileUtils#directoryContains(File, File)
      */
     public static boolean directoryContains(final String canonicalParent, final String canonicalChild)
@@ -1157,7 +1157,7 @@ public class FilenameUtils {
      * @param normalized  whether to normalize the filenames
      * @param caseSensitivity  what case sensitivity rule to use, null means case-sensitive
      * @return true if the filenames are equal, null equals null
-     * @since 1.3
+     * @since Commons I/O 1.3
      */
     public static boolean equals(
             String filename1, String filename2,
@@ -1331,7 +1331,7 @@ public class FilenameUtils {
      * @param wildcardMatcher  the wildcard string to match against
      * @param caseSensitivity  what case sensitivity rule to use, null means case-sensitive
      * @return true if the filename matches the wilcard string
-     * @since 1.3
+     * @since Commons I/O 1.3
      */
     public static boolean wildcardMatch(final String filename, final String wildcardMatcher, IOCase caseSensitivity) {
         if (filename == null && wildcardMatcher == null) {

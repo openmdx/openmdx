@@ -931,8 +931,8 @@ checkLongOption()
                   // +option or -option
                   else
                     {
-                      Object[] msgArgs = { progname, new 
-                               Character(argv[optind-1].charAt(0)).toString(),
+                      Object[] msgArgs = { progname, 
+                               Character.valueOf(argv[optind-1].charAt(0)).toString(),
                                pfound.name };
                       System.err.println(MessageFormat.format(
                                _messages.getString("getopt.arguments2"), 
@@ -1134,8 +1134,8 @@ getopt()
                 }
               else
                 {
-                  Object[] msgArgs = { progname, new 
-                                 Character(argv[optind].charAt(0)).toString(), 
+                  Object[] msgArgs = { progname,  
+                                 Character.valueOf(argv[optind].charAt(0)).toString(), 
                                  nextchar };
                   System.err.println(MessageFormat.format(
                                  _messages.getString("getopt.unrecognized2"), 
@@ -1172,15 +1172,15 @@ getopt()
           if (posixly_correct)
             {
               // 1003.2 specifies the format of this message
-              Object[] msgArgs = { progname, new 
-                                   Character((char)c).toString() };
+              Object[] msgArgs = { progname,  
+                                   Character.valueOf((char)c).toString() };
               System.err.println(MessageFormat.format(
                             _messages.getString("getopt.illegal"), msgArgs));
             }
           else
             {
-              Object[] msgArgs = { progname, new 
-                                   Character((char)c).toString() };
+              Object[] msgArgs = { progname,  
+                                   Character.valueOf((char)c).toString() };
               System.err.println(MessageFormat.format(
                             _messages.getString("getopt.invalid"), msgArgs));
             }
@@ -1204,8 +1204,8 @@ getopt()
           if (opterr)
             {
               // 1003.2 specifies the format of this message. 
-              Object[] msgArgs = { progname, new 
-                                   Character((char)c).toString() };
+              Object[] msgArgs = { progname,  
+                                   Character.valueOf((char)c).toString() };
               System.err.println(MessageFormat.format(
                             _messages.getString("getopt.requires2"), msgArgs));
             }
@@ -1266,8 +1266,8 @@ getopt()
               if (opterr)
                 {
                   // 1003.2 specifies the format of this message
-                  Object[] msgArgs = { progname, new 
-                                       Character((char)c).toString() };
+                  Object[] msgArgs = { progname,  
+                                       Character.valueOf((char)c).toString() };
                   System.err.println(MessageFormat.format(
                             _messages.getString("getopt.requires2"), msgArgs));
                 }
@@ -1296,8 +1296,8 @@ getopt()
                       if (opterr)
                         {
                           // 1003.2 specifies the format of this message
-                          Object[] msgArgs = { progname, new 
-                                               Character((char)c).toString() };
+                          Object[] msgArgs = { progname,  
+                                               Character.valueOf((char)c).toString() };
                           System.err.println(MessageFormat.format(
                              _messages.getString("getopt.requires2"), msgArgs));
                         }

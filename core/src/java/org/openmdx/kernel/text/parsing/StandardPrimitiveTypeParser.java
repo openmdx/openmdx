@@ -51,7 +51,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 
 import org.ietf.jgss.Oid;
 import org.openmdx.kernel.text.spi.Parser;
@@ -71,7 +71,7 @@ public class StandardPrimitiveTypeParser extends AbstractParser {
     /**
      * The supported types
      */
-    private static final List<Class<?>> SUPPORTED_TYPES = Arrays.<Class<?>>asList(
+    private static final Collection<Class<?>> SUPPORTED_TYPES = Arrays.<Class<?>>asList(
    		Boolean.class,
    		String.class,
     	Byte.class,	
@@ -97,15 +97,12 @@ public class StandardPrimitiveTypeParser extends AbstractParser {
     public static Parser getInstance(){
         return INSTANCE;
     }
-        
-    /* (non-Javadoc)
-     * @see org.w3c.spi.Parser#handles(java.lang.Class)
-     */
-    @Override
-    public boolean handles(Class<?> type) {
-        return SUPPORTED_TYPES.contains(type);
-    }
 
+    @Override
+    protected Collection<Class<?>> supportedTypes(){
+        return SUPPORTED_TYPES;
+    }
+    
     /* (non-Javadoc)
 	 * @see org.openmdx.kernel.text.parse.AbstractParser#parse(java.lang.String, java.lang.Class)
 	 */

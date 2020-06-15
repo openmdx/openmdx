@@ -143,9 +143,11 @@ public class Launch {
 	    		String value = source[i];
 	    		if(value.startsWith("@")) {
 	    	        File script = new File(value.substring(1));
-	    	        BufferedReader in = null;
-	    	        try {
-	        	        in = new BufferedReader(new FileReader(script));
+	    	        try (
+	    	            BufferedReader in = new BufferedReader(
+	    	                new FileReader(script)
+	    	            )
+	    	        ){
 	    	        	for(
 	    	        		String argument = in.readLine();
 	    	        		argument != null;
@@ -153,12 +155,6 @@ public class Launch {
 	    	        	) {
 	    	        		target.add(argument);
 	    	        	}
-					} finally {
-						if(in != null) try {
-							in.close(); 
-						} catch (IOException ignore) {
-							// Ignored close failure
-						}
 	    	        }
 	    		} else {
 	    			target.add(value);

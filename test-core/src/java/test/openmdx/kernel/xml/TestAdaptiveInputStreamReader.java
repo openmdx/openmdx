@@ -72,16 +72,17 @@ public class TestAdaptiveInputStreamReader {
         String byteOrderMark,
         String xmlDeclaration
     ) throws IOException { 
-        AdaptiveInputStreamReader r = new AdaptiveInputStreamReader(
-            TestAdaptiveInputStreamReader.class.getResource(
-                file
-            ).openStream(),
-            null, // encoding
-            true, // byteOrderMarkAware
-            true, // xmlDeclarationAware
-            true // propagate close
-        );
-        try {
+        try (
+            AdaptiveInputStreamReader r = new AdaptiveInputStreamReader(
+                TestAdaptiveInputStreamReader.class.getResource(
+                    file
+                ).openStream(),
+                null, // encoding
+                true, // byteOrderMarkAware
+                true, // xmlDeclarationAware
+                true // propagate close
+            )
+        ){
     //      assertEquals("ByteOrderMark", byteOrderMark, r.getByteOrderMark());
     //      assertEquals("XMLDeclaration", xmlDeclaration, String.valueOf(r.getXMLDclaration()));
             for(
@@ -96,8 +97,6 @@ public class TestAdaptiveInputStreamReader {
                 );
                     
             }
-        } finally {
-            r.close();
         }
     }
 

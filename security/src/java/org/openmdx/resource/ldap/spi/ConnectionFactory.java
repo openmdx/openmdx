@@ -51,16 +51,16 @@ import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ManagedConnectionFactory;
 
+import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.directory.api.ldap.model.exception.LdapOtherException;
+import org.apache.directory.ldap.client.api.LdapConnection;
 import org.openmdx.resource.spi.AbstractConnectionFactory;
-import org.openmdx.resource.ldap.cci.LDAPConnection;
-
-import netscape.ldap.LDAPException;
 
 /**
  * LDAP Connection Factory
  */
 public class ConnectionFactory
-	extends AbstractConnectionFactory<LDAPConnection,LDAPException>
+	extends AbstractConnectionFactory<LdapConnection,LdapException>
 {
 
     /**
@@ -90,17 +90,14 @@ public class ConnectionFactory
      * @see org.openmdx.resource.spi.AbstractConnectionFactory#toEISException(javax.resource.ResourceException)
      */
     @Override
-    protected LDAPException toEISException(ResourceException exception) {
+    protected LdapException toEISException(ResourceException exception) {
         final Throwable cause = exception.getCause();
-        return (LDAPException) (
-            cause instanceof LDAPException ? cause : new LDAPException(
+        return 
+            cause instanceof LdapException ? (LdapException) cause : 
+            new LdapOtherException(
                 "Connection handle acquisition failed",
-                LDAPException.CONNECT_ERROR,
-                exception.getMessage()
-            ).initCause(
                 exception
-            )
-        );
+            );
     }
 
 }

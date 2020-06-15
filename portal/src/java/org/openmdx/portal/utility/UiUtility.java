@@ -78,6 +78,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.kernel.exception.Throwables;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -455,7 +456,7 @@ public class UiUtility {
             System.out.println("STATUS: " + e.getMessage());
           }
           catch(Exception e) {
-              new ServiceException(e).log();
+              Throwables.log(e);
               System.out.println("STATUS: " + e.getMessage());
           }
       }
@@ -532,7 +533,7 @@ public class UiUtility {
           System.out.println("STATUS: " + e.getMessage());
       }
       catch(Exception e) {
-          new ServiceException(e).log();
+          Throwables.log(e);
           System.out.println("STATUS: " + e.getMessage());
       }
       try {
@@ -756,15 +757,17 @@ public class UiUtility {
 	                      }
 	                  }
 	                  System.out.println("Writing file " + outFileName);
-	                  Writer w = new OutputStreamWriter(new FileOutputStream(outFileName), "UTF-8");
-	                  Writer fw = new XMLWriter(w);
-	                  this.writeAsSchema(
-	                      w, 
-	                      fw, 
-	                      elementDefinitions, 
-	                      j
-	                  );
-	                  w.close();
+	                  try(
+    	                  Writer w = new OutputStreamWriter(new FileOutputStream(outFileName), "UTF-8");
+    	                  Writer fw = new XMLWriter(w)
+    	              ){
+    	                  this.writeAsSchema(
+    	                      w, 
+    	                      fw, 
+    	                      elementDefinitions, 
+    	                      j
+    	                  );
+	                  }
 	              }
 	              catch(FileNotFoundException e) {
 	                  System.err.println("Can not create file " + outFileName);
@@ -832,24 +835,26 @@ public class UiUtility {
                   }
               }
               System.out.println("Writing file " + outFileName);
-              Writer w = new OutputStreamWriter(new FileOutputStream(outFileName), "UTF-8");
-              Writer fw = new XMLWriter(w);
-              if("table".equals(format)) {
-                  this.writeAsTable(
-                      w,
-                      fw,
-                      mergedElementDefinitions
-                  );
+              try(
+                  Writer w = new OutputStreamWriter(new FileOutputStream(outFileName), "UTF-8");
+                  Writer fw = new XMLWriter(w);
+              ){
+                  if("table".equals(format)) {
+                      this.writeAsTable(
+                          w,
+                          fw,
+                          mergedElementDefinitions
+                      );
+                  }
+                  else {
+                      this.writeAsSchema(
+                          w,
+                          fw,
+                          mergedElementDefinitions,
+                          -1
+                      );
+                  }
               }
-              else {
-                  this.writeAsSchema(
-                      w,
-                      fw,
-                      mergedElementDefinitions,
-                      -1
-                  );
-              }
-              w.close();
           }
           catch(FileNotFoundException e) {
               System.err.println("can not create file " + outFileName);

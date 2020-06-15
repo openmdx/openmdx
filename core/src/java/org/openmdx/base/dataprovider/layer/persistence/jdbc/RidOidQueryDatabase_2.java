@@ -161,7 +161,8 @@ public class RidOidQueryDatabase_2 extends Database_2 {
         boolean negation,
         ModelElement_1_0 filterPropertyDef, 
         StringBuilder clause, 
-        List<Object> clauseValues, Object[] values
+        List<Object> clauseValues, Object[] values,
+        Map<String,Object> context
     ) throws ServiceException {
         if(useRidAndOid(filterPropertyDef)) {
             clause.append("(");
@@ -219,7 +220,11 @@ public class RidOidQueryDatabase_2 extends Database_2 {
                 dbObject,
                 column,
                 negation,
-                filterPropertyDef, clause, clauseValues, values
+                filterPropertyDef,
+                clause,
+                clauseValues,
+                values,
+                context
             );
         }
     }
@@ -368,7 +373,9 @@ public class RidOidQueryDatabase_2 extends Database_2 {
         ModelElement_1_0 filterPropertyDef,
         String columnName,
         ConditionType condition, 
-        List<Object> clauseValues, StringBuilder clause
+        List<Object> clauseValues,
+        StringBuilder clause,
+        Map<String,Object> context
     ) throws ServiceException {
         ModelElement_1_0 referencedType = getReferenceType(filterPropertyDef);        
         String joinViewAliasName = viewAliasName + "v";
@@ -430,7 +437,8 @@ public class RidOidQueryDatabase_2 extends Database_2 {
             includingFilterClauses, 
             includingFilterValues, 
             excludingFilterClauses, 
-            excludingFilterValues
+            excludingFilterValues,
+            context
         );
         final Membership membership = new Membership(Quantifier.valueOf(filterProperty.quantor()), condition);
         clause.append("(").append(membership.isMember() ? " " : "NOT ").append("EXISTS (SELECT 1 FROM ").append(view1).append(" ").append(joinViewAliasName).append(" WHERE (");
@@ -472,7 +480,8 @@ public class RidOidQueryDatabase_2 extends Database_2 {
             includingFilterClauses, 
             includingFilterValues, 
             excludingFilterClauses, 
-            excludingFilterValues
+            excludingFilterValues,
+            context
         );
         for(int i = 0, iLimit = excludingFilterClauses.size(); i < iLimit; i++) {
             clause.append(
@@ -630,7 +639,8 @@ public class RidOidQueryDatabase_2 extends Database_2 {
         ModelElement_1_0 referencedType,
         List<FilterProperty> filterProperties,
         boolean negate,
-        List<Object> statementParameters
+        List<Object> statementParameters,
+        Map<String,Object> context
      ) throws ServiceException {
         boolean joinByRidAndOid = !viewIsPrimary && dbObject.getConfiguration().hasDbObject2();
         return super.filterToSqlClause(
@@ -647,7 +657,9 @@ public class RidOidQueryDatabase_2 extends Database_2 {
             referencedType,
             filterProperties,
             negate,
-            statementParameters);
+            statementParameters,
+            context
+        );
     }
 
 }

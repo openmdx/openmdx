@@ -65,9 +65,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.kernel.log.SysLog;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
@@ -163,14 +162,12 @@ public class UiGridMoveUpObjectAction extends BoundAction {
                     }
                 }
             } catch (Exception e) {
-                ServiceException e0 = new ServiceException(e);
-                SysLog.warning(e0.getMessage(), e0.getCause());
+                Throwables.log(e);
             }
             try {
                 p.close(true);
             } catch (Exception e) {
-                ServiceException e0 = new ServiceException(e);
-                SysLog.warning(e0.getMessage(), e0.getCause());
+                Throwables.log(e);
             }            
         }       
         return new ActionPerformResult(

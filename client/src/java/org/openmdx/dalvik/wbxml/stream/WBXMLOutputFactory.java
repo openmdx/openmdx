@@ -49,10 +49,8 @@ package org.openmdx.dalvik.wbxml.stream;
 
 import java.io.OutputStream;
 
-
 import org.openmdx.dalvik.uses.javax.xml.stream.XMLStreamException;
 import org.openmdx.dalvik.uses.javax.xml.stream.XMLStreamWriter;
-import org.openmdx.dalvik.wbxml.stream.WBXMLStreamWriter;
 import org.openmdx.dalvik.xml.stream.AbstractXMLOutputFactory;
 
 /**

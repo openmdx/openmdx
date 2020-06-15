@@ -47,13 +47,14 @@
  */
 package test.cache;
 
-import java.util.Collections;
 import java.util.Date;
 
 import javax.cache.Cache;
 import javax.cache.CacheException;
-import javax.cache.CacheFactory;
 import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.cache.configuration.Configuration;
+import javax.cache.spi.CachingProvider;
 
 /**
  * Cache Test
@@ -69,17 +70,37 @@ public class CacheTest {
     public static void main(
         String... arguments
     ){
-        CacheManager manager = CacheManager.getInstance();
         try {
-            CacheFactory factory = manager.getCacheFactory();
+            final CachingProvider cachingProvider = Caching.getCachingProvider();
+            final CacheManager cacheManager = cachingProvider.getCacheManager();
+            final Configuration<String, Date> configuration = new Configuration<String, Date>() {
+
+                @Override
+                public Class<String> getKeyType(
+                ) {
+                    return String.class;
+                }
+
+                @Override
+                public Class<Date> getValueType(
+                ) {
+                    return Date.class;
+                }
+
+                @Override
+                public boolean isStoreByValue(
+                ) {
+                    return false;
+                }
+            };
             Date now = new Date();
-            Cache cache1 = factory.createCache(Collections.emptyMap());
+            Cache<String,Date> cache1 = cacheManager.createCache("testCache", configuration);
             cache1.put("created", now);
             now = new Date(now.getTime() + 1000);
-            Cache cache2 = factory.createCache(Collections.emptyMap());
+            Cache<String,Date> cache2 = cacheManager.createCache("testCache", configuration);
             cache2.put("created", now);
-            System.out.println(cache1.getClass().getName() + '@' + System.identityHashCode(cache1) + " created at " + cache1.get("created") + "(" + cache1.getCacheEntry("created") + ")");
-            System.out.println(cache2.getClass().getName() + '@' + System.identityHashCode(cache2) + " created at " + cache2.get("created") + "(" + cache2.getCacheEntry("created") + ")");
+            System.out.println(cache1.getClass().getName() + '@' + System.identityHashCode(cache1) + " created at " + cache1.get("created"));
+            System.out.println(cache2.getClass().getName() + '@' + System.identityHashCode(cache2) + " created at " + cache2.get("created"));
         } catch (CacheException exception) {
             exception.printStackTrace();
         }

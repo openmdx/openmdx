@@ -68,7 +68,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
@@ -79,6 +78,7 @@ import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.CssClass;
@@ -128,127 +128,129 @@ public class FindObjectsAction extends UnboundAction {
         		new Integer(sizeAsString).intValue();
 
         // Output
-        PrintWriter pw = this.getWriter(
-            request, 
-            response
-        );
-        PersistenceManager pm = null;
-        try {
-            Path objectIdentity = new Path(objectXri);
-            pm = app.getNewPmData();
-            RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(objectIdentity);
-            List<Condition> conditions = new ArrayList<Condition>(
-                app.getPortalExtension().getFindObjectsBaseFilter(
-                    app, 
-                    parent,
-                    referenceName
-                )
-            );            
-            // filterByType
-            if(
-                (filterByType != null) &&
-                (filterByType.length()  > 0)
-            ) {
-                conditions.add(
-                    new IsInstanceOfCondition(filterByType)
-                );                
-            }
-            // filterByFeature
-            if(
-                (filterByFeature != null) && (filterByFeature.length() > 0) &&
-                (filterValues != null) && (filterValues.length > 0)
-            ) {
-                Model_1_0 model = app.getModel();
-                // Is filter feature numeric?
-                ModelElement_1_0 parentDef = ((RefMetaObject_1)parent.refMetaObject()).getElementDef();                
-                ModelElement_1_0 referenceDef = (ModelElement_1_0)parentDef.objGetMap("reference").get(referenceName);
-                if(referenceDef != null) {
-                    ModelElement_1_0 referencedType = model.getElement(referenceDef.getType());
-                    ModelElement_1_0 filterFeatureDef = model.getFeatureDef(referencedType, filterByFeature, true);
-                    if(filterFeatureDef != null) {
-                        boolean filterFeatureIsNumeric = model.isNumericType(filterFeatureDef.getType());
-                        String filterValue = filterValues[0];
-                        // Remove trailing "[ text ]". This suffix was most probably by the autocompleter.
-                        if(filterValue.indexOf(" [") > 0) {
-                        	filterValue = filterValue.substring(0, filterValue.indexOf(" ["));
+        try(
+            PrintWriter pw = this.getWriter(
+                request, 
+                response
+            )
+        ){
+            PersistenceManager pm = null;
+            try {
+                Path objectIdentity = new Path(objectXri);
+                pm = app.getNewPmData();
+                RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(objectIdentity);
+                List<Condition> conditions = new ArrayList<Condition>(
+                    app.getPortalExtension().getFindObjectsBaseFilter(
+                        app, 
+                        parent,
+                        referenceName
+                    )
+                );            
+                // filterByType
+                if(
+                    (filterByType != null) &&
+                    (filterByType.length()  > 0)
+                ) {
+                    conditions.add(
+                        new IsInstanceOfCondition(filterByType)
+                    );                
+                }
+                // filterByFeature
+                if(
+                    (filterByFeature != null) && (filterByFeature.length() > 0) &&
+                    (filterValues != null) && (filterValues.length > 0)
+                ) {
+                    Model_1_0 model = app.getModel();
+                    // Is filter feature numeric?
+                    ModelElement_1_0 parentDef = ((RefMetaObject_1)parent.refMetaObject()).getElementDef();                
+                    ModelElement_1_0 referenceDef = (ModelElement_1_0)parentDef.objGetMap("reference").get(referenceName);
+                    if(referenceDef != null) {
+                        ModelElement_1_0 referencedType = model.getElement(referenceDef.getType());
+                        ModelElement_1_0 filterFeatureDef = model.getFeatureDef(referencedType, filterByFeature, true);
+                        if(filterFeatureDef != null) {
+                            boolean filterFeatureIsNumeric = model.isNumericType(filterFeatureDef.getType());
+                            String filterValue = filterValues[0];
+                            // Remove trailing "[ text ]". This suffix was most probably by the autocompleter.
+                            if(filterValue.indexOf(" [") > 0) {
+                            	filterValue = filterValue.substring(0, filterValue.indexOf(" ["));
+                            }
+                            conditions.add(
+                                new AnyTypeCondition(
+                                    Quantifier.THERE_EXISTS,
+                                    filterByFeature,
+                                    filterOperator,
+                                    filterFeatureIsNumeric ? Integer.valueOf(filterValue) :
+                                    filterOperator == ConditionType.IS_LIKE ? "(?i).*" + filterValue + ".*": filterValue
+                                )
+                            );
                         }
-                        conditions.add(
-                            new AnyTypeCondition(
-                                Quantifier.THERE_EXISTS,
-                                filterByFeature,
-                                filterOperator,
-                                filterFeatureIsNumeric ? Integer.valueOf(filterValue) :
-                                filterOperator == ConditionType.IS_LIKE ? "(?i).*" + filterValue + ".*": filterValue
-                            )
-                        );
                     }
                 }
-            }
-            // Order
-            OrderSpecifier s = null;
-            if(
-                (orderByFeature != null) && (orderByFeature.length() > 0)
-            ) {
-                s = new OrderSpecifier(
-                    orderByFeature,
-                    SortOrder.ASCENDING
-                );
-            }
-            Collection<?> allObjects = (Collection<?>)parent.refGetValue(referenceName);
-            List<RefObject_1_0> filteredObjects = null;
-            try {
-                filteredObjects = ((RefContainer<RefObject_1_0>)allObjects).refGetAll(
-                    new org.openmdx.base.query.Filter(
-                        conditions,
-                        s == null ? null : Collections.singletonList(s),
-                        null // extension
-                    )
-                );
-            } catch(UnsupportedOperationException e) {
-                filteredObjects = new ArrayList<RefObject_1_0>(
-                    ((RefContainer<RefObject_1_0>)allObjects).refGetAll(null)
-                );
-            }
-            pw.print("<ul class=\"" + CssClass.dropdownMenu.toString() + "\" style=\"display:block;\">\n");
-            int ii = 0;
-            for(
-                ListIterator<RefObject_1_0> i = filteredObjects.listIterator(position);
-                i.hasNext() && (ii < size);
-                ii++
-            ) {
-                RefObject_1_0 obj = (RefObject_1_0)i.next();
-                pw.write("<li>");
-                String title = app.getPortalExtension().getTitle(
-                    obj, 
-                    app.getCurrentLocaleAsIndex(), 
-                    app.getCurrentLocaleAsString(), 
-                    false, // asShortTitle
-                    app
-                );
-                if(!filterByFeature.isEmpty()) {
-                    try {
-                        title += " [" + obj.refGetValue(filterByFeature) + "]";
-                    } catch(Exception e) {}
+                // Order
+                OrderSpecifier s = null;
+                if(
+                    (orderByFeature != null) && (orderByFeature.length() > 0)
+                ) {
+                    s = new OrderSpecifier(
+                        orderByFeature,
+                        SortOrder.ASCENDING
+                    );
                 }
-                pw.write(app.getHtmlEncoder().encode(title, false));
-                // Mark non-primary fields as informal 
-                pw.write("<span>");
-                pw.write("<div style=\"display:none\">");
-                pw.write(response.encodeURL(obj.refMofId()));
-                pw.write("</div>");
-                pw.write("</span>");
-                pw.write("</li>\n");
+                Collection<?> allObjects = (Collection<?>)parent.refGetValue(referenceName);
+                List<RefObject_1_0> filteredObjects = null;
+                try {
+                    filteredObjects = ((RefContainer<RefObject_1_0>)allObjects).refGetAll(
+                        new org.openmdx.base.query.Filter(
+                            conditions,
+                            s == null ? null : Collections.singletonList(s),
+                            null // extension
+                        )
+                    );
+                } catch(UnsupportedOperationException e) {
+                    filteredObjects = new ArrayList<RefObject_1_0>(
+                        ((RefContainer<RefObject_1_0>)allObjects).refGetAll(null)
+                    );
+                }
+                pw.print("<ul class=\"" + CssClass.dropdown_menu.toString() + "\" style=\"display:block;\">\n");
+                int ii = 0;
+                for(
+                    ListIterator<RefObject_1_0> i = filteredObjects.listIterator(position);
+                    i.hasNext() && (ii < size);
+                    ii++
+                ) {
+                    RefObject_1_0 obj = (RefObject_1_0)i.next();
+                    pw.write("<li>");
+                    String title = app.getPortalExtension().getTitle(
+                        obj, 
+                        app.getCurrentLocaleAsIndex(), 
+                        app.getCurrentLocaleAsString(), 
+                        false, // asShortTitle
+                        app
+                    );
+                    if(!filterByFeature.isEmpty()) {
+                        try {
+                            title += " [" + obj.refGetValue(filterByFeature) + "]";
+                        } catch(Exception e) {}
+                    }
+                    pw.write(app.getHtmlEncoder().encode(title, false));
+                    // Mark non-primary fields as informal 
+                    pw.write("<span>");
+                    pw.write("<div style=\"display:none\">");
+                    pw.write(response.encodeURL(obj.refMofId()));
+                    pw.write("</div>");
+                    pw.write("</span>");
+                    pw.write("</li>\n");
+                }
+                pw.print("</ul>\n");
             }
-            pw.print("</ul>\n");
+            catch(Exception e) {
+                Throwables.log(e);
+            } finally {
+            	if(pm != null) {
+            		pm.close();
+            	}
+            }
         }
-        catch(Exception e) {
-            new ServiceException(e).log();
-        } finally {
-        	if(pm != null) {
-        		pm.close();
-        	}
-        }
-        pw.close();  
         return new ActionPerformResult(
             ActionPerformResult.StatusCode.DONE
         );

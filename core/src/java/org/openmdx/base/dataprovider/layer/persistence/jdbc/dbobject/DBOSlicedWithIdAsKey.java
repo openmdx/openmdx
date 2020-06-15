@@ -306,8 +306,6 @@ extends SlicedDbObject
     @Override
     public void remove(
     ) throws ServiceException {
-
-        PreparedStatement ps = null;
         String currentStatement = null;
         Path accessPath = this.getResourceIdentifier();
         Path type = this.getConfiguration().getType();
@@ -340,20 +338,22 @@ extends SlicedDbObject
                     );
                     String statement =
                         "DELETE FROM " + dbObject + " WHERE " + this.database.getObjectOidColumnName() + " IN (?)";
-                    ps = this.database.prepareStatement(
-                        conn,
-                        currentStatement = statement
-                    );
-                    for(int j = 0; j < statementParameters.size(); j++) {
-                        this.database.setPreparedStatementValue(
-                            this.conn,
-                            ps, 
-                            j+1, 
-                            statementParameters.get(j)
-                        );
+                    try(
+                        PreparedStatement ps = this.database.prepareStatement(
+                            conn,
+                            currentStatement = statement
+                        )
+                    ){
+                        for(int j = 0; j < statementParameters.size(); j++) {
+                            this.database.setPreparedStatementValue(
+                                this.conn,
+                                ps, 
+                                j+1, 
+                                statementParameters.get(j)
+                            );
+                        }
+                        this.database.executeUpdate(ps, currentStatement, statementParameters);
                     }
-                    this.database.executeUpdate(ps, currentStatement, statementParameters);
-                    ps.close(); ps = null;
                 }
                 // Composite objects (only if dbObject (=table) is configured)
                 if(
@@ -392,20 +392,22 @@ extends SlicedDbObject
                         statementParameters.add(ridAsString + "/");
                         statementParameters.add(ridAsString + "0");
                     }
-                    ps = this.database.prepareStatement(
-                        this.conn,
-                        currentStatement = statement
-                    );
-                    for(int j = 0; j < statementParameters.size(); j++) {
-                        this.database.setPreparedStatementValue(
+                    try (
+                        PreparedStatement ps = this.database.prepareStatement(
                             this.conn,
-                            ps, 
-                            j+1, 
-                            statementParameters.get(j)
-                        );
+                            currentStatement = statement
+                        )
+                    ){
+                        for(int j = 0; j < statementParameters.size(); j++) {
+                            this.database.setPreparedStatementValue(
+                                this.conn,
+                                ps, 
+                                j+1, 
+                                statementParameters.get(j)
+                            );
+                        }
+                        this.database.executeUpdate(ps, currentStatement, statementParameters);
                     }
-                    this.database.executeUpdate(ps, currentStatement, statementParameters);
-                    ps.close(); ps = null;
                 }
             }
         } catch(SQLException ex) {
@@ -414,7 +416,7 @@ extends SlicedDbObject
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.MEDIA_ACCESS_FAILURE, 
                 null,
-                new BasicException.Parameter("path", accessPath),
+                new BasicException.Parameter(BasicException.Parameter.XRI, accessPath),
                 new BasicException.Parameter("statement", currentStatement),
                 new BasicException.Parameter("parameters", statementParameters),
                 new BasicException.Parameter("sqlErrorCode", ex.getErrorCode()), 
@@ -432,12 +434,6 @@ extends SlicedDbObject
                 BasicException.Code.GENERIC, 
                 exception.toString()
             );
-        } finally {
-            try {
-                if(ps != null) ps.close();
-            } catch(Throwable ex) {
-                // ignore
-            }
         }
     }
 
@@ -506,20 +502,20 @@ extends SlicedDbObject
             }
         }
         // Add parent id 
-        if(pathNormalizeLevel > 0) {  
-            Path parentObjectPath = facade.getPath().getPrefix(facade.getPath().size()-2);    
+        if(pathNormalizeLevel > 0) {
+            Path parentObjectPath = facade.getPath().getPrefix(facade.getPath().size()-2);
             if(parentObjectPath.size() >= 5) {
                 normalizedObjectFacade.addToAttributeValuesAsList(
                     this.database.getPrivateAttributesPrefix() + "parent",
                     this.database.getReferenceId(
-                        conn, 
-                        parentObjectPath, 
-                        true 
+                        conn,
+                        parentObjectPath,
+                        true
                     ) + "/" + parentObjectPath.getLastSegment().toClassicRepresentation()
                 );
             }
             // Add id for all attributes with values of type path
-            if(pathNormalizeLevel > 1) {  
+            if(pathNormalizeLevel > 1) {
                 Set<String> attributeNames = facade.getValue().keySet();
                 for(String attributeName: attributeNames) {
                     List<Object> values = facade.getAttributeValuesAsReadOnlyList(attributeName);
@@ -587,50 +583,60 @@ extends SlicedDbObject
         /**
          * Slice object
          */
-        // get number of partitions
-        int maxSize = 0;
+        // get number of slices
+        int nSlices = 0;
         for(
             Iterator<String> i = facade.getValue().keySet().iterator();
             i.hasNext();
         ) {
             String attributeName = i.next();
-            maxSize = java.lang.Math.max(maxSize, facade.getSizeOfAttributeValuesAsList(attributeName));
+            if(this.database.isEmbeddedFeature(attributeName)) {
+                nSlices = Math.max(
+                    nSlices,
+                    1
+                );
+            } else {
+                nSlices = Math.max(
+                    nSlices,
+                    facade.getSizeOfAttributeValuesAsList(attributeName)
+                );
+            }
         }
         // Create partitioned objects
-        ObjectRecord[] slices = new ObjectRecord[maxSize];
+        ObjectRecord[] slices = new ObjectRecord[nSlices];
         for(
             Iterator<String> i = facade.getValue().keySet().iterator();
             i.hasNext();
         ) {
-            String attributeName = i.next();            
+            String attributeName = i.next();
             for(
-                int j = 0; 
+                int j = 0;
                 j < facade.getSizeOfAttributeValuesAsList(attributeName);
                 j++
             ) {
-                if(slices[j] == null) {
-                    slices[j] = Facades.newObject(
+                // Map to slice with corresponding index                
+                int sliceIndex = this.database.isEmbeddedFeature(attributeName) ? Math.min(0, j) : j;
+                if(slices[sliceIndex] == null) {
+                    slices[sliceIndex] = Facades.newObject(
 					    facade.getPath(),
 					    facade.getObjectClass()
 					).getDelegate();
                 }
-                // Embedded features are mapped to slice 0
                 if(this.database.isEmbeddedFeature(attributeName)) {                    
-                    Facades.asObject(slices[0]).addToAttributeValuesAsList(
+                    Facades.asObject(slices[sliceIndex]).addToAttributeValuesAsList(
                         attributeName + this.database.getSizeSuffix() + j,
-                        facade.getAttributeValueFromList(attributeName,j)
+                        facade.getAttributeValueFromList(attributeName, j)
                     );
-                }
-                // Map to slice with corresponding index
-                else {               
-                    MappedRecord target = slices[j].getValue();
+                } else {               
+                    // Map to slice with corresponding index
+                    MappedRecord target = slices[sliceIndex].getValue();
                     target.put(
                         "objectIdx",
                         Integer.valueOf(j)
                     );
                     target.put(
                         attributeName,
-                        facade.getAttributeValueFromList(attributeName,j)
+                        facade.getAttributeValueFromList(attributeName, j)
                     );
                 }
             }

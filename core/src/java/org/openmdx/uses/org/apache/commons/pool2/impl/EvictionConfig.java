@@ -32,9 +32,7 @@ package org.openmdx.uses.org.apache.commons.pool2.impl;
  * <p>
  * This class is immutable and thread-safe.
  *
- * @version $Revision: $
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public class EvictionConfig {
 

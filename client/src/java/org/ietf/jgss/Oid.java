@@ -1,6 +1,4 @@
 /*
- * %W% %E%
- *
  * Copyright (c) 2006, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
@@ -28,8 +26,7 @@ import sun.security.util.ObjectIdentifier;
  * representing the standard name types defined in GSS-API.
  *
  * @author Mayank Upadhyay
- * @version %I%, %G%
- * @since 1.4
+ * @since GSS 1.4
  */
 public class Oid {
 

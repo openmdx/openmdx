@@ -123,20 +123,6 @@ public class CharacterLargeObjects {
     /**
      * Create a <code>CharacterLargeObject</code> facade for the given file
      * 
-     * @param source
-     * 
-     * @return a <code>CharacterLargeObject</code> facade for the given file
-     * @deprecated Use {@link #valueOf(File,String)} instead
-     */
-    public static CharacterLargeObject valueOf(
-        File source
-    ){
-        return valueOf(source, "UTF-8");
-    }
-
-    /**
-     * Create a <code>CharacterLargeObject</code> facade for the given file
-     * 
      * @param source the file to be read
      * @param encoding the file's the character encoding 
      * 

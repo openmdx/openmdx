@@ -59,9 +59,9 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.url.protocol.XRI_1Protocols;
-import org.openmdx.kernel.url.protocol.XRI_2Protocols;
-import org.openmdx.kernel.url.protocol.XriAuthorities;
+import org.openmdx.kernel.xri.XRI_1Protocols;
+import org.openmdx.kernel.xri.XRI_2Protocols;
+import org.openmdx.kernel.xri.XRIAuthorities;
 
 /**
  * The Path class represents an object's XRI.
@@ -153,7 +153,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
         this (
             charSequence, 
             charSequence.startsWith(XRI_2Protocols.OPENMDX_PREFIX) ? XRI_2Marshaller.getInstance() :
-            charSequence.startsWith(XriAuthorities.OPENMDX_AUTHORITY) ? IRI_2Marshaller.getInstance() :     
+            charSequence.startsWith(XRIAuthorities.OPENMDX_AUTHORITY) ? IRI_2Marshaller.getInstance() :     
             charSequence.startsWith(XRI_1Protocols.OPENMDX_PREFIX) ? XRI_1Marshaller.getInstance() :
             charSequence.startsWith(URI_1Marshaller.OPENMDX_PREFIX) ? URI_1Marshaller.getInstance() : 
             LegacyMarshaller.getInstance()
@@ -398,26 +398,6 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     }
     
     /**
-     * Returns a child path
-     *
-     * @param       component 
-     *              the component to be added
-     *
-     * @return      a new and longer path
-     *
-     * @exception   RuntimeServiceException
-     *              if the component is null or empty
-     *              
-     * @deprecated             
-     */
-    @Deprecated
-    public Path getChild(
-   		org.openmdx.base.naming.PathComponent component
-    ){
-        return this.getChild(component.toString());
-    }
-
-    /**
      * Returns a descendant path.
      *
      * @param       suffix
@@ -502,58 +482,6 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     	return getPrefix(index + 1).getLastSegment(); 
     }
     
-    /**
-     * Returns the base of the path. The base is the last component of a path.
-     *
-     * @return the base path component.
-     *
-     * @exception   NullPointerException
-     *              if the path is empty
-     *              
-     * @deprecated use {@link Path#getLastSegment()}.toClassicRepresentation()             
-     */
-    @Deprecated
-    public String getBase(
-    ){
-    	return getLastSegment().toClassicRepresentation();
-    }
-
-    /**
-     * Returns the last component of a path.
-     *
-     * @return      the last path component.
-     *
-     * @exception   ArrayIndexOutOfBoundsException
-     *              if the path is empty
-     *              
-     * @deprecated             
-     */
-    @Deprecated
-    public org.openmdx.base.naming.PathComponent getLastComponent(
-    ) {
-        return new org.openmdx.base.naming.PathComponent(this.getLastSegment().toClassicRepresentation()); 
-    }
-
-    /**
-     * Return the specified component
-     *
-     * @param   position    the 0-based index of the component to
-     *                  retrieve. Must be in the range [0,size()).
-     * 
-     * @return  the component at index position
-     * 
-     * @exception   ArrayIndexOutOfBoundsException
-     *              if position is outside the specified range
-     *              
-     * @deprecated             
-     */
-    @Deprecated
-    public org.openmdx.base.naming.PathComponent getComponent(
-        int position
-    ) {
-    	return new org.openmdx.base.naming.PathComponent(this.getSegment(position).toClassicRepresentation()); 
-    }
-
     /**
      * Generates the URI representation of this path. An empty
      * path is represented by "spice:/". The string representation
@@ -729,7 +657,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
                 "This path does not represent a transient object id",
-                new BasicException.Parameter("path", this)
+                new BasicException.Parameter(BasicException.Parameter.XRI, this)
             );
         }
     }

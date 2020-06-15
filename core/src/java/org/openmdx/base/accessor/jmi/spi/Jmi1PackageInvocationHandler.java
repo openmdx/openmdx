@@ -80,8 +80,8 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
     //-----------------------------------------------------------------------
     public Jmi1PackageInvocationHandler(
         String qualifiedPackageName,
-        javax.jmi.reflect.RefPackage outermostPackage,
-        javax.jmi.reflect.RefPackage immediatePackage
+        Jmi1Package_1_0 outermostPackage,
+        Jmi1Package_1_0 immediatePackage
     ) {
         this.delegation = new RefPackage_1(
             qualifiedPackageName,

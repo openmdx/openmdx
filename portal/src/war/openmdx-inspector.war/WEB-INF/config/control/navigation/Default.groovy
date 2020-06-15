@@ -8,5 +8,5 @@ NavigationControl.paintClose(p, forEditing);
 NavigationControl.paintPrint(p, forEditing);
 NavigationControl.paintHeaderHider(p, forEditing);
 NavigationControl.paintSelectPerspectives(p, forEditing);
-NavigationControl.paintBreadcrum(p, forEditing);
+NavigationControl.paintBreadcrumb(p, forEditing);
 p.write("</div> <!-- breadcrum -->");

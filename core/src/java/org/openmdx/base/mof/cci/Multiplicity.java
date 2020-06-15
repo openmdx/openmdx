@@ -47,6 +47,9 @@
  */
 package org.openmdx.base.mof.cci;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 
@@ -55,133 +58,173 @@ import org.openmdx.kernel.exception.Throwables;
  */
 public enum Multiplicity {
 
-	/**
-	 * Cardinality 0 or 1
-	 */
-	OPTIONAL("0..1"),
-	
-	/**
-	 * Cardinality 1
-	 */
-	SINGLE_VALUE("1..1"),
-	
-	/**
-	 * An unbounded list
-	 */
-	LIST("list"),
-	
-	/**
-	 * An unbounded set
-	 */
-	SET("set"),
-	
-	/**
-	 * An unbounded sparse array
-	 */
-	SPARSEARRAY("sparsearray"),
-	
-	/**
-	 * An unbounded map
-	 */
-	MAP("map"),
+    /**
+     * Cardinality 0 or 1
+     */
+    OPTIONAL("0..1"),
 
-	/**
-	 * A stream
-	 */
-	STREAM("stream");
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param value
-	 */
-	private Multiplicity(
-		String value
-	){
-		this.code = value;
-	}
-  
-	/**
-	 * The external representation
-	 */
-	private final String code;
+    /**
+     * Cardinality 1
+     */
+    SINGLE_VALUE("1..1"),
 
-	/**
-	 * Parse the multiplicity 
-	 * 
-	 * @param multiplicity the value's String representation
-	 * 
-	 * @return the corresponding enumeration value
-	 * 
-	 * @throws NullPointerException if value is <code>null</value>
-	 * @throws IllegalArgumentException if the value does not match any of Multiplicity's <code>String</code> representations
-	 */
-	public static Multiplicity parse(
-		String multiplicity
-	){
-		for(Multiplicity candidate : values()) {
-			if(candidate.code.equals(multiplicity)){
-				return candidate;
-			}
-		}
-		throw Throwables.initCause(
-			new IllegalArgumentException("Unknown multiplicity"),
-			null,
-			BasicException.Code.DEFAULT_DOMAIN,
-			BasicException.Code.BAD_PARAMETER,
-			new BasicException.Parameter("value", multiplicity)
-		);
-	}
-	
-	/**
-	 * Tells whether the Multiplicity is one of<ul>
-	 * <li>{@link #OPTIONAL}
-	 * <li>{@link #SINGLE_VALUE}
-	 * </ul>
-	 * @return <code>true</code> if the multiplicity is single-valued
-	 */
-	public boolean isSingleValued(){
-		return this == OPTIONAL || this == SINGLE_VALUE;
-	}
+    /**
+     * An unbounded list
+     */
+    LIST("list"),
 
-	/**
-	 * Tells whether the Multiplicity is one of<ul>
-	 * <li>{@link #LIST}
-	 * <li>{@link #SET}
-	 * <li>{@link #SPARSEARRAY}
-	 * <li>{@link #MAP}
-	 * </ul>
-	 * @return <code>true</code> if the multiplicity is multi-valued
-	 */
-	public boolean isMultiValued(){
-		return this == LIST || this == SET || this == SPARSEARRAY || this == MAP;
-	}
-	
-	/**
-	 * Tells whether the Multiplicity is<ul>
-	 * <li>{@link #STREAM}
-	 * </ul>
-	 * @return <code>true</code> if the multiplicity is stream-valued
-	 */
-	public boolean isStreamValued(){
-		return this == Multiplicity.STREAM;
-	}
-	
-	/**
-	 * Retrieve the multiplicity's representation
-	 * 
-	 * @return the multiplicity's representation
-	 */
-	public String code(){
-		return this.code;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Enum#toString()
-	 */
-	@Override
-	public String toString() {
-		return code();
-	}
-	
+    /**
+     * An unbounded set
+     */
+    SET("set"),
+
+    /**
+     * An unbounded sparse array
+     */
+    SPARSEARRAY("sparsearray"),
+
+    /**
+     * An unbounded map
+     */
+    MAP("map"),
+
+    /**
+     * A stream
+     */
+    STREAM("stream");
+
+    /**
+     * Constructor
+     * 
+     * @param value
+     */
+    private Multiplicity(
+        String value
+    ) {
+        this.code = value;
+    }
+
+    /**
+     * The external representation
+     */
+    private final String code;
+    
+    /**
+     * This legacy declaration is treated the same way as {@code LIST}
+     */
+    public static String UNBOUNDED = "0..n";
+
+    private static final Set<Multiplicity> SINGLE_VALUED = EnumSet.of(Multiplicity.OPTIONAL, Multiplicity.SINGLE_VALUE);
+    private static final Set<Multiplicity> MULTI_VALUED = EnumSet.of(
+        Multiplicity.LIST, Multiplicity.SET, Multiplicity.SPARSEARRAY, Multiplicity.MAP
+    );
+    private static final Set<Multiplicity> COLLECTIONS = EnumSet.of(
+        Multiplicity.LIST, Multiplicity.SET, Multiplicity.SPARSEARRAY
+    );
+
+    /**
+     * Parse the multiplicity
+     * 
+     * @param multiplicity
+     *            the value's String representation
+     * 
+     * @return the corresponding enumeration value
+     * 
+     * @throws NullPointerException
+     *             if value is <code>null</value>
+     * @throws IllegalArgumentException if the value does not match any of Multiplicity's <code>String</code> representations
+     */
+    public static Multiplicity parse(
+        String multiplicity
+    ) {
+        for (Multiplicity candidate : values()) {
+            if (candidate.code.equalsIgnoreCase(multiplicity)) {
+                return candidate;
+            }
+        }
+        if (UNBOUNDED.equalsIgnoreCase(multiplicity)) {
+            return LIST;
+        }
+        throw Throwables.initCause(
+            new IllegalArgumentException("Unknown multiplicity"),
+            null,
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.BAD_PARAMETER,
+            new BasicException.Parameter("value", multiplicity)
+        );
+    }
+
+    /**
+     * Tells whether the Multiplicity is one of
+     * <ul>
+     * <li>{@link #OPTIONAL}
+     * <li>{@link #SINGLE_VALUE}
+     * </ul>
+     * 
+     * @return <code>true</code> if the multiplicity is single-valued
+     */
+    public boolean isSingleValued() {
+        return SINGLE_VALUED.contains(this);
+    }
+
+    /**
+     * Tells whether the Multiplicity is one of
+     * <ul>
+     * <li>{@link #LIST}
+     * <li>{@link #SET}
+     * <li>{@link #SPARSEARRAY}
+     * <li>{@link #MAP}
+     * </ul>
+     * 
+     * @return <code>true</code> if the multiplicity is multi-valued
+     */
+    public boolean isMultiValued() {
+        return MULTI_VALUED.contains(this);
+    }
+
+    /**
+     * Tells whether the Multiplicity is one of
+     * <ul>
+     * <li>{@link #LIST}
+     * <li>{@link #SET}
+     * <li>{@link #SPARSEARRAY}
+     * </ul>
+     * 
+     * @return <code>true</code> if the multiplicity is multi-valued
+     */
+    public boolean isCollection() {
+        return COLLECTIONS.contains(this);
+    }
+    
+    /**
+     * Tells whether the Multiplicity is
+     * <ul>
+     * <li>{@link #STREAM}
+     * </ul>
+     * 
+     * @return <code>true</code> if the multiplicity is stream-valued
+     */
+    public boolean isStreamValued() {
+        return this == Multiplicity.STREAM;
+    }
+
+    /**
+     * Retrieve the multiplicity's representation
+     * 
+     * @return the multiplicity's representation
+     */
+    public String code() {
+        return this.code;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Enum#toString()
+     */
+    @Override
+    public String toString() {
+        return code();
+    }
+
 }

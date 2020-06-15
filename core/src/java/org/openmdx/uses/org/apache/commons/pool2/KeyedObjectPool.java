@@ -67,9 +67,7 @@ import java.util.NoSuchElementException;
  * @see ObjectPool
  * @see org.openmdx.uses.org.apache.commons.pool2.impl.GenericKeyedObjectPool GenericKeyedObjectPool
  *
- * @version $Revision: 1566605 $
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public interface KeyedObjectPool<K,V> {
     /**

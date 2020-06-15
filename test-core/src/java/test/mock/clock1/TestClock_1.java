@@ -47,99 +47,67 @@
  */
 package test.mock.clock1;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-
 import java.text.ParseException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
+import javax.jmi.reflect.RefException;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.resource.ResourceException;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openmdx.base.jmi1.Authority;
-import org.openmdx.base.jmi1.Provider;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactory;
-import org.w3c.format.DateTimeFormat;
 
-import test.openmdx.clock1.jmi1.Clock1Package;
 import test.openmdx.clock1.jmi1.Segment;
 
 /**
- * Class Loading Test
+ * AOP 2 Test
  */
 public class TestClock_1 {
-    
+
     /**
-     * Retrieve a segment
-     */
-    protected Segment getSegment(
-        String name,
-        Map<?,?> overrides
-    ) throws ResourceException{
-        PersistenceManagerFactory entityManagerFactory = JDOHelper.getPersistenceManagerFactory(overrides, "test-Clock-EntityManagerFactory");
-        PersistenceManager persistenceManager = entityManagerFactory.getPersistenceManager();
-        Authority authority = persistenceManager.getObjectById(Authority.class, Clock1Package.AUTHORITY_XRI);
-        Provider provider = authority.getProvider("Java");
-        return (Segment) provider.getSegment(name);
-    }
-    
-    /**
-     * Standard
+     * Standard Segment Test
+     * @throws RefException 
      */
     @Test
     public void normal(
-    ) throws ResourceException{
-        Segment segment = getSegment("Normal", null);
-        String description = segment.getDescription();
-        assertEquals(
-            "description", 
-            "clock1 segment",
-            segment.getDescription()
-        );
-        Date utc = segment.currentDateAndTime().getUtc();
-        long now = System.currentTimeMillis();
-        Assert.assertTrue("Time window < 1 s", Math.abs(now - utc.getTime()) < 1000);
-        System.out.println(description + ": " + DateTimeFormat.BASIC_UTC_FORMAT.format(utc));
-        Provider provider = segment.getProvider();
-        assertEquals("Normal provider", "xri://@openmdx*test.openmdx.clock1/provider/Java", provider.refMofId());
+    ) throws ResourceException, RefException{
+        // Arrange
+        final PersistenceManagerFactory entityManagerFactory = EntityManagerFactories.getNormalEntityManagerFactory();
+        final PersistenceManager persistenceManager = entityManagerFactory.getPersistenceManager();
+        // Act
+        final Segment segment = Segments.getNormalSegment(persistenceManager);
+        // Assert
+        Segments.validateNormalDescription(segment);
+        Segments.validateNormalTimePoint(segment);
+        Segments.validateNormalTimePointReflectively(segment);
+        Segments.validateNormalProvider(segment);
+        Segments.validateUnchangedTimePoint(segment);
     }
 
     /**
-     * Standard
-     * @throws ParseException 
+     * Mocked Segment Test
+     * @throws RefException 
      */
     @Test
     public void mocked(
-    ) throws ResourceException, ParseException {
-        Map<String,String> overrides = new HashMap<String, String>();
-        overrides.put("org.openmdx.jdo.EntityManager.plugIn[0]","mockPlugIn");
-        overrides.put("mockPlugIn.modelPackage[0]","test:openmdx:clock1");
-        overrides.put("mockPlugIn.packageImpl[0]","test.mock.clock1.aop2");
-        Segment segment = getSegment("Mocked", overrides);
-        try {
-            segment.getDescription();
-            Assert.fail("IndexOutOfBoundsException expected");
-        } catch (IndexOutOfBoundsException exception) {
-            // Excpected behaviour
-        }
-        Date utc = segment.currentDateAndTime().getUtc();
-        assertEquals("High Noon", DateTimeFormat.BASIC_UTC_FORMAT.parse("20000401T120000.000Z"), segment.currentDateAndTime().getUtc());
-        System.out.println("n/a: " + DateTimeFormat.BASIC_UTC_FORMAT.format(utc)); // xri://@openmdx*test.openmdx.clock1/provider/Mocked
-        Provider provider = segment.getProvider();
-        assertEquals("Normal provider", "xri://@openmdx*test.openmdx.clock1/provider/Mocked", provider.refMofId());
-        assertSame("Persistence Managers", JDOHelper.getPersistenceManager(segment), JDOHelper.getPersistenceManager(provider));
+    ) throws ResourceException, ParseException, RefException {
+        // Arrange
+        final PersistenceManagerFactory entityManagerFactory = EntityManagerFactories.getMockedEntityManagerFactory();
+        final PersistenceManager persistenceManager = entityManagerFactory.getPersistenceManager();
+        // Act
+        final Segment segment = Segments.getMockedSegment(persistenceManager);
+        // Assert
+        Segments.validateMockedDescription(segment);
+        Segments.validateMockedTimePoint(segment);
+        Segments.validateMockedTimePointReflectively(segment);
+        Segments.validateMockedProvider(segment);
+        Segments.validateChangedTimePoint(segment);
+        Segments.validateChangedTimePointReflectively(segment);
     }
-        
-    
+
     @BeforeClass
     public static void setUp() throws NamingException{
         System.setProperty(Context.INITIAL_CONTEXT_FACTORY, NonManagedInitialContextFactory.class.getName());

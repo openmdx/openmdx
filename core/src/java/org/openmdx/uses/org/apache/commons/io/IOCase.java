@@ -42,7 +42,7 @@ import java.io.Serializable;
  * class to compare filenames.
  *
  * @version $Id: IOCase.java 1483915 2013-05-17 17:02:35Z sebb $
- * @since 1.3
+ * @since Commons I/O 1.3
  */
 public enum IOCase implements Serializable {
 
@@ -220,7 +220,7 @@ public enum IOCase implements Serializable {
      * @return the first index of the search String,
      *  -1 if no match or {@code null} string input
      * @throws NullPointerException if either string is null
-     * @since 2.0
+     * @since Commons I/O 2.0
      */
     public int checkIndexOf(final String str, final int strStartIndex, final String search) {
         final int endIndex = str.length() - search.length();

@@ -52,7 +52,7 @@ import javax.resource.ResourceException;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.spi.ConnectionAdapterFactory;
-import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
+import org.openmdx.base.rest.spi.RestConnectionFactory;
 
 /**
  * Connection Adapter Factory
@@ -69,7 +69,7 @@ public class JTAConnectionAdapterFactory implements ConnectionAdapterFactory {
      */
     @Override
     public RestConnection newConnectionAdapter(
-        ConnectionFactoryAdapter connectionFactory, 
+        RestConnectionFactory connectionFactory, 
         RestConnectionSpec connectionSpec
     ) throws ResourceException {
         return new SuspendingConnectionAdapter(

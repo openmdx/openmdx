@@ -129,21 +129,21 @@ public class StandardMarshaller implements Marshaller {
         try {
             return source instanceof Object[] ? marshal(
                 (Object[])source
-            ) : source instanceof Container ? Classes.newProxyInstance(
-                new Jmi1ContainerInvocationHandler(this, (Container)source),
+            ) : source instanceof Container<?> ? Classes.newProxyInstance(
+                new Jmi1ContainerInvocationHandlerWithCciDelegate(this, (Container<?>)source),
                 source.getClass().getInterfaces()[0], 
                 RefContainer.class, 
                 PersistenceCapableCollection.class,
                 Serializable.class 
-            ) : source instanceof List ? marshal(
-                (List)source
-            ) : source instanceof Set ? new MarshallingSet(
+            ) : source instanceof List<?> ? marshal(
+                (List<?>)source
+            ) : source instanceof Set<?> ? new MarshallingSet(
                 this, 
-                (Set)source
-            ) : source instanceof SparseArray ? SortedMaps.asSparseArray(
-                new MarshallingSortedMap(this, (SparseArray)source)
-            ) : source instanceof Iterator ? new MarshallingIterator(
-                (Iterator)source
+                (Set<?>)source
+            ) : source instanceof SparseArray<?> ? SortedMaps.asSparseArray(
+                new MarshallingSortedMap(this, (SparseArray<Object>)source)
+            ) : source instanceof Iterator<?> ? new MarshallingIterator(
+                (Iterator<?>)source
             ) : source instanceof Record ? this.outermostPackage.refCreateStruct(
                 (Record)source
             ) : source instanceof PersistenceCapable ? this.outermostPackage.marshal(

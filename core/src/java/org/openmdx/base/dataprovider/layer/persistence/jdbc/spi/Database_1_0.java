@@ -244,6 +244,10 @@ public interface Database_1_0 {
     
     public boolean isCascadeDeletes();
 
+    public SparseArray<Path> getExcludeType();
+    
+    public SparseArray<Path> getIncludeType();
+    
     /**
      * @return
      */
@@ -308,7 +312,6 @@ public interface Database_1_0 {
      */
     FilterProperty mapInstanceOfFilterProperty(
         QueryRecord request, Collection<String> qualifiedClassNames
-    )
-        throws ServiceException;
-    
+    ) throws ServiceException;        
+     
 }

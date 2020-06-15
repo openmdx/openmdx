@@ -1,11 +1,8 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ManifestType.java,v 1.1 2005/12/06 17:42:53 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: Manifest
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/12/06 17:42:53 $
  * ====================================================================
  *
  * This software is published under the BSD license

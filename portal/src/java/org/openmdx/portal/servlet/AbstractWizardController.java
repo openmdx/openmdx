@@ -48,19 +48,9 @@
  */
 package org.openmdx.portal.servlet;
 
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -73,12 +63,12 @@ import javax.servlet.http.HttpSession;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.component.ObjectView;
 import org.openmdx.portal.servlet.component.OperationPane;
 import org.openmdx.portal.servlet.component.ShowObjectView;
 import org.openmdx.portal.servlet.component.UiOperationTab;
-import org.openmdx.portal.servlet.control.FormControl;
 import org.openmdx.portal.servlet.control.UiWizardTabControl;
 import org.openmdx.portal.servlet.control.WizardControl;
 import org.openmdx.uses.org.apache.commons.fileupload.DiskFileUpload;
@@ -91,112 +81,6 @@ import org.openmdx.uses.org.apache.commons.fileupload.FileUpload;
  */
 public abstract class AbstractWizardController {
 
-	public static class ObjectReferenceBean {
-
-		/**
-		 * @return the title
-		 */
-		public String getTitle() {
-			return title;
-		}
-		/**
-		 * @param title the title to set
-		 */
-		public void setTitle(String title) {
-			this.title = title;
-		}
-		/**
-		 * @return the xri
-		 */
-		public String getXri() {
-			return xri;
-		}
-		/**
-		 * @param xri the xri to set
-		 */
-		public void setXri(String xri) {
-			this.xri = xri;
-		}
-		
-		private String title;
-		private String xri;
-	}
-	
-	public static class OptionBean {
-		
-		/**
-		 * @return the value
-		 */
-		public Short getValue() {
-			return value;
-		}
-		/**
-		 * @param value the value to set
-		 */
-		public void setValue(Short value) {
-			this.value = value;
-		}
-		/**
-		 * @return the title
-		 */
-		public String getTitle() {
-			return title;
-		}
-		/**
-		 * @param title the title to set
-		 */
-		public void setTitle(String title) {
-			this.title = title;
-		}
-		
-		private Short value;
-		private String title;
-	}
-
-	public static class QueryBean {
-		
-		/**
-		 * @return the position
-		 */
-		public Integer getPosition() {
-			return position;
-		}
-		/**
-		 * @param position the position to set
-		 */
-		public void setPosition(Integer position) {
-			this.position = position;
-		}
-		/**
-		 * @return the size
-		 */
-		public Integer getSize() {
-			return size;
-		}
-		/**
-		 * @param size the size to set
-		 */
-		public void setSize(Integer size) {
-			this.size = size;
-		}
-		/**
-		 * @return the query
-		 */
-		public String getQuery() {
-			return query;
-		}
-		/**
-		 * @param query the query to set
-		 */
-		public void setQuery(String query) {
-			this.query = query;
-		}
-		
-		private Integer position;
-		private Integer size;
-		private String query;
-	}
-		
 	/**
 	 * Constructor 
 	 *
@@ -205,29 +89,6 @@ public abstract class AbstractWizardController {
 	) {
 	}
 	
-	/**
-	 * RequestParameter
-	 *
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.PARAMETER)
-	public @interface RequestParameter {
-		
-		String name() default "";
-		String type() default "";
-	}
-
-	/**
-	 * FormParameter
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.PARAMETER)
-	public @interface FormParameter {
-		
-		String[] forms();
-		
-	}
-
 	/**
 	 * Init request dispatcher.
 	 * 
@@ -243,7 +104,9 @@ public abstract class AbstractWizardController {
 	) {
 		try {
 			request.setCharacterEncoding(encoding);
-		} catch(Exception ignore) {}
+		} catch(Exception ignore) {
+			SysLog.trace("Exception ignored", ignore);
+		}
 		this.request = request;
 		this.session = request.getSession();
 		this.app = (ApplicationContext)this.session.getAttribute(WebKeys.APPLICATION_KEY);
@@ -285,21 +148,23 @@ public abstract class AbstractWizardController {
 								File outFile = new File(location);
 								item.write(outFile);
 								// type
-								PrintWriter pw = new PrintWriter(
-									new FileOutputStream(location + ".INFO")
-								);
-								pw.println(item.getContentType());
-								int sep = item.getName().lastIndexOf("/");
-								if(sep < 0) {
-									sep = item.getName().lastIndexOf("\\");
+								try(
+    								PrintWriter pw = new PrintWriter(
+    									new FileOutputStream(location + ".INFO")
+    								)
+    							){
+    								pw.println(item.getContentType());
+    								int sep = item.getName().lastIndexOf("/");
+    								if(sep < 0) {
+    									sep = item.getName().lastIndexOf("\\");
+    								}
+    								pw.println(item.getName().substring(sep + 1));
 								}
-								pw.println(item.getName().substring(sep + 1));
-								pw.close();
 							}
 						}
 					}
 				} catch(Exception e) {
-					new ServiceException(e).log();
+		            Throwables.log(e);
 					SysLog.warning("Unable to parse multipart request", e.getMessage());
 					this.parameterMap = Collections.emptyMap();
 				}
@@ -338,28 +203,6 @@ public abstract class AbstractWizardController {
 		this.texts = this.app.getTexts();
 		this.codes = this.app.getCodes();
 		return true;
-	}
-
-	/**
-	 * Invoked by handle() before command-specific method is called.
-	 * 
-	 * @return
-	 * @throws ServiceException
-	 */
-	protected boolean prepare(
-	) throws ServiceException {
-		return true;
-	}
-	
-	/**
-	 * Init form values. Called after creation of formValues and before mapping request 
-	 * parameters to formValues.
-	 * 
-	 * @param formFields
-	 */
-	protected void initFormFields(
-		Map<String,Object> formFields
-	) throws ServiceException {		
 	}
 
 	/**
@@ -407,198 +250,6 @@ public abstract class AbstractWizardController {
 		return parameterValues == null || parameterValues.length == 0
 			? null 
 			: parameterValues[0];
-	}
-
-	/**
-	 * Handle command. Lookup up a matching controller and invoke the
-	 * method corresponding to the command.
-	 * 
-	 * @param command
-	 * @param parameterMap
-	 * @throws ServiceException
-	 */
-	protected boolean forward(
-		String command,
-		Map<String,String[]> parameterMap
-	) throws ServiceException {
-		this.forms.clear();
-		this.errorMessage = "";
-		if(!this.prepare()) {
-			return false;
-		}
-		this.command = command;
-		String methodName = "do" + command;
-		Method method = null;
-		for(Method m: this.getClass().getDeclaredMethods()) {
-			if(m.getName().equals(methodName)) {
-				method = m;
-				break;
-			}
-		}
-		// No action method found in declaring class. Check super types.
-		if(method == null) {
-			for(Method m: this.getClass().getMethods()) {
-				if(m.getName().equals(methodName)) {
-					method = m;
-					break;
-				}
-			}		
-		}
-		if(method != null) {
-			List<Object> parameterValues = new ArrayList<Object>();
-			for(int i = 0; i < method.getParameterTypes().length; i++) {
-				Object parameterValue = null;
-				String requestParameterName = null;
-				for(Annotation annotation: method.getParameterAnnotations()[i]) {
-					// RequestParameter
-					if(annotation.annotationType() == RequestParameter.class) {
-						RequestParameter requestParameter = (RequestParameter)annotation;
-						// RequestParameter specified by name
-						if(requestParameter.name() != null && !requestParameter.name().isEmpty()) {
-							requestParameterName = requestParameter.name();					
-							Class<?> parameterType = method.getParameterTypes()[i];
-							parameterValue = parameterType.isArray()
-								? this.getParameterValues(parameterMap, requestParameterName)
-								: this.getFirstParameterValue(parameterMap, requestParameterName);
-							if(parameterType == Boolean.class) {
-								if(parameterValue == null) {
-									parameterValue = "false";
-								} else if("on".equals(parameterValue)) {
-									parameterValue = "true";
-								}
-							}
-							if(parameterValue != null) {
-								Method valueOfMethod = null;
-								try {
-									valueOfMethod = parameterType.getMethod("valueOf", String.class);
-								} catch(Exception ignore) {}
-								if(valueOfMethod != null) {
-									try {
-										parameterValues.add(
-											valueOfMethod.invoke(null, parameterValue)
-										);
-									} catch(Exception e) {
-										parameterValues.add(null);
-									}
-								} else {
-									parameterValues.add(parameterValue);
-								}
-							} else {
-								parameterValues.add(null);
-							}
-						}
-						// RequestParameter specified by type
-						else if(requestParameter.type() != null && !requestParameter.type().isEmpty()) {
-							String requestParameterType = requestParameter.type();
-							// RequestParameter is a bean
-							if(requestParameterType.equalsIgnoreCase("Bean")) {
-								Class<?> parameterType = method.getParameterTypes()[i];
-								try {
-									Object bean = parameterType.newInstance();
-									BeanInfo beanInfo = Introspector.getBeanInfo(parameterType);
-									for(PropertyDescriptor pd: beanInfo.getPropertyDescriptors()) {
-										Object propertyValue = this.getFirstParameterValue(parameterMap, pd.getName());
-										Class<?> propertyType = pd.getReadMethod().getReturnType();
-										if(propertyType == Boolean.class) {
-											if(propertyValue == null) {
-												propertyValue = "false";
-											} else if("on".equals(propertyValue)) {
-												propertyValue = "true";
-											}
-										}
-										if(propertyValue != null) {
-											Method valueOfMethod = null;
-											try {
-												valueOfMethod = propertyType.getMethod("valueOf", String.class);
-											} catch(Exception ignore) {}
-											if(valueOfMethod != null) {
-												try {
-													pd.getWriteMethod().invoke(
-														bean, 
-														valueOfMethod.invoke(null, propertyValue)
-													);
-												} catch(Exception ignore) {}
-											} else {
-												try {
-													pd.getWriteMethod().invoke(bean, propertyValue);
-												} catch(Exception ignore) {}
-											}
-										}
-									}
-									parameterValues.add(bean);
-								} catch(Exception e) {
-									parameterValues.add(null);
-								}
-							} else {
-								parameterValues.add(null);
-							}
-						} else {
-							parameterValues.add(null);
-						}
-					}
-					// FormParameter
-					else if(annotation.annotationType() == FormParameter.class) {
-						String[] formNames = ((FormParameter)annotation).forms();
-						Map<String,Object> formValues = new HashMap<String,Object>();
-						this.initFormFields(formValues);
-						for(String formName: formNames) {
-				    		org.openmdx.ui1.jmi1.FormDefinition formDefinition = this.app.getUiFormDefinition(formName);
-				    		if(formDefinition != null) {
-					    		FormControl form = new org.openmdx.portal.servlet.control.FormControl(
-									formDefinition.refGetPath().getLastSegment().toClassicRepresentation(),
-									this.app.getCurrentLocaleAsString(),
-									this.app.getCurrentLocaleAsIndex(),
-									this.app.getUiContext(),
-									formDefinition
-								);
-								form.updateObject(
-									parameterMap,
-									formValues,
-									this.app,
-									this.pm
-								);
-								this.forms.put(
-									formName,
-									form
-								);
-				    		}
-						}
-						parameterValues.add(formValues);
-					} else {
-						parameterValues.add(null);
-					}
-				}
-			}
-			try {
-				method.invoke(
-					this, 
-					parameterValues.toArray(new Object[parameterValues.size()])
-				);
-			} catch(Exception e) {
-				this.errorMessage = "An unexecpted error occurred. The error message is " + e.getMessage() + ". For more information inspect the server log.";
-				new ServiceException(e).log();
-			}
-			return true;
-		} else {
-			return false;
-		}		
-	}
-
-	/**
-	 * Handle command. Lookup up a matching controller and invoke the
-	 * method corresponding to the command.
-	 * 
-	 * @param command
-	 * @return
-	 * @throws ServiceException
-	 */
-	public boolean handle(
-		String command
-	) throws ServiceException {
-		return this.forward(
-			command, 
-			this.parameterMap
-		);		
 	}
 
 	/**
@@ -846,27 +497,6 @@ public abstract class AbstractWizardController {
 	}
 
 	/**
-	 * Retrieve exitAction.
-	 *
-	 * @return Returns the exitAction.
-	 */
-	public Action getExitAction(
-	) {
-		return this.exitAction;
-	}
-
-	/**
-	 * Set exitAction.
-	 * 
-	 * @param exitAction The exitAction to set.
-	 */
-	public void setExitAction(
-		Action exitAction
-	) {
-		this.exitAction = exitAction;
-	}
-
-	/**
 	 * Get servlet path.
 	 * 
 	 * @return
@@ -930,49 +560,6 @@ public abstract class AbstractWizardController {
 	}
 	
 	/**
-	 * Retrieve forms.
-	 *
-	 * @return Returns the forms.
-	 */
-	public Map<String,FormControl> getForms(
-	) {
-		return this.forms;
-	}
-
-	/**
-	 * Set forms.
-	 * 
-	 * @param forms The forms to set.
-	 */
-	public void setForms(
-		Map<String,FormControl> forms
-	) {
-		this.forms = forms;
-	}
-
-	/**
-	 * Get first form.
-	 * 
-	 * @return
-	 */
-	public FormControl getForm(
-	) {
-		return this.forms == null || this.forms.isEmpty()
-			? null
-			: this.forms.values().iterator().next();
-	}
-
-	/**
-	 * Retrieve command.
-	 *
-	 * @return Returns the command.
-	 */
-	public String getCommand(
-	) {
-		return this.command;
-	}
-
-	/**
 	 * @return the wizardName
 	 */
 	public String getWizardName(
@@ -1030,14 +617,19 @@ public abstract class AbstractWizardController {
 	 * @return
 	 * @throws ServiceException
 	 */
-	protected String getLabel(
+	public String getLabel(
 		String qualifiedElementName
 	) throws ServiceException {
 		ApplicationContext app = this.getApp();
-		List<String> labels = app.getUiElementDefinition(qualifiedElementName).getLabel();
-		return app.getCurrentLocaleAsIndex() < labels.size()
-			? labels.get(app.getCurrentLocaleAsIndex())
-			: labels.get(0);
+		org.openmdx.ui1.jmi1.ElementDefinition elementDefinition = app.getUiElementDefinition(qualifiedElementName);
+		if(elementDefinition == null || !Boolean.TRUE.equals(elementDefinition.isActive())) {
+			return null;
+		} else {
+			List<String> labels = app.getUiElementDefinition(qualifiedElementName).getLabel();
+			return app.getCurrentLocaleAsIndex() < labels.size()
+				? labels.get(app.getCurrentLocaleAsIndex())
+				: labels.get(0);
+		}
 	}
 
 	/**
@@ -1047,96 +639,38 @@ public abstract class AbstractWizardController {
 	 * @return
 	 * @throws ServiceException
 	 */
-	protected String getToolTip(
+	public String getToolTip(
 		String qualifiedElementName
 	) throws ServiceException {
 		ApplicationContext app = this.getApp();
-		List<String> toolTips = app.getUiElementDefinition(qualifiedElementName).getToolTip();
-		return app.getCurrentLocaleAsIndex() < toolTips.size()
-			? toolTips.get(app.getCurrentLocaleAsIndex())
-			: toolTips.get(0);
-	}
-	
-	/**
-	 * Retrieve errorMessage.
-	 *
-	 * @return Returns the errorMessage.
-	 */
-	public String getErrorMessage(
-	) {
-		return this.errorMessage;
-    }
-
-	/**
-	 * Get object reference bean for given object.
-	 * 
-	 * @param obj
-	 * @return
-	 */
-	protected ObjectReferenceBean newObjectReferenceBean(
-		RefObject_1_0 obj
-	) {
-		ApplicationContext app = this.getApp();
-		ObjectReferenceBean objRef = new ObjectReferenceBean();
-		objRef.setXri(obj.refGetPath().toXRI());
-		objRef.setTitle(
-			app.getPortalExtension().getTitle(
-				obj, 
-				app.getCurrentLocaleAsIndex(), 
-				app.getCurrentLocaleAsString(), 
-				false, // asShortTitle, 
-				app
-			)
-		);
-		return objRef;
-	}
-	
-	/**
-	 * Get options for given code container.
-	 * 
-	 * @param name
-	 * @param locale
-	 * @param includeAll
-	 * @return
-	 * @throws ServiceException
-	 */
-	protected List<OptionBean> getOptions(
-		String name,
-		short locale,
-		boolean includeAll
-	) throws ServiceException {
-		Map<Short,String> codeEntries = codes.getLongTextByCode(name, locale, includeAll);		
-		List<OptionBean> options = new ArrayList<OptionBean>();
-		for(Map.Entry<Short,String> codeEntry: codeEntries.entrySet()) {
-			OptionBean optionBean = new OptionBean();
-			optionBean.setValue(codeEntry.getKey());
-			optionBean.setTitle(codeEntry.getValue());
-			options.add(optionBean);
+		org.openmdx.ui1.jmi1.ElementDefinition elementDefinition = app.getUiElementDefinition(qualifiedElementName);
+		if(elementDefinition == null) {
+			return null;
+		} else {
+			List<String> toolTips = app.getUiElementDefinition(qualifiedElementName).getToolTip();
+			return app.getCurrentLocaleAsIndex() < toolTips.size()
+				? toolTips.get(app.getCurrentLocaleAsIndex())
+				: toolTips.get(0);
 		}
-		return options;
 	}
-
+	
 	//-----------------------------------------------------------------------
 	// Members
 	//-----------------------------------------------------------------------
 	public static final String DEFAULT_CONTROLLER_ID = "Default";
 
-	private Action exitAction;
-	private String command;
 	private HttpServletRequest request;
 	private String requestId;
 	private HttpSession session;
-	private ApplicationContext app;
-	private PersistenceManager pm;
+	protected ApplicationContext app;
+	protected PersistenceManager pm;
 	private RefObject_1_0 object;
 	private Path objectIdentity;
 	private ObjectView currentView;
 	private Texts_1_0 texts;
-	private Codes codes;
+	protected Codes codes;
 	private String providerName;
 	private String segmentName;
-	protected String errorMessage;
-	private Map<String,FormControl> forms = new HashMap<String,FormControl>();
-	private Map<String,String[]> parameterMap = null;
+	protected Map<String,String[]> parameterMap = null;
 
 }

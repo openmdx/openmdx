@@ -52,11 +52,11 @@ import java.util.Collections;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.macros.ClassicMacroConfiguration;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.macros.MacroConfiguration;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.macros.MacroHandler;
 import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.collection.TreeSparseArray;
 import org.w3c.cci2.SparseArray;
 
 /**
@@ -80,19 +80,19 @@ public class TestClassicMacroConfiguration {
             () -> pathMacroName,
             () -> pathMacroValue
         );
-        stringMacroColumn = new TreeSparseArray<>(
+        stringMacroColumn = new TreeSparseArray<String>(
             Collections.singletonMap(Integer.valueOf(0), "object__class")
         );
-        stringMacroName = new TreeSparseArray<>(
+        stringMacroName = new TreeSparseArray<String>(
             Collections.singletonMap(Integer.valueOf(0), "state2:")
         );
-        stringMacroValue = new TreeSparseArray<>(
+        stringMacroValue = new TreeSparseArray<String>(
             Collections.singletonMap(Integer.valueOf(0), "org:openmdx:state2:")
         );
-        pathMacroName = new TreeSparseArray<>(
+        pathMacroName = new TreeSparseArray<String>(
             Collections.singletonMap(Integer.valueOf(0), "app1.Sliced.Standard")
         );
-        pathMacroValue = new TreeSparseArray<>(
+        pathMacroValue = new TreeSparseArray<String>(
             Collections.singletonMap(Integer.valueOf(0), "xri://@openmdx*org.openmdx.test.app1/provider/Sliced/segment/Standard")
         );
     }

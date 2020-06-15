@@ -50,6 +50,7 @@ package org.openmdx.application.rest.http;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Duration;
 
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
@@ -182,17 +183,21 @@ class PlainVanillaInteraction extends AbstractHttpInteraction implements HttpInt
     
     /**
      * Create connection for the given URL
-     * 
-     * @param uri
-     * 
-     * @throws ServiceException
      */
     protected HttpURLConnection newConnection(
-        URL url,
-        RestInteractionSpec interactionSpec
+        final URL url,
+        final RestInteractionSpec interactionSpec
     ) throws ResourceException{
         try {
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            final HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            final Duration connectTimeout = httpContext.getConnectionConnectTimeout();
+            if(connectTimeout != null) {
+                urlConnection.setConnectTimeout((int) connectTimeout.toMillis());
+            }
+            final Duration readTimeout = httpContext.getConnectionReadTimeout();
+            if(readTimeout != null) {
+                urlConnection.setReadTimeout((int) readTimeout.toMillis());
+            }
             urlConnection.setRequestMethod(
                 interactionSpec.getFunctionName()
             );

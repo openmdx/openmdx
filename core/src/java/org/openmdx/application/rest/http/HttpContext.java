@@ -50,6 +50,7 @@
 package org.openmdx.application.rest.http;
 
 import java.net.URL;
+import java.time.Duration;
 
 import javax.resource.ResourceException;
 
@@ -89,6 +90,20 @@ public interface HttpContext {
      */
     String getConnectionURL();
 
+    /**
+     * Retrieve the connection's connect timeout
+     * 
+     * @return the connection's connect timeout
+     */
+    Duration getConnectionConnectTimeout();
+    
+    /**
+     * Retrieve the connection's read timeout
+     * 
+     * @return the connection's read timeout
+     */
+    Duration getConnectionReadTimeout();
+    
     /**
      * Retrieve the MIME type.
      *

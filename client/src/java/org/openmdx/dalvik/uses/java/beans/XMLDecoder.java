@@ -62,7 +62,7 @@ import javax.xml.parsers.SAXParser;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  *
  * @author Philip Milne
@@ -126,7 +126,6 @@ public class XMLDecoder {
      * @param cl the class loader used for instantiating objects.
      *        <code>null</code> indicates that the default class loader should
      *        be used
-     * @since 1.5
      */
     public XMLDecoder(InputStream in, Object owner,
                       ExceptionListener exceptionListener, ClassLoader cl) {

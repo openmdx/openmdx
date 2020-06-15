@@ -80,14 +80,14 @@ public interface ObjectRecord extends RequestRecord {
      * 
      * @return the object's version
      */
-    Object getVersion();
+    byte[] getVersion();
     
     /**
      * Set the object's lock
      * 
-     * @param lock the object's version
+     * @param version the object's version
      */
-    void setVersion(Object lock);
+    void setVersion(byte[] version);
     
     /**
      * Retrieve the object's lock

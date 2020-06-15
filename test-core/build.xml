@@ -71,6 +71,10 @@
 		<path refid="postgresql.jdbc.lib"/>
 		<path refid="oracle.jdbc.lib"/>
 		<pathelement location="${project.home}/osgi/${build.java.platform}/extension/lib/concurrent.jar"/>		
+		<pathelement location="${project.home}/osgi/${build.java.platform}/extension/lib/mockito-core.jar"/>		
+		<pathelement location="${project.home}/osgi/${build.java.platform}/extension/lib/objenesis.jar"/>		
+		<pathelement location="${project.home}/osgi/${build.java.platform}/extension/lib/byte-buddy.jar"/>		
+		<pathelement location="${project.home}/osgi/${build.java.platform}/extension/lib/byte-buddy-agent.jar"/>		
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="project.lib.classpath"/>

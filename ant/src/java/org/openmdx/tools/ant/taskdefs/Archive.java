@@ -66,11 +66,12 @@ import org.apache.tools.ant.taskdefs.Checksum;
 import org.apache.tools.ant.taskdefs.Manifest;
 import org.apache.tools.ant.taskdefs.ManifestException;
 import org.apache.tools.ant.taskdefs.MatchingTask;
-import org.apache.tools.ant.taskdefs.UpToDate;
 import org.apache.tools.ant.taskdefs.Tar.TarCompressionMethod;
+import org.apache.tools.ant.taskdefs.UpToDate;
 import org.apache.tools.ant.taskdefs.Zip.Duplicate;
 import org.apache.tools.ant.taskdefs.condition.Condition;
 import org.apache.tools.ant.types.FileSet;
+import org.apache.tools.ant.types.FilterChain;
 import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.types.ZipFileSet;
 import org.apache.tools.ant.types.selectors.SelectorContainer;
@@ -781,7 +782,7 @@ public class Archive
 	    	String mappedPath = path;
 	    	InputStream filteredInputStream = in;
 			if(!this.filterChains.isEmpty()) {
-		    	Vector<ArchiveFilterChain> applicableFilterChains = new Vector<ArchiveFilterChain>();		    	
+		    	Vector<FilterChain> applicableFilterChains = new Vector<FilterChain>();		    	
 		    	FilterChains: for(
 		    		Enumeration<ArchiveFilterChain> e = this.filterChains.elements();
 		    		e.hasMoreElements();
@@ -1430,9 +1431,6 @@ public class Archive
 			String vPath, 
 			TarFileSet tarFileSet
 		) throws IOException {
-	        FileInputStream fIn = null;
-	        InputStream in = null;
-
 	        String fullpath = tarFileSet.getFullpath();
 	        if (fullpath.length() > 0) {
 	            vPath = fullpath;
@@ -1463,60 +1461,72 @@ public class Archive
 	            vPath = vPath.substring(1, l);
 	        }
 
-	        try {
-	            TarEntry te = new TarEntry(vPath);
-	            te.setModTime(file.lastModified());
-	            if (file.isDirectory()) {
-	                te.setMode(tarFileSet.getDirMode());
-	            } else {
-	        		Entry entry = filterset.getEntry(
-                		fIn = new FileInputStream(file), 
+            final TarEntry te = createTarEntry(vPath, tarFileSet, file);
+            if (file.isDirectory()) {
+                tOut.putNextEntry(te);
+            } else {
+                try (final FileInputStream fIn = new FileInputStream(file)) {
+	        		final Entry entry = filterset.getEntry(
+                		fIn, 
         				vPath, getProject()
         			);
-	            	in = entry.getStream();
-	                if(in == fIn) {
+	            	final InputStream eIn = entry.getStream();
+	                if(eIn == fIn) {
 		                te.setSize(file.length());
+	                    tOut.putNextEntry(te);
+	                    streamToTar(tOut, eIn);
 	                } else {
-	                	in = new BufferedInputStream(in);
-	                	in.mark(Integer.MAX_VALUE);
-	                	long size = 0L, step = 0L;
-	                	while(
-                			(step = in.skip(Long.MAX_VALUE)) > 0L
-	                	) size += step;
-	                	while(
-	                		in.read() > 0
-	                	) size++;
-	                	in.reset();    
-		                te.setSize(size);
+	                    try (final InputStream in = new BufferedInputStream(eIn)) {
+    	                	in.mark(Integer.MAX_VALUE);
+    	                	long size = 0L, step = 0L;
+    	                	while(
+                    			(step = in.skip(Long.MAX_VALUE)) > 0L
+    	                	) size += step;
+    	                	while(
+    	                		in.read() > 0
+    	                	) size++;
+    	                	in.reset();    
+    		                te.setSize(size);
+    	                    tOut.putNextEntry(te);
+    	                    streamToTar(tOut, in);
+	                    }
 	                }
-	                te.setMode(tarFileSet.getMode());
-	            }
-	            te.setUserName(tarFileSet.getUserName());
-	            te.setGroupName(tarFileSet.getGroup());
-	            te.setUserId(tarFileSet.getUid());
-	            te.setGroupId(tarFileSet.getGid());
-
-	            tOut.putNextEntry(te);
-
-	            if (!file.isDirectory()) {
-
-	                byte[] buffer = new byte[8 * 1024];
-	                int count = 0;
-	                do {
-	                    tOut.write(buffer, 0, count);
-	                    count = in.read(buffer, 0, buffer.length);
-	                } while (count != -1);
-	            }
-
-	            tOut.closeEntry();
-	        } finally {
-	            if (in != null) {
-	                in.close();
-	            } else if (fIn != null) {
-	            	fIn.close();
-	            }
-	        }
+                }
+            }
+            tOut.closeEntry();
 		}
+
+        /**
+         * @param tOut
+         * @param in
+         * @throws IOException
+         */
+        private void streamToTar(
+            TarOutputStream tOut,
+            InputStream in
+        ) throws IOException {
+            byte[] buffer = new byte[8 * 1024];
+            int count = 0;
+            do {
+                tOut.write(buffer, 0, count);
+                count = in.read(buffer, 0, buffer.length);
+            } while (count != -1);
+        }
+
+        private TarEntry createTarEntry(
+            String vPath,
+            TarFileSet tarFileSet,
+            File file
+        ) {
+            TarEntry te = new TarEntry(vPath);
+            te.setModTime(file.lastModified());
+            te.setMode(file.isDirectory() ? tarFileSet.getDirMode() : tarFileSet.getMode());
+            te.setUserName(tarFileSet.getUserName());
+            te.setGroupName(tarFileSet.getGroup());
+            te.setUserId(tarFileSet.getUid());
+            te.setGroupId(tarFileSet.getGid());
+            return te;
+        }
 		
         static {
         	NO_COMPRESSION.setValue("none");

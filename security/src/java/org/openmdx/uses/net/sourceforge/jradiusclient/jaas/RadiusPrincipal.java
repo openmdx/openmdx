@@ -56,7 +56,6 @@ import java.security.Principal;
 /**
  *
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.3 $
  */
 public class RadiusPrincipal implements Principal{
     private String principalName;

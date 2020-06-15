@@ -34,9 +34,7 @@ import org.openmdx.uses.org.apache.commons.pool2.UsageTracking;
 /**
  * Configuration settings for abandoned object removal.
  *
- * @version $Revision:$
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public class AbandonedConfig {
 

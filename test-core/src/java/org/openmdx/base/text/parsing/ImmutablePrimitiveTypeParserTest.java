@@ -56,7 +56,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.text.parsing.ImmutablePrimitiveTypeParser;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.text.spi.Parser;

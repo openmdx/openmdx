@@ -135,7 +135,7 @@ public class ServletFileUpload extends FileUpload {
      * @throws FileUploadException if there are problems reading/parsing
      *                             the request or storing files.
      *
-     * @since 1.3
+     * @since FileUpload 1.3
      */
     public Map<String, List<FileItem>> parseParameterMap(HttpServletRequest request)
             throws FileUploadException {

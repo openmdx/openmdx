@@ -61,7 +61,6 @@ import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 import javax.resource.spi.CommException;
 import javax.resource.spi.ResourceAllocationException;
-import javax.rmi.PortableRemoteObject;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.spi.AbstractInteraction;
@@ -117,10 +116,7 @@ class Connection_2RemotePort implements Port<RestConnection> {
         //
         Connection_2Home home;
         try {
-            home = (Connection_2Home) PortableRemoteObject.narrow(
-                delegate,
-                Connection_2Home.class
-            );
+            home = (Connection_2Home) delegate;
         } catch (ClassCastException exception) {
             throw new ServiceException(
                 exception,

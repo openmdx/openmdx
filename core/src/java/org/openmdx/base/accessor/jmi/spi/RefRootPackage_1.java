@@ -128,8 +128,6 @@ import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.cci.Queries;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManager;
-import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
-import org.openmdx.base.persistence.spi.DelegatingPersistenceManagerFactory;
 import org.openmdx.base.persistence.spi.MarshallingInstanceLifecycleListener;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.Transactions;
@@ -141,6 +139,8 @@ import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.base.transaction.ContainerManagedUnitOfWorkSynchronization;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.JDOPersistenceManager;
+import org.openmdx.kernel.jdo.JDOPersistenceManagerFactory;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.loading.Factory;
@@ -174,7 +174,7 @@ public class RefRootPackage_1
         PersistenceManager delegate,
         Mapping_1_0 implementationMapper,
         Map<String, Object> userObjects,
-        PersistenceManagerFactory persistenceManagerFactory
+        JDOPersistenceManagerFactory persistenceManagerFactory
     ) {
         super(
             null, // refMofId
@@ -192,10 +192,7 @@ public class RefRootPackage_1
         this.registry = new WeakRegistry<>(multithreaded);
         final MarshallingInstanceLifecycleListener listener = new MarshallingInstanceLifecycleListener(this.registry, this);
         delegate.addInstanceLifecycleListener(listener);
-        boolean containterManagedTransaction = 
-            AbstractPersistenceManagerFactory.isTransactionContainerManaged(persistenceManagerFactory) ||
-            DelegatingPersistenceManagerFactory.isTransactionContainerManaged(persistenceManagerFactory);
-        this.persistenceManager = containterManagedTransaction ? new ContainerManagedPersistenceManager_1(
+        this.persistenceManager = persistenceManagerFactory.getContainerManaged() ? new ContainerManagedPersistenceManager_1(
             persistenceManagerFactory,
             listener, 
             interactionSpec == null && persistenceManagerFactory instanceof EntityManagerFactory_1
@@ -239,8 +236,8 @@ public class RefRootPackage_1
      * @see EntityManagerFactory_1
      */
     public RefRootPackage_1(
-        PersistenceManagerFactory persistenceManagerFactory,
-        PersistenceManager standardDelegate,
+        JDOPersistenceManagerFactory persistenceManagerFactory,
+        JDOPersistenceManager standardDelegate,
         Mapping_1_0 mapping,
         Map<String,Object> userObjects
     ){
@@ -271,7 +268,7 @@ public class RefRootPackage_1
 
     private final InteractionSpec interactionSpec;
     protected Map<InteractionSpec,RefRootPackage_1> viewManager;
-    private final PersistenceManagerFactory persistenceManagerFactory;
+    private final JDOPersistenceManagerFactory persistenceManagerFactory;
     protected final PersistenceManager_1_0 persistenceManager;
     final StandardMarshaller standardMarshaller = new StandardMarshaller(this);
     final ValidatingMarshaller validatingMarshaller = new ValidatingMarshaller(this);
@@ -372,7 +369,8 @@ public class RefRootPackage_1
     public Object unmarshalUnchecked(
     	Object source
     ){
-        return RefRootPackage_1.this.isTerminal() ?
+        return source == null ? null :
+            RefRootPackage_1.this.isTerminal() ?
     		((RefObject_1_0)source).refDelegate() :	
 			((DelegatingRefObject_1_0)source).openmdxjdoGetDelegate();
     }
@@ -400,18 +398,17 @@ public class RefRootPackage_1
         if(source instanceof RefStruct_1_0) {
             return ((RefStruct_1_0)source).refDelegate();
         } else if(source instanceof RefObject_1_0) {
-        	RefObject_1_0 refObject = (RefObject_1_0) source;
-    		RefPackage actual = refObject.refOutermostPackage();
-    		InteractionSpec actualInteractionSpec;
+        	final RefObject_1_0 refObject = (RefObject_1_0) source;
+        	final RefPackage actual = refObject.refOutermostPackage();
+    		final InteractionSpec actualInteractionSpec;
         	if(actual == this) { 
             	return unmarshalUnchecked(source);
         	} else if (actual instanceof RefPackage_1_0){
         		RefPackage_1_0 that = (RefPackage_1_0) actual;
         		if(this.refPackage((InteractionSpec)null) == that.refPackage((InteractionSpec)null)) {
         			return unmarshalLenient(source);
-        		} else {
-        			actualInteractionSpec = that.refInteractionSpec();
         		}
+    			actualInteractionSpec = that.refInteractionSpec();
         	} else {
         		actualInteractionSpec = null;
         	}
@@ -419,7 +416,7 @@ public class RefRootPackage_1
 				BasicException.Code.DEFAULT_DOMAIN,
 				BasicException.Code.BAD_PARAMETER,
 				"Outermost RefPackage mismatch",
-				new BasicException.Parameter("xri", refObject.refMofId()),
+				new BasicException.Parameter(BasicException.Parameter.XRI, refObject.refMofId()),
 				new BasicException.Parameter("target package class", this.getClass().getName()),
 				new BasicException.Parameter("target package hash code", System.identityHashCode(this)),
 				new BasicException.Parameter("target interaction spec", this.refInteractionSpec()),
@@ -457,7 +454,7 @@ public class RefRootPackage_1
                               BasicException.Code.DEFAULT_DOMAIN,
                               BasicException.Code.NOT_FOUND,
                               "Object class can not be determined",
-                              new BasicException.Parameter("xri", pc.jdoGetObjectId()),
+                              new BasicException.Parameter(BasicException.Parameter.XRI, pc.jdoGetObjectId()),
                               new BasicException.Parameter("transactional-object-id", pc.jdoGetTransactionalObjectId()),
                               new BasicException.Parameter("interaction-spec", refPackage.interactionSpec)
                             );
@@ -525,7 +522,7 @@ public class RefRootPackage_1
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
                 "This is an object, not a container path",
-                new BasicException.Parameter("xri", resourceIdentifier)
+                new BasicException.Parameter(BasicException.Parameter.XRI, resourceIdentifier)
             );
 //          if(!this.refModel().containsSharedAssociation(resourceIdentifier)){
 //              TODO might be optimised by avoiding the parent's retrieval 
@@ -652,17 +649,7 @@ public class RefRootPackage_1
                 );
             }
             if(refPackage == null) {
-                PersistenceManager_1_0 delegate = this.isTerminal() ? 
-                    this.delegate :
-                    ((Delegating_1_0<RefPackage_1_0>)this.delegate).objGetDelegate().refPersistenceManager();
-                refPackage = new RefRootPackage_1(
-                    this.viewManager,
-                    interactionSpec,
-                    delegate.getPersistenceManager(interactionSpec), 
-                    this.implementationMapper,
-                    this.userObjects,
-                    this.persistenceManagerFactory
-                );
+                refPackage = createRefRootPackage(interactionSpec);
                 RefRootPackage_1 oldPackage = this.viewManager.put(
                     interactionSpec,
                     refPackage
@@ -684,6 +671,23 @@ public class RefRootPackage_1
                 )
             );
         }
+    }
+
+    private RefRootPackage_1 createRefRootPackage(InteractionSpec interactionSpec) {
+        return new RefRootPackage_1(
+            this.viewManager,
+            interactionSpec,
+            (
+                this.isTerminal() ? this.delegate : objGetDelegate().refPersistenceManager()
+            ).getPersistenceManager(interactionSpec), 
+            this.implementationMapper,
+            this.userObjects,
+            this.persistenceManagerFactory
+        );
+    }
+
+    private RefPackage_1_0 objGetDelegate() {
+        return ((Delegating_1_0<RefPackage_1_0>)this.delegate).objGetDelegate();
     }
 
     /**
@@ -1013,7 +1017,7 @@ public class RefRootPackage_1
      */
     class StandardPersistenceManager_1
         extends AbstractPersistenceManager
-        implements PersistenceManager_1_0, Delegating_1_0<RefRootPackage_1>
+        implements Delegating_1_0<RefRootPackage_1>
     {
 
         /**
@@ -1023,7 +1027,7 @@ public class RefRootPackage_1
          * @param listener
          */
         StandardPersistenceManager_1(
-            PersistenceManagerFactory factory, 
+            JDOPersistenceManagerFactory factory, 
             MarshallingInstanceLifecycleListener listener
         ) {
             super(
@@ -1731,7 +1735,7 @@ public class RefRootPackage_1
                         DataObject_1_0 dataObject = pm.makePersistent(
                             new DataObject_1(
                                 xri,
-                                ReducedJDOHelper.getVersion(source), 
+                                (byte[]) ReducedJDOHelper.getVersion(source), 
                                 pm.getMultithreaded()
                             )
                         );
@@ -2305,7 +2309,7 @@ public class RefRootPackage_1
          * @param entityManager <true> in case of the <em>leading</em> manager in respect to unit of work management
          */
         ContainerManagedPersistenceManager_1(
-            PersistenceManagerFactory factory,
+            JDOPersistenceManagerFactory factory,
             MarshallingInstanceLifecycleListener listener, 
             boolean entityManager
         ) {

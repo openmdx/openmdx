@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_9M97kHLeEeGNgPDkuA6txR" name="database2" viewpoint="">
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_9M97kHLeEeGNgPDkuA6txR" name="database2" viewpoint="">
   <packagedElement xmi:type="uml:Package" xmi:id="_KWNCsHLfEeGNgPDkuA6txR" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_Y8TwcHLfEeGNgPDkuA6txR" name="openmdx">
       <packagedElement xmi:type="uml:Package" xmi:id="_c6xKEHLfEeGNgPDkuA6txR" name="database2">
         <packagedElement xmi:type="uml:Class" xmi:id="_JVHw8E0REeiDgZp6R_9Hfw" name="NextValueResult">
-          <eAnnotations xmi:id="_L6nsME0UEeiDgZp6R_9Hfw" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_UPUGQE0UEeiDgZp6R_9Hfw" key="struct"/>
+          <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_L6nsME0UEeiDgZp6R_9Hfw" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_UPUGQE0UEeiDgZp6R_9Hfw" key="struct"/>
           </eAnnotations>
-          <ownedAttribute xmi:id="_wwQekE0REeiDgZp6R_9Hfw" name="value" isReadOnly="true">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_wwQekE0REeiDgZp6R_9Hfw" name="value" isReadOnly="true">
             <type xmi:type="uml:PrimitiveType" href="../openMDX 2 ~ Core (EMF)/org.w3c.uml#_3C7B8A60016D3C8B631401F0"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_9hkoQHNPEeG9T95WWtTPPR" name="Sequence">
-          <ownedOperation xmi:id="_RCYpMEwBEeiP_v9qilBc9Q" name="nextValue" concurrency="concurrent" isQuery="true">
-            <ownedParameter xmi:id="_jVWOEE0QEeiDgZp6R_9Hfw" name="return" type="_JVHw8E0REeiDgZp6R_9Hfw" direction="return">
+          <ownedOperation xmi:type="uml:Operation" xmi:id="_RCYpMEwBEeiP_v9qilBc9Q" name="nextValue" concurrency="concurrent" isQuery="true">
+            <ownedParameter xmi:type="uml:Parameter" xmi:id="_jVWOEE0QEeiDgZp6R_9Hfw" name="return" type="_JVHw8E0REeiDgZp6R_9Hfw" direction="return">
               <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_0DDhgE0QEeiDgZp6R_9Hfw" value="1"/>
               <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_0DEvoE0QEeiDgZp6R_9Hfw" value="1"/>
             </ownedParameter>
           </ownedOperation>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_IMtKsHNPEeG9T95WWtTPPR" name="Segment">
-          <generalization xmi:id="_6MzE0HNPEeG9T95WWtTPPR">
+          <generalization xmi:type="uml:Generalization" xmi:id="_6MzE0HNPEeG9T95WWtTPPR">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D3FC487C80099"/>
           </generalization>
-          <ownedAttribute xmi:id="_63VDAXNkEeG9T95WWtTPPR" name="sequence" type="_9hkoQHNPEeG9T95WWtTPPR" isUnique="false" aggregation="composite" association="_63VDAHNkEeG9T95WWtTPPR">
+          <ownedAttribute xmi:type="uml:Property" xmi:id="_63VDAXNkEeG9T95WWtTPPR" name="sequence" type="_9hkoQHNPEeG9T95WWtTPPR" isUnique="false" aggregation="composite" association="_63VDAHNkEeG9T95WWtTPPR">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_63WRIHNkEeG9T95WWtTPPR"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_63WRIXNkEeG9T95WWtTPPR" value="1"/>
-            <qualifier xmi:id="" name="id" visibility="private">
+            <qualifier xmi:type="uml:Property" xmi:id="" name="id" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_63VDAHNkEeG9T95WWtTPPR" name="DatabaseExposesSequence" memberEnd="_63VDAXNkEeG9T95WWtTPPR _63W4MHNkEeG9T95WWtTPPR">
-          <ownedEnd xmi:id="_63W4MHNkEeG9T95WWtTPPR" name="segment" type="_IMtKsHNPEeG9T95WWtTPPR" isUnique="false" association="_63VDAHNkEeG9T95WWtTPPR">
+          <ownedEnd xmi:type="uml:Property" xmi:id="_63W4MHNkEeG9T95WWtTPPR" name="segment" type="_IMtKsHNPEeG9T95WWtTPPR" isUnique="false" association="_63VDAHNkEeG9T95WWtTPPR">
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_63W4MXNkEeG9T95WWtTPPR" value="1"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_63W4MnNkEeG9T95WWtTPPR" value="1"/>
           </ownedEnd>
@@ -40,4 +40,10 @@
       </packagedElement>
     </packagedElement>
   </packagedElement>
+  <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_cui3gBZmEemGMr2sON_HWQ">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_cujekBZmEemGMr2sON_HWQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+      <references xmi:type="ecore:EPackage" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#_Kv8EIKFXEeS_KNX0nfvIVQ"/>
+    </eAnnotations>
+    <appliedProfile xmi:type="uml:Profile" href="pathmap://PAPYRUS_ACTIONLANGUAGE_PROFILE/ActionLanguage-Profile.profile.uml#ActionLanguage"/>
+  </profileApplication>
 </uml:Model>

@@ -289,7 +289,8 @@ public class Swagger {
      */
     private JSONObject newRequestBody(
         String description,
-        ModelElement_1_0 typeDef
+        ModelElement_1_0 typeDef,
+        Map<Object,ModelElement_1_0> collectedTypeDefs
     ) throws JSONException, ServiceException {
         Model_1_0 model = typeDef.getModel();
         List<ModelElement_1_0> subtypeDefs = new ArrayList<ModelElement_1_0>();
@@ -298,6 +299,12 @@ public class Swagger {
             if(!Boolean.TRUE.equals(subtypeDef.isAbstract())) {
                 subtypeDefs.add(subtypeDef);
             }
+        }
+        if(typeDef.isStructureType()) {
+            this.collectNestedTypeDefs(
+                typeDef,
+                collectedTypeDefs
+            );
         }
         JSONObject requestBody = new JSONObject();
         requestBody.put("description", description);
@@ -360,6 +367,40 @@ public class Swagger {
     }
 
     /**
+     * Collect nested types for given structDef
+     * 
+     * @param structDef
+     * @param collectedTypeDefs
+     * @throws ServiceException
+     */
+    private void collectNestedTypeDefs(
+        ModelElement_1_0 structDef,
+        Map<Object,ModelElement_1_0> collectedTypeDefs
+    ) throws ServiceException {
+        Model_1_0 model = structDef.getModel();
+        if(structDef.isStructureType()) {
+            for(Object field: structDef.objGetMap("field").values()) {
+                ModelElement_1_0 fieldDef = model.getElement(field);
+                if(fieldDef.isStructureFieldType()) { 
+                    ModelElement_1_0 fieldDefType = model.getDereferencedType(fieldDef.getType());
+                    if(!fieldDefType.isPrimitiveType()) {
+                        collectedTypeDefs.put(
+                            fieldDefType.jdoGetObjectId(),
+                            fieldDefType
+                        );
+                    }
+                    if(fieldDefType.isStructureType()) {
+                        this.collectNestedTypeDefs(
+                            fieldDefType,
+                            collectedTypeDefs
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Create response element for given type.
      * 
      * @param typeDef
@@ -374,36 +415,46 @@ public class Swagger {
         Multiplicity multiplicity,
         Map<Object,ModelElement_1_0> collectedTypeDefs
     ) throws ServiceException, JSONException {
-        List<ModelElement_1_0> subtypeDefs = new ArrayList<ModelElement_1_0>();
-        Model_1_0 model = typeDef.getModel();
-        for(Object subtype: typeDef.objGetSet("allSubtype")) {
-            ModelElement_1_0 subtypeDef = model.getElement(subtype);
-            if(!Boolean.TRUE.equals(subtypeDef.isAbstract())) {
-                subtypeDefs.add(subtypeDef);
-                collectedTypeDefs.put(subtypeDef.jdoGetObjectId(), subtypeDef);
-            }
-        }
         JSONObject response = new JSONObject();
         JSONObject content = new JSONObject();
         JSONObject applicationJson = new JSONObject();
         JSONObject applicationXml = new JSONObject();
         JSONObject schema = new JSONObject();
-        JSONArray oneOf = new JSONArray();
-        for(ModelElement_1_0 subTypeDef: subtypeDefs) {
-            JSONObject type = new JSONObject();
-            this.setType(
-                type, 
-                subTypeDef, 
-                multiplicity, 
-                false, 
-                "#/components/schemas/"
-            );
-            oneOf.put(type);
+        if(multiplicity == Multiplicity.LIST) {
+            schema.put("$ref", "#/components/schemas/" + typeDef.getQualifiedName() + LIST_SUFFIX);
+        } else {
+            List<ModelElement_1_0> subtypeDefs = new ArrayList<ModelElement_1_0>();
+            Model_1_0 model = typeDef.getModel();
+            for(Object subtype: typeDef.objGetSet("allSubtype")) {
+                ModelElement_1_0 subtypeDef = model.getElement(subtype);
+                if(!Boolean.TRUE.equals(subtypeDef.isAbstract())) {
+                    subtypeDefs.add(subtypeDef);
+                    collectedTypeDefs.put(subtypeDef.jdoGetObjectId(), subtypeDef);
+                }
+            }
+            if(typeDef.isStructureType()) {
+                this.collectNestedTypeDefs(
+                    typeDef,
+                    collectedTypeDefs
+                );
+            }
+            JSONArray oneOf = new JSONArray();
+            for(ModelElement_1_0 subTypeDef: subtypeDefs) {
+                JSONObject type = new JSONObject();
+                this.setType(
+                    type, 
+                    subTypeDef, 
+                    Multiplicity.SINGLE_VALUE, 
+                    false, 
+                    "#/components/schemas/"
+                );
+                oneOf.put(type);
+            }
+            schema.put("oneOf", oneOf);
+            JSONObject discriminator = new JSONObject();
+            discriminator.put("propertyName", TYPE_PROPERTY);
+            schema.put("discriminator", discriminator);
         }
-        schema.put("oneOf", oneOf);
-        JSONObject discriminator = new JSONObject();
-        discriminator.put("propertyName", TYPE_PROPERTY);
-        schema.put("discriminator", discriminator);
         applicationJson.put("schema", schema);
         content.put("application/json", applicationJson);
         applicationXml.put("schema", schema);
@@ -473,7 +524,6 @@ public class Swagger {
      */
     private JSONObject newDefinition(
         ModelElement_1_0 typeDef,
-        boolean withDiscriminator,
         JSONArray subTypes,
         Set<String> excludeProperties
     ) throws JSONException, ServiceException {
@@ -508,7 +558,7 @@ public class Swagger {
                         property,
                         elementTypeDef,
                         ModelHelper.getMultiplicity(elementDef),
-                        true,
+                        !elementTypeDef.isStructureType(),
                         "#/components/schemas/"
                     );
                     boolean isReadOnly = 
@@ -534,8 +584,7 @@ public class Swagger {
                 }
             }
         }
-        if(withDiscriminator) {
-            typeDefinition.put("discriminator", TYPE_PROPERTY);
+        {
             // @type
             {
                 JSONObject property = new JSONObject();
@@ -593,7 +642,6 @@ public class Swagger {
      */
     private void putAllDefinitions(
         ModelElement_1_0 typeDef,
-        boolean withDiscriminator,
         JSONObject definitions,
         Set<String> excludeProperties
     ) throws JSONException, ServiceException {
@@ -612,14 +660,12 @@ public class Swagger {
         }
         JSONObject typeDefinition = this.newDefinition(
             typeDef,
-            withDiscriminator,
             subTypes,
             excludeProperties
         );
         for(ModelElement_1_0 subtypeDef: subtypeDefs) {
             this.putAllDefinitions(
                 subtypeDef,
-                false, // no discriminator for sub-types
                 definitions,
                 Collections.<String>emptySet()
             );
@@ -676,6 +722,11 @@ public class Swagger {
                 subtypesDescription += "</pre>";
                 // Operations for pattern /reference
                 {
+                    ModelElement_1_0 queryDef = model.getElement("org:openmdx:kernel:Query");
+                    collectedTypeDefs.put(
+                        queryDef.jdoGetObjectId(),
+                        queryDef
+                    );
                     JSONObject operations = new JSONObject().put(
                         "get",
                         this.newOperation(
@@ -701,36 +752,35 @@ public class Swagger {
                             )
                         )
                     );
-                    if(Boolean.TRUE.equals(model.getElement(referenceDef.getReferencedEnd()).isChangeable())) {
-                        operations.put(
-                            "post", 
-                            this.newOperation(
-                                // operationId
-                                Identifier.OPERATION_NAME.toIdentifier(referenceDef.getName(), null, "add", null, null),
-                                // description
-                                "Adds the specified element to the set of the values for the reference &laquo;" + referenceDef.getName() + "&raquo; using an implementation-specific, reassignable qualifier. The element must be of type:" + subtypesDescription,
-                                // tags
-                                this.newTags().put(referenceDef.getName()),                             
-                                // parameters
-                                null,
-                                // requestBody
-                                this.newRequestBody(
-                                    "in",
-                                    referencedTypeDef
-                                ),
-                                // responses
-                                this.newResponse().put(
-                                    "default",
-                                    this.newObjectResponse(
-                                        referencedTypeDef,
-                                        referencedTypeDef.getQualifiedName(),
-                                        Multiplicity.SINGLE_VALUE,
-                                        collectedTypeDefs
-                                    )
+                    operations.put(
+                        "post",
+                        this.newOperation(
+                            // operationId
+                            Identifier.OPERATION_NAME.toIdentifier(referenceDef.getName(), null, "get", null, null),
+                            // description
+                            "Retrieves the value for the reference &laquo;" + referenceDef.getName() + "&raquo for the specified query.",
+                            // tags
+                            this.newTags().put(referenceDef.getName()),                             
+                            // parameters
+                            null,
+                            // requestBody
+                            this.newRequestBody(
+                                "in",
+                                queryDef,
+                                collectedTypeDefs
+                            ),
+                            // responses
+                            this.newResponse().put(
+                                "default",
+                                this.newObjectResponse(
+                                    referencedTypeDef,
+                                    "List&lt;" + referencedTypeDef.getQualifiedName() + "&gt;",
+                                    Multiplicity.LIST,
+                                    collectedTypeDefs
                                 )
                             )
-                        );
-                    }
+                        )
+                    );
                     paths.put(
                         "/" + referenceDef.getName(),
                         operations
@@ -806,7 +856,8 @@ public class Swagger {
                                 // requestBody
                                 this.newRequestBody(
                                     "in", 
-                                    referencedTypeDef
+                                    referencedTypeDef,
+                                    collectedTypeDefs
                                 ),
                                 // responses
                                 this.newResponse().put(
@@ -838,7 +889,8 @@ public class Swagger {
                                 // requestBody
                                 this.newRequestBody(
                                     "in",
-                                    referencedTypeDef
+                                    referencedTypeDef,
+                                    collectedTypeDefs
                                 ),
                                 // responses
                                 this.newResponse().put(
@@ -902,7 +954,8 @@ public class Swagger {
                                 // requestBody
                                 this.newRequestBody(
                                     "in",
-                                    inParamTypeDef
+                                    inParamTypeDef,
+                                    collectedTypeDefs
                                 ),
                                 // responses
                                 this.newResponse().put(
@@ -1288,18 +1341,17 @@ public class Swagger {
                 }
                 schema.put("properties", properties);
                 schemas.put("Decimal" + LIST_SUFFIX, schema);
-            }                 
+            }
             for(ModelElement_1_0 typeDef: collectedTypeDefs.values()) {
                 if(!schemas.has(typeDef.getQualifiedName())) {
                     this.putAllDefinitions(
                         typeDef,
-                        true, // withDiscriminator
                         schemas,
                         Collections.<String>emptySet()
-                        );
+                    );
                 }
                 // List<Type>
-                if(!typeDef.isStructureType()) {
+                {
                     JSONObject type = new JSONObject();
                     JSONObject properties = new JSONObject();
                     // @type
@@ -1328,16 +1380,33 @@ public class Swagger {
                     }
                     // objects
                     {
+                        Model_1_0 model = typeDef.getModel();
+                        List<ModelElement_1_0> subtypeDefs = new ArrayList<ModelElement_1_0>();
+                        for(Object subtype: typeDef.objGetSet("allSubtype")) {
+                            ModelElement_1_0 subtypeDef = model.getElement(subtype);
+                            if(!Boolean.TRUE.equals(subtypeDef.isAbstract())) {
+                                subtypeDefs.add(subtypeDef);
+                            }
+                        }
+                        JSONArray oneOf = new JSONArray();
+                        for(ModelElement_1_0 subTypeDef: subtypeDefs) {
+                            JSONObject subType = new JSONObject();
+                            this.setType(
+                                subType, 
+                                subTypeDef,
+                                Multiplicity.SINGLE_VALUE, 
+                                false, 
+                                "#/components/schemas/"
+                            );
+                            oneOf.put(subType);
+                        }
                         JSONObject property = new JSONObject();
                         property.put("type", "array");
                         JSONObject items = new JSONObject();
-                        this.setType(
-                            items, 
-                            typeDef,
-                            Multiplicity.SINGLE_VALUE,
-                            false, 
-                            "#/components/schemas/"
-                        );
+                        items.put("oneOf", oneOf);
+                        JSONObject discriminator = new JSONObject();
+                        discriminator.put("propertyName", TYPE_PROPERTY);
+                        items.put("discriminator", discriminator);                        
                         property.put("items", items);
                         properties.put("objects", property);
                     }

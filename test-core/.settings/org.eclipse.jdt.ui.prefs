@@ -1,6 +1,6 @@
 eclipse.preferences.version=1
 formatter_profile=_openMDX
-formatter_settings_version=12
+formatter_settings_version=15
 org.eclipse.jdt.ui.exception.name=exception
 org.eclipse.jdt.ui.gettersetter.use.is=true
 org.eclipse.jdt.ui.javadoc=true

@@ -47,7 +47,7 @@ import org.openmdx.dalvik.uses.sun.reflect.generics.reflectiveObjects.Parameteri
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  *
  * @author Eamonn McManus

@@ -104,11 +104,11 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
      */
     public RefPackage_1(
         String qualifiedPackageName,
-        RefPackage outermostPackage,
-        RefPackage immediatePackage
+        Jmi1Package_1_0 outermostPackage,
+        Jmi1Package_1_0 immediatePackage
     ) {
-        this.outermostPackage = (RefRootPackage_1)outermostPackage;
-        this.immediatePackage = immediatePackage;
+        this.outermostPackage = outermostPackage == null ? this : outermostPackage;
+        this.immediatePackage = immediatePackage == null ? this : immediatePackage;
         this.qualifiedPackageName = qualifiedPackageName;
     }
 
@@ -118,7 +118,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
      * @return <code>true</code> if the persistence manager is already closed
      */
     protected boolean isClosed(){
-    	return ((RefPackage_1_0)this.outermostPackage).refPersistenceManager().isClosed();
+    	return this.outermostPackage.refPersistenceManager().isClosed();
     }
     
     /**
@@ -323,7 +323,8 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
                     filter,
                     mapping,
                     qualifiedClassName, 
-                    subclasses
+                    subclasses,
+                    this.outermostPackage.refPersistenceManager()
                 )
             )
         ); 
@@ -514,7 +515,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
 
     //-------------------------------------------------------------------------
     @Override
-    public RefRootPackage_1 refOutermostPackage(
+    public Jmi1Package_1_0 refOutermostPackage(
     ) {
         return this.outermostPackage;
     }
@@ -581,8 +582,8 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
      * 'immediatePackage', 'outmostPackage', 'implementationUri' and
      * the 'outmostPackage' the 'accessor'.
      */
-    private final RefPackage immediatePackage;
-    private final RefRootPackage_1 outermostPackage;
+    private final Jmi1Package_1_0 immediatePackage;
+    private final Jmi1Package_1_0 outermostPackage;
     private final String qualifiedPackageName;
     
 }

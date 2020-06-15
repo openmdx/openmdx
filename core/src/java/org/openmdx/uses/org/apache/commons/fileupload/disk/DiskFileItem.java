@@ -317,21 +317,10 @@ public class DiskFileItem
         }
 
         byte[] fileData = new byte[(int) getSize()];
-        InputStream fis = null;
-
-        try {
-            fis = new BufferedInputStream(new FileInputStream(dfos.getFile()));
+        try(InputStream fis = new BufferedInputStream(new FileInputStream(dfos.getFile())))  {
             fis.read(fileData);
         } catch (IOException e) {
             fileData = null;
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
         }
 
         return fileData;
@@ -398,14 +387,8 @@ public class DiskFileItem
      */
     public void write(File file) throws Exception {
         if (isInMemory()) {
-            FileOutputStream fout = null;
-            try {
-                fout = new FileOutputStream(file);
+            try (FileOutputStream fout = new FileOutputStream(file)) {
                 fout.write(get());
-            } finally {
-                if (fout != null) {
-                    fout.close();
-                }
             }
         } else {
             File outputFile = getStoreLocation();
@@ -418,29 +401,15 @@ public class DiskFileItem
                  * desired file.
                  */
                 if (!outputFile.renameTo(file)) {
-                    BufferedInputStream in = null;
-                    BufferedOutputStream out = null;
-                    try {
-                        in = new BufferedInputStream(
-                            new FileInputStream(outputFile));
-                        out = new BufferedOutputStream(
-                                new FileOutputStream(file));
+                    try (
+                        BufferedInputStream in = new BufferedInputStream(
+                            new FileInputStream(outputFile)
+                        );
+                        BufferedOutputStream out = new BufferedOutputStream(
+                            new FileOutputStream(file)
+                        )
+                    ){
                         IOUtils.copy(in, out);
-                    } finally {
-                        if (in != null) {
-                            try {
-                                in.close();
-                            } catch (IOException e) {
-                                // ignore
-                            }
-                        }
-                        if (out != null) {
-                            try {
-                                out.close();
-                            } catch (IOException e) {
-                                // ignore
-                            }
-                        }
                     }
                 }
             } else {
@@ -686,17 +655,17 @@ public class DiskFileItem
             }
         }
 
-        OutputStream output = getOutputStream();
-        if (cachedContent != null) {
-            output.write(cachedContent);
-        } else {
-            FileInputStream input = new FileInputStream(dfosFile);
-            IOUtils.copy(input, output);
-            dfosFile.delete();
-            dfosFile = null;
+        try (OutputStream output = getOutputStream()){
+            if (cachedContent != null) {
+                output.write(cachedContent);
+            } else {
+                try (FileInputStream input = new FileInputStream(dfosFile)){
+                    IOUtils.copy(input, output);
+                }
+                dfosFile.delete();
+                dfosFile = null;
+            }
         }
-        output.close();
-
         cachedContent = null;
     }
 

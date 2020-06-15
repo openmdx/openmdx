@@ -58,13 +58,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 
-import org.openmdx.kernel.configuration.Configuration;
-import org.openmdx.kernel.configuration.MapConfiguration;
+import org.openmdx.kernel.configuration.Configurations;
+import org.openmdx.kernel.configuration.cci.Configuration;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
-import org.w3c.spi.PrimitiveTypeParsers;
 
 /**
  * Bean Factory
@@ -83,7 +83,7 @@ public class BeanFactory<T> implements Factory<T> {
 	/**
      * Constructor 
      *
-     * @param declaredClass the instance class, often an interface
+     * @param declaredClass the declared class, often an interface
      * @param actualClass the Java bean class
      * @param configuration the configuration to be kept by the bean factory
      */
@@ -165,16 +165,22 @@ public class BeanFactory<T> implements Factory<T> {
     public static Factory<?> newInstance(
 		Configuration configuration
 	){
-    	Class<Object> declaredClass = getClass(configuration, "interface", false);
-    	Class<Object> actualClass = getClass(configuration, "class", true);
-		return configuration.getOptionalValue("interface", String.class) != null ? new BeanFactory<Object>(
-			declaredClass,
-			actualClass,
-			configuration
-		) : new BeanFactory<Object>(
-			actualClass,
-			configuration
-		);
+    	final Class<Object> actualClass = getClass(configuration, "class");
+    	return getOptionalClass(
+    	    configuration, 
+    	    "interface"
+    	).map(
+    	    declaredClass -> new BeanFactory<Object>(
+                declaredClass,
+                actualClass,
+                configuration
+            )
+    	).orElseGet(
+    	    () -> new BeanFactory<Object>(
+                actualClass,
+                configuration
+            )
+    	);
     }
 
     
@@ -196,9 +202,34 @@ public class BeanFactory<T> implements Factory<T> {
 	){
         return new BeanFactory<T>(
 		    instanceClass,
-		    BeanFactory.<T>getClass(configuration, "class", true),
+		    BeanFactory.<T>getClass(configuration, "class"),
 		    configuration
 		);
+    }
+    
+    /**
+     * Create a factory for the given class.
+     * <p>
+     * The bean class name is retrieved from the following configuration key<ul>
+     * <li><code>"class"</code> <em>(mandatory)</em>
+     * </ul>
+     * 
+     * @param declaredClass the instance class
+     * @param configuration the Java Bean Factory configuration
+     * @param defaultClass the default class if the configured class can't be found
+     * 
+     * @return a factory for the given class
+     */
+    public static <T, D extends T> Factory<T> newInstance(
+        Class<T> declaredClass,
+        Configuration configuration,
+        Class<D> defaultClass
+    ){
+        return new BeanFactory<T>(
+            declaredClass,
+            BeanFactory.<D>getOptionalClass(configuration, "class").orElse(defaultClass),
+            configuration
+        );
     }
     
     /**
@@ -216,7 +247,7 @@ public class BeanFactory<T> implements Factory<T> {
         return newInstance(
         	Object.class,
         	beanClassName, 
-            new MapConfiguration(properties, PrimitiveTypeParsers.getExtendedParser())
+            Configurations.getBeanConfiguration(properties)
         );
     }
 
@@ -247,7 +278,7 @@ public class BeanFactory<T> implements Factory<T> {
      * 
      * @param instanceClass
      * @param beanClassName
-     * @param configuration the Java Bean settings
+     * @param configuration the Java Bean configuration
      * 
      * @return a factory for the given class
      */
@@ -259,7 +290,7 @@ public class BeanFactory<T> implements Factory<T> {
     	return newInstance(
     		instanceClass, 
     		beanClassName, 
-            new MapConfiguration(configuration, PrimitiveTypeParsers.getExtendedParser())
+            Configurations.getBeanConfiguration(configuration)
     	);
     }
 
@@ -272,15 +303,13 @@ public class BeanFactory<T> implements Factory<T> {
         try {
         	return build();
         }  catch (Exception exception) {
-            List<BasicException.Parameter> parameters = new ArrayList<BasicException.Parameter>();
+            final List<BasicException.Parameter> parameters = new ArrayList<BasicException.Parameter>();
             parameters.add(new BasicException.Parameter("class", actualClass.getName()));
-            for(String e : this.configuration.singleValuedEntryNames()) {
-                final Object value = configuration.getOptionalValue(e, null);
-                parameters.add(new BasicException.Parameter(e, value));
+            for(String key : this.configuration.singleValuedEntryNames()) {
+                parameters.add(new BasicException.Parameter(key, configuration.getOptionalValue(key, Object.class).orElse(null)));
             }
-            for(String e : this.configuration.multiValuedEntryNames()) {
-                final SparseArray<Object> values = configuration.getValues(e, null);
-                parameters.add(new BasicException.Parameter(e, values));
+            for(String key : this.configuration.multiValuedEntryNames()) {
+                parameters.add(new BasicException.Parameter(key, configuration.getSparseArray(key, Object.class)));
             }
             throw BasicException.initHolder(
                 new RuntimeException(
@@ -326,25 +355,24 @@ public class BeanFactory<T> implements Factory<T> {
 		if(!RESERVED_ENTRIES.contains(entryName)) {
 			final Method setter = introspector.getPropertyModifier(this.actualClass, entryName); 
 			final Class<?> parameterType = setter.getParameterTypes()[0];
-			final Object arg;
 			if(parameterType.isArray()) {
-			    arg = toArray(entryName, parameterType);
+	            setter.invoke(instance, toArray(entryName, parameterType));
 			} else if(parameterType == SparseArray.class) {
 			    final Class<?> elementType = getElementType(setter.getGenericParameterTypes()[0]);
 			    if(this.configuration.multiValuedEntryNames().contains(entryName)) {
-			        arg = this.configuration.getValues(entryName, elementType);
+			        setter.invoke(instance, this.configuration.getSparseArray(entryName, elementType));
 			    } else if(this.configuration.singleValuedEntryNames().contains(entryName)){ 
-			        final Object value = this.configuration.getOptionalValue(entryName, elementType);
-                    arg = value == null ?
-                        SortedMaps.<T>emptySparseArray() :
-                        SortedMaps.singletonSparseArray(value);
-			    } else {
-			        arg = SortedMaps.<T>emptySparseArray();
+			        final Optional<?> optionalValue = this.configuration.getOptionalValue(entryName, elementType);
+			        if(optionalValue.isPresent()) {
+			            setter.invoke(SortedMaps.singletonSparseArray(optionalValue.get()));
+			        }
 			    }
 			} else {
-			    arg = toSingleValue(entryName, parameterType);
+			    final Optional<?> optionalValue = toSingleValue(entryName, parameterType);
+                if(optionalValue.isPresent()) {
+                    setter.invoke(instance, optionalValue.get());
+                }
 			}
-			setter.invoke(instance, arg);
 		}
 	}
 
@@ -376,14 +404,22 @@ public class BeanFactory<T> implements Factory<T> {
 	 * 
 	 * @return the single-valued parameter value
 	 */
-	private Object toSingleValue(
+	private Optional<?> toSingleValue(
 		String parameterName, 
 		Class<?> parameterType
 	) {
-		return configuration.getOptionalValue(
+		final Class<?> elementType = Classes.toObjectClass(parameterType);
+		final Optional<?> optionalValue = configuration.getOptionalValue(
 			parameterName, 
-			Classes.toObjectClass(parameterType)
+			elementType
 		);
+		if(!optionalValue.isPresent() && configuration.multiValuedEntryNames().contains(parameterName)) {
+		    final SparseArray<?> values = configuration.getSparseArray(parameterName, elementType);
+		    if(!values.isEmpty()) {
+		        return Optional.ofNullable(values.get(0));
+		    }
+		}
+        return optionalValue;
 	}
 
 	/**
@@ -400,7 +436,7 @@ public class BeanFactory<T> implements Factory<T> {
 	) {
 		return toArray(
 			parameterType, 
-			configuration.getValues(
+			configuration.getSparseArray(
 				parameterName, 
 				Classes.toObjectClass(
 					parameterType.getComponentType()
@@ -438,33 +474,51 @@ public class BeanFactory<T> implements Factory<T> {
      * Retrieve the class specified by its name
      * 
      * @param configuration the configuration is used to retrieve the class name
-     * @param kind the kind corresponds to the configuration entry name
-     * @param className the name of the class
-     * 
+	 * @param kind the kind corresponds to the configuration entry name
+	 * @param className the name of the class
      * @return the requested class
      */
     protected static <C> Class<C> getClass(
     	Configuration configuration, 
-    	String kind, 
-    	boolean mandatory
+    	String kind
     ){
-    	final String className = configuration.getOptionalValue(kind, String.class);
-    	if(className != null){
-    		return getClass(kind, className);
-    	} else if(mandatory) {
-	        throw BasicException.initHolder(
-                new IllegalArgumentException(
-                    "Missing class name",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.INVALID_CONFIGURATION,
-                        new BasicException.Parameter(kind, className)
-                    )
-                )
-            );
-    	} else {
-    		return null;
-    	}
+    	return configuration.getOptionalValue(
+    	    kind, 
+    	    String.class
+    	).map(
+    	    className -> BeanFactory.<C>getClass(kind, className)
+    	).orElseThrow(
+    	    () -> BasicException.initHolder(
+    	        new IllegalArgumentException(
+    	            "Missing class name",
+    	            BasicException.newEmbeddedExceptionStack(
+    	                BasicException.Code.DEFAULT_DOMAIN,
+    	                BasicException.Code.INVALID_CONFIGURATION,
+    	                new BasicException.Parameter(kind)
+    	            )
+    	        )
+    	    )
+    	);
+    }
+
+    /**
+     * Retrieve the class specified by its name
+     * 
+     * @param configuration the configuration is used to retrieve the class name
+     * @param kind the kind corresponds to the configuration entry name
+     * 
+     * @return the requested class
+     */
+    protected static <C> Optional<Class<C>> getOptionalClass(
+        Configuration configuration, 
+        String kind
+    ){
+        return configuration.getOptionalValue(
+            kind, 
+            String.class
+        ).map(
+            className -> getClass(kind, className)
+        );
     }
     
     /**

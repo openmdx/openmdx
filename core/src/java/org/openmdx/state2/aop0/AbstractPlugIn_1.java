@@ -49,6 +49,7 @@ package org.openmdx.state2.aop0;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -68,7 +69,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
-import org.openmdx.base.naming.PathComponent;
+import org.openmdx.base.naming.ClassicSegments;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.spi.Propagation;
@@ -150,15 +151,15 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
     }
 
     /**
-     * Build a qualifier
+     * Build a qualifier for a basic state instance
      * 
-     * @param coreQualifier
-     * @param stateQualifier
+     * @param coreComponent the qualifier's core component
+     * @param stateComponent the qualifier's state component
      * 
      * @return a newly created qualifier
      */
     protected abstract String newBasicStateQualifier(
-        PathComponent coreQualifier,
+        String coreComponent,
         Integer stateQualifier
     );
 
@@ -218,44 +219,54 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
         } else if(core == null) {
             // We are processing a proxy's request
             return qualifier;
-        } else {
-			if(PathComponent.isPlaceHolder(qualifier)){
-				final PathComponent pathComponent = new PathComponent(qualifier);
-                if(pathComponent.size() != 3) throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.BAD_PARAMETER,
-                    "The qualifier has an unexpected format for a state's placeholder",
-                    ExceptionHelper.newObjectIdParameter("id", this),
-                    new BasicException.Parameter("qualifier",qualifier)
-                );
-                final Integer id = successor((Integer) core.objGetValue(TechnicalAttributes.STATE_VERSION));
-                core.objSetValue(
-                    TechnicalAttributes.STATE_VERSION,
-                    id
-                );
+        } else if(ClassicSegments.isPlaceholder(qualifier)){
+            final Optional<String> coreComponent = ClassicSegments.getCoreComponentFromAspectQualifierPlaceholder(qualifier);
+			if(coreComponent.isPresent()) {
                 return newBasicStateQualifier(
-                    new PathComponent(pathComponent.getParent().getSuffix(1)),
-                    id
+                    coreComponent.get(),
+                    nextAspectComponent(core)
                 );
-            } else if (core.jdoIsPersistent()) {
-            	final PathComponent pathComponent = new PathComponent(qualifier);
-            	final StringBuilder aspectQualifier = new StringBuilder(core.jdoGetObjectId().getLastSegment().toClassicRepresentation());
-                for(
-                    int i = 1, l = pathComponent.size();
-                    i < l;
-                    i++
-                ){
-                	final String aspectId = pathComponent.get(i);
-                    if(!aspectId.startsWith("!") && !aspectId.startsWith("*")) {
-                        aspectQualifier.append('*');
-                    }
-                    aspectQualifier.append(aspectId);
-                }
-                return aspectQualifier.toString();
-            } else {
-                return qualifier;
-            }
+			} else {
+	            throw new ServiceException(
+	                BasicException.Code.DEFAULT_DOMAIN,
+	                BasicException.Code.BAD_PARAMETER,
+	                "The qualifier does not match the aspect qualifier placeholder pattern",
+	                ExceptionHelper.newObjectIdParameter("id", this),
+	                new BasicException.Parameter("qualifier", qualifier),
+                    new BasicException.Parameter("pattern", "^:([^:]+)+:[^:]+$")
+	            );
+			}
+        } else if (core.jdoIsPersistent()) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "Explicitely provided state components are not supported",
+                ExceptionHelper.newObjectIdParameter("id", this),
+                new BasicException.Parameter("qualifier", qualifier),
+                ExceptionHelper.newObjectIdParameter(SystemAttributes.CORE, core)
+            );
+        } else {
+            return qualifier;
         }
+    }
+
+    /**
+     * Increments the state version and returns the new value
+     * 
+     * @param core the state's core object
+     * 
+     * @return the next aspect component
+     * 
+     * @throws ServiceException
+     */
+    private Integer nextAspectComponent(final DataObject_1_0 core)
+        throws ServiceException {
+        final Integer apectComponent = successor((Integer) core.objGetValue(TechnicalAttributes.STATE_VERSION));
+        core.objSetValue(
+            TechnicalAttributes.STATE_VERSION,
+            apectComponent
+        );
+        return apectComponent;
     }
 
     /* (non-Javadoc)

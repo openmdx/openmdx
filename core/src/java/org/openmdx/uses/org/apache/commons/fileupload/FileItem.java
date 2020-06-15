@@ -53,7 +53,7 @@ import java.io.UnsupportedEncodingException;
  * <code>javax.activation.DataSource</code> with minimal additional work.
  *
  * @version $Id: FileItem.java 1454690 2013-03-09 12:08:48Z simonetripodi $
- * @since 1.3 additionally implements FileItemHeadersSupport
+ * @since FileUpload 1.3 additionally implements FileItemHeadersSupport
  */
 public interface FileItem extends Serializable, FileItemHeadersSupport {
 

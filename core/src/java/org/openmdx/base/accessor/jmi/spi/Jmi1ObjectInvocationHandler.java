@@ -81,13 +81,11 @@ import javax.jmi.reflect.RefPackage;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.Identifier;
-import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.accessor.jmi.spi.FeatureMapper.Kind;
-import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -95,7 +93,6 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.jdo.listener.ConstructCallback;
 import org.openmdx.kernel.collection.ArraysExtension;
@@ -899,7 +896,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         }
         if(value instanceof RefContainer){
             return Classes.newProxyInstance(
-                new Jmi1ContainerInvocationHandler(this.getValidator(), (RefContainer<?>)value),
+                new Jmi1ContainerInvocationHandlerWithRefDelegate(this.getValidator(), (RefContainer<?>)value),
                 returnType == null ? getReturnType(featureName) : returnType, 
                 RefContainer.class, 
                 PersistenceCapableCollection.class,
@@ -1075,7 +1072,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                     return ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate()); 
                 }
             } else {
-            	Object[] arguments;
+            	final Object[] arguments;
             	if(hasVoidArg){
             		arguments = null;
             	} else if(
@@ -1165,20 +1162,17 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                  }
             } 
         }  else {
-            Object reply = invocationTarget.invoke(
+            final Object reply = invocationTarget.invoke(
                 hasVoidArg ? null : args
             );
             if(kind == Kind.NON_QUERY_OPERATION) {
-                Object refObject = delegate.openmdxjdoGetDataObject();
+                final Object refObject = delegate.openmdxjdoGetDataObject();
                 if(refObject instanceof RefObject_1_0) {
-                    DataObject_1_0 dataObject = ((RefObject_1_0)refObject).refDelegate().objGetDelegate();
-                    if(dataObject instanceof DataObject_1) {
-                        ((DataObject_1)dataObject).touch();
-                    }
+                    ((RefObject_1_0)refObject).refDelegate().objGetDelegate().touch();   
                 }
             }
             return reply instanceof Container<?> && !(reply instanceof RefContainer<?>) ? Classes.newProxyInstance(
-                new Jmi1ContainerInvocationHandler(
+                new Jmi1ContainerInvocationHandlerWithCciDelegate(
                     this.getValidator(), // marshaller
                     (Container<?>) reply
                 ),
@@ -1697,31 +1691,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             long position
         ) {
             throw newUnsupportedOperationException(REFLECTIVE, feature);
-        }
-    
-        /**
-         * Initializes the object based on the source object. The source object
-         * must be of the same class or a subtype of the target.
-         * 
-         * @param existing existing object.
-         * 
-         * @deprecated use {@link PersistenceHelper#clone(Object, String...)}
-         */
-        @Deprecated
-        public void refInitialize(
-            RefObject source
-        ) {
-            if(this.cciDelegate instanceof RefObject_1_0) {
-                ((RefObject_1_0)this.cciDelegate).refInitialize(
-                    source
-                );
-            } 
-            else {
-                throw newUnsupportedOperationException(
-                    DelegatingRefObject_1.STANDARD,
-                    "refInitialize"
-                );
-            }
         }
     
         /* (non-Javadoc)

@@ -60,7 +60,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -93,8 +93,7 @@ public class SelectViewportAction extends BoundAction {
             nextView = currentView;
         }
         catch (Exception e) {
-            ServiceException e0 = new ServiceException(e);
-            SysLog.warning(e0.getMessage(), e0.getCause());
+            Throwables.log(e);
             application.addErrorMessage(
                 application.getTexts().getErrorTextCannotSetLocale(),
                 new String[] { parameter, e.getMessage() });

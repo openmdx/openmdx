@@ -65,6 +65,7 @@ import org.openmdx.application.mof.externalizer.cci.ModelImporter_1_0;
 import org.openmdx.base.dataprovider.cci.Channel;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.naming.XRISegment;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.kernel.exception.BasicException;
@@ -115,10 +116,18 @@ abstract public class ModelImporter_1 implements ModelImporter_1_0 {
         String featureName
     ){
         return classPath.getParent().getChild(
-            classPath.getLastComponent().getChild(featureName)
+            newFeatureQualifier(classPath.getLastSegment(), featureName)
         );
     }
-        
+
+    /**
+     * The feature qualifier is similar to the fully qualified MOF id, but
+     * the components are separated by single colons, not double colons.
+     */
+    private static String newFeatureQualifier(XRISegment classQualifier, String featureName) {
+        return classQualifier.toClassicRepresentation() + ":" + featureName;
+    }
+    
     //---------------------------------------------------------------------------
     protected void createModelElement(
         List scope,

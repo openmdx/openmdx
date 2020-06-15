@@ -109,7 +109,7 @@ org.openmdx.kernel.log.*
 	        boolean isEditMode = COMMAND_SELECT_EDIT_MODE.equals(command) || (selectedTargetXri != null && selectedTargetXri.length() > 0);
 %>			
 			<div id="<%= dashletId %>Content">
-			<form id="<%= dashletId %>Form" name="<%= dashletId %>Form" />
+			<form id="<%= dashletId %>Form" name="<%= dashletId %>Form">
 				<input id="<%= WebKeys.REQUEST_ID %>" name="<%= Action.PARAMETER_REQUEST_ID %>" type="hidden" value="<%= requestId %>" />
 				<input id="<%= WebKeys.REQUEST_PARAMETER %>" name="<%= WebKeys.REQUEST_PARAMETER %>" type="hidden" value="<%= parameters %>" />
 				<input id="<%= FIELD_NAME_COMMAND %>" name="<%= FIELD_NAME_COMMAND %>" type="hidden" value=""/>
@@ -172,8 +172,8 @@ org.openmdx.kernel.log.*
 							}
 							Path previousTargetXri = null;
 %>
-							<div class="<%= CssClass.sidebarNav %>">
-							<ul class="<%= CssClass.nav + " " + CssClass.navList %>">
+							<div class="<%= CssClass.sidebar_nav %>">
+							<nav class="<%= CssClass.nav + " " + CssClass.flex_column %>">
 <%							
 								for(String menuEntry: menuEntries) {
 									try {
@@ -267,12 +267,11 @@ org.openmdx.kernel.log.*
 															  toolTip = "--";
 															}
 %>
-															<li class="<%= CssClass.navHeader %>"><a href='<%= targetHref %>' style="padding:2px;"><b><%= targetView.getObjectReference().getTitle() %></b></a></li>
+															<span class="<%= CssClass.nav_link %>"><a href='<%= targetHref %>' style="padding:2px;"><b><%= targetView.getObjectReference().getTitle() %></b></a></span>
 <%
 														}
 %>
-														<li <%= !isEditMode && function.compareTo("Operation.org:openmdx:base:BasicObject:reload") == 0 ? "style='display:none;'" : "" %>>
-															<span>
+														<span class="<%= CssClass.nav_link %>" style="<%= !isEditMode && function.compareTo("Operation.org:openmdx:base:BasicObject:reload") == 0 ? "display:none;" : "" %>">
 <%
 															if(isEditMode) {
 %>									            		
@@ -281,8 +280,7 @@ org.openmdx.kernel.log.*
 															}
 %>									            			
 															<a <%= target %> href="#" style="padding:2px;font-size:90%;" onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};"><%= action.getTitle() %></a>
-															</span>
-														</li>
+														</span>
 <%
 														previousTargetXri = targetXri;
 													}
@@ -341,12 +339,11 @@ org.openmdx.kernel.log.*
 															  toolTip = "--";
 															}
 %>
-														<li class="<%= CssClass.navHeader %>"><a href='<%= targetHref%>' style="padding:2px;"><b><%= targetView.getObjectReference().getTitle() %></b></a></li>
+														<span class="<%= CssClass.nav_link %>"><a href='<%= targetHref%>' style="padding:2px;"><b><%= targetView.getObjectReference().getTitle() %></b></a></span>
 <%
 													}
 %>								                    
-													<li>
-														<span>
+													<span class="<%= CssClass.nav_link %>">
 <%
 														if(isEditMode) {
 %>									            		
@@ -356,8 +353,7 @@ org.openmdx.kernel.log.*
 														String target = "_blank".equals(tabControl.getWizardDefinition().getTargetType()) ? "target=\"_blank\"" : "target=\"_self\"";
 %>
 									          			<a href="#" <%= target %> style="padding:2px;font-size:90%;" onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};"><%= action.getTitle() %></a>
-														</span>
-									          		</li>
+									          		</span>
 <%
 													previousTargetXri = targetXri;
 												}
@@ -399,12 +395,11 @@ org.openmdx.kernel.log.*
 															  toolTip = "--";
 															}
 %>
-															<li class="<%= CssClass.navHeader %>"><a href='<%= targetHref %>' style="padding:2px;"><b><%= targetView.getObjectReference().getTitle() %></b></a></li>
+															<span class="<%= CssClass.nav_link %>"><a href='<%= targetHref %>' style="padding:2px;"><b><%= targetView.getObjectReference().getTitle() %></b></a></span>
 <%
 														}
 %>
-														<li>
-															<span>
+														<span class="<%= CssClass.nav_link %>">
 <%
 															if(isEditMode) {
 %>								                    	
@@ -413,8 +408,7 @@ org.openmdx.kernel.log.*
 															}
 %>									            			
 									                  		<a href="#" style="padding:2px;font-size:90%;" onmouseover="javascript:this.href=<%= view.getEvalHRef(selectObjectAndReferenceAction) %>;onmouseover=function(){};"><%= (action.getTitle().startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? action.getTitle().substring(1) : action.getTitle()) %></a>
-															</span>
-									                  	</li>
+									                  	</span>
 <%
 														previousTargetXri = targetXri;
 													}
@@ -429,7 +423,7 @@ org.openmdx.kernel.log.*
 									}
 								}
 %>
-							</ul>
+							</nav>
 							</div>
 						</div>
 						<div>
@@ -526,17 +520,17 @@ org.openmdx.kernel.log.*
 <%
 											if(selectedTargetXri != null) {
 %>								
-												<a class="<%= CssClass.btn.toString() + " " + CssClass.btnDefault.toString() %>" style="font-size:90%;" onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_ADD_MENU_ENTRY %>';<%= submitFormScriptlet %>">&nbsp;&nbsp;+&nbsp;&nbsp;</a>&nbsp;&nbsp;
+												<a class="<%= CssClass.btn.toString() + " " + CssClass.btn_light.toString() %>" style="font-size:90%;" onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_ADD_MENU_ENTRY %>';<%= submitFormScriptlet %>">&nbsp;&nbsp;+&nbsp;&nbsp;</a>&nbsp;&nbsp;
 <%
 											}
 %>									
-											<a class="<%= CssClass.btn.toString() + " " + CssClass.btnDefault.toString() %>" style="font-size:90%;" onclick="javascript:$('<%= FIELD_NAME_TARGET_XRI %>').value='';$('<%= FIELD_NAME_TARGET_XRI %>.Title').value='';<%= submitFormScriptlet %>"><%= texts.getCancelTitle() %></a>
+											<a class="<%= CssClass.btn.toString() + " " + CssClass.btn_light.toString() %>" style="font-size:90%;" onclick="javascript:$('<%= FIELD_NAME_TARGET_XRI %>').value='';$('<%= FIELD_NAME_TARGET_XRI %>.Title').value='';<%= submitFormScriptlet %>"><%= texts.getCancelTitle() %></a>
 										</td>
 									</tr>
 								</table>
 							</fieldset>
 						</div>
-			</form>
+				</form>
 			</div>
 <%				
 		}

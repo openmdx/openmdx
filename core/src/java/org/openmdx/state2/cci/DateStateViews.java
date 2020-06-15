@@ -64,6 +64,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import javax.jdo.JDOHelper;
@@ -922,50 +923,6 @@ public class DateStateViews {
     /**
      * Retrieve a view for a given period.
      * 
-     * @param referenceCollection
-     *            the result of the parents getXXX() method
-     * @param qualifier
-     *            the object's qualifier
-     * @param validFrom
-     *            exclude all states not valid at or after the given
-     *            date unless validFrom is <code>null</code>
-     * @param validTo
-     *            exclude all states not valid at or before the given
-     *            date unless validTo is <code>null</code>
-     * 
-     * @return a list of DateState instances
-     *         getViewForTimeRange
-     * @throws IllegalArgumentException
-     *             if validTo is less than validFrom
-     * 
-     * @deprecated use {@link #getViewForTimeRange(Container,
-     *             XMLGregorianCalendar, XMLGregorianCalendar)}.get(QualifierType.REASSIGNABLE, String)
-     */
-    @SuppressWarnings("unchecked")
-    @Deprecated
-    public static <T extends RefObject> T getViewForTimeRange(
-        Collection<? extends DateState> referenceCollection,
-        String qualifier,
-        XMLGregorianCalendar validFrom,
-        XMLGregorianCalendar validTo
-    ) {
-        Container<? super T> container = (Container<? super T>) referenceCollection;
-        RefContainer<T> refContainer = (RefContainer<T>) DateStateViews.getPersistenceManager(
-            asRefContainer(container),
-            validFrom,
-            validTo
-        ).getObjectById(
-            JDOHelper.getTransactionalObjectId(container)
-        );
-        return refContainer.refGet(
-            REASSIGNABLE,
-            qualifier
-        );
-    }
-
-    /**
-     * Retrieve a view for a given period.
-     * 
      * @param dateState
      * @param packageClass
      * 
@@ -1203,7 +1160,7 @@ public class DateStateViews {
                         BasicException.newEmbeddedExceptionStack(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.DUPLICATE,
-                            ExceptionHelper.newObjectIdParameter("xri", core),
+                            ExceptionHelper.newObjectIdParameter(BasicException.Parameter.XRI, core),
                             new BasicException.Parameter("validFrom", validFrom),
                             new BasicException.Parameter("validTo", validTo),
                             new BasicException.Parameter("override", override)
@@ -1263,7 +1220,7 @@ public class DateStateViews {
                         BasicException.newEmbeddedExceptionStack(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.DUPLICATE,
-                            ExceptionHelper.newObjectIdParameter("xri", source),
+                            ExceptionHelper.newObjectIdParameter(BasicException.Parameter.XRI, source),
                             new BasicException.Parameter("validFrom", validFrom),
                             new BasicException.Parameter("validTo", validTo),
                             new BasicException.Parameter("override", override)
@@ -1450,7 +1407,7 @@ public class DateStateViews {
                         BasicException.newEmbeddedExceptionStack(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.DUPLICATE,
-                            ExceptionHelper.newObjectIdParameter("xri", source),
+                            ExceptionHelper.newObjectIdParameter(BasicException.Parameter.XRI, source),
                             new BasicException.Parameter("override", Boolean.FALSE),
                             new BasicException.Parameter("viewContext", targetContext),
                             new BasicException.Parameter("stateContext", DateStateViews.getContext(state))
@@ -2074,7 +2031,7 @@ public class DateStateViews {
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
-                        ExceptionHelper.newObjectIdParameter("xri", refObject)
+                        ExceptionHelper.newObjectIdParameter(BasicException.Parameter.XRI, refObject)
                     )
                 )
             );
@@ -2122,7 +2079,7 @@ public class DateStateViews {
                         BasicException.newEmbeddedExceptionStack(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.INVALID_CARDINALITY,
-                            ExceptionHelper.newObjectIdParameter("xri", refObject),
+                            ExceptionHelper.newObjectIdParameter(BasicException.Parameter.XRI, refObject),
                             new BasicException.Parameter("states", cardinality)
                         )
                     )
@@ -2320,6 +2277,28 @@ public class DateStateViews {
         return periods;
     }
 
+    /**
+     * Retrieve the states selected by the given predicate
+     *
+     * @param container the container
+     * @param predicate the predicate
+     * @param consumer the state consumer
+     *
+     * @return the states selected by the given predicate
+     */
+    public static <T extends DateState> void forEachState(
+        Container<? super T> container,
+        AnyTypePredicate predicate,
+        Consumer<T> consumer
+    ) {
+        final RefContainer<? super T> refContainer = (RefContainer<? super T>) container;
+        final Container<T> coreContainer = getTimeIndependentContainer(refContainer);
+        final AnyTypePredicate statePredicate = getStatePredicate(refContainer, predicate);
+        final Consumer<T> marshallingConsumer = new MarshallingStateConsumer<>(consumer);
+        coreContainer.processAll(statePredicate, marshallingConsumer);
+    }
+
+    
     //------------------------------------------------------------------------
     // Class StateList
     //------------------------------------------------------------------------
@@ -2756,5 +2735,30 @@ public class DateStateViews {
         }
 
     }
+
+    
+    //------------------------------------------------------------------------
+    // Class MarshallingStateConsumer
+    //------------------------------------------------------------------------
+    
+    /**
+     * Marshalling State Consumer
+     */
+    private static class MarshallingStateConsumer<T extends DateState> implements Consumer<T> {
+
+        MarshallingStateConsumer(Consumer<T> stateConsumer) {
+           this.stateConsumer = stateConsumer;
+        }
+
+        /**
+         * The state consumer
+         */
+        private final Consumer<T> stateConsumer;
+
+        @Override
+        public void accept(T t) {
+           stateConsumer.accept(getViewForState(t));
+        }
+      }
 
 }

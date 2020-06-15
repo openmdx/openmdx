@@ -47,17 +47,18 @@
  */
 package org.openmdx.base.resource.spi;
 
-import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
-import javax.resource.cci.Record;
 
 import org.openmdx.base.mof.repository.spi.ModelRecordFactory;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
-import org.openmdx.base.rest.spi.KernelRecordFactory;
+import org.openmdx.base.rest.spi.RestRecordFactory;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -118,11 +119,13 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
     public MappedRecord createMappedRecord(
         String recordName
     ) throws ResourceException {
-        final MappedRecord typedRecord = KernelRecordFactory.supports(recordName) ? KernelRecordFactory.createMappedRecord(recordName) :
-        ModelRecordFactory.supports(recordName) ? ModelRecordFactory.createMappedRecord(recordName) :
-        org.openmdx.base.rest.cci.VoidRecord.NAME.equals(recordName) ? org.openmdx.base.rest.spi.VoidRecord.getInstance() : 
-        null;
-        return typedRecord == null ? new VariableSizeMappedRecord(recordName) : typedRecord;
+        return RestRecordFactory.createMappedRecord(recordName).orElseGet(
+            ()-> ModelRecordFactory.createMappedRecord(recordName).orElseGet(
+                () -> CollectionRecordFactory.createMappedRecord(recordName).orElseGet(
+                    () -> new VariableSizeMappedRecord(recordName)
+                )
+            )
+        );
     }
 
     /* (non-Javadoc)
@@ -132,11 +135,23 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
 	public <T extends MappedRecord> T createMappedRecord(
 		Class<T> typedInterface
 	) throws ResourceException {
-		return cast(
-			typedInterface, 
-            org.openmdx.base.rest.cci.VoidRecord.class == typedInterface ? org.openmdx.base.rest.spi.VoidRecord.getInstance() :
-            KernelRecordFactory.createMappedRecord(typedInterface)    
-		);
+        return Optional.ofNullable(
+            RestRecordFactory.createMappedRecord(typedInterface).orElseGet(
+                () -> CollectionRecordFactory.createMappedRecord(typedInterface).orElse(null)
+            )
+        ).orElseThrow(
+            () -> ResourceExceptions.initHolder(
+                new NotSupportedException(
+                    "Unsupported record interface",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("interfaceName", typedInterface.getName()),
+                        new BasicException.Parameter("isInterface", typedInterface.isInterface())
+                    )
+                )
+            )
+        );
 	}
 
 	/* (non-Javadoc)
@@ -146,30 +161,23 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
 	public <T extends IndexedRecord> T createIndexedRecord(
 		Class<T> typedInterface
 	) throws ResourceException {
-		return cast(
-			typedInterface,
-			KernelRecordFactory.createIndexedRecord(typedInterface)
- 		);
-	}
-
-	private static <T extends Record> T cast(
-		Class<T> typedInterface, 
-		final Record record
-	) throws NotSupportedException {
-		if(record == null) {
-			throw ResourceExceptions.initHolder(
-				new NotSupportedException(
-					"Unsupported record interface",
-					BasicException.newEmbeddedExceptionStack(
-						BasicException.Code.DEFAULT_DOMAIN,
-						BasicException.Code.BAD_PARAMETER,
-						new BasicException.Parameter("interfaceName", typedInterface.getName()),
-						new BasicException.Parameter("isInterface", typedInterface.isInterface())
-					)
-				)
-			);
-		}
-		return typedInterface.cast(record);
+        return Optional.ofNullable(
+            RestRecordFactory.createIndexedRecord(typedInterface).orElseGet(
+                () -> CollectionRecordFactory.createIndexedRecord(typedInterface).orElse(null)
+            )
+        ).orElseThrow(
+            () -> ResourceExceptions.initHolder(
+                new NotSupportedException(
+                    "Unsupported record interface",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("interfaceName", typedInterface.getName()),
+                        new BasicException.Parameter("isInterface", typedInterface.isInterface())
+                    )
+                )
+            )
+        );
 	}
 
 	/**
@@ -194,9 +202,11 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
     public IndexedRecord createIndexedRecord(
         String recordName
     ) throws ResourceException {
-        return 
-            org.openmdx.base.rest.cci.ResultRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.ResultRecord() : 
-            new VariableSizeIndexedRecord(recordName);
+        return RestRecordFactory.createIndexedRecord(recordName).orElseGet(
+            () -> CollectionRecordFactory.createIndexedRecord(recordName).orElseGet(
+                () -> new VariableSizeIndexedRecord(recordName)
+            )
+        );
     }
 
 
@@ -289,64 +299,51 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      */
     @Override
     public IndexedRecord asIndexedRecord(
-        String recordName,
-        String recordShortDescription,
-        Object values
+        final String recordName,
+        final String recordShortDescription,
+        final Object values
     ) {
-        if(values instanceof List<?>) {
-            return new DelegatingIndexedRecord(
-                recordName,
-                recordShortDescription,
-                (List<?>) values
-            );
-        } else if(values instanceof Object[]){
-            return new FixedSizeIndexedRecord(
-                recordName,
-                recordShortDescription,
-                (Object[])values
-            );
-        } else if(values.getClass().isArray()) { 
-            return new PrimitiveArrayRecord(
-                recordName,
-                recordShortDescription,
-                values
-            );
-        } else {
-            throw new IllegalArgumentException(
+        return CollectionRecordFactory.asIndexedRecord(recordName, recordShortDescription, values).orElseThrow(
+            () -> new IllegalArgumentException(
                 "The argument 'values' is neither an array nor a List: " + values.getClass().getName() 
-            );
-        }
+            )
+        );
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ExtendedRecordFactory#singletonIndexedRecord(java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
+    @Deprecated
     public IndexedRecord singletonIndexedRecord(
         String recordName,
         String recordShortDescription,
         Object value
     ) {
-        return new SingletonIndexedRecord(
-            recordName,
-            recordShortDescription,
-            value
-        );
+        return CollectionRecordFactory.singletonIndexedRecord(recordName, recordShortDescription, value);
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.resource.cci.ExtendedRecordFactory#tinyIndexedRecord(java.lang.String, java.lang.String, java.lang.Object)
+     * @see org.openmdx.base.resource.cci.ExtendedRecordFactory#indexedRecordFacade(java.lang.Class, java.util.function.Supplier, java.util.function.Consumer)
      */
     @Override
-    public IndexedRecord tinyIndexedRecord(
-        String recordName,
-        String recordShortDescription,
-        Object value
-    ) {
-        return new TinyIndexedRecord(
-            recordName,
-            recordShortDescription,
-            value
+    public <T extends IndexedRecord> T indexedRecordFacade(
+        Class<T> typedInterface,
+        Supplier<Object> getter,
+        Consumer<Object> setter
+    ) throws ResourceException {
+        return CollectionRecordFactory.createIndexedRecordFacade(typedInterface, getter, setter).orElseThrow(
+            () -> ResourceExceptions.initHolder(
+                new NotSupportedException(
+                    "Unsupported record interface",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("interfaceName", typedInterface.getName()),
+                        new BasicException.Parameter("isInterface", typedInterface.isInterface())
+                    )
+                )
+            )
         );
     }
 

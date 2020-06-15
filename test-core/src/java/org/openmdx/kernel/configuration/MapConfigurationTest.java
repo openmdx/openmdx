@@ -50,12 +50,12 @@ package org.openmdx.kernel.configuration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openmdx.kernel.configuration.MapConfiguration;
+import org.openmdx.kernel.configuration.cci.Configuration;
 import org.w3c.cci2.SparseArray;
-import org.w3c.spi.PrimitiveTypeParsers;
 
 /**
  * Map Backed Configuration Test
@@ -67,7 +67,9 @@ public class MapConfigurationTest {
 		// Arrange
 		final Map<String,?> map = Collections.emptyMap();
 		// Act
-		final MapConfiguration testee = new MapConfiguration(map, PrimitiveTypeParsers.getExtendedParser());
+        final Configuration testee = Configurations.getBeanConfiguration(
+            map
+        );
 		// Assert
 		Assert.assertTrue(testee.singleValuedEntryNames().isEmpty());
 		Assert.assertTrue(testee.multiValuedEntryNames().isEmpty());
@@ -76,10 +78,11 @@ public class MapConfigurationTest {
 	@Test
 	public void whenEntryIsMissingThenReturnEmptySparseArray(){
 		// Arrange
-		final Map<String,?> map = Collections.emptyMap();
-		final MapConfiguration testee = new MapConfiguration(map, PrimitiveTypeParsers.getExtendedParser());
+        final Configuration testee = Configurations.getBeanConfiguration(
+            Collections.emptyMap()
+        );
 		// Act
-		final SparseArray<Integer> values = testee.getValues("feature", Integer.class);
+		final SparseArray<Integer> values = testee.getSparseArray("feature", Integer.class);
 		// Assert
 		Assert.assertTrue(values.isEmpty());
 	}
@@ -88,11 +91,12 @@ public class MapConfigurationTest {
 	public void whenEntryIsMissingThenReturnDefaultValue(){
 		// Arrange
 		final String entryName = "feature";
-		final Map<String,?> map = Collections.emptyMap();
-		final MapConfiguration testee = new MapConfiguration(map, PrimitiveTypeParsers.getExtendedParser());
+        final Configuration testee = Configurations.getBeanConfiguration(
+            Collections.emptyMap()
+        );
 		final Integer defaultValue = Integer.valueOf(4711);
 		// Act
-		final Integer value = testee.getValue(entryName, defaultValue);
+		final Integer value = testee.getOptionalValue(entryName, Integer.class).orElse(defaultValue);
 		// Assert
 		Assert.assertEquals(defaultValue, value);
 	}
@@ -101,83 +105,79 @@ public class MapConfigurationTest {
 	public void whenEntryIsNullThenReturnDefaultValue(){
 		// Arrange
 		final String entryName = "feature";
-		final Map<String,?> map = Collections.singletonMap(entryName, null);
-		final MapConfiguration testee = new MapConfiguration(map, PrimitiveTypeParsers.getExtendedParser());
+        final Configuration testee = Configurations.getBeanConfiguration(
+            Collections.singletonMap(entryName, null)
+        );
 		final Integer defaultValue = Integer.valueOf(4711);
 		// Act
-		final Integer value = testee.getValue(entryName, defaultValue);
+		final Integer value = testee.getOptionalValue(entryName, Integer.class).orElse(defaultValue);
 		// Assert
 		Assert.assertEquals(defaultValue, value);
 	}
 
 	@Test
-	public void whenEntryIsNullThenReturnNull(){
+	public void whenEntryIsNullThenReturnAbsent(){
 		// Arrange
 		final String entryName = "feature";
-		final Map<String,?> map = Collections.singletonMap(entryName, null);
-		final MapConfiguration testee = new MapConfiguration(map, PrimitiveTypeParsers.getExtendedParser());
+        final Configuration testee = Configurations.getBeanConfiguration(
+            Collections.singletonMap(entryName, null)
+        );
 		// Act
-		final Integer value = testee.getOptionalValue(entryName, Integer.class);
+		final Optional<Integer> value = testee.getOptionalValue(entryName, Integer.class);
 		// Assert
-		Assert.assertNull(value);
+		Assert.assertFalse(value.isPresent());
 	}
 		
 	@Test
-	public void whenEntryIsMissingThenReturnNull(){
+	public void whenEntryIsMissingThenReturnAbsent(){
 		// Arrange
 		final String entryName = "feature";
-		final Map<String,?> map = Collections.emptyMap();
-		final MapConfiguration testee = new MapConfiguration(map, PrimitiveTypeParsers.getExtendedParser());
-		// Act
-		final Integer value = testee.getOptionalValue(entryName, Integer.class);
+        final Configuration testee = Configurations.getBeanConfiguration(
+            Collections.emptyMap()
+        );
+		// ActCollections.emptyMap()
+		final Optional<Integer> value = testee.getOptionalValue(entryName, Integer.class);
 		// Assert
-		Assert.assertNull(value);
+        Assert.assertFalse(value.isPresent());
 	}
 	
 	@Test
 	public void whenParserIsMissingThenKeepLong(){
 		// Arrange
 		final String entryName = "feature";
-		final MapConfiguration testee = new MapConfiguration(null);
-		testee.singleValued.put(entryName, Long.valueOf(-1));
+        final Configuration testee = Configurations.getBeanConfiguration(
+            Collections.singletonMap(entryName, Long.valueOf(-1))
+        );
 		// Act
-		final Long value = testee.getOptionalValue(entryName, Long.class);
+		final Optional<Long> value = testee.getOptionalValue(entryName, Long.class);
 		// Assert
-		Assert.assertEquals(Long.valueOf(-1), value);
+		Assert.assertEquals(Long.valueOf(-1), value.get());
 	}
 
 	@Test
 	public void whenParserIsMissingThenKeepString(){
 		// Arrange
 		final String entryName = "feature";
-		final MapConfiguration testee = new MapConfiguration(null);
-		testee.singleValued.put(entryName, "aValue");
+        final Configuration testee = Configurations.getBeanConfiguration(
+            Collections.singletonMap(entryName, "aValue")
+        );
 		// Act
-		final String value = testee.getOptionalValue(entryName, String.class);
+		final Optional<String> value = testee.getOptionalValue(entryName, String.class);
 		// Assert
-		Assert.assertEquals("aValue", value);
-	}
-
-	@Test(expected = ClassCastException.class)
-	public void whenParserIsMissingThenThrowException(){
-		// Arrange
-		final String entryName = "feature";
-		final MapConfiguration testee = new MapConfiguration(null);
-		testee.singleValued.put(entryName, "-1");
-		// Act
-		testee.getOptionalValue(entryName, Integer.class);
+		Assert.assertEquals("aValue", value.get());
 	}
 
 	@Test
 	public void whenParserIsGivenThenConvertStringToInteger(){
 		// Arrange
 		final String entryName = "feature";
-		final MapConfiguration testee = new MapConfiguration(PrimitiveTypeParsers.getExtendedParser());
-		testee.singleValued.put(entryName, "-1");
+        final Configuration testee = Configurations.getBeanConfiguration(
+            Collections.singletonMap(entryName, "-1")
+        );
 		// Act
-		final Integer value = testee.getOptionalValue(entryName, Integer.class);
+		final Optional<Integer> value = testee.getOptionalValue(entryName, Integer.class);
 		// Assert
-		Assert.assertEquals(Integer.valueOf(-1), value);
+		Assert.assertEquals(Integer.valueOf(-1), value.get());
 	}
 	
 	@Test
@@ -185,11 +185,11 @@ public class MapConfigurationTest {
 		// Arrange
 		final String entryName = "feature";
 		final Map<String,?> map = Collections.singletonMap(entryName, "(java.lang.String)aValue");
-		final MapConfiguration testee = new MapConfiguration(map, PrimitiveTypeParsers.getExtendedParser());
+        final Configuration testee = Configurations.getBeanConfiguration(map);
 		// Act
-		final Object value = testee.getOptionalValue(entryName, (Class<?>)null);
+		final Optional<?> value = testee.getOptionalValue(entryName, (Class<?>)null);
 		// Assert
-		Assert.assertEquals("aValue", value);
+		Assert.assertEquals("aValue", value.get());
 	}
 
 	@Test
@@ -197,11 +197,11 @@ public class MapConfigurationTest {
 		// Arrange
 		final String entryName = "feature";
 		final Map<String,?> map = Collections.singletonMap(entryName, "aValue");
-		final MapConfiguration testee = new MapConfiguration(map, PrimitiveTypeParsers.getExtendedParser());
+        final Configuration testee = Configurations.getBeanConfiguration(map);
 		// Act
-		final Object value = testee.getOptionalValue(entryName, (Class<?>)null);
+		final Optional<?> value = testee.getOptionalValue(entryName, (Class<?>)null);
 		// Assert
-		Assert.assertEquals("aValue", value);
+		Assert.assertEquals("aValue", value.get());
 	}
 	
 	@Test
@@ -211,12 +211,9 @@ public class MapConfigurationTest {
 		final Map<String,Object> map = new HashMap<String, Object>();
 		map.put(entryName + "[0]", "(java.lang.String)0");
 		map.put(entryName + "[1]", "(java.lang.Integer)1");
-		final MapConfiguration testee = new MapConfiguration(
-			map, 
-			PrimitiveTypeParsers.getExtendedParser()
-		);
+        final Configuration testee = Configurations.getBeanConfiguration(map);
 		// Act
-		final SparseArray<?> values = testee.getValues(entryName, (Class<?>)null);
+		final SparseArray<?> values = testee.getSparseArray(entryName, (Class<?>)null);
 		// Assert
 		Assert.assertEquals(2, values.size());
 		Assert.assertEquals("0", values.get(Integer.valueOf(0)));
@@ -230,12 +227,9 @@ public class MapConfigurationTest {
 		final Map<String,Object> map = new HashMap<String, Object>();
 		map.put(entryName + "[0]", "0");
 		map.put(entryName + "[1]", "(java.lang.Integer)1");
-		final MapConfiguration testee = new MapConfiguration(
-			map, 
-			PrimitiveTypeParsers.getExtendedParser()
-		);
+        final Configuration testee = Configurations.getBeanConfiguration(map);
 		// Act
-		final SparseArray<?> values = testee.getValues(entryName, (Class<?>)null);
+		final SparseArray<?> values = testee.getSparseArray(entryName, (Class<?>)null);
 		// Assert
 		Assert.assertEquals(2, values.size());
 		Assert.assertEquals("0", values.get(Integer.valueOf(0)));

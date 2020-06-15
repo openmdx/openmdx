@@ -93,7 +93,7 @@ public class Order {
         0 // second
     );
 
-    
+
     //------------------------------------------------------------------------
     // Date States
     //------------------------------------------------------------------------
@@ -131,8 +131,8 @@ public class Order {
      * Compare two XMLGregorianCalendar values where <code>null</code> is
      * considered to be smaller than every other value.
      * 
-     * @param d1
-     * @param d2
+     * @param d1 the first value
+     * @param d2 the second value
      * 
      * @return a negative integer, zero, or a positive integer as d1 is less 
      * than, equal to, or greater than d2. 

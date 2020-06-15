@@ -413,20 +413,10 @@ public class Unarchive extends Task {
 			} else try {
 				byte[] buffer = new byte[1024];
 				int length = 0;
-				FileOutputStream fos = null;
-				try {
-					fos = new FileOutputStream(file);
+				try (FileOutputStream fos = new FileOutputStream(file)){
 					while (
 						(length = compressedInputStream.read(buffer)) >= 0
 					) fos.write(buffer, 0, length);
-					fos.close();
-					fos = null;
-				} finally {
-					if (fos != null) try {
-		                fos.close();
-					} catch (IOException e) {
-						// Ignored close failure
-					}
 				}
 				fileUtils.setFileLastModified(file, entryDate.getTime());
 			} catch (FileNotFoundException ex) {

@@ -110,13 +110,13 @@ public class ValueListAutocompleter implements Autocompleter_1_0, Serializable {
                     if(d1 == null) {
                     	SysLog.warning("Option for numeric field is not a number", Arrays.asList(new Object[]{fieldName, option, this.options}));
                     }
-                    BigDecimal d2 = app.parseNumber((String)currentValue.getValue(false));
+                    BigDecimal d2 = app.parseNumber((String)currentValue.getValue(p, false));
                     if(d2 == null) {
                     	SysLog.warning("Numeric attribute value can not be parsed as number", Arrays.asList(new Object[]{fieldName, option}));                        
                     }
                     selectedModifier = (d1 != null) && (d2 != null)  
                         ? d1.compareTo(d2) == 0 ? "selected" : ""
-                        : option.equals(currentValue.getValue(false)) ? "selected" : "";                                                        
+                        : option.equals(currentValue.getValue(p, false)) ? "selected" : "";                                                        
                 } else {
                 	Object optionValue = null;
                 	if(option instanceof String[]) {
@@ -124,7 +124,7 @@ public class ValueListAutocompleter implements Autocompleter_1_0, Serializable {
                 	} else {
                 		optionValue = option;
                 	}
-                    selectedModifier = optionValue.equals(currentValue.getValue(false)) ? "selected" : "";                    
+                    selectedModifier = optionValue.equals(currentValue.getValue(p, false)) ? "selected" : "";                    
                 }
             }
             if(option instanceof ObjectReference) {

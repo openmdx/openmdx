@@ -188,7 +188,7 @@ public class DbObjectConfiguration {
 		    this.type.toString(), // recordName, 
 		    null, // recordShortDescription
 		    TO_STRING_FIELDS,
-		    new Object[]{this.typeName,this.dbObject1,this.dbObject2,this.dbObjectFormat,this.dbObjectForQuery1,this.dbObjectForQuery2,new Integer(this.pathNormalizeLevel),this.dbObjectHint,this.objectIdPattern,this.autonumColumns}
+		    new Object[]{this.typeName,this.dbObject1,this.dbObject2,this.dbObjectFormat,this.dbObjectForQuery1,this.dbObjectForQuery2,Integer.valueOf(this.pathNormalizeLevel),this.dbObjectHint,this.objectIdPattern,this.autonumColumns}
 		).toString();
     }
 

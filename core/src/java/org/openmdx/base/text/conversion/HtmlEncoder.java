@@ -165,7 +165,7 @@ public class HtmlEncoder {
             s.indexOf("\n= ") >= 0 || s.startsWith("= ") ||
             s.indexOf("\n== ") >= 0 || s.startsWith("== ") ||
             s.indexOf("\n=== ") >= 0 || s.startsWith("=== ") ||
-            s.indexOf("\n[") >= 0 || s.startsWith("[") ||
+            s.indexOf("\n[") >= 0 || (s.startsWith("[") && s.length() > 2 && !Character.isLetter(s.charAt(1))) ||
             s.indexOf("\n* ") >= 0 || s.startsWith("* ") ||
             (s.indexOf("[%") >= 0 && s.indexOf("%]") > 0);
     }

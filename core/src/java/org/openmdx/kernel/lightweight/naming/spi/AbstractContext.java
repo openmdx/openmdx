@@ -47,8 +47,6 @@
  */
 package org.openmdx.kernel.lightweight.naming.spi;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -57,6 +55,10 @@ import java.util.Map;
 import javax.naming.Context;
 import javax.naming.NameParser;
 import javax.naming.NamingException;
+
+import org.openmdx.kernel.log.SysLog;
+import org.openmdx.kernel.text.spi.Decoder;
+import org.w3c.spi.PrimitiveTypeParsers;
 
 
 /**
@@ -87,6 +89,11 @@ public abstract class AbstractContext implements Context {
     protected final Hashtable<Object,Object> environment;
 
     /**
+     * To decode encoded values
+     */
+    private static final Decoder STANDARD_DECODER = PrimitiveTypeParsers.getDecoder(PrimitiveTypeParsers.getStandardParser());
+    
+    /**
      * Decode url property values
      * 
      * @param encodedValue
@@ -96,25 +103,10 @@ public abstract class AbstractContext implements Context {
     protected static Object decode(
         String encodedValue
     ){
-        if(encodedValue.startsWith("(java.lang.Boolean)")) {
-            return Boolean.valueOf(encodedValue.substring(19));
-        } else if(encodedValue.startsWith("(java.lang.Integer)")){
-            return Integer.valueOf(encodedValue.substring(19));
-        } else if (encodedValue.startsWith("(java.lang.Long)")){
-            return Long.valueOf(encodedValue.substring(16));
-        } else if (encodedValue.startsWith("(java.lang.Short)")){
-            return Short.valueOf(encodedValue.substring(17));
-        } else if (encodedValue.startsWith("(java.lang.Byte)")){
-            return Byte.valueOf(encodedValue.substring(16));
-        } else if (encodedValue.startsWith("(java.lang.String)")){
-            return encodedValue.substring(18);
-        } else if (encodedValue.startsWith("(java.math.BigInteger)")){
-            return new BigInteger(encodedValue.substring(22));
-        } else if (encodedValue.startsWith("(java.math.BigDecimal)")){
-            return new BigDecimal(encodedValue.substring(22));
-//      } else if(encodedValue.indexOf('%') >= 0) {
-//          return URITransformation.decode(encodedValue);
-        } else {
+        try {
+            return STANDARD_DECODER.decode(encodedValue);
+        } catch (IllegalArgumentException decodingFailure) {
+            SysLog.trace("Unable to decode " + encodedValue, decodingFailure);
             return encodedValue;
         }
     }

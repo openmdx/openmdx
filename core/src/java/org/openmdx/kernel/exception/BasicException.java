@@ -55,6 +55,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -1570,9 +1571,10 @@ public final class BasicException extends Exception {
             this.name = name;
             this.value = 
                 value == null ? null :
-                    value instanceof Object[] ? Arrays.deepToString((Object[]) value) :
-                        value.getClass().isArray() ? ArraysExtension.asList(value).toString() :
-                            value.toString();
+                value instanceof Object[] ? Arrays.deepToString((Object[]) value) :
+                value instanceof List ? Arrays.deepToString(((List<?>)value).toArray()) :
+                value.getClass().isArray() ? ArraysExtension.asList(value).toString() :
+                value.toString();
         }
 
 
@@ -1745,6 +1747,13 @@ public final class BasicException extends Exception {
          */
         final static public String EXCEPTION_CLASS = "exception.class";
 
+        /**
+         * Name of the parameter representing the object's identifier.
+         * 
+         * @since openMDX 2.17
+         */
+        final static public String XRI = "xri";
+        
         /**
          * Returns the property name
          *

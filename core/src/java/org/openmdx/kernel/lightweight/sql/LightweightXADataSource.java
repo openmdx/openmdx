@@ -106,9 +106,7 @@ final public class LightweightXADataSource
     		String[] entries = url.substring(q+1).split("&");
     		for(String entry : entries) {
     			int e = entry.indexOf('=');
-    			if(e < 0) {
-    				connectionProperties.put(entry, null);
-    			} else {
+    			if(e > 0) {
     				connectionProperties.put(
 						entry.substring(0, e), 
 						entry.substring(e+1)

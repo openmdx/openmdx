@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: InteractionSpecs 
+ * Description: Interaction Specs 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
@@ -45,7 +45,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.resource;
 
 import java.io.ObjectStreamException;
@@ -57,13 +56,14 @@ import org.openmdx.base.resource.spi.MethodInvocationSpec;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 
 /**
- * InteractionSpecs
+ * Interaction Specs
  */
 public class InteractionSpecs {
 
     /**
      * Constructor 
-     * @param retainValues
+     * 
+     * @param retainValues CREATE and PUT return updates if {@code retainValues} is {@code true}
      */
     private InteractionSpecs(
         boolean retainValues
@@ -136,22 +136,24 @@ public class InteractionSpecs {
     /**
      * CREATE and PUT return updates
      */
-    private static InteractionSpecs retainingValues = new InteractionSpecs(true);
+    private static final InteractionSpecs RETAINING_VALUES = new InteractionSpecs(true);
     
     /**
      * CREATE and PUT return nothing
      */
-    private static InteractionSpecs notRetainingValues = new InteractionSpecs(false);
+    private static final InteractionSpecs NOT_RETAINING_VALUES = new InteractionSpecs(false);
     
     /**
      * REST <code>InteractionSpecs</code> factory method.
      * 
-     * @return a new <code>InteractionSpecs</code> instance
+     * @param retainValues CREATE and PUT return updates if {@code retainValues} is {@code true}
+     * 
+     * @return an <code>InteractionSpecs</code> instance
      */
     public static InteractionSpecs getRestInteractionSpecs(
-        boolean retainValues
+        boolean retainValues 
     ){
-        return retainValues ? retainingValues : notRetainingValues;
+        return retainValues ? RETAINING_VALUES : NOT_RETAINING_VALUES;
     }
     
     /**

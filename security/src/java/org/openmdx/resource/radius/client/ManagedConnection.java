@@ -68,10 +68,9 @@ public class ManagedConnection extends AbstractManagedConnection<ManagedConnecti
     ManagedConnection(
         ManagedConnectionFactory factory,
         PasswordCredential credential, 
-        ConnectionRequestInfo connectionRequestInfo, 
         RadiusConnection radiusClient
     ) {
-    	super(factory,"RADIUS","1.0", credential, connectionRequestInfo);
+    	super(factory,"RADIUS","1.0", credential, null);
         this.radiusClient = radiusClient;
     }
 
@@ -112,6 +111,14 @@ public class ManagedConnection extends AbstractManagedConnection<ManagedConnecti
     @Override
     protected Object newConnection(Subject subject, ConnectionRequestInfo connectionRequestInfo) {
     	return new Connection();
+    }
+
+    @Override
+    protected boolean matches(
+        Object credential,
+        ConnectionRequestInfo connectionRequestInfo
+    ) {
+        return credentialsMatch(credential);
     }
 
 }

@@ -47,6 +47,9 @@
  */
 package org.openmdx.kernel.text.parsing;
 
+import java.util.Collection;
+import java.util.Optional;
+
 import org.openmdx.kernel.text.parsing.AbstractParser;
 import org.openmdx.kernel.text.spi.Parser;
 
@@ -70,7 +73,15 @@ public class DelegatingParser extends AbstractParser {
 	 * The delegate parsers 
 	 */
 	private final Parser[] delegates;
-	
+
+    /* (non-Javadoc)
+     * @see org.openmdx.kernel.text.parsing.AbstractParser#supportedTypes()
+     */
+    @Override
+    protected Collection<Class<?>> supportedTypes() {
+        throw new UnsupportedOperationException();
+    }
+
 	@Override
 	public boolean handles(Class<?> type) {
 		for(Parser parser : delegates) {
@@ -81,7 +92,23 @@ public class DelegatingParser extends AbstractParser {
 		return false;
 	}
 
-	/* (non-Javadoc)
+    /* (non-Javadoc)
+     * @see org.openmdx.kernel.text.parsing.AbstractParser#handles(java.lang.String)
+     */
+    @Override
+    public Optional<Class<?>> handles(String className) {
+        for(Parser parser : delegates) {
+            final Optional<Class<?>> optional = parser.handles(className);
+            if(optional.isPresent()) {
+                return optional;
+            }
+        }
+        return Optional.empty();
+    }
+
+
+
+    /* (non-Javadoc)
 	 * @see org.openmdx.kernel.text.parsing.AbstractParser#parseAs(java.lang.String, java.lang.Class)
 	 */
 	@Override

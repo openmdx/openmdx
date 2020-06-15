@@ -100,7 +100,7 @@ import org.openmdx.dalvik.uses.org.apache.xerces.util.DatatypeMessageFormatter;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.2
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 class DurationImpl

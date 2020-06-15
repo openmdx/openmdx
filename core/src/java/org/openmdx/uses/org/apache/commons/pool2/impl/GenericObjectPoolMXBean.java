@@ -37,9 +37,7 @@ import java.util.Set;
  *       not, therefore, be able to upgrade to a new minor or patch release
  *       without requiring code changes.
  *
- * @version $Revision: $
- *
- * @since 2.0
+ * @since Commons Pool 2.0
  */
 public interface GenericObjectPoolMXBean {
     // Getters for basic configuration settings
@@ -101,7 +99,7 @@ public interface GenericObjectPoolMXBean {
     /**
      * See {@link GenericObjectPool#getTestOnCreate()}
      * @return See {@link GenericObjectPool#getTestOnCreate()}
-     * @since 2.2
+     * @since Commons Pool 2.2
      */
     boolean getTestOnCreate();
     /**

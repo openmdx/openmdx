@@ -54,7 +54,7 @@ import java.util.NoSuchElementException;
  * </pre>
  *
  * @version $Id: LineIterator.java 1471767 2013-04-24 23:24:19Z sebb $
- * @since 1.2
+ * @since Commons I/O 1.2
  */
 public class LineIterator implements Iterator<String> {
 

@@ -73,7 +73,7 @@ import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.url.protocol.XRI_2Protocols;
+import org.openmdx.kernel.xri.XRI_2Protocols;
 import org.xml.sax.InputSource;
 
 /**

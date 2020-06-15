@@ -52,7 +52,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.openmdx.kernel.url.protocol.AbstractURLConnection;
-import org.openmdx.kernel.url.protocol.XriAuthorities;
+import org.openmdx.kernel.xri.XRIAuthorities;
 
 /**
  * Provides access to system resources as an URLConnection.
@@ -85,7 +85,7 @@ public class ResourceURLConnection
     ) throws IOException {     
         String path = url.getPath();
         if(!path.startsWith(PREFIX)) throw new MalformedURLException(
-            "Only the XRI authority '" + XriAuthorities.RESOURCE_AUTHORITY + "' can be handled: " + url
+            "Only the XRI authority '" + XRIAuthorities.RESOURCE_AUTHORITY + "' can be handled: " + url
         );
         return getResourceUrl(path.substring(PREFIX.length()));
    }
@@ -93,6 +93,6 @@ public class ResourceURLConnection
    /**
     * 
     */
-   final private static String PREFIX = XriAuthorities.RESOURCE_AUTHORITY + '/';
+   final private static String PREFIX = XRIAuthorities.RESOURCE_AUTHORITY + '/';
    
 }

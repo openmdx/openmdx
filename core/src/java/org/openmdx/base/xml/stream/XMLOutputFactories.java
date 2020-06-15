@@ -163,10 +163,8 @@ public class XMLOutputFactories {
     ) {
         Properties configuration = new Properties();
         for(URL url : Resources.getMetaInfResources(XMLOutputFactories.class.getClassLoader(), "openmdx-xml-outputfactory.properties")) { 
-            try {
-                InputStream source = url.openStream();       
+            try (InputStream source = url.openStream()){
                 configuration.load(source);
-                source.close();
             } catch (IOException exception) {
                 SysLog.warning("XML output factory configuration failure: " + url, exception);
             }

@@ -83,6 +83,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.action.SelectObjectAction;
 import org.openmdx.portal.servlet.component.LayoutFactory;
@@ -478,7 +479,9 @@ public final class ApplicationContext implements Serializable {
                             	@SuppressWarnings("unchecked")
 								List<String> params = (List<String>)quickAccessor.refGetValue("actionParam");
                             	actionParams = params;
-                            } catch(Exception e) {}
+                            } catch(Exception ignore) {
+                    			SysLog.trace("Exception ignored", ignore);
+                            }
                             if(name == null) {
                                 name = new ObjectReference(target, this).getTitle();
                             }           
@@ -567,26 +570,26 @@ public final class ApplicationContext implements Serializable {
         if(this.userHome != null) {
             PersistenceManager pm = this.getNewPmData();
             try {                  
-                ByteArrayOutputStream bs = new ByteArrayOutputStream();
-                if(this.currentSettings == null) {
-                	this.currentSettings = new Properties();
+                try(ByteArrayOutputStream bs = new ByteArrayOutputStream()){
+                    if(this.currentSettings == null) {
+                    	this.currentSettings = new Properties();
+                    }
+                    this.currentSettings.store(
+                        bs,
+                        "Settings of user " + this.userHome.refMofId() 
+                    );
+                    RefObject_1_0 userHome = (RefObject_1_0)pm.getObjectById(this.userHome.refGetPath());
+                    pm.currentTransaction().begin();
+                    userHome.refSetValue(
+                        "settings",
+                        bs.toString("UTF-8")
+                    );
                 }
-                this.currentSettings.store(
-                    bs,
-                    "Settings of user " + this.userHome.refMofId() 
-                );
-                bs.close();                
-                RefObject_1_0 userHome = (RefObject_1_0)pm.getObjectById(this.userHome.refGetPath());
-                pm.currentTransaction().begin();
-                userHome.refSetValue(
-                    "settings",
-                    bs.toString("UTF-8")
-                );
                 pm.currentTransaction().commit();
             }
             catch(Exception e) {
             	SysLog.warning("Unable to store user settings for " + this.userHome.refMofId() + ". Ignoring.");
-            	new ServiceException(e).log();
+                Throwables.log(e);
                 try {
                     pm.currentTransaction().rollback();
                 } 
@@ -653,7 +656,9 @@ public final class ApplicationContext implements Serializable {
                     String label = "-";
                     try {
                         label = this.getLabel(rootObjectClass);
-                    } catch(Exception e) {}
+                    } catch(Exception ignore) {
+            			SysLog.trace("Exception ignored", ignore);
+                    }
                     boolean isEnabled = label != null;
                     String iconKey = WebKeys.ICON_MISSING;
                     try {
@@ -1016,7 +1021,9 @@ public final class ApplicationContext implements Serializable {
                 try {
                     preparedMessage += parameters[index];
                 } 
-                catch(Exception e) {}
+                catch(Exception ignore) {
+        			SysLog.trace("Exception ignored", ignore);
+                }
                 i += 4;
             }
             else {
@@ -1090,8 +1097,9 @@ public final class ApplicationContext implements Serializable {
         this.pmData.evictAll();
         try {
             this.pmData.currentTransaction().rollback();
-        } 
-        catch(Exception e) {}
+        } catch(Exception ignore) {
+			SysLog.trace("Exception ignored", ignore);
+        }
         this.pmDataReloadedAt = new Date();
     }
 
@@ -1346,8 +1354,7 @@ public final class ApplicationContext implements Serializable {
                 return new BigDecimal(numberAsString);
             }
             catch(Exception e) {
-                ServiceException e0 = new ServiceException(e);
-                SysLog.warning(e0.getMessage(), e0.getCause());
+                Throwables.log(e);
                 return null;
             }
         }
@@ -1512,6 +1519,14 @@ public final class ApplicationContext implements Serializable {
     public String getWildcardFilterValue(
         String filterValue
     ) {
+    	// Escape regexp chars
+    	filterValue = filterValue.replace("(", "\\(");
+    	filterValue = filterValue.replace(")", "\\)");
+    	filterValue = filterValue.replace("[", "\\[");
+    	filterValue = filterValue.replace("]", "\\]");
+    	filterValue = filterValue.replace("*", "\\*");
+    	filterValue = filterValue.replace(".", "\\.");
+    	// filterValuePattern handling
         if(!filterValue.endsWith(this.getFilterValuePattern()[2])) {
             filterValue += this.getFilterValuePattern()[2];
         }

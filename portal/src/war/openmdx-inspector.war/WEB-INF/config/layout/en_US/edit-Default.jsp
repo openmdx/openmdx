@@ -125,6 +125,7 @@ org.openmdx.base.naming.*
 	<script>
 	  $.noConflict();
 	</script>
+    <script src="js/popper/js/popper.min.js"></script>
     <script src="js/bootstrap/js/bootstrap.min.js"></script>
 	<script src="js/portal-all.js"></script>
 	<script src="js/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>

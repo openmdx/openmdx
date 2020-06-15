@@ -30,7 +30,7 @@ import java.io.Serializable;
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  * </p>
- * @since openMDX 2.12.2
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 final class SerializedXMLGregorianCalendar implements Serializable {

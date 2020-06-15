@@ -70,20 +70,12 @@ import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.ResultRecord;
-import org.openmdx.base.rest.spi.AbstractRestInteraction;
-import org.openmdx.base.rest.spi.AbstractRestPort;
-import org.openmdx.base.rest.spi.Facades;
-import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Hard-wired Objects Layer
- * <p>
- * This layer implementation shall be replaced by an aspect oriented
- * persistence plug-in in future.
  */
-@SuppressWarnings("unchecked")
-public class HardWiredObjects_2 extends AbstractRestPort {
+public class HardWiredObjects_2 extends AccessControl_2 {
 
     
     /**
@@ -125,6 +117,7 @@ public class HardWiredObjects_2 extends AbstractRestPort {
 
     private static final String ADDRESS_FORMAT_TYPE_NAME = "test:openmdx:app1:AddressFormat";
     private static final String NAME_FORMAT_TYPE_NAME = "test:openmdx:app1:NameFormat";
+    private static final byte[] HARD_WIRED_OBJECT_VERSION = {'h','a','r','d','-','w','i','r','e','d'};
 
     private Map<String,MappedRecord> nameFormats;
     private Map<String,MappedRecord> addressFormats;
@@ -154,14 +147,15 @@ public class HardWiredObjects_2 extends AbstractRestPort {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND, 
                         "Format not found",
-                        new BasicException.Parameter("xri", objectId)
+                        new BasicException.Parameter(BasicException.Parameter.XRI, objectId)
                     );        
                 }
             }
-            Object_2Facade facade;
-            facade = Facades.newObject(objectId);
-            facade.setValue(original);
-            return facade.getDelegate();
+            final ObjectRecord object = Records.getRecordFactory().createMappedRecord(ObjectRecord.class);
+            object.setResourceIdentifier(objectId);
+            object.setValue(original);
+            object.setVersion(HARD_WIRED_OBJECT_VERSION);
+            return object;
         } catch (ServiceException exception) {
             throw ResourceExceptions.toResourceException(exception);
         }
@@ -228,7 +222,7 @@ public class HardWiredObjects_2 extends AbstractRestPort {
     /**
      * Intercepting Interaction
      */
-    protected class RestInteraction extends AbstractRestInteraction {
+    protected class RestInteraction extends AccessControl_2.RestInteraction {
 
         /**
          * Constructor 

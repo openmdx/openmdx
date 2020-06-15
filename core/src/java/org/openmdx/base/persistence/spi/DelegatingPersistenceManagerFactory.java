@@ -52,19 +52,20 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.jdo.FetchGroup;
-import javax.jdo.PersistenceManager;
-import javax.jdo.PersistenceManagerFactory;
-import javax.jdo.datastore.DataStoreCache;
 import javax.jdo.listener.InstanceLifecycleListener;
+import javax.jdo.metadata.JDOMetadata;
+import javax.jdo.metadata.TypeMetadata;
 
-import org.openmdx.base.accessor.view.ViewManagerFactory_1;
+import org.openmdx.kernel.jdo.JDODataStoreCache;
+import org.openmdx.kernel.jdo.JDOPersistenceManager;
+import org.openmdx.kernel.jdo.JDOPersistenceManagerFactory;
 
 /**
  * Delegating Persistence Manager Factory
  */
 @SuppressWarnings({"rawtypes"})
 public abstract class DelegatingPersistenceManagerFactory
-    implements PersistenceManagerFactory
+    implements JDOPersistenceManagerFactory
 {
 
     /**
@@ -80,7 +81,7 @@ public abstract class DelegatingPersistenceManagerFactory
      */
     private static final long serialVersionUID = 8157804936933793541L;
 
-    protected abstract PersistenceManagerFactory delegate();
+    protected abstract JDOPersistenceManagerFactory delegate();
 
     /**
      * @param listener
@@ -162,7 +163,7 @@ public abstract class DelegatingPersistenceManagerFactory
      * @return
      * @see javax.jdo.PersistenceManagerFactory#getDataStoreCache()
      */
-    public DataStoreCache getDataStoreCache() {
+    public JDODataStoreCache getDataStoreCache() {
         return delegate().getDataStoreCache();
     }
 
@@ -226,7 +227,7 @@ public abstract class DelegatingPersistenceManagerFactory
      * @return
      * @see javax.jdo.PersistenceManagerFactory#getPersistenceManager()
      */
-    public PersistenceManager getPersistenceManager() {
+    public JDOPersistenceManager getPersistenceManager() {
         return delegate().getPersistenceManager();
     }
 
@@ -236,7 +237,7 @@ public abstract class DelegatingPersistenceManagerFactory
      * @return
      * @see javax.jdo.PersistenceManagerFactory#getPersistenceManager(java.lang.String, java.lang.String)
      */
-    public PersistenceManager getPersistenceManager(
+    public JDOPersistenceManager getPersistenceManager(
         String userid,
         String password
     ) {
@@ -467,7 +468,7 @@ public abstract class DelegatingPersistenceManagerFactory
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManagerFactory#getPersistenceManagerProxy()
      */
-    public PersistenceManager getPersistenceManagerProxy() {
+    public JDOPersistenceManager getPersistenceManagerProxy() {
         return delegate().getPersistenceManagerProxy();
     }
 
@@ -570,22 +571,76 @@ public abstract class DelegatingPersistenceManagerFactory
     }
     
     /**
-     * Tells whether the transactions are container managed
-     * 
-     * @param persistenceManagerFactory
-     * 
-     * @return <code>true</code> if the persistenceManagerFactory is an instance of
-     * <code>AbstractPersistenceManagerFactory</code> and its transactions are 
-     * container managed
+     * @param interval
+     * @see javax.jdo.PersistenceManagerFactory#setDatastoreReadTimeoutMillis(java.lang.Integer)
      */
-    public static boolean isTransactionContainerManaged(
-        PersistenceManagerFactory persistenceManagerFactory
-    ){
-        PersistenceManagerFactory current = persistenceManagerFactory;
-        while(current instanceof DelegatingPersistenceManagerFactory) {
-            current = ((DelegatingPersistenceManagerFactory)current).delegate();
-        }
-        return ViewManagerFactory_1.isTransactionContainerManaged(current); 
+    public void setDatastoreReadTimeoutMillis(Integer interval) {
+        this.delegate().setDatastoreReadTimeoutMillis(interval);
+    }
+
+    /**
+     * @return
+     * @see javax.jdo.PersistenceManagerFactory#getDatastoreReadTimeoutMillis()
+     */
+    public Integer getDatastoreReadTimeoutMillis() {
+        return this.delegate().getDatastoreReadTimeoutMillis();
+    }
+
+    /**
+     * @param interval
+     * @see javax.jdo.PersistenceManagerFactory#setDatastoreWriteTimeoutMillis(java.lang.Integer)
+     */
+    public void setDatastoreWriteTimeoutMillis(Integer interval) {
+        this.delegate().setDatastoreWriteTimeoutMillis(interval);
+    }
+
+    /**
+     * @return
+     * @see javax.jdo.PersistenceManagerFactory#getDatastoreWriteTimeoutMillis()
+     */
+    public Integer getDatastoreWriteTimeoutMillis() {
+        return this.delegate().getDatastoreWriteTimeoutMillis();
+    }
+
+    /**
+     * @param metadata
+     * @see javax.jdo.PersistenceManagerFactory#registerMetadata(javax.jdo.metadata.JDOMetadata)
+     */
+    public void registerMetadata(JDOMetadata metadata) {
+        this.delegate().registerMetadata(metadata);
+    }
+
+    /**
+     * @return
+     * @see javax.jdo.PersistenceManagerFactory#newMetadata()
+     */
+    public JDOMetadata newMetadata() {
+        return this.delegate().newMetadata();
+    }
+
+    /**
+     * @param className
+     * @return
+     * @see javax.jdo.PersistenceManagerFactory#getMetadata(java.lang.String)
+     */
+    public TypeMetadata getMetadata(String className) {
+        return this.delegate().getMetadata(className);
+    }
+
+    /**
+     * @return
+     * @see javax.jdo.PersistenceManagerFactory#getManagedClasses()
+     */
+    public Collection<Class> getManagedClasses() {
+        return this.delegate().getManagedClasses();
     }
     
+    /* (non-Javadoc)
+     * @see org.openmdx.kernel.jdo.JDOPersistenceManagerFactory#getContainerManaged()
+     */
+    @Override
+    public boolean getContainerManaged() {
+        return delegate().getContainerManaged();
+    }
+
 }

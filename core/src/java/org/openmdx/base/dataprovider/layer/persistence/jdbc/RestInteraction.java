@@ -153,9 +153,7 @@ public class RestInteraction extends AbstractRestInteraction {
     ) throws ResourceException {
         final long startTime = System.nanoTime();
         SysLog.detail("> get", request);
-        Connection conn = null;
-        try {
-            conn = getConnection(ispec, request);
+        try (Connection conn = getConnection(ispec, request)) {
             SingletonTarget target = new SingletonTarget(database);
             final short attributeSelector = AttributeSelectors.getAttributeSelector(request);
             // Attribute specifiers are ignored except in case of attributeSelector==SPECIFIED_AND_SYSTEM_ATTRIBUTES.
@@ -182,7 +180,6 @@ public class RestInteraction extends AbstractRestInteraction {
         } catch (Exception exception) {
             throw ResourceExceptions.toResourceException(exception);
         } finally {
-            Closeables.close(conn);
             SysLog.detail("< get", System.nanoTime() - startTime + " ns");
         }
     }
@@ -249,18 +246,13 @@ public class RestInteraction extends AbstractRestInteraction {
         RestInteractionSpec ispec,
         QueryRecord request,
         Target target
-    )
-        throws ResourceException {
+    ) throws ResourceException {
         final Model_1_0 model = Model_1Factory.getModel();
-        PreparedStatement ps = null;
         String currentStatement = null;
-        ResultSet rs = null;
-        Connection conn = null;
         String statement = null;
         List<Object> statementParameters = null;
         boolean countResultSet = false;
-        try {
-            conn = database.getConnection(ispec, request);
+        try (Connection conn = database.getConnection(ispec, request)) {
             final short attributeSelector = AttributeSelectors.getAttributeSelector(request);
             final List<FilterProperty> attributeFilter = FilterProperty.getFilterProperties(request.getQueryFilter());
             final List<AttributeSpecifier> attributeSpecifiers = AttributeSpecifier.getAttributeSpecifiers(request
@@ -481,10 +473,14 @@ public class RestInteraction extends AbstractRestInteraction {
             List<List<Object>> includingClausesValues = new ArrayList<List<Object>>();
             List<String> exludingClauses = new ArrayList<String>();
             List<List<Object>> excludingClausesValues = new ArrayList<List<Object>>();
-            String joinColumn = "v." + (dbObject.getConfiguration().getDbObjectsForQueryJoinColumn() == null ? dbObject
-                .getObjectIdColumn().get(0) : dbObject.getConfiguration().getDbObjectsForQueryJoinColumn());
+            String joinColumn = "v." + 
+                (dbObject.getConfiguration().getDbObjectsForQueryJoinColumn() == null
+                    ? dbObject.getObjectIdColumn().get(0)
+                    : dbObject.getConfiguration().getDbObjectsForQueryJoinColumn().replace("${v2}.", "vv.").replace("${v}.", "v.")
+                );
             ModelElement_1_0 referencedType = model.getTypes(dbObject.getReference())[2];
-            database.filterToSqlClauses(
+            Map<String,Object> context = new HashMap<String,Object>();
+            this.database.filterToSqlClauses(
                 conn,
                 dbObject,
                 stated,
@@ -500,7 +496,9 @@ public class RestInteraction extends AbstractRestInteraction {
                 includingClauses,
                 includingClausesValues,
                 exludingClauses,
-                excludingClausesValues);
+                excludingClausesValues,
+                context
+            );
             /**
              * get all slices of objects which match the reference and attribute
              * filter
@@ -642,64 +640,67 @@ public class RestInteraction extends AbstractRestInteraction {
                     // (compared to the probability of concurrent modifications)
                     break;
             }
+            final boolean hasMore;
+            try(
             // Prepare and ...
-            ps = database.prepareStatement(
-                conn,
-                currentStatement = statement.toString());
-            try {
-                //
-                // ... fill in statement parameters ...
-                //
-                for (int i = 0, iLimit = statementParameters.size(); i < iLimit; i++) {
-                    database.setPreparedStatementValue(
-                        conn,
+                final PreparedStatement ps = database.prepareStatement(
+                    conn,
+                    currentStatement = statement.toString())
+            ){
+                try {
+                    //
+                    // ... fill in statement parameters ...
+                    //
+                    for (int i = 0, iLimit = statementParameters.size(); i < iLimit; i++) {
+                        database.setPreparedStatementValue(
+                            conn,
+                            ps,
+                            i + 1,
+                            statementParameters.get(i)
+                        );
+                    }
+                } catch (ServiceException exception) {
+                    throw new ServiceException(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.GENERIC,
+                        "Can't propagate the parameters to the prepared statement",
+                        new BasicException.Parameter("statement", currentStatement));
+                }
+                // ... and finally execute
+                final int fetchSize = target.getFetchSize();
+                try(
+                    ResultSet rs = database.executeQuery(
                         ps,
-                        i + 1,
-                        statementParameters.get(i)
+                        statement.toString(),
+                        statementParameters,
+                        // +1 is required in order to handle hasMore properly
+                        fetchSize == FetchPlan.FETCH_SIZE_GREEDY || fetchSize == Integer.MAX_VALUE
+                            ? 0 
+                            : Math.max(0, target.getStartPosition() + fetchSize + 1)
+                    )
+                ){
+                    // get selected objects
+                    hasMore = database.getObjects(
+                        conn,
+                        dbObject,
+                        rs,
+                        new ArrayList<ObjectRecord>(database.getObjectBatchSize()),
+                        attributeSelector,
+                        attributeSpecifiersAsMap,
+                        false, // objectClassAsAttribute
+                        target.getStartPosition(),
+                        target.getObjectBatchSize(),
+                        null, 
+                        target
+                    );
+                    SysLog.log(
+                        Level.FINE, "Sys|*** hasMore={0}|objects.size()={1}", 
+                        Boolean.valueOf(hasMore), 
+                        Integer.valueOf(target.count())
                     );
                 }
-            } catch (ServiceException exception) {
-                throw new ServiceException(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.GENERIC,
-                    "Can't propagate the parameters to the prepared statement",
-                    new BasicException.Parameter("statement", currentStatement));
             }
-            // ... and finally execute
-            int fetchSize = target.getFetchSize();
-            rs = database.executeQuery(
-                ps,
-                statement.toString(),
-                statementParameters,
-                // +1 is required in order to handle hasMore properly
-                fetchSize == FetchPlan.FETCH_SIZE_GREEDY || fetchSize == Integer.MAX_VALUE
-                    ? 0 
-                    : Math.max(0, target.getStartPosition() + fetchSize + 1)
-            );
-            // get selected objects
-            final boolean hasMore = database.getObjects(
-                conn,
-                dbObject,
-                rs,
-                new ArrayList<ObjectRecord>(database.getObjectBatchSize()),
-                attributeSelector,
-                attributeSpecifiersAsMap,
-                false, // objectClassAsAttribute
-                target.getStartPosition(),
-                target.getObjectBatchSize(),
-                null, 
-                target
-            );
-            SysLog.log(
-                Level.FINE, "Sys|*** hasMore={0}|objects.size()={1}", 
-                Boolean.valueOf(hasMore), 
-                Integer.valueOf(target.count())
-            );
-            rs.close();
-            rs = null;
-            ps.close();
-            ps = null;
             // Calculate context.TOTAL only when iterating
             if (request.getResourceIdentifier().isContainerPath()) {
                 if (!hasMore) {
@@ -712,32 +713,34 @@ public class RestInteraction extends AbstractRestInteraction {
                         if (countStatement.indexOf("ORDER BY") > 0) {
                             countStatement = countStatement.substring(0, countStatement.indexOf("ORDER BY"));
                         }
-                        ps = database.prepareStatement(
-                            conn,
-                            currentStatement = countStatement.toString()
-                        );
-                        for (int i = 0, iLimit = statementParameters.size(); i < iLimit; i++) {
-                            database.setPreparedStatementValue(
+                        try (
+                            PreparedStatement ps = database.prepareStatement(
                                 conn,
-                                ps,
-                                i + 1,
-                                statementParameters.get(i));
+                                currentStatement = countStatement.toString()
+                            )
+                        ){
+                            for (int i = 0, iLimit = statementParameters.size(); i < iLimit; i++) {
+                                database.setPreparedStatementValue(
+                                    conn,
+                                    ps,
+                                    i + 1,
+                                    statementParameters.get(i));
+                            }
+                            try (
+                                ResultSet rs = database.executeQuery(
+                                    ps,
+                                    countStatement.toString(),
+                                    statementParameters,
+                                    0 // no limit for maxRows
+                                )
+                            ){    
+                                if (rs.next()) {
+                                    target.close(rs.getInt(1));
+                                } else {
+                                    target.close(hasMore);
+                                }
+                            }
                         }
-                        rs = database.executeQuery(
-                            ps,
-                            countStatement.toString(),
-                            statementParameters,
-                            0 // no limit for maxRows
-                        );
-                        if (rs.next()) {
-                            target.close(rs.getInt(1));
-                        } else {
-                            target.close(hasMore);
-                        }
-                        rs.close();
-                        rs = null;
-                        ps.close();
-                        ps = null;
                     } else {
                         target.close(hasMore);
                     }
@@ -754,17 +757,13 @@ public class RestInteraction extends AbstractRestInteraction {
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.MEDIA_ACCESS_FAILURE,
                     "Error when executing SQL statement",
-                    new BasicException.Parameter("path", request.getResourceIdentifier()),
+                    new BasicException.Parameter(BasicException.Parameter.XRI, request.getResourceIdentifier()),
                     new BasicException.Parameter("statement", currentStatement),
                     new BasicException.Parameter("parameters", statementParameters),
                     new BasicException.Parameter("sqlErrorCode", exception.getErrorCode()),
                     new BasicException.Parameter("sqlState", exception.getSQLState())));
         } catch (Exception exception) {
             throw ResourceExceptions.toResourceException(exception);
-        } finally {
-            Closeables.close(rs);
-            Closeables.close(ps);
-            Closeables.close(conn);
         }
         return true;
     }
@@ -802,21 +801,17 @@ public class RestInteraction extends AbstractRestInteraction {
         RestInteractionSpec ispec,
         ObjectRecord request,
         ResultRecord reply
-    )
-        throws ResourceException {
+    ) throws ResourceException {
         SysLog.detail("> create", request);
-        Connection conn = null;
-        try {
-            conn = database.getConnection(ispec, request);
+        try (Connection conn = database.getConnection(ispec, request)){
             database.create(
                 conn,
                 ispec,
                 request,
-                reply);
+                reply
+            );
         } catch (Exception exception) {
             throw ResourceExceptions.toResourceException(exception);
-        } finally {
-            Closeables.close(conn);
         }
         return true;
     }
@@ -837,11 +832,9 @@ public class RestInteraction extends AbstractRestInteraction {
     ) throws ResourceException {
         final long startTime = System.nanoTime();
         SysLog.detail("> remove", request);
-        Connection conn = null;
         String currentStatement = null;
         List<Object> statementParameters = null;
-        try {
-            conn = database.getConnection(ispec, request);
+        try (Connection conn = database.getConnection(ispec, request)) {
             final Path accessPath = request.getResourceIdentifier();
             // Does object exist?// Avoid completion
             final SingletonTarget target = new SingletonTarget(null); // Avoid completion
@@ -858,35 +851,37 @@ public class RestInteraction extends AbstractRestInteraction {
             // Remove object ...
             database.createDbObject(
                 conn,
-                request.getResourceIdentifier(),
-                true).remove();
+                accessPath,
+                true
+            ).remove();
             // ... and its composites
             Map<Path, DbObjectConfiguration> processedDbObjectConfigurations = new HashMap<Path, DbObjectConfiguration>();
-            for (DbObjectConfiguration dbObjectConfiguration : database.getDatabaseConfiguration()
-                .getDbObjectConfigurations()) {
-                if ((dbObjectConfiguration.getType().size() > accessPath.size()) &&
+            for(DbObjectConfiguration dbObjectConfiguration : database.getDatabaseConfiguration().getDbObjectConfigurations()) {
+                if(
+                    (dbObjectConfiguration.getType().size() > accessPath.size()) &&
                     accessPath.isLike(dbObjectConfiguration.getType().getPrefix(accessPath.size())) &&
-                    !processedDbObjectConfigurations.containsKey(dbObjectConfiguration.getType())) {
+                    !processedDbObjectConfigurations.containsKey(dbObjectConfiguration.getType()) &&
+                    !this.database.getDatabaseConfiguration().getDbObjectConfigurations(accessPath.getDescendant(dbObjectConfiguration.getType().getSuffix(accessPath.size()))).isEmpty()
+                ) {
                     boolean processed = false;
                     // Check whether dbObjectConfiguration is already processed
-                    for (Iterator<DbObjectConfiguration> j = processedDbObjectConfigurations.values().iterator(); j
-                        .hasNext();) {
+                    for(Iterator<DbObjectConfiguration> j = processedDbObjectConfigurations.values().iterator(); j.hasNext();) {
                         DbObjectConfiguration processedDbObjectConfiguration = j.next();
                         // dbObject is processed if type if 
                         // <ul>
                         //   <li>db object is composite to processed db object
                         //   <li>dbObjectForUpdate1 are equal
                         // </ul>
-                        boolean dbObjectForUpdate1Matches = (dbObjectConfiguration.getDbObjectForUpdate1() == null)
-                            || (processedDbObjectConfiguration.getDbObjectForUpdate1() == null) ? dbObjectConfiguration
-                                .getDbObjectForUpdate1() == processedDbObjectConfiguration.getDbObjectForUpdate1()
-                                : dbObjectConfiguration.getDbObjectForUpdate1().equals(processedDbObjectConfiguration
-                                    .getDbObjectForUpdate1());
-                        if (dbObjectForUpdate1Matches &&
-                            (dbObjectConfiguration.getType().size() > processedDbObjectConfiguration.getType().size())
-                            &&
-                            dbObjectConfiguration.getType().getPrefix(processedDbObjectConfiguration.getType().size())
-                                .isLike(processedDbObjectConfiguration.getType())) {
+                        boolean dbObjectForUpdate1Matches =
+                            (dbObjectConfiguration.getDbObjectForUpdate1() == null) ||
+                            (processedDbObjectConfiguration.getDbObjectForUpdate1() == null)
+                                ? dbObjectConfiguration.getDbObjectForUpdate1() == processedDbObjectConfiguration.getDbObjectForUpdate1()
+                                : dbObjectConfiguration.getDbObjectForUpdate1().equals(processedDbObjectConfiguration.getDbObjectForUpdate1());
+                        if(
+                            dbObjectForUpdate1Matches &&
+                            (dbObjectConfiguration.getType().size() > processedDbObjectConfiguration.getType().size()) &&
+                            dbObjectConfiguration.getType().getPrefix(processedDbObjectConfiguration.getType().size()).isLike(processedDbObjectConfiguration.getType())
+                        ) {
                             processed = true;
                             break;
                         }
@@ -897,10 +892,12 @@ public class RestInteraction extends AbstractRestInteraction {
                             conn,
                             dbObjectConfiguration,
                             request.getResourceIdentifier(),
-                            true).remove();
+                            true
+                        ).remove();
                         processedDbObjectConfigurations.put(
                             dbObjectConfiguration.getType(),
-                            dbObjectConfiguration);
+                            dbObjectConfiguration
+                        );
                     }
                 }
             }
@@ -911,7 +908,7 @@ public class RestInteraction extends AbstractRestInteraction {
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.MEDIA_ACCESS_FAILURE,
                     "Error when executing SQL statement",
-                    new BasicException.Parameter("path", request.getResourceIdentifier()),
+                    new BasicException.Parameter(BasicException.Parameter.XRI, request.getResourceIdentifier()),
                     new BasicException.Parameter("errorCode", exception.getErrorCode()),
                     new BasicException.Parameter("statement", currentStatement),
                     new BasicException.Parameter("parameters", statementParameters),
@@ -920,7 +917,6 @@ public class RestInteraction extends AbstractRestInteraction {
         } catch (ServiceException exception) {
             throw ResourceExceptions.toResourceException(exception);
         } finally {
-            Closeables.close(conn);
             SysLog.detail("< remove", System.nanoTime() - startTime + " ns");
         }
         return true;
@@ -944,12 +940,9 @@ public class RestInteraction extends AbstractRestInteraction {
     ) throws ResourceException {
         final long startTime = System.nanoTime();
         SysLog.detail("> replace", object);
-        PreparedStatement ps = null;
         String currentStatement = null;
-        Connection conn = null;
         List<Object> objectIdValues = null;
-        try {
-            conn = database.getConnection(ispec, object);
+        try (Connection conn = database.getConnection(ispec, object)){
             DbObject dbObject = database.createDbObject(
                 conn,
                 object.getResourceIdentifier(),
@@ -1005,49 +998,49 @@ public class RestInteraction extends AbstractRestInteraction {
                 }
                 // Remove extra old slices
                 if (oldSlices.length > newSlices.length) {
-                    boolean isIndexed;
-                    if (dbObject.getConfiguration().getDbObjectForUpdate2() != null) {
-                        isIndexed = true;
-                        ps = database.prepareStatement(
+                    final boolean isIndexed = dbObject.getConfiguration().getDbObjectForUpdate2() != null || dbObject.getIndexColumn() != null;
+                    try (
+                        PreparedStatement ps = dbObject.getConfiguration().getDbObjectForUpdate2() != null ? database.prepareStatement(
                             conn,
                             currentStatement = "DELETE FROM " + dbObject.getConfiguration().getDbObjectForUpdate2() +
                                 " WHERE " +
                                 database.removeViewPrefix(
                                     dbObject.getReferenceClause() +
                                         " AND " + dbObject.getObjectIdClause() +
-                                        " AND (" + database.getObjectIdxColumnName() + " >= ?)"));
-                    } else {
-                        isIndexed = dbObject.getIndexColumn() != null;
-                        ps = database.prepareStatement(
+                                        " AND (" + database.getObjectIdxColumnName() + " >= ?)")
+                                
+                       ) : database.prepareStatement(
                             conn,
                             currentStatement = "DELETE FROM " + dbObject.getConfiguration().getDbObjectForUpdate1() +
                                 " WHERE " +
                                 database.removeViewPrefix(
                                     dbObject.getReferenceClause() +
                                         " AND " + dbObject.getObjectIdClause() +
-                                        (isIndexed ? " AND (" + dbObject.getIndexColumn() + " >= ?)" : "")));
+                                        (isIndexed ? " AND (" + dbObject.getIndexColumn() + " >= ?)" : ""))
+                      )
+                    ){
+                        int pos = 1;
+                        List<Object> referenceValues = dbObject.getReferenceValues();
+                        for (Object referenceValue : referenceValues) {
+                            database.setPreparedStatementValue(
+                                conn,
+                                ps,
+                                pos++,
+                                referenceValue);
+                        }
+                        objectIdValues = dbObject.getObjectIdValues();
+                        for (Object objectIdValue : objectIdValues) {
+                            database.setPreparedStatementValue(
+                                conn,
+                                ps,
+                                pos++,
+                                objectIdValue);
+                        }
+                        if (isIndexed) {
+                            ps.setInt(pos++, newSlices.length);
+                        }
+                        database.executeUpdate(ps, currentStatement, objectIdValues);
                     }
-                    int pos = 1;
-                    List<Object> referenceValues = dbObject.getReferenceValues();
-                    for (Object referenceValue : referenceValues) {
-                        database.setPreparedStatementValue(
-                            conn,
-                            ps,
-                            pos++,
-                            referenceValue);
-                    }
-                    objectIdValues = dbObject.getObjectIdValues();
-                    for (Object objectIdValue : objectIdValues) {
-                        database.setPreparedStatementValue(
-                            conn,
-                            ps,
-                            pos++,
-                            objectIdValue);
-                    }
-                    if (isIndexed) {
-                        ps.setInt(pos++, newSlices.length);
-                    }
-                    database.executeUpdate(ps, currentStatement, objectIdValues);
                 }
                 // Create extra new slices
                 if (newSlices.length > oldSlices.length) {
@@ -1069,7 +1062,7 @@ public class RestInteraction extends AbstractRestInteraction {
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.CONCURRENT_ACCESS_FAILURE,
                             "The object has been modified since it has been read",
-                            new BasicException.Parameter("path", object.getResourceIdentifier()),
+                            new BasicException.Parameter(BasicException.Parameter.XRI, object.getResourceIdentifier()),
                             new BasicException.Parameter("expected", writeLock),
                             new BasicException.Parameter("actual", version));
                     }
@@ -1084,7 +1077,7 @@ public class RestInteraction extends AbstractRestInteraction {
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.CONCURRENT_ACCESS_FAILURE,
                             "The object's modification time can't be determined",
-                            new BasicException.Parameter("path", object.getResourceIdentifier()),
+                            new BasicException.Parameter(BasicException.Parameter.XRI, object.getResourceIdentifier()),
                             new BasicException.Parameter("expected", readLock),
                             new BasicException.Parameter("actual"));
                     } else if (transactionTime.before(modifiedAt)) {
@@ -1092,7 +1085,7 @@ public class RestInteraction extends AbstractRestInteraction {
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.CONCURRENT_ACCESS_FAILURE,
                             "The object has been modified since the unit of work has started",
-                            new BasicException.Parameter("xri", object.getResourceIdentifier()),
+                            new BasicException.Parameter(BasicException.Parameter.XRI, object.getResourceIdentifier()),
                             new BasicException.Parameter("expected", readLock),
                             new BasicException.Parameter(
                                 "actual", SystemAttributes.MODIFIED_AT + '=' + DateTimeFormat.EXTENDED_UTC_FORMAT
@@ -1110,7 +1103,7 @@ public class RestInteraction extends AbstractRestInteraction {
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.MEDIA_ACCESS_FAILURE,
                     "Error when executing SQL statement",
-                    new BasicException.Parameter("path", object.getResourceIdentifier()),
+                    new BasicException.Parameter(BasicException.Parameter.XRI, object.getResourceIdentifier()),
                     new BasicException.Parameter("statement", currentStatement),
                     new BasicException.Parameter("parameters", objectIdValues),
                     new BasicException.Parameter("sqlErrorCode", exception.getErrorCode()),
@@ -1118,8 +1111,6 @@ public class RestInteraction extends AbstractRestInteraction {
         } catch (Exception exception) {
             throw ResourceExceptions.toResourceException(exception);
         } finally {
-            Closeables.close(ps);
-            Closeables.close(conn);
             SysLog.detail("< replace", System.nanoTime() - startTime + " ns");
         }
     }

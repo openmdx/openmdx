@@ -55,8 +55,8 @@ import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.Record;
 
+import org.openmdx.base.caching.port.CachingPort;
 import org.openmdx.base.collection.Maps;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.cci.RestFunction;
 import org.openmdx.base.resource.spi.Port;
@@ -82,10 +82,10 @@ public class Switch_2 implements Port<RestConnection> {
      * @throws ResourceException 
      */
     public Switch_2(
-        BasicCache_2 virtualObjects, 
+        CachingPort cachingPort, 
         Map<Path,Port<RestConnection>> destinations
     ) throws ResourceException{
-        this.cachingPlugIn = virtualObjects;
+        this.cachingPort = cachingPort;
         this.destinations = destinations; 
     }
     
@@ -97,7 +97,7 @@ public class Switch_2 implements Port<RestConnection> {
     /**
      * Virtual object port
      */
-    protected final BasicCache_2 cachingPlugIn;
+    protected final CachingPort cachingPort;
     
     
     //------------------------------------------------------------------------
@@ -114,6 +114,21 @@ public class Switch_2 implements Port<RestConnection> {
         return new SwitchingInteraction(connection);
     }
 
+    private ConcurrentHashMap<Port<RestConnection>, Interaction> createInteractionRegistry(
+        RestConnection connection
+    ) throws ResourceException {
+        final ConcurrentHashMap<Port<RestConnection>, Interaction> interactionRegistry = new ConcurrentHashMap<Port<RestConnection>,Interaction>();
+        interactionRegistry.put(this.cachingPort, this.cachingPort.getInteraction(connection));
+        return interactionRegistry;
+        
+    }
+
+    private boolean isCached(Path xri) {
+        return
+            !xri.isTransactionalObjectId() &&
+            Switch_2.this.cachingPort.containsKey(xri);
+    }
+    
     
     //------------------------------------------------------------------------
     // Class SwitchingInteraction
@@ -122,7 +137,7 @@ public class Switch_2 implements Port<RestConnection> {
     /**
      * Switching Interaction
      */
-    class SwitchingInteraction extends AbstractRestInteraction implements CacheAccessor_2_0 {
+    class SwitchingInteraction extends AbstractRestInteraction {
        
         /**
          * Constructor 
@@ -134,40 +149,13 @@ public class Switch_2 implements Port<RestConnection> {
             RestConnection connection
         ) throws ResourceException{
             super(connection);
-            this.enlisted.put(
-                Switch_2.this.cachingPlugIn, 
-                this.cachingInteraction = Switch_2.this.cachingPlugIn.getInteraction(connection)
-            );
+            this.enlisted = createInteractionRegistry(connection);
         }
-        
-        /**
-         * The virtual object provider instance
-         */
-        private final BasicCache_2.CachingInteraction cachingInteraction;
-        
+
         /**
          * The enlisted interactions
          */
-        private final ConcurrentMap<Port<RestConnection>,Interaction> enlisted = new ConcurrentHashMap<Port<RestConnection>,Interaction>();
-
-        
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.rest.spi.CacheAccessor_2_0#getDataStoreCache()
-         */
-        @Override
-        public DataStoreCache_2_0 getDataStoreCache(
-        ) throws ServiceException {
-            return this.cachingInteraction.getDataStoreCache();
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.rest.spi.CacheProvider_2_0#getCache()
-         */
-        @Override
-        public ManagedConnectionCache_2_0 getManagedConnectionCache(
-        ) throws ServiceException {
-            return this.cachingInteraction.getManagedConnectionCache();
-        }
+        private final ConcurrentMap<Port<RestConnection>,Interaction> enlisted;
 
         /**
          * Retrieve the destination for the given resource identifier
@@ -181,11 +169,8 @@ public class Switch_2 implements Port<RestConnection> {
         protected Port<RestConnection> getDestination(
             Path xri
         ) throws ResourceException {
-            if(
-            	!xri.isTransactionalObjectId() &&
-				this.cachingInteraction.getManagedConnectionCache().isAvailable(null, xri)
-			){
-                return Switch_2.this.cachingPlugIn;
+            if(isCached(xri)) {
+                return Switch_2.this.cachingPort;
             }
             for(Map.Entry<Path,Port<RestConnection>> entry : Switch_2.this.destinations.entrySet()) {
                 if(xri.isLike(entry.getKey())) {
@@ -199,7 +184,7 @@ public class Switch_2 implements Port<RestConnection> {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_SUPPORTED,
                         new BasicException.Parameter(
-                            "xri", 
+                            BasicException.Parameter.XRI, 
                             xri
                         ),
                         new BasicException.Parameter(
@@ -209,20 +194,19 @@ public class Switch_2 implements Port<RestConnection> {
                 )
             );
         }
-        
+
         /**
-         * Retrieve an interaction for the given resource identifier
+         * Retrieve an interaction for getInteractionthe given resource identifier
          * 
-         * @param xri the resource identifier
+         * @param destination the destination
          * 
          * @return a (maybe newly created) interaction for the given resource identifier
          * 
          * @throws ResourceException if there is no destination for the given resource identifier
          */
         protected Interaction getInteraction(
-            Path xri
+            Port<RestConnection> destination
         ) throws ResourceException {
-            Port<RestConnection> destination = this.getDestination(xri);
             Interaction interaction = this.enlisted.get(destination);
             return interaction == null ? Maps.putUnlessPresent(
                 this.enlisted,
@@ -240,17 +224,19 @@ public class Switch_2 implements Port<RestConnection> {
             RequestRecord input,
             Record output
         ) throws ResourceException {
-            Interaction interaction = this.getInteraction(input.getResourceIdentifier());
-            boolean executed = interaction.execute(ispec, input, output);
+            final Path xri = input.getResourceIdentifier();
+            final Port<RestConnection> destination = getDestination(xri);
+            final Interaction interaction = getInteraction(destination);
+            final boolean executed = interaction.execute(ispec, input, output);
             if(
                 executed && 
-                interaction != this.cachingInteraction && 
+                destination != cachingPort && 
                 ispec.getFunction() == RestFunction.GET && 
                 output instanceof ResultRecord
+                // TODO && Fetch Group is ALL
             ){
-                ManagedConnectionCache_2_0 cache = this.cachingInteraction.getManagedConnectionCache(); 
                 for(Object object : (ResultRecord)output) {
-                    cache.put(null, (ObjectRecord)object);
+                    cachingPort.offer((ObjectRecord)object);
                 }
             }
             return executed;

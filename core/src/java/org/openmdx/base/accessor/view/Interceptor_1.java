@@ -47,6 +47,8 @@
  */
 package org.openmdx.base.accessor.view;
 
+import java.util.List;
+
 import javax.jdo.PersistenceManager;
 import javax.jdo.listener.ClearCallback;
 import javax.jdo.listener.DeleteCallback;
@@ -54,6 +56,7 @@ import javax.jdo.listener.StoreCallback;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.spi.DelegatingObject_1;
+import org.openmdx.base.aop1.PlugIn_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
@@ -89,11 +92,30 @@ public class Interceptor_1
      * 
      * @throws ServiceException
      */
-    Interceptor_1(
+    private Interceptor_1(
         ObjectView_1_0 self
     ) throws ServiceException {
         super(self.objGetDelegate());
         this.self = self;
+    }
+
+    /**
+     * Create an interceptor stack
+     * 
+     * @param owner the object view
+     * @param plugIns the object view's plug-in's
+     * @return an interceptor stack
+     * @throws ServiceException 
+     */
+    public static Interceptor_1 newStack(
+        ObjectView_1_0 owner, 
+        List<PlugIn_1_0> plugIns
+    ) throws ServiceException {
+        Interceptor_1 interceptor = new Interceptor_1(owner);
+        for(PlugIn_1_0 plugIn : plugIns) {
+            interceptor = plugIn.getInterceptor(owner, interceptor);
+        }
+        return interceptor;
     }
     
     /**
@@ -132,6 +154,7 @@ public class Interceptor_1
         return this.self.getModel();
     }
     
+    @Override
     public PersistenceManager jdoGetPersistenceManager(
     ) {
         return this.self.jdoGetPersistenceManager();
@@ -169,6 +192,7 @@ public class Interceptor_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.ClearCallback#jdoPreClear()
      */
+    @Override
     public void jdoPreClear() {
         Interceptor_1 next = getNext();
         if(next != null) {
@@ -179,6 +203,7 @@ public class Interceptor_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.DeleteCallback#jdoPreDelete()
      */
+    @Override
     public void jdoPreDelete() {
         Interceptor_1 next = getNext();
         if(next != null) {
@@ -189,6 +214,7 @@ public class Interceptor_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.StoreCallback#jdoPreStore()
      */
+    @Override
     public void jdoPreStore() {
         Interceptor_1 next = getNext();
         if(next != null) {

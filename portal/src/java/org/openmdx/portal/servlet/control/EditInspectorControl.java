@@ -152,8 +152,8 @@ public class EditInspectorControl extends InspectorControl implements Serializab
         p.write("        </form>");
         p.write("      </div>");
         p.write("      <div class=\"modal-footer\">");
-        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getOkTitle(), "\" data-dismiss=\"modal\" onclick=\"javascript:", EDIT_STRINGS, "_click_OK();\" />");
-        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getCancelTitle(), "\" data-dismiss=\"modal\" />");
+        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getOkTitle(), "\" data-dismiss=\"modal\" onclick=\"javascript:", EDIT_STRINGS, "_click_OK();\" />");
+        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getCancelTitle(), "\" data-dismiss=\"modal\" />");
         p.write("      </div>");
         p.write("    </div>");
         p.write("  </div>");
@@ -175,8 +175,8 @@ public class EditInspectorControl extends InspectorControl implements Serializab
         p.write("        </form>");
         p.write("      </div>");
         p.write("      <div class=\"modal-footer\">");
-        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getOkTitle(), "\" data-dismiss=\"modal\" onclick=\"javascript:", EDIT_NUMBERS, "_click_OK();\" />");
-        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getCancelTitle(), "\" data-dismiss=\"modal\" />");
+        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getOkTitle(), "\" data-dismiss=\"modal\" onclick=\"javascript:", EDIT_NUMBERS, "_click_OK();\" />");
+        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getCancelTitle(), "\" data-dismiss=\"modal\" />");
         p.write("      </div>");
         p.write("    </div>");
         p.write("  </div>");
@@ -199,8 +199,8 @@ public class EditInspectorControl extends InspectorControl implements Serializab
         p.write("        </form>");
         p.write("      </div>");
         p.write("      <div class=\"modal-footer\">");
-        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getOkTitle(), "\" data-dismiss=\"modal\" onclick=\"javascript:", EDIT_DATES, "_click_OK();\" />");
-        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getCancelTitle(), "\" data-dismiss=\"modal\" />");
+        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getOkTitle(), "\" data-dismiss=\"modal\" onclick=\"javascript:", EDIT_DATES, "_click_OK();\" />");
+        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getCancelTitle(), "\" data-dismiss=\"modal\" />");
         p.write("      </div>");
         p.write("    </div>");
         p.write("  </div>");
@@ -223,8 +223,8 @@ public class EditInspectorControl extends InspectorControl implements Serializab
         p.write("        </form>");
         p.write("      </div>");
         p.write("      <div class=\"modal-footer\">");
-        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getOkTitle(), "\" data-dismiss=\"modal\" onclick=\"javascript:", EDIT_DATETIMES, "_click_OK();\" />");
-        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getCancelTitle(), "\" data-dismiss=\"modal\" />");
+        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getOkTitle(), "\" data-dismiss=\"modal\" onclick=\"javascript:", EDIT_DATETIMES, "_click_OK();\" />");
+        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getCancelTitle(), "\" data-dismiss=\"modal\" />");
         p.write("      </div>");
         p.write("    </div>");
         p.write("  </div>");
@@ -246,8 +246,8 @@ public class EditInspectorControl extends InspectorControl implements Serializab
         p.write("        </form>");
         p.write("      </div>");
         p.write("      <div class=\"modal-footer\">");
-        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getOkTitle(), "\" data-dismiss=\"modal\" onclick=\"javascript:", EDIT_BOOLEANS, "_click_OK();\" />");
-        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getCancelTitle(), "\" data-dismiss=\"modal\" />");
+        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getOkTitle(), "\" data-dismiss=\"modal\" onclick=\"javascript:", EDIT_BOOLEANS, "_click_OK();\" />");
+        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getCancelTitle(), "\" data-dismiss=\"modal\" />");
         p.write("      </div>");
         p.write("    </div>");
         p.write("  </div>");
@@ -269,8 +269,8 @@ public class EditInspectorControl extends InspectorControl implements Serializab
         p.write("        </form>");
         p.write("      </div>");
         p.write("      <div class=\"modal-footer\">");
-        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getOkTitle(), "\" data-dismiss=\"modal\" onclick=\"javascript:", EDIT_CODES, "_click_OK();\" />");
-        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" value=\"", texts.getCancelTitle(), "\" data-dismiss=\"modal\" />");
+        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getOkTitle(), "\" data-dismiss=\"modal\" onclick=\"javascript:", EDIT_CODES, "_click_OK();\" />");
+        p.write("        <input type=\"button\" class=\"", CssClass.btn.toString(), " ", CssClass.btn_light.toString(), "\" value=\"", texts.getCancelTitle(), "\" data-dismiss=\"modal\" />");
         p.write("      </div>");
         p.write("    </div>");        
         p.write("  </div>");

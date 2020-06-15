@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>To test the PersistenceManagerFactory configuration provider</comment>
+	<entry key="org.openmdx.jdo.DataManager.cachePlugIn">org.openmdx.cache.PlugIn</entry>
+	<entry key="org.openmdx.jdo.DataManager.plugIn[0]">org.openmdx.audit2.PlugIn</entry>
+	<entry key="org.openmdx.jdo.DataManager.plugIn[1]">org.openmdx.base.PlugIn</entry>
+	<entry key="org.openmdx.jdo.DataManager.xriPattern[0]">xri://@openmdx*test.openmdx.app1/provider/Data/($...)</entry>
+	<entry key="org.openmdx.jdo.DataManager.xriPattern[1]">xri://@openmdx*org.openmdx.audit2/provider/Audit/($...)</entry>
+	<entry key="org.openmdx.jdo.DataManager.xriPattern[2]">xri://@openmdx*test.openmdx.app1/provider/Audit/($...)</entry>
+	<entry key="org.openmdx.jdo.DataManager.xriPattern[4]">xri://@openmdx*test.openmdx.model1/provider/Transient/($...)</entry>
+	<entry key="org.openmdx.jdo.DataManager.xriPattern[8]">xri://@openmdx*test.openmdx.app1/provider/Transient/($...)</entry>
+	<entry key="org.openmdx.jdo.DataManager.restPlugIn[0]">test.openmdx.app1.Data.PlugIn</entry>
+	<entry key="org.openmdx.jdo.DataManager.restPlugIn[1]">test.openmdx.app1.Audit.PlugIn</entry>
+	<entry key="org.openmdx.jdo.DataManager.restPlugIn[2]">test.openmdx.app1.BeforeImage.PlugIn</entry>
+	<entry key="org.openmdx.jdo.DataManager.restPlugIn[4]">test.openmdx.app1.Model.PlugIn</entry>
+	<entry key="org.openmdx.jdo.DataManager.restPlugIn[8]">test.openmdx.app1.Transient.PlugIn</entry>
+	<entry key="org.openmdx.cache.PlugIn.class">org.openmdx.base.accessor.rest.spi.BasicCache_2</entry>
+	<entry key="test.openmdx.app1.Data.PlugIn.class">org.openmdx.base.dataprovider.kernel.Dataprovider_2</entry>
+	<entry key="test.openmdx.app1.Data.PlugIn.configuration">xri://+resource/META-INF/app1DataProvider.properties</entry>
+	<entry key="test.openmdx.app1.Audit.PlugIn.class">org.openmdx.base.dataprovider.kernel.Dataprovider_2</entry>
+	<entry key="test.openmdx.app1.Audit.PlugIn.configuration">xri://+resource/META-INF/app1AuditProvider.properties</entry>
+	<entry key="test.openmdx.app1.BeforeImage.PlugIn.class">org.openmdx.base.dataprovider.kernel.Dataprovider_2</entry>
+	<entry key="test.openmdx.app1.BeforeImage.PlugIn.configuration">xri://+resource/META-INF/app1BeforeImageProvider.properties</entry>
+	<entry key="test.openmdx.app1.Model.PlugIn.class">org.openmdx.base.dataprovider.kernel.Dataprovider_2</entry>
+	<entry key="test.openmdx.app1.Model.PlugIn.configuration">xri://+resource/META-INF/model1DataManagerPlugIn.properties</entry>
+	<entry key="test.openmdx.app1.Transient.PlugIn.class">org.openmdx.base.dataprovider.kernel.Dataprovider_2</entry>
+	<entry key="test.openmdx.app1.Transient.PlugIn.configuration">xri://+resource/META-INF/inMemoryDataprovider.properties</entry>
+	<entry key="org.openmdx.audit2.PlugIn.class">org.openmdx.audit2.aop0.PlugIn_1</entry>
+	<entry key="org.openmdx.audit2.PlugIn.auditSegment">xri://@openmdx*org.openmdx.audit2/provider/Audit/segment/Standard</entry>
+	<entry key="org.openmdx.audit2.PlugIn.auditPattern[0]">xri://@openmdx*test.openmdx.app1/provider/Audit/($...)</entry>
+	<entry key="org.openmdx.audit2.PlugIn.dataPattern[0]">xri://@openmdx*test.openmdx.app1/provider/Data/($...)</entry>
+	<entry key="org.openmdx.audit2.PlugIn.exclusionPattern[0]">xri://@openmdx*test.openmdx.app1/provider/Data/segment/NO-AUDIT/($...)</entry>
+	<entry key="org.openmdx.audit2.PlugIn.involvementPersistence">EMBEDDED</entry>
+	<entry key="org.openmdx.base.PlugIn.class">org.openmdx.base.aop0.PlugIn_1</entry>
+</properties>
+        

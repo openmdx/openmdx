@@ -385,7 +385,7 @@ public class Model_1Validator {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
                 "Missing feature in classifier",
-                new BasicException.Parameter("xri", classifier.jdoGetObjectId()),
+                new BasicException.Parameter(BasicException.Parameter.XRI, classifier.jdoGetObjectId()),
                 new BasicException.Parameter("feature", feature)
             );
         }

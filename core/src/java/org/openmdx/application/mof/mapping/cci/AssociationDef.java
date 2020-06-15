@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: VelocityClassDef class
+ * Description: AssociationDef
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *

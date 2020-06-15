@@ -32,7 +32,7 @@ import java.io.IOException;
  * Subclasses IOException with the {@link Throwable} constructors missing before Java 6.
  * 
  * @version $Id: IOExceptionWithCause.java 1643107 2014-12-03 13:05:23Z sebb $
- * @since 1.4
+ * @since Commons I/O 1.4
  * @deprecated (since 2.5) use {@link IOException} instead
  */
 @Deprecated

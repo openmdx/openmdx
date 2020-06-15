@@ -48,13 +48,12 @@ import org.openmdx.dalvik.uses.javax.xml.stream.util.XMLEventConsumer;
  * @see org.openmdx.dalvik.uses.javax.xml.stream.events.ProcessingInstruction
  * @see org.openmdx.dalvik.uses.javax.xml.stream.events.StartElement
  * @see org.openmdx.dalvik.uses.javax.xml.stream.events.EndElement
- * @since 1.6
  * 
  * openMDX/Dalvik Notice (February 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  *
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 public interface XMLEventWriter extends XMLEventConsumer {

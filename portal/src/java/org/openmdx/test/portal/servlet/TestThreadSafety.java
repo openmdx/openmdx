@@ -180,20 +180,21 @@ public class TestThreadSafety
         String name
     ) throws MalformedURLException, FileNotFoundException, IOException {
         super(name);
-        InputStream is = new FileInputStream("c:/temp/TestThreadSafety.config");
-        BufferedReader reader = new BufferedReader(
-            new InputStreamReader(is)
-        );
-        
-        this.url = new URL(reader.readLine());
-        this.nThreads = Integer.valueOf(reader.readLine()).intValue();
-        this.userName = reader.readLine();
-        this.password = reader.readLine();
-        this.objectXris = new ArrayList<String>();
-        while(reader.ready()) {
-            objectXris.add(reader.readLine());
+        try(
+            InputStream is = new FileInputStream("c:/temp/TestThreadSafety.config");
+            BufferedReader reader = new BufferedReader(
+                new InputStreamReader(is)
+            )
+        ){
+            this.url = new URL(reader.readLine());
+            this.nThreads = Integer.valueOf(reader.readLine()).intValue();
+            this.userName = reader.readLine();
+            this.password = reader.readLine();
+            this.objectXris = new ArrayList<String>();
+            while(reader.ready()) {
+                objectXris.add(reader.readLine());
+            }
         }
-        reader.close();
     }  
 
     //---------------------------------------------------------------------------     

@@ -220,7 +220,7 @@ public class UiWizardTabControl extends UiOperationTabControl implements Seriali
             ); 
             if(!isRevokeShow && !isRevokeEdit) {
                 if(this.wizardDefinition.getOpenParameter() != null && !this.wizardDefinition.getOpenParameter().isEmpty()) {
-                    p.write("    <li><a href=\"javascript:void(0)\" onclick=\"javascript:window.open('.", this.getOperationName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "', '", this.getOperationName(), "', '", this.wizardDefinition.getOpenParameter(), "');\" id=\"op", Integer.toString(tabId), "\">", this.getName(), "...</a></li>");                    
+                    p.write("    <a href=\"#\" class=\"" + CssClass.dropdown_item.toString() + "\" onclick=\"javascript:window.open('.", this.getOperationName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "', '", this.getOperationName(), "', '", this.wizardDefinition.getOpenParameter(), "');\" id=\"op", Integer.toString(tabId), "\">", this.getName(), "...</a>");                    
                 } else {
                     String parameters = null;
                     String operationName = super.getOperationName();
@@ -228,13 +228,13 @@ public class UiWizardTabControl extends UiOperationTabControl implements Seriali
                         parameters = operationName.substring(operationName.indexOf("?") + 1);
                     }                    
                     if(this.isInplace()) {
-                        p.write("    <li><a href=\"javascript:void(0)\" onclick=\"javascript:jQuery.ajax({type: 'get', url: '.", this.getOperationName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "', dataType: 'html', success: function(data){$('UserDialog').innerHTML=data;evalScripts(data);}});\" id=\"op", Integer.toString(tabId), "\">", this.getName(), "...</a></li>");
+                        p.write("    <a href=\"#\" class=\"" + CssClass.dropdown_item.toString() + "\" onclick=\"javascript:jQuery.ajax({type: 'get', url: '.", this.getOperationName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "', dataType: 'html', success: function(data){$('UserDialog').innerHTML=data;evalScripts(data);}});\" id=\"op", Integer.toString(tabId), "\">", this.getName(), "...</a>");
                     } else {
-                        p.write("    <li><a href=\".", this.getOperationName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "\" target=\"", this.wizardDefinition.getTargetType(), "\" id=\"op", Integer.toString(tabId), "\">", this.getName(), "...</a></li>");
+                        p.write("    <a href=\".", this.getOperationName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "\" class=\"" + CssClass.dropdown_item.toString() + "\" target=\"", this.wizardDefinition.getTargetType(), "\" id=\"op", Integer.toString(tabId), "\">", this.getName(), "...</a>");
                     }
                 }
             } else if(!isRevokeShow) {
-                p.write("    <li class=\"", CssClass.disabled.toString(),"\"><a href=\"javascript:void(0)\" id=\"op", Integer.toString(tabId), "\"><span>", this.getName(), "</span></a></li>");                
+                p.write("    <a href=\"#\" class=\"" + CssClass.dropdown_item.toString() + " " + CssClass.dropdown_item.toString() + "\" id=\"op", Integer.toString(tabId), "\"><span>", this.getName(), "</span></a>");
             }
         }
     }

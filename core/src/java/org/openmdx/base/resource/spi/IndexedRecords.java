@@ -57,7 +57,7 @@ public class IndexedRecords {
     }
     
     private static boolean isASet(IndexedRecord left){
-    	return "SET".equalsIgnoreCase(left.getRecordName());
+    	return SetRecord.NAME.equalsIgnoreCase(left.getRecordName());
     }
 
 }

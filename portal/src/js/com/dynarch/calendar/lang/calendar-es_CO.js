@@ -1,4 +1,4 @@
-﻿// ** I18N
+// ** I18N
 
 // Calendar ES language
 // Author: Mihai Bazon, <mishoo@infoiasi.ro>

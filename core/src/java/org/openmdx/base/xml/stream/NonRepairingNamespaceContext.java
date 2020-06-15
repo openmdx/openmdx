@@ -189,7 +189,7 @@ class NonRepairingNamespaceContext implements NamespaceContext {
      * @see javax.xml.namespace.NamespaceContext#getPrefixes(java.lang.String)
      */
     @Override
-    public Iterator<?> getPrefixes(
+    public Iterator<String> getPrefixes(
         final String namespaceURI
     ) {
         if(namespaceURI == null) throw new IllegalArgumentException();
@@ -211,7 +211,7 @@ class NonRepairingNamespaceContext implements NamespaceContext {
         return mappedPrefixes.iterator();
     }
     
-    private Iterator<?> getSecondaryPrefixes(
+    private Iterator<String> getSecondaryPrefixes(
         final String namespaceURI
     ){
     	return this.next.getPrefixes(namespaceURI);
@@ -222,18 +222,18 @@ class NonRepairingNamespaceContext implements NamespaceContext {
     // Class Concatenation
     //------------------------------------------------------------------------
     
-    private static class Concatenation implements Iterator<Object> {
+    private static class Concatenation implements Iterator<String> {
 
         Concatenation(
     		Iterator<String> primary, 
-    		Iterator<?> secondary
+    		Iterator<String> secondary
         ){
         	this.primary = primary;
         	this.secondary = secondary;
         }
         
         private final Iterator<String> primary;
-        private final Iterator<?> secondary;
+        private final Iterator<String> secondary;
 
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
@@ -247,7 +247,7 @@ class NonRepairingNamespaceContext implements NamespaceContext {
          * @see java.util.Iterator#next()
          */
         @Override
-        public Object next() {
+        public String next() {
             return this.primary.hasNext() ? this.primary.next() : this.secondary.next();
         }
 

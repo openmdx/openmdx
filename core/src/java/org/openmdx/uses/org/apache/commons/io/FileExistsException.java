@@ -32,7 +32,7 @@ import java.io.IOException;
  * Indicates that a file already exists.
  * 
  * @version $Id: FileExistsException.java 1415850 2012-11-30 20:51:39Z ggregory $
- * @since 2.0
+ * @since Commons I/O 2.0
  */
 public class FileExistsException extends IOException {
 

@@ -33,7 +33,7 @@ import java.io.Serializable;
 /**
  * This class turns a Java FileFilter or FilenameFilter into an IO FileFilter.
  *
- * @since 1.0
+ * @since Commons I/O 1.0
  * @version $Id: DelegateFileFilter.java 1642757 2014-12-01 21:09:30Z sebb $
  *
  * @see FileFilterUtils#asFileFilter(FileFilter)

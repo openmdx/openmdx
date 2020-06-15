@@ -173,6 +173,7 @@ org.openmdx.portal.servlet.component.*
 	<script>
 	  $.noConflict();
 	</script>
+	<script src="js/popper/js/popper.min.js"></script>	
 	<script src="js/bootstrap/js/bootstrap.min.js"></script>
 	<script src="js/portal-all.js"></script>
 	<script src="js/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>
@@ -199,54 +200,45 @@ org.openmdx.portal.servlet.component.*
 		EditInspectorControl.paintEditPopups(p);
 		p.flush();
 %>
-<div class="<%= CssClass.navbar + " " + CssClass.navbarInverse + " " + CssClass.navbarFixedTop %>" role="navigation">
-	<div class="<%= CssClass.containerFluid %>" style="padding-left:0px;">
-		<div class="<%= CssClass.navbarHeader %>">
-			<button type="button" class="<%= CssClass.navbarToggle %>" data-toggle="collapse" data-target="#bs-top-navigation">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-		</div>
-		<div class="<%= CssClass.collapse + " " + CssClass.navbarCollapse %>" id="bs-top-navigation">
-			<ul class="<%= CssClass.nav + " " + CssClass.navbarNav + " " + CssClass.visibleSm + " " + CssClass.visibleMd %>">
+<div class="<%= CssClass.navbar + " " + CssClass.navbar_expand_md + " " + CssClass.navbar_dark + " " + CssClass.fixed_top + " " + CssClass.bg_dark %>">
+	<button class="<%= CssClass.navbar_toggler %>" type="button" data-toggle="collapse" data-target="#bs-top-navigation">
+    	<span class="navbar-toggler-icon"></span>
+	</button>
+	<div id="bs-top-navigation" class="<%= CssClass.collapse + " " + CssClass.navbar_collapse %>">
+		<ul class="<%= CssClass.navbar_nav + " " + CssClass.mr_auto %>">
 <%
-				RootMenuControl.paintTopNavigation(p, 1);
-				p.flush();
-%>
-			</ul>
-			<ul class="<%= CssClass.nav + " " + CssClass.navbarNav + " " + CssClass.hiddenSm + " " + CssClass.hiddenMd %>">
-<%
-				RootMenuControl.paintTopNavigation(p, null);
-				p.flush();
-%>
-			</ul>
-			<ul class="<%= CssClass.nav + " " + CssClass.navbarNav + " " + CssClass.navbarRight %>">
-				<li class="<%= CssClass.dropdown %>"  onclick="javascript:toggleMenu(this);">
-					<a href="#" class="<%= CssClass.dropdownToggle %>"><span><%= app.getLoginPrincipal() %> <b class="<%= CssClass.caret %>"></b></span></a>
-					<ul class="<%= CssClass.dropdownMenu %>" role="menu">
-						<li><% SessionInfoControl.paintLogoffButton(p, false, ""); p.flush(); %></li>
-						<li><% SessionInfoControl.paintSaveSettingsButton(p, false, ""); p.flush(); %></li>
-					</ul>
-				</li>
-			</ul>
-<%
-			search.paint(p, false);
+			RootMenuControl.paintTopNavigation(p, null);
 			p.flush();
 %>
-		</div>
+		</ul>
+<%
+		search.paint(p, false);
+		p.flush();
+%>
+		<ul class="<%= CssClass.navbar_nav %>">
+			<li class="<%= CssClass.nav_item %>">
+			    <div class="<%= CssClass.dropdown %>">
+			        <button type="button" class="<%= CssClass.btn %> <%= CssClass.btn_sm %>" data-toggle="<%= CssClass.dropdown %>" onclick="javascript:this.parentNode.hide=function(){};">
+			            <span class="<%= CssClass.nav_link %>" style="background-color:inherit;"><%= app.getLoginPrincipal() %></span>
+			        </button>
+			        <div class="<%= CssClass.dropdown_menu %> <%= CssClass.dropdown_menu_right %>">
+			            <% SessionInfoControl.paintLogoffButton(p, false, CssClass.dropdown_item.toString()); p.flush(); %>
+			            <% SessionInfoControl.paintSaveSettingsButton(p, false, CssClass.dropdown_item.toString()); p.flush(); %>
+			        </div>
+			    </div>
+			</li>
+    	</ul>
 	</div>
 </div>
 <div id="container">
 	<div id="wrap">
-		<div id="<%= NavigationControl.getHeaderId(p) %>" class="<%= CssClass.hiddenPrint %>">
+		<div id="<%= NavigationControl.getHeaderId(p) %>" class="<%= CssClass.d_print_none %>">
 			<div id="hider">
 			    <!-- root panel -->
 				<div id="rootPanel">"
 					<div class="<%= CssClass.hd %>"><%= app.getTexts().getExploreText() %></div>
 					<div class="bd">
-						<ul id="<%=CssClass.ssfNavv %>" class="<%=CssClass.ssfNavv %>" onmouseover="sfinit(this);">
+						<ul id="<%=CssClass.ssf_navv %>" class="<%=CssClass.ssf_navv %>" onmouseover="sfinit(this);">
 <%
 							RootMenuControl.paintQuickAccessors(p);
 							p.flush();
@@ -262,7 +254,7 @@ org.openmdx.portal.servlet.component.*
 			navigation.paint(p, false);
 			p.flush();
 %>
-			<ul id="nav" class="<%= CssClass.nav + " " + CssClass.navPills %>">
+			<ul id="nav" class="<%= CssClass.nav + " " + CssClass.nav_pills %>" style="width:100%">
 <%
 				for(OperationPane operationPane: view.getChildren(OperationPane.class)) {
 					operationPane.paint(p, null, false);
@@ -290,7 +282,7 @@ org.openmdx.portal.servlet.component.*
 <%
 				if(!hideWorkspaceDashboard) {
 %>
-					<div class="<%= CssClass.hiddenXs %> <%= CssClass.colSm3 %> <%= CssClass.colLg2 %> <%= CssClass.hiddenPrint %>">
+					<div class="<%= CssClass.d_xs_none %> <%= CssClass.col_sm_3 %> <%= CssClass.col_lg_2 %> <%= CssClass.d_print_none %>">
 <%
 						workspaceDashboard.paint(p, false);
 						p.flush();
@@ -299,7 +291,7 @@ org.openmdx.portal.servlet.component.*
 <%
 				}
 %>
-				<div class="<%= hideWorkspaceDashboard ? CssClass.colXs12.toString() : CssClass.colXs12 + " " + CssClass.colSm9 + " " + CssClass.colLg10 %>">
+				<div class="<%= hideWorkspaceDashboard ? CssClass.col_12.toString() : CssClass.col_sm_9 + " " + CssClass.col_lg_10 %>">
 <%
 					errors.paint(p, false);
 					// No dashboards in lookup mode
@@ -310,7 +302,7 @@ org.openmdx.portal.servlet.component.*
 %>
 					<iframe name="UserDialogResponse" id="UserDialogResponse" style="display:none;" onload="javascript:var t=this.contentDocument.body.innerHTML;if(t){$('UserDialog').innerHTML=t;};"></iframe>
 					<div id="OperationDialogPlaceHolder" style="display:none;"></div>
-					<div id="UserDialog"><div id="UserDialogWait" class="<%= CssClass.hidden %>" /></div></div>
+					<div id="UserDialog"><div id="UserDialogWait" class="<%= CssClass.d_none %>" /></div></div>
 					<div id="UserDialogPlaceHolder" style="display:none;"></div>
 					<script language="javascript" type="text/javascript">try {if($('header')){$('OperationDialogEmbedder').click();}}catch(e){};</script>
 					<div id="aPanel">

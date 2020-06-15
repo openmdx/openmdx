@@ -74,6 +74,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
+import org.openmdx.base.rest.cci.VoidRecord;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -85,7 +86,6 @@ extends AbstractClassMapper {
     /**
      * Constructor 
      */
-    @SuppressWarnings("cast")
     public InstanceMapper(
         ModelElement_1_0 classDef,
         Writer writer,
@@ -397,7 +397,7 @@ extends AbstractClassMapper {
         this.pw.println(MapperUtils.wrapText(
             "   * ",
             "<em>Note: This is an extension to the JMI 1 standard.<br>" +
-            "In order to remain standard compliant you should substitute this method with <code>java.jdo.Query</code></em>"
+            "In order to remain standard compliant you should substitute this method with <code>javax.jdo.Query</code></em>"
         ));
         if (referenceDef.getAnnotation() != null) {
             this.pw.println("   * <p>");
@@ -472,7 +472,7 @@ extends AbstractClassMapper {
             this.pw.println(MapperUtils.wrapText(
                 "   * ",
                 "<em>Note: This is an extension to the JMI 1 standard.<br>" +
-                "In order to remain standard compliant you should substitute this method with <code>java.jdo.Query</code></em>"
+                "In order to remain standard compliant you should substitute this method with <code>javax.jdo.Query</code></em>"
             ));
             if (referenceDef.getAnnotation() != null) {
                 this.pw.println("   * <p>");
@@ -735,7 +735,7 @@ extends AbstractClassMapper {
             this.pw.println(MapperUtils.wrapText("   * ", operationDef.getAnnotation()));
         }
         for(StructuralFeatureDef param: operationDef.getParameters()) {
-            if(!"org:openmdx:base:Void".equals(param.getQualifiedTypeName())) {
+            if(!VoidRecord.NAME.equals(param.getQualifiedTypeName())) {
                 if (param.getAnnotation() != null) {
                     this.pw.println("   * @param " + param.getName() + " " + param.getAnnotation() + "");
                 }
@@ -745,7 +745,7 @@ extends AbstractClassMapper {
         this.pw.println("  public " + this.getReturnType(operationDef) + " " + this.getMethodName(operationDef.getName()) + "(");
         int ii = 0;
         for(StructuralFeatureDef param: operationDef.getParameters()) {
-            if(!"org:openmdx:base:Void".equals(param.getQualifiedTypeName())) {
+            if(!VoidRecord.NAME.equals(param.getQualifiedTypeName())) {
                 String separator = ii == 0
                 ? "      "
                     : "    , ";
@@ -1010,7 +1010,7 @@ extends AbstractClassMapper {
     ){
         return 
             this.extendsClassDef != null ||
-            (( this.classMetaData.getBaseClass() != null) && (this.classMetaData.getBaseClass() != null)) ||
+            this.classMetaData.getBaseClass() != null ||
             !this.sliced.isEmpty();
     }
 

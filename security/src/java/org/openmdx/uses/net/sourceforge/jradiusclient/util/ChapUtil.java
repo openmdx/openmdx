@@ -58,7 +58,6 @@ import java.security.SecureRandom;
 /**
  * Released under the LGPL<BR>
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.2 $
  */
 public class ChapUtil {
     public static final int DEFAULT_CHALLENGE_SIZE = 16;

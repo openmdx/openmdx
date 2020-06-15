@@ -92,6 +92,7 @@ import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 
@@ -361,7 +362,9 @@ public final class Codes implements Serializable {
 		        }
 		        try {
 		        	this.pm.close();
-		        } catch(Exception ignore) {}
+		        } catch(Exception ignore) {
+					SysLog.trace("Exception ignored", ignore);
+		        }
 		        this.pm = pm;
 				this.codeContainers = codeContainers;
 				this.refreshedAt = System.currentTimeMillis();				
@@ -499,8 +502,10 @@ public final class Codes implements Serializable {
     			} catch(Exception e) {
 					try {
 						pm.currentTransaction().rollback();
-					} catch(Exception ignore) {}
-    				new ServiceException(e).log();
+					} catch(Exception ignore) {
+						SysLog.trace("Exception ignored", ignore);
+					}
+		            Throwables.log(e);
     				System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
     			}
     		}

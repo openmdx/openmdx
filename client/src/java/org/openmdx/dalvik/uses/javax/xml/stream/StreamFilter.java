@@ -29,7 +29,7 @@
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
  * <code>org.openmdx.dalvik.uses.</code>
  *
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  * @author openMDX Team
  */
 package org.openmdx.dalvik.uses.javax.xml.stream;
@@ -39,7 +39,6 @@ package org.openmdx.dalvik.uses.javax.xml.stream;
  * create to filter XMLStreamReaders
  * @version 1.0
  * @author Copyright (c) 2009 by Oracle Corporation. All Rights Reserved.
- * @since 1.6
  */
 public interface StreamFilter {
 

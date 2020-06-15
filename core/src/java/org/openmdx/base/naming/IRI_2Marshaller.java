@@ -51,8 +51,8 @@ package org.openmdx.base.naming;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
-import org.openmdx.kernel.url.protocol.XRI_2Protocols;
-import org.openmdx.kernel.url.protocol.XriAuthorities;
+import org.openmdx.kernel.xri.XRI_2Protocols;
+import org.openmdx.kernel.xri.XRIAuthorities;
 
 
 /**
@@ -137,7 +137,7 @@ public final class IRI_2Marshaller
             }
             iri = UnicodeTransformation.toString(target,0, targetLength);
         }
-        if(iri.startsWith(XriAuthorities.OPENMDX_AUTHORITY)) {
+        if(iri.startsWith(XRIAuthorities.OPENMDX_AUTHORITY)) {
             iri = XRI_2Protocols.SCHEME_PREFIX + iri;
         }
         try {

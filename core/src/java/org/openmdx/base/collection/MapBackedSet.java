@@ -33,7 +33,7 @@ import java.util.Set;
  * Exceptions include <code>BidiMap</code> implementations, as they require unique values.
  *
  * @since Commons Collections 3.1
- * @version $Revision: 1.3 $ $Date: 2011/04/12 12:19:18 $
+ * @version Revision: 1.3  Date: 2011/04/12 12:19:18
  * 
  * @author Stephen Colebourne
  */

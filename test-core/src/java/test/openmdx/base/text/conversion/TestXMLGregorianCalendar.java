@@ -6,6 +6,7 @@ import java.io.StringReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.xml.datatype.DatatypeConstants;
 
@@ -156,7 +157,7 @@ public class TestXMLGregorianCalendar {
         String query
     ) throws IOException{
         BufferedReader actual = new BufferedReader(new StringReader(query));
-        String line0 = actual.readLine().trim();
+        String line0 = Objects.requireNonNull(actual.readLine()).trim();
         if(line0.startsWith("<?xml")) {
 	        Assert.assertEquals("<?xml...", EXPECTED_XML_DECODER[0], line0);
 	        for(int i = 1; i < EXPECTED_XML_DECODER.length; i++) {

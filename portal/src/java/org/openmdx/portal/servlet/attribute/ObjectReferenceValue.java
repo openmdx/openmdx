@@ -82,7 +82,6 @@ public class ObjectReferenceValue
 extends AttributeValue
 implements Serializable {
 
-    //-------------------------------------------------------------------------
     public static AttributeValue createObjectReferenceValue(
         Object object,
         FieldDef fieldDef,
@@ -109,7 +108,6 @@ implements Serializable {
             );
     }
 
-    //-------------------------------------------------------------------------
     protected ObjectReferenceValue(
         Object object,
         FieldDef fieldDef,
@@ -125,14 +123,12 @@ implements Serializable {
         );
     }
 
-    //-------------------------------------------------------------------------
     public void refresh(
     ) {
-        Object v = this.getValue(false);
+        Object v = this.getValue(null, false);
         if(v instanceof ObjectReference) {
             ((ObjectReference)v).refresh();
-        }
-        else if(v instanceof Collection) {
+        } else if(v instanceof Collection) {
             for(Iterator<?> i = ((Collection<?>)v).iterator(); i.hasNext(); ) {
                 Object e = i.next();
                 if(e instanceof ObjectReference) {
@@ -147,6 +143,7 @@ implements Serializable {
      */
     @Override
     public Object getValue(
+    	ViewPort p,
         boolean shortFormat
     ) {
         /**
@@ -158,7 +155,7 @@ implements Serializable {
         Object value = 
             this.object instanceof RefObject_1_0 && 
             this.fieldDef.qualifiedFeatureName.equals("org:openmdx:base:ExtentCapable:identity") ? this.object
-            	: super.getValue(shortFormat);
+            	: super.getValue(p, shortFormat);
         if(value == null) {
             return new ObjectReference(
                 (RefObject_1_0)null,
@@ -189,26 +186,23 @@ implements Serializable {
         }
     }
 
-    //-------------------------------------------------------------------------
     public Object getDefaultValue(
     ) {      
         return this.fieldDef.defaultValue;
     }
 
-    //-------------------------------------------------------------------------
     public String getBackColor(
     ) {
-        Object value = this.getValue(false);
+        Object value = this.getValue(null, false);
         if(value instanceof ObjectReference) {
             return ((ObjectReference)value).getBackColor();
         }
         return null;
     }
 
-    //-------------------------------------------------------------------------
     public String getColor(
     ) {
-        Object value = this.getValue(false);
+        Object value = this.getValue(null, false);
         if(value instanceof ObjectReference) {
             return ((ObjectReference)value).getColor();
         }
@@ -221,21 +215,18 @@ implements Serializable {
     @Override
     public String toString(
     ) {
-        Object value = this.getValue(false);
+        Object value = this.getValue(null, false);
         if(value == null) {
             return "";
-        }
-        else if(value instanceof ObjectReference) {
+        } else if(value instanceof ObjectReference) {
             return value.toString();
-        }
-        else if(value instanceof Collection) {
+        } else if(value instanceof Collection) {
             List<String> titles = new ArrayList<String>();
             for(Iterator<?> i = ((Collection<?>)value).iterator(); i.hasNext(); ) {
                 titles.add(i.next().toString());
             }
             return titles.toString();
-        }
-        else {
+        } else {
             return value.toString();
         }
     }
@@ -270,7 +261,6 @@ implements Serializable {
         }
     }
 
-    //-------------------------------------------------------------------------
     public static class ObjectReferenceMarshaller implements Marshaller, Serializable {
 
         public ObjectReferenceMarshaller(
@@ -292,7 +282,7 @@ implements Serializable {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND,
                         "Null object can not be marshalled",
-                        new BasicException.Parameter("path")
+                        new BasicException.Parameter(BasicException.Parameter.XRI)
                     ),
                     this.app
                 );
@@ -342,7 +332,7 @@ implements Serializable {
         String title = this.getTitle(attribute, label);
         if(forEditing && this.isSingleValued() && readonlyModifier.isEmpty()) {
             String feature = this.getName();
-            ObjectReference objectReference = (ObjectReference)this.getValue(false);
+            ObjectReference objectReference = (ObjectReference)this.getValue(p, false);
             id = (id == null) || (id.length() == 0) ? 
                 feature + "[" + tabIndex + "]" : 
                 id;
@@ -424,5 +414,3 @@ implements Serializable {
     private ObjectReferenceMarshaller objectReferenceMarshaller = null;
 
 }
-
-//--- End of File -----------------------------------------------------------

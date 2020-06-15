@@ -47,6 +47,8 @@
  */
 package org.openmdx.resource.spi;
 
+import java.util.Arrays;
+
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
@@ -81,9 +83,11 @@ public class PasswordCredentials {
         final ManagedConnectionFactory target,
         final Subject subject
     ) {
-        for(PasswordCredential credential : subject.getPrivateCredentials(PasswordCredential.class)) {
-            if(credential.getManagedConnectionFactory() == target) {
-                return credential;
+        if(subject != null) {
+            for(PasswordCredential credential : subject.getPrivateCredentials(PasswordCredential.class)) {
+                if(credential.getManagedConnectionFactory() == target) {
+                    return credential;
+                }
             }
         }
         return null;
@@ -157,6 +161,19 @@ public class PasswordCredentials {
         for(int i = 0; i < password.length; i++) {
             password[i] = Character.MIN_VALUE;
         }
+    }
+
+    /**
+     * Tells whether the password is empty
+     * 
+     * @param passwordCredential the credential
+     * 
+     * @return {@code true} if the password is empty
+     */
+    public static boolean isPasswordEmpty(
+        PasswordCredential passwordCredential
+    ) {
+        return Arrays.equals(EMPTY_PASSWORD, passwordCredential.getPassword());
     }
 
 }

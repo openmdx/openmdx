@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<jdoconfig xmlns="http://java.sun.com/xml/ns/jdo/jdoconfig"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://java.sun.com/xml/ns/jdo/jdoconfig"
+<?xml version="1.0" encoding="UTF-8" ?>
+<jdoconfig 
+	xmlns="http://xmlns.jcp.org/xml/ns/jdo/jdoconfig"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/jdo/jdoconfig http://xmlns.jcp.org/xml/ns/jdo/jdoconfig_3_0.xsd"
 >
-
 	<!-- Clock -->
     <persistence-manager-factory 
     	name="test-Clock-EntityManagerFactory"
@@ -14,8 +14,6 @@
     	name="test-Clock-DataManagerFactory"
     	class="org.openmdx.base.accessor.rest.DataManagerFactory_1"
     >
-        <property name="org.openmdx.jdo.DataManager.xriPattern[0]" value="xri://@openmdx*test.openmdx.clock1/provider/Java/($...)"/>
-        <property name="org.openmdx.jdo.DataManager.restPlugIn[0]" value="test.openmdx.clock1.jdo.DataManagerPlugIn"/>
         <property name="test.openmdx.clock1.jdo.DataManagerPlugIn.class" value="org.openmdx.base.dataprovider.kernel.Dataprovider_2"/>
         <property name="test.openmdx.clock1.jdo.DataManagerPlugIn.configuration" value="xri://+resource/META-INF/clock1DataManagerPlugIn.properties"/>
     </persistence-manager-factory>
@@ -40,7 +38,7 @@
         <property name="org.openmdx.jdo.DataManager.plugIn[1]" value="org.openmdx.base.PlugIn"/>
         <property name="org.openmdx.jdo.DataManager.xriPattern[0]" value="xri://@openmdx*org.openmdx.preferences2/provider/Data/($...)"/>
         <property name="org.openmdx.jdo.DataManager.restPlugIn[0]" value="test.openmdx.preferences2.Data.PlugIn"/>
-        <property name="org.openmdx.cache.PlugIn.class" value="org.openmdx.base.accessor.rest.spi.PinningCache_2"/>
+        <property name="org.openmdx.cache.PlugIn.class" value="org.openmdx.base.accessor.rest.spi.BasicCache_2"/>
         <property name="test.openmdx.preferences2.Data.PlugIn.class" value="org.openmdx.base.dataprovider.kernel.Dataprovider_2"/>
         <property name="test.openmdx.preferences2.Data.PlugIn.configuration" value="xri://+resource/META-INF/preferences2DataProvider.properties"/>
         <property name="org.openmdx.preferences2.PlugIn.class" value="org.openmdx.preferences2.aop0.PlugIn_1"/>
@@ -87,7 +85,7 @@
         <property name="org.openmdx.jdo.DataManager.restPlugIn[2]" value="test.openmdx.app1.BeforeImage.PlugIn"/>
         <property name="org.openmdx.jdo.DataManager.restPlugIn[3]" value="test.openmdx.app1.Model.PlugIn"/>
         <property name="org.openmdx.jdo.DataManager.restPlugIn[4]" value="test.openmdx.app1.Transient.PlugIn"/>
-        <property name="org.openmdx.cache.PlugIn.class" value="org.openmdx.base.accessor.rest.spi.PinningCache_2"/>
+        <property name="org.openmdx.cache.PlugIn.class" value="org.openmdx.base.accessor.rest.spi.BasicCache_2"/>
         <property name="test.openmdx.app1.Data.PlugIn.class" value="org.openmdx.base.dataprovider.kernel.Dataprovider_2"/>
         <property name="test.openmdx.app1.Data.PlugIn.configuration" value="xri://+resource/META-INF/app1DataProvider.properties"/>
         <property name="test.openmdx.app1.Audit.PlugIn.class" value="org.openmdx.base.dataprovider.kernel.Dataprovider_2"/>

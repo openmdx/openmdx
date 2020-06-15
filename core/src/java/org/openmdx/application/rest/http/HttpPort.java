@@ -51,6 +51,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.time.Duration;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
@@ -63,7 +64,7 @@ import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
- * The abstract port depends on the JDK's URL functionality only
+ * The HTTP port depends on the JDK's URL functionality only
  */
 public class HttpPort implements HttpContext, Port<RestConnection> {
 
@@ -82,8 +83,18 @@ public class HttpPort implements HttpContext, Port<RestConnection> {
     /**
      * The REST server's URI
      */
-    private String contextURL;
+    private String connectionURL;
 
+    /**
+     * The (optional) connect timeout
+     */
+    private Duration connectTimeout = null;
+    
+    /**
+     * The (optional) read timeout
+     */
+    private Duration readTimeout = null;
+    
     /**
      * The MIME type, one of<ul>
      * <li>text/xml
@@ -153,22 +164,74 @@ public class HttpPort implements HttpContext, Port<RestConnection> {
      */
     @Override
     public String getConnectionURL() {
-        return this.contextURL;
+        return this.connectionURL;
     }
     
     /**
      * Set uri.
      * 
-     * @param contextURL The uri to set.
+     * @param connectionURL The uri to set.
      */
     public void setConnectionURL(
-        String contextURL
+        String connectionURL
     ) {
-        this.contextURL =
-            contextURL == null || !contextURL.endsWith("/") ? contextURL : 
-            contextURL.substring(0, contextURL.length() - 1);
+        this.connectionURL =
+            connectionURL == null || !connectionURL.endsWith("/") ? connectionURL : 
+            connectionURL.substring(0, connectionURL.length() - 1);
     }
     
+    /**
+     * Retrieve connectTimeout.
+     *
+     * @return Returns the connectTimeout.
+     */
+    public String getConnectTimeout() {
+        return this.connectTimeout == null ? null : this.connectTimeout.toString();
+    }
+    
+    /**
+     * Set connectTimeout.
+     * 
+     * @param connectTimeout The connectTimeout to set.
+     */
+    public void setConnectTimeout(String connectTimeout) {
+        this.connectTimeout = connectTimeout == null ? null : Duration.parse(connectTimeout);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.application.rest.http.HttpContext#getConnectTimeout()
+     */
+    @Override
+    public Duration getConnectionConnectTimeout() {
+        return this.connectTimeout;
+    }
+    
+    /**
+     * Retrieve readTimeout.
+     *
+     * @return Returns the readTimeout.
+     */
+    public String getReadTimeout() {
+        return this.readTimeout == null ? null : this.readTimeout.toString();
+    }
+    
+    /**
+     * Set readTimeout.
+     * 
+     * @param readTimeout The readTimeout to set.
+     */
+    public void setReadTimeout(String readTimeout) {
+        this.readTimeout = readTimeout == null ? null : Duration.parse(readTimeout);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.application.rest.http.HttpContext#getReadTimeout()
+     */
+    @Override
+    public Duration getConnectionReadTimeout() {
+        return this.readTimeout;
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
      */
@@ -216,7 +279,7 @@ public class HttpPort implements HttpContext, Port<RestConnection> {
 		                exception,
 		                BasicException.Code.DEFAULT_DOMAIN,
 		                BasicException.Code.MEDIA_ACCESS_FAILURE,
-		                new BasicException.Parameter("path", path),
+		                new BasicException.Parameter(BasicException.Parameter.XRI, path),
 		                new BasicException.Parameter("query", query)
 		           )
 		       )

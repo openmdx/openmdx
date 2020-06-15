@@ -61,7 +61,6 @@ package org.openmdx.uses.net.sourceforge.jradiusclient;
  * for laying the groundwork for the development of this class.
  *
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.2 $
  */
 public final class RadiusAttributeValues
 {

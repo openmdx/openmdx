@@ -184,13 +184,15 @@ public class TestFilter {
         filter.getExtension().add(extension);
         //
         // CR20018833
-        // 
-        XMLDecoder decoder = new XMLDecoder(
-            new URL(null, "xri://+resource/test/openmdx/query/CR20018833.xml", new org.openmdx.kernel.url.protocol.xri.Handler()).openStream()
-        );
-        Filter filter1 = (Filter) decoder.readObject();
-        decoder.close();
-        assertEquals("Deserialization", filter, filter1);
+        //
+        try(
+            XMLDecoder decoder = new XMLDecoder(
+                new URL(null, "xri://+resource/test/openmdx/query/CR20018833.xml", new org.openmdx.kernel.url.protocol.xri.Handler()).openStream()
+            )
+        ){
+            Filter filter1 = (Filter) decoder.readObject();
+            assertEquals("Deserialization", filter, filter1);
+        }
         filter.getCondition().add(
             new IsInstanceOfCondition(
                 true,

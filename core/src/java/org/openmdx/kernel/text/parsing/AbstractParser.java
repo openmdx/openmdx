@@ -49,6 +49,8 @@
 package org.openmdx.kernel.text.parsing;
 
 import java.text.ParseException;
+import java.util.Collection;
+import java.util.Optional;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.text.spi.Parser;
@@ -126,4 +128,32 @@ public abstract class AbstractParser implements Parser {
     	}
     }
             
+    /**
+     * Tells which types are supported by this parser
+     *
+     * @return the types supported by this parser
+     */
+    protected abstract Collection<Class<?>> supportedTypes();
+    
+    /* (non-Javadoc)
+     * @see org.w3c.spi.Parser#handles(java.lang.Class)
+     */
+    @Override
+    public boolean handles(Class<?> type) {
+        return supportedTypes().contains(type);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.kernel.text.spi.Parser#handles(java.lang.String)
+     */
+    @Override
+    public Optional<Class<?>> handles(String className) {
+        for(Class<?> candidate : supportedTypes()) {
+            if(className.equals(candidate.getName())) {
+                return Optional.of(candidate);
+            }
+        }
+        return Optional.empty();
+    }
+
 }

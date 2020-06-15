@@ -60,6 +60,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.naming.ClassicSegments;
 
 public class PathTransformationTest {
     
@@ -165,24 +166,12 @@ public class PathTransformationTest {
 //        assertEquals("xref xri path", "/2/3", xref.getXRIPath().toString());
     }
 
-    @SuppressWarnings("deprecation")
-	@Test
-    public void testCR20006216(
-    ){
-        final org.openmdx.base.naming.PathComponent stateId = new org.openmdx.base.naming.PathComponent("sins:0:");
-        assertEquals("Object Id", "sins", stateId.get(0));
-        assertEquals("State Number", "0", stateId.get(1));
-        assertFalse("PlaceHolder", stateId.isPlaceHolder());
-        assertTrue("Private", stateId.isPrivate());        
-    }
-
-    @SuppressWarnings("deprecation")
 	@Test
     public void testCR20020172(
     ){
         final String stateId = "sins:0:";
-        assertFalse("PlaceHolder", org.openmdx.base.naming.PathComponent.isPlaceHolder(stateId));
-        assertTrue("Private", org.openmdx.base.naming.PathComponent.isPrivate(stateId));        
+        assertFalse("PlaceHolder", ClassicSegments.isPlaceholder(stateId));
+        assertTrue("Private", ClassicSegments.isPrivate(stateId));        
     }
     
 }

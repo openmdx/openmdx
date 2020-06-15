@@ -47,12 +47,12 @@
  */
 package org.openmdx.base.persistence.cci;
 
+import java.util.Optional;
+
 import javax.jdo.Constants;
 
 /**
- * JDO 2.0 Options
- *
- * @since openMDX 2.0
+ * JDO 3.1 Options
  */
 public enum ConfigurableProperty {
 
@@ -79,8 +79,10 @@ public enum ConfigurableProperty {
     Mapping(Constants.PROPERTY_MAPPING),
     CopyOnAttach(Constants.PROPERTY_COPY_ON_ATTACH),
     Name(Constants.PROPERTY_NAME),
-    PersistenceUnitName(Constants.PROPERTY_NAME),
+    PersistenceUnitName(Constants.PROPERTY_PERSISTENCE_UNIT_NAME),
     ServerTimeZoneID(Constants.PROPERTY_SERVER_TIME_ZONE_ID),
+    DatastoreReadTimeoutMillis(Constants.PROPERTY_DATASTORE_READ_TIMEOUT_MILLIS),
+    DatastoreWriteTimeoutMillis(Constants.PROPERTY_DATASTORE_WRITE_TIMEOUT_MILLIS),
     TransactionType("javax.persistence.TransactionType"),
 
     //------------------------------------------------------------------------
@@ -151,6 +153,24 @@ public enum ConfigurableProperty {
     @Override
     public String toString() {
         return qualifiedName();
+    }
+
+    /**
+     * Unknown properties must be silently ignored
+     * 
+     * @param qualifiedName the (case-insensitive) qualified name
+     * 
+     * @return the configurable property, if known
+     */
+    public static Optional<ConfigurableProperty> fromQualifiedName(
+        String qualifiedName
+    ){
+        for(ConfigurableProperty candidate : ConfigurableProperty.values()) {
+            if(candidate.qualifiedName.equalsIgnoreCase(qualifiedName)) {
+                return Optional.of(candidate);
+            }
+        }
+        return Optional.empty();    
     }
 
 }

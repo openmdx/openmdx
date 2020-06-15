@@ -86,9 +86,10 @@ import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.cci.RestConnection;
-import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
+import org.openmdx.base.rest.spi.RestConnectionFactory;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.transaction.TransactionAttributeType;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
 
@@ -141,7 +142,7 @@ public class UiLoader
     ) throws ServiceException {
         if(this.pm == null) {
         	try {
-	        	ConnectionFactoryAdapter connectionFactoryAdapter = new ConnectionFactoryAdapter(
+	        	RestConnectionFactory connectionFactoryAdapter = new RestConnectionFactory(
 	                this.uiRepository,
 	            	false, // supportsLocalTransactionDemarcation
 	            	TransactionAttributeType.NEVER
@@ -258,7 +259,7 @@ public class UiLoader
                         		  org.openmdx.application.xml.spi.ImportMode.CREATE
                               );
                           } catch(Exception e) {
-                              new ServiceException(e).log();
+                              Throwables.log(e);
                               System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
                           }
                       }   

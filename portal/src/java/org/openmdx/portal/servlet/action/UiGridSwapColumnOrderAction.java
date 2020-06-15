@@ -60,7 +60,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ViewPort;
@@ -132,8 +132,7 @@ public class UiGridSwapColumnOrderAction extends BoundAction {
             try {
                 p.close(true);
             } catch (Exception e) {
-                ServiceException e0 = new ServiceException(e);
-                SysLog.warning(e0.getMessage(), e0.getCause());
+                Throwables.log(e);
             }           
         }
         return new ActionPerformResult(

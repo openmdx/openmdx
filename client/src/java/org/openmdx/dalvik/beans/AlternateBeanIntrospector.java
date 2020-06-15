@@ -55,7 +55,7 @@ import org.openmdx.kernel.loading.BeanIntrospector;
 /**
  * Alternate Java Bean Introspector
  * 
- * @since openMDX 2.12.0
+ * @since openMDX 2.12
  */
 public class AlternateBeanIntrospector implements BeanIntrospector {
 
