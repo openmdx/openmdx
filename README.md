@@ -1,5 +1,5 @@
 # Welcome to openMDX
 
-For documentation see [here](openmdx-documentation/blob/master/README.md)
+For documentation see [here](/openmdx/openmdx-documentation/README.md)
 
 For more information go to the [openMDX web site](http://www.openmdx.org).
