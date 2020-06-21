@@ -56,10 +56,13 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.jdo.JDOHelper;
 
@@ -67,6 +70,7 @@ import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Multiplicity;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.HtmlEncoder;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
@@ -321,7 +325,7 @@ public abstract class AttributeValue implements Serializable {
                     return value;
                 }
             } catch(Exception e) {
-            	this.logNotAccessible(p, e, 0);
+            	this.logValueNotAccessible(p, e, 0);
                 return null;
             }
         } else {
@@ -429,7 +433,7 @@ public abstract class AttributeValue implements Serializable {
      * @param e
      * @param index
      */
-    protected void logNotAccessible(
+    protected void logValueNotAccessible(
     	ViewPort p,
     	Exception e,
     	int index
@@ -438,17 +442,33 @@ public abstract class AttributeValue implements Serializable {
     	if(p != null && p.getView() != null) {
     		viewObject = p.getView().getObject() instanceof RefObject_1_0 ? (RefObject_1_0)p.getView().getObject() : null;
     	}
-    	ServiceException e0 = new ServiceException(
+    	Path viewXri = viewObject == null ? null : viewObject.refGetPath();
+    	Path objectXri = this.getObject() instanceof RefObject_1_0 ? ((RefObject_1_0)this.getObject()).refGetPath() : null;
+    	String feature = this.fieldDef.qualifiedFeatureName;
+    	ServiceException se = new ServiceException(
     		e,
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_AVAILABLE,
             "Unable to access feature value",
-    		new BasicException.Parameter("view.xri", viewObject == null ? null : viewObject.refGetPath()),
-    		new BasicException.Parameter("object.xri", this.getObject() instanceof RefObject_1_0 ? ((RefObject_1_0)this.getObject()).refGetPath() : null),
-    		new BasicException.Parameter("feature", this.fieldDef.qualifiedFeatureName),
+    		new BasicException.Parameter("view.xri", viewXri),
+    		new BasicException.Parameter("object.xri", objectXri),
+    		new BasicException.Parameter("feature", feature),
     		new BasicException.Parameter("index", index)
     	);
-    	e0.log();
+    	SysLog.detail(se.getMessage(), se.getCause());
+    	if(e instanceof JmiServiceException || e instanceof ServiceException) {
+    		BasicException cause = e instanceof JmiServiceException
+    			? ((JmiServiceException)e).getCause()
+    			: ((ServiceException)e).getCause();
+    		// BAD_MEMBER_NAME is a customizing issue. Do not log them at level WARNING
+    		if(cause.getExceptionCode() != BasicException.Code.BAD_MEMBER_NAME) {
+	        	SysLog.log(
+	        		Level.WARNING,
+	        		"Unable to retrieve value. Cause is [ viewXri: {0}, objectXri: {1}, feature: {2}, index: {3}, exceptionDomain: {4}, exceptionCode: {5}, exceptionDescription: {6}, exceptionParameters: {7} ]",
+	        		viewXri, objectXri, feature, index, cause.getExceptionDomain(), cause.getExceptionCode(), cause.getDescription(), Arrays.asList(cause.getParameters())
+	        	);
+    		}
+        }
     }
 
     /** 
@@ -478,7 +498,7 @@ public abstract class AttributeValue implements Serializable {
                 try {
                     v = i.next();
                 } catch(Exception e) {
-                	this.logNotAccessible(p, e, index);
+                	this.logValueNotAccessible(p, e, index);
                 }
                 boolean hasDivTag = false;
                 if(!this.isSingleValued()) {
