@@ -2403,100 +2403,92 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 		if(doCreate) {
 			PersistenceManager pm = JDOHelper.getPersistenceManager(parent);
 			Transaction tx = pm.currentTransaction();
-			try {
-				if(tx.isActive()) {
-					SysLog.log(Level.WARNING, "Transaction is active before creating {0}/{1}. Rolling back.", parent.refGetPath(), forReference);
-					try {
-						tx.rollback();
-					} catch(Exception ignore) {}
-				}
-				tx.begin();
-				this.updateObject(
-					object,
-				    parameterMap,
-				    attributeMap,
-				    app
-				);
-				if(app.getErrorMessages().isEmpty()) {
-					Object[] qualifiers = (Object[])parameterMap.get("qualifier");
-					if(qualifiers == null) {
-						qualifiers = new String[] {
-							UUIDConversion.toUID(UUIDs.newUUID())
-						};
-					}
-					// Prevent CONCURRENT_MODIFICATION in case the parent was updated by some other user
-					pm.refresh(parent);
-					DataBinding dataBinding = null;
-					try {
-						ElementDefinition elementDefinition = app.getUiElementDefinition(
-							parent.refClass().refMofId() + ":" + forReference
-						);
-						dataBinding = elementDefinition == null 
-							? null 
-							: elementDefinition.getDataBindingName() == null 
-								? null
-								: this.getDataBinding(elementDefinition.getDataBindingName());
-					} catch(Exception ignore) {}
-					if(dataBinding != null) {
-						dataBinding.setValue(
-							parent, 
-							forReference, 
-							object,
-							app
-						);
-					} else {
-						Object container = parent.refGetValue(forReference);
-						((RefContainer<?>)container).refAdd(
-						    org.oasisopen.cci2.QualifierType.REASSIGNABLE,
-						    qualifiers.length > 0 ? (String) qualifiers[0] : "",
-						    object
-						);
-					}
-					tx.commit();
-					return true;
-				} else {
-					try {
-						tx.rollback();
-					} catch(Exception e1) {}
-				}
-			} catch(Exception e) {
+			synchronized(tx) {
 				try {
-					tx.rollback();				
-		        } catch(Exception ignore) {
-					SysLog.trace("Exception ignored", ignore);
+					tx.begin();
+					this.updateObject(
+						object,
+					    parameterMap,
+					    attributeMap,
+					    app
+					);
+					if(app.getErrorMessages().isEmpty()) {
+						Object[] qualifiers = (Object[])parameterMap.get("qualifier");
+						if(qualifiers == null) {
+							qualifiers = new String[] {
+								UUIDConversion.toUID(UUIDs.newUUID())
+							};
+						}
+						// Prevent CONCURRENT_MODIFICATION in case the parent was updated by some other user
+						pm.refresh(parent);
+						DataBinding dataBinding = null;
+						try {
+							ElementDefinition elementDefinition = app.getUiElementDefinition(
+								parent.refClass().refMofId() + ":" + forReference
+							);
+							dataBinding = elementDefinition == null 
+								? null 
+								: elementDefinition.getDataBindingName() == null 
+									? null
+									: this.getDataBinding(elementDefinition.getDataBindingName());
+						} catch(Exception ignore) {}
+						if(dataBinding != null) {
+							dataBinding.setValue(
+								parent, 
+								forReference, 
+								object,
+								app
+							);
+						} else {
+							Object container = parent.refGetValue(forReference);
+							((RefContainer<?>)container).refAdd(
+							    org.oasisopen.cci2.QualifierType.REASSIGNABLE,
+							    qualifiers.length > 0 ? (String) qualifiers[0] : "",
+							    object
+							);
+						}
+						tx.commit();
+						return true;
+					} else {
+						try {
+							tx.rollback();
+						} catch(Exception e1) {}
+					}
+				} catch(Exception e) {
+					try {
+						tx.rollback();				
+			        } catch(Exception ignore) {
+						SysLog.trace("Exception ignored", ignore);
+					}
+					throw new ServiceException(e);
 				}
-				throw new ServiceException(e);
 			}
 		} else {
 			PersistenceManager pm = JDOHelper.getPersistenceManager(object);
 			Transaction tx = pm.currentTransaction();
-			try {
-				if(tx.isActive()) {
-					SysLog.log(Level.WARNING, "Transaction is active before updating {0}. Rolling back", object.refGetPath());
-					try {
-						tx.rollback();
-					} catch(Exception ignore) {}
-				}
-				tx.begin();
-				app.getPortalExtension().updateObject(
-					object,
-				    parameterMap,
-				    attributeMap,
-				    app
-				);
-				if(app.getErrorMessages().isEmpty()) {
-					tx.commit();
-					return true;
-				} else {
-					try {
-						tx.rollback();
-					} catch(Exception ignore) {}
-				}
-			} catch(Exception e) {
+			synchronized(tx) {
 				try {
-					tx.rollback();
-				} catch(Exception e1) {}
-				throw new ServiceException(e);
+					tx.begin();
+					app.getPortalExtension().updateObject(
+						object,
+					    parameterMap,
+					    attributeMap,
+					    app
+					);
+					if(app.getErrorMessages().isEmpty()) {
+						tx.commit();
+						return true;
+					} else {
+						try {
+							tx.rollback();
+						} catch(Exception ignore) {}
+					}
+				} catch(Exception e) {
+					try {
+						tx.rollback();
+					} catch(Exception e1) {}
+					throw new ServiceException(e);
+				}
 			}
 		}
 		return false;
