@@ -72,6 +72,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.logging.Level;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
@@ -1339,7 +1340,6 @@ public final class ApplicationContext implements Serializable {
         DecimalFormat parser = userLocale == null ? 
             (DecimalFormat)DecimalFormat.getInstance() : 
             (DecimalFormat)DecimalFormat.getInstance(userLocale);
-
         // DecimalFormat is not used to parse the number because
         // it can not parse BigDecimal --> loss of precision
         numberAsString = numberAsString.replace(parser.getDecimalFormatSymbols().getGroupingSeparator(), ' ');
@@ -1352,17 +1352,15 @@ public final class ApplicationContext implements Serializable {
         if(numberAsString.length() > 0) {
             try {
                 return new BigDecimal(numberAsString);
-            }
-            catch(Exception e) {
-                Throwables.log(e);
+            } catch(Exception e) {
+            	SysLog.log(Level.FINE, "Error when parsing number {0}", numberAsString, e);
                 return null;
             }
-        }
-        else {
+        } else {
             return null;
         }
     }
-  
+
     /**
      * Get identity of current user's home object.
      * @return
