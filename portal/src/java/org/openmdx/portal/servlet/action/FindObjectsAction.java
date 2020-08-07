@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2020, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -67,17 +66,22 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
+import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.AnyTypeCondition;
-import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.FeatureOrderRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
+import org.openmdx.base.rest.spi.Facades;
+import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -108,6 +112,7 @@ public class FindObjectsAction extends UnboundAction {
         String referenceName = Action.getParameter(parameter, Action.PARAMETER_REFERENCE_NAME);
         String filterByType = Action.getParameter(parameter, Action.PARAMETER_FILTER_BY_TYPE);
         String filterByFeature = Action.getParameter(parameter, Action.PARAMETER_FILTER_BY_FEATURE);
+        String filterByQuery = Action.getParameter(parameter, Action.PARAMETER_FILTER_BY_QUERY);
         String[] filterValues = (String[])requestParameters.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES);
         ConditionType filterOperator = ConditionType.IS_LIKE;
         if(Action.getParameter(parameter, Action.PARAMETER_FILTER_OPERATOR) != null) {
@@ -116,48 +121,58 @@ public class FindObjectsAction extends UnboundAction {
             );
         }
         String orderByFeature = Action.getParameter(parameter, Action.PARAMETER_ORDER_BY_FEATURE);
-        // TODO: the option format allows to specify the output format 
-//        String format = Action.getParameter(parameter, Action.PARAMETER_FORMAT);
         String positionAsString = Action.getParameter(parameter, Action.PARAMETER_POSITION);
-        int position = positionAsString == null ? 
-        	0 : 
-        		new Integer(positionAsString).intValue();         
+        int position = positionAsString == null ? 0 : Integer.parseInt(positionAsString);         
         String sizeAsString = Action.getParameter(parameter, Action.PARAMETER_SIZE);        
-        int size = sizeAsString == null ? 
-        	0 : 
-        		new Integer(sizeAsString).intValue();
-
+        int size = sizeAsString == null ? 0 : new Integer(sizeAsString).intValue();
         // Output
         try(
             PrintWriter pw = this.getWriter(
                 request, 
                 response
             )
-        ){
+        ) {
             PersistenceManager pm = null;
             try {
                 Path objectIdentity = new Path(objectXri);
                 pm = app.getNewPmData();
                 RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(objectIdentity);
-                List<Condition> conditions = new ArrayList<Condition>(
+                List<ConditionRecord> conditions = new ArrayList<ConditionRecord>(
                     app.getPortalExtension().getFindObjectsBaseFilter(
                         app, 
                         parent,
                         referenceName
                     )
-                );            
+                );
+                List<FeatureOrderRecord> orderSpecifiers = new ArrayList<FeatureOrderRecord>();
                 // filterByType
-                if(
-                    (filterByType != null) &&
-                    (filterByType.length()  > 0)
-                ) {
-                    conditions.add(
-                        new IsInstanceOfCondition(filterByType)
-                    );                
+                if((filterByType != null) && !filterByType.isEmpty()) {
+                    // filterByQuery
+                    if((filterByQuery != null) && !filterByQuery.isEmpty()) {
+                        Query_2Facade queryFacade = Facades.newQuery(objectIdentity.getDescendant(referenceName));
+                        queryFacade.setQueryType(filterByType);
+                        queryFacade.setQuery(filterByQuery);
+                        queryFacade.setPosition(position);
+                        queryFacade.setSize(size);
+                        javax.jdo.Query query = pm.newQuery(
+                        	org.openmdx.base.persistence.cci.Queries.QUERY_LANGUAGE, 
+                        	queryFacade.getDelegate()
+                        );
+                        if(query instanceof RefQuery_1_0) {
+                        	RefQuery_1_0 refQuery = (RefQuery_1_0)query;
+                        	QueryFilterRecord queryRecord = refQuery.refGetFilter();
+                        	conditions.addAll(queryRecord.getCondition());
+                        	orderSpecifiers.addAll(queryRecord.getOrderSpecifier());
+                        }
+                    } else {
+	                    conditions.add(
+	                        new IsInstanceOfCondition(filterByType)
+	                    );
+                    }
                 }
                 // filterByFeature
                 if(
-                    (filterByFeature != null) && (filterByFeature.length() > 0) &&
+                    (filterByFeature != null) && !filterByFeature.isEmpty() &&
                     (filterValues != null) && (filterValues.length > 0)
                 ) {
                     Model_1_0 model = app.getModel();
@@ -187,14 +202,13 @@ public class FindObjectsAction extends UnboundAction {
                     }
                 }
                 // Order
-                OrderSpecifier s = null;
-                if(
-                    (orderByFeature != null) && (orderByFeature.length() > 0)
-                ) {
-                    s = new OrderSpecifier(
-                        orderByFeature,
-                        SortOrder.ASCENDING
-                    );
+                if((orderByFeature != null) && !orderByFeature.isEmpty()) {
+                    orderSpecifiers.add(
+                    	new OrderSpecifier(
+	                        orderByFeature,
+	                        SortOrder.ASCENDING
+	                    )
+	               );
                 }
                 Collection<?> allObjects = (Collection<?>)parent.refGetValue(referenceName);
                 List<RefObject_1_0> filteredObjects = null;
@@ -202,7 +216,7 @@ public class FindObjectsAction extends UnboundAction {
                     filteredObjects = ((RefContainer<RefObject_1_0>)allObjects).refGetAll(
                         new org.openmdx.base.query.Filter(
                             conditions,
-                            s == null ? null : Collections.singletonList(s),
+                            orderSpecifiers,
                             null // extension
                         )
                     );
