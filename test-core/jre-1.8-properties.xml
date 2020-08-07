@@ -48,7 +48,7 @@
 	-->
 	<property 
 		name="model.build.formats" 
-		value="--format=xmi1 --format=uml.openmdx-1 --format=uml2.openmdx-1 --format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(cci2) --format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(jmi1) --format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(jpa3)"
+		value="--format=xmi1 --format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(cci2) --format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(jmi1) --format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(jpa3)"
 	/>	
 </project>
 

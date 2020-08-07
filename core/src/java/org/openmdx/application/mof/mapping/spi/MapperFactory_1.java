@@ -89,10 +89,8 @@ public class MapperFactory_1 {
             );
         } else if (MappingTypes.XMI1.equals(format)) {
             return new org.openmdx.application.mof.mapping.xmi.XMIMapper_1();
-        } else if (MappingTypes.UML_OPENMDX_1.equals(format)) {
-            return new org.openmdx.application.mof.mapping.xmi.Uml1Mapper_1();
-        } else if (MappingTypes.UML2_OPENMDX_1.equals(format)) {
-            return new org.openmdx.application.mof.mapping.xmi.Uml2Mapper_1();
+        } else if (MappingTypes.MOF1.equals(format)) {
+            return new org.openmdx.application.mof.mapping.java.mof.ModelNameConstantsMapper();
         } else {
             try {
                 final String className;

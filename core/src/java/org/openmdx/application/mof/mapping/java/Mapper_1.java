@@ -161,8 +161,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                     new AttributeDef(attributeDef, this.model);
                 ClassDef mClassDef =
                     new ClassDef(classDef, this.model, this.metaData);
-                // setter/getter interface only if modelAttribute.container =
-                // modelClass.
+                // setter/getter interface only if modelAttribute.container == modelClass.
                 // Otherwise inherit from super interfaces.
                 if (((this.format == Format.JPA3) && (((ClassMetaData) mClassDef
                     .getClassMetaData()).getBaseClass() == null))
@@ -175,8 +174,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                             mAttributeDef);
                     }
                     // Note:
-                    // Set operations in interfaces are generated only if the
-                    // attribute
+                    // Set operations in interfaces are generated only if the attribute
                     // is changeable and is not derived.
 
                     if(multiplicity == null) {

@@ -285,8 +285,9 @@ public class DataObject_1
             // Persistent Values
             //
             for (Map.Entry<?, ?> e : ((Map<?, ?>) that.persistentValues).entrySet()) {
-                if (!notToBeCloned.contains(e.getKey())) {
-                    this.persistentValues.put(e.getKey(), e.getValue());
+                final Object featureName = e.getKey();
+                if (!notToBeCloned.contains(featureName)) {
+                    this.persistentValues.put(featureName, isolate(e.getValue()));
                 }
             }
         }
@@ -521,6 +522,25 @@ public class DataObject_1
      */
     private static final FetchPlan CLONE_FETCH_PLAN = StandardFetchPlan.newInstance(null);
     
+    /**
+     * Isolate {@link Record} values
+     * 
+     * @param value the source value
+     * @return the cloned value in case of a {@link Record}, the value itself in all other cases
+     * @throws ServiceException 
+     */
+    private Object isolate(Object value) throws ServiceException {
+        if(value instanceof Record) {
+            try {
+                return ((Record)value).clone();
+            } catch (CloneNotSupportedException exception) {
+                throw new ServiceException(exception);
+            }
+        } else {
+            return value;
+        }
+    }
+
     /**
      * Valdidate the object's state and retrieve its class
      * 

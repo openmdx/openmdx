@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry exported="true" kind="lib" path="lib/junit.jar" sourcepath="src/junit.java.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/openjpa.jar" sourcepath="src/openjpa.java.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/concurrent.jar"/>

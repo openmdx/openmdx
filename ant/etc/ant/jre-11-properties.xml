@@ -47,7 +47,7 @@
 	<property name="build.target.platform" value="jre-11"/>
 	<property name="build.target.version" value="11"/>
 
-	<property name="model.build.formats" value="--format=xmi1 --format=uml.openmdx-1 --format=uml2.openmdx-1 --format=cci2 --format=jmi1 --format=jpa3 "/>
+	<property name="model.build.formats" value="--format=xmi1 --format=mof1 --format=cci2 --format=jmi1 --format=jpa3 "/>
 	
 	<condition property="build.target.jre" value="${java.home}">
 		<equals arg1="${java.specification.version}" arg2="${build.target.version}"/>

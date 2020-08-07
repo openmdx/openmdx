@@ -270,7 +270,7 @@ public class MapView implements SortedMap<Integer, Object> {
      * @see java.util.Map#clear()
      */
     public void clear() {
-        for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+        for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_UPDATE)) {
             delegate.clear();
         }
     }
@@ -440,7 +440,7 @@ public class MapView implements SortedMap<Integer, Object> {
         Object value
     ) {
         Object reply = get(key);
-        for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+        for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_UPDATE)) {
             delegate.put(key, value);
         }
         return reply;
@@ -452,7 +452,7 @@ public class MapView implements SortedMap<Integer, Object> {
      * @see java.util.Map#putAll(java.util.Map)
      */
     public void putAll(Map<? extends Integer, ? extends Object> t) {
-        for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+        for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_UPDATE)) {
             delegate.putAll(t);
         }
     }
@@ -464,7 +464,7 @@ public class MapView implements SortedMap<Integer, Object> {
      */
     public Object remove(Object key) {
         Object reply = get(key);
-        for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+        for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_UPDATE)) {
             delegate.remove(key);
         }
         return reply;

@@ -54,13 +54,6 @@ public class MappingTypes {
     }
     
     //------------------------------------------------------------------------
-    // openMDX 1 formats
-    //------------------------------------------------------------------------
-    public static final String UML_OPENMDX_1 = "uml.openmdx-1";
-    public static final String UML2_OPENMDX_1 = "uml2.openmdx-1";
-
-    
-    //------------------------------------------------------------------------
     // openMDX 2 formats
     //------------------------------------------------------------------------
     
@@ -80,9 +73,14 @@ public class MappingTypes {
     public static final String JMI1 = "jmi1";
 
     /**
-     * Standard JDO 2 mapping
+     * Standard JPA mapping
      */
     public static final String JPA3 = "jpa3";
+
+    /**
+     * Java interfaces with the model
+     */
+    public static final String MOF1 = "mof1";
 
 }
 

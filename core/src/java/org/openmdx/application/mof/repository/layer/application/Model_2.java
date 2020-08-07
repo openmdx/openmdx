@@ -114,9 +114,7 @@ public class Model_2 extends AbstractRestPort {
 
     protected static final List<String> STANDARD_FORMAT = Collections.unmodifiableList(
         Arrays.asList(
-            MappingTypes.XMI1, 
-            MappingTypes.UML_OPENMDX_1,
-            MappingTypes.UML2_OPENMDX_1
+            MappingTypes.XMI1
         )
     );
 
