@@ -375,12 +375,12 @@ public final class Action implements Serializable {
 	) {
 		String[] components = this.getHRef(requestId);
 		StringBuilder href = new StringBuilder(components[0]);
-		for (int i = 1; i < components.length; i += 2) {
+		for(int i = 1; i < components.length; i += 2) {
 			try {
-				href.append(i == 1 ? "?" : "&").append(components[i]).append("=")
-						.append(URLEncoder.encode(components[i + 1], "UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-			}
+				href.append(i == 1 ? "?" : "&")
+					.append(components[i]).append("=")
+					.append(URLEncoder.encode(components[i + 1], "UTF-8"));
+			} catch (UnsupportedEncodingException ignore) {}
 		}
 		return href.toString();
 	}
@@ -406,10 +406,12 @@ public final class Action implements Serializable {
 	) {
 		String actionParameter = this.getParameter();
 		int n = 3;
-		if (requestId != null)
+		if(requestId != null) {
 			n += 2;
-		if (actionParameter.length() > 0)
+		}
+		if(!actionParameter.isEmpty()) {
 			n += 2;
+		}
 		String[] components = new String[n];
 		n = 0;
 		// Servlet name
@@ -417,13 +419,20 @@ public final class Action implements Serializable {
 		// an IE workaround. Setting the reply header fields is not sufficient.
 		// Also see http://ppewww.ph.gla.ac.uk/~flavell/www/content-type.html
 		StringBuilder href = new StringBuilder(WebKeys.SERVLET_NAME);
-		if ((this.getEvent() == Action.EVENT_DOWNLOAD_FROM_LOCATION)
-				|| (this.getEvent() == Action.EVENT_DOWNLOAD_FROM_FEATURE)) {
-			href.append("/").append(this.getParameter(Action.PARAMETER_NAME));
+		if(
+			(this.getEvent() == Action.EVENT_DOWNLOAD_FROM_LOCATION) || 
+			(this.getEvent() == Action.EVENT_DOWNLOAD_FROM_FEATURE)
+		) {
+			href.append("/");
+			try {
+				href.append(
+					URLEncoder.encode(this.getParameter(Action.PARAMETER_NAME), "UTF-8")
+				);
+			} catch(Exception ignore) {}
 		}
 		components[n++] = href.toString();
 		// REQUEST_ID
-		if (requestId != null) {
+		if(requestId != null) {
 			components[n++] = WebKeys.REQUEST_ID;
 			components[n++] = requestId;
 		}
@@ -431,7 +440,7 @@ public final class Action implements Serializable {
 		components[n++] = WebKeys.REQUEST_EVENT;
 		components[n++] = Integer.toString(this.getEvent());
 		// Parameter name
-		if (actionParameter.length() > 0) {
+		if(!actionParameter.isEmpty()) {
 			components[n++] = WebKeys.REQUEST_PARAMETER;
 			components[n++] = actionParameter;
 		}
@@ -459,8 +468,10 @@ public final class Action implements Serializable {
 	) {
 		String[] components = this.getHRef(requestId);
 		StringBuilder href = new StringBuilder("getEncodedHRef([");
-		for (int i = 0; i < components.length; i++) {
-			(i > 0 ? href.append(", ") : href).append("'").append(components[i]).append("'");
+		for(int i = 0; i < components.length; i++) {
+			(i > 0 ? href.append(", ") : href).append("'")
+				.append(components[i])
+				.append("'");
 		}
 		return href.append("])").toString();
 	}
