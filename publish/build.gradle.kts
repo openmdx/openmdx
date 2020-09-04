@@ -64,7 +64,7 @@ eclipse {
 }
 
 group = "org.openmdx"
-version = "2.17-20200826"
+version = "2.17-20200904"
 
 publishing {
     repositories {

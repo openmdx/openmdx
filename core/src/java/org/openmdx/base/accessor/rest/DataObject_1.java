@@ -269,7 +269,7 @@ public class DataObject_1
         if (that.jdoIsPersistent() && !that.jdoIsNew()) {
             that.objRetrieve(
                 false,
-                beforeImage ? null : CLONE_FETCH_PLAN,
+                null,
                 null,
                 beforeImage,
                 true // throwNotFoundException
@@ -518,9 +518,9 @@ public class DataObject_1
     );
 
     /**
-     * The clone fetch plan retrieves allattributes
+     * The clone fetch plan retrieves all attributes
      */
-    private static final FetchPlan CLONE_FETCH_PLAN = StandardFetchPlan.newInstance(null);
+    private static final FetchPlan PROXY_CLONE_FETCH_PLAN = StandardFetchPlan.newInstance(null);
     
     /**
      * Isolate {@link Record} values
@@ -529,11 +529,28 @@ public class DataObject_1
      * @return the cloned value in case of a {@link Record}, the value itself in all other cases
      * @throws ServiceException 
      */
+    @SuppressWarnings("unchecked")
     private Object isolate(Object value) throws ServiceException {
         if(value instanceof Record) {
             try {
                 return ((Record)value).clone();
             } catch (CloneNotSupportedException exception) {
+                throw new ServiceException(exception);
+            }
+        } else if (value instanceof List<?>){
+            try {
+                final IndexedRecord clone = Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.code());
+                clone.addAll((List<?>)value);
+                return clone;
+            } catch (ResourceException exception) {
+                throw new ServiceException(exception);
+            }
+        } else if (value instanceof Set<?>){
+            try {
+                final IndexedRecord clone = Records.getRecordFactory().createIndexedRecord(Multiplicity.SET.code());
+                clone.addAll((Set<?>)value);
+                return clone;
+            } catch (ResourceException exception) {
                 throw new ServiceException(exception);
             }
         } else {
@@ -2730,7 +2747,7 @@ public class DataObject_1
             if (isProxy() && !isVirtual()) {
                 this.dataObjectManager.currentUnitOfWork().synchronize();
                 return unconditionalLoad(
-                    fetchPlan,
+                    fetchPlan == null ? PROXY_CLONE_FETCH_PLAN : fetchPlan,
                     features,
                     false, // refresh
                     throwNotFoundException
@@ -5794,7 +5811,7 @@ public class DataObject_1
         //
         // clone fetch plan
         //
-        CLONE_FETCH_PLAN.setGroup(FetchPlan.ALL);
+        PROXY_CLONE_FETCH_PLAN.setGroup(FetchPlan.ALL);
     }
 
     
