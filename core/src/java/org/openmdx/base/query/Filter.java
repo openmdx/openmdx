@@ -149,7 +149,7 @@ public class Filter extends QueryFilterRecord {
      * @return
      */
     private static String getFirstValue(
-        Condition condition
+        ConditionRecord condition
     ){
         Object[] values = condition.getValue();
         return values == null || values.length == 0 || !(values[0] instanceof String) ? null : (String)values[0];
@@ -165,7 +165,7 @@ public class Filter extends QueryFilterRecord {
      */
     private static <E> List<E> getValues(
         Class<E> valueClass,
-        Condition condition
+        ConditionRecord condition
     ){
         List<E> target = new ArrayList<E>();
         Object[] source = condition.getValue();
@@ -191,32 +191,34 @@ public class Filter extends QueryFilterRecord {
     /**
      * Required to decode legacy XML data
      * 
-     * @deprecated use {@link Filter#getCondition()}.set(int,Condition)
      */
-	@Deprecated
     public void setCondition(
         int index,
-        Condition condition
+        ConditionRecord condition
     ) {
-    	getCondition().set(
+    	super.getCondition().set(
             index,
             condition
         );
     }
 
+    public ConditionRecord getCondition(
+        int index
+    ) {
+        return super.getCondition().get(index);
+    }
+    
     /**
      * Required to decode legacy XML data
      * 
-     * @deprecated use {@link Filter#setCondition(List)}
      */
-	@Deprecated
     public void setCondition(
-        Condition[] conditions
+        ConditionRecord[] conditions
     ) {
     	final List<ConditionRecord> target = getCondition();
     	target.clear();
         if(conditions != null) {
-            for(Condition candidateCondition : conditions) {
+            for(ConditionRecord candidateCondition : conditions) {
                 if(candidateCondition.getType() == null) {
                     String piggyBackFeature = candidateCondition.getFeature();
                     if(
@@ -230,7 +232,7 @@ public class Filter extends QueryFilterRecord {
                             piggyBackFeature.length() - SystemAttributes.OBJECT_CLASS.length()
                         );
                         QueryExtension extension = new QueryExtension();
-                        for(Condition condition : conditions) {
+                        for(ConditionRecord condition : conditions) {
                             String feature = condition.getFeature();
                             if(feature.startsWith(piggyBackNamespace)) {
                                 piggyBackFeature = feature.substring(piggyBackNamespace.length());
@@ -295,23 +297,27 @@ public class Filter extends QueryFilterRecord {
     @Deprecated
     public FeatureOrderRecord[] getOrderSpecifierAsArray(
     ) {
-    	final List<FeatureOrderRecord> orderSpecifier = getOrderSpecifier();
+    	final List<FeatureOrderRecord> orderSpecifier = super.getOrderSpecifier();
     	return orderSpecifier.toArray(
 			new FeatureOrderRecord[orderSpecifier.size()]
         );
     }
 
+    public FeatureOrderRecord getOrderSpecifier(
+        int index
+    ) {
+        return getOrderSpecifier().get(index);
+    }
+    
     /**
      * Required to decode array based XML data
      * 
-     * @deprecated use {@link Filter#getOrderSpecifier()}.set(int,order specifiers)
      */
-	@Deprecated
     public void setOrderSpecifier(
         int index,
-        OrderSpecifier orderSpecifier
+        FeatureOrderRecord orderSpecifier
     ) {
-        getOrderSpecifier().set(
+        super.getOrderSpecifier().set(
             index,
             orderSpecifier
         );
@@ -320,11 +326,9 @@ public class Filter extends QueryFilterRecord {
     /**
      * Required to decode array based XML data
      * 
-     * @deprecated use {@link Filter#setOrderSpecifier(List)}
      */
-    @Deprecated
     public void setOrderSpecifier(
-        OrderSpecifier[] orderSpecifiers
+        FeatureOrderRecord[] orderSpecifiers
     ) {
     	replaceValues(getOrderSpecifier(), orderSpecifiers);
     }
@@ -340,6 +344,12 @@ public class Filter extends QueryFilterRecord {
     	replaceValues(getExtension(), extensions);
     }
 
+    public QueryExtensionRecord getExtension(
+        int index
+    ) {
+        return super.getExtension().get(index);
+    }
+    
     /**
      * Set extension at index.
      * 
@@ -350,7 +360,7 @@ public class Filter extends QueryFilterRecord {
         int index, 
         QueryExtensionRecord extension
     ) {
-        getExtension().set(
+        super.getExtension().set(
             index, 
             extension
         );

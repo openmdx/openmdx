@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2020, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -64,17 +64,19 @@ import org.openmdx.base.rest.cci.FeatureOrderRecord;
 import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.kernel.log.SysLog;
 
-public class Filter 
-extends org.openmdx.base.query.Filter
-implements Serializable {
+public class Filter extends org.openmdx.base.query.Filter implements Serializable {
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor.
+     * 
+     */
     public Filter(
     ) {
     }
 
     /**
-     * Constructor 
+     * Constructor.
+     *  
      */
     public Filter(
         String name,
@@ -100,7 +102,14 @@ implements Serializable {
     }
 
     
-    //-------------------------------------------------------------------------
+    /**
+     * Remove duplicate order specifiers.
+     * 
+     * @param name
+     * @param orderSpecifiers
+     * @param context
+     * @return
+     */
     private static List<FeatureOrderRecord> removeDuplicateOrderSpecifiers(
         String name,
         List<? extends FeatureOrderRecord> orderSpecifiers,
@@ -129,26 +138,22 @@ implements Serializable {
         return specifiers;
     }
 
-    //-------------------------------------------------------------------------
     public String getName(
     ) {
         return this.name;
     }
 
-    //-------------------------------------------------------------------------
     public void setName(
         String newValue
     ) {
         this.name = newValue;
     }
 
-    //-------------------------------------------------------------------------
     public String[] getLabel(
     ) {
         return this.labels;
     }
 
-    //-------------------------------------------------------------------------
     public String getLabel(
         short index
     ) {
@@ -159,14 +164,12 @@ implements Serializable {
                 : this.name;
     }
 
-    //-------------------------------------------------------------------------
     public void setLabel(
         String[] newValue
     ) {
         this.labels = newValue;
     }
 
-    //-------------------------------------------------------------------------
     public void setLabel(
         int index,
         String value
@@ -182,26 +185,22 @@ implements Serializable {
         this.labels[index] = value;
     }
 
-    //-------------------------------------------------------------------------
     public String getIconKey(
     ) {
         return this.iconKey;
     }
 
-    //-------------------------------------------------------------------------
     public void setIconKey(
         String iconKey
     ) {
         this.iconKey = iconKey;
     }
 
-    //-------------------------------------------------------------------------
     public String getGroupName(
     ) {
         return this.groupName;
     }
 
-    //-------------------------------------------------------------------------
     public Integer getOrder(
         int index
     ) {
@@ -210,20 +209,17 @@ implements Serializable {
         : this.order[index];
     }
 
-    //-------------------------------------------------------------------------
     public Integer[] getOrder(
     ) {
         return this.order;
     }
 
-    //-------------------------------------------------------------------------
     public void setOrder(
         Integer[] order
     ) {
         this.order = order;
     }
 
-    //-------------------------------------------------------------------------
     public void setOrder(
         int index,
         Integer value
@@ -239,19 +235,17 @@ implements Serializable {
         this.order[index] = value;
     }
 
-    //-------------------------------------------------------------------------
     public void setGroupName(
         String groupName
     ) {
         this.groupName = groupName;
     }
 
-    //-------------------------------------------------------------------------
     public String toString(
     ) {
         return Records.getRecordFactory().asMappedRecord(
-            this.getClass().getName(), 
-            this.groupName + '-' + Arrays.asList(this.labels),
+            this.getClass().getName(),
+            this.groupName,
             TO_STRING_FIELDS,
             new Object[]{
                 this.name,
@@ -265,9 +259,9 @@ implements Serializable {
         ).toString();
     }
 
-    //-------------------------------------------------------------------------
     /**
-     * filter has a parameter (filter value (?))
+     * filter has a parameter (filter value (?)).
+     * 
      */
     public boolean hasParameter(
     ) {
@@ -281,6 +275,8 @@ implements Serializable {
         return false;
     }
 
+    //-------------------------------------------------------------------------
+    // Members
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3257572814784770101L;
 
@@ -301,5 +297,3 @@ implements Serializable {
     };
     
 }
-
-//--- End of File -----------------------------------------------------------
