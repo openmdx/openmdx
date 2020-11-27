@@ -64,14 +64,16 @@ eclipse {
 }
 
 group = "org.openmdx"
-version = "2.17.7"
+version = "2.17-20200911"
 
 publishing {
     repositories {
         maven {
         	// Publish to local
+        	/**/
             val releasesRepoUrl = uri("$buildDir/repos/releases")
             val snapshotsRepoUrl = uri("$buildDir/repos/snapshots")
+            /**/
             // Publish to OSSRH
             /*
             credentials {
