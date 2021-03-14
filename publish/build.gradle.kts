@@ -107,7 +107,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -141,7 +141,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -175,7 +175,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -209,7 +209,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -243,7 +243,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -277,7 +277,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -311,7 +311,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -345,7 +345,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -379,7 +379,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -413,7 +413,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -447,7 +447,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -481,7 +481,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -515,7 +515,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -549,7 +549,7 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -583,7 +583,41 @@ publishing {
                     developer {
                         id.set("wfro")
                         name.set("Werner Froidevaux")
-                        email.set("wfro@users.sourceforge.net")
+                        email.set("wfro64@users.noreply.github.com")
+                    }
+                    developer {
+                        id.set("dirty-harry")
+                        name.set("Harry")
+                        email.set("dirty-harry@users.sourceforge.net")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:https://github.com/openmdx/openmdx.git")
+                    developerConnection.set("scm:git:ssh://github.com/openmdx/openmdx.git")
+                    url.set("https://github.com/openmdx/openmdx/tree/master")
+                }
+            }
+        }
+        create<MavenPublication>("openmdxCatalina") {
+            artifactId = "catalina-openmdx"
+            artifact(project.artifacts.add("archives", File("../jre-" + JavaVersion.current() + "/tomcat/lib/catalina-openmdx.jar")) { type = "war" })
+            artifact(project.artifacts.add("archives", File("../jre-" + JavaVersion.current() + "/tomcat/lib/catalina-openmdx-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("src/main/maven/catalina-openmdx-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
+            pom {
+                name.set("catalina-openmdx")
+                description.set("openMDX/Catalina Library")
+                url.set("http://www.openmdx.org")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("wfro")
+                        name.set("Werner Froidevaux")
+                        email.set("wfro64@users.noreply.github.com")
                     }
                     developer {
                         id.set("dirty-harry")
@@ -618,5 +652,6 @@ signing {
     sign(publishing.publications["openmdxPortal"])
     sign(publishing.publications["openmdxPortalModels"])
     sign(publishing.publications["openmdxInspector"])
+    sign(publishing.publications["openmdxCatalina"])
     */
 }

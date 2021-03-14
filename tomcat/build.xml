@@ -111,7 +111,18 @@
 			<openmdx:archivefileset dir="${build.dir}/bin">
 				<patternset refid="catalina-openmdx.jar.content"/>
 			</openmdx:archivefileset>
-		</openmdx:archive>		
+		</openmdx:archive>
+        <openmdx:archive
+			destfile="${deliver.dir}/lib/catalina-openmdx-sources.jar"
+			format="jar"
+		>
+			<openmdx:archivefileset dir="${basedir}/src/java">
+				<patternset refid="catalina-openmdx.jar.content"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
+				<patternset refid="catalina-openmdx.jar.content"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>        
 	</target>
 	<!-- ******************************************************************* -->
 	<!-- * distribution -->
