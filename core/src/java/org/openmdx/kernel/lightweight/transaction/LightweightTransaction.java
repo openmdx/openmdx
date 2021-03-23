@@ -398,7 +398,7 @@ final class LightweightTransaction implements Transaction {
         
         if (status == Status.STATUS_MARKED_ROLLBACK) {
             rollback();
-            return;
+            throw new RollbackException();
         }
 
         boolean fail = false;
