@@ -1,6 +1,8 @@
-/distribution/
-/source-archive/
-/*/build/
-/jre-*/
-/.metadata/
-/opt/xstream/
+distribution/
+source-archive/
+build/
+jre-*/
+.metadata/
+opt/xstream/
+build
+.gradle/

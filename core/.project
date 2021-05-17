@@ -1,52 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>openMDX 2 ~ Core (jre-1.8)</name>
+	<name>openMDX 2 ~ Core</name>
 	<comment></comment>
-	<projects>
-	</projects>
+	<projects/>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
 	<buildSpec>
 		<buildCommand>
 			<name>org.eclipse.jdt.core.javabuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
-		<buildCommand>
-			<name>com.atlassw.tools.eclipse.checkstyle.CheckstyleBuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
-		<buildCommand>
-			<name>edu.umd.cs.findbugs.plugin.eclipse.findbugsBuilder</name>
-			<arguments>
-			</arguments>
+			<arguments/>
 		</buildCommand>
 	</buildSpec>
-	<natures>
-		<nature>org.eclipse.jdt.core.javanature</nature>
-		<nature>com.atlassw.tools.eclipse.checkstyle.CheckstyleNature</nature>
-		<nature>edu.umd.cs.findbugs.plugin.eclipse.findbugsNature</nature>
-	</natures>
-	<linkedResources>
-		<link>
-			<name>build</name>
-			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/core/build</locationURI>
-		</link>
-		<link>
-			<name>openmdx.version.properties</name>
-			<type>1</type>
-			<locationURI>OPENMDX_HOME/openmdx.version.properties</locationURI>
-		</link>
-		<link>
-			<name>src</name>
-			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/core/src</locationURI>
-		</link>
-	</linkedResources>
-	<variableList>
-		<variable>
-			<name>OPENMDX_HOME</name>
-			<value>file:/var/opt/Repository/openMDX-CSS</value>
-		</variable>
-	</variableList>
+	<linkedResources/>
+	<filteredResources/>
 </projectDescription>

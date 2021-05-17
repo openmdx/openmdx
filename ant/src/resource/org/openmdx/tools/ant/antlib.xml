@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<antlib>
-    <taskdef resource="org/openmdx/tools/ant/taskdef.properties"/>
-    <typedef name="archivefilterchain" classname="org.openmdx.tools.ant.types.ArchiveFilterChain"/>    
-    <typedef name="archivemanifest" classname="org.openmdx.tools.ant.types.ManifestType"/>    
-    <typedef name="unarchivepatternset" classname="org.openmdx.tools.ant.types.UnarchivePatternSet"/>    
-</antlib>

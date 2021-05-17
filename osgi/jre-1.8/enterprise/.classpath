@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry exported="true" kind="lib" path="lib/activation.jar" sourcepath="src/activation.java.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/javaee-api.jar" sourcepath="src/javaee-api.java.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/javax.mail.jar" sourcepath="src/javax.mail.java.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/javax.servlet-api.jar" sourcepath="src/javax.servlet-api.java.zip"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 8"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>
