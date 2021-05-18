@@ -52,5 +52,5 @@ plugins {
 
 allprojects {
     group = "org.openmdx"
-    version = "2.17-20210517"
+    version = "2.17.8"
 }
