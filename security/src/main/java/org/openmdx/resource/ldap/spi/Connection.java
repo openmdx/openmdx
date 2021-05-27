@@ -1057,5 +1057,9 @@ class Connection extends AbstractConnection implements LdapConnection {
             throw new LdapRuntimeException(e);
         }
     }
+
+	public Throwable exceptionCaught() {
+		return null;
+	}
     
 }

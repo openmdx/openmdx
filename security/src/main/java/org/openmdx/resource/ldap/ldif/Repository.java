@@ -781,6 +781,9 @@ class Repository implements LdapConnection {
     ) {
         throw new UnsupportedOperationException();
     }
-	
+
+	public Throwable exceptionCaught() {
+		return null;
+	}
 
 }
