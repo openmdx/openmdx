@@ -65,9 +65,6 @@ eclipse {
     }
 }
 
-group = "org.openmdx"
-version = "2.17.8"
-
 publishing {
     repositories {
         maven {
