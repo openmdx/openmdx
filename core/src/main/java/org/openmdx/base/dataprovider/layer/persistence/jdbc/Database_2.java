@@ -211,6 +211,10 @@ public class Database_2
         super();
     }
 
+    public enum QueryContext {
+    	PRE_SELECT
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -4838,7 +4842,9 @@ public class Database_2
      * @param conn
      * @param equalsClauseLargeStringSet
      * @param externalizedValues
+     * @param clauseValues
      * @param context
+     * @return
      * @throws ServiceException
      */
     protected String isInToSqlClauseLargeStringSet0(
@@ -4859,7 +4865,9 @@ public class Database_2
      * @param conn
      * @param equalsClauseLargeStringSet
      * @param externalizedValues
+     * @param clauseValues
      * @param context
+     * @return
      * @throws ServiceException
      */
     protected String isInToSqlClauseLargeStringSet1(

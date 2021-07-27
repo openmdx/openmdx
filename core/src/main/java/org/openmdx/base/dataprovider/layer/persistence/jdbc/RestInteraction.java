@@ -76,6 +76,7 @@ import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.rest.spi.LockAssertions;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.Database_2.QueryContext;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.dbobject.DbObject;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.dbobject.DbObjectConfiguration;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes;
@@ -641,17 +642,23 @@ public class RestInteraction extends AbstractRestInteraction {
                     break;
             }
             final boolean hasMore;
-            try(
-            // Prepare and ...
+            // inject PRE_SELECT
+            String statement2 = statement;
+            if(context.containsKey(QueryContext.PRE_SELECT.name())) {
+            	statement2 = context.get(QueryContext.PRE_SELECT.name()) + statement2;
+            }
+            try (
+            	// Prepare and ...
                 final PreparedStatement ps = database.prepareStatement(
                     conn,
-                    currentStatement = statement.toString())
-            ){
+                    currentStatement = statement2
+                )
+            ) {
                 try {
                     //
                     // ... fill in statement parameters ...
                     //
-                    for (int i = 0, iLimit = statementParameters.size(); i < iLimit; i++) {
+                    for(int i = 0, iLimit = statementParameters.size(); i < iLimit; i++) {
                         database.setPreparedStatementValue(
                             conn,
                             ps,
@@ -669,17 +676,17 @@ public class RestInteraction extends AbstractRestInteraction {
                 }
                 // ... and finally execute
                 final int fetchSize = target.getFetchSize();
-                try(
+                try (
                     ResultSet rs = database.executeQuery(
                         ps,
-                        statement.toString(),
+                        currentStatement,
                         statementParameters,
                         // +1 is required in order to handle hasMore properly
                         fetchSize == FetchPlan.FETCH_SIZE_GREEDY || fetchSize == Integer.MAX_VALUE
                             ? 0 
                             : Math.max(0, target.getStartPosition() + fetchSize + 1)
                     )
-                ){
+                ) {
                     // get selected objects
                     hasMore = database.getObjects(
                         conn,
@@ -708,17 +715,22 @@ public class RestInteraction extends AbstractRestInteraction {
                 } else if (countResultSet && (dbObject.getIndexColumn() == null)) {
                     // Issue a SELECT COUNT(*) if the result set is not indexed and counting is requested
                     String countStatement = statement;
-                    if (countStatement.startsWith("SELECT")) {
+                    if(countStatement.startsWith("SELECT")) {
                         countStatement = "SELECT COUNT(*) " + countStatement.substring(countStatement.indexOf("FROM"));
-                        if (countStatement.indexOf("ORDER BY") > 0) {
+                        if(countStatement.indexOf("ORDER BY") > 0) {
                             countStatement = countStatement.substring(0, countStatement.indexOf("ORDER BY"));
+                        }
+                        // inject PRE_SELECT
+                        String countStatement2 = countStatement;
+                        if(context.containsKey(QueryContext.PRE_SELECT.name())) {
+                        	countStatement2 = context.get(QueryContext.PRE_SELECT.name()) + countStatement2;
                         }
                         try (
                             PreparedStatement ps = database.prepareStatement(
                                 conn,
-                                currentStatement = countStatement.toString()
+                                currentStatement = countStatement2
                             )
-                        ){
+                        ) {
                             for (int i = 0, iLimit = statementParameters.size(); i < iLimit; i++) {
                                 database.setPreparedStatementValue(
                                     conn,
@@ -729,11 +741,11 @@ public class RestInteraction extends AbstractRestInteraction {
                             try (
                                 ResultSet rs = database.executeQuery(
                                     ps,
-                                    countStatement.toString(),
+                                    currentStatement,
                                     statementParameters,
                                     0 // no limit for maxRows
                                 )
-                            ){    
+                            ) {
                                 if (rs.next()) {
                                     target.close(rs.getInt(1));
                                 } else {
@@ -761,7 +773,8 @@ public class RestInteraction extends AbstractRestInteraction {
                     new BasicException.Parameter("statement", currentStatement),
                     new BasicException.Parameter("parameters", statementParameters),
                     new BasicException.Parameter("sqlErrorCode", exception.getErrorCode()),
-                    new BasicException.Parameter("sqlState", exception.getSQLState())));
+                    new BasicException.Parameter("sqlState", exception.getSQLState()))
+                );
         } catch (Exception exception) {
             throw ResourceExceptions.toResourceException(exception);
         }
