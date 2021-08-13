@@ -250,6 +250,7 @@ public class RestInteraction extends AbstractRestInteraction {
     ) throws ResourceException {
         final Model_1_0 model = Model_1Factory.getModel();
         String currentStatement = null;
+        List<Object> currentStatementParameters = null;
         String statement = null;
         List<Object> statementParameters = null;
         boolean countResultSet = false;
@@ -642,10 +643,15 @@ public class RestInteraction extends AbstractRestInteraction {
                     break;
             }
             final boolean hasMore;
-            // inject PRE_SELECT
+            // INJECT_STATEMENT
             String statement2 = statement;
-            if(context.containsKey(QueryContext.PRE_SELECT.name())) {
-            	statement2 = context.get(QueryContext.PRE_SELECT.name()) + statement2;
+            if(context.containsKey(QueryContext.INJECT_STATEMENT.name())) {
+            	statement2 = context.get(QueryContext.INJECT_STATEMENT.name()) + statement2;
+            }
+            // INJECT_STATEMENT_PARAMS
+            List<Object> statementParameters2 = new ArrayList<Object>(statementParameters);
+            if(context.containsKey(QueryContext.INJECT_STATEMENT_PARAMS.name())) {
+            	statementParameters2.addAll(0, (List<?>)context.get(QueryContext.INJECT_STATEMENT_PARAMS.name()));
             }
             try (
             	// Prepare and ...
@@ -655,15 +661,14 @@ public class RestInteraction extends AbstractRestInteraction {
                 )
             ) {
                 try {
-                    //
                     // ... fill in statement parameters ...
-                    //
-                    for(int i = 0, iLimit = statementParameters.size(); i < iLimit; i++) {
+                    currentStatementParameters = statementParameters2;
+                    for(int i = 0, iLimit = currentStatementParameters.size(); i < iLimit; i++) {
                         database.setPreparedStatementValue(
                             conn,
                             ps,
                             i + 1,
-                            statementParameters.get(i)
+                            currentStatementParameters.get(i)
                         );
                     }
                 } catch (ServiceException exception) {
@@ -680,7 +685,7 @@ public class RestInteraction extends AbstractRestInteraction {
                     ResultSet rs = database.executeQuery(
                         ps,
                         currentStatement,
-                        statementParameters,
+                        currentStatementParameters,
                         // +1 is required in order to handle hasMore properly
                         fetchSize == FetchPlan.FETCH_SIZE_GREEDY || fetchSize == Integer.MAX_VALUE
                             ? 0 
@@ -698,7 +703,7 @@ public class RestInteraction extends AbstractRestInteraction {
                         false, // objectClassAsAttribute
                         target.getStartPosition(),
                         target.getObjectBatchSize(),
-                        null, 
+                        null,
                         target
                     );
                     SysLog.log(
@@ -709,7 +714,7 @@ public class RestInteraction extends AbstractRestInteraction {
                 }
             }
             // Calculate context.TOTAL only when iterating
-            if (request.getResourceIdentifier().isContainerPath()) {
+            if(request.getResourceIdentifier().isContainerPath()) {
                 if (!hasMore) {
                     target.close(hasMore);
                 } else if (countResultSet && (dbObject.getIndexColumn() == null)) {
@@ -720,10 +725,15 @@ public class RestInteraction extends AbstractRestInteraction {
                         if(countStatement.indexOf("ORDER BY") > 0) {
                             countStatement = countStatement.substring(0, countStatement.indexOf("ORDER BY"));
                         }
-                        // inject PRE_SELECT
+                        // INJECT_STATEMENT
                         String countStatement2 = countStatement;
-                        if(context.containsKey(QueryContext.PRE_SELECT.name())) {
-                        	countStatement2 = context.get(QueryContext.PRE_SELECT.name()) + countStatement2;
+                        if(context.containsKey(QueryContext.INJECT_STATEMENT.name())) {
+                        	countStatement2 = context.get(QueryContext.INJECT_STATEMENT.name()) + countStatement2;
+                        }
+                        // INJECT_STATEMENT_PARAMS
+                        List<Object> countStatementParameters2 = new ArrayList<Object>(statementParameters);
+                        if(context.containsKey(QueryContext.INJECT_STATEMENT_PARAMS.name())) {
+                        	countStatementParameters2.addAll(0, (List<?>)context.get(QueryContext.INJECT_STATEMENT_PARAMS.name()));
                         }
                         try (
                             PreparedStatement ps = database.prepareStatement(
@@ -731,22 +741,23 @@ public class RestInteraction extends AbstractRestInteraction {
                                 currentStatement = countStatement2
                             )
                         ) {
-                            for (int i = 0, iLimit = statementParameters.size(); i < iLimit; i++) {
+                            currentStatementParameters = countStatementParameters2;
+                            for(int i = 0, iLimit = currentStatementParameters.size(); i < iLimit; i++) {
                                 database.setPreparedStatementValue(
                                     conn,
                                     ps,
                                     i + 1,
-                                    statementParameters.get(i));
+                                    currentStatementParameters.get(i));
                             }
                             try (
                                 ResultSet rs = database.executeQuery(
                                     ps,
                                     currentStatement,
-                                    statementParameters,
+                                    currentStatementParameters,
                                     0 // no limit for maxRows
                                 )
                             ) {
-                                if (rs.next()) {
+                                if(rs.next()) {
                                     target.close(rs.getInt(1));
                                 } else {
                                     target.close(hasMore);
@@ -771,7 +782,7 @@ public class RestInteraction extends AbstractRestInteraction {
                     "Error when executing SQL statement",
                     new BasicException.Parameter(BasicException.Parameter.XRI, request.getResourceIdentifier()),
                     new BasicException.Parameter("statement", currentStatement),
-                    new BasicException.Parameter("parameters", statementParameters),
+                    new BasicException.Parameter("parameters", currentStatementParameters),
                     new BasicException.Parameter("sqlErrorCode", exception.getErrorCode()),
                     new BasicException.Parameter("sqlState", exception.getSQLState()))
                 );

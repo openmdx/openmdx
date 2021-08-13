@@ -212,7 +212,8 @@ public class Database_2
     }
 
     public enum QueryContext {
-    	PRE_SELECT
+    	INJECT_STATEMENT,
+    	INJECT_STATEMENT_PARAMS
     }
 
     /*
