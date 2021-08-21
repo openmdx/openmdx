@@ -481,7 +481,15 @@ public class RestInteraction extends AbstractRestInteraction {
                     : dbObject.getConfiguration().getDbObjectsForQueryJoinColumn().replace("${v2}.", "vv.").replace("${v}.", "v.")
                 );
             ModelElement_1_0 referencedType = model.getTypes(dbObject.getReference())[2];
+            // fetchSize
+            final int fetchSize = target.getFetchSize();
+            final int maxRows = fetchSize == FetchPlan.FETCH_SIZE_GREEDY || fetchSize == Integer.MAX_VALUE
+                ? 0
+                : Math.max(0, target.getStartPosition() + fetchSize + 1);
+            // context is populated by custom-specific sub-classes of the database plug-in
+            // QueryContext defines pre-defined context properties
             Map<String,Object> context = new HashMap<String,Object>();
+            context.put(QueryContext.MAX_ROWS.name(), maxRows);
             this.database.filterToSqlClauses(
                 conn,
                 dbObject,
@@ -680,16 +688,12 @@ public class RestInteraction extends AbstractRestInteraction {
                         new BasicException.Parameter("statement", currentStatement));
                 }
                 // ... and finally execute
-                final int fetchSize = target.getFetchSize();
                 try (
                     ResultSet rs = database.executeQuery(
                         ps,
                         currentStatement,
                         currentStatementParameters,
-                        // +1 is required in order to handle hasMore properly
-                        fetchSize == FetchPlan.FETCH_SIZE_GREEDY || fetchSize == Integer.MAX_VALUE
-                            ? 0 
-                            : Math.max(0, target.getStartPosition() + fetchSize + 1)
+                        maxRows
                     )
                 ) {
                     // get selected objects

@@ -213,7 +213,8 @@ public class Database_2
 
     public enum QueryContext {
     	INJECT_STATEMENT,
-    	INJECT_STATEMENT_PARAMS
+    	INJECT_STATEMENT_PARAMS,
+    	MAX_ROWS
     }
 
     /*
