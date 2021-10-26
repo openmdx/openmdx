@@ -177,7 +177,8 @@ public interface Database_1_0 {
 	) throws ServiceException;
 
 	public String getEscapeClause(
-		Connection connection
+		Connection connection,
+		String value
 	) throws ServiceException;
 
 	public String getDatabaseSpecificColumnName(

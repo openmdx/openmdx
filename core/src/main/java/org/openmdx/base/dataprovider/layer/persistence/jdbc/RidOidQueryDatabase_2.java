@@ -254,7 +254,6 @@ public class RidOidQueryDatabase_2 extends Database_2 {
                     connection, 
                     path.getDescendant(pattern.getSuffix(path.size()))
                 );
-                String escapeClause = getEscapeClause(connection) ;
                 Path uri = new Path(externalized);
                 String oidValue = uri.getLastSegment().toClassicRepresentation();
                 String ridValue = uri.getParent().toClassicRepresentation();
@@ -268,8 +267,12 @@ public class RidOidQueryDatabase_2 extends Database_2 {
                         clause.append(" = ?");              
                         clauseValues.add(ridValue);
                     } else if (rPos > 0) {
-                        clause.append(" LIKE ? ").append(escapeClause);              
-                        clauseValues.add(ridValue.substring(0, rPos + 1)); // TODO is it really o.k. to ignore strings after a '%'
+                    	// TODO is it really o.k. to ignore strings after a '%'
+                    	String likeValue = ridValue.substring(0, rPos + 1);
+                        clause
+                        	.append(" LIKE ? ")
+                        	.append(this.getEscapeClause(connection, likeValue));
+                        clauseValues.add(likeValue); 
                     }
                 } else {
                     Matcher matcher = referenceIdPattern.matcher(ridValue);
@@ -288,8 +291,12 @@ public class RidOidQueryDatabase_2 extends Database_2 {
                                 clause.append(" = ?");
                                 clauseValues.add(groupValue);
                             } else if (rPos > 0) {
-                                clause.append(" LIKE ? ").append(escapeClause);              
-                                clauseValues.add(groupValue.substring(0, rPos + 1)); // TODO is it really o.k. to ignore strings after a '%'
+                            	// TODO is it really o.k. to ignore strings after a '%'
+                            	String likeValue = groupValue.substring(0, rPos + 1); 
+                                clause
+                                	.append(" LIKE ? ")
+                                	.append(this.getEscapeClause(connection, likeValue));              
+                                clauseValues.add(likeValue);
                             }
                         }
                     } else {
@@ -311,8 +318,11 @@ public class RidOidQueryDatabase_2 extends Database_2 {
                         clause.append(oidColumn).append(" = ?");              
                         clauseValues.add(oidValue);
                     } else {
-                        clause.append(oidColumn).append(" LIKE ? ").append(escapeClause);              
-                        clauseValues.add(oidValue.substring(0, oPos + 1));
+                    	String likeValue = oidValue.substring(0, oPos + 1); 
+                        clause
+                        	.append(oidColumn)
+                        	.append(" LIKE ? ").append(this.getEscapeClause(connection, likeValue));              
+                        clauseValues.add(likeValue);
                     }
                 }
                 oparator = " OR ";

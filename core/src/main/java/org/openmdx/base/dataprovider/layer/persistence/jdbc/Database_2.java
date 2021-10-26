@@ -2889,7 +2889,7 @@ public class Database_2
             String srid = (String) rid;
             if (srid.endsWith("%") && !srid.endsWith("\\%")) {
                 statementParameters.add(srid);
-                return "LIKE ? " + getEscapeClause(conn);
+                return "LIKE ? " + getEscapeClause(conn, srid);
             } else {
                 statementParameters.add(unescape(srid));
                 return "IN (?)";
@@ -5085,13 +5085,6 @@ public class Database_2
                 connection,
                 path.getDescendant(pattern.getSuffix(path.size()))
             );
-            clause
-                .append(operator)
-                .append(like ? "(" : "(NOT (")
-                .append(columnName)
-                .append(" LIKE ? ")
-                .append(getEscapeClause(connection))
-                .append(like ? ")" : "))");
             int pos = externalized.indexOf("%");
             if (pos >= 0) {
                 externalized = externalized.substring(0, pos + 1);
@@ -5128,6 +5121,13 @@ public class Database_2
                     }
                 }
             }
+            clause
+	            .append(operator)
+	            .append(like ? "(" : "(NOT (")
+	            .append(columnName)
+	            .append(" LIKE ? ")
+	            .append(getEscapeClause(connection, externalized))
+	            .append(like ? ")" : "))");
             clauseValues.add(externalized);
             operator = like ? " OR " : " AND ";
         }
@@ -5538,18 +5538,11 @@ public class Database_2
                         }
                         // NOT LIKE clause for each path pattern
                         int ii = 0;
-                        for (Iterator<?> i = matchingTypes.iterator(); i
-                            .hasNext(); ii++) {
+                        for (Iterator<?> i = matchingTypes.iterator(); i.hasNext(); ii++) {
                             Path type = (Path) i.next();
                             if (ii > 0) {
                                 clause.append(" AND ");
                             }
-                            clause
-                                .append("(NOT (")
-                                .append(columnName)
-                                .append(" LIKE ? ")
-                                .append(getEscapeClause(conn))
-                                .append("))");
                             String externalized = this.externalizePathValue(
                                 conn,
                                 vp.getDescendant(type.getSuffix(vp.size()))
@@ -5610,6 +5603,12 @@ public class Database_2
                                     }
                                 }
                             }
+                            clause
+	                            .append("(NOT (")
+	                            .append(columnName)
+	                            .append(" LIKE ? ")
+	                            .append(getEscapeClause(conn, externalized))
+	                            .append("))");
                             clauseValues.add(externalized);
                         }
                     } else {
@@ -5782,7 +5781,7 @@ public class Database_2
                 .append("(")
                 .append(columnName)
                 .append(" LIKE ? ")
-                .append(getEscapeClause(conn))
+                .append(getEscapeClause(conn, externalized))
                 .append(")");
             clauseValues.add(externalized);
         }
@@ -7160,12 +7159,15 @@ public class Database_2
      * @throws ServiceException
      */
     @Override
-    public String getEscapeClause(Connection connection)
-        throws ServiceException {
-        return getDriverProperty(
-            connection, "ESCAPE.CLAUSE", "" // "ESCAPE
-                                                                     // '\\'"
-        );
+    public String getEscapeClause(
+    	Connection connection,
+    	String value
+    ) throws ServiceException {
+    	if(value.indexOf("\\_") >= 0 || value.indexOf("\\%") >= 0) {
+    		return getDriverProperty(connection, "ESCAPE.CLAUSE", ""); // "ESCAPE '\\'"
+    	} else {
+        	return "";
+        }
     }
 
     /**

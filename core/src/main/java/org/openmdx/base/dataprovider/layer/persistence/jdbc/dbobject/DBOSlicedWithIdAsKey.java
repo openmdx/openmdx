@@ -130,14 +130,10 @@ extends SlicedDbObject
         if(isExtent) {
             this.getReferenceValues().clear();
             String base = accessPath.getLastSegment().toClassicRepresentation();
-            this.getReferenceValues().add(
-                base.equals("%") || base.equals(":*") ? 
-                    rid + "/%" : 
-                        rid
-            );
-            this.referenceClause = "(v." + database.getObjectOidColumnName() + " LIKE ? " + this.database.getEscapeClause(conn) + ")";
-        }
-        else {
+            String referenceValue = base.equals("%") || base.equals(":*") ? rid + "/%" : rid;
+            this.getReferenceValues().add(referenceValue);
+            this.referenceClause = "(v." + database.getObjectOidColumnName() + " LIKE ? " + this.database.getEscapeClause(conn, referenceValue) + ")";
+        } else {
             this.getReferenceValues().clear();
             if(this.getJoinCriteria() == null) {
                 String databaseProductName = getDatabaseProductName(conn);
