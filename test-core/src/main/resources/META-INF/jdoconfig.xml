@@ -111,7 +111,7 @@
     />
     <persistence-manager-factory 
     	name="test-Main-DataManagerProxyFactory"
-    	class="org.openmdx.application.rest.spi.EntityManagerProxyFactory_2"
+    	class="org.openmdx.base.rest.connector.EntityManagerProxyFactory_2"
     >
     	<property name="javax.jdo.option.ConnectionDriverName" value="org.openmdx.application.rest.http.SimplePort"/>
         <property name="javax.jdo.option.ConnectionURL" value="http://localhost:9080/app1"/>

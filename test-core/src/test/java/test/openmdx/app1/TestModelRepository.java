@@ -295,8 +295,8 @@ public class TestModelRepository {
     @Test
     public void dumpModel() throws FileNotFoundException, ServiceException, InterruptedException{
         final File build = new File("build");
-        final File platform = new File(build, "jre-" + System.getProperty("java.specification.version"));
-        final File destination = new File(platform, "tmp");
+        final File temp = new File(build, "tmp");
+        final File destination = new File(temp, "dumpModel");
         final boolean created = destination.mkdir();
         System.out.println("Directory " + destination.getAbsolutePath() + (created ? " created" : " did exist"));
         if(created) Thread.sleep(500);
