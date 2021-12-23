@@ -99,8 +99,13 @@ dependencies {
     implementation("javax:javaee-api:8.0.+")
     implementation("javax.jdo:jdo-api:3.1")
     implementation("javax.cache:cache-api:1.1.+")    
-    implementation("junit:junit:4.12")
-    implementation("org.mockito:mockito-core:2.28.+")    
+    // testImplementation
+    testCompileOnly("junit:junit:4.12")
+    testImplementation("org.mockito:mockito-core:2.28.+")    
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+    // testRuntimeOnly
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
+	testRuntimeOnly("org.postgresql:postgresql:42.3.1")
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 }
@@ -109,26 +114,38 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir("$buildDir/generated/sources/java/main")
+            srcDir("${buildDir}/generated/sources/java/main")
         }
         resources {
         	srcDir("src/main/resources")
+            srcDir("$buildDir/generated/resources/main")
         }        
     }
     test {
         java {
             srcDir("src/test/java")
-            srcDir("$buildDir/generated/sources/java/test")
+            srcDir("${buildDir}/generated/sources/java/test")
         }
         resources {
         	srcDir("src/test/resources")
         }
     }    
+
 }
 
+tasks.withType<Test> {
+    this.classpath.forEach { println(it) }
+}
 tasks.test {
     useJUnitPlatform()
     maxHeapSize = "4G"
+    systemProperty("java.protocol.handler.pkgs","org.openmdx.kernel.url.protocol")
+    systemProperty("user.timezone","Europe/Zurich")
+    systemProperty("org.openmdx.comp.env.jdbc.DataSource","jdbc:postgresql:openmdx-test?user=postgres&password=manager99&stringtype=unspecified")
+}
+
+project.tasks.named("processResources", Copy::class.java) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
 tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
@@ -144,10 +161,16 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
             from(
                 zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
             )
-            into("$buildDir/generated/sources/java/main")
+            into("${buildDir}/generated/sources/java/main")
             include(
                 "**/*.java"
             )
+        }
+        copy {
+            from(
+                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+            )
+            into("${buildDir}/generated/resources/main")
         }
     }
 }
@@ -156,6 +179,7 @@ tasks.compileJava {
     dependsOn("generate-model")
     options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
 }
+
 
 tasks {
 	assemble {

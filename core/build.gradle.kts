@@ -179,16 +179,28 @@ dependencies {
     jdoApi("javax.jdo:jdo-api:3.1")
     // cache-api
     cacheApi("javax.cache:cache-api:1.1.+")
+    // Test
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 }
 
 sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir("$buildDir/generated/sources/java/main")
+            srcDir("${buildDir}/generated/sources/java/main")
         }
         resources {
         	srcDir("src/main/resources")
+            srcDir("${buildDir}/generated/resources/main")
+        }        
+    }
+    test {
+        java {
+            srcDir("src/test/java")
+        }
+        resources {
+        	srcDir("src/test/resources")
         }        
     }
 }
@@ -196,6 +208,10 @@ sourceSets {
 tasks.test {
     useJUnitPlatform()
     maxHeapSize = "4G"
+}
+
+project.tasks.named("processResources", Copy::class.java) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
 tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
@@ -218,6 +234,15 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
             into("$buildDir/generated/sources/java/main")
             include(
                 "**/*.java"
+            )
+        }
+        copy {
+            from(
+                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+            )
+            into("$buildDir/generated/resources/main")
+            exclude(
+                "**/orm.xml"
             )
         }
     }
@@ -294,6 +319,7 @@ val openmdxBaseExcludes = listOf<String>(
 )
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-base.jar") {
+    duplicatesStrategy = DuplicatesStrategy.WARN
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
 	archiveFileName.set("openmdx-base.jar")
     includeEmptyDirs = false
@@ -308,8 +334,8 @@ tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-base.jar") {
 	from(
 		File(buildDir, "classes/java/main"),
 		File(buildDir, "resources/main"),
+		File(buildDir, "generated/resources/main"),
 		"src/main/resources",
-		zipTree(File(buildDir, "generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")),
         configurations["cacheApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) },
         configurations["jdoApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) }
 	)

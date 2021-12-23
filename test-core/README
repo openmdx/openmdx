@@ -10,7 +10,7 @@
    openmdx-test.core.datasource=jdbc:postgresql:\\/\\/localhost\\/openmdx-test?user=postgres&password=manager99&driver=org.postgresql.Driver
    openmdx-test.core.timezone=Europe/Zurich
 
-2. With pgadmin III create the database openmdx-test and run the
-   script ./test-core/src/sql/postgresql-8/dbcreate-tables.sql
+2. With pgAdmin 4 create the database openmdx-test and run the
+   script ./test-core/src/sql/postgresql-14/db-create-tables.sql
    
 3. Open a shell and go to the directory ./test-core. Run ant test.

@@ -217,7 +217,7 @@ public enum Identifier {
      * 
      * @return the words the <code>modelElementName</code> consists of
      */
-    public static final List<String> toWords(
+    static final List<String> toWords(
         String modelElementName
     ){
         List<String> words = new ArrayList<String>();
