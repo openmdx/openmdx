@@ -49,7 +49,6 @@ package org.openmdx.kernel.exception;
 
 import java.util.logging.Level;
 
-import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
 /**

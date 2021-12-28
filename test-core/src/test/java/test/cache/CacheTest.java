@@ -66,7 +66,6 @@ public class CacheTest {
      * 
      * @param arguments
      */
-    @SuppressWarnings("unchecked")
     public static void main(
         String... arguments
     ){
@@ -75,7 +74,12 @@ public class CacheTest {
             final CacheManager cacheManager = cachingProvider.getCacheManager();
             final Configuration<String, Date> configuration = new Configuration<String, Date>() {
 
-                @Override
+                /**
+				 * Implements {@code Serializable}
+				 */
+				private static final long serialVersionUID = -8761562372515462710L;
+
+				@Override
                 public Class<String> getKeyType(
                 ) {
                     return String.class;

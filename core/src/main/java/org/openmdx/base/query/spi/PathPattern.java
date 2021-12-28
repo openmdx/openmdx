@@ -48,7 +48,6 @@
 package org.openmdx.base.query.spi;
 
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.spi.AbstractPattern;
 
 /**
  * Path Pattern

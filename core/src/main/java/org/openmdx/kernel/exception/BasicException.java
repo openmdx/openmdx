@@ -117,7 +117,7 @@ public final class BasicException extends Exception {
         this.parameter = parameters;
         this.timestamp = System.currentTimeMillis();
         if(cause != null) {
-            setCause(cause);
+            initCauseInternal(cause);
         }
     }
 
@@ -146,7 +146,7 @@ public final class BasicException extends Exception {
         this.parameter = parameters;
         this.timestamp = System.currentTimeMillis();
         if(cause != null) {
-            setCause(cause);
+            initCauseInternal(cause);
         }
     }
     
@@ -175,7 +175,7 @@ public final class BasicException extends Exception {
         this.parameter = parameters;
         this.timestamp = System.currentTimeMillis();
         if(cause != null) {
-            setCause(cause);
+            initCauseInternal(cause);
         }
     }
 
@@ -540,7 +540,7 @@ public final class BasicException extends Exception {
      * 
      * @return the newly appended exception stack
      */
-    private BasicException setCause(
+    private BasicException initCauseInternal(
         Throwable throwable
     ){
         BasicException exceptionStack = toExceptionStack(throwable);
@@ -556,6 +556,8 @@ public final class BasicException extends Exception {
         return exceptionStack;
         
     }
+    
+    
     
     /**
      * Initializes the cause of this throwable to the specified value. 
@@ -573,7 +575,7 @@ public final class BasicException extends Exception {
     public synchronized BasicException initCause(
         Throwable throwable
     ){
-        setCause(throwable);
+        initCauseInternal(throwable);
         return this;
     }
 
@@ -594,7 +596,7 @@ public final class BasicException extends Exception {
         if(cause == null && this.source != null && this.timestamp == Long.MIN_VALUE) {
             Throwable source = this.source.getCause();
             if(source != null) {
-                return setCause(source);
+                return initCauseInternal(source);
             }
         }
         return cause;

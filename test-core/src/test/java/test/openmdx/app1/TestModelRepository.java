@@ -64,8 +64,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.naming.Context;
-
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -80,7 +78,6 @@ import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.junit.rules.EntityManagerFactoryRule;
 import org.openmdx.junit.rules.EntityManagerRule;
-import org.openmdx.junit.rules.SystemPropertyRule;
 import org.openmdx.kernel.log.SysLog;
 
 /**

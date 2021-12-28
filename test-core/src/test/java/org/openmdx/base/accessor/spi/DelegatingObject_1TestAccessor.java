@@ -6,7 +6,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2019, OMEX AG, Switzerland
+ * Copyright (c) 2019-2021, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -44,10 +44,9 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.accessor.spi;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.exception.ServiceException;
@@ -55,11 +54,11 @@ import org.openmdx.base.exception.ServiceException;
 /**
  * DelgatingObject_1 Test Accessor 
  */
-public class DelegatingObject_1TestAccessor {
+public class DelegatingObject_1TestAccessor{
     
     public static Interceptor_1 getDelegateAsInterceptor(DelegatingObject_1 delegatingObject) throws ServiceException {
         final DataObject_1_0 delegate = getDelegate(delegatingObject);
-        Assert.assertTrue("Delegate is expected to be an interceptor", delegate instanceof Interceptor_1);
+        Assertions.assertTrue(delegate instanceof Interceptor_1, "Delegate is expected to be an interceptor");
         return (Interceptor_1)delegate;
     }
 

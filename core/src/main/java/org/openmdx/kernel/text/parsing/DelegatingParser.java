@@ -50,7 +50,6 @@ package org.openmdx.kernel.text.parsing;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.openmdx.kernel.text.parsing.AbstractParser;
 import org.openmdx.kernel.text.spi.Parser;
 
 /**

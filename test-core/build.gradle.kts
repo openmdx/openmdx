@@ -94,18 +94,20 @@ project.getConfigurations().maybeCreate("openmdxBootstrap")
 val openmdxBootstrap by configurations
 
 dependencies {
-    // implementation
+    // main
     implementation(project(":core"))
     implementation("javax:javaee-api:8.0.+")
     implementation("javax.jdo:jdo-api:3.1")
     implementation("javax.cache:cache-api:1.1.+")    
-    // testImplementation
+    // test
+    testImplementation(project(":core"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    testImplementation("org.mockito:mockito-core:4.2.0")    
+    testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
     testCompileOnly("junit:junit:4.12")
-    testImplementation("org.mockito:mockito-core:2.28.+")    
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    // testRuntimeOnly
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
 	testRuntimeOnly("org.postgresql:postgresql:42.3.1")
+	testRuntimeOnly("javax.servlet:javax.servlet-api:3.1.0")
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 }
@@ -130,7 +132,15 @@ sourceSets {
         	srcDir("src/test/resources")
         }
     }    
+    create("openmdxDatatype") {
+    	java {
+        	srcDir("src/model/java")
+    	}
+    }
+}
 
+tasks.named<AbstractCompile>("compileOpenmdxDatatypeJava") {
+    classpath = configurations["openmdxBootstrap"]
 }
 
 tasks.withType<Test> {
@@ -149,11 +159,32 @@ project.tasks.named("processResources", Copy::class.java) {
 }
 
 tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
+	dependsOn("openmdxDatatypeClasses")
     inputs.dir("${projectDir}/src/model/emf")
     inputs.dir("${projectDir}/src/main/resources")
     outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
     outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
-    classpath = configurations["openmdxBootstrap"]
+    classpath(configurations["openmdxBootstrap"])
+    classpath(sourceSets["openmdxDatatype"].runtimeClasspath)
+	args = listOf(
+		"--pathMapSymbol=openMDX 2 ~ Core (EMF)",
+		"--pathMapPath=file:" + File(project.getRootDir(), "core/src/model/emf") + "/",
+		"--pathMapSymbol=openMDX 2 ~ Security (EMF)",
+		"--pathMapPath=file:" + File(project.getRootDir(), "security/src/model/emf") + "/",
+		"--pathMapSymbol=openMDX 2 ~ Portal (EMF)",
+		"--pathMapPath=file:" + File(project.getRootDir(), "portal/src/model/emf") + "/",
+		"--url=file:src/model/emf/models.uml",
+		"--xmi=emf",
+		"--out=" + File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + "-models.zip"),
+		"--openmdxjdo=" + File(project.getProjectDir(), "src/main/resources"),
+		"--dataproviderVersion=2",
+		"--format=xmi1",
+	    "--format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(cci2)",
+	    "--format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(jmi1)",
+	    "--format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(jpa3)",
+		"--format=mof1",            
+		"%"
+	)
     doFirst {
     }
     doLast {

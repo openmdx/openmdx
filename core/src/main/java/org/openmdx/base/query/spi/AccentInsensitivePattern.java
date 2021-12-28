@@ -49,7 +49,6 @@ package org.openmdx.base.query.spi;
 
 import java.util.EnumSet;
 
-import org.openmdx.base.query.spi.EmbeddedFlags;
 import org.w3c.cci2.RegularExpressionFlag;
 
 public class AccentInsensitivePattern extends RegularExpressionPattern {

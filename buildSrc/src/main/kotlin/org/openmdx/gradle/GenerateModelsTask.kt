@@ -53,9 +53,9 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.Input
 import java.io.File
-import org.gradle.kotlin.dsl.*
+import org.gradle.api.tasks.JavaExec
 
-open class GenerateModelsTask : ExecTask() {
+open class GenerateModelsTask : JavaExec() {
 
 	init {
 		main = "org.openmdx.application.mof.externalizer.xmi.XMIExternalizer"

@@ -49,8 +49,6 @@
 
 package org.openmdx.application.mof.externalizer.xmi.uml1;
 
-import org.openmdx.application.mof.externalizer.xmi.uml1.UML1ModelElement;
-
 public class UML1Generalization
   extends UML1ModelElement
 {

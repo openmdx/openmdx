@@ -50,8 +50,6 @@ package org.openmdx.kernel.jdo;
 
 import javax.jdo.datastore.DataStoreCache;
 
-import org.openmdx.kernel.jdo.JDODataStoreCache;
-
 
 /**
  * Empty JDO Data Store Cache

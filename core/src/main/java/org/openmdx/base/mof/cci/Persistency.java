@@ -101,7 +101,7 @@ public class Persistency {
         final String openmdxormProperties = locateConfiguration();
         SysLog.info("ORM mapping: Scanning for Persistence Modifiers", openmdxormProperties); 
         try {
-            Properties persistenceModifiers = new Properties();
+            final Properties persistenceModifiers = new Properties();
             for(URL url : Resources.getMetaInfResources(CONFIGURATION_NAME)) {
                 SysLog.log(
                     Level.INFO,
@@ -169,13 +169,13 @@ public class Persistency {
         Boolean expected
     ) throws ServiceException {
         final Boolean actual = this.persistentFeatures.get(feature);
-        if(expected != actual) {
+        if(!expected.equals(actual)) {
             throw logAsSevere(
                 new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE, 
                     "Sanity check: Unexpected openMDX ORM persistency configuration",
-                    new BasicException.Parameter("feature", actual),
+                    new BasicException.Parameter("feature", feature),
                     new BasicException.Parameter("expected", expected),
                     new BasicException.Parameter("actual", actual)
                 )

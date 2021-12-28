@@ -56,8 +56,11 @@ import java.util.Collections;
 import java.util.Date;
 
 import javax.jdo.PersistenceManager;
+import javax.naming.NamingException;
+import javax.naming.spi.NamingManager;
 import javax.xml.datatype.Duration;
 
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -69,6 +72,7 @@ import org.openmdx.base.persistence.cci.UnitOfWork;
 import org.openmdx.junit.rules.EntityManagerFactoryRule;
 import org.openmdx.junit.rules.EntityManagerRule;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
+import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.w3c.spi2.Structures;
 
 import test.openmdx.model1.jmi1.ClassContainingOperations;
@@ -378,4 +382,11 @@ public class TestOperationArguments {
     	return PersistenceHelper.currentUnitOfWork(getEntityManager());
     }
     
+    @BeforeClass
+    public static void deploy() throws NamingException{
+        if(!NamingManager.hasInitialContextFactoryBuilder()) {
+            NonManagedInitialContextFactoryBuilder.install(null);
+        }
+    }
+
 }

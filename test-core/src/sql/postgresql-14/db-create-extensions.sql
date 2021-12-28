@@ -1,0 +1,2 @@
+CREATE EXTENSION unaccent;
+CREATE EXTENSION fuzzystrmatch

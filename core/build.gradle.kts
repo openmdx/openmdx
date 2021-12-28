@@ -45,7 +45,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 import org.gradle.kotlin.dsl.*
 import org.w3c.dom.Element
 import java.util.*
@@ -170,6 +169,10 @@ dependencies {
     implementation("javax:javaee-api:8.0.+")
     implementation("javax.jdo:jdo-api:3.1")
     implementation("javax.cache:cache-api:1.1.+")
+    // Test
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    testImplementation("org.mockito:mockito-core:4.2.0")    
+    testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
     // openmdxBase
     openmdxBase("org.openmdx:openmdx-base:2.17.7")
     // openmdxBootstrap
@@ -179,9 +182,6 @@ dependencies {
     jdoApi("javax.jdo:jdo-api:3.1")
     // cache-api
     cacheApi("javax.cache:cache-api:1.1.+")
-    // Test
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 }
 
 sourceSets {
@@ -205,12 +205,18 @@ sourceSets {
     }
 }
 
+tasks.withType<Test> {
+    this.classpath.forEach { println(it) }
+}
 tasks.test {
     useJUnitPlatform()
     maxHeapSize = "4G"
 }
 
 project.tasks.named("processResources", Copy::class.java) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+project.tasks.named("processTestResources", Copy::class.java) {
     duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
@@ -243,6 +249,15 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
             into("$buildDir/generated/resources/main")
             exclude(
                 "**/orm.xml"
+            )
+        }
+        copy {
+            from(
+                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+            )
+            into("$buildDir/generated/resources/main")
+            include(
+                "**/openmdxorm.properties"
             )
         }
     }

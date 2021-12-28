@@ -109,7 +109,7 @@ public class Segments {
         transaction.begin();
         final Date expected = tryToChangeDateAndTime(segment);
         Assert.assertEquals("Time set back", expected, segment.currentDateAndTime().getUtc());
-        transaction.commit();
+        transaction.commit();	
     }
 
     static void validateChangedTimePointReflectively(Segment segment) throws RefException {

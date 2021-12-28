@@ -49,8 +49,6 @@ package org.openmdx.base.persistence.spi;
 
 import javax.jdo.Transaction;
 
-import org.openmdx.base.persistence.spi.UnitOfWork;
-
 /**
  * Unit Of Work Factory
  */

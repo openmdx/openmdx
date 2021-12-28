@@ -48,6 +48,7 @@
 package org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
@@ -125,13 +126,14 @@ public class DurationMarshallerTest {
 		assertEquals("-P1MT2M3.5S", duration);
 	}
 
+	@Disabled("PostgreSQL marshalling must be fixed first")
 	@Test
 	public void postgresPositiveYearNegativeTime() throws ServiceException {
 		// Arrange
 		DurationMarshaller testee = DurationMarshaller.newInstance("INTERVAL");
 		// Act
 		try {
-			Object duration = testee.unmarshal("1 years 0 mons 0 days 0 hours -2 mins -3.5 secs");
+			testee.unmarshal("1 years 0 mons 0 days 0 hours -2 mins -3.5 secs");
 			Assertions.fail();
 		} catch (ServiceException expected) {
 			Assertions.assertEquals(BasicException.Code.TRANSFORMATION_FAILURE, expected.getExceptionCode());

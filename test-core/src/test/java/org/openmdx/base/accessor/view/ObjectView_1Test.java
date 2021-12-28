@@ -53,13 +53,12 @@ import java.util.List;
 
 import javax.jdo.PersistenceManager;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmdx.audit2.aop1.UnitOfWork_1;
 import org.openmdx.audit2.spi.Configuration;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
@@ -76,12 +75,13 @@ import org.openmdx.state2.cci.DateStateViews;
 import org.openmdx.state2.spi.DateStateViewContext;
 
 /**
- * ObjectView_1Test
+ * ObjectView_1 Test
+ * 
+ * Note:
+ * The audit plug-in can't be tested in openMDX/Core
  */
+@ExtendWith(MockitoExtension.class)
 public class ObjectView_1Test {
-    
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule();
     
     @Mock
     private ViewManager_1_0 marshaller;
@@ -98,11 +98,16 @@ public class ObjectView_1Test {
     private ObjectView_1 newTestee() throws ServiceException {
         return new ObjectView_1(marshaller, dataObject) {
 
-            @Override
+            /**
+			 * Implements {@code Serializable}
+			 */
+			private static final long serialVersionUID = -3596351625947356936L;
+
+			@Override
             public void objSetDelegate(
                 DataObject_1_0 delegate
             ) throws ServiceException {
-                Assert.fail("Intermediate interceptor availability has changed!");
+                Assertions.fail("Intermediate interceptor availability has changed!");
             }
             
         };
@@ -123,9 +128,9 @@ public class ObjectView_1Test {
         // Assert
         //
         final Interceptor_1 terminalInterceptor = testee.getDelegate();
-        Assert.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
-        Assert.assertSame(testee, terminalInterceptor.self);
-        Assert.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
+        Assertions.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
+        Assertions.assertSame(testee, terminalInterceptor.self);
+        Assertions.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
     }    
 
     @Test
@@ -147,11 +152,11 @@ public class ObjectView_1Test {
         // Assert
         //
         final Interceptor_1 baseInterceptor = testee.getDelegate();
-        Assert.assertSame(testee, baseInterceptor.self);
-        Assert.assertSame(Segment_1.class, baseInterceptor.getClass());
+        Assertions.assertSame(testee, baseInterceptor.self);
+        Assertions.assertSame(Segment_1.class, baseInterceptor.getClass());
         final Interceptor_1 terminalInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(baseInterceptor);
-        Assert.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
-        Assert.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
+        Assertions.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
+        Assertions.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
     }    
     
     @Test
@@ -179,11 +184,11 @@ public class ObjectView_1Test {
         // Assert
         //
         final Interceptor_1 baseInterceptor = testee.getDelegate();
-        Assert.assertSame(Segment_1.class, baseInterceptor.getClass());
-        Assert.assertSame(testee, baseInterceptor.self);
+        Assertions.assertSame(Segment_1.class, baseInterceptor.getClass());
+        Assertions.assertSame(testee, baseInterceptor.self);
         final Interceptor_1 terminalInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(baseInterceptor);
-        Assert.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
-        Assert.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
+        Assertions.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
+        Assertions.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
     }    
 
     @Test
@@ -211,11 +216,11 @@ public class ObjectView_1Test {
         // Assert
         //
         final Interceptor_1 auditInterceptor = testee.getDelegate();
-        Assert.assertSame(UnitOfWork_1.class, auditInterceptor.getClass());
-        Assert.assertSame(testee, auditInterceptor.self);
+        Assertions.assertSame(UnitOfWork_1.class, auditInterceptor.getClass());
+        Assertions.assertSame(testee, auditInterceptor.self);
         final Interceptor_1 terminalInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(auditInterceptor);
-        Assert.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
-        Assert.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
+        Assertions.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
+        Assertions.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
     }    
     
     @Test
@@ -238,15 +243,15 @@ public class ObjectView_1Test {
         // Assert
         //
         final Interceptor_1 baseInterceptor = testee.getDelegate();
-        Assert.assertSame(Segment_1.class, baseInterceptor.getClass());
-        Assert.assertSame(testee, baseInterceptor.self);
+        Assertions.assertSame(Segment_1.class, baseInterceptor.getClass());
+        Assertions.assertSame(testee, baseInterceptor.self);
         final Interceptor_1 stateSegmentInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(baseInterceptor);
-        Assert.assertTrue(stateSegmentInterceptor instanceof org.openmdx.base.aop1.AbstractSegment_1);
+        Assertions.assertTrue(stateSegmentInterceptor instanceof org.openmdx.base.aop1.AbstractSegment_1);
         final Interceptor_1 stateObjectInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(stateSegmentInterceptor);
-        Assert.assertTrue(stateObjectInterceptor instanceof org.openmdx.state2.aop1.Object_1);
+        Assertions.assertTrue(stateObjectInterceptor instanceof org.openmdx.state2.aop1.Object_1);
         final Interceptor_1 terminalInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(stateObjectInterceptor);
-        Assert.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
-        Assert.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
+        Assertions.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
+        Assertions.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
     }    
 
     @Test
@@ -269,14 +274,14 @@ public class ObjectView_1Test {
         // Assert
         //
         final Interceptor_1 baseInterceptor = testee.getDelegate();
-        Assert.assertSame(ExtentCapable_1.class, baseInterceptor.getClass());
-        Assert.assertSame(testee, baseInterceptor.self);
+        Assertions.assertSame(ExtentCapable_1.class, baseInterceptor.getClass());
+        Assertions.assertSame(testee, baseInterceptor.self);
         final Interceptor_1 stateCapableInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(baseInterceptor);
-        Assert.assertSame(StateCapable_1.class, stateCapableInterceptor.getClass());
+        Assertions.assertSame(StateCapable_1.class, stateCapableInterceptor.getClass());
         final Interceptor_1 stateObjectInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(stateCapableInterceptor);
         final Interceptor_1 terminalInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(stateObjectInterceptor);
-        Assert.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
-        Assert.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
+        Assertions.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
+        Assertions.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
     }    
 
     @Test
@@ -300,15 +305,15 @@ public class ObjectView_1Test {
         // Assert
         //
         final Interceptor_1 baseInterceptor = testee.getDelegate();
-        Assert.assertSame(ExtentCapable_1.class, baseInterceptor.getClass());
-        Assert.assertSame(testee, baseInterceptor.self);
+        Assertions.assertSame(ExtentCapable_1.class, baseInterceptor.getClass());
+        Assertions.assertSame(testee, baseInterceptor.self);
         final Interceptor_1 dateStateInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(baseInterceptor);
-        Assert.assertSame(DateState_1.class, dateStateInterceptor.getClass());
+        Assertions.assertSame(DateState_1.class, dateStateInterceptor.getClass());
         final Interceptor_1 stateObjectInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(dateStateInterceptor);
-        Assert.assertTrue(stateObjectInterceptor instanceof org.openmdx.state2.aop1.Object_1);
+        Assertions.assertTrue(stateObjectInterceptor instanceof org.openmdx.state2.aop1.Object_1);
         final Interceptor_1 terminalInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(stateObjectInterceptor);
-        Assert.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
-        Assert.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
+        Assertions.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
+        Assertions.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate(terminalInterceptor));
     }    
     
     @Test
@@ -331,15 +336,15 @@ public class ObjectView_1Test {
         // Assert
         //
         final Interceptor_1 baseInterceptor = testee.getDelegate();
-        Assert.assertSame(ExtentCapable_1.class, baseInterceptor.getClass());
-        Assert.assertSame(testee, baseInterceptor.self);
+        Assertions.assertSame(ExtentCapable_1.class, baseInterceptor.getClass());
+        Assertions.assertSame(testee, baseInterceptor.self);
         final Interceptor_1 stateSCapableInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(baseInterceptor);
-        Assert.assertSame(StateCapable_1.class, stateSCapableInterceptor.getClass());
+        Assertions.assertSame(StateCapable_1.class, stateSCapableInterceptor.getClass());
         final Interceptor_1 stateObjectInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(stateSCapableInterceptor);
-        Assert.assertTrue(stateObjectInterceptor instanceof org.openmdx.state2.aop1.Object_1);
+        Assertions.assertTrue(stateObjectInterceptor instanceof org.openmdx.state2.aop1.Object_1);
         final Interceptor_1 terminalInterceptor = DelegatingObject_1TestAccessor.getDelegateAsInterceptor(stateObjectInterceptor);
-        Assert.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
-        Assert.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate((DelegatingObject_1) terminalInterceptor));
+        Assertions.assertSame(Interceptor_1.class, terminalInterceptor.getClass());
+        Assertions.assertSame(dataObject, DelegatingObject_1TestAccessor.getDelegate((DelegatingObject_1) terminalInterceptor));
     }    
 
 }

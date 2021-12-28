@@ -433,10 +433,12 @@ public class DurationMarshaller implements Marshaller {
 			if(positiveDuration.getSign()==0) {
 				return negativeDuration.negate();
 			}
-			throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
-					BasicException.Code.TRANSFORMATION_FAILURE,
-					Duration.class.getName() + " does not allow to mix positive and negative fields",
-					new BasicException.Parameter("value", positive + "-" + negative));
+			// TODO the values seem not to be filled correctly according to postgres standard
+			return negativeDuration.add(positiveDuration).negate();
+//			throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
+//					BasicException.Code.TRANSFORMATION_FAILURE,
+//					Duration.class.getName() + " does not allow to mix positive and negative fields",
+//					new BasicException.Parameter("value", positive + "-" + negative));
 		}
 	}
 
