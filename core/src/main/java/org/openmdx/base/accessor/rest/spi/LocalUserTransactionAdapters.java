@@ -53,21 +53,21 @@ import javax.resource.spi.LocalTransactionException;
 
 import org.openmdx.base.transaction.LocalUserTransaction;
 import org.openmdx.kernel.loading.Factory;
-
+import org.openmdx.kernel.platform.Platform;
 
 /**
  * UserTransactions
  */
 public class LocalUserTransactionAdapters {
-    
+
     private static final Factory<LocalUserTransaction> jtaUserTransactionFactory = new LocalUserTransactionFactory(
-        "org.openmdx.application.transaction.JTALocalUserTransactionAdapter"
+        Platform.getProperty("org.openmdx.base.transaction.LocalUserTransaction.jta")
     );
-    
+
     private static final Factory<LocalUserTransaction> containerManagedLocalUserTransactionFactory = new LocalUserTransactionFactory(
-        "org.openmdx.application.transaction.ContainerManagedLocalUserTransactionAdapter"
-    );    
-    
+        Platform.getProperty("org.openmdx.base.transaction.LocalUserTransaction.containerManaged")
+    );
+
     public static LocalUserTransaction getResourceLocalUserTransactionAdapter(
         PersistenceManager persistenceManager
     ) throws ResourceException {
