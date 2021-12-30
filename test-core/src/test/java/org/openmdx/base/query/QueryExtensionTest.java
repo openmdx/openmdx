@@ -47,9 +47,6 @@
  */
 package org.openmdx.base.query;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_BOOLEAN_PARAM;
 import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_CLASS;
 import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_CLAUSE;
@@ -69,12 +66,13 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefPackage;
 import javax.naming.NamingException;
-import javax.naming.spi.NamingManager;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
@@ -84,8 +82,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.base.rest.cci.QueryFilterRecord;
-import org.openmdx.kernel.id.UUIDs;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
+import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
 
 import test.openmdx.clock1.cci2.SegmentQuery;
 import test.openmdx.clock1.jmi1.Clock1Package;
@@ -93,6 +90,7 @@ import test.openmdx.clock1.jmi1.Clock1Package;
 /**
  * Query Extension Test
  */
+@ExtendWith(OpenmdxTestCoreStandardExtension.class)
 public class QueryExtensionTest {
 
     static final String[] expectedAttributes = new String[]{
@@ -115,24 +113,13 @@ public class QueryExtensionTest {
         Collections.EMPTY_LIST
     };
 
-    protected static PersistenceManagerFactory entityManagerFactory;
-    
-    /**
-     * 
-     */
+    private static PersistenceManagerFactory entityManagerFactory;
     private Provider provider;
-    
-    /**
-     * 
-     */
     private Clock1Package clock1;
 
-    /**
-     * 
-     */
     static private final String PROVIDER_PATH = "xri://@openmdx*test.openmdx.clock1/provider/Java";
 
-    @Before
+    @BeforeEach
     public void setUp(
     ) throws Exception {
         PersistenceManager entityManager = entityManagerFactory.getPersistenceManager();
@@ -166,74 +153,55 @@ public class QueryExtensionTest {
         extension.setIntegerParam(
             new int[]{1, 2, 3}
         );
-        assertTrue("Query instance of RefFilter_1_0", query instanceof RefQuery_1_0);
+        Assertions.assertTrue(query instanceof RefQuery_1_0, "Query instance of RefFilter_1_0");
         QueryFilterRecord filter = ((RefQuery_1_0)query).refGetFilter();
         System.out.println(filter);
-        assertEquals("Filter condition count", 1, filter.getCondition().size());
-        assertEquals(
-            "Instance of",
-            new IsInstanceOfCondition(
-                "test:openmdx:clock1:Segment"
-            ),
-            filter.getCondition().get(0)
-        );
+        Assertions.assertEquals(1,  filter.getCondition().size(), "Filter condition count");
+        Assertions.assertEquals(new IsInstanceOfCondition(
+		    "test:openmdx:clock1:Segment"
+		),  filter.getCondition().get(0), "Instance of");
         List<FilterProperty> filterProperties = FilterProperty.getFilterProperties(filter);
-        assertEquals(
-            "Filter property count", 
-            2 + expectedAttributes.length, 
-            filterProperties.size()
-        );
+        Assertions.assertEquals(2 + expectedAttributes.length,  filterProperties.size(), "Filter property count");
         FilterProperty firstCondition = filterProperties.get(1);
         String firstFeature = firstCondition.name();
         String namespace = firstFeature.substring(
             0, 
             firstFeature.lastIndexOf(':') + 1
         );
-        assertEquals(
-            "Context object class",
-            new FilterProperty(
-                Quantifier.codeOf(null),
-                namespace + SystemAttributes.OBJECT_CLASS,
-                ConditionType.codeOf(null),
-                QUERY_EXTENSION_CLASS
-            ),
-            filterProperties.get(1)
-        );
+        Assertions.assertEquals(new FilterProperty(
+		    Quantifier.codeOf(null),
+		    namespace + SystemAttributes.OBJECT_CLASS,
+		    ConditionType.codeOf(null),
+		    QUERY_EXTENSION_CLASS
+		),  filterProperties.get(1), "Context object class");
         int processedAttributes = 0;
         for(int i = 2; i < filterProperties.size(); i++) {
             FilterProperty p = filterProperties.get(i);
-            assertNull("Piggy back quantifier", Quantifier.valueOf(p.quantor()));
+            Assertions.assertNull(Quantifier.valueOf(p.quantor()), "Piggy back quantifier");
             Expected: for(
                 int j = 0;
                 j < expectedAttributes.length;
                 j++
             ){
                 if(p.name().equals(namespace + expectedAttributes[j])) {
-                    assertEquals(expectedAttributes[j], expectedValues[j], p.values());
+                    Assertions.assertEquals(expectedValues[j],  p.values(), expectedAttributes[j]);
                     processedAttributes++;
                     continue Expected;
                 }
             }
         }
-        assertEquals(
-            "Expected attributes", 
-            expectedAttributes.length, 
-            processedAttributes
-        );
+        Assertions.assertEquals(expectedAttributes.length,  processedAttributes, "Expected attributes");
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void deploy() throws NamingException{
-        if(!NamingManager.hasInitialContextFactoryBuilder()) {
-            NonManagedInitialContextFactoryBuilder.install(null);
-        }
         entityManagerFactory = JDOHelper.getPersistenceManagerFactory("test-Clock-EntityManagerFactory");
     }
 
-    @AfterClass
+    @AfterAll
     public static void close(
     ) throws IOException{
         entityManagerFactory.close();
-        System.out.println(UUIDs.newUUID());
     }
+
 }

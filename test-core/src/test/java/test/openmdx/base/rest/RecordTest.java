@@ -55,8 +55,8 @@ import java.util.UUID;
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
@@ -129,7 +129,7 @@ public class RecordTest {
         public void validate(){
             for(Object e : target.entrySet()) {
                 Map.Entry<?,?> o = (Entry<?, ?>) e;
-                Assert.assertEquals(o.getKey(), o.getValue().toString());
+                Assertions.assertEquals(o.getKey(), o.getValue().toString());
             }
             System.out.println(getName() + " with " + target.size() + " entries is valid");
         }

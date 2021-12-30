@@ -47,11 +47,6 @@
  */
 package test.openmdx.preferences2;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
 import java.util.Arrays;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -60,18 +55,17 @@ import java.util.prefs.PreferencesFactory;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import javax.naming.NamingException;
-import javax.naming.spi.NamingManager;
 import javax.resource.ResourceException;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
+import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
 import org.openmdx.preferences2.jmi1.Entry;
 import org.openmdx.preferences2.jmi1.Node;
 import org.openmdx.preferences2.jmi1.Preferences2Package;
@@ -84,6 +78,7 @@ import test.openmdx.application.dataprovider.layer.persistence.jdbc.RidOidQueryD
 /**
  * PreferencesTest
  */
+@ExtendWith(OpenmdxTestCoreStandardExtension.class)
 public class PreferencesTest {
 
     private static final String JMI_SEGMENT_NAME = "JMI";
@@ -99,7 +94,7 @@ public class PreferencesTest {
     /**
      * Set-up
      */
-    @Before
+    @BeforeEach
     public void setUp(
     ){
         this.entityManagerFactory = JDOHelper.getPersistenceManagerFactory(ENTITY_MANAGER_FACTORY_NAME);
@@ -113,9 +108,9 @@ public class PreferencesTest {
     ) throws ResourceException {
         PersistenceManager entity = this.entityManagerFactory.getPersistenceManager();
         Authority authority = entity.getObjectById(Authority.class, Preferences2Package.AUTHORITY_XRI);
-        assertNotNull("Authority '" + Preferences2Package.AUTHORITY_XRI + "'", authority);
+        Assertions.assertNotNull(authority, "Authority '" + Preferences2Package.AUTHORITY_XRI + "'");
         Provider provider = authority.getProvider(PROVIDER_NAME);
-        assertNotNull("Provider '" + PROVIDER_NAME + "'", provider);
+        Assertions.assertNotNull(provider, "Provider '" + PROVIDER_NAME + "'");
         Segment segment = (Segment) provider.getSegment(name);
         if(segment != null) {
             entity.currentTransaction().begin();
@@ -138,9 +133,9 @@ public class PreferencesTest {
     ) throws ResourceException {
         PersistenceManager entity = this.entityManagerFactory.getPersistenceManager();
         Authority authority = entity.getObjectById(Authority.class, Preferences2Package.AUTHORITY_XRI);
-        assertNotNull("Authority '" + Preferences2Package.AUTHORITY_XRI + "'", authority);
+        Assertions.assertNotNull(authority, "Authority '" + Preferences2Package.AUTHORITY_XRI + "'");
         Provider provider = authority.getProvider(PROVIDER_NAME);
-        assertNotNull("Provider '" + PROVIDER_NAME + "'", provider);
+        Assertions.assertNotNull(provider, "Provider '" + PROVIDER_NAME + "'");
         return (Segment) provider.getSegment(name);
     }
     
@@ -160,7 +155,7 @@ public class PreferencesTest {
         );
         try {
             preferences.setType("any");
-            fail("Only 'system' and 'user' are legal types");
+            Assertions.fail("Only 'system' and 'user' are legal types");
         } catch (IllegalArgumentException expected) {
             // Only "system" and "user" are legal types
         }
@@ -168,45 +163,45 @@ public class PreferencesTest {
         segment.addPreferences("System", preferences);
         Node root = persistenceManager.newInstance(Node.class);
         root.setName("");
-        assertEquals("Root node", "/", root.getAbsolutePath());
+        Assertions.assertEquals("/",  root.getAbsolutePath(), "Root node");
         preferences.addNode(root);
         Node first = persistenceManager.newInstance(Node.class);
         first.setParent(root);
         try {
             first.setName("1/2");
-            fail("'/' are not allowed in names");
+            Assertions.fail("'/' are not allowed in names");
         } catch (IllegalArgumentException expected) {
             // '/' are not allowed in names
         }
         first.setName("1st");
         preferences.addNode(first);
-        assertEquals("First node", "/1st", first.getAbsolutePath());
+        Assertions.assertEquals("/1st",  first.getAbsolutePath(), "First node");
         Entry entry1 = persistenceManager.newInstance(Entry.class);
         entry1.setValue("Zum ersten");
         first.addEntry("I", entry1);
-        assertEquals("I", entry1.getName());
+        Assertions.assertEquals("I",  entry1.getName());
         Node second = persistenceManager.newInstance(Node.class);
         second.setParent(first);
         second.setName("2nd");
-        assertEquals("Second node", "/1st/2nd", second.getAbsolutePath());
+        Assertions.assertEquals("/1st/2nd",  second.getAbsolutePath(), "Second node");
         Entry entry2 = persistenceManager.newInstance(Entry.class);
         entry2.setValue("Zum zweiten");
         second.addEntry("II", entry2);
-        assertEquals("II", entry2.getName());
+        Assertions.assertEquals("II",  entry2.getName());
         preferences.addNode(second);
         persistenceManager.currentTransaction().commit();
         int children = 0;
         for(Node child : first.<Node>getChild(first.getRoot())) {
-            assertEquals("Child", "/1st/2nd", child.getAbsolutePath());
+            Assertions.assertEquals("/1st/2nd",  child.getAbsolutePath(), "Child");
             children++;
         }
-        assertEquals("Number of children", 1, children);
+        Assertions.assertEquals(1,  children, "Number of children");
     }
 
     /**
      * Read Preferences through the JDK API
      * 
-     * @throws BackingStoreException 
+     * @throwsa BackingStoreException 
      */
     @Test
     public void jdkReadPreferences(
@@ -214,24 +209,29 @@ public class PreferencesTest {
         PreferencesFactory testee = new EmbeddedPreferencesFactory(JMI_SEGMENT_NAME);
         Preferences systemRoot = testee.systemRoot();
         Preferences first = systemRoot.node("1st");
-        assertEquals("First node", "/1st", first.absolutePath());
+        Assertions.assertEquals("/1st",  first.absolutePath(), "First node");
         assertArrayEquals("The first node's keys", new String[]{"I"}, first.keys());
         String entry1 = first.get("I", "ZUM ERSTEN");
-        assertEquals("The first node's entry", "Zum ersten", entry1);
+        Assertions.assertEquals("Zum ersten",  entry1, "The first node's entry");
         Preferences second = first.node("2nd");
-        assertEquals("Second node", "/1st/2nd", second.absolutePath());
+        Assertions.assertEquals("/1st/2nd",  second.absolutePath(), "Second node");
         String entry2 = second.get("II", "ZUM ZWEITEN");
-        assertEquals("The second node's entry", "Zum zweiten", entry2);
+        Assertions.assertEquals("Zum zweiten",  entry2, "The second node's entry");
         int children = 0;
         for(String name : first.childrenNames()) {
             Preferences child = first.node(name);
-            assertEquals("Child", "/1st/2nd", child.absolutePath());
+            Assertions.assertEquals("/1st/2nd",  child.absolutePath(), "Child");
             children++;
         }
-        assertEquals("Number of children", 1, children);
+        Assertions.assertEquals(1,  children, "Number of children");
     }
 
-    /**
+    private void assertArrayEquals(String string, String[] strings, String[] keys) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
      * Create Preferences through the JDK API
      * 
      * @throws BackingStoreException 
@@ -251,31 +251,23 @@ public class PreferencesTest {
         }
         {
             Preferences userRoot = testee.userRoot();
-            assertEquals("The userRoot's absolute path", "/", userRoot.absolutePath());
+            Assertions.assertEquals("/",  userRoot.absolutePath(), "The userRoot's absolute path");
             Preferences packageNode = userRoot.node("test/openmdx/preferences2");
-            assertEquals("The packageNode's absolute path", "/test/openmdx/preferences2", packageNode.absolutePath());
+            Assertions.assertEquals("/test/openmdx/preferences2",  packageNode.absolutePath(), "The packageNode's absolute path");
             Preferences dummyNode = userRoot.node("/test/openmdx/dummy0");
-            assertEquals("The dummyNode's absolute path", "/test/openmdx/dummy0", dummyNode.absolutePath());
+            Assertions.assertEquals("/test/openmdx/dummy0",  dummyNode.absolutePath(), "The dummyNode's absolute path");
             dummyNode.put("dummy","value");
             Preferences testNode = userRoot.node("test");
-            assertEquals("The testNode's absolute path", "/test", testNode.absolutePath());
+            Assertions.assertEquals("/test",  testNode.absolutePath(), "The testNode's absolute path");
             Preferences parentNode = testNode.node("openmdx");
-            assertEquals("/test/openmdx", parentNode.absolutePath());
-            assertEquals(
-                "The parent node's transient children",
-                Sets.asSet(Arrays.asList("preferences2", "dummy0")),
-                Sets.asSet(Arrays.asList(parentNode.childrenNames()))
-            );
+            Assertions.assertEquals("/test/openmdx",  parentNode.absolutePath());
+            Assertions.assertEquals(Sets.asSet(Arrays.asList("preferences2", "dummy0")),  Sets.asSet(Arrays.asList(parentNode.childrenNames())), "The parent node's transient children");
             packageNode.put("kind", "wrong");
             packageNode.putBoolean("flag", false);
-            assertEquals("The package node's keys", Sets.asSet(new String[]{"kind","flag"}), Sets.asSet(packageNode.keys()));
+            Assertions.assertEquals(Sets.asSet(new String[]{"kind","flag"}),  Sets.asSet(packageNode.keys()), "The package node's keys");
             packageNode.remove("kind");
             dummyNode.removeNode();
-            assertEquals(
-                "The parent node's persistent children",
-                Sets.asSet(Arrays.asList("preferences2")),
-                Sets.asSet(Arrays.asList(parentNode.childrenNames()))
-            );
+            Assertions.assertEquals(Sets.asSet(Arrays.asList("preferences2")),  Sets.asSet(Arrays.asList(parentNode.childrenNames())), "The parent node's persistent children");
         }
     }
 
@@ -338,7 +330,7 @@ public class PreferencesTest {
         int expectedCount = touch ? RidOidQueryDatabase_2.getUpdateCount() : RidOidQueryDatabase_2.getQueryCount(); 
         jdkTraversePreferences(root, touch);
         int actualCount = touch ? RidOidQueryDatabase_2.getUpdateCount() : RidOidQueryDatabase_2.getQueryCount(); 
-        assertEquals("No DB access necessary", expectedCount, actualCount);
+        Assertions.assertEquals(expectedCount,  actualCount, "No DB access necessary");
     }
 
     /**
@@ -369,13 +361,6 @@ public class PreferencesTest {
         jdkLoadAndTraversePreferences(testee.userRoot(), false);
     }
     
-    @BeforeClass
-    public static void deploy() throws NamingException{
-        if(!NamingManager.hasInitialContextFactoryBuilder()) {
-            NonManagedInitialContextFactoryBuilder.install(null);
-        }
-    }
-
     /**
      * 
      * Test Preferences Factory

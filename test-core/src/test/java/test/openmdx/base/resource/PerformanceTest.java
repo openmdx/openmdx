@@ -47,8 +47,6 @@
  */
 package test.openmdx.base.resource;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -67,8 +65,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.io.UTF8Writer;
 import org.openmdx.base.naming.Path;
@@ -125,7 +124,7 @@ public class PerformanceTest {
                 ObjectInputStream source = new ObjectInputStream(sink.asSource());
                 source.readObject();
                 if(this.prolog) {
-                    assertEquals("openMDX",(String)source.readObject());
+                    Assertions.assertEquals("openMDX",(String)source.readObject());
                 }
             }
 
@@ -244,7 +243,7 @@ public class PerformanceTest {
         }
     }
 
-    @BeforeClass
+    @BeforeAll
     @SuppressWarnings("unchecked")
     static public void setUp(
     ) throws ResourceException{

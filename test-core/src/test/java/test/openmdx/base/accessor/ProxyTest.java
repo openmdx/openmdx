@@ -52,7 +52,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.text.ParseException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Proxy Test

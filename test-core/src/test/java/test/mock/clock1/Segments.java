@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2020, OMEX AG, Switzerland
+ * Copyright (c) 2020-2021, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -48,9 +48,6 @@
 
 package test.mock.clock1;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,7 +59,7 @@ import javax.jdo.Transaction;
 import javax.jmi.reflect.RefException;
 import javax.jmi.reflect.RefStruct;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.rest.cci.VoidRecord;
@@ -100,15 +97,15 @@ public class Segments {
         Segment segment
     ) {
         Provider provider = segment.getProvider();
-        assertEquals(getMockedSegmentName() + " segment's provider", "xri://@openmdx*test.openmdx.clock1/provider/Mocked", provider.refMofId());
-        assertSame("Persistence Managers", JDOHelper.getPersistenceManager(segment), JDOHelper.getPersistenceManager(provider));
+        Assertions.assertEquals("xri://@openmdx*test.openmdx.clock1/provider/Mocked",  provider.refMofId(), getMockedSegmentName() + " segment's provider");
+        Assertions.assertSame(JDOHelper.getPersistenceManager(segment),  JDOHelper.getPersistenceManager(provider), "Persistence Managers");
     }
 
     static void validateChangedTimePoint(Segment segment) {
         final Transaction transaction = JDOHelper.getPersistenceManager(segment).currentTransaction();
         transaction.begin();
         final Date expected = tryToChangeDateAndTime(segment);
-        Assert.assertEquals("Time set back", expected, segment.currentDateAndTime().getUtc());
+        Assertions.assertEquals(expected,  segment.currentDateAndTime().getUtc(), "Time set back");
         transaction.commit();	
     }
 
@@ -116,7 +113,7 @@ public class Segments {
         final Transaction transaction = JDOHelper.getPersistenceManager(segment).currentTransaction();
         transaction.begin();
         final Date expected = tryToChangeDateAndTimeReflectively(segment);
-        Assert.assertEquals("Time set back", expected, segment.currentDateAndTime().getUtc());
+        Assertions.assertEquals(expected,  segment.currentDateAndTime().getUtc(), "Time set back");
         transaction.commit();
     }
     
@@ -171,7 +168,7 @@ public class Segments {
         Date utc,
         String mode
     ) throws ParseException {
-        assertEquals("High Noon", DateTimeFormat.BASIC_UTC_FORMAT.parse("20000401T120000.000Z"), utc);
+        Assertions.assertEquals(DateTimeFormat.BASIC_UTC_FORMAT.parse("20000401T120000.000Z"),  utc, "High Noon");
         System.out.println(getMockedSegmentName() + mode + ": " + DateTimeFormat.BASIC_UTC_FORMAT.format(utc)); // xri://@openmdx*test.openmdx.clock1/provider/Mocked
     }
 
@@ -180,7 +177,7 @@ public class Segments {
     ) {
         try {
             segment.getDescription();
-            Assert.fail("IndexOutOfBoundsException expected");
+            Assertions.fail("IndexOutOfBoundsException expected");
         } catch (IndexOutOfBoundsException exception) {
             // Excpected behaviour
         }
@@ -201,7 +198,7 @@ public class Segments {
         final Segment segment
     ) {
         Provider provider = segment.getProvider();
-        assertEquals(getNormalSegmentName() + " segment's provider", "xri://@openmdx*test.openmdx.clock1/provider/Java", provider.refMofId());
+        Assertions.assertEquals("xri://@openmdx*test.openmdx.clock1/provider/Java",  provider.refMofId(), getNormalSegmentName() + " segment's provider");
     }
 
     static void validateNormalTimePoint(
@@ -244,18 +241,14 @@ public class Segments {
         String mode
     ) {
         long now = System.currentTimeMillis();
-        Assert.assertTrue("Time window < 1 s", Math.abs(now - utc.getTime()) < 1000);
+        Assertions.assertTrue(Math.abs(now - utc.getTime()) < 1000, "Time window < 1 s");
         System.out.println(getNormalSegmentName() + mode + ": " + DateTimeFormat.BASIC_UTC_FORMAT.format(utc));
     }
 
     static void validateNormalDescription(
         final Segment segment
     ) {
-        assertEquals(
-            "description", 
-            "clock1 segment",
-            segment.getDescription()
-        );
+        Assertions.assertEquals("clock1 segment",  segment.getDescription(), "description");
     }
 
     static Segment getNormalSegment(

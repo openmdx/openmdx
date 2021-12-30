@@ -50,7 +50,6 @@ package org.openmdx.kernel.text.format;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openmdx.kernel.text.format.ByteArrayFormatter;
 
 /**
  * Byte Array Formatter Test

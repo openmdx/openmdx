@@ -99,14 +99,14 @@ dependencies {
     implementation("javax:javaee-api:8.0.+")
     implementation("javax.jdo:jdo-api:3.1")
     implementation("javax.cache:cache-api:1.1.+")    
+    implementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     // test
     testImplementation(project(":core"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
     testImplementation("org.mockito:mockito-core:4.2.0")    
     testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
     testCompileOnly("junit:junit:4.12")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
-	testRuntimeOnly("org.postgresql:postgresql:42.3.1")
+ 	testRuntimeOnly("org.postgresql:postgresql:42.3.1")
 	testRuntimeOnly("javax.servlet:javax.servlet-api:3.1.0")
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
@@ -149,9 +149,6 @@ tasks.withType<Test> {
 tasks.test {
     useJUnitPlatform()
     maxHeapSize = "4G"
-    systemProperty("java.protocol.handler.pkgs","org.openmdx.kernel.url.protocol")
-    systemProperty("user.timezone","Europe/Zurich")
-    systemProperty("org.openmdx.comp.env.jdbc.DataSource","jdbc:postgresql:openmdx-test?user=postgres&password=manager99&stringtype=unspecified")
 }
 
 project.tasks.named("processResources", Copy::class.java) {

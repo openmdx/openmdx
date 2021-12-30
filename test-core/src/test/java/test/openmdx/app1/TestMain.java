@@ -47,16 +47,6 @@
  */
 package test.openmdx.app1;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayReader;
@@ -109,20 +99,18 @@ import javax.jmi.reflect.InvalidObjectException;
 import javax.jmi.reflect.RefBaseObject;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
-import javax.naming.NamingException;
-import javax.naming.spi.NamingManager;
 import javax.resource.spi.CommException;
 import javax.servlet.ServletException;
 import javax.transaction.UserTransaction;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.rest.adapter.InboundConnectionFactory_2;
@@ -182,10 +170,10 @@ import org.openmdx.generic1.jmi1.IntegerProperty;
 import org.openmdx.generic1.jmi1.Property;
 import org.openmdx.generic1.jmi1.StringProperty;
 import org.openmdx.generic1.jmi1.UriProperty;
+import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.openmdx.kernel.loading.Factory;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.naming.ComponentEnvironment;
@@ -267,6 +255,7 @@ import test.openmdx.model1.jmi1.Model1Package;
 /**
  * Test Main
  */
+@ExtendWith(OpenmdxTestCoreStandardExtension.class)
 public class TestMain {
 
 	protected static final String ENTITY_MANAGER_FACTORY_NAME = "test-Main-EntityManagerFactory";
@@ -292,18 +281,6 @@ public class TestMain {
 	 * Abstract Test
 	 */
 	public abstract static class AbstractTest {
-
-		@BeforeClass
-		public static void jndiSetUp() throws NamingException {
-			if (!NamingManager.hasInitialContextFactoryBuilder()) {
-//			    System.setProperty("java.protocol.handler.pkgs","org.openmdx.kernel.url.protocol");
-//			    System.setProperty("user.timezone","Europe/Zurich");
-				NonManagedInitialContextFactoryBuilder.install(
-//					Collections.singletonMap("org.openmdx.comp.env.jdbc.DataSource", "jdbc:postgresql:openmdx-test?user=postgres&password=manager99&stringtype=unspecified")
-					null
-				);
-			}
-		}
 
 		/**
 		 * Constructor
@@ -349,7 +326,7 @@ public class TestMain {
 
 		protected abstract boolean isContainerManaged();
 
-		@Before
+		@BeforeEach
 		public void jdoSetUp() {
 			entityManagerFactory = newEntityManagerFactory();
 			if (!isContainerManaged()) {
@@ -364,7 +341,7 @@ public class TestMain {
 			UserObjects.setTaskIdentifier(this.entityManager, this.taskIdentifier);
 		}
 
-		@After
+		@AfterEach
 		public void tearDown() {
 			if (this.entityManager != null) {
 				try {
@@ -519,11 +496,11 @@ public class TestMain {
 				super.taskId = "CR20019917";
 				Object userObject = new Object();
 				this.entityManager.setUserObject(userObject);
-				assertSame("initial UserObject", userObject, this.entityManager.getUserObject());
+				Assertions.assertSame(userObject, this.entityManager.getUserObject(), "initial UserObject");
 				this.entityManager.setUserObject(BigDecimal.ONE);
-				assertSame("intermediate UserObject", BigDecimal.ONE, this.entityManager.getUserObject());
+				Assertions.assertSame(BigDecimal.ONE, this.entityManager.getUserObject(), "intermediate UserObject");
 				this.entityManager.setUserObject(null);
-				assertNull("final UserObject", this.entityManager.getUserObject());
+				Assertions.assertNull(this.entityManager.getUserObject(), "final UserObject");
 			} finally {
 				super.taskId = null;
 			}
@@ -536,11 +513,11 @@ public class TestMain {
 				Invoice invoice = this.entityManager.newInstance(Invoice.class);
 				InvoicePosition position = this.entityManager.newInstance(InvoicePosition.class);
 				Container<InvoicePosition> positions = invoice.getInvoicePosition();
-				assertTrue(positions.isEmpty());
+				Assertions.assertTrue(positions.isEmpty());
 				invoice.addInvoicePosition(position);
-				assertEquals(1, positions.size());
+				Assertions.assertEquals(1,  positions.size());
 				positions.remove(position);
-				assertTrue(positions.isEmpty());
+				Assertions.assertTrue(positions.isEmpty());
 			} finally {
 				super.taskId = null;
 			}
@@ -553,11 +530,11 @@ public class TestMain {
 				List<String> originalPrinicpals = UserObjects.getPrincipalChain(original);
 				PersistenceManager sibling = entityManagerFactory.getPersistenceManager();
 				List<String> siblingPrinicpals = UserObjects.getPrincipalChain(sibling);
-				assertEquals("sibling", originalPrinicpals, siblingPrinicpals);
+				Assertions.assertEquals(originalPrinicpals,  siblingPrinicpals, "sibling");
 				PersistenceManagerFactory factory = original.getPersistenceManagerFactory();
 				PersistenceManager clone = factory.getPersistenceManager();
 				List<String> clonePrinicpals = UserObjects.getPrincipalChain(clone);
-				assertEquals("clone", originalPrinicpals, clonePrinicpals);
+				Assertions.assertEquals(originalPrinicpals,  clonePrinicpals, "clone");
 			} finally {
 				super.taskId = null;
 			}
@@ -573,7 +550,7 @@ public class TestMain {
 		protected void testPackageAcquisition() {
 			UnitOfWork instance = this.entityManager.newInstance(UnitOfWork.class);
 			Audit2Package audit2Package = (Audit2Package) instance.refImmediatePackage();
-			assertEquals("MOF ID", "org:openmdx:audit2:audit2", audit2Package.refMofId());
+			Assertions.assertEquals("org:openmdx:audit2:audit2",  audit2Package.refMofId(), "MOF ID");
 		}
 
 		protected void resetAuditSegment() {
@@ -606,7 +583,7 @@ public class TestMain {
 				super.taskId = "CR20020187";
 				Path segmentId = provider.refGetPath().getDescendant("segment", STANDARD_SEGMENT_NAME);
 				this.entityManager.getObjectById(segmentId);
-				fail("Segment has been deleted");
+				Assertions.fail("Segment has been deleted");
 			} catch (JDOObjectNotFoundException expected) {
 				// Segment has been deleted
 			} finally {
@@ -750,11 +727,9 @@ public class TestMain {
 				Object noPosition = null;
 				InvoicePosition jmiPosition = this.entityManager.newInstance(InvoicePosition.class);
 				test.openmdx.app1.jpa3.InvoicePosition jpaPosition = new test.openmdx.app1.jpa3.InvoicePosition();
-				assertNull("CR20020355", PersistenceHelper.getClassName(noPosition));
-				assertEquals("CR20020355", "test:openmdx:app1:InvoicePosition",
-						PersistenceHelper.getClassName(jmiPosition));
-				assertEquals("CR20020355", "test.openmdx.app1.jpa3.InvoicePosition",
-						PersistenceHelper.getClassName(jpaPosition));
+				Assertions.assertNull(PersistenceHelper.getClassName(noPosition), "CR20020355");
+				Assertions.assertEquals("test:openmdx:app1:InvoicePosition",  PersistenceHelper.getClassName(jmiPosition), "CR20020355");
+				Assertions.assertEquals("test.openmdx.app1.jpa3.InvoicePosition",  PersistenceHelper.getClassName(jpaPosition), "CR20020355");
 			} finally {
 				super.taskId = null;
 			}
@@ -766,17 +741,17 @@ public class TestMain {
 					super.taskId = "CR20059789";
 					final PersistenceManager pm = JDOHelper.getPersistenceManager(segment);
 					pm.currentTransaction().begin();
-					assertNotEquals("CR20059789", segment.getDescription());
+					Assertions.assertNotEquals("CR20059789", segment.getDescription());
 					segment.setDescription("CR20059789");
-					assertEquals("CR20059789", segment.getDescription());
+					Assertions.assertEquals("CR20059789", segment.getDescription());
 					final org.openmdx.base.persistence.spi.UnitOfWork uow = (org.openmdx.base.persistence.spi.UnitOfWork) PersistenceHelper
 							.currentUnitOfWork(pm);
 					uow.beforeCompletion();
 					uow.clear();
 					pm.evictAll();
-					assertEquals("CR20059789", segment.getDescription());
+					Assertions.assertEquals("CR20059789", segment.getDescription());
 					pm.currentTransaction().rollback();
-					assertNotEquals("CR20059789", segment.getDescription());
+					Assertions.assertNotEquals("CR20059789", segment.getDescription());
 				} finally {
 					super.taskId = null;
 				}
@@ -787,10 +762,10 @@ public class TestMain {
 			try {
 				super.taskId = "CR20019971";
 				InvoicePosition position = this.entityManager.newInstance(InvoicePosition.class);
-				assertNull("Not yet contained", position.getInvoice());
+				Assertions.assertNull(position.getInvoice(), "Not yet contained");
 				Invoice invoice = this.entityManager.newInstance(Invoice.class);
 				invoice.addInvoicePosition(position);
-				assertSame("Transient but contained", invoice, position.getInvoice());
+				Assertions.assertSame(invoice, position.getInvoice(), "Transient but contained");
 			} finally {
 				super.taskId = null;
 			}
@@ -801,13 +776,13 @@ public class TestMain {
 				super.taskId = "CR10011870";
 				PriceCalculator inaccessable = (PriceCalculator) entityManager
 						.getUserObject(PriceCalculator.class.getSimpleName());
-				assertNull("Inaccessable user object", inaccessable);
+				Assertions.assertNull(inaccessable, "Inaccessable user object");
 				PropagatedUserObject propagated = (PropagatedUserObject) entityManager
 						.getUserObject(PropagatedUserObject.class);
 				if (this instanceof ProxyConnectionTest) {
-					assertNull("Propagated user object", propagated);
+					Assertions.assertNull(propagated, "Propagated user object");
 				} else {
-					assertNotNull("Propagated user object", propagated);
+					Assertions.assertNotNull(propagated, "Propagated user object");
 				}
 
 			} finally {
@@ -837,29 +812,27 @@ public class TestMain {
 				invoice.setDescription("this is an invoice for PG0");
 				invoice.setProductGroupId("PG0");
 				invoice.setPaymentPeriod(Datatypes.create(Duration.class, "P30D")); // CR20020068
-				assertNull("CR0003551", ReducedJDOHelper.getObjectId(invoice));
+				Assertions.assertNull(ReducedJDOHelper.getObjectId(invoice), "CR0003551");
 				@SuppressWarnings("unchecked")
 				RefContainer<Invoice> refInvoices = (RefContainer<Invoice>) segment.<Invoice>getInvoice();
-				assertNull("Not yet contained", PersistenceHelper.getLastXRISegment(booleanProperty));
+				Assertions.assertNull(PersistenceHelper.getLastXRISegment(booleanProperty), "Not yet contained");
 				invoice.addProperty(false, "flag", booleanProperty);
-				assertFalse(ReducedJDOHelper.isPersistent(booleanProperty));
-				assertEquals("Transient object has alread XRI qualifier", "flag",
-						PersistenceHelper.getLastXRISegment(booleanProperty));
+				Assertions.assertFalse(ReducedJDOHelper.isPersistent(booleanProperty));
+				Assertions.assertEquals("flag",  PersistenceHelper.getLastXRISegment(booleanProperty), "Transient object has alread XRI qualifier");
 				this.begin();
 				refInvoices.refAdd(RefContainer.REASSIGNABLE, nextId(), invoice);
-				assertNotNull("CR0003551", ReducedJDOHelper.getObjectId(invoice));
+				Assertions.assertNotNull(ReducedJDOHelper.getObjectId(invoice), "CR0003551");
 				for (int i = 0; i < 10; i++) {
 					InvoicePosition invoicePosition = invoicePositionClass.createInvoicePosition();
 					invoicePosition.setDescription("this is an invoice position for P" + i);
 					invoicePosition.setProductId("P" + i);
-					assertNull("CR0003551", ReducedJDOHelper.getObjectId(invoicePosition));
+					Assertions.assertNull(ReducedJDOHelper.getObjectId(invoicePosition), "CR0003551");
 					invoice.addInvoicePosition(false, nextId(), invoicePosition);
-					assertNotNull("CR0003551", ReducedJDOHelper.getObjectId(invoicePosition));
+					Assertions.assertNotNull(ReducedJDOHelper.getObjectId(invoicePosition), "CR0003551");
 				}
 				this.commit();
-				assertTrue(ReducedJDOHelper.isPersistent(booleanProperty));
-				assertEquals("Persistent object has alread XRI qualifier", "flag",
-						PersistenceHelper.getLastXRISegment(booleanProperty));
+				Assertions.assertTrue(ReducedJDOHelper.isPersistent(booleanProperty));
+				Assertions.assertEquals("flag",  PersistenceHelper.getLastXRISegment(booleanProperty), "Persistent object has alread XRI qualifier");
 			} finally {
 				super.taskId = null;
 			}
@@ -873,7 +846,7 @@ public class TestMain {
 					invoiceQuery.productGroupId().like(RegularExpressionFlag.CASE_INSENSITIVE.getFlag(), "Pg0");
 					((Query) invoiceQuery).getFetchPlan().setFetchSize(FetchPlan.FETCH_SIZE_GREEDY);
 					List<Invoice> invoices = segment.getInvoice(invoiceQuery);
-					assertEquals(1, invoices.size());
+					Assertions.assertEquals(1,  invoices.size());
 				}
 				{
 					InvoiceQuery invoiceQuery = (InvoiceQuery) entityManager.newQuery(Invoice.class);
@@ -881,11 +854,9 @@ public class TestMain {
 							"this is \u00E4n invoice for PG0");
 					try {
 						final List<Invoice> invoices = segment.getInvoice(invoiceQuery);
-						assertEquals(1, invoices.size());
+						Assertions.assertEquals(1,  invoices.size());
 					} catch (Exception acceptable) {
-						assertEquals("The actual database has no configuration for the requested LIKE flavour",
-								BasicException.Code.NOT_SUPPORTED,
-								new ServiceException(acceptable).log().getExceptionCode());
+						Assertions.assertEquals( BasicException.Code.NOT_SUPPORTED,   new ServiceException(acceptable).log().getExceptionCode(), "The actual database has no configuration for the requested LIKE flavour");
 					}
 				}
 			} finally {
@@ -899,19 +870,17 @@ public class TestMain {
 				invoice.getInvoicePosition((InvoicePositionQuery) null);
 				try {
 					invoice.getInvoicePosition((String) null);
-					fail("null is not allowed as qualifier");
+					Assertions.fail("null is not allowed as qualifier");
 				} catch (JmiServiceException exception) {
-					assertEquals("Invalid Argument", BasicException.Code.DEFAULT_DOMAIN,
-							exception.getExceptionDomain());
-					assertEquals("Invalid Argument", BasicException.Code.BAD_PARAMETER, exception.getExceptionCode());
+					Assertions.assertEquals(BasicException.Code.DEFAULT_DOMAIN,  exception.getExceptionDomain(), "Invalid Argument");
+					Assertions.assertEquals( BasicException.Code.BAD_PARAMETER,   exception.getExceptionCode(), "Invalid Argument");
 				}
 				try {
 					invoice.getInvoicePosition(false, (String) null);
-					fail("null is not allowed as qualifier");
+					Assertions.fail("null is not allowed as qualifier");
 				} catch (JmiServiceException exception) {
-					assertEquals("Invalid Argument", BasicException.Code.DEFAULT_DOMAIN,
-							exception.getExceptionDomain());
-					assertEquals("Invalid Argument", BasicException.Code.BAD_PARAMETER, exception.getExceptionCode());
+					Assertions.assertEquals(BasicException.Code.DEFAULT_DOMAIN,  exception.getExceptionDomain(), "Invalid Argument");
+					Assertions.assertEquals( BasicException.Code.BAD_PARAMETER,   exception.getExceptionCode(), "Invalid Argument");
 				}
 			} finally {
 				super.taskId = null;
@@ -923,10 +892,9 @@ public class TestMain {
 				super.taskId = "CR20019592";
 				ProductQuery productQuery = (ProductQuery) entityManager.newQuery(Product.class);
 				productQuery.createdAt().lessThanOrEqualTo(null);
-				fail("Null values are not allowed in queries");
+				Assertions.fail("Null values are not allowed in queries");
 			} catch (JmiServiceException expected) {
-				assertEquals("Null values are not allowed in queries", BasicException.Code.BAD_PARAMETER,
-						expected.getExceptionCode());
+				Assertions.assertEquals( BasicException.Code.BAD_PARAMETER,   expected.getExceptionCode(), "Null values are not allowed in queries");
 			} finally {
 				super.taskId = null;
 			}
@@ -953,7 +921,7 @@ public class TestMain {
 					invoiceQuery.thereExistsInvoicePosition()
 							.elementOf(PersistenceHelper.asSubquery(invoicePositionQuery));
 					List<Invoice> invoices = segment.getInvoice(invoiceQuery);
-					assertFalse("There exist invoices including product P6", invoices.isEmpty());
+					Assertions.assertFalse(invoices.isEmpty(), "There exist invoices including product P6");
 					for (Invoice anInvoice : invoices) {
 						System.out.println(anInvoice);
 						for (InvoicePosition anInvoicePosition : anInvoice.<InvoicePosition>getInvoicePosition()) {
@@ -973,7 +941,7 @@ public class TestMain {
 					InvoiceQuery invoiceQuery = (InvoiceQuery) entityManager.newQuery(Invoice.class);
 					invoiceQuery.thereExistsInvoicePosition().productId().equalTo("P6");
 					List<Invoice> invoices = segment.getInvoice(invoiceQuery);
-					assertFalse("There exist invoices including product P6", invoices.isEmpty());
+					Assertions.assertFalse(invoices.isEmpty(), "There exist invoices including product P6");
 					for (Invoice anInvoice : invoices) {
 						System.out.println(anInvoice);
 						for (InvoicePosition anInvoicePosition : anInvoice.<InvoicePosition>getInvoicePosition()) {
@@ -1001,7 +969,7 @@ public class TestMain {
 					InvoiceQuery invoiceQuery = invoicePositionQuery.invoice();
 					invoiceQuery.productGroupId().equalTo("PG0");
 					List<InvoicePosition> invoicePositions = segment.getExtent(invoicePositionQuery);
-					assertFalse("Invoice Positions", invoicePositions.isEmpty());
+					Assertions.assertFalse(invoicePositions.isEmpty(), "Invoice Positions");
 				}
 			} finally {
 				super.taskId = null;
@@ -1016,8 +984,8 @@ public class TestMain {
 				//
 				// Before the unit of work's begin
 				//
-				assertEquals("Second part of first name", "Maria", person.getGivenName().get(1));
-				assertNull("LastName", person.getLastName());
+				Assertions.assertEquals("Maria",  person.getGivenName().get(1), "Second part of first name");
+				Assertions.assertNull(person.getLastName(), "LastName");
 				if (super.entityManager.getPersistenceManagerFactory().getProperties()
 						.contains(Constants.OPTION_TRANSACTIONAL_TRANSIENT)) {
 					this.begin();
@@ -1026,32 +994,32 @@ public class TestMain {
 					//
 					// In the unit of work
 					//
-					assertEquals("Second part of first name", "Maria", person.getGivenName().get(1));
-					assertEquals("LastName", "Brandauer", person.getLastName());
+					Assertions.assertEquals("Maria",  person.getGivenName().get(1), "Second part of first name");
+					Assertions.assertEquals("Brandauer",  person.getLastName(), "LastName");
 					this.rollback();
 					//
 					// After the unit of work's roll-back
 					//
-					assertEquals("Second part of first name", "Maria", person.getGivenName().get(1));
-					assertNull("LastName", person.getLastName());
+					Assertions.assertEquals("Maria",  person.getGivenName().get(1), "Second part of first name");
+					Assertions.assertNull(person.getLastName(), "LastName");
 				} else {
 					try {
 						this.begin();
 						super.entityManager.makeTransactional(person);
-						fail(Constants.OPTION_TRANSACTIONAL_TRANSIENT + " is not supported");
+						Assertions.fail(Constants.OPTION_TRANSACTIONAL_TRANSIENT + " is not supported");
 					} catch (JDOUnsupportedOptionException expected) {
 						person.setLastName("Brandauer");
 						//
 						// In the unit of work
 						//
-						assertEquals("Second part of first name", "Maria", person.getGivenName().get(1));
-						assertEquals("LastName", "Brandauer", person.getLastName());
+						Assertions.assertEquals("Maria",  person.getGivenName().get(1), "Second part of first name");
+						Assertions.assertEquals("Brandauer",  person.getLastName(), "LastName");
 						this.rollback();
 						//
 						// After the unit of work's roll-back
 						//
-						assertEquals("Second part of first name", "Maria", person.getGivenName().get(1));
-						assertEquals("LastName", "Brandauer", person.getLastName());
+						Assertions.assertEquals("Maria",  person.getGivenName().get(1), "Second part of first name");
+						Assertions.assertEquals("Brandauer",  person.getLastName(), "LastName");
 					}
 				}
 			} finally {
@@ -1069,11 +1037,9 @@ public class TestMain {
 				i4711.setInternationalProductGroupIdentification("K-4711");
 				segment.addInvoice("CR20019862", i4711);
 				this.commit();
-				fail("Missing mandatory feature ProductGroupId");
+				Assertions.fail("Missing mandatory feature ProductGroupId");
 			} catch (JDOFatalDataStoreException exception) {
-				assertEquals("Missing mandatory feature ProductGroupId",
-						causeIsGeneric() ? BasicException.Code.GENERIC : BasicException.Code.VALIDATION_FAILURE,
-						Throwables.getCause(exception, null).getExceptionCode());
+				Assertions.assertEquals( (causeIsGeneric() ? BasicException.Code.GENERIC : BasicException.Code.VALIDATION_FAILURE),   Throwables.getCause(exception, null).getExceptionCode(), "Missing mandatory feature ProductGroupId");
 			} finally {
 				super.taskId = null;
 			}
@@ -1089,7 +1055,7 @@ public class TestMain {
 				i4711.setDescription("K\u00F6lnische W\u00E4sser");
 				i4711.setInternationalProductGroupIdentification("K-4711");
 				i4711.setProductGroupId("4711");
-				assertNull("Invoice not yet added", segment.getInvoice("CR20019862"));
+				Assertions.assertNull(segment.getInvoice("CR20019862"), "Invoice not yet added");
 				segment.addInvoice("CR20019862", i4711);
 				this.commit();
 			}
@@ -1098,7 +1064,7 @@ public class TestMain {
 				InvoiceQuery query = (InvoiceQuery) this.entityManager.newQuery(Invoice.class);
 				query.thereExistsInternationalProductGroupIdentification().like("K-.*");
 				List<Invoice> groups = segment.getInvoice(query);
-				assertEquals("K\u00F6lnisch Wasser", 1, groups.size());
+				Assertions.assertEquals( 1,   groups.size(), "K\u00F6lnisch Wasser");
 			} finally {
 				super.taskId = null;
 			}
@@ -1146,11 +1112,11 @@ public class TestMain {
 				this.taskId = "CR20019629";
 				Collection<Property> properties = propertyHolder.<Property>getProperty();
 				this.begin();
-				assertEquals(2, properties.size());
+				Assertions.assertEquals(2,  properties.size());
 				UriProperty uriProperty = this.entityManager.newInstance(UriProperty.class);
 				uriProperty.getUriValue().put(0, URI.create("xri://+ChangeRequest/20019629"));
 				propertyHolder.addProperty(this.taskId, uriProperty);
-				assertEquals(3, properties.size());
+				Assertions.assertEquals(3,  properties.size());
 				for (Property property : new ArrayList<Property>(properties)) {
 					if (property instanceof StringProperty) {
 						propertyId = property.refGetPath();
@@ -1158,7 +1124,7 @@ public class TestMain {
 					property.refDelete();
 				}
 				for (Property property : properties) {
-					fail("There should be no properties left: " + property);
+					Assertions.fail("There should be no properties left: " + property);
 				}
 			} finally {
 				this.rollback();
@@ -1175,7 +1141,7 @@ public class TestMain {
 						.<StringProperty>getProperty();
 				StringProperty property = properties.get(QualifierType.REASSIGNABLE,
 						propertyId.getLastSegment().toClassicRepresentation());
-				assertEquals("Property value", propertyValue, property.getStringValue().get(propertyIndex));
+				Assertions.assertEquals(propertyValue,  property.getStringValue().get(propertyIndex), "Property value");
 				this.begin();
 				property.getStringValue().put(propertyIndex, propertyValue);
 				this.commit();
@@ -1193,8 +1159,8 @@ public class TestMain {
 				//
 				// After begin
 				//
-				assertEquals("List size after begin", 2, list.size());
-				assertEquals("Container size after begin", 2, container.size());
+				Assertions.assertEquals( 2,   list.size(), "List size after begin");
+				Assertions.assertEquals( 2,   container.size(), "Container size after begin");
 				//
 				// Add new property
 				//
@@ -1205,20 +1171,20 @@ public class TestMain {
 				// After insert
 				//
 				System.out.println("CR20019915: List");
-				assertEquals("List size after insert", 3, list.size());
+				Assertions.assertEquals( 3,   list.size(), "List size after insert");
 				for (Property p : list) {
 					System.out.println(p.refClass().refMofId() + ": " + p.refMofId());
 				}
 				System.out.println("CR20019915: Container");
-				assertEquals("Container size after insert", 3, container.size());
+				Assertions.assertEquals( 3,   container.size(), "Container size after insert");
 				for (Property p : container) {
 					System.out.println(p.refClass().refMofId() + ": " + p.refMofId());
 				}
 				//
 				// Before roll back
 				//
-				assertEquals("List size before roll back", 3, list.size());
-				assertEquals("Container size before roll back", 3, container.size());
+				Assertions.assertEquals( 3,   list.size(), "List size before roll back");
+				Assertions.assertEquals( 3,   container.size(), "Container size before roll back");
 				this.rollback();
 			} finally {
 				super.taskId = null;
@@ -1235,10 +1201,9 @@ public class TestMain {
 					uriProperty.getUriValue().put(0, URI.create("xri://+ChangeRequest/20019816"));
 					try {
 						propertyHolder.addProperty(this.taskId, uriProperty);
-						fail("Data Object Manager Mismatch");
+						Assertions.fail("Data Object Manager Mismatch");
 					} catch (RuntimeException exception) {
-						assertEquals("Data Object Manager Mismatch", BasicException.Code.BAD_PARAMETER,
-								BasicException.toExceptionStack(exception).getExceptionCode());
+						Assertions.assertEquals( BasicException.Code.BAD_PARAMETER,   BasicException.toExceptionStack(exception).getExceptionCode(), "Data Object Manager Mismatch");
 					}
 				} finally {
 					this.rollback();
@@ -1253,9 +1218,8 @@ public class TestMain {
 					UriPropertyQuery query = (UriPropertyQuery) this.entityManager.newQuery(UriProperty.class);
 					query.thereExistsUriValue().equalTo(URI.create("xri://+ChangeRequest/20019533"));
 					List<UriProperty> properties = propertyHolder.<UriProperty>getProperty(query);
-					assertEquals(1, properties.size());
-					assertFalse("Plug-in-provided id",
-							ClassicSegments.isPlaceholder(properties.get(0).refGetPath().getLastSegment()));
+					Assertions.assertEquals(1,  properties.size());
+					Assertions.assertFalse(ClassicSegments.isPlaceholder(properties.get(0).refGetPath().getLastSegment()), "Plug-in-provided id");
 				} finally {
 					super.taskId = null;
 				}
@@ -1263,24 +1227,24 @@ public class TestMain {
 				System.out.println("Invoice instanceof " + Arrays.toString(invoice.getClass().getInterfaces()));
 				Path flagId = ((Path) ReducedJDOHelper.getObjectId(invoice)).getDescendant("property", "flag");
 				BooleanProperty flag = (BooleanProperty) super.entityManager.getObjectById(flagId);
-				assertNotNull("Flag", flag);
+				Assertions.assertNotNull(flag, "Flag");
 				SparseArray<Boolean> flags = flag.getBooleanValue();
-				assertNotNull("flags", flags);
-				assertEquals("Flag[0]", Boolean.TRUE, flags.get(0));
+				Assertions.assertNotNull(flags, "flags");
+				Assertions.assertEquals(Boolean.TRUE,  flags.get(0), "Flag[0]");
 				PersistenceManager m = ReducedJDOHelper.getPersistenceManager(flag);
-				assertSame("Class with root parent", super.entityManager, m);
+				Assertions.assertSame(super.entityManager, m, "Class with root parent");
 				if (this instanceof AbstractLocalConnectionTest) {
-					assertTrue("Implementation detail", flag instanceof DelegatingRefObject_1_0);
+					Assertions.assertTrue(flag instanceof DelegatingRefObject_1_0, "Implementation detail");
 					DelegatingRefObject_1_0 entity = (DelegatingRefObject_1_0) flag;
 					Object dataObject = entity.openmdxjdoGetDataObject();
-					assertTrue(dataObject instanceof PersistenceCapable);
-					assertTrue(dataObject instanceof RefObject_1_0);
+					Assertions.assertTrue(dataObject instanceof PersistenceCapable);
+					Assertions.assertTrue(dataObject instanceof RefObject_1_0);
 					ObjectView_1_0 objectView = ((RefObject_1_0) dataObject).refDelegate();
-					assertNotNull(objectView);
-					assertNotSame("Made persistent", entity.openmdxjdoGetDelegate(), dataObject);
+					Assertions.assertNotNull(objectView);
+					Assertions.assertNotSame(entity.openmdxjdoGetDelegate(), dataObject, "Made persistent");
 				}
 				if (this instanceof ProxyConnectionTest) {
-					assertFalse("Implementation detail", flag instanceof DelegatingRefObject_1_0);
+					Assertions.assertFalse(flag instanceof DelegatingRefObject_1_0, "Implementation detail");
 				}
 			}
 			if (isBackedUpByStandardDB()) {
@@ -1293,9 +1257,9 @@ public class TestMain {
 					InvoicePositionQuery invoicePositionQuery = (InvoicePositionQuery) PersistenceHelper
 							.newQuery(entityManager.getExtent(InvoicePosition.class), xriPattern);
 					List<InvoicePosition> invoicePositions = segment.getExtent(invoicePositionQuery);
-					assertTrue("Invoice Positions: Second Last", invoicePositions.listIterator(14).hasNext());
-					assertFalse("Invoice Positions: Last", invoicePositions.listIterator(15).hasNext());
-					assertEquals("Invoice Positions: Size", 15, invoicePositions.size());
+					Assertions.assertTrue(invoicePositions.listIterator(14).hasNext(), "Invoice Positions: Second Last");
+					Assertions.assertFalse(invoicePositions.listIterator(15).hasNext(), "Invoice Positions: Last");
+					Assertions.assertEquals( 15,   invoicePositions.size(), "Invoice Positions: Size");
 				}
 				{
 					//
@@ -1307,9 +1271,9 @@ public class TestMain {
 					query.setCandidates(segment.getExtent());
 					@SuppressWarnings("unchecked")
 					List<InvoicePosition> invoicePositions = (List<InvoicePosition>) query.execute();
-					assertTrue("Invoice Positions: Second Last", invoicePositions.listIterator(14).hasNext());
-					assertFalse("Invoice Positions: Last", invoicePositions.listIterator(15).hasNext());
-					assertEquals("Invoice Positions: Size", 15, invoicePositions.size());
+					Assertions.assertTrue(invoicePositions.listIterator(14).hasNext(), "Invoice Positions: Second Last");
+					Assertions.assertFalse(invoicePositions.listIterator(15).hasNext(), "Invoice Positions: Last");
+					Assertions.assertEquals( 15,   invoicePositions.size(), "Invoice Positions: Size");
 				}
 				{
 					InvoicePositionQuery invoicePositionQuery = app1Package.createInvoicePositionQuery();
@@ -1354,8 +1318,7 @@ public class TestMain {
 				this.begin();
 				InvoicePosition invoicePosition0 = invoicePositions.get(0);
 				invoicePosition0.setProductId("p3");
-				assertEquals("CR10011367", Collections.singleton("productId"),
-						DirtyObjects.getModifiedFeatures(invoicePosition0));
+				Assertions.assertEquals(Collections.singleton("productId"),  DirtyObjects.getModifiedFeatures(invoicePosition0), "CR10011367");
 				validateInvoicePositions(invoicePositions, productId, 1);
 				validateInvoicePositions(
 						segment.<InvoicePosition>getExtent(createInvoicePositionQuery(segment, productId)), productId,
@@ -1386,7 +1349,7 @@ public class TestMain {
 				super.taskId = "CR20019855";
 				for (Invoice i : segment.<Invoice>getInvoice()) {
 					for (InvoicePosition p : i.<InvoicePosition>getInvoicePosition()) {
-						assertNotNull("The product id is mandatory", p.getProductId());
+						Assertions.assertNotNull(p.getProductId(), "The product id is mandatory");
 					}
 				}
 			} finally {
@@ -1438,17 +1401,17 @@ public class TestMain {
 																												// well...
 				);
 				List<ConditionRecord> conditions = query.refGetFilter().getCondition();
-				assertEquals("Conditions", 2, conditions.size());
-				assertEquals("Condition 0", SystemAttributes.OBJECT_INSTANCE_OF, conditions.get(0).getFeature());
-				assertEquals("Condition 0", Quantifier.THERE_EXISTS, conditions.get(0).getQuantifier());
-				assertEquals("Condition 0", ConditionType.IS_IN, conditions.get(0).getType());
-				assertEquals("Condition 0", 1, conditions.get(0).getValue().length);
-				assertEquals("Condition 0", "test:openmdx:app1:CycleMember1", conditions.get(0).getValue(0));
-				assertEquals("Condition 1", "m2", conditions.get(1).getFeature());
-				assertEquals("Condition 1", Quantifier.THERE_EXISTS, conditions.get(1).getQuantifier());
-				assertEquals("Condition 1", ConditionType.IS_IN, conditions.get(1).getType());
-				assertEquals("Condition 1", 1, conditions.get(1).getValue().length);
-				assertEquals("Condition 1", new Path(cycle2Id), conditions.get(1).getValue(0));
+				Assertions.assertEquals( 2,   conditions.size(), "Conditions");
+				Assertions.assertEquals(SystemAttributes.OBJECT_INSTANCE_OF,  conditions.get(0).getFeature(), "Condition 0");
+				Assertions.assertEquals(Quantifier.THERE_EXISTS,  conditions.get(0).getQuantifier(), "Condition 0");
+				Assertions.assertEquals(ConditionType.IS_IN,  conditions.get(0).getType(), "Condition 0");
+				Assertions.assertEquals( 1,   conditions.get(0).getValue().length, "Condition 0");
+				Assertions.assertEquals("test:openmdx:app1:CycleMember1",  conditions.get(0).getValue(0), "Condition 0");
+				Assertions.assertEquals("m2",  conditions.get(1).getFeature(), "Condition 1");
+				Assertions.assertEquals(Quantifier.THERE_EXISTS,  conditions.get(1).getQuantifier(), "Condition 1");
+				Assertions.assertEquals(ConditionType.IS_IN,  conditions.get(1).getType(), "Condition 1");
+				Assertions.assertEquals( 1,   conditions.get(1).getValue().length, "Condition 1");
+				Assertions.assertEquals(new Path(cycle2Id),  conditions.get(1).getValue(0), "Condition 1");
 			} finally {
 				super.taskId = null;
 			}
@@ -1461,51 +1424,51 @@ public class TestMain {
 				org.openmdx.base.persistence.spi.Queries.applyStatements(query,
 						"forAllDescription().unlike(\"./.\");thereExistsInvoicePosition().productId().like(\"P.*\");forAllProperty().name().equalTo(\"FLAG\")");
 				List<ConditionRecord> conditions = query.refGetFilter().getCondition();
-				assertEquals("Conditions", 4, conditions.size());
-				assertEquals("Condition 0", SystemAttributes.OBJECT_INSTANCE_OF, conditions.get(0).getFeature());
-				assertEquals("Condition 0", Quantifier.THERE_EXISTS, conditions.get(0).getQuantifier());
-				assertEquals("Condition 0", ConditionType.IS_IN, conditions.get(0).getType());
-				assertEquals("Condition 0", 1, conditions.get(0).getValue().length);
-				assertEquals("Condition 0", "test:openmdx:app1:Invoice", conditions.get(0).getValue(0));
-				assertEquals("Condition 1", "description", conditions.get(1).getFeature());
-				assertEquals("Condition 1", Quantifier.FOR_ALL, conditions.get(1).getQuantifier());
-				assertEquals("Condition 1", ConditionType.IS_UNLIKE, conditions.get(1).getType());
-				assertEquals("Condition 1", 1, conditions.get(1).getValue().length);
-				assertEquals("Condition 1", "./.", conditions.get(1).getValue(0));
-				assertEquals("Condition 2", "invoicePosition", conditions.get(2).getFeature());
-				assertEquals("Condition 2", Quantifier.THERE_EXISTS, conditions.get(2).getQuantifier());
-				assertEquals("Condition 2", ConditionType.IS_IN, conditions.get(2).getType());
-				assertEquals("Condition 2", 1, conditions.get(2).getValue().length);
-				assertTrue("Condition 2", conditions.get(2).getValue(0) instanceof QueryFilterRecord);
+				Assertions.assertEquals( 4,   conditions.size(), "Conditions");
+				Assertions.assertEquals(SystemAttributes.OBJECT_INSTANCE_OF,  conditions.get(0).getFeature(), "Condition 0");
+				Assertions.assertEquals(Quantifier.THERE_EXISTS,  conditions.get(0).getQuantifier(), "Condition 0");
+				Assertions.assertEquals(ConditionType.IS_IN,  conditions.get(0).getType(), "Condition 0");
+				Assertions.assertEquals( 1,   conditions.get(0).getValue().length, "Condition 0");
+				Assertions.assertEquals("test:openmdx:app1:Invoice",  conditions.get(0).getValue(0), "Condition 0");
+				Assertions.assertEquals("description",  conditions.get(1).getFeature(), "Condition 1");
+				Assertions.assertEquals(Quantifier.FOR_ALL,  conditions.get(1).getQuantifier(), "Condition 1");
+				Assertions.assertEquals(ConditionType.IS_UNLIKE,  conditions.get(1).getType(), "Condition 1");
+				Assertions.assertEquals( 1,   conditions.get(1).getValue().length, "Condition 1");
+				Assertions.assertEquals("./.",  conditions.get(1).getValue(0), "Condition 1");
+				Assertions.assertEquals("invoicePosition",  conditions.get(2).getFeature(), "Condition 2");
+				Assertions.assertEquals(Quantifier.THERE_EXISTS,  conditions.get(2).getQuantifier(), "Condition 2");
+				Assertions.assertEquals(ConditionType.IS_IN,  conditions.get(2).getType(), "Condition 2");
+				Assertions.assertEquals( 1,   conditions.get(2).getValue().length, "Condition 2");
+				Assertions.assertTrue(conditions.get(2).getValue(0) instanceof QueryFilterRecord, "Condition 2");
 				List<ConditionRecord> conditions2 = ((QueryFilterRecord) conditions.get(2).getValue(0)).getCondition();
-				assertEquals("Conditions 2", 2, conditions2.size());
-				assertEquals("Condition 2.0", SystemAttributes.OBJECT_INSTANCE_OF, conditions2.get(0).getFeature());
-				assertEquals("Condition 2.0", Quantifier.THERE_EXISTS, conditions2.get(0).getQuantifier());
-				assertEquals("Condition 2.0", ConditionType.IS_IN, conditions2.get(0).getType());
-				assertEquals("Condition 2.0", 1, conditions2.get(0).getValue().length);
-				assertEquals("Condition 2.0", "test:openmdx:app1:InvoicePosition", conditions2.get(0).getValue(0));
-				assertEquals("Condition 2.1", "productId", conditions2.get(1).getFeature());
-				assertEquals("Condition 2.1", Quantifier.THERE_EXISTS, conditions2.get(1).getQuantifier());
-				assertEquals("Condition 2.1", ConditionType.IS_LIKE, conditions2.get(1).getType());
-				assertEquals("Condition 2.1", 1, conditions2.get(1).getValue().length);
-				assertEquals("Condition 2.1", "P.*", conditions2.get(1).getValue(0));
-				assertEquals("Condition 3", "property", conditions.get(3).getFeature());
-				assertEquals("Condition 3", Quantifier.FOR_ALL, conditions.get(3).getQuantifier());
-				assertEquals("Condition 3", ConditionType.IS_IN, conditions.get(3).getType());
-				assertEquals("Condition 3", 1, conditions.get(3).getValue().length);
-				assertTrue("Condition 3", conditions.get(3).getValue(0) instanceof QueryFilterRecord);
+				Assertions.assertEquals( 2,   conditions2.size(), "Conditions 2");
+				Assertions.assertEquals(SystemAttributes.OBJECT_INSTANCE_OF,  conditions2.get(0).getFeature(), "Condition 2.0");
+				Assertions.assertEquals(Quantifier.THERE_EXISTS,  conditions2.get(0).getQuantifier(), "Condition 2.0");
+				Assertions.assertEquals(ConditionType.IS_IN,  conditions2.get(0).getType(), "Condition 2.0");
+				Assertions.assertEquals( 1,   conditions2.get(0).getValue().length, "Condition 2.0");
+				Assertions.assertEquals("test:openmdx:app1:InvoicePosition",  conditions2.get(0).getValue(0), "Condition 2.0");
+				Assertions.assertEquals("productId",  conditions2.get(1).getFeature(), "Condition 2.1");
+				Assertions.assertEquals(Quantifier.THERE_EXISTS,  conditions2.get(1).getQuantifier(), "Condition 2.1");
+				Assertions.assertEquals(ConditionType.IS_LIKE,  conditions2.get(1).getType(), "Condition 2.1");
+				Assertions.assertEquals( 1,   conditions2.get(1).getValue().length, "Condition 2.1");
+				Assertions.assertEquals("P.*",  conditions2.get(1).getValue(0), "Condition 2.1");
+				Assertions.assertEquals("property",  conditions.get(3).getFeature(), "Condition 3");
+				Assertions.assertEquals(Quantifier.FOR_ALL,  conditions.get(3).getQuantifier(), "Condition 3");
+				Assertions.assertEquals(ConditionType.IS_IN,  conditions.get(3).getType(), "Condition 3");
+				Assertions.assertEquals( 1,   conditions.get(3).getValue().length, "Condition 3");
+				Assertions.assertTrue(conditions.get(3).getValue(0) instanceof QueryFilterRecord, "Condition 3");
 				List<ConditionRecord> conditions3 = ((QueryFilterRecord) conditions.get(3).getValue(0)).getCondition();
-				assertEquals("Conditions 3", 2, conditions3.size());
-				assertEquals("Condition 3.0", SystemAttributes.OBJECT_INSTANCE_OF, conditions3.get(0).getFeature());
-				assertEquals("Condition 3.0", Quantifier.THERE_EXISTS, conditions3.get(0).getQuantifier());
-				assertEquals("Condition 3.0", ConditionType.IS_IN, conditions3.get(0).getType());
-				assertEquals("Condition 3.0", 1, conditions3.get(0).getValue().length);
-				assertEquals("Condition 3.0", "org:openmdx:generic1:Property", conditions3.get(0).getValue(0));
-				assertEquals("Condition 3.1", "name", conditions3.get(1).getFeature());
-				assertEquals("Condition 3.1", Quantifier.THERE_EXISTS, conditions3.get(1).getQuantifier());
-				assertEquals("Condition 3.1", ConditionType.IS_IN, conditions3.get(1).getType());
-				assertEquals("Condition 3.1", 1, conditions3.get(1).getValue().length);
-				assertEquals("Condition 3.1", "FLAG", conditions3.get(1).getValue(0));
+				Assertions.assertEquals( 2,   conditions3.size(), "Conditions 3");
+				Assertions.assertEquals(SystemAttributes.OBJECT_INSTANCE_OF,  conditions3.get(0).getFeature(), "Condition 3.0");
+				Assertions.assertEquals(Quantifier.THERE_EXISTS,  conditions3.get(0).getQuantifier(), "Condition 3.0");
+				Assertions.assertEquals(ConditionType.IS_IN,  conditions3.get(0).getType(), "Condition 3.0");
+				Assertions.assertEquals( 1,   conditions3.get(0).getValue().length, "Condition 3.0");
+				Assertions.assertEquals("org:openmdx:generic1:Property",  conditions3.get(0).getValue(0), "Condition 3.0");
+				Assertions.assertEquals("name",  conditions3.get(1).getFeature(), "Condition 3.1");
+				Assertions.assertEquals(Quantifier.THERE_EXISTS,  conditions3.get(1).getQuantifier(), "Condition 3.1");
+				Assertions.assertEquals(ConditionType.IS_IN,  conditions3.get(1).getType(), "Condition 3.1");
+				Assertions.assertEquals( 1,   conditions3.get(1).getValue().length, "Condition 3.1");
+				Assertions.assertEquals("FLAG",  conditions3.get(1).getValue(0), "Condition 3.1");
 			} finally {
 				super.taskId = null;
 			}
@@ -1524,7 +1487,7 @@ public class TestMain {
 					InvoiceQuery invoiceQuery = (InvoiceQuery) super.entityManager.newQuery(Invoice.class);
 					invoiceQuery.thereExistsInvoicePosition().productId().like("P.*");
 					List<Invoice> matchingInvoices = segment.getInvoice(invoiceQuery);
-					assertEquals("Complex query", 2, matchingInvoices.size());
+					Assertions.assertEquals( 2,   matchingInvoices.size(), "Complex query");
 				}
 				{
 					//
@@ -1537,7 +1500,7 @@ public class TestMain {
 					test.openmdx.app1.jmi1.Segment sameSegment = anotherPersistenceManager
 							.getObjectById(test.openmdx.app1.jmi1.Segment.class, segment.refMofId());
 					List<Invoice> matchingInvoices = sameSegment.getInvoice(invoiceQuery);
-					assertEquals("Complex query", 2, matchingInvoices.size());
+					Assertions.assertEquals( 2,   matchingInvoices.size(), "Complex query");
 				}
 				try {
 					//
@@ -1563,14 +1526,13 @@ public class TestMain {
 								positionProperty.setDescription(prefix + "[" + i + "," + j + "]");
 								invoicePosition.addProperty("P" + j, positionProperty);
 							}
-							assertEquals("Properties/Position", propertyCount, invoicePosition.getProperty().size());
+							Assertions.assertEquals( propertyCount,   invoicePosition.getProperty().size(), "Properties/Position");
 						}
-						assertEquals("Positions/Invoice", positionCount, transientInvoice.getInvoicePosition().size());
+						Assertions.assertEquals( positionCount,   transientInvoice.getInvoicePosition().size(), "Positions/Invoice");
 						InvoicePositionQuery positionQuery = (InvoicePositionQuery) super.entityManager
 								.newQuery(InvoicePosition.class);
 						positionQuery.thereExistsProperty().thereExistsDescription().like("ODD.*");
-						assertEquals("ODDs", positionCount / 2,
-								transientInvoice.getInvoicePosition(positionQuery).size());
+						Assertions.assertEquals( (positionCount / 2),   transientInvoice.getInvoicePosition(positionQuery).size(), "ODDs");
 					}
 					{
 						//
@@ -1587,7 +1549,7 @@ public class TestMain {
 							groups[i].setName(name);
 							transientSegment.addPersonGroup(name, groups[i]);
 						}
-						assertEquals("Groups/Segment", groupCount, transientSegment.getPersonGroup().size());
+						Assertions.assertEquals( groupCount,   transientSegment.getPersonGroup().size(), "Groups/Segment");
 						for (int j = 0; j < personCount; j++) {
 							Person person = super.entityManager.newInstance(Person.class);
 							if (j > 0) {
@@ -1596,33 +1558,31 @@ public class TestMain {
 							}
 							transientSegment.addPerson("P" + j, person);
 						}
-						assertEquals("People/Segment", personCount, transientSegment.getPerson().size());
+						Assertions.assertEquals( personCount,   transientSegment.getPerson().size(), "People/Segment");
 						{
 							PersonQuery personQuery = (PersonQuery) super.entityManager.newQuery(Person.class);
 							personQuery.thereExistsPersonGroup().name().equalTo("G1");
-							assertEquals("Some G1", 3, transientSegment.getPerson(personQuery).size());
+							Assertions.assertEquals( 3,   transientSegment.getPerson(personQuery).size(), "Some G1");
 						}
 						{
 							PersonQuery personQuery = (PersonQuery) super.entityManager.newQuery(Person.class);
 							personQuery.thereExistsPersonGroup().name().equalTo("G3");
-							assertEquals("Some G3", 2, transientSegment.getPerson(personQuery).size());
+							Assertions.assertEquals( 2,   transientSegment.getPerson(personQuery).size(), "Some G3");
 						}
 						{
 							PersonQuery personQuery = (PersonQuery) super.entityManager.newQuery(Person.class);
 							personQuery.forAllPersonGroup().name().equalTo("G3");
-							assertEquals("All G3", 3, transientSegment.getPerson(personQuery).size());
+							Assertions.assertEquals( 3,   transientSegment.getPerson(personQuery).size(), "All G3");
 						}
 						{
 							PersonQuery personQuery = (PersonQuery) super.entityManager.newQuery(Person.class);
 							personQuery.forAllPersonGroup().name().like("G.*");
-							assertEquals("All Start With G", personCount,
-									transientSegment.getPerson(personQuery).size());
+							Assertions.assertEquals( personCount,   transientSegment.getPerson(personQuery).size(), "All Start With G");
 						}
 						{
 							PersonQuery personQuery = (PersonQuery) super.entityManager.newQuery(Person.class);
 							personQuery.thereExistsPersonGroup().name().like("G.*");
-							assertEquals("Some Start With G", personCount - 1,
-									transientSegment.getPerson(personQuery).size());
+							Assertions.assertEquals( (personCount - 1),   transientSegment.getPerson(personQuery).size(), "Some Start With G");
 						}
 					}
 				} finally {
@@ -1646,7 +1606,7 @@ public class TestMain {
 						.getObjectById(ReducedJDOHelper.getObjectId(segment))).getAddressFormat();
 				for (AddressFormat addressFormat : addressFormats) {
 					PersistenceManager formatManager = ReducedJDOHelper.getPersistenceManager(addressFormat);
-					assertSame("cci2.getContainer()", segmentManager, formatManager);
+					Assertions.assertSame(segmentManager, formatManager, "cci2.getContainer()");
 					System.out.println("addressFormat=" + addressFormat);
 				}
 			} finally {
@@ -1658,23 +1618,23 @@ public class TestMain {
 			for (NameFormat nameFormat : nameFormats) {
 				System.out.println("nameFormat=" + nameFormat);
 			}
-			assertNull("Unknown name format", segment.getNameFormat(false, "unknown"));
-			assertNull("Unknown address format", segment.getAddressFormat("unknown"));
+			Assertions.assertNull(segment.getNameFormat(false, "unknown"), "Unknown name format");
+			Assertions.assertNull(segment.getAddressFormat("unknown"), "Unknown address format");
 
 			if (isBackedUpByStandardDB())
 				try {
 					super.taskId = "CR20020187";
 					segment.getNameFormat("CR20020187");
-					fail("CR20020187");
+					Assertions.fail("CR20020187");
 				} catch (JmiServiceException exception) {
 					boolean rolledBack = isTransactionRolledBack(exception);
 					if (this instanceof AbstractContainerManagedTransactionTest) {
-						assertFalse("We remain in container managed transaction", rolledBack);
+						Assertions.assertFalse(rolledBack, "We remain in container managed transaction");
 					} else {
 						org.openmdx.base.persistence.cci.UnitOfWork unitOfWork = PersistenceHelper
 								.currentUnitOfWork(ReducedJDOHelper.getPersistenceManager(segment));
-						assertFalse(unitOfWork.isActive());
-						assertTrue("RuntimeException lead to roll-back", rolledBack);
+						Assertions.assertFalse(unitOfWork.isActive());
+						Assertions.assertTrue(rolledBack, "RuntimeException lead to roll-back");
 					}
 				} finally {
 					super.taskId = null;
@@ -1685,7 +1645,7 @@ public class TestMain {
 					this.begin();
 					nameFormat.refSetValue("description", "modified description");
 					this.commit();
-					fail("all attributes are non changeable --> object can not be updated");
+					Assertions.fail("all attributes are non changeable --> object can not be updated");
 				} catch (JDOFatalDataStoreException e) {
 					System.out.println("all attributes are non changeable --> object can not be updated");
 				}
@@ -1697,14 +1657,14 @@ public class TestMain {
 					nameFormat.setDescription("a description");
 					segment.getNameFormat().add(nameFormat);
 					this.commit();
-					fail("constraint isFrozen --> object can not be updated");
+					Assertions.fail("constraint isFrozen --> object can not be updated");
 				} catch (JDOFatalDataStoreException e) {
 					System.out.println("constraint isFrozen --> object can not be updated");
 				}
 
 			InternationalPostalAddress postalAddress = null;
 			EmailAddress emailAddress = null;
-			assertEquals("Initial address count", 0, segment.getAddress().size());
+			Assertions.assertEquals( 0,   segment.getAddress().size(), "Initial address count");
 			for (int i = 0; i < 4; i++) {
 				System.out.println(new String[] { "Rollback address addition", "Clear persistent address collection",
 						"Clear transient address collection", "Commit address addition" }[i]);
@@ -1716,39 +1676,39 @@ public class TestMain {
 				emailAddress.setAddress("hans.muster@app1.ch");
 				segment.addAddress(false, "0002", emailAddress);
 				int addressCount = segment.getAddress().size();
-				assertEquals("Transient added address count", 2, addressCount);
+				Assertions.assertEquals( 2,   addressCount, "Transient added address count");
 				switch (i) {
 				case 0: {
 					this.rollback();
 					addressCount = segment.getAddress().size();
-					assertEquals("Rolled back address count", 0, addressCount);
+					Assertions.assertEquals( 0,   addressCount, "Rolled back address count");
 				}
 					break;
 				case 1: {
 					this.commit();
-					assertEquals("Commited address count", 2, segment.getAddress().size());
+					Assertions.assertEquals( 2,   segment.getAddress().size(), "Commited address count");
 					InternationalPostalAddress retrievedAddress = (InternationalPostalAddress) this.entityManager
 							.getObjectById(postalAddressId);
 					InternationalPostalAddress clonedAddress = PersistenceHelper.clone(retrievedAddress);
-					assertFalse(ReducedJDOHelper.isPersistent(clonedAddress));
+					Assertions.assertFalse(ReducedJDOHelper.isPersistent(clonedAddress));
 					this.entityManager.retrieve(retrievedAddress);
 					this.begin();
 					segment.getAddress().clear();
 					addressCount = segment.getAddress().size();
-					assertEquals("Transient cleared address count", 0, addressCount);
+					Assertions.assertEquals( 0,   addressCount, "Transient cleared address count");
 					this.commit();
 					addressCount = segment.getAddress().size();
-					assertEquals("Cleared persistent address count", 0, addressCount);
+					Assertions.assertEquals( 0,   addressCount, "Cleared persistent address count");
 				}
 					break;
 				case 2: {
 					segment.getAddress().clear();
 					addressCount = segment.getAddress().size();
-					assertEquals("Cleared transient address count", 0, addressCount);
+					Assertions.assertEquals( 0,   addressCount, "Cleared transient address count");
 					this.commit();
 					addressCount = segment.getAddress().size();
-					assertEquals("Cleared committed address count", 0, addressCount);
-					assertTrue("Cleared committed address count", segment.getAddress().isEmpty());
+					Assertions.assertEquals( 0,   addressCount, "Cleared committed address count");
+					Assertions.assertTrue(segment.getAddress().isEmpty(), "Cleared committed address count");
 				}
 					break;
 				case 3: {
@@ -1756,20 +1716,20 @@ public class TestMain {
 					transientAddress.setAddress("john.player@games.net");
 					segment.addAddress(false, "0003", transientAddress);
 					addressCount = segment.getAddress().size();
-					assertEquals("Transient added address count", 3, addressCount);
+					Assertions.assertEquals( 3,   addressCount, "Transient added address count");
 					transientAddress.refDelete(); // segment.getAddress().remove(transientAddress);
 					this.commit();
 					addressCount = segment.getAddress().size();
-					assertEquals("Commited address count", 2, addressCount);
+					Assertions.assertEquals( 2,   addressCount, "Commited address count");
 				}
 					break;
 				default:
-					fail("No more instructions");
+					Assertions.fail("No more instructions");
 				}
 			}
 			Path segmentId = (Path) ReducedJDOHelper.getObjectId(segment);
-			assertTrue("Identity should be available outside the unit of work", Arrays.equals(
-					segmentId.getSuffix(segmentId.size() - 2), new String[] { "segment", STANDARD_SEGMENT_NAME }));
+			Assertions.assertTrue(Arrays.equals(
+			segmentId.getSuffix(segmentId.size() - 2), new String[] { "segment", STANDARD_SEGMENT_NAME }), "Identity should be available outside the unit of work");
 			//
 			// CR20020342
 			//
@@ -1793,9 +1753,9 @@ public class TestMain {
 								segment.refMofId() + "/address/($..)");
 						addressQuery.thereExistsAddressLine().equalTo("Muster");
 						List<PostalAddress> addressList = segment.getExtent(addressQuery);
-						assertFalse("Multivalue predicate on extent", addressList.isEmpty());
+						Assertions.assertFalse(addressList.isEmpty(), "Multivalue predicate on extent");
 						for (PostalAddress address : addressList) {
-							assertTrue("Multivalue predicate", address.getAddressLine().contains("Muster"));
+							Assertions.assertTrue(address.getAddressLine().contains("Muster"), "Multivalue predicate");
 						}
 					}
 					{
@@ -1804,9 +1764,9 @@ public class TestMain {
 								segment.refMofId() + "/address/($..)");
 						addressQuery.forAllAddressLine().notEqualTo("Muster");
 						List<PostalAddress> addressList = segment.getExtent(addressQuery);
-						assertFalse("Multivalue predicate on extent", addressList.isEmpty());
+						Assertions.assertFalse(addressList.isEmpty(), "Multivalue predicate on extent");
 						for (PostalAddress address : addressList) {
-							assertFalse("Multivalue predicate", address.getAddressLine().contains("Muster"));
+							Assertions.assertFalse(address.getAddressLine().contains("Muster"), "Multivalue predicate");
 						}
 					}
 				}
@@ -1823,42 +1783,38 @@ public class TestMain {
 				duplicateAddress.setStreet("Bahnhofstr.");
 				duplicateAddress.setAddressLine(new String[] { "Familie", "Muster" });
 				emailAddress.setAddress("hans.muster@app1.int");
-				assertEquals("Transient E-Mail-Address should have changed", "hans.muster@app1.int",
-						emailAddress.getAddress());
+				Assertions.assertEquals("hans.muster@app1.int",  emailAddress.getAddress(), "Transient E-Mail-Address should have changed");
 				segment.addAddress(false, "0001", duplicateAddress);
 				this.commit();
-				fail("DUPLICATE expected");
+				Assertions.fail("DUPLICATE expected");
 			} catch (JmiServiceException exception) {
-				assertTrue("Early duplicate recognition", currentUnitOfWork().isActive());
-				assertEquals("Duplicate exception expected", BasicException.Code.DUPLICATE,
-						exception.getExceptionCode());
+				Assertions.assertTrue(currentUnitOfWork().isActive(), "Early duplicate recognition");
+				Assertions.assertEquals( BasicException.Code.DUPLICATE,   exception.getExceptionCode(), "Duplicate exception expected");
 				this.rollback();
 			} catch (JDOException exception) {
-				assertFalse("Late duplicate recognition", currentUnitOfWork().isActive());
+				Assertions.assertFalse(currentUnitOfWork().isActive(), "Late duplicate recognition");
 				BasicException exceptionStack = BasicException.toExceptionStack(exception);
-				assertTrue("Unit of work failure", exceptionStack.getExceptionCode() == BasicException.Code.ABORT
-						|| exceptionStack.getExceptionCode() == BasicException.Code.ROLLBACK);
+				Assertions.assertTrue(exceptionStack.getExceptionCode() == BasicException.Code.ABORT
+				|| exceptionStack.getExceptionCode() == BasicException.Code.ROLLBACK, "Unit of work failure");
 			}
-			assertEquals("Persistent E-Mail-Address shouldn't have changed", "hans.muster@app1.ch",
-					emailAddress.getAddress());
-			assertTrue("Identity should be available after unit of work failure",
-					emailAddress.getIdentity().endsWith("/segment/" + STANDARD_SEGMENT_NAME + "/address/0002"));
+			Assertions.assertEquals("hans.muster@app1.ch",  emailAddress.getAddress(), "Persistent E-Mail-Address shouldn't have changed");
+			Assertions.assertTrue(emailAddress.getIdentity().endsWith("/segment/" + STANDARD_SEGMENT_NAME + "/address/0002"), "Identity should be available after unit of work failure");
 			//
 			// CR220019366 Missing implementation
 			//
 			try {
 				super.taskId = "CR220019366";
 				Address original = segment.getAddress("0001");
-				assertEquals("Address.id()", "0001", original.getId());
+				Assertions.assertEquals("0001",  original.getId(), "Address.id()");
 				PersistenceManager sibling = entityManagerFactory.getPersistenceManager();
 				Path xri = new Path(original.refMofId());
 				@SuppressWarnings("unchecked")
 				RefContainer<Address> container = (RefContainer<Address>) sibling.getObjectById(xri.getParent());
 				Address copy = container.refGet(RefContainer.REASSIGNABLE,
 						xri.getLastSegment().toClassicRepresentation());
-				assertEquals("Address.id()", "0001", copy.getId());
-				assertNotSame(original, copy);
-				assertEquals(original, copy);
+				Assertions.assertEquals("0001",  copy.getId(), "Address.id()");
+				Assertions.assertNotSame(original, copy);
+				Assertions.assertEquals(original, copy);
 			} finally {
 				super.taskId = null;
 			}
@@ -1870,8 +1826,8 @@ public class TestMain {
 				this.begin();
 				for (int i = 3; i >= 0; i--) {
 					emailAddress.setAddress("jean.\u00e9echantillon");
-					assertTrue(ReducedJDOHelper.isDirty(emailAddress));
-					assertEquals("jean.\u00e9echantillon", emailAddress.getAddress());
+					Assertions.assertTrue(ReducedJDOHelper.isDirty(emailAddress));
+					Assertions.assertEquals("jean.\u00e9echantillon", emailAddress.getAddress());
 					switch (i) {
 					case 3:
 						this.entityManager.refresh(emailAddress);
@@ -1886,9 +1842,8 @@ public class TestMain {
 					default:
 						this.entityManager.refreshAll();
 					}
-					assertTrue(!ReducedJDOHelper.isDirty(emailAddress));
-					assertEquals("Persistent E-Mail-Address be reset", "hans.muster@app1.ch",
-							emailAddress.getAddress());
+					Assertions.assertTrue(!ReducedJDOHelper.isDirty(emailAddress));
+					Assertions.assertEquals("hans.muster@app1.ch",  emailAddress.getAddress(), "Persistent E-Mail-Address be reset");
 				}
 				this.commit();
 				for (int i = 3; i >= 0; i--) {
@@ -2016,16 +1971,16 @@ public class TestMain {
 			}
 			EmailAddressSendMessageTemplateResult sendResult = emailAddress
 					.sendMessageTemplate(emailAddressSendMessageTemplateParams);
-			assertNotNull("Send result", sendResult);
+			Assertions.assertNotNull(sendResult, "Send result");
 			{
 				PersistenceManager targetManager = ReducedJDOHelper.getPersistenceManager(emailAddress);
-				assertSame("Operation Target Manager", this.entityManager, targetManager);
+				Assertions.assertSame(this.entityManager, targetManager, "Operation Target Manager");
 				targetManager.flush();
 				MessageTemplate deliveredBody = sendResult.getDeliveredBody();
-				assertNotNull("messageTemplate", messageTemplate);
+				Assertions.assertNotNull(messageTemplate, "messageTemplate");
 				PersistenceManager resultManager = ReducedJDOHelper.getPersistenceManager(deliveredBody);
-				assertSame("Operation Result Manager", targetManager, resultManager);
-				assertEquals("Body", "hello world", deliveredBody.getText());
+				Assertions.assertSame(targetManager, resultManager, "Operation Result Manager");
+				Assertions.assertEquals("hello world",  deliveredBody.getText(), "Body");
 			}
 			this.commit();
 
@@ -2040,8 +1995,7 @@ public class TestMain {
 					super.taskId = "CR20019366";
 					Collection<Person> people = segment.getPerson();
 					Person aPerson = people.iterator().next();
-					assertSame("segment.getPerson()", ReducedJDOHelper.getPersistenceManager(segment),
-							ReducedJDOHelper.getPersistenceManager(aPerson));
+					Assertions.assertSame(ReducedJDOHelper.getPersistenceManager(segment), ReducedJDOHelper.getPersistenceManager(aPerson), "segment.getPerson()");
 				} finally {
 					super.taskId = null;
 				}
@@ -2064,8 +2018,7 @@ public class TestMain {
 						runtime.gc();
 						currentMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
 						additionalMemoryUsage = currentMemoryUsage - initialMemoryUsage;
-						assertFalse("Memory used up after " + i + " failed retrievals: " + additionalMemoryUsage,
-								additionalMemoryUsage > limit);
+						Assertions.assertFalse(additionalMemoryUsage > limit, "Memory used up after " + i + " failed retrievals: " + additionalMemoryUsage);
 					}
 				}
 				this.commit();
@@ -2080,17 +2033,17 @@ public class TestMain {
 				super.taskId = "CR0003686";
 				this.begin();
 				person = personClass.createPerson();
-				assertEquals("Mix-in", this instanceof AbstractLocalConnectionTest, person instanceof NaturalPerson);
+				Assertions.assertEquals( (this instanceof AbstractLocalConnectionTest),   (person instanceof NaturalPerson), "Mix-in");
 				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1963-01-01"));
 				person.setLastName("Rossi");
 				person.setSalutation("Signor");
 				person.getGivenName().add("Alfonso");
 				int age = GregorianCalendar.getInstance().get(GregorianCalendar.YEAR) - 1963;
-				assertEquals("Age", age, person.getAge());
+				Assertions.assertEquals(age, person.getAge(), "Age");
 				person.setSex((short) 0);
 				segment.addPerson(false, nextId(), person);
 				this.commit();
-				fail("'Signor' was expected not to be supported");
+				Assertions.fail("'Signor' was expected not to be supported");
 			} catch (JDOFatalDataStoreException exception) {
 				System.out.println("Unsupported language prevents commit");
 			} finally {
@@ -2107,8 +2060,7 @@ public class TestMain {
 				birthDate.setTimezone(-1);
 				person.setBirthdate(birthDate);
 				person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
-				assertEquals("Born at noon", "1960-01-01T12:00:00.000Z",
-						DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()));
+				Assertions.assertEquals("1960-01-01T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()), "Born at noon");
 				person.setLastName("MusterX");
 				person.setSalutation("Herr");
 				person.setSex((short) 0);
@@ -2120,25 +2072,19 @@ public class TestMain {
 				if (this instanceof ProxyConnectionTest) {
 					try {
 						segment.addPerson(person);
-						fail("Birthdate with time zone is invalid: " + birthDate);
+						Assertions.fail("Birthdate with time zone is invalid: " + birthDate);
 					} catch (JmiServiceException expected) {
 						BasicException exceptionStack = BasicException.toExceptionStack(expected);
 						if (this.causeIsGeneric()) {
-							assertEquals("Unit of work has to be rolled back", BasicException.Code.GENERIC,
-									exceptionStack.getExceptionCode());
+							Assertions.assertEquals( BasicException.Code.GENERIC,   exceptionStack.getExceptionCode(), "Unit of work has to be rolled back");
 						} else {
-							assertEquals("Unit of work has to be rolled back",
-									BasicException.Code.TRANSFORMATION_FAILURE, exceptionStack.getExceptionCode());
-							assertEquals("Unit of work has to be rolled back", CommException.class.getName(),
-									exceptionStack.getExceptionClass());
+							Assertions.assertEquals( BasicException.Code.TRANSFORMATION_FAILURE,   exceptionStack.getExceptionCode(), "Unit of work has to be rolled back");
+							Assertions.assertEquals(CommException.class.getName(),  exceptionStack.getExceptionClass(), "Unit of work has to be rolled back");
 							if (BasicException.Code.GENERIC == exceptionStack.getCause(null).getExceptionCode()) {
-								assertEquals("cause", org.xml.sax.SAXException.class.getName(),
-										exceptionStack.getCause(null).getExceptionClass());
+								Assertions.assertEquals(org.xml.sax.SAXException.class.getName(),  exceptionStack.getCause(null).getExceptionClass(), "cause");
 							} else {
-								assertEquals("cause", BasicException.Code.BAD_PARAMETER,
-										exceptionStack.getCause(null).getExceptionCode());
-								assertEquals("cause", IllegalArgumentException.class.getName(),
-										exceptionStack.getCause(null).getExceptionClass());
+								Assertions.assertEquals( BasicException.Code.BAD_PARAMETER,   exceptionStack.getCause(null).getExceptionCode(), "cause");
+								Assertions.assertEquals(IllegalArgumentException.class.getName(),  exceptionStack.getCause(null).getExceptionClass(), "cause");
 							}
 						}
 						System.out.println("ProxyConnectionTest: " + exceptionStack.getCause(null).getExceptionClass());
@@ -2149,53 +2095,44 @@ public class TestMain {
 					try {
 						segment.addPerson(person);
 						this.commit();
-						fail("Birthdate with time zone is invalid: " + birthDate);
+						Assertions.fail("Birthdate with time zone is invalid: " + birthDate);
 					} catch (JDOFatalDataStoreException expected) {
 						BasicException exceptionStack = BasicException.toExceptionStack(expected);
-						assertEquals("Unit of work has to be rolled back", BasicException.Code.ROLLBACK,
-								exceptionStack.getExceptionCode());
-						assertEquals("Initial Cause", BasicException.Code.GENERIC,
-								exceptionStack.getCause(null).getExceptionCode());
-						assertTrue("Initial Cause", IllegalArgumentException.class.getName()
-								.equals(exceptionStack.getCause(null).getExceptionClass()) || // JRE 6
-								NumberFormatException.class.getName()
-										.equals(exceptionStack.getCause(null).getExceptionClass()) // JRE 5.0
-						);
+						Assertions.assertEquals( BasicException.Code.ROLLBACK,   exceptionStack.getExceptionCode(), "Unit of work has to be rolled back");
+						Assertions.assertEquals( BasicException.Code.GENERIC,   exceptionStack.getCause(null).getExceptionCode(), "Initial Cause");
+						Assertions.assertTrue(IllegalArgumentException.class.getName()
+						.equals(exceptionStack.getCause(null).getExceptionClass()) || // JRE 6
+						NumberFormatException.class.getName()
+								.equals(exceptionStack.getCause(null).getExceptionClass()), "Initial Cause");
 					}
 				} else if (this instanceof PessimisticContainerManagedTransactionTest) {
 					try {
 						segment.addPerson(person);
 						this.commit();
-						fail("Birthdate with time zone is invalid: " + birthDate);
+						Assertions.fail("Birthdate with time zone is invalid: " + birthDate);
 					} catch (JDOFatalDataStoreException expected) {
 						BasicException exceptionStack = BasicException.toExceptionStack(expected);
-						assertEquals("Unit of work should have been rolled back", BasicException.Code.ROLLBACK,
-								exceptionStack.getExceptionCode());
-						assertEquals("The initial case is a RuntimeException", BasicException.Code.GENERIC,
-								exceptionStack.getCause(null).getExceptionCode());
-						assertTrue("Initial Cause", IllegalArgumentException.class.getName()
-								.equals(exceptionStack.getCause(null).getExceptionClass()) || // JRE 6
-								NumberFormatException.class.getName()
-										.equals(exceptionStack.getCause(null).getExceptionClass()) // JRE 5.0
-						);
+						Assertions.assertEquals( BasicException.Code.ROLLBACK,   exceptionStack.getExceptionCode(), "Unit of work should have been rolled back");
+						Assertions.assertEquals( BasicException.Code.GENERIC,   exceptionStack.getCause(null).getExceptionCode(), "The initial case is a RuntimeException");
+						Assertions.assertTrue(IllegalArgumentException.class.getName()
+						.equals(exceptionStack.getCause(null).getExceptionClass()) || // JRE 6
+						NumberFormatException.class.getName()
+								.equals(exceptionStack.getCause(null).getExceptionClass()), "Initial Cause");
 					}
 				} else {
 					if (isBackedUpByStandardDB()) {
 						try {
 							segment.addPerson(person);
 							this.commit();
-							fail("Birthdate with time zone is invalid: " + birthDate);
+							Assertions.fail("Birthdate with time zone is invalid: " + birthDate);
 						} catch (JDOFatalDataStoreException expected) {
 							BasicException exceptionStack = BasicException.toExceptionStack(expected);
-							assertEquals("Unit of work should have been rolled back", BasicException.Code.ROLLBACK,
-									exceptionStack.getExceptionCode());
-							assertEquals("Initial Cause", BasicException.Code.GENERIC,
-									exceptionStack.getCause(null).getExceptionCode());
-							assertTrue("Initial Cause", IllegalArgumentException.class.getName()
-									.equals(exceptionStack.getCause(null).getExceptionClass()) || // JRE 6
-									NumberFormatException.class.getName()
-											.equals(exceptionStack.getCause(null).getExceptionClass()) // JRE 5.0
-							);
+							Assertions.assertEquals( BasicException.Code.ROLLBACK,   exceptionStack.getExceptionCode(), "Unit of work should have been rolled back");
+							Assertions.assertEquals( BasicException.Code.GENERIC,   exceptionStack.getCause(null).getExceptionCode(), "Initial Cause");
+							Assertions.assertTrue(IllegalArgumentException.class.getName()
+							.equals(exceptionStack.getCause(null).getExceptionClass()) || // JRE 6
+							NumberFormatException.class.getName()
+									.equals(exceptionStack.getCause(null).getExceptionClass()), "Initial Cause");
 						}
 					} else {
 						this.rollback();
@@ -2213,8 +2150,7 @@ public class TestMain {
 				XMLGregorianCalendar birthDate = Datatypes.create(XMLGregorianCalendar.class, "1960-01-01");
 				person.setBirthdate(birthDate);
 				person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
-				assertEquals("Born at noon", "1960-01-01T12:00:00.000Z",
-						DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()));
+				Assertions.assertEquals("1960-01-01T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()), "Born at noon");
 				person.setLastName("MusterX");
 				person.setSalutation("Herr");
 				person.setSex((short) 0);
@@ -2227,7 +2163,7 @@ public class TestMain {
 				Path personId = segment.refGetPath().getDescendant("person", nextId());
 				try {
 					ReducedJDOHelper.getPersistenceManager(segment).getObjectById(personId);
-					fail("Person does not yet exist");
+					Assertions.fail("Person does not yet exist");
 				} catch (JDOObjectNotFoundException exception) {
 					// Person does not yet exist
 				}
@@ -2259,7 +2195,7 @@ public class TestMain {
 							.newQuery(GenericAddress.class);
 					addressQuery.thereExistsProperty().elementOf(selectedNumbers);
 					List<Address> selectedAddresses = segment.getAddress(addressQuery);
-					assertEquals(1, selectedAddresses.size());
+					Assertions.assertEquals(1,  selectedAddresses.size());
 				}
 				this.begin();
 				telexNumber.getStringValue().put(Integer.valueOf(0), "45112233");
@@ -2274,7 +2210,7 @@ public class TestMain {
 							.newQuery(GenericAddress.class);
 					addressQuery.thereExistsProperty().elementOf(selectedNumbers);
 					List<Address> selectedAddresses = segment.getAddress(addressQuery);
-					assertTrue(selectedAddresses.isEmpty());
+					Assertions.assertTrue(selectedAddresses.isEmpty());
 				}
 				if (isBackedUpByStandardDB()) {
 					{
@@ -2287,7 +2223,7 @@ public class TestMain {
 								.newQuery(GenericAddress.class);
 						addressQuery.thereExistsProperty().elementOf(selectedNumbers);
 						List<Address> selectedAddresses = segment.getAddress(addressQuery);
-						assertEquals(1, selectedAddresses.size());
+						Assertions.assertEquals(1,  selectedAddresses.size());
 					}
 					{
 						StringPropertyQuery numberQuery = (StringPropertyQuery) entityManager
@@ -2299,7 +2235,7 @@ public class TestMain {
 								.newQuery(GenericAddress.class);
 						addressQuery.thereExistsProperty().elementOf(selectedNumbers);
 						List<Address> selectedAddresses = segment.getAddress(addressQuery);
-						assertEquals(1, selectedAddresses.size());
+						Assertions.assertEquals(1,  selectedAddresses.size());
 					}
 				}
 				{
@@ -2311,7 +2247,7 @@ public class TestMain {
 							.newQuery(GenericAddress.class);
 					addressQuery.thereExistsProperty().elementOf(selectedNumbers);
 					List<Address> selectedAddresses = segment.getAddress(addressQuery);
-					assertTrue(selectedAddresses.isEmpty());
+					Assertions.assertTrue(selectedAddresses.isEmpty());
 				}
 				if (isBackedUpByStandardDB()) {
 					StringPropertyQuery numberQuery = (StringPropertyQuery) entityManager
@@ -2323,13 +2259,13 @@ public class TestMain {
 							.newQuery(GenericAddress.class);
 					addressQuery.thereExistsProperty().elementOf(selectedNumbers);
 					Collection<Address> selectedAddresses = segment.getAddress(addressQuery);
-					assertEquals(1, selectedAddresses.size());
+					Assertions.assertEquals(1,  selectedAddresses.size());
 					SegmentQuery segmentQuery = (SegmentQuery) entityManager
 							.newQuery(test.openmdx.app1.jmi1.Segment.class);
 					selectedAddresses = PersistenceHelper.asSubquery(addressQuery);
 					segmentQuery.thereExistsAddress().elementOf(selectedAddresses);
 					List<Segment> selectedSegments = provider.getSegment(segmentQuery);
-					assertEquals(1, selectedSegments.size());
+					Assertions.assertEquals(1,  selectedSegments.size());
 				}
 			} finally {
 				super.taskId = null;
@@ -2348,23 +2284,23 @@ public class TestMain {
 					PersistenceManager anotherPersistenceManager = super.entityManager.getPersistenceManagerFactory()
 							.getPersistenceManager();
 					Person anotherPerson = (Person) anotherPersistenceManager.getObjectById(personId);
-					assertNotSame("Same person in different persistence managers", person, anotherPerson);
-					assertEquals("Same person in different persistence managers", person, anotherPerson);
+					Assertions.assertNotSame(person, anotherPerson, "Same person in different persistence managers");
+					Assertions.assertEquals(person,  anotherPerson, "Same person in different persistence managers");
 					SparseArray<String> anotherInfo = anotherPerson.getAdditionalInfo();
-					assertEquals("CR20018969", 2, anotherInfo.size());
-					assertEquals("CR20018969.0", "Null", anotherInfo.get(0));
-					assertNull("CR20018969.1", anotherInfo.get(1));
-					assertEquals("CR20018969.2", "Zwei", anotherInfo.get(2));
-					assertNull("CR20018969.3", anotherInfo.get(3));
-					assertTrue("CR20018969.1_2", anotherInfo.subMap(1, 2).isEmpty());
+					Assertions.assertEquals( 2,   anotherInfo.size(), "CR20018969");
+					Assertions.assertEquals("Null",  anotherInfo.get(0), "CR20018969.0");
+					Assertions.assertNull(anotherInfo.get(1), "CR20018969.1");
+					Assertions.assertEquals("Zwei",  anotherInfo.get(2), "CR20018969.2");
+					Assertions.assertNull(anotherInfo.get(3), "CR20018969.3");
+					Assertions.assertTrue(anotherInfo.subMap(1, 2).isEmpty(), "CR20018969.1_2");
 					SparseArray<String> tail = anotherInfo.tailMap(1);
-					assertEquals("CR20018969.1_", 1, tail.size());
+					Assertions.assertEquals( 1,   tail.size(), "CR20018969.1_");
 					SparseArray<String> head = anotherInfo.headMap(1);
-					assertEquals("CR20018969._1", 1, head.size());
-					assertEquals("CR20018969.0", "Null", head.get(0));
-					assertNull("CR20018969.0", tail.get(0));
-					assertNull("CR20018969.2", head.get(2));
-					assertEquals("CR20018969.2", "Zwei", tail.get(2));
+					Assertions.assertEquals( 1,   head.size(), "CR20018969._1");
+					Assertions.assertEquals("Null",  head.get(0), "CR20018969.0");
+					Assertions.assertNull(tail.get(0), "CR20018969.0");
+					Assertions.assertNull(head.get(2), "CR20018969.2");
+					Assertions.assertEquals("Zwei",  tail.get(2), "CR20018969.2");
 					PersistenceHelper.currentUnitOfWork(anotherPersistenceManager).begin();
 					for (Map.Entry<Integer, String> e : anotherInfo.entrySet()) {
 						e.setValue(e.getKey().toString());
@@ -2376,17 +2312,13 @@ public class TestMain {
 				if (isBackedUpByStandardDB()) {
 					try {
 						this.commit();
-						fail("CONCURRENT_ACCESS_FAILURE expected");
+						Assertions.fail("CONCURRENT_ACCESS_FAILURE expected");
 					} catch (JDOOptimisticVerificationException exception) {
 						Throwable cause = exception.getCause();
-						assertTrue("A nested exception per object",
-								cause instanceof JDOOptimisticVerificationException);
+						Assertions.assertTrue(cause instanceof JDOOptimisticVerificationException, "A nested exception per object");
 						BasicException exceptionStack = BasicException.toExceptionStack(cause);
-						assertEquals("ROLLBACK expected", BasicException.Code.ROLLBACK,
-								exceptionStack.getExceptionCode());
-						assertEquals("CONCURRENT_ACCESS_FAILURE expected",
-								BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-								exceptionStack.getCause(null).getExceptionCode());
+						Assertions.assertEquals( BasicException.Code.ROLLBACK,   exceptionStack.getExceptionCode(), "ROLLBACK expected");
+						Assertions.assertEquals( BasicException.Code.CONCURRENT_ACCESS_FAILURE,   exceptionStack.getCause(null).getExceptionCode(), "CONCURRENT_ACCESS_FAILURE expected");
 					}
 				} else {
 					this.rollback();
@@ -2396,27 +2328,27 @@ public class TestMain {
 							.getPersistenceManager();
 					Person anotherPerson = (Person) anotherPersistenceManager.getObjectById(personId);
 					SparseArray<String> anotherInfo = anotherPerson.getAdditionalInfo();
-					assertEquals("CR20018969", 2, anotherInfo.size());
-					assertEquals("CR20018969.0", "0", anotherInfo.get(0));
-					assertNull("CR20018969.1", anotherInfo.get(1));
-					assertEquals("CR20018969.2", "2", anotherInfo.get(2));
-					assertNull("CR20018969.3", anotherInfo.get(3));
-					assertTrue("CR20018969.1_2", anotherInfo.subMap(1, 2).isEmpty());
+					Assertions.assertEquals( 2,   anotherInfo.size(), "CR20018969");
+					Assertions.assertEquals("0",  anotherInfo.get(0), "CR20018969.0");
+					Assertions.assertNull(anotherInfo.get(1), "CR20018969.1");
+					Assertions.assertEquals("2",  anotherInfo.get(2), "CR20018969.2");
+					Assertions.assertNull(anotherInfo.get(3), "CR20018969.3");
+					Assertions.assertTrue(anotherInfo.subMap(1, 2).isEmpty(), "CR20018969.1_2");
 					SparseArray<String> tail = anotherInfo.tailMap(1);
-					assertEquals("CR20018969.1_", 1, tail.size());
+					Assertions.assertEquals( 1,   tail.size(), "CR20018969.1_");
 					SparseArray<String> head = anotherInfo.headMap(1);
-					assertEquals("CR20018969._1", 1, head.size());
-					assertEquals("CR20018969.0", "0", head.get(0));
-					assertNull("CR20018969.0", tail.get(0));
-					assertNull("CR20018969.2", head.get(2));
-					assertEquals("CR20018969.2", "2", tail.get(2));
+					Assertions.assertEquals( 1,   head.size(), "CR20018969._1");
+					Assertions.assertEquals("0",  head.get(0), "CR20018969.0");
+					Assertions.assertNull(tail.get(0), "CR20018969.0");
+					Assertions.assertNull(head.get(2), "CR20018969.2");
+					Assertions.assertEquals("2",  tail.get(2), "CR20018969.2");
 				}
 			}
 			Path pId = (Path) ReducedJDOHelper.getObjectId(person);
-			assertEquals("person.refMofId() must be object path", 1, new Path(person.refMofId()).size() % 2);
-			assertEquals("person's path must be object path", 1, pId.size() % 2);
-			assertEquals("person.refIdentity() must corrspond to its path", pId.toXRI(), person.getIdentity());
-			assertEquals("person.refMofId() must corrspond to its path", pId.toXRI(), person.refMofId());
+			Assertions.assertEquals( 1,   (new Path(person.refMofId()).size() % 2), "person.refMofId() must be object path");
+			Assertions.assertEquals( 1,   (pId.size() % 2), "person's path must be object path");
+			Assertions.assertEquals(pId.toXRI(),  person.getIdentity(), "person.refIdentity() must corrspond to its path");
+			Assertions.assertEquals(pId.toXRI(),  person.refMofId(), "person.refMofId() must corrspond to its path");
 
 			if (!(this instanceof AbstractContainerManagedTransactionTest))
 				try {
@@ -2424,8 +2356,7 @@ public class TestMain {
 					PersistenceManagerFactory persistenceManagerFactory = super.entityManager
 							.getPersistenceManagerFactory();
 					PersistenceManager persistenceManager1 = persistenceManagerFactory.getPersistenceManager();
-					assertEquals("Transaction Isolation Level", Constants.TX_REPEATABLE_READ,
-							persistenceManagerFactory.getTransactionIsolationLevel());
+					Assertions.assertEquals(Constants.TX_REPEATABLE_READ,  persistenceManagerFactory.getTransactionIsolationLevel(), "Transaction Isolation Level");
 					{
 						final Date transactionTime1 = new Date(System.currentTimeMillis() - 20L);
 						UserObjects.setTransactionTime(persistenceManager1, new Factory<Date>() {
@@ -2465,7 +2396,7 @@ public class TestMain {
 								Person person1 = (Person) persistenceManager1.getObjectById(personId);
 								person1.getGivenName().add("Klaus");
 								PersistenceHelper.currentUnitOfWork(persistenceManager1).commit();
-								fail("Write lock failure expected");
+								Assertions.fail("Write lock failure expected");
 							} catch (JDOOptimisticVerificationException expected) {
 								// Expected exception
 							}
@@ -2474,7 +2405,7 @@ public class TestMain {
 								Person person1 = (Person) persistenceManager1.getObjectById(personId);
 								persistenceManager1.makeTransactional(person1);
 								PersistenceHelper.currentUnitOfWork(persistenceManager1).commit();
-								fail("Read lock failure expected");
+								Assertions.fail("Read lock failure expected");
 							} catch (JDOOptimisticVerificationException expected) {
 								// Expected exception
 							}
@@ -2499,7 +2430,7 @@ public class TestMain {
 					super.taskId = null;
 				}
 
-			assertEquals("Initial postal code without country code", "8005", postalAddress.getPostalCode());
+			Assertions.assertEquals("8005",  postalAddress.getPostalCode(), "Initial postal code without country code");
 
 			// Add country code to postal code
 			entityManager.refresh(person);
@@ -2511,7 +2442,7 @@ public class TestMain {
 			//
 			super.entityManager.makeTransactional(postalAddress);
 			this.commit();
-			assertEquals("voidOp should have updated the postal codes", "CH-8005", postalAddress.getPostalCode());
+			Assertions.assertEquals("CH-8005",  postalAddress.getPostalCode(), "voidOp should have updated the postal codes");
 
 			// get assigned addresses by index
 			for (int i = 0; i < 2; i++) {
@@ -2552,8 +2483,8 @@ public class TestMain {
 					PersonQuery personQuery = (PersonQuery) super.entityManager.newQuery(Person.class);
 					personQuery.thereExistsAssignedAddress().elementOf(additionalAddresses);
 					List<Person> people = segment.getPerson(personQuery);
-					assertEquals("Join by reference", 1, people.size());
-					assertSame("Join by reference", person, people.iterator().next());
+					Assertions.assertEquals( 1,   people.size(), "Join by reference");
+					Assertions.assertSame(person, people.iterator().next(), "Join by reference");
 				} finally {
 					super.taskId = null;
 				}
@@ -2562,17 +2493,14 @@ public class TestMain {
 				// postal code refreshed
 				if (ReducedJDOHelper.getObjectId(address).equals(ReducedJDOHelper.getObjectId(postalAddress))) {
 					if (address instanceof DelegatingRefObject_1_0) {
-						assertSame("created and retrieved object should be the same",
-								((DelegatingRefObject_1_0) address).openmdxjdoGetDataObject(),
-								((DelegatingRefObject_1_0) postalAddress).openmdxjdoGetDataObject());
+						Assertions.assertSame(((DelegatingRefObject_1_0) address).openmdxjdoGetDataObject(), ((DelegatingRefObject_1_0) postalAddress).openmdxjdoGetDataObject(), "created and retrieved object should be the same");
 					} else {
-						assertSame("created and retrieved object should be the same",
-								((RefObject_1_0) address).refDelegate(), ((RefObject_1_0) postalAddress).refDelegate());
+						Assertions.assertSame(((RefObject_1_0) address).refDelegate(), ((RefObject_1_0) postalAddress).refDelegate(), "created and retrieved object should be the same");
 					}
 				}
 				System.out.println("assigned address=" + ReducedJDOHelper.getObjectId(address));
 			}
-			assertEquals("number of assigned addresses", 6, person.getAssignedAddress().size());
+			Assertions.assertEquals( 6,   person.getAssignedAddress().size(), "number of assigned addresses");
 
 			// assignAddress by operation. This operation does not really
 			// perform an assign. It is just there to see whether the operation
@@ -2601,14 +2529,14 @@ public class TestMain {
 			//
 			try {
 				super.taskId = "CR20020140";
-				assertFalse("Person is clean before the address is assigned", ReducedJDOHelper.isDirty(person));
+				Assertions.assertFalse(ReducedJDOHelper.isDirty(person), "Person is clean before the address is assigned");
 				person.assignAddress(personAssignAddressParams);
 				Object oldVersion = person.getModifiedAt();
-				assertTrue("Person is dirty after the address has been assigned", ReducedJDOHelper.isDirty(person));
+				Assertions.assertTrue(ReducedJDOHelper.isDirty(person), "Person is dirty after the address has been assigned");
 				this.commit();
 				Object newVersion = person.getModifiedAt();
-				assertFalse("Person is clean after commit", ReducedJDOHelper.isDirty(person));
-				assertFalse("Person has been touched", oldVersion.equals(newVersion));
+				Assertions.assertFalse(ReducedJDOHelper.isDirty(person), "Person is clean after commit");
+				Assertions.assertFalse(oldVersion.equals(newVersion), "Person has been touched");
 			} finally {
 				super.taskId = null;
 			}
@@ -2618,21 +2546,21 @@ public class TestMain {
 			try {
 				super.taskId = "CR20018578";
 				this.begin();
-				assertTrue("Persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertFalse("Deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertNotNull("Object Id", ReducedJDOHelper.getObjectId(additionalAddress));
+				Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalAddress), "Persistent");
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalAddress), "Deleted");
+				Assertions.assertNotNull(ReducedJDOHelper.getObjectId(additionalAddress), "Object Id");
 				additionalAddress.refDelete();
-				assertTrue("Persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertTrue("Deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertNotNull("Object Id", ReducedJDOHelper.getObjectId(additionalAddress));
+				Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalAddress), "Persistent");
+				Assertions.assertTrue(ReducedJDOHelper.isDeleted(additionalAddress), "Deleted");
+				Assertions.assertNotNull(ReducedJDOHelper.getObjectId(additionalAddress), "Object Id");
 				Address a = segment.getAddress("CR0002096");
-				assertNotNull("Deleted additional address", a);
-				assertSame("Deleted additional address", additionalAddress, a);
+				Assertions.assertNotNull(a, "Deleted additional address");
+				Assertions.assertSame(additionalAddress, a, "Deleted additional address");
 				this.commit();
-				assertFalse("Persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertNull("Object Id", ReducedJDOHelper.getObjectId(additionalAddress));
-				assertNotNull("Transactional Object Id", ReducedJDOHelper.getTransactionalObjectId(additionalAddress));
-				assertNull("Deleted additional address", segment.getAddress("CR0002096"));
+				Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Persistent");
+				Assertions.assertNull(ReducedJDOHelper.getObjectId(additionalAddress), "Object Id");
+				Assertions.assertNotNull(ReducedJDOHelper.getTransactionalObjectId(additionalAddress), "Transactional Object Id");
+				Assertions.assertNull(segment.getAddress("CR0002096"), "Deleted additional address");
 			} finally {
 				super.taskId = null;
 			}
@@ -2649,20 +2577,16 @@ public class TestMain {
 					Address address;
 					try {
 						address = i.next();
-						assertNotNull("Returning null was the former behaviour", address);
-						assertNotNull("Returning null was the former behaviour", ReducedJDOHelper.getObjectId(address)); // was
+						Assertions.assertNotNull(address, "Returning null was the former behaviour");
+						Assertions.assertNotNull(ReducedJDOHelper.getObjectId(address), "Returning null was the former behaviour"); // was
 																															// current
 																															// object
 																															// id
 						if (ReducedJDOHelper.getObjectId(address).equals(ReducedJDOHelper.getObjectId(postalAddress))) {
 							if (address instanceof DelegatingRefObject_1_0) {
-								assertSame("created and retrieved object should be the same",
-										((DelegatingRefObject_1_0) address).openmdxjdoGetDataObject(),
-										((DelegatingRefObject_1_0) postalAddress).openmdxjdoGetDataObject());
+								Assertions.assertSame(((DelegatingRefObject_1_0) address).openmdxjdoGetDataObject(), ((DelegatingRefObject_1_0) postalAddress).openmdxjdoGetDataObject(), "created and retrieved object should be the same");
 							} else {
-								assertSame("created and retrieved object should be the same",
-										((RefObject_1_0) address).refDelegate(),
-										((RefObject_1_0) postalAddress).refDelegate());
+								Assertions.assertSame(((RefObject_1_0) address).refDelegate(), ((RefObject_1_0) postalAddress).refDelegate(), "created and retrieved object should be the same");
 							}
 						}
 						System.out.println("Assigned address " + j + ": " + ReducedJDOHelper.getObjectId(address));
@@ -2672,7 +2596,7 @@ public class TestMain {
 					}
 				}
 				this.commit();
-				assertEquals("number of assigned addresses", 5, person.getAssignedAddress().size());
+				Assertions.assertEquals( 5,   person.getAssignedAddress().size(), "number of assigned addresses");
 			} finally {
 				super.taskId = null;
 			}
@@ -2690,44 +2614,28 @@ public class TestMain {
 					Invoice additionalInvoice = this.entityManager.newInstance(Invoice.class);
 					additionalInvoice.setProductGroupId("PG" + i);
 					additionalInvoice.setDescription("Invoice # " + invoiceId);
-					assertFalse("Step " + i + " Additional invoice not yet deleted",
-							ReducedJDOHelper.isDeleted(additionalInvoice));
-					assertFalse("Step " + i + " Additional invoice not yet persistent",
-							ReducedJDOHelper.isPersistent(additionalInvoice));
-					assertFalse("Step " + i + " Additional invoice not yet new",
-							ReducedJDOHelper.isNew(additionalInvoice));
-					assertFalse("Step " + i + " Additional invoice not yet persistent",
-							ReducedJDOHelper.isDirty(additionalInvoice));
+					Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalInvoice), "Step " + i + " Additional invoice not yet deleted");
+					Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalInvoice), "Step " + i + " Additional invoice not yet persistent");
+					Assertions.assertFalse(ReducedJDOHelper.isNew(additionalInvoice), "Step " + i + " Additional invoice not yet new");
+					Assertions.assertFalse(ReducedJDOHelper.isDirty(additionalInvoice), "Step " + i + " Additional invoice not yet persistent");
 					InvoicePosition additionalPosition = this.entityManager.newInstance(InvoicePosition.class);
 					additionalPosition.setProductId("P" + i);
-					assertFalse("Step " + i + " Additional position not yet deleted",
-							ReducedJDOHelper.isDeleted(additionalPosition));
-					assertFalse("Step " + i + " Additional position not yet persistent",
-							ReducedJDOHelper.isPersistent(additionalPosition));
-					assertFalse("Step " + i + " Additional position not yet new",
-							ReducedJDOHelper.isNew(additionalPosition));
-					assertFalse("Step " + i + " Additional position not yet persistent",
-							ReducedJDOHelper.isDirty(additionalPosition));
+					Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalPosition), "Step " + i + " Additional position not yet deleted");
+					Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalPosition), "Step " + i + " Additional position not yet persistent");
+					Assertions.assertFalse(ReducedJDOHelper.isNew(additionalPosition), "Step " + i + " Additional position not yet new");
+					Assertions.assertFalse(ReducedJDOHelper.isDirty(additionalPosition), "Step " + i + " Additional position not yet persistent");
 					segment.addInvoice(false, invoiceId, additionalInvoice);
-					assertSame("Step " + i + " Created invoice retrieval", additionalInvoice,
-							segment.getInvoice(false, invoiceId));
-					assertFalse("Step " + i + " Additional invoice not yet deleted",
-							ReducedJDOHelper.isDeleted(additionalInvoice));
-					assertTrue("Step " + i + " Additional invoice now persistent",
-							ReducedJDOHelper.isPersistent(additionalInvoice));
-					assertTrue("Step " + i + " Additional invoice now new", ReducedJDOHelper.isNew(additionalInvoice));
-					assertTrue("Step " + i + " Additional invoice now persistent",
-							ReducedJDOHelper.isDirty(additionalInvoice));
+					Assertions.assertSame(additionalInvoice, segment.getInvoice(false, invoiceId), "Step " + i + " Created invoice retrieval");
+					Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalInvoice), "Step " + i + " Additional invoice not yet deleted");
+					Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalInvoice), "Step " + i + " Additional invoice now persistent");
+					Assertions.assertTrue(ReducedJDOHelper.isNew(additionalInvoice), "Step " + i + " Additional invoice now new");
+					Assertions.assertTrue(ReducedJDOHelper.isDirty(additionalInvoice), "Step " + i + " Additional invoice now persistent");
 					additionalInvoice.addInvoicePosition(false, Integer.toString(i), additionalPosition);
-					assertSame("Step " + i + " Created position retrieval", additionalPosition,
-							additionalInvoice.getInvoicePosition(false, Integer.toString(i)));
-					assertFalse("Step " + i + " Additional invoice not yet deleted",
-							ReducedJDOHelper.isDeleted(additionalPosition));
-					assertTrue("Step " + i + " Additional invoice now persistent",
-							ReducedJDOHelper.isPersistent(additionalPosition));
-					assertTrue("Step " + i + " Additional invoice now new", ReducedJDOHelper.isNew(additionalPosition));
-					assertTrue("Step " + i + " Additional invoice now persistent",
-							ReducedJDOHelper.isDirty(additionalPosition));
+					Assertions.assertSame(additionalPosition, additionalInvoice.getInvoicePosition(false, Integer.toString(i)), "Step " + i + " Created position retrieval");
+					Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalPosition), "Step " + i + " Additional invoice not yet deleted");
+					Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalPosition), "Step " + i + " Additional invoice now persistent");
+					Assertions.assertTrue(ReducedJDOHelper.isNew(additionalPosition), "Step " + i + " Additional invoice now new");
+					Assertions.assertTrue(ReducedJDOHelper.isDirty(additionalPosition), "Step " + i + " Additional invoice now persistent");
 					Object positionId = ReducedJDOHelper.getObjectId(additionalPosition);
 					if (!persistentNew) {
 						this.commit();
@@ -2749,7 +2657,7 @@ public class TestMain {
 							for (Invoice candidate : invoices) {
 								found |= candidate == additionalInvoice;
 							}
-							assertTrue("Join by containment", found);
+							Assertions.assertTrue(found, "Join by containment");
 						} finally {
 							super.taskId = outerTask;
 						}
@@ -2771,7 +2679,7 @@ public class TestMain {
 								for (InvoicePosition candidate : invoicePositions) {
 									found |= candidate == additionalPosition;
 								}
-								assertTrue("Join by parent", found);
+								Assertions.assertTrue(found, "Join by parent");
 							} finally {
 								super.taskId = outerTask;
 							}
@@ -2791,46 +2699,28 @@ public class TestMain {
 						segment.getInvoice().remove(additionalInvoice);
 						break;
 					}
-					assertSame("Step " + i + " Deleted invoice retrieval", additionalInvoice,
-							segment.getInvoice(false, invoiceId));
-					assertTrue("Step " + i + " Additional invoice now deleted",
-							ReducedJDOHelper.isDeleted(additionalInvoice));
-					assertTrue("Step " + i + " Additional invoice still persistent",
-							ReducedJDOHelper.isPersistent(additionalInvoice));
-					assertEquals("Step " + i + " Additional invoice might be new new", isEven(i),
-							ReducedJDOHelper.isNew(additionalInvoice));
-					assertTrue("Step " + i + " Additional invoice now deleted",
-							ReducedJDOHelper.isDirty(additionalInvoice));
-					assertSame("Step " + i + " Deleted position retrieval", additionalPosition,
-							this.entityManager.getObjectById(positionId));
+					Assertions.assertSame(additionalInvoice, segment.getInvoice(false, invoiceId), "Step " + i + " Deleted invoice retrieval");
+					Assertions.assertTrue(ReducedJDOHelper.isDeleted(additionalInvoice), "Step " + i + " Additional invoice now deleted");
+					Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalInvoice), "Step " + i + " Additional invoice still persistent");
+					Assertions.assertEquals( isEven(i),   ReducedJDOHelper.isNew(additionalInvoice), "Step " + i + " Additional invoice might be new new");
+					Assertions.assertTrue(ReducedJDOHelper.isDirty(additionalInvoice), "Step " + i + " Additional invoice now deleted");
+					Assertions.assertSame(additionalPosition, this.entityManager.getObjectById(positionId), "Step " + i + " Deleted position retrieval");
 					if (persistentNew) {
-						assertTrue("Step " + i + " Additional position now deleted",
-								ReducedJDOHelper.isDeleted(additionalPosition));
-						assertTrue("Step " + i + " Additional position still persistent",
-								ReducedJDOHelper.isPersistent(additionalPosition));
-						assertEquals("Step " + i + " Additional position might be new", isEven(i),
-								ReducedJDOHelper.isNew(additionalPosition));
-						assertTrue("Step " + i + " Additional position now deleted",
-								ReducedJDOHelper.isDirty(additionalPosition));
+						Assertions.assertTrue(ReducedJDOHelper.isDeleted(additionalPosition), "Step " + i + " Additional position now deleted");
+						Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalPosition), "Step " + i + " Additional position still persistent");
+						Assertions.assertEquals( isEven(i),   ReducedJDOHelper.isNew(additionalPosition), "Step " + i + " Additional position might be new");
+						Assertions.assertTrue(ReducedJDOHelper.isDirty(additionalPosition), "Step " + i + " Additional position now deleted");
 					}
 					this.commit();
-					assertNull("Step " + i + " Deleted invoice retrieval", segment.getInvoice(false, invoiceId));
-					assertFalse("Step " + i + " Additional invoice now transient",
-							ReducedJDOHelper.isDeleted(additionalInvoice));
-					assertFalse("Step " + i + " Additional invoice now transient",
-							ReducedJDOHelper.isPersistent(additionalInvoice));
-					assertFalse("Step " + i + " Additional invoice now transient",
-							ReducedJDOHelper.isNew(additionalInvoice));
-					assertFalse("Step " + i + " Additional invoice now transient",
-							ReducedJDOHelper.isDirty(additionalInvoice));
-					assertFalse("Step " + i + " Additional position now transient",
-							ReducedJDOHelper.isDeleted(additionalPosition));
-					assertFalse("Step " + i + " Additional position now transient",
-							ReducedJDOHelper.isPersistent(additionalPosition));
-					assertFalse("Step " + i + " Additional position now transient",
-							ReducedJDOHelper.isNew(additionalPosition));
-					assertFalse("Step " + i + " Additional position now transient",
-							ReducedJDOHelper.isDirty(additionalPosition));
+					Assertions.assertNull(segment.getInvoice(false, invoiceId), "Step " + i + " Deleted invoice retrieval");
+					Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalInvoice), "Step " + i + " Additional invoice now transient");
+					Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalInvoice), "Step " + i + " Additional invoice now transient");
+					Assertions.assertFalse(ReducedJDOHelper.isNew(additionalInvoice), "Step " + i + " Additional invoice now transient");
+					Assertions.assertFalse(ReducedJDOHelper.isDirty(additionalInvoice), "Step " + i + " Additional invoice now transient");
+					Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalPosition), "Step " + i + " Additional position now transient");
+					Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalPosition), "Step " + i + " Additional position now transient");
+					Assertions.assertFalse(ReducedJDOHelper.isNew(additionalPosition), "Step " + i + " Additional position now transient");
+					Assertions.assertFalse(ReducedJDOHelper.isDirty(additionalPosition), "Step " + i + " Additional position now transient");
 				}
 			} finally {
 				super.taskId = null;
@@ -2863,8 +2753,7 @@ public class TestMain {
 						thread2.start();
 						thread1.join();
 						thread2.join();
-						assertTrue("With " + pause + " ms pause one thread must fail and one succeed",
-								thread1.isCommitted() ^ thread2.isCommitted());
+						Assertions.assertTrue(thread1.isCommitted() ^ thread2.isCommitted(), "With " + pause + " ms pause one thread must fail and one succeed");
 					}
 					for (long pause = 50L; pause < 1000L; pause += 50L) {
 						CountryChanger thread1 = new CountryChanger(anAddressId, "Deutschland" + pause, -1, pause);
@@ -2873,11 +2762,9 @@ public class TestMain {
 						thread2.start();
 						thread1.join();
 						thread2.join();
-						assertTrue(
-								"Exactly one must succed: With " + pause + " ms pause did thread1 "
-										+ (thread1.isCommitted() ? "commit" : "succeed") + " and thread2 did "
-										+ (thread1.isCommitted() ? "commit" : "roll back"),
-								thread1.isCommitted() ^ thread2.isCommitted());
+						Assertions.assertTrue(thread1.isCommitted() ^ thread2.isCommitted(), "Exactly one must succed: With " + pause + " ms pause did thread1 "
+						+ (thread1.isCommitted() ? "commit" : "succeed") + " and thread2 did "
+						+ (thread1.isCommitted() ? "commit" : "roll back"));
 					}
 				} finally {
 					super.taskId = null;
@@ -2894,71 +2781,68 @@ public class TestMain {
 				additionalAddress.setHouseNumber("2");
 				additionalAddress.setPostalCode("2222");
 				additionalAddress.setStreet("Nebenstrasse");
-				assertFalse("Additional address not yet deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertFalse("Additional address not yet persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertFalse("Additional address not yet new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address not yet deleted");
+				Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address not yet persistent");
+				Assertions.assertFalse(ReducedJDOHelper.isNew(additionalAddress), "Additional address not yet new");
 				segment.addAddress(false, "9002", additionalAddress);
-				assertFalse("Additional address not yet deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertTrue("Additional address now persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertTrue("Additional address now new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address not yet deleted");
+				Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address now persistent");
+				Assertions.assertTrue(ReducedJDOHelper.isNew(additionalAddress), "Additional address now new");
 				additionalAddress.refDelete();
-				assertSame("Deleted address retrieval", additionalAddress, segment.getAddress(false, "9002"));
-				assertTrue("Additional address now deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertTrue("Additional address still persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertTrue("Additional address still new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertSame(additionalAddress, segment.getAddress(false, "9002"), "Deleted address retrieval");
+				Assertions.assertTrue(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address now deleted");
+				Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address still persistent");
+				Assertions.assertTrue(ReducedJDOHelper.isNew(additionalAddress), "Additional address still new");
 				this.rollback();
-				assertFalse("Additional address no longer deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertFalse("Additional address no longer persistent",
-						ReducedJDOHelper.isPersistent(additionalAddress));
-				assertFalse("Additional address no longer new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address no longer deleted");
+				Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address no longer persistent");
+				Assertions.assertFalse(ReducedJDOHelper.isNew(additionalAddress), "Additional address no longer new");
 				this.begin();
 				additionalAddress = app1Package.getPostalAddress().createPostalAddress();
 				additionalAddress.setCity("Liestal");
 				additionalAddress.setHouseNumber("3");
 				additionalAddress.setPostalCode("2222");
 				additionalAddress.setStreet("Nebenstrasse");
-				assertFalse("Additional address not yet deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertFalse("Additional address not yet persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertFalse("Additional address not yet new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address not yet deleted");
+				Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address not yet persistent");
+				Assertions.assertFalse(ReducedJDOHelper.isNew(additionalAddress), "Additional address not yet new");
 				segment.addAddress(false, "9003", additionalAddress);
-				assertFalse("Additional address not yet deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertTrue("Additional address now persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertTrue("Additional address now new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address not yet deleted");
+				Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address now persistent");
+				Assertions.assertTrue(ReducedJDOHelper.isNew(additionalAddress), "Additional address now new");
 				segment.getAddress().remove(QualifierType.REASSIGNABLE, "9003");
-				assertSame("Deleted address retrieval", additionalAddress, segment.getAddress(false, "9003"));
-				assertTrue("Additional address now deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertTrue("Additional address still persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertTrue("Additional address still new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertSame(additionalAddress, segment.getAddress(false, "9003"), "Deleted address retrieval");
+				Assertions.assertTrue(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address now deleted");
+				Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address still persistent");
+				Assertions.assertTrue(ReducedJDOHelper.isNew(additionalAddress), "Additional address still new");
 				this.commit();
-				assertFalse("Additional address no longer deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertFalse("Additional address no longer persistent",
-						ReducedJDOHelper.isPersistent(additionalAddress));
-				assertFalse("Additional address no longer new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address no longer deleted");
+				Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address no longer persistent");
+				Assertions.assertFalse(ReducedJDOHelper.isNew(additionalAddress), "Additional address no longer new");
 				this.begin();
 				additionalAddress = app1Package.getPostalAddress().createPostalAddress();
 				additionalAddress.setCity("Liestal");
 				additionalAddress.setHouseNumber("4");
 				additionalAddress.setPostalCode("2222");
 				additionalAddress.setStreet("Nebenstrasse");
-				assertFalse("Additional address not yet deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertFalse("Additional address not yet persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertFalse("Additional address not yet new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address not yet deleted");
+				Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address not yet persistent");
+				Assertions.assertFalse(ReducedJDOHelper.isNew(additionalAddress), "Additional address not yet new");
 				segment.addAddress(false, "9004", additionalAddress);
-				assertFalse("Additional address not yet deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertTrue("Additional address now persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertTrue("Additional address now new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address not yet deleted");
+				Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address now persistent");
+				Assertions.assertTrue(ReducedJDOHelper.isNew(additionalAddress), "Additional address now new");
 				// segment.getAddress().remove(additionalAddress);
 				// assertSame("Deleted address retrieval", additionalAddress,
 				// segment.getAddress(false, "9004"));
 				// assertTrue("Additional address now deleted",
 				// ReducedJDOHelper.isDeleted(additionalAddress));
-				assertTrue("Additional address still persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertTrue("Additional address still new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address still persistent");
+				Assertions.assertTrue(ReducedJDOHelper.isNew(additionalAddress), "Additional address still new");
 				this.rollback();
-				assertFalse("Additional address no longer deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertFalse("Additional address no longer persistent",
-						ReducedJDOHelper.isPersistent(additionalAddress));
-				assertFalse("Additional address no longer new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address no longer deleted");
+				Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address no longer persistent");
+				Assertions.assertFalse(ReducedJDOHelper.isNew(additionalAddress), "Additional address no longer new");
 				//
 			} finally {
 				super.taskId = null;
@@ -2976,20 +2860,19 @@ public class TestMain {
 				additionalAddress.setHouseNumber("3");
 				additionalAddress.setPostalCode("1111");
 				additionalAddress.setStreet("Hauptstrasse");
-				assertFalse("Additional address not deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertFalse("Additional address not persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertFalse("Additional address not new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address not deleted");
+				Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address not persistent");
+				Assertions.assertFalse(ReducedJDOHelper.isNew(additionalAddress), "Additional address not new");
 				transientSegment.addAddress(false, "9003", additionalAddress);
-				assertFalse("Additional address not deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertFalse("Additional address not persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertFalse("Additional address not new", ReducedJDOHelper.isNew(additionalAddress));
-				assertSame("Transient address retrieval", additionalAddress,
-						transientSegment.getAddress(false, "9003"));
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address not deleted");
+				Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address not persistent");
+				Assertions.assertFalse(ReducedJDOHelper.isNew(additionalAddress), "Additional address not new");
+				Assertions.assertSame(additionalAddress, transientSegment.getAddress(false, "9003"), "Transient address retrieval");
 				transientSegment.getAddress().remove(QualifierType.REASSIGNABLE, "9003");
-				assertNull("Removed address retrieval", transientSegment.getAddress(false, "9003"));
-				assertFalse("Additional address not deleted", ReducedJDOHelper.isDeleted(additionalAddress));
-				assertFalse("Additional address not persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertFalse("Additional address not new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertNull(transientSegment.getAddress(false, "9003"), "Removed address retrieval");
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(additionalAddress), "Additional address not deleted");
+				Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address not persistent");
+				Assertions.assertFalse(ReducedJDOHelper.isNew(additionalAddress), "Additional address not new");
 				this.rollback();
 				this.begin();
 				additionalAddress = app1Package.getPostalAddress().createPostalAddress();
@@ -2998,10 +2881,9 @@ public class TestMain {
 				additionalAddress.setPostalCode("1111");
 				additionalAddress.setStreet("Hauptstrasse");
 				transientSegment.addAddress(false, "9004", additionalAddress);
-				assertSame("Transient address retrieval", additionalAddress,
-						transientSegment.getAddress(false, "9004"));
-				assertTrue("Transient address removal", transientSegment.getAddress().remove(additionalAddress));
-				assertNull("Removed address retrieval", transientSegment.getAddress(false, "9004"));
+				Assertions.assertSame(additionalAddress, transientSegment.getAddress(false, "9004"), "Transient address retrieval");
+				Assertions.assertTrue(transientSegment.getAddress().remove(additionalAddress), "Transient address removal");
+				Assertions.assertNull(transientSegment.getAddress(false, "9004"), "Removed address retrieval");
 				this.rollback();
 			} finally {
 				super.taskId = null;
@@ -3019,18 +2901,17 @@ public class TestMain {
 				additionalAddress.setHouseNumber("0");
 				additionalAddress.setPostalCode("0000");
 				additionalAddress.setStreet("Kirchgasse");
-				assertFalse("Additional address not yet persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertFalse("Additional address not yet new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address not yet persistent");
+				Assertions.assertFalse(ReducedJDOHelper.isNew(additionalAddress), "Additional address not yet new");
 				segment.addAddress(false, "9001", additionalAddress);
-				assertTrue("Additional address now persistent", ReducedJDOHelper.isPersistent(additionalAddress));
-				assertTrue("Additional address now new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address now persistent");
+				Assertions.assertTrue(ReducedJDOHelper.isNew(additionalAddress), "Additional address now new");
 				if (this instanceof PessimisticContainerManagedTransactionTest && testForeign.isEnabled()) {
-					assertEquals("1 row inserted", 1, testForeign.insert("2PC-Test", 1, "Implicitely rolled back"));
+					Assertions.assertEquals( 1,   testForeign.insert("2PC-Test", 1, "Implicitely rolled back"), "1 row inserted");
 				}
 				this.rollback();
-				assertFalse("Additional address no longer persistent",
-						ReducedJDOHelper.isPersistent(additionalAddress));
-				assertFalse("Additional address no longer new", ReducedJDOHelper.isNew(additionalAddress));
+				Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address no longer persistent");
+				Assertions.assertFalse(ReducedJDOHelper.isNew(additionalAddress), "Additional address no longer new");
 				if (isBackedUpByStandardDB())
 					try {
 						System.out.println("Implicit rollback test");
@@ -3040,26 +2921,22 @@ public class TestMain {
 						additionalAddress.setHouseNumber("0");
 						additionalAddress.setPostalCode("0000");
 						additionalAddress.setStreet("Kirchgasse");
-						assertFalse("Additional address not yet persistent",
-								ReducedJDOHelper.isPersistent(additionalAddress));
-						assertFalse("Additional address not yet new", ReducedJDOHelper.isNew(additionalAddress));
+						Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address not yet persistent");
+						Assertions.assertFalse(ReducedJDOHelper.isNew(additionalAddress), "Additional address not yet new");
 						segment.addAddress(false, "CR0002987", additionalAddress);
-						assertTrue("Additional address now persistent",
-								ReducedJDOHelper.isPersistent(additionalAddress));
-						assertTrue("Additional address now new", ReducedJDOHelper.isNew(additionalAddress));
+						Assertions.assertTrue(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address now persistent");
+						Assertions.assertTrue(ReducedJDOHelper.isNew(additionalAddress), "Additional address now new");
 						NameFormat jmiNameFormat = app1Package.getNameFormat().createNameFormat();
 						jmiNameFormat.setDescription("modified description");
 						segment.addNameFormat(false, nextId(), jmiNameFormat);
 						if (this instanceof PessimisticContainerManagedTransactionTest && testForeign.isEnabled()) {
-							assertEquals("1 row inserted", 1,
-									testForeign.insert("2PC-Test", 2, "Explicitely rolled back"));
+							Assertions.assertEquals( 1,   testForeign.insert("2PC-Test", 2, "Explicitely rolled back"), "1 row inserted");
 						}
 						this.commit();
-						fail("constraint isFrozen --> object can not be updated");
+						Assertions.fail("constraint isFrozen --> object can not be updated");
 					} catch (JDOFatalDataStoreException e) {
-						assertFalse("Additional address no longer new", ReducedJDOHelper.isNew(additionalAddress));
-						assertFalse("Additional address no longer persistent",
-								ReducedJDOHelper.isPersistent(additionalAddress));
+						Assertions.assertFalse(ReducedJDOHelper.isNew(additionalAddress), "Additional address no longer new");
+						Assertions.assertFalse(ReducedJDOHelper.isPersistent(additionalAddress), "Additional address no longer persistent");
 					}
 			} finally {
 				super.taskId = null;
@@ -3068,17 +2945,17 @@ public class TestMain {
 				super.taskId = "CR20019671";
 				if (this instanceof PessimisticContainerManagedTransactionTest && testForeign.isEnabled()) {
 					this.begin();
-					assertEquals("1 row inserted", 1, testForeign.insert("2PC-Test", 0, "Committed"));
+					Assertions.assertEquals( 1,   testForeign.insert("2PC-Test", 0, "Committed"), "1 row inserted");
 					this.commit();
-					assertEquals("1 of 3 committed", 1, testForeign.retrieve().size());
+					Assertions.assertEquals( 1,   testForeign.retrieve().size(), "1 of 3 committed");
 				}
-				assertNull("CR20019671 explicit rollback", segment.getAddress("9001"));
-				assertNull("CR20019671 implicit rollback", segment.getAddress("CR0002987"));
+				Assertions.assertNull(segment.getAddress("9001"), "CR20019671 explicit rollback");
+				Assertions.assertNull(segment.getAddress("CR0002987"), "CR20019671 implicit rollback");
 			} finally {
 				super.taskId = null;
 			}
 			for (int i = 0; i < 2; i++) {
-				assertNull("No TRANSIENT person expected", segment.getPerson(false, "TRANSIENT"));
+				Assertions.assertNull(segment.getPerson(false, "TRANSIENT"), "No TRANSIENT person expected");
 				if (i == 0)
 					this.begin();
 			}
@@ -3130,7 +3007,7 @@ public class TestMain {
 							//
 							super.taskId = "CRCR20019192";
 							segment.addForeignPerson("F" + N_PERSONS, person);
-							fail("This shared assoication is expected to be unmodifiable");
+							Assertions.fail("This shared assoication is expected to be unmodifiable");
 						} catch (InvalidCallException expected) {
 							// We expect to pass this exception handler
 						} finally {
@@ -3149,12 +3026,9 @@ public class TestMain {
 			System.out.println("person.createdAt=" + person.getCreatedAt());
 
 			// test unqualified feature retrieval
-			assertTrue("postalAddress.address must be instance of String",
-					emailAddress.refGetValue("address") instanceof String);
-			assertTrue("segment.address must be instance of Container",
-					segment.refGetValue("address") instanceof RefContainer<?>);
-			assertTrue("postalAddress.address must be instance of String",
-					emailAddress.refGetValue("address") instanceof String);
+			Assertions.assertTrue(emailAddress.refGetValue("address") instanceof String, "postalAddress.address must be instance of String");
+			Assertions.assertTrue(segment.refGetValue("address") instanceof RefContainer<?>, "segment.address must be instance of Container");
+			Assertions.assertTrue(emailAddress.refGetValue("address") instanceof String, "postalAddress.address must be instance of String");
 			//
 			// test performance of accessor.jmi of reading all non-derived attributes of
 			// person INSPECTION_COUNT times
@@ -3243,9 +3117,9 @@ public class TestMain {
 			{
 				// get person on 'none', derived association 'SegmentReferencesForeignPerson'
 				person = segment.getForeignPerson("F1");
-				assertNotNull("Foreign Person", person);
+				Assertions.assertNotNull(person, "Foreign Person");
 				PersistenceManager m = ReducedJDOHelper.getPersistenceManager(person);
-				assertSame("Derived association marshalling", super.entityManager, m);
+				Assertions.assertSame(super.entityManager, m, "Derived association marshalling");
 			}
 			{
 				//
@@ -3253,7 +3127,7 @@ public class TestMain {
 				//
 				Path foreignId = segment.refGetPath().getDescendant("foreignPerson", "F1");
 				Person personByForeignId = (Person) super.entityManager.getObjectById(foreignId);
-				assertSame("CR20018977", personByForeignId, person);
+				Assertions.assertSame(personByForeignId, person, "CR20018977");
 			}
 
 			System.out.println("person.age=" + person.getAge());
@@ -3272,7 +3146,7 @@ public class TestMain {
 					}
 				}
 				if (allPeople.isEmpty()) {
-					fail("There should be people");
+					Assertions.fail("There should be people");
 				}
 			} finally {
 				super.taskId = null;
@@ -3309,18 +3183,18 @@ public class TestMain {
 				Person containerElement = containerIterator.next();
 				Person listElement = listIterator.next();
 				if (this instanceof ProxyConnectionTest) {
-					assertFalse("listElement", listElement instanceof NaturalPerson);
-					assertFalse("containerElement", containerElement instanceof NaturalPerson);
+					Assertions.assertFalse(listElement instanceof NaturalPerson, "listElement");
+					Assertions.assertFalse(containerElement instanceof NaturalPerson, "containerElement");
 				} else {
-					assertTrue("listElement", listElement instanceof NaturalPerson);
-					assertFalse("listElement", ((NaturalPerson) listElement).isRetired());
-					assertTrue("containerElement", containerElement instanceof NaturalPerson);
-					assertFalse("containerElement", ((NaturalPerson) containerElement).isRetired());
+					Assertions.assertTrue(listElement instanceof NaturalPerson, "listElement");
+					Assertions.assertFalse(((NaturalPerson) listElement).isRetired(), "listElement");
+					Assertions.assertTrue(containerElement instanceof NaturalPerson, "containerElement");
+					Assertions.assertFalse(((NaturalPerson) containerElement).isRetired(), "containerElement");
 				}
 				for (Iterator<Person> i = personCollection.iterator(); i.hasNext();) {
 					Person p = i.next();
 					PersistenceManager m = ReducedJDOHelper.getPersistenceManager(p);
-					assertSame("Query result marshalling", super.entityManager, m);
+					Assertions.assertSame(super.entityManager, m, "Query result marshalling");
 					break; // Test at least one persistence manager
 				}
 			} finally {
@@ -3331,9 +3205,9 @@ public class TestMain {
 			personList = segment.getPerson(personQuery);
 			boolean nobodyOutThere = personList.isEmpty();
 			System.out.println("There are " + (nobodyOutThere ? "no" : "some") + " people");
-			assertFalse("Anybody out there", nobodyOutThere);
+			Assertions.assertFalse(nobodyOutThere, "Anybody out there");
 			for (Person p : personList) {
-				assertSame("Query result marshalling", super.entityManager, ReducedJDOHelper.getPersistenceManager(p));
+				Assertions.assertSame(super.entityManager, ReducedJDOHelper.getPersistenceManager(p), "Query result marshalling");
 				SysLog.trace("person", p);
 			}
 
@@ -3346,7 +3220,7 @@ public class TestMain {
 					personQuery = (PersonQuery) this.entityManager.newQuery(Person.class);
 					personQuery.thereExistsPersonGroup().name().equalTo("Group 0");
 					List<Person> people = segment.getPerson(personQuery);
-					assertEquals("Cached complex query", 100, people.size());
+					Assertions.assertEquals( 100,   people.size(), "Cached complex query");
 				}
 				if (isBackedUpByStandardDB()) {
 					//
@@ -3359,7 +3233,7 @@ public class TestMain {
 					test.openmdx.app1.jmi1.Segment sameSegment = anotherPersistenceManager
 							.getObjectById(test.openmdx.app1.jmi1.Segment.class, segment.refMofId());
 					List<Person> people = sameSegment.getPerson(personQuery);
-					assertEquals("Standard complex query", 100, people.size());
+					Assertions.assertEquals( 100,   people.size(), "Standard complex query");
 				}
 			} finally {
 				super.taskId = null;
@@ -3370,39 +3244,33 @@ public class TestMain {
 			personQuery.lastName().like(StringTypePredicate.SOUNDS, "Maasteer");
 			if (isBackedUpByStandardDB()) {
 				int people = allPeople.size();
-				assertEquals("1 added by XmlImporter, 1 added with addPerson(), N_PERSONS added by addPerson()",
-						N_PERSONS + 2, people);
+				Assertions.assertEquals( (N_PERSONS + 2),   people, "1 added by XmlImporter, 1 added with addPerson(), N_PERSONS added by addPerson()");
 
 				List<Person> maasteer = allPeople.getAll(personQuery);
 				int numberOfPersons = maasteer.size();
-				assertEquals("number of persons found with SOUNDS_LIKE", TEST_PERSON_COUNT + SIMILAR_NAME_COUNT,
-						numberOfPersons);
+				Assertions.assertEquals( (TEST_PERSON_COUNT + SIMILAR_NAME_COUNT),   numberOfPersons, "number of persons found with SOUNDS_LIKE");
 				this.begin();
 				maasteer.clear();
-				assertEquals("Container emptied", 0, segment.getPerson().size());
+				Assertions.assertEquals( 0,   segment.getPerson().size(), "Container emptied");
 				this.rollback();
 				maasteer = allPeople.getAll(personQuery);
 				{
-					assertTrue("People found with SOUNDS_LIKE: Second Last",
-							maasteer.listIterator(TEST_PERSON_COUNT + SIMILAR_NAME_COUNT - 1).hasNext());
-					assertFalse("People found with SOUNDS_LIKE: Last",
-							maasteer.listIterator(TEST_PERSON_COUNT + SIMILAR_NAME_COUNT).hasNext());
+					Assertions.assertTrue(maasteer.listIterator(TEST_PERSON_COUNT + SIMILAR_NAME_COUNT - 1).hasNext(), "People found with SOUNDS_LIKE: Second Last");
+					Assertions.assertFalse(maasteer.listIterator(TEST_PERSON_COUNT + SIMILAR_NAME_COUNT).hasNext(), "People found with SOUNDS_LIKE: Last");
 				}
 				numberOfPersons = maasteer.size();
-				assertEquals("number of persons found with SOUNDS_LIKE", TEST_PERSON_COUNT + SIMILAR_NAME_COUNT,
-						numberOfPersons);
+				Assertions.assertEquals( (TEST_PERSON_COUNT + SIMILAR_NAME_COUNT),   numberOfPersons, "number of persons found with SOUNDS_LIKE");
 				Counter<Person> counter = new PackageValidator<Person>(segment.refOutermostPackage());
 				allPeople.processAll(personQuery, counter);
-				assertEquals("number of persons found with SOUNDS_LIKE", TEST_PERSON_COUNT + SIMILAR_NAME_COUNT,
-						counter.getCount());
+				Assertions.assertEquals( (TEST_PERSON_COUNT + SIMILAR_NAME_COUNT),   counter.getCount(), "number of persons found with SOUNDS_LIKE");
 				this.begin();
 				maasteer.clear();
 				int remaining = segment.getPerson().size();
-				assertEquals("container emptied", 0, remaining);
+				Assertions.assertEquals( 0,   remaining, "container emptied");
 				if (PROXY_IS_DIRTY_COLLECTION_AWARE || !(this instanceof ProxyConnectionTest)) {
 					counter = new PackageValidator<Person>(segment.refOutermostPackage());
 					allPeople.processAll(personQuery, counter);
-					assertEquals("container emptied", 0, counter.getCount());
+					Assertions.assertEquals( 0,   counter.getCount(), "container emptied");
 				}
 				this.rollback();
 			}
@@ -3432,8 +3300,7 @@ public class TestMain {
 					Person p : maasteer) {
 						numberOfPersons++;
 					}
-					assertEquals("number of persons found with SOUNDS_LIKE", TEST_PERSON_COUNT + SIMILAR_NAME_COUNT,
-							numberOfPersons);
+					Assertions.assertEquals( (TEST_PERSON_COUNT + SIMILAR_NAME_COUNT),   numberOfPersons, "number of persons found with SOUNDS_LIKE");
 
 				} finally {
 					super.taskId = null;
@@ -3454,8 +3321,7 @@ public class TestMain {
 					((Query) personQuery).getFetchPlan().setFetchSize(1000);
 					List<Person> people = segment.getExtent(personQuery);
 					int numberOfPersons = people.size();
-					assertEquals("number of persons found with SOUNDS_LIKE", TEST_PERSON_COUNT + SIMILAR_NAME_COUNT,
-							numberOfPersons);
+					Assertions.assertEquals( (TEST_PERSON_COUNT + SIMILAR_NAME_COUNT),   numberOfPersons, "number of persons found with SOUNDS_LIKE");
 
 				} finally {
 					super.taskId = null;
@@ -3497,14 +3363,14 @@ public class TestMain {
 				List<Person> cr0003454 = segment.getPerson(personQuery);
 				ListIterator<Person> pi = cr0003454.listIterator();
 				for (int i = 0; i < 6; i++) {
-					assertEquals("ListIterator.nextIndex()", i, pi.nextIndex());
+					Assertions.assertEquals( i,   pi.nextIndex(), "ListIterator.nextIndex()");
 					Person pp = (Person) pi.next();
 					System.out.println("person[" + i + "] " + pp.getForeignId());
 				}
 				for (int i = 5; i >= 0; i--) {
-					assertEquals("ListIterator.previousIndex()", i, pi.previousIndex());
+					Assertions.assertEquals( i,   pi.previousIndex(), "ListIterator.previousIndex()");
 					Person pp = (Person) pi.previous();
-					assertEquals("Person[" + i + "].foreignId", "F" + i, pp.getForeignId());
+					Assertions.assertEquals("F" + i,  pp.getForeignId(), "Person[" + i + "].foreignId");
 				}
 			} finally {
 				super.taskId = null;
@@ -3515,13 +3381,13 @@ public class TestMain {
 			try {
 				super.taskId = "CR20019430";
 				this.begin();
-				assertFalse("Pre-modify state", ReducedJDOHelper.isDirty(person));
+				Assertions.assertFalse(ReducedJDOHelper.isDirty(person), "Pre-modify state");
 				person.getGivenName().clear();
-				assertTrue("Pre-flush state", ReducedJDOHelper.isDirty(person));
-				assertTrue("pre-flush attribute retrieval", person.getGivenName().isEmpty());
+				Assertions.assertTrue(ReducedJDOHelper.isDirty(person), "Pre-flush state");
+				Assertions.assertTrue(person.getGivenName().isEmpty(), "pre-flush attribute retrieval");
 				this.entityManager.flush();
-				assertTrue("Post-flush state", ReducedJDOHelper.isDirty(person));
-				assertTrue("Post-flush attribute retrieval", person.getGivenName().isEmpty());
+				Assertions.assertTrue(ReducedJDOHelper.isDirty(person), "Post-flush state");
+				Assertions.assertTrue(person.getGivenName().isEmpty(), "Post-flush attribute retrieval");
 				person.setGivenName("Heiri");
 				person.setLastName("Imhof");
 				person.setForeignId("HI");
@@ -3529,8 +3395,8 @@ public class TestMain {
 				person.setBirthdateAsDateTime(Datatypes.create(Date.class, "20000401T120000.000Z"));
 				person.setSalutation("Herr");
 				this.commit();
-				assertEquals("givenName", Collections.singletonList("Heiri"), person.getGivenName());
-				assertFalse("Post-commit state", ReducedJDOHelper.isDirty(person));
+				Assertions.assertEquals(Collections.singletonList("Heiri"),  person.getGivenName(), "givenName");
+				Assertions.assertFalse(ReducedJDOHelper.isDirty(person), "Post-commit state");
 			} finally {
 				super.taskId = null;
 			}
@@ -3542,9 +3408,9 @@ public class TestMain {
 				this.begin();
 				List<String> givenName = person.getGivenName();
 				givenName.set(0, null);
-				fail("Null values can neither be set nor be added to lists");
+				Assertions.fail("Null values can neither be set nor be added to lists");
 			} catch (JDOUserException expected) {
-				assertTrue(expected.getNestedExceptions()[0] instanceof NullPointerException);
+				Assertions.assertTrue(expected.getNestedExceptions()[0] instanceof NullPointerException);
 			} finally {
 				this.rollback();
 				super.taskId = null;
@@ -3581,18 +3447,18 @@ public class TestMain {
 			if (!isContainerManaged())
 				try {
 					super.taskId = "CR20019967";
-					assertFalse("A givenName", person.getGivenName().isEmpty());
+					Assertions.assertFalse(person.getGivenName().isEmpty(), "A givenName");
 					PersistenceManager anotherManager = newEntityManagerFactory().getPersistenceManager();
 					UserObjects.setBulkLoad(anotherManager, true);
 					try {
 						Person samePerson = anotherManager.getObjectById(Person.class, person.refMofId());
 						PersistenceHelper.currentUnitOfWork(anotherManager).begin();
 						samePerson.getGivenName().clear();
-						assertTrue("No givenName", samePerson.getGivenName().isEmpty());
+						Assertions.assertTrue(samePerson.getGivenName().isEmpty(), "No givenName");
 						PersistenceHelper.currentUnitOfWork(anotherManager).commit();
-						assertTrue("No givenName", samePerson.getGivenName().isEmpty());
+						Assertions.assertTrue(samePerson.getGivenName().isEmpty(), "No givenName");
 						anotherManager.refresh(samePerson);
-						assertTrue("No givenName", samePerson.getGivenName().isEmpty());
+						Assertions.assertTrue(samePerson.getGivenName().isEmpty(), "No givenName");
 					} finally {
 						if (PersistenceHelper.currentUnitOfWork(anotherManager).isActive()) {
 							PersistenceHelper.currentUnitOfWork(anotherManager).rollback();
@@ -3602,7 +3468,7 @@ public class TestMain {
 					anotherManager = newEntityManagerFactory().getPersistenceManager();
 					try {
 						Person samePerson = anotherManager.getObjectById(Person.class, person.refMofId());
-						assertTrue("No givenName", samePerson.getGivenName().isEmpty());
+						Assertions.assertTrue(samePerson.getGivenName().isEmpty(), "No givenName");
 					} finally {
 						if (PersistenceHelper.currentUnitOfWork(anotherManager).isActive()) {
 							PersistenceHelper.currentUnitOfWork(anotherManager).rollback();
@@ -3610,7 +3476,7 @@ public class TestMain {
 						anotherManager.close();
 					}
 					this.entityManager.refresh(person);
-					assertTrue("No givenName", person.getGivenName().isEmpty());
+					Assertions.assertTrue(person.getGivenName().isEmpty(), "No givenName");
 				} finally {
 					super.taskId = null;
 				}
@@ -3635,17 +3501,17 @@ public class TestMain {
 			PersonFormatNameAsResult formattedName = person.formatNameAs(personFormatNameAsParams);
 			this.commit(); // result available after commit only
 			final String formattedNameString = formattedName.getFormattedName();
-			Assert.assertNotNull("formattedNameString must not be null", formattedNameString);
-			Assert.assertFalse("formattedNameString must not be empty".isEmpty());
+			Assertions.assertNotNull(formattedNameString, "formattedNameString must not be null");
+			Assertions.assertFalse("formattedNameString must not be empty".isEmpty());
 			System.out.println("formatted name=" + formattedNameString);
 			final Set<String> formattedNameSet = formattedName.getFormattedNameAsSet();
-			Assert.assertEquals("formattedNameSet must have cardinality 1", 1, formattedNameSet.size());
+			Assertions.assertEquals(1,  formattedNameSet.size(), "formattedNameSet must have cardinality 1");
 			System.out.println("formatted name as set=" + formattedNameSet);
 			final List<String> formattedNameList = formattedName.getFormattedNameAsList();
-			Assert.assertEquals("formattedNameList must have cardinality 1", 1, formattedNameList.size());
+			Assertions.assertEquals(1,  formattedNameList.size(), "formattedNameList must have cardinality 1");
 			System.out.println("formatted name as list=" + formattedNameList);
 			final SparseArray<String> formattedNameArray = formattedName.getFormattedNameAsSparseArray();
-			Assert.assertEquals("formattedNameArray must have cardinality 1", 1, formattedNameArray.size());
+			Assertions.assertEquals(1,  formattedNameArray.size(), "formattedNameArray must have cardinality 1");
 			System.out.println("formatted name as sparsearray=" + formattedNameArray);
 
 			// test optional argument
@@ -3684,7 +3550,7 @@ public class TestMain {
 					personFormatNameAsParams = null;
 				}
 				person.formatNameAs(app1Package.createPersonFormatNameAsParams("InvalidFormat"));
-				fail("CanNotFormatNameException expected");
+				Assertions.fail("CanNotFormatNameException expected");
 			} catch (CanNotFormatNameException e) {
 				System.out.println("formatNameAs() raised exception as expected: " + e.getMessage());
 			}
@@ -3726,7 +3592,7 @@ public class TestMain {
 			System.out.println("dateOp.dateTimeResult=" + dateOpResult.getDateTimeResult());
 
 			// no more NOT_FOUND exceptions
-			assertNull("Not existing person", segment.getPerson("alskdjflaksdjf"));
+			Assertions.assertNull(segment.getPerson("alskdjflaksdjf"), "Not existing person");
 
 			// remove some persons
 
@@ -3740,23 +3606,23 @@ public class TestMain {
 			segment.getPerson(false, "00053").refDelete();
 			segment.getPerson(false, "00082").refDelete();
 			int finalPersonCount = segment.getPerson().size();
-			assertEquals("Transient person count", initialPersonCount - 3, finalPersonCount);
+			Assertions.assertEquals( (initialPersonCount - 3),   finalPersonCount, "Transient person count");
 			this.rollback();
 
 			finalPersonCount = segment.getPerson().size();
-			assertEquals("Rollback person count", initialPersonCount, finalPersonCount);
+			Assertions.assertEquals( initialPersonCount,   finalPersonCount, "Rollback person count");
 			this.begin();
 			segment.getPerson(false, "0001").refDelete();
 			segment.getPerson(false, "00053").refDelete();
 			segment.getPerson(false, "00082").refDelete();
 			finalPersonCount = segment.getPerson().size();
-			assertEquals("Transient person count", initialPersonCount - 3, finalPersonCount);
+			Assertions.assertEquals( (initialPersonCount - 3),   finalPersonCount, "Transient person count");
 			this.commit();
 			finalPersonCount = segment.getPerson().size();
-			assertEquals("Commit person count", initialPersonCount - 3, finalPersonCount);
+			Assertions.assertEquals( (initialPersonCount - 3),   finalPersonCount, "Commit person count");
 
 			// ... and test whether they are removed
-			assertNull("person 0001 not removed", segment.getPerson("0001"));
+			Assertions.assertNull(segment.getPerson("0001"), "person 0001 not removed");
 
 			//
 			// CR0003390 Code Accessor
@@ -3765,19 +3631,19 @@ public class TestMain {
 				super.taskId = "CR0003390";
 				this.begin();
 				person = segment.getPerson("DOE");
-				assertNull("DOE does not exist", person);
+				Assertions.assertNull(person, "DOE does not exist");
 				person = personClass.createPerson();
 				segment.addPerson(false, "DOE", person);
-				assertTrue("DOE is persistent-new", ReducedJDOHelper.isNew(person));
-				assertFalse("DOE is persistent-new", ReducedJDOHelper.isDeleted(person));
+				Assertions.assertTrue(ReducedJDOHelper.isNew(person), "DOE is persistent-new");
+				Assertions.assertFalse(ReducedJDOHelper.isDeleted(person), "DOE is persistent-new");
 				person.refDelete();
 				person = segment.getPerson("DOE");
-				assertTrue("DOE is persistent-new-deleted", ReducedJDOHelper.isNew(person));
-				assertTrue("DOE is persistent-new-deleted", ReducedJDOHelper.isDeleted(person));
+				Assertions.assertTrue(ReducedJDOHelper.isNew(person), "DOE is persistent-new-deleted");
+				Assertions.assertTrue(ReducedJDOHelper.isDeleted(person), "DOE is persistent-new-deleted");
 				this.rollback();
 
 				// Add after failed get
-				assertNull("person NO1 exists", segment.getPerson("NO1"));
+				Assertions.assertNull(segment.getPerson("NO1"), "person NO1 exists");
 
 				this.begin();
 				person = personClass.createPerson();
@@ -3795,11 +3661,11 @@ public class TestMain {
 				this.rollback();
 
 				// ... and test whether they are removed
-				assertNull("Person N01", segment.getPerson(false, "NO1"));
+				Assertions.assertNull(segment.getPerson(false, "NO1"), "Person N01");
 				segment.getPerson().remove(QualifierType.REASSIGNABLE, "NO1");
 
 				// A non-existent person
-				assertNull("Person N02", segment.getPerson(false, "NO2"));
+				Assertions.assertNull(segment.getPerson(false, "NO2"), "Person N02");
 				segment.getPerson().remove(QualifierType.REASSIGNABLE, "NO2");
 
 				// Add after failed removal
@@ -3818,8 +3684,8 @@ public class TestMain {
 				segment.addPerson(false, "NO2", person);
 				this.rollback();
 
-				assertNull("person 00053 not removed", segment.getPerson("00053"));
-				assertNull("person 00082 not removed", segment.getPerson("00082"));
+				Assertions.assertNull(segment.getPerson("00053"), "person 00053 not removed");
+				Assertions.assertNull(segment.getPerson("00082"), "person 00082 not removed");
 
 				// postalAddress.formatAs
 				AddressFormatAsResult formattedAddress = null;
@@ -3899,7 +3765,7 @@ public class TestMain {
 						} else if (address instanceof GenericAddress) {
 							SysLog.detail("Generic addresses are not sent");
 						} else {
-							fail("address format " + address.getClass().getName() + " unknown");
+							Assertions.fail("address format " + address.getClass().getName() + " unknown");
 						}
 					}
 			} finally {
@@ -3909,11 +3775,10 @@ public class TestMain {
 			try {
 				super.taskId = "CR20019669";
 				SegmentHasAddress.Address<Address> addresses = segment.getAddress();
-				assertTrue("Persistence Capable Container", addresses instanceof PersistenceCapable);
-				assertEquals("Container Id", ((Path) ReducedJDOHelper.getObjectId(segment)).getChild("address"),
-						ReducedJDOHelper.getObjectId(addresses));
+				Assertions.assertTrue(addresses instanceof PersistenceCapable, "Persistence Capable Container");
+				Assertions.assertEquals(((Path) ReducedJDOHelper.getObjectId(segment)).getChild("address"),  ReducedJDOHelper.getObjectId(addresses), "Container Id");
 				PersistenceManager manager = ReducedJDOHelper.getPersistenceManager(addresses);
-				assertSame("Container Persistence Manager", ReducedJDOHelper.getPersistenceManager(segment), manager);
+				Assertions.assertSame(ReducedJDOHelper.getPersistenceManager(segment), manager, "Container Persistence Manager");
 			} finally {
 				super.taskId = null;
 			}
@@ -3924,23 +3789,22 @@ public class TestMain {
 				PersistenceManager manager = ReducedJDOHelper.getPersistenceManager(addresses);
 				Object addressId = ReducedJDOHelper.getObjectId(addresses);
 				String xri = ((Path) addressId).toXRI();
-				assertEquals("Validating a RefContainer's string representation",
-						SegmentHasAddress.Address.class.getName() + ": " + xri, addresses.toString());
+				Assertions.assertEquals(SegmentHasAddress.Address.class.getName() + ": " + xri,  addresses.toString(), "Validating a RefContainer's string representation");
 				Object transientAddressId = ReducedJDOHelper.getTransactionalObjectId(addresses);
-				assertTrue("Transient container id", transientAddressId instanceof TransientContainerId);
+				Assertions.assertTrue(transientAddressId instanceof TransientContainerId, "Transient container id");
 				{
 					RefBaseObject container = (RefBaseObject) manager.getObjectById(transientAddressId);
-					assertTrue("The container's JMI class", container instanceof SegmentHasAddress.Address<?>);
-					assertEquals(addresses, container);
-					assertSame("The container's manager", manager, ReducedJDOHelper.getPersistenceManager(container));
-					assertEquals("The container's id", xri, container.refMofId());
+					Assertions.assertTrue(container instanceof SegmentHasAddress.Address<?>, "The container's JMI class");
+					Assertions.assertEquals(addresses, container);
+					Assertions.assertSame(manager, ReducedJDOHelper.getPersistenceManager(container), "The container's manager");
+					Assertions.assertEquals(xri,  container.refMofId(), "The container's id");
 				}
 				{
 					RefBaseObject container = (RefBaseObject) manager.getObjectById(addressId);
-					assertTrue("The container's JMI class", container instanceof SegmentHasAddress.Address<?>);
-					assertEquals(addresses, container);
-					assertEquals("The container's id", xri, container.refMofId());
-					assertSame("The container's manager", manager, ReducedJDOHelper.getPersistenceManager(container));
+					Assertions.assertTrue(container instanceof SegmentHasAddress.Address<?>, "The container's JMI class");
+					Assertions.assertEquals(addresses, container);
+					Assertions.assertEquals(xri,  container.refMofId(), "The container's id");
+					Assertions.assertSame(manager, ReducedJDOHelper.getPersistenceManager(container), "The container's manager");
 				}
 			} finally {
 				super.taskId = null;
@@ -3951,7 +3815,7 @@ public class TestMain {
 				personQuery = app1Package.createPersonQuery();
 				personQuery.createdAt().equalTo(new Date());
 				List<Person> people = segment.<Person>getPerson().getAll(personQuery);
-				assertTrue(people.isEmpty());
+				Assertions.assertTrue(people.isEmpty());
 			} finally {
 				super.taskId = null;
 			}
@@ -3980,15 +3844,15 @@ public class TestMain {
 				member2 = member1.getM2();
 				System.out.println("member1" + member1);
 				System.out.println("member2" + member2);
-				assertNotNull("We need a member value for the next test", member2);
+				Assertions.assertNotNull(member2, "We need a member value for the next test");
 				CycleMember1Query query = app1Package.createCycleMember1Query();
 				query.thereExistsM2().equalTo(member2);
 				query.m2().isNonNull();
 				try {
 					query.thereExistsM2().equalTo(null);
-					fail("equalTo's argument must not be null");
+					Assertions.fail("equalTo's argument must not be null");
 				} catch (JmiServiceException exception) {
-					assertEquals("equalTo(null)", BasicException.Code.BAD_PARAMETER, exception.getExceptionCode());
+					Assertions.assertEquals( BasicException.Code.BAD_PARAMETER,   exception.getExceptionCode(), "equalTo(null)");
 				}
 			} finally {
 				super.taskId = null;
@@ -4007,7 +3871,7 @@ public class TestMain {
 					binaryDocument.setDescription("an empty document");
 					this.commit();
 					this.begin();
-					assertNull("Initilly no content", binaryDocument.getContent());
+					Assertions.assertNull(binaryDocument.getContent(), "Initilly no content");
 					for (int i = 0; i < binaryContent.length; i++) {
 						binaryContent[i] = (byte) ((short) (i % 256));
 					}
@@ -4020,10 +3884,10 @@ public class TestMain {
 					System.out.println("document.keyword=" + binaryDocument.getKeyword());
 					binaryLargeObject = binaryDocument.getContent();
 					this.begin();
-					assertNotNull("BLOB", binaryLargeObject);
+					Assertions.assertNotNull(binaryLargeObject, "BLOB");
 					Long documentSize = binaryLargeObject.getLength();
 					if (documentSize != null) {
-						assertEquals("document size", binaryContent.length, documentSize.longValue());
+						Assertions.assertEquals(binaryContent.length, documentSize.longValue(), "document size");
 					}
 					for (int r = 0; r < 2; r++) {
 						//
@@ -4031,9 +3895,9 @@ public class TestMain {
 						//
 						System.out.println("verifying content (with InputStream)");
 						try (InputStream contentIs = binaryLargeObject.getContent()) {
-							assertNotNull("A large object's stream", contentIs);
+							Assertions.assertNotNull(contentIs, "A large object's stream");
 							for (int i = 0; i < binaryContent.length; i += 10) {
-								assertEquals("content at position " + i, i % 256, contentIs.read());
+								Assertions.assertEquals((i % 256), contentIs.read(), "content at position " + i);
 								contentIs.skip(9);
 							}
 						}
@@ -4051,7 +3915,7 @@ public class TestMain {
 						}
 						try (InputStream contentIs = new ByteArrayInputStream(octets)) {
 							for (int i = 0; i < binaryContent.length; i += 10) {
-								assertEquals("content at position " + i, i % 256, contentIs.read());
+								Assertions.assertEquals((i % 256), contentIs.read(), "content at position " + i);
 								contentIs.skip(9);
 							}
 						}
@@ -4062,8 +3926,7 @@ public class TestMain {
 					PersistenceManager differentManager = newEntityManagerFactory().getPersistenceManager();
 					Document theDocument = (Document) differentManager
 							.getObjectById(ReducedJDOHelper.getObjectId(binaryDocument));
-					assertEquals("Description changed after content access", "A test document",
-							theDocument.getDescription());
+					Assertions.assertEquals("A test document",  theDocument.getDescription(), "Description changed after content access");
 					//
 					// Modify content
 					//
@@ -4074,10 +3937,10 @@ public class TestMain {
 					binaryDocument.setContent(BinaryLargeObjects.valueOf(binaryContent));
 					this.commit();
 					binaryLargeObject = binaryDocument.getContent();
-					assertNotNull("BLOB", binaryLargeObject);
+					Assertions.assertNotNull(binaryLargeObject, "BLOB");
 					documentSize = binaryLargeObject.getLength();
 					if (documentSize != null) {
-						assertEquals("document size", binaryContent.length, documentSize.longValue());
+						Assertions.assertEquals(binaryContent.length,  documentSize.longValue(), "document size");
 					}
 					for (int r = 0; r < 2; r++) {
 						//
@@ -4086,7 +3949,7 @@ public class TestMain {
 						System.out.println("verifying content (with InputStream)");
 						try (InputStream contentIs = binaryLargeObject.getContent()) {
 							for (int i = 0; i < binaryContent.length; i += 10) {
-								assertEquals("Run " + r + ": content at position " + i, i % 137, contentIs.read());
+								Assertions.assertEquals((i % 137), contentIs.read(), "Run " + r + ": content at position " + i);
 								contentIs.skip(9);
 							}
 						}
@@ -4104,7 +3967,7 @@ public class TestMain {
 						}
 						try (InputStream contentIs = new ByteArrayInputStream(octets)) {
 							for (int i = 0; i < binaryContent.length; i += 10) {
-								assertEquals("content at position " + i, i % 137, contentIs.read());
+								Assertions.assertEquals( (i % 137),   contentIs.read(), "content at position " + i);
 								contentIs.skip(9);
 							}
 						}
@@ -4127,7 +3990,7 @@ public class TestMain {
 					segment.addDocument(false, "myText", textDocument);
 					this.commit();
 					this.begin();
-					assertNull("Initially no text", textDocument.getText());
+					Assertions.assertNull(textDocument.getText(), "Initially no text");
 					for (int i = 0; i < characterContent.length; i++) {
 						characterContent[i] = Character.isLetterOrDigit(i) ? (char) i : '_';
 					}
@@ -4139,10 +4002,10 @@ public class TestMain {
 					System.out.println("document.keyword=" + textDocument.getKeyword());
 					this.begin();
 					characterLargeObject = textDocument.getText();
-					assertNotNull("CLOB", characterLargeObject);
+					Assertions.assertNotNull(characterLargeObject, "CLOB");
 					Long documentSize = characterLargeObject.getLength();
 					if (documentSize != null) {
-						assertEquals("document size", characterContent.length, documentSize.longValue());
+						Assertions.assertEquals(characterContent.length, documentSize.longValue(), "document size");
 					}
 					for (int r = 0; r < 2; r++) {
 						//
@@ -4150,10 +4013,9 @@ public class TestMain {
 						//
 						System.out.println("verifying content (with Reader)");
 						try (Reader contentIs = characterLargeObject.getContent()) {
-							assertNotNull("A large object's stream", contentIs);
+							Assertions.assertNotNull(contentIs, "A large object's stream");
 							for (int i = 0; i < characterContent.length; i += 10) {
-								assertEquals("content at position " + i, Character.isLetterOrDigit(i) ? (char) i : '_',
-										contentIs.read());
+								Assertions.assertEquals((Character.isLetterOrDigit(i) ? (char) i : '_'), contentIs.read(), "content at position " + i);
 								contentIs.skip(9);
 							}
 						}
@@ -4171,8 +4033,7 @@ public class TestMain {
 						}
 						try (Reader contentIs = new CharArrayReader(octets)) {
 							for (int i = 0; i < characterContent.length; i += 10) {
-								assertEquals("content at position " + i, Character.isLetterOrDigit(i) ? (char) i : '_',
-										contentIs.read());
+								Assertions.assertEquals((Character.isLetterOrDigit(i) ? (char) i : '_'), contentIs.read(), "content at position " + i);
 								contentIs.skip(9);
 							}
 						}
@@ -4183,8 +4044,7 @@ public class TestMain {
 					PersistenceManager differentManager = newEntityManagerFactory().getPersistenceManager();
 					TextDocument theDocument = (TextDocument) differentManager
 							.getObjectById(ReducedJDOHelper.getObjectId(textDocument));
-					assertEquals("Description changed after content access", "A test document",
-							theDocument.getDescription());
+					Assertions.assertEquals("A test document",  theDocument.getDescription(), "Description changed after content access");
 					//
 					// Modify content
 					//
@@ -4195,10 +4055,10 @@ public class TestMain {
 					textDocument.setText(CharacterLargeObjects.valueOf(characterContent));
 					this.commit();
 					characterLargeObject = textDocument.getText();
-					assertNotNull("CLOB", binaryLargeObject);
+					Assertions.assertNotNull(binaryLargeObject, "CLOB");
 					documentSize = characterLargeObject.getLength();
 					if (documentSize != null) {
-						assertEquals("document size", characterContent.length, documentSize.longValue());
+						Assertions.assertEquals(characterContent.length, documentSize.longValue(), "document size");
 					}
 					for (int r = 0; r < 2; r++) {
 						//
@@ -4207,8 +4067,7 @@ public class TestMain {
 						System.out.println("verifying content (with Reader)");
 						try (Reader contentIs = characterLargeObject.getContent()) {
 							for (int i = 0; i < characterContent.length; i += 10) {
-								assertEquals("Run " + r + ": content at position " + i,
-										Character.isLetterOrDigit(2 * i) ? (char) (2 * i) : '_', contentIs.read());
+								Assertions.assertEquals((Character.isLetterOrDigit(2 * i) ? (char) (2 * i) : '_'),  contentIs.read(), "Run " + r + ": content at position " + i);
 								contentIs.skip(9);
 							}
 						}
@@ -4226,8 +4085,7 @@ public class TestMain {
 						}
 						try (Reader contentIs = new CharArrayReader(text)) {
 							for (int i = 0; i < characterContent.length; i += 10) {
-								assertEquals("content at position " + i,
-										Character.isLetterOrDigit(2 * i) ? (char) (2 * i) : '_', contentIs.read());
+								Assertions.assertEquals((Character.isLetterOrDigit(2 * i) ? (char) (2 * i) : '_'), contentIs.read(), "content at position " + i);
 								contentIs.skip(9);
 							}
 						}
@@ -4250,7 +4108,7 @@ public class TestMain {
 						//
 						UpdateAvoidance updateAvoidance = UserObjects.getPlugInObject(this.entityManager,
 								UpdateAvoidance.class);
-						assertNotNull(UpdateAvoidance.class.getSimpleName(), updateAvoidance);
+						Assertions.assertNotNull(updateAvoidance, UpdateAvoidance.class.getSimpleName());
 						updateAvoidance.touchAllDirtyObjects(this.entityManager);
 					}
 					this.commit();
@@ -4264,8 +4122,7 @@ public class TestMain {
 					// Validate date-time values
 					//
 					person = (Person) super.entityManager.getObjectById(personId);
-					assertEquals("Birthdate as date/time", Datatypes.create(Date.class, "1960-01-01T12:00:00Z"),
-							person.getBirthdateAsDateTime());
+					Assertions.assertEquals(Datatypes.create(Date.class, "1960-01-01T12:00:00Z"),  person.getBirthdateAsDateTime(), "Birthdate as date/time");
 				} finally {
 					super.taskId = null;
 				}
@@ -4294,15 +4151,15 @@ public class TestMain {
 								.detachCopyAll(jmiPeople);
 						Collection<test.openmdx.app1.cci2.Address> jpaAddresses = new ArrayList<test.openmdx.app1.cci2.Address>();
 						cardinality = jpaPeople.size();
-						assertEquals("people", cardinality, jmiPeople.size());
-						assertTrue("Implementation detail", jpaPeople instanceof ArrayList<?>);
+						Assertions.assertEquals(cardinality, jmiPeople.size(), "people");
+						Assertions.assertTrue(jpaPeople instanceof ArrayList<?>, "Implementation detail");
 						for (test.openmdx.app1.cci2.Person p : jpaPeople) {
-							assertFalse("deleted", ReducedJDOHelper.isDeleted(p));
-							assertTrue("detached", ReducedJDOHelper.isDetached(p));
-							assertFalse("dirty", ReducedJDOHelper.isDirty(p));
-							assertFalse("new", ReducedJDOHelper.isNew(p));
-							assertFalse("persistent", ReducedJDOHelper.isPersistent(p));
-							assertFalse("transactional", ReducedJDOHelper.isTransactional(p));
+							Assertions.assertFalse(ReducedJDOHelper.isDeleted(p), "deleted");
+							Assertions.assertTrue(ReducedJDOHelper.isDetached(p), "detached");
+							Assertions.assertFalse(ReducedJDOHelper.isDirty(p), "dirty");
+							Assertions.assertFalse(ReducedJDOHelper.isNew(p), "new");
+							Assertions.assertFalse(ReducedJDOHelper.isPersistent(p), "persistent");
+							Assertions.assertFalse(ReducedJDOHelper.isTransactional(p), "transactional");
 							if ("F10".equals(p.getForeignId())) {
 								test.openmdx.app1.jpa3.Person jpaPersion = (test.openmdx.app1.jpa3.Person) p;
 								test.openmdx.app1.jpa3.EmailAddress jpaAddress = new test.openmdx.app1.jpa3.EmailAddress();
@@ -4313,12 +4170,12 @@ public class TestMain {
 								jpaAddresses.add(jpaAddress);
 								jpaPersion.getGivenName().set(1, "Heinrich");
 								jpaPersion.getAssignedAddress_Id().add(jpaAddress_Id);
-								assertFalse("deleted", ReducedJDOHelper.isDeleted(jpaPersion));
-								assertTrue("detached", ReducedJDOHelper.isDetached(jpaPersion));
-								assertTrue("dirty", ReducedJDOHelper.isDirty(jpaPersion));
-								assertFalse("new", ReducedJDOHelper.isNew(jpaPersion));
-								assertFalse("persistent", ReducedJDOHelper.isPersistent(jpaPersion));
-								assertFalse("transactional", ReducedJDOHelper.isTransactional(jpaPersion));
+								Assertions.assertFalse(ReducedJDOHelper.isDeleted(jpaPersion), "deleted");
+								Assertions.assertTrue(ReducedJDOHelper.isDetached(jpaPersion), "detached");
+								Assertions.assertTrue(ReducedJDOHelper.isDirty(jpaPersion), "dirty");
+								Assertions.assertFalse(ReducedJDOHelper.isNew(jpaPersion), "new");
+								Assertions.assertFalse(ReducedJDOHelper.isPersistent(jpaPersion), "persistent");
+								Assertions.assertFalse(ReducedJDOHelper.isTransactional(jpaPersion), "transactional");
 							}
 						}
 						{
@@ -4341,49 +4198,49 @@ public class TestMain {
 							jpaPeople = (Collection<test.openmdx.app1.cci2.Person>) objectInputStream.readObject();
 							jpaAddresses = (Collection<test.openmdx.app1.cci2.Address>) objectInputStream.readObject();
 							jpaDocument = (test.openmdx.app1.cci2.Document) objectInputStream.readObject();
-							assertEquals("people", cardinality, jpaPeople.size());
-							assertEquals("addresses", 1, jpaAddresses.size());
+							Assertions.assertEquals(cardinality, jpaPeople.size(), "people");
+							Assertions.assertEquals(1, jpaAddresses.size(), "addresses");
 						}
 						this.begin();
 						for (test.openmdx.app1.cci2.Address jpaAddress : jpaAddresses) {
-							assertFalse("deleted", ReducedJDOHelper.isDeleted(jpaAddress));
-							assertFalse("detached", ReducedJDOHelper.isDetached(jpaAddress));
-							assertFalse("dirty", ReducedJDOHelper.isDirty(jpaAddress));
-							assertFalse("new", ReducedJDOHelper.isNew(jpaAddress));
-							assertFalse("persistent", ReducedJDOHelper.isPersistent(jpaAddress));
-							assertFalse("transactional", ReducedJDOHelper.isTransactional(jpaAddress));
+							Assertions.assertFalse(ReducedJDOHelper.isDeleted(jpaAddress), "deleted");
+							Assertions.assertFalse(ReducedJDOHelper.isDetached(jpaAddress), "detached");
+							Assertions.assertFalse(ReducedJDOHelper.isDirty(jpaAddress), "dirty");
+							Assertions.assertFalse(ReducedJDOHelper.isNew(jpaAddress), "new");
+							Assertions.assertFalse(ReducedJDOHelper.isPersistent(jpaAddress), "persistent");
+							Assertions.assertFalse(ReducedJDOHelper.isTransactional(jpaAddress), "transactional");
 							test.openmdx.app1.cci2.Address jmiAddress = super.entityManager.makePersistent(jpaAddress);
-							assertFalse("deleted", ReducedJDOHelper.isDeleted(jmiAddress));
-							assertFalse("detached", ReducedJDOHelper.isDetached(jmiAddress));
-							assertTrue("dirty", ReducedJDOHelper.isDirty(jmiAddress));
-							assertTrue("new", ReducedJDOHelper.isNew(jmiAddress));
-							assertTrue("persistent", ReducedJDOHelper.isPersistent(jmiAddress));
-							assertTrue("transactional", ReducedJDOHelper.isTransactional(jmiAddress));
+							Assertions.assertFalse(ReducedJDOHelper.isDeleted(jmiAddress), "deleted");
+							Assertions.assertFalse(ReducedJDOHelper.isDetached(jmiAddress), "detached");
+							Assertions.assertTrue(ReducedJDOHelper.isDirty(jmiAddress), "dirty");
+							Assertions.assertTrue(ReducedJDOHelper.isNew(jmiAddress), "new");
+							Assertions.assertTrue(ReducedJDOHelper.isPersistent(jmiAddress), "persistent");
+							Assertions.assertTrue(ReducedJDOHelper.isTransactional(jmiAddress), "transactional");
 						}
 						for (test.openmdx.app1.cci2.Person jpaPerson : jpaPeople) {
 							boolean dirty = "F10".equals(jpaPerson.getForeignId());
-							assertFalse("deleted", ReducedJDOHelper.isDeleted(jpaPerson));
-							assertTrue("detached", ReducedJDOHelper.isDetached(jpaPerson));
-							assertEquals("dirty", dirty, ReducedJDOHelper.isDirty(jpaPerson));
-							assertFalse("new", ReducedJDOHelper.isNew(jpaPerson));
-							assertFalse("new", ReducedJDOHelper.isPersistent(jpaPerson));
-							assertFalse("transactional", ReducedJDOHelper.isTransactional(jpaPerson));
+							Assertions.assertFalse(ReducedJDOHelper.isDeleted(jpaPerson), "deleted");
+							Assertions.assertTrue(ReducedJDOHelper.isDetached(jpaPerson), "detached");
+							Assertions.assertEquals(dirty, ReducedJDOHelper.isDirty(jpaPerson), "dirty");
+							Assertions.assertFalse(ReducedJDOHelper.isNew(jpaPerson), "new");
+							Assertions.assertFalse(ReducedJDOHelper.isPersistent(jpaPerson), "new");
+							Assertions.assertFalse(ReducedJDOHelper.isTransactional(jpaPerson), "transactional");
 							test.openmdx.app1.cci2.Person jmiPerson = super.entityManager.makePersistent(jpaPerson);
-							assertFalse("deleted", ReducedJDOHelper.isDeleted(jmiPerson));
-							assertFalse("detached", ReducedJDOHelper.isDetached(jmiPerson));
-							assertEquals("dirty", dirty, ReducedJDOHelper.isDirty(jmiPerson));
-							assertFalse("new", ReducedJDOHelper.isNew(jmiPerson));
-							assertTrue("persistent", ReducedJDOHelper.isPersistent(jmiPerson));
-							assertEquals("transactional", dirty, ReducedJDOHelper.isTransactional(jmiPerson));
+							Assertions.assertFalse(ReducedJDOHelper.isDeleted(jmiPerson), "deleted");
+							Assertions.assertFalse(ReducedJDOHelper.isDetached(jmiPerson), "detached");
+							Assertions.assertEquals(dirty, ReducedJDOHelper.isDirty(jmiPerson), "dirty");
+							Assertions.assertFalse(ReducedJDOHelper.isNew(jmiPerson), "new");
+							Assertions.assertTrue(ReducedJDOHelper.isPersistent(jmiPerson), "persistent");
+							Assertions.assertEquals(dirty, ReducedJDOHelper.isTransactional(jmiPerson), "transactional");
 							if (dirty)
-								assertEquals("Middle Name", "Heinrich", jmiPerson.getGivenName().get(1));
+								Assertions.assertEquals("Heinrich",  jmiPerson.getGivenName().get(1), "Middle Name");
 						}
 						{
 							binaryLargeObject = jpaDocument.getContent();
-							assertNotNull("BLOB", binaryLargeObject);
+							Assertions.assertNotNull(binaryLargeObject, "BLOB");
 							Long documentSize = binaryLargeObject.getLength();
 							if (documentSize != null) {
-								assertEquals("document size", binaryContent.length, documentSize.longValue());
+								Assertions.assertEquals(binaryContent.length, documentSize.longValue(), "document size");
 							}
 							for (int r = 0; r < 2; r++) {
 								//
@@ -4392,8 +4249,7 @@ public class TestMain {
 								System.out.println("verifying content (with InputStream)");
 								try (InputStream contentIs = binaryLargeObject.getContent()) {
 									for (int i = 0; i < binaryContent.length; i += 10) {
-										assertEquals("Run " + r + ": content at position " + i, i % 137,
-												contentIs.read());
+										Assertions.assertEquals((i % 137), contentIs.read(), "Run " + r + ": content at position " + i);
 										contentIs.skip(9);
 									}
 								}
@@ -4411,7 +4267,7 @@ public class TestMain {
 								}
 								try (InputStream contentIs = new ByteArrayInputStream(octets)) {
 									for (int i = 0; i < binaryContent.length; i += 10) {
-										assertEquals("content at position " + i, i % 137, contentIs.read());
+										Assertions.assertEquals((i % 137), contentIs.read(), "content at position " + i);
 										contentIs.skip(9);
 									}
 								}
@@ -4458,12 +4314,12 @@ public class TestMain {
 		 * @param person20019366
 		 */
 		private void validatePerson(Person person20019366) {
-			assertNotNull("Person", person20019366);
+			Assertions.assertNotNull(person20019366, "Person");
 			if (this instanceof ProxyConnectionTest) {
-				assertFalse("Mix-In interface should be absent", person20019366 instanceof NaturalPerson);
+				Assertions.assertFalse(person20019366 instanceof NaturalPerson, "Mix-In interface should be absent");
 			} else {
-				assertTrue("Mix-In interface should be present", person20019366 instanceof NaturalPerson);
-				assertFalse("Person", ((NaturalPerson) person20019366).isRetired());
+				Assertions.assertTrue(person20019366 instanceof NaturalPerson, "Mix-In interface should be present");
+				Assertions.assertFalse(((NaturalPerson) person20019366).isRetired(), "Person");
 			}
 		}
 
@@ -4591,11 +4447,11 @@ public class TestMain {
 				int expectedCount) {
 			int count = 0;
 			for (InvoicePosition p : invoicePositions) {
-				assertEquals("Remaining invoice positions", productId, p.getProductId());
+				Assertions.assertEquals(productId,  p.getProductId(), "Remaining invoice positions");
 				count++;
 			}
-			assertEquals("Invoice positions with product id " + productId, expectedCount, count);
-			assertEquals("Invoice positions with product id " + productId, expectedCount, invoicePositions.size());
+			Assertions.assertEquals(expectedCount, count, "Invoice positions with product id " + productId);
+			Assertions.assertEquals(expectedCount, invoicePositions.size(), "Invoice positions with product id " + productId);
 		}
 
 		/**
@@ -4678,32 +4534,32 @@ public class TestMain {
 		 * @param query
 		 */
 		private void validateCycleQuery(RefQuery_1_0 query) {
-			assertTrue("CycleMember1QueryCCI Query Interface", query instanceof CycleMember1Query);
+			Assertions.assertTrue(query instanceof CycleMember1Query, "CycleMember1QueryCCI Query Interface");
 			List<ConditionRecord> m1Conditions = query.refGetFilter().getCondition();
-			assertEquals("m1 Conditions", 2, m1Conditions.size());
-			assertEquals("m1 Condition 0", SystemAttributes.OBJECT_INSTANCE_OF, m1Conditions.get(0).getFeature());
-			assertEquals("m1 Condition 0", Quantifier.THERE_EXISTS, m1Conditions.get(0).getQuantifier());
-			assertEquals("m1 Condition 0", ConditionType.IS_IN, m1Conditions.get(0).getType());
-			assertEquals("m1 Condition 0", 1, m1Conditions.get(0).getValue().length);
-			assertEquals("m1 Condition 0", "test:openmdx:app1:CycleMember1", m1Conditions.get(0).getValue(0));
-			assertTrue("m1 Condition 1", m1Conditions.get(1).getValue(0) instanceof QueryFilterRecord);
+			Assertions.assertEquals(2,   m1Conditions.size(), "m1 Conditions");
+			Assertions.assertEquals(SystemAttributes.OBJECT_INSTANCE_OF,  m1Conditions.get(0).getFeature(), "m1 Condition 0");
+			Assertions.assertEquals(Quantifier.THERE_EXISTS,  m1Conditions.get(0).getQuantifier(), "m1 Condition 0");
+			Assertions.assertEquals(ConditionType.IS_IN,  m1Conditions.get(0).getType(), "m1 Condition 0");
+			Assertions.assertEquals( 1,   m1Conditions.get(0).getValue().length, "m1 Condition 0");
+			Assertions.assertEquals("test:openmdx:app1:CycleMember1",  m1Conditions.get(0).getValue(0), "m1 Condition 0");
+			Assertions.assertTrue(m1Conditions.get(1).getValue(0) instanceof QueryFilterRecord, "m1 Condition 1");
 			List<ConditionRecord> m2Conditions = ((QueryFilterRecord) m1Conditions.get(1).getValue(0)).getCondition();
-			assertEquals("m2 Conditions", 3, m2Conditions.size());
-			assertEquals("m2 Condition 0", SystemAttributes.OBJECT_INSTANCE_OF, m2Conditions.get(0).getFeature());
-			assertEquals("m2 Condition 0", Quantifier.THERE_EXISTS, m2Conditions.get(0).getQuantifier());
-			assertEquals("m2 Condition 0", ConditionType.IS_IN, m2Conditions.get(0).getType());
-			assertEquals("m2 Condition 0", 1, m2Conditions.get(0).getValue().length);
-			assertEquals("m2 Condition 0", "test:openmdx:app1:CycleMember2", m2Conditions.get(0).getValue(0));
-			assertEquals("m2 Condition 1", "description", m2Conditions.get(1).getFeature());
-			assertEquals("m2 Condition 1", Quantifier.THERE_EXISTS, m2Conditions.get(1).getQuantifier());
-			assertEquals("m2 Condition 1", ConditionType.IS_IN, m2Conditions.get(1).getType());
-			assertEquals("m2 Condition 1", 2, m2Conditions.get(1).getValue().length);
-			assertEquals("m2 Condition 1", "Cycle Member \"CR20020022\"", m2Conditions.get(1).getValue(0));
-			assertEquals("m2 Condition 1", "n/a", m2Conditions.get(1).getValue(1));
-			assertEquals("m2 Condition 2", "m1", m2Conditions.get(2).getFeature());
-			assertEquals("m2 Condition 2", Quantifier.FOR_ALL, m2Conditions.get(2).getQuantifier());
-			assertEquals("m2 Condition 2", ConditionType.IS_IN, m2Conditions.get(2).getType());
-			assertEquals("m2 Condition 2", 0, m2Conditions.get(2).getValue().length);
+			Assertions.assertEquals( 3,   m2Conditions.size(), "m2 Conditions");
+			Assertions.assertEquals(SystemAttributes.OBJECT_INSTANCE_OF,  m2Conditions.get(0).getFeature(), "m2 Condition 0");
+			Assertions.assertEquals(Quantifier.THERE_EXISTS,  m2Conditions.get(0).getQuantifier(), "m2 Condition 0");
+			Assertions.assertEquals(ConditionType.IS_IN,  m2Conditions.get(0).getType(), "m2 Condition 0");
+			Assertions.assertEquals( 1,   m2Conditions.get(0).getValue().length, "m2 Condition 0");
+			Assertions.assertEquals("test:openmdx:app1:CycleMember2",  m2Conditions.get(0).getValue(0), "m2 Condition 0");
+			Assertions.assertEquals("description",  m2Conditions.get(1).getFeature(), "m2 Condition 1");
+			Assertions.assertEquals(Quantifier.THERE_EXISTS,  m2Conditions.get(1).getQuantifier(), "m2 Condition 1");
+			Assertions.assertEquals(ConditionType.IS_IN,  m2Conditions.get(1).getType(), "m2 Condition 1");
+			Assertions.assertEquals( 2,   m2Conditions.get(1).getValue().length, "m2 Condition 1");
+			Assertions.assertEquals("Cycle Member \"CR20020022\"",  m2Conditions.get(1).getValue(0), "m2 Condition 1");
+			Assertions.assertEquals("n/a",  m2Conditions.get(1).getValue(1), "m2 Condition 1");
+			Assertions.assertEquals("m1",  m2Conditions.get(2).getFeature(), "m2 Condition 2");
+			Assertions.assertEquals(Quantifier.FOR_ALL,  m2Conditions.get(2).getQuantifier(), "m2 Condition 2");
+			Assertions.assertEquals(ConditionType.IS_IN,  m2Conditions.get(2).getType(), "m2 Condition 2");
+			Assertions.assertEquals( 0,   m2Conditions.get(2).getValue().length, "m2 Condition 2");
 		}
 
 		/**
@@ -4727,9 +4583,9 @@ public class TestMain {
 			// By Task Id
 			//
 			Collection<UnitOfWork> task = AuditQueries.getUnitOfWorkBelongingToTask(super.entityManager, "CR20018578");
-			assertEquals("Size of task CR20018578", 1 * run, task.size());
+			Assertions.assertEquals( (1 * run),   task.size(), "Size of task CR20018578");
 			task = AuditQueries.getUnitOfWorkBelongingToTask(super.entityManager, "CR0002096");
-			assertEquals("Size of task CR0002096", 2 * run, task.size());
+			Assertions.assertEquals( (2 * run),   task.size(), "Size of task CR0002096");
 			dumpTask("CR0002096", task);
 			//
 			// By Object
@@ -4752,12 +4608,12 @@ public class TestMain {
 			Collection<UnitOfWork> task = AuditQueries.getUnitOfWorkInvolvingObject(from, null, invoice);
 			String id = "Involve InvoicePosition CR20019372.";
 			dumpTask(id + scope, task);
-			assertEquals(id + scope, (1 * create + 1) * factor, task.size());
+			Assertions.assertEquals( ((1 * create + 1) * factor),   task.size(), id + scope);
 			id = "Involve InvoicePosition... CR20019372.";
 			Collection<ExtentCapable> tree = PersistenceHelper.getCandidates(
 					this.entityManager.getExtent(ExtentCapable.class, true), invoice.refMofId() + "/($...)");
 			task = AuditQueries.getUnitOfWorkInvolvingObject(from, null, tree);
-			assertEquals(id + scope, (1 * create + 1) * factor, task.size());
+			Assertions.assertEquals( ((1 * create + 1) * factor),   task.size(), id + scope);
 			for (UnitOfWork unitOfWork : task) {
 				for (Iterator<Involvement> i = unitOfWork.<Involvement>getInvolvement().iterator(); i.hasNext();) {
 					Involvement involvement = i.next();
@@ -4776,23 +4632,23 @@ public class TestMain {
 			Collection<UnitOfWork> task = AuditQueries.getUnitOfWorkInvolvingObject(from, null, person);
 			String id = "involve Person # ID500012";
 			dumpTask(id + scope, task);
-			assertEquals(id + scope, (1 * create + 8) * factor, task.size());
+			Assertions.assertEquals( ((1 * create + 8) * factor),   task.size(), id + scope);
 			if (scoped || run == 1) {
 				Modifiable lastImage = null;
 				for (UnitOfWork unitOfWork : task) {
 					Involvement involvement = unitOfWork.getInvolvement(person.refGetPath().toClassicRepresentation());
-					assertNotNull(id, involvement);
+					Assertions.assertNotNull(involvement, id);
 					if (lastImage != null) {
-						assertSame(id, lastImage, involvement.getBeforeImage());
+						Assertions.assertSame(lastImage, involvement.getBeforeImage(), id);
 					}
 					lastImage = involvement.getAfterImage();
 				}
-				assertNotNull(id, lastImage);
+				Assertions.assertNotNull(lastImage, id);
 			}
 			if (create == 0) {
 				try {
 					task = AuditQueries.getUnitOfWorkCreatingObject(from, null, person);
-					fail("Create not audited in EMBEDDED mode");
+					Assertions.fail("Create not audited in EMBEDDED mode");
 				} catch (UnsupportedOperationException exception) {
 					// Create not audited in audit1 mode
 				}
@@ -4800,49 +4656,49 @@ public class TestMain {
 				id = "create Person # ID500012";
 				task = AuditQueries.getUnitOfWorkCreatingObject(from, null, person);
 				dumpTask(id + scope, task);
-				assertEquals(id + scope, (1 * create + 0) * factor, task.size());
+				Assertions.assertEquals( ((1 * create + 0) * factor),   task.size(), id + scope);
 			}
 			if (run == 1) {
 				id = "touch Person # ID500012";
 				task = AuditQueries.getUnitOfWorkTouchingObject(from, null, null, person);
 				dumpTask(id + scope, task);
-				assertEquals(id + scope, (0 * create + 8) * factor, task.size());
+				Assertions.assertEquals( ((0 * create + 8) * factor),   task.size(), id + scope);
 				id = "touch specific attributes of Person # ID500012";
 				task = AuditQueries.getUnitOfWorkTouchingObject(from, null, Sets.asSet(Arrays
 						.asList("test:openmdx:app1:Person:assignedAddress", "test:openmdx:app1:Person:additionalInfo")),
 						person);
 				dumpTask(id + scope, task);
-				assertEquals(id + scope, (0 * create + 4) * factor, task.size());
+				Assertions.assertEquals( ((0 * create + 4) * factor),   task.size(), id + scope);
 			}
 			if (scoped || run == 1) {
 				id = "remove Person # ID500012";
 				task = AuditQueries.getUnitOfWorkRemovingObject(from, null, person);
 				dumpTask(id + scope, task);
-				assertEquals(id + scope, 0 * factor, task.size());
+				Assertions.assertEquals( (0 * factor),   task.size(), id + scope);
 			}
 			id = "all units of work";
 			task = AuditQueries.getUnitOfWorkForTimeRange(super.entityManager, from, null);
 			dumpTask(id + scope, task);
-			assertEquals(id + scope, (16 * create + 69) * factor, task.size());
+			Assertions.assertEquals( ((16 * create + 69) * factor),   task.size(), id + scope);
 			id = "units of work involving people";
 			task = AuditQueries.getUnitOfWorkInvolvingObject(from, null, PersistenceHelper.getCandidates(
 					super.entityManager.getExtent(Person.class), dataSegmentId.getDescendant("person", "%")));
 			dumpTask(id + scope, task);
-			assertEquals(id + scope, (3 * create + 14) * factor, task.size());
+			Assertions.assertEquals( ((3 * create + 14) * factor),   task.size(), id + scope);
 			id = "units of work involving deleted object";
 			Path addressId = dataSegmentId.getDescendant("address", "CR0002096");
 			task = AuditQueries.getUnitOfWorkInvolvingObject(from, null,
 					PersistenceHelper.getCandidates(super.entityManager.getExtent(Person.class), addressId.toXRI()));
 			dumpTask(id + scope, task);
-			assertEquals(id + scope, (1 * create + 1) * factor, task.size());
+			Assertions.assertEquals( ((1 * create + 1) * factor),   task.size(), id + scope);
 			id = "units of work deleting object";
 			task = AuditQueries.getUnitOfWorkRemovingObject(from, null,
 					PersistenceHelper.getCandidates(super.entityManager.getExtent(Person.class), addressId.toXRI()));
 			dumpTask(id + scope, task);
-			assertEquals(id + scope, (0 * create + 1) * factor, task.size());
+			Assertions.assertEquals( ((0 * create + 1) * factor),   task.size(), id + scope);
 			for (UnitOfWork unitOfWork : task) {
 				for (Involvement involvement : unitOfWork.<Involvement>getInvolvement()) {
-					assertNull(id + scope, involvement.getAfterImage());
+					Assertions.assertNull(involvement.getAfterImage(), id + scope);
 				}
 			}
 		}
@@ -4928,8 +4784,7 @@ public class TestMain {
 						runtime.gc();
 						currentMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
 						additionalMemoryUsage = currentMemoryUsage - initialMemoryUsage;
-						assertFalse("Memory used up after " + ii + " failed retrievals: " + additionalMemoryUsage,
-								additionalMemoryUsage > limit);
+						Assertions.assertFalse(additionalMemoryUsage > limit, "Memory used up after " + ii + " failed retrievals: " + additionalMemoryUsage);
 					}
 				}
 				limit += 3500;
@@ -5035,7 +4890,7 @@ public class TestMain {
 
 		public void testCR20044760() {
 			final Collection<Node> nodes = getNodes();
-			Assert.assertFalse("There are no nodes", nodes.isEmpty());
+			Assertions.assertFalse(nodes.isEmpty(), "There are no nodes");
 			for (Node node : nodes) {
 				Collection<Entry> entries = node.<Entry>getEntry();
 				for (Object entry : entries) {
@@ -5314,7 +5169,7 @@ public class TestMain {
 
 	}
 
-	@Ignore("openMDX test server usually not running")
+	@Disabled("openMDX test server usually not running")
 	public static class RemoteConnectionTest extends ProxyConnectionTest {
 
 		/*

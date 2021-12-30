@@ -47,13 +47,6 @@
  */
 package test.openmdx.datatypes1;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -81,18 +74,18 @@ import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
 import javax.naming.NamingException;
-import javax.naming.spi.NamingManager;
 import javax.resource.cci.MappedRecord;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openmdx.application.xml.Exporter;
 import org.openmdx.application.xml.Importer;
 import org.openmdx.base.jmi1.Authority;
@@ -100,9 +93,9 @@ import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.rest.spi.RestParser;
 import org.openmdx.base.rest.spi.RestSource;
+import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.state2.spi.Order;
 import org.w3c.cci2.ImmutableDatatype;
@@ -122,17 +115,15 @@ import test.openmdx.datatypes1.jmi1.Segment;
 /**
  * Datatypes Test
  */
+@ExtendWith(OpenmdxTestCoreStandardExtension.class)
 public class DatatypesTest  {
 
-    @BeforeClass
+    @BeforeAll
     public static void createPersistenceManagerFactory(
     ) throws NamingException{
         entityManagerFactory = JDOHelper.getPersistenceManagerFactory(
             "test-Datatypes-EntityManagerFactory"
         );
-        if(!NamingManager.hasInitialContextFactoryBuilder()) {
-            NonManagedInitialContextFactoryBuilder.install(null);
-        }
     }
 
     protected final static TimeZone UTC = TimeZone.getTimeZone("UTC");
@@ -164,7 +155,7 @@ public class DatatypesTest  {
      * @throws IOException 
      * @throws URISyntaxException 
      */
-    @Before
+    @BeforeEach
     public void setUp(
     ) throws ParseException, URISyntaxException{  
         DatatypeFactory datatypeFactory = DatatypeFactories.xmlDatatypeFactory();
@@ -229,16 +220,16 @@ public class DatatypesTest  {
     @Test
     public void testCR20019941() throws IOException, ClassNotFoundException{
         XMLGregorianCalendar original = Datatypes.create(XMLGregorianCalendar.class, "20000401");
-        assertTrue("Date is immutable", original instanceof ImmutableDatatype<?>);
+        Assertions.assertTrue(original instanceof ImmutableDatatype<?>, "Date is immutable");
         XMLGregorianCalendar copy = copy(original);
-        assertNotSame("Immutable date gets mutable", original.getClass(), copy.getClass());
-        assertFalse("A Date's copy is mutable", copy instanceof ImmutableDatatype<?>);
-        assertEquals("2000-04-01", copy.toXMLFormat());
+        Assertions.assertNotSame(original.getClass(), copy.getClass(), "Immutable date gets mutable");
+        Assertions.assertFalse(copy instanceof ImmutableDatatype<?>, "A Date's copy is mutable");
+        Assertions.assertEquals("2000-04-01", copy.toXMLFormat());
         original = (XMLGregorianCalendar) original.clone();
-        assertFalse("A Date's clone is mutable", original instanceof ImmutableDatatype<?>);
+        Assertions.assertFalse(original instanceof ImmutableDatatype<?>, "A Date's clone is mutable");
         copy = copy(original);
-        assertEquals("2000-04-01", copy.toXMLFormat());
-        assertSame("Mutable date remains the mutable", original.getClass(), copy.getClass());
+        Assertions.assertEquals("2000-04-01", copy.toXMLFormat());
+        Assertions.assertSame(original.getClass(),  copy.getClass(), "Mutable date remains the mutable");
     }
     
     @Test
@@ -251,28 +242,16 @@ public class DatatypesTest  {
                 DatatypeConstants.FIELD_UNDEFINED
             )
         );
-        assertEquals(
-            "2009-04-01",
-            firstOfApril,
-            Datatypes.create(XMLGregorianCalendar.class, "2009-04-01")
-        );
-        assertEquals(
-            "20090401",
-            firstOfApril,
-            Datatypes.create(XMLGregorianCalendar.class, "20090401")
-        );
-        assertEquals(
-            "090401",
-            firstOfApril,
-            Datatypes.create(XMLGregorianCalendar.class, "090401")
-        );
+        Assertions.assertEquals(firstOfApril,  Datatypes.create(XMLGregorianCalendar.class, "2009-04-01"), "2009-04-01");
+        Assertions.assertEquals(firstOfApril,  Datatypes.create(XMLGregorianCalendar.class, "20090401"), "20090401");
+        Assertions.assertEquals(firstOfApril,  Datatypes.create(XMLGregorianCalendar.class, "090401"), "090401");
     }
     
     @Test
     public void testCountryCode(){
         CountryCode actual = Datatypes.create(CountryCode.class, "ch");
         CountryCode expected = CountryCode.valueOf("ch");
-        assertEquals("Datatypes", expected, actual);
+        Assertions.assertEquals(expected,  actual, "Datatypes");
     }
     
     @Test
@@ -288,46 +267,14 @@ public class DatatypesTest  {
           00 // second
         );
         Date fiveToTwelve = new Date(calendar.getTimeInMillis()); 
-        assertEquals(
-            "Basic Format",
-            "19950101T115500.000Z", 
-            DateTimeFormat.BASIC_UTC_FORMAT.format(fiveToTwelve)
-        );
-        assertEquals(
-            "Extended Format",
-            "1995-01-01T11:55:00.000Z", 
-            DateTimeFormat.EXTENDED_UTC_FORMAT.format(fiveToTwelve)
-        );
-        assertEquals(
-            "Basic parser",
-            fiveToTwelve,
-            Datatypes.create(Date.class, "19950101T115500.000Z")
-        );
-        assertEquals(
-            "Extended parser",
-            fiveToTwelve,
-            Datatypes.create(Date.class, "1995-01-01T11:55:00.000Z")
-        );
-        assertEquals(
-            "Basic parser accepting reduced accuracy and alternative UTC identifier",
-            fiveToTwelve,
-            Datatypes.create(Date.class, "19950101T1155-00")
-        );
-        assertEquals(
-            "Extended parser accepting comma and extended accuracy",
-            fiveToTwelve,
-            Datatypes.create(Date.class, "1995-01-01T11:55:00,000000Z")
-        );
-        assertEquals(
-            "Extended parser accepting two digit year",
-            fiveToTwelve,
-            Datatypes.create(Date.class, "95-01-01T11:55-00")
-        );
-        assertEquals(
-            "Basic parser accepting two digit year",
-            fiveToTwelve,
-            Datatypes.create(Date.class, "950101T1155-00")
-        );
+        Assertions.assertEquals("19950101T115500.000Z",  DateTimeFormat.BASIC_UTC_FORMAT.format(fiveToTwelve), "Basic Format");
+        Assertions.assertEquals("1995-01-01T11:55:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(fiveToTwelve), "Extended Format");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Date.class, "19950101T115500.000Z"), "Basic parser");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Date.class, "1995-01-01T11:55:00.000Z"), "Extended parser");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Date.class, "19950101T1155-00"), "Basic parser accepting reduced accuracy and alternative UTC identifier");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Date.class, "1995-01-01T11:55:00,000000Z"), "Extended parser accepting comma and extended accuracy");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Date.class, "95-01-01T11:55-00"), "Extended parser accepting two digit year");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Date.class, "950101T1155-00"), "Basic parser accepting two digit year");
     }
     
     @Test
@@ -454,13 +401,13 @@ public class DatatypesTest  {
         NonStated nonStated = datatypes1Package.getNonStated().createNonStated();
         try {
         	nonStated.isValue1();
-        	Assert.fail("NullPointerException expected");
+        	Assertions.fail("NullPointerException expected");
         } catch (NullPointerException exception) {
         	final BasicException cause = Throwables.getCause(exception, null);
-        	Assert.assertEquals("exception-code", BasicException.Code.ILLEGAL_STATE, cause.getExceptionCode());
-        	Assert.assertEquals("feature-name", "value1", cause.getParameter("feature-name"));
-        	Assert.assertEquals("feature-type", PrimitiveTypes.BOOLEAN, cause.getParameter("feature-type"));
-        	Assert.assertEquals("object-class", "test:openmdx:datatypes1:NonStated", cause.getParameter("object-class"));
+        	Assertions.assertEquals(BasicException.Code.ILLEGAL_STATE,  cause.getExceptionCode(), "exception-code");
+        	Assertions.assertEquals("value1",  cause.getParameter("feature-name"), "feature-name");
+        	Assertions.assertEquals(PrimitiveTypes.BOOLEAN,  cause.getParameter("feature-type"), "feature-type");
+        	Assertions.assertEquals("test:openmdx:datatypes1:NonStated",  cause.getParameter("object-class"), "object-class");
         }
     }
 
@@ -635,7 +582,7 @@ public class DatatypesTest  {
             ((Query)query).getFetchPlan().setFetchSize(fetchSize.intValue());
             actualCount = segment.getNonStated(query).size();
         }
-        assertEquals("Number of entries in the range [" + DateTimeFormat.BASIC_UTC_FORMAT.format(dateTimeLowerBound) + ".." + DateTimeFormat.BASIC_UTC_FORMAT.format(dateTimeUpperBound) + "]", expectedCount, actualCount);
+        Assertions.assertEquals(expectedCount,  actualCount, "Number of entries in the range [" + DateTimeFormat.BASIC_UTC_FORMAT.format(dateTimeLowerBound) + ".." + DateTimeFormat.BASIC_UTC_FORMAT.format(dateTimeUpperBound) + "]");
     } 
     
     /**
@@ -706,16 +653,16 @@ public class DatatypesTest  {
         NonStated nonStated        
     ) throws Exception {
         final Transaction currentTransaction = JDOHelper.getPersistenceManager(nonStated).currentTransaction();
-        Assert.assertFalse(JDOHelper.isDirty(nonStated));
+        Assertions.assertFalse(JDOHelper.isDirty(nonStated));
         System.out.println("Touch with same value");
         currentTransaction.begin();
         touchEvenWhenApplyingCurrentRequiredValue(nonStated);
         currentTransaction.rollback();
-        Assert.assertFalse(JDOHelper.isDirty(nonStated));
+        Assertions.assertFalse(JDOHelper.isDirty(nonStated));
         currentTransaction.begin();
         doNotTouchWhenApplyingCurrentListValue(nonStated);
         currentTransaction.rollback();
-        Assert.assertFalse(JDOHelper.isDirty(nonStated));
+        Assertions.assertFalse(JDOHelper.isDirty(nonStated));
     }
 
     /**
@@ -726,7 +673,7 @@ public class DatatypesTest  {
     ) {
         final boolean oldValue = nonStated.isValue1();
         nonStated.setValue1(oldValue);
-        Assert.assertTrue(JDOHelper.isDirty(nonStated));
+        Assertions.assertTrue(JDOHelper.isDirty(nonStated));
     }
 
     /**
@@ -737,7 +684,7 @@ public class DatatypesTest  {
     ) {
         final List<Integer> value = nonStated.getValue3();
         value.remove(Integer.valueOf(47));
-        Assert.assertFalse(JDOHelper.isDirty(nonStated));
+        Assertions.assertFalse(JDOHelper.isDirty(nonStated));
         value.remove(Integer.valueOf(12));
     }
     
@@ -819,7 +766,7 @@ public class DatatypesTest  {
             NonStatedQuery query = datatypes1Package.createNonStatedQuery();
             query.value6().like((String)this.values[i][VALUE6]);
             List<NonStated> list = segment.getNonStated(query);
-            assertEquals("Query result size", 1, list.size());
+            Assertions.assertEquals(1,  list.size(), "Query result size");
             nonStated = (NonStated) list.get(0);
             validateData(nonStated, this.values[i]);
         }
@@ -868,54 +815,51 @@ public class DatatypesTest  {
         Data data,
         Object[] source
     ){
-        assertEquals("value1", (Boolean)source[VALUE1], Boolean.valueOf(data.isValue1()));
-        assertEquals("value2", ((Number)source[VALUE2]).shortValue(), data.getValue2());
+        Assertions.assertEquals((Boolean)source[VALUE1],  Boolean.valueOf(data.isValue1()), "value1");
+        Assertions.assertEquals((int) ((Number)source[VALUE2]).shortValue(),  (int) data.getValue2(), "value2");
         int[] expected3 = (int[]) source[VALUE3];        
-        assertEquals("value3.size()", expected3.length, data.getValue3().size());            
+        Assertions.assertEquals(expected3.length,  data.getValue3().size(), "value3.size()");            
         for(
             int i = 0;
             i < expected3.length;
             i++
         ) {
-            assertEquals("value3[" + i + "]", expected3[i], data.getValue3().get(i).intValue());
+            Assertions.assertEquals(expected3[i],  data.getValue3().get(i).intValue(), "value3[" + i + "]");
         }
-        assertEquals("value4", (Long)source[VALUE4], data.getValue4());
-        assertEquals("value5", ((BigDecimal) source[VALUE5]).doubleValue(), data.getValue5().doubleValue(), 0.0);
-        assertEquals("value6", (String)source[VALUE6], data.getValue6());
-        assertEquals("value7", (Date)source[VALUE7], data.getValue7());
-        assertEquals("value8", (XMLGregorianCalendar)source[VALUE8], data.getValue8());
-        assertEquals(
-            "value9", 
-            (URI)
-            source[VALUE9], 
-            data.getValue9()
-        );
+        Assertions.assertEquals((Long)source[VALUE4],   data.getValue4(), "value4");
+        Assertions.assertEquals(((BigDecimal) source[VALUE5]).doubleValue(),  data.getValue5().doubleValue(), 0.0, "value5");
+        Assertions.assertEquals((String)source[VALUE6],  data.getValue6(), "value6");
+        Assertions.assertEquals((Date)source[VALUE7],  data.getValue7(), "value7");
+        Assertions.assertEquals((XMLGregorianCalendar)source[VALUE8],  data.getValue8(), "value8");
+        Assertions.assertEquals((URI)
+		source[VALUE9],  data.getValue9(), "value9");
         byte[] expected10 = (byte[]) source[VALUE10];
         byte[] actual10 = data.getValue10();
         if(expected10.length == 0) {
-            assertTrue("value10", actual10 == null || actual10.length == 0);
+            Assertions.assertTrue(actual10 == null || actual10.length == 0, "value10");
         } else {
-            assertEquals("value10.length", expected10.length, actual10.length);            
+            Assertions.assertEquals(expected10.length,  actual10.length, "value10.length");            
             for(
                 int i = 0;
                 i < expected10.length;
                 i++
-            ) assertEquals("value10[" + i + "]", expected10[i], data.getValue10()[i]);
+            )
+				Assertions.assertEquals((int) expected10[i],  (int) data.getValue10()[i], "value10[" + i + "]");
         }
-        assertEquals("value11a", (Duration)source[VALUE11a], data.getValue11a());
-        assertEquals("value11b", (Duration)source[VALUE11b], data.getValue11b());
+        Assertions.assertEquals((Duration)source[VALUE11a],  data.getValue11a(), "value11a");
+        Assertions.assertEquals((Duration)source[VALUE11b],  data.getValue11b(), "value11b");
     }
 
     protected void validateOptionalData(
         Data data,
         boolean empty
     ){
-        assertEquals("value4", empty, data.getValue4() == null);
-        assertEquals("value9", empty, data.getValue4() == null);
-        assertEquals("value11a", empty, data.getValue11a() == null);
+        Assertions.assertEquals( empty,   (data.getValue4() == null), "value4");
+        Assertions.assertEquals( empty,   (data.getValue4() == null), "value9");
+        Assertions.assertEquals( empty,   (data.getValue11a() == null), "value11a");
     }
     
-    @AfterClass
+    @AfterAll
     public static void closePersistenceManagerFactory(
     ) throws IOException{
         if(entityManagerFactory instanceof Closeable) {
@@ -934,7 +878,7 @@ public class DatatypesTest  {
             70, // minutes
             0 // seconds
         );
-        assertEquals("70 min", "P0Y0M0DT0H70M0S", t.toString());
+        Assertions.assertEquals("P0Y0M0DT0H70M0S",  t.toString(), "70 min");
     }
 
     @Test
@@ -950,7 +894,7 @@ public class DatatypesTest  {
             restSource,
             null // no XRI struct
         );
-        assertNotNull("GetConfigResultT", getConfigResultT);
+        Assertions.assertNotNull(getConfigResultT, "GetConfigResultT");
     }
 
     @SuppressWarnings("unchecked")

@@ -1,13 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Non-Configurable Properties Test
- * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Description: Build Properties for openMDX/Core
+ * Owner:       Datura Informatik + Organisation AG, Switzerland, 
+ *              https://www.datura.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2021, OMEX AG, Switzerland
+ * Copyright (c) 2021, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -45,34 +46,50 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package test.openmdx.clock1;
+package org.openmdx.junit5;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Properties;
 
-import javax.jdo.Constants;
-import javax.jdo.JDOHelper;
-import javax.jdo.PersistenceManagerFactory;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.openmdx.base.Version;
-import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
-
 /**
- * Non-Configurable Properties Test
+ * Build Properties for openMDX/Test Core
  */
-@ExtendWith(OpenmdxTestCoreStandardExtension.class)
-public class NonConfigurablePropertiesTest {
+public class BuildProperties {
 
-    @Test
-    public void testNonConfigurableProperties(
-    ){
-        PersistenceManagerFactory entityManagerFactory = JDOHelper.getPersistenceManagerFactory("test-Clock-EntityManagerFactory");
-        Assertions.assertNotNull(entityManagerFactory, "Persistence Manager Factory");
-        Properties factoryProperties = entityManagerFactory.getProperties();
-        Assertions.assertEquals("openMDX",  factoryProperties.getProperty(Constants.NONCONFIGURABLE_PROPERTY_VENDOR_NAME), Constants.NONCONFIGURABLE_PROPERTY_VENDOR_NAME);
-        Assertions.assertEquals(Version.getSpecificationVersion(),  factoryProperties.getProperty(Constants.NONCONFIGURABLE_PROPERTY_VERSION_NUMBER), Constants.NONCONFIGURABLE_PROPERTY_VERSION_NUMBER);
-    }
-    
+	public static final String TIMEZONE_KEY = "org.openmdx.test-core.timezone";
+
+	private static final String TIMEZONE_DEFAULT = "Europe/Zurich";
+
+	private static final String FILE_NAME = "build.properties";
+
+	public static Properties getBuildProperties() throws IOException {
+		return getUserBuildProperties();
+	}
+	
+	private static Properties getUserBuildProperties() throws IOException {
+		final Properties userBuildProperties = new Properties(getProjectBuildProperties());
+		final File userBuildPropertiesFile = new File(System.getProperty("user.home"), FILE_NAME);
+		if (userBuildPropertiesFile.canRead()) {
+			userBuildProperties.load(new FileInputStream(userBuildPropertiesFile));
+		}
+		return userBuildProperties;
+	}
+
+	private static Properties getProjectBuildProperties() throws IOException {
+		final Properties projectBuildProperties = new Properties(getStandardBuildProperties());
+		final File projectBuildPropertiesFile = new File(FILE_NAME);
+		if (projectBuildPropertiesFile.canRead()) {
+			projectBuildProperties.load(new FileInputStream(projectBuildPropertiesFile));
+		}
+		return projectBuildProperties;
+	}
+
+	private static Properties getStandardBuildProperties() {
+		final Properties standardBuildProperties = new Properties();
+		standardBuildProperties.setProperty(TIMEZONE_KEY, TIMEZONE_DEFAULT);
+		return standardBuildProperties;
+	}
+	
 }

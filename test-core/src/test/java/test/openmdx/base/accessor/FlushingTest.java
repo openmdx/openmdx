@@ -47,9 +47,6 @@
  */
 package test.openmdx.base.accessor;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,8 +56,9 @@ import java.util.List;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.rest.FlushOrder;
 import org.openmdx.base.accessor.spi.DelegatingObject_1;
@@ -73,7 +71,7 @@ public class FlushingTest {
     
     private List<DataObject_1_0> members;
     
-    @Before
+    @BeforeEach
     public void setUp(){
         this.members = new ArrayList<DataObject_1_0>(
             Arrays.asList(
@@ -174,15 +172,15 @@ public class FlushingTest {
      */
     @Test
     public void testFlushing(){
-        assertTrue("Former Precondition", isPartiallyOrdered(IncompleteOrder.getInstance()));
-        assertFalse("Actual Precondition", isPartiallyOrdered(FlushOrder.getInstance()));
-        assertFalse("Former Precondition", isCompletelyOrdered(IncompleteOrder.getInstance()));
-        assertFalse("Actual Precondition", isCompletelyOrdered(FlushOrder.getInstance()));
+        Assertions.assertTrue(isPartiallyOrdered(IncompleteOrder.getInstance()), "Former Precondition");
+        Assertions.assertFalse(isPartiallyOrdered(FlushOrder.getInstance()),"Actual Precondition");
+        Assertions.assertFalse(isCompletelyOrdered(IncompleteOrder.getInstance()),"Former Precondition");
+        Assertions.assertFalse(isCompletelyOrdered(FlushOrder.getInstance()),"Actual Precondition");
         Collections.sort(this.members, FlushOrder.getInstance());
-        assertTrue("Former Postcondition", isPartiallyOrdered(IncompleteOrder.getInstance()));
-        assertTrue("Actual Postcondition", isPartiallyOrdered(FlushOrder.getInstance()));
-        assertTrue("Former Postcondition", isCompletelyOrdered(IncompleteOrder.getInstance()));
-        assertTrue("Actual Postcondition", isCompletelyOrdered(FlushOrder.getInstance()));
+        Assertions.assertTrue(isPartiallyOrdered(IncompleteOrder.getInstance()), "Former Postcondition");
+        Assertions.assertTrue(isPartiallyOrdered(FlushOrder.getInstance()), "Actual Postcondition");
+        Assertions.assertTrue(isCompletelyOrdered(IncompleteOrder.getInstance()), "Former Postcondition");
+        Assertions.assertTrue(isCompletelyOrdered(FlushOrder.getInstance()), "Actual Postcondition");
     }
     
     /**

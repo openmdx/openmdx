@@ -48,80 +48,90 @@
  */
 package org.w3c.cci2;
 
+import java.io.IOException;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.openmdx.junit5.BuildProperties;
+import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
+import org.openmdx.kernel.log.SysLog;
 
 /**
  * TimeZone Test
  */
+@ExtendWith(OpenmdxTestCoreStandardExtension.class)
 public class TimeZoneTest {
+	
+	private static String format(final GregorianCalendar calendar) {
+		return new StringBuilder(
+		    64
+		).append(
+		    Integer.toString(calendar.get(GregorianCalendar.YEAR))
+		).append(
+		    '-'                            
+		).append(
+			Integer.toString(101 + calendar.get(GregorianCalendar.MONTH)).substring(1)
+		).append(
+		    '-'                            
+		).append(
+		    Integer.toString(100 + calendar.get(GregorianCalendar.DAY_OF_MONTH)).substring(1)
+		).append(
+		    'T'
+		).append(
+		    calendar.get(GregorianCalendar.HOUR_OF_DAY)
+		).append(
+		    ':'
+		).append(
+		    calendar.get(GregorianCalendar.MINUTE)
+		).append(
+		    ':'
+		).append(
+		    calendar.get(GregorianCalendar.SECOND)
+		).append(
+		    '.'
+		).append(
+		    String.valueOf(
+		        1000 + calendar.get(GregorianCalendar.MILLISECOND)
+		    ).substring(1)
+		).append(
+		    ' '
+		).append(
+		    TimeZone.getDefault().getID()
+		).toString();
+	}
 
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-        displayTimestamp();
-    }
-
-    private static void displayTimestamp(){
-        try {DatatypeFactory.newInstance();
-            final DatatypeFactory datatypeFactory = MutableDatatypeFactory.xmlDatatypeFactory();
-            final GregorianCalendar calendar = datatypeFactory.newXMLGregorianCalendar(
-                new GregorianCalendar()
-            ).toGregorianCalendar(
-                null, // zone 
-                null, // locale 
-                null // defaults
-            );
-            System.out.println(
-                "Now: " + new StringBuilder(
-                    64
-                ).append(
-                    "TIMESTAMP '"
-                ).append(
-                    calendar.get(GregorianCalendar.YEAR)
-                ).append(
-                    '-'                            
-                ).append(
-                    calendar.get(GregorianCalendar.MONTH)
-                ).append(
-                    '-'                            
-                ).append(
-                    calendar.get(GregorianCalendar.DAY_OF_MONTH)
-                ).append(
-                    ' '
-                ).append(
-                    calendar.get(GregorianCalendar.HOUR_OF_DAY)
-                ).append(
-                    ':'
-                ).append(
-                    calendar.get(GregorianCalendar.MINUTE)
-                ).append(
-                    ':'
-                ).append(
-                    calendar.get(GregorianCalendar.SECOND)
-                ).append(
-                    '.'
-                ).append(
-                    String.valueOf(
-                        1000 + calendar.get(GregorianCalendar.MILLISECOND)
-                    ).substring(1)
-                ).append(
-                    ' '
-                ).append(
-                    TimeZone.getDefault().getID()
-                ).append(
-                    "'"
-                )
-            );
-        } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
-        }
-    }
+	private static GregorianCalendar now() {
+		final DatatypeFactory datatypeFactory = MutableDatatypeFactory.xmlDatatypeFactory();
+		final GregorianCalendar calendar = datatypeFactory.newXMLGregorianCalendar(
+		    new GregorianCalendar()
+		).toGregorianCalendar(
+		    null, // zone 
+		    null, // locale 
+		    null // defaults
+		);
+		return calendar;
+	}
+	
+	@Test
+	public void usesConfiguredTimezone() throws IOException {
+		//
+		// Arrange
+		//
+		final String configuredTimeZone = BuildProperties.getBuildProperties().getProperty(BuildProperties.TIMEZONE_KEY);
+		//
+		// Act
+		//
+		final String now = format(now());
+		SysLog.info("It is now " + now);
+		//
+		// Assert
+		//
+		Assertions.assertTrue(now.endsWith(configuredTimeZone));
+	}
     
-    final static String PATTERN = "yyyy-MM-dd HH:mm:ss.SSS ";
-
 }

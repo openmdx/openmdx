@@ -65,9 +65,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.junit.Assert;
-import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openmdx.application.mof.repository.accessor.ModelBuilder_1;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
@@ -76,23 +75,19 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Dumper;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
-import org.openmdx.junit.rules.EntityManagerFactoryRule;
-import org.openmdx.junit.rules.EntityManagerRule;
+import org.openmdx.junit5.JDOExtension;
+import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
 import org.openmdx.kernel.log.SysLog;
 
 /**
  * Test Model Repository
  */
+@ExtendWith(OpenmdxTestCoreStandardExtension.class)
 public class TestModelRepository {
     
-    @ClassRule
-	public static EntityManagerFactoryRule entityManagerFactoryRule = new EntityManagerFactoryRule() //
-		.setName("test-Main-EntityManagerFactory");
+	static JDOExtension jdoExtension = JDOExtension.withEntityManagerFactoryName("test-Main-EntityManagerFactory");
 
-    @Rule
-    public EntityManagerRule entityManagerRule = new EntityManagerRule(entityManagerFactoryRule);
-    
-    /**
+	/**
      * CR20020284
      */
     @Test

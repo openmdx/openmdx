@@ -50,8 +50,8 @@ package test.openmdx.base.accessor;
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.junit.Test;
 import org.openmdx.base.collection.WeakRegistry;
+import org.junit.jupiter.api.Test;
 import org.openmdx.base.collection.Registry;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.id.UUIDs;
