@@ -58,6 +58,8 @@ import javax.cache.spi.CachingProvider;
 
 /**
  * Cache Test
+ * 
+ * This test is to be ignored at the moment
  */
 public class CacheTest {
     

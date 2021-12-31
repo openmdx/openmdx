@@ -54,7 +54,6 @@ import java.util.UUID;
 import org.ietf.jgss.Oid;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.base.text.format.UUIDFormatter;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
@@ -238,7 +237,7 @@ public class UUIDTest {
 			// TODO Auto-generated method stub
             if(OUT_LIMIT > i) log("testUuidgenSequentialUUID", uuid);
             if(last != null){
-                Assertions.assertEquals((Object) uuid.node(), (Object) last.node(), "Node");
+                Assertions.assertEquals( uuid.node(),  last.node(), "Node");
 				// TODO Auto-generated method stub
                 Assertions.assertTrue(uuid.timestamp() > last.timestamp(), "Sequence");
             }

@@ -53,8 +53,8 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.logging.BasicFormatter;
@@ -121,7 +121,7 @@ public abstract class AbstractFileHandlerTest {
         use(basic,1);
     }
 
-    @Before
+    @BeforeEach
     public void collectGarbage(){
         Runtime.getRuntime().gc();
     }

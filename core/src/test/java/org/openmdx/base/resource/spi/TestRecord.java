@@ -123,13 +123,13 @@ public class TestRecord {
 		Assertions.assertEquals("a", r2m.get("A"), "r2.A");
 		Assertions.assertNull(r2m.get("B"), "r2.B");
 		Assertions.assertEquals("c", r2m.get("C"), "r2.C");
-		Assertions.assertEquals((Object) 2, (Object) r2m.size(), "r2m.size()");
+		Assertions.assertEquals( 2,  r2m.size(), "r2m.size()");
 		Assertions.assertTrue(map2.equals(r2m), "map2.equals(r2m)");
 		// TODO Auto-generated method stub
 		Assertions.assertFalse(r2m.equals(map2), "r2m.equals(map2)");
 		// TODO Auto-generated method stub
 		if (USE_RECORDS_AS_KEYS)
-			Assertions.assertEquals((Object) map2.hashCode(), (Object) r2m.hashCode(), "map2.hashCode()==r2m.hashCode()");
+			Assertions.assertEquals( map2.hashCode(),  r2m.hashCode(), "map2.hashCode()==r2m.hashCode()");
 
 		// VariableSizeMappedRecord with description
 		MappedRecord r2md = factory.createMappedRecord("r2");
@@ -145,12 +145,12 @@ public class TestRecord {
 		Assertions.assertFalse(r2md.equals(map2), "r2md.equals(map2)");
 		// TODO Auto-generated method stub
 		if (USE_RECORDS_AS_KEYS)
-			Assertions.assertEquals((Object) map2.hashCode(), (Object) r2md.hashCode(), "map2.hashCode()==r2md.hashCode()");
+			Assertions.assertEquals( map2.hashCode(),  r2md.hashCode(), "map2.hashCode()==r2md.hashCode()");
 		Assertions.assertTrue(r2md.equals(r2m), "r2md.equals(r2m)");
 		// TODO Auto-generated method stub
 		Assertions.assertTrue(r2m.equals(r2md), "r2m.equals(r2md)");
 		// TODO Auto-generated method stub
-		Assertions.assertEquals((Object) r2md.hashCode(), (Object) r2m.hashCode(), "r2md.hashCode()==r2m.hashCode()");
+		Assertions.assertEquals( r2md.hashCode(),  r2m.hashCode(), "r2md.hashCode()==r2m.hashCode()");
 
 		if (USE_INTEGERS_AS_KEYS) {
 			// Nested VariableSizeMappedRecords
@@ -196,13 +196,13 @@ public class TestRecord {
 		Assertions.assertEquals("a", r2m.get("A"), "r2.A");
 		Assertions.assertNull(r2m.get("B"), "r2.B");
 		Assertions.assertEquals("c", r2m.get("C"), "r2.C");
-		Assertions.assertEquals((Object) 2, (Object) r2m.size(), "r2m.size()");
+		Assertions.assertEquals( 2,  r2m.size(), "r2m.size()");
 		Assertions.assertTrue(map2.equals(r2m), "map2.equals(r2m)");
 		// TODO Auto-generated method stub
 		Assertions.assertFalse(r2m.equals(map2), "r2m.equals(map2)");
 		// TODO Auto-generated method stub
 		if (USE_RECORDS_AS_KEYS)
-			Assertions.assertEquals((Object) map2.hashCode(), (Object) r2m.hashCode(), "map2.hashCode()==r2m.hashCode()");
+			Assertions.assertEquals( map2.hashCode(),  r2m.hashCode(), "map2.hashCode()==r2m.hashCode()");
 
 		// VariableSizeMappedRecord with description
 		MappedRecord r2md = factory.createMappedRecord("r2");
@@ -218,12 +218,12 @@ public class TestRecord {
 		Assertions.assertFalse(r2md.equals(map2), "r2md.equals(map2)");
 		// TODO Auto-generated method stub
 		if (USE_RECORDS_AS_KEYS)
-			Assertions.assertEquals((Object) map2.hashCode(), (Object) r2md.hashCode(), "map2.hashCode()==r2md.hashCode()");
+			Assertions.assertEquals( map2.hashCode(),  r2md.hashCode(), "map2.hashCode()==r2md.hashCode()");
 		Assertions.assertTrue(r2md.equals(r2m), "r2md.equals(r2m)");
 		// TODO Auto-generated method stub
 		Assertions.assertTrue(r2m.equals(r2md), "r2m.equals(r2md)");
 		// TODO Auto-generated method stub
-		Assertions.assertEquals((Object) r2m.hashCode(), (Object) r2md.hashCode(), "r2m.hashCode()==r2md.hashCode()");
+		Assertions.assertEquals( r2m.hashCode(),  r2md.hashCode(), "r2m.hashCode()==r2md.hashCode()");
 
 		if (USE_INTEGERS_AS_KEYS) {
 			// Nested VariableSizeMappedRecords
@@ -259,14 +259,14 @@ public class TestRecord {
 		Assertions.assertEquals("r2: [\n" + "\t0: \"a\"\n" + "\t1: \"c\"\n" + "]", r2i.toString(), "r2i");
 		Assertions.assertEquals("a", r2i.get(0), "r2i[0]");
 		Assertions.assertEquals("c", r2i.get(1), "r2i[1]");
-		Assertions.assertEquals((Object) 2, (Object) r2i.size(), "r2i.size()");
+		Assertions.assertEquals( 2,  r2i.size(), "r2i.size()");
 		Assertions.assertTrue(list2.equals(r2i), "list2.equals(r2i)");
 		// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r2i.equals(list2), "r2i.equals(list2)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list2.hashCode(), (Object) r2i.hashCode(), "list2.hashCode()==r2i.hashCode()");
+			Assertions.assertEquals( list2.hashCode(),  r2i.hashCode(), "list2.hashCode()==r2i.hashCode()");
 
 		// VariableSizeIndexedRecord with description
 		IndexedRecord r2id = factory.createIndexedRecord("r2");
@@ -280,12 +280,12 @@ public class TestRecord {
 			Assertions.assertTrue(r2id.equals(list2), "r2id.equals(list2)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list2.hashCode(), (Object) r2id.hashCode(), "list2.hashCode()==r2id.hashCode()");
+			Assertions.assertEquals( list2.hashCode(),  r2id.hashCode(), "list2.hashCode()==r2id.hashCode()");
 		Assertions.assertTrue(r2id.equals(r2i), "r2id.equals(r2i)");
 		// TODO Auto-generated method stub
 		Assertions.assertTrue(r2i.equals(r2id), "r2i.equals(r2id)");
 		// TODO Auto-generated method stub
-		Assertions.assertEquals((Object) r2id.hashCode(), (Object) r2i.hashCode(), "r2id.hashCode()==r2i.hashCode()");
+		Assertions.assertEquals( r2id.hashCode(),  r2i.hashCode(), "r2id.hashCode()==r2i.hashCode()");
 
 		// VariableSizeIndexedRecord with description
 		IndexedRecord r3 = factory.createIndexedRecord("r3");
@@ -305,16 +305,16 @@ public class TestRecord {
 			Assertions.assertTrue(r23.equals(list23), "r23.equals(list23)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list23.hashCode(), (Object) r23.hashCode(), "list23.hashCode()==r23.hashCode()");
+			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list23.hashCode(), (Object) r23.hashCode(), "list23.hashCode()==r23.hashCode()");
+			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
 		Assertions.assertTrue(l23.equals(r23), "l23.equals(r23)");
 		// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r23.equals(l23), "r23.equals(l23)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) l23.hashCode(), (Object) r23.hashCode(), "l23.hashCode()==r23.hashCode()");
+			Assertions.assertEquals( l23.hashCode(),  r23.hashCode(), "l23.hashCode()==r23.hashCode()");
 	}
 
 	@Test
@@ -328,7 +328,7 @@ public class TestRecord {
 		Assertions.assertEquals("r2: [\n" + "\t0: \"a\"\n" + "\t1: \"c\"\n" + "]", r2i.toString(), "r2i");
 		Assertions.assertEquals("a", r2i.get(0), "r2i[0]");
 		Assertions.assertEquals("c", r2i.get(1), "r2i[1]");
-		Assertions.assertEquals((Object) 2, (Object) r2i.size(), "r2i.size()");
+		Assertions.assertEquals( 2,  r2i.size(), "r2i.size()");
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(list2.equals(r2i), "list2.equals(r2i)");
 			// TODO Auto-generated method stub
@@ -336,7 +336,7 @@ public class TestRecord {
 			Assertions.assertTrue(r2i.equals(list2), "r2i.equals(list2)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list2.hashCode(), (Object) r2i.hashCode(), "list2.hashCode()==r2i.hashCode()");
+			Assertions.assertEquals( list2.hashCode(),  r2i.hashCode(), "list2.hashCode()==r2i.hashCode()");
 
 		// VariableSizeIndexedRecord with description
 		IndexedRecord r2id = factory.createIndexedRecord("r2");
@@ -350,12 +350,12 @@ public class TestRecord {
 			Assertions.assertTrue(r2id.equals(list2), "r2id.equals(list2)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list2.hashCode(), (Object) r2id.hashCode(), "list2.hashCode()==r2id.hashCode()");
+			Assertions.assertEquals( list2.hashCode(),  r2id.hashCode(), "list2.hashCode()==r2id.hashCode()");
 		Assertions.assertTrue(r2id.equals(r2i), "r2id.equals(r2i)");
 		// TODO Auto-generated method stub
 		Assertions.assertTrue(r2i.equals(r2id), "r2i.equals(r2id)");
 		// TODO Auto-generated method stub
-		Assertions.assertEquals((Object) r2id.hashCode(), (Object) r2i.hashCode(), "r2id.hashCode()==r2i.hashCode()");
+		Assertions.assertEquals( r2id.hashCode(),  r2i.hashCode(), "r2id.hashCode()==r2i.hashCode()");
 
 		// Nested VariableSizeIndexedRecords
 		IndexedRecord r3 = factory.createIndexedRecord("r3");
@@ -374,16 +374,16 @@ public class TestRecord {
 			Assertions.assertTrue(r23.equals(list23), "r23.equals(list23)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list23.hashCode(), (Object) r23.hashCode(), "list23.hashCode()==r23.hashCode()");
+			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list23.hashCode(), (Object) r23.hashCode(), "list23.hashCode()==r23.hashCode()");
+			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
 		Assertions.assertTrue(l23.equals(r23), "l23.equals(r23)");
 		// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r23.equals(l23), "r23.equals(l23)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) l23.hashCode(), (Object) r23.hashCode(), "l23.hashCode()==r23.hashCode()");
+			Assertions.assertEquals( l23.hashCode(),  r23.hashCode(), "l23.hashCode()==r23.hashCode()");
 	}
 
 	@Test
@@ -399,14 +399,14 @@ public class TestRecord {
 		// TODO Auto-generated method stub
 		Assertions.assertEquals("a", r2i.get(0), "r2i[0]");
 		Assertions.assertEquals("c", r2i.get(1), "r2i[1]");
-		Assertions.assertEquals((Object) 2, (Object) r2i.size(), "r2i.size()");
+		Assertions.assertEquals( 2,  r2i.size(), "r2i.size()");
 		Assertions.assertTrue(list2.equals(r2i), "list.equals(r2i)");
 		// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r2i.equals(list2), "r2i.equals(list2)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list2.hashCode(), (Object) r2i.hashCode(), "list2.hashCode()==r2i.hashCode()");
+			Assertions.assertEquals( list2.hashCode(),  r2i.hashCode(), "list2.hashCode()==r2i.hashCode()");
 
 		// FixedSizeIndexedRecord with description
 		IndexedRecord r2id = factory.asIndexedRecord("r2", "Record 2", array2);
@@ -422,12 +422,12 @@ public class TestRecord {
 			Assertions.assertTrue(r2id.equals(list2), "r2id.equals(list2)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list2.hashCode(), (Object) r2id.hashCode(), "list2.hashCode()==r2id.hashCode()");
+			Assertions.assertEquals( list2.hashCode(),  r2id.hashCode(), "list2.hashCode()==r2id.hashCode()");
 		Assertions.assertTrue(r2id.equals(r2i), "r2id.equals(r2i)");
 		// TODO Auto-generated method stub
 		Assertions.assertTrue(r2i.equals(r2id), "r2i.equals(r2id)");
 		// TODO Auto-generated method stub
-		Assertions.assertEquals((Object) r2id.hashCode(), (Object) r2i.hashCode(), "r2id.hashCode()==r2i.hashCode()");
+		Assertions.assertEquals( r2id.hashCode(),  r2i.hashCode(), "r2id.hashCode()==r2i.hashCode()");
 
 		// Nested FixedSizeIndexedRecords
 		IndexedRecord r23 = factory.asIndexedRecord("r23", "Nested Utilities",
@@ -435,7 +435,7 @@ public class TestRecord {
 		Assertions.assertEquals("org.openmdx.base.resource.spi.FixedSizeIndexedRecord", r23.getClass().getName(), "r23");
 		Object a23 = Records.nDimensionalArray(r23);
 		Assertions.assertEquals("[[Ljava.lang.String;", a23.getClass().getName(), "a23");
-		Assertions.assertEquals((Object) array23.length, (Object) ((Object[]) a23).length, "array23.length==r23.length");
+		Assertions.assertEquals( array23.length,  ((Object[]) a23).length, "array23.length==r23.length");
 		for (int i = 0; i < array23.length; i++) {
 			Assertions.assertTrue(Arrays.equals(array23[i], ((Object[][]) a23)[i]), "Arrays.equals(array23[" + i + "],a23[" + i + "])");
 			// TODO Auto-generated method stub
@@ -449,7 +449,7 @@ public class TestRecord {
 			Assertions.assertTrue(r23.equals(list23), "r23.equals(list23)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list23.hashCode(), (Object) r23.hashCode(), "list23.hashCode()==r23.hashCode()");
+			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
 	}
 
 	@Test
@@ -463,14 +463,14 @@ public class TestRecord {
 		Assertions.assertEquals("[Ljava.lang.Integer;", a0i.getClass().getName(), "a01");
 		Assertions.assertTrue(Arrays.equals(array0, (Integer[]) a0i), "Arrays.equals(array0,a0i)");
 		// TODO Auto-generated method stub
-		Assertions.assertEquals((Object) 0, (Object) r0i.size(), "r0i.size()");
+		Assertions.assertEquals( 0,  r0i.size(), "r0i.size()");
 		Assertions.assertTrue(list0.equals(r0i), "list0.equals(r0i)");
 		// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r0i.equals(list0), "r0i.equals(list0)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list0.hashCode(), (Object) r0i.hashCode(), "list0.hashCode()==r0i.hashCode()");
+			Assertions.assertEquals( list0.hashCode(),  r0i.hashCode(), "list0.hashCode()==r0i.hashCode()");
 
 		// FixedSizeIndexedRecord with description
 		IndexedRecord r1id = factory.asIndexedRecord("r1", "Record 1", array1);
@@ -486,14 +486,14 @@ public class TestRecord {
 			Assertions.assertTrue(r1id.equals(list1), "r1id.equals(list1)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list1.hashCode(), (Object) r1id.hashCode(), "list1.hashCode()==r1id.hashCode()");
+			Assertions.assertEquals( list1.hashCode(),  r1id.hashCode(), "list1.hashCode()==r1id.hashCode()");
 
 		// Nested FixedSizeIndexedRecords
 		IndexedRecord r01 = factory.asIndexedRecord("r01", "Nested Utilities", new Record[] { r0i, r1id });
 		Assertions.assertEquals("org.openmdx.base.resource.spi.FixedSizeIndexedRecord", r01.getClass().getName(), "r01");
 		Object a01 = Records.nDimensionalArray(r01);
 		Assertions.assertEquals("[[Ljava.lang.Integer;", a01.getClass().getName(), "a01");
-		Assertions.assertEquals((Object) array01.length, (Object) ((Object[]) a01).length, "array01.length==r01.length");
+		Assertions.assertEquals( array01.length,  ((Object[]) a01).length, "array01.length==r01.length");
 		for (int i = 0; i < array01.length; i++) {
 			Assertions.assertTrue(Arrays.equals(array01[i], ((Integer[][]) a01)[i]), "Arrays.equals(array01[" + i + "],a01[" + i + "])");
 			// TODO Auto-generated method stub
@@ -506,7 +506,7 @@ public class TestRecord {
 			Assertions.assertTrue(r01.equals(list01), "r01.equals(list01)");
 			// TODO Auto-generated method stub
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertEquals((Object) list01.hashCode(), (Object) r01.hashCode(), "list01.hashCode()==r01.hashCode()");
+			Assertions.assertEquals( list01.hashCode(),  r01.hashCode(), "list01.hashCode()==r01.hashCode()");
 	}
 
 	@Test

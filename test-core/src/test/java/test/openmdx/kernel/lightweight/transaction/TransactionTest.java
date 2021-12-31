@@ -47,8 +47,7 @@
  */
 package test.openmdx.kernel.lightweight.transaction;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.JDOHelper;
@@ -57,20 +56,21 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
 import javax.naming.NamingException;
-import javax.naming.spi.NamingManager;
 import javax.resource.ResourceException;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openmdx.application.transaction.UserTransactions;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.transaction.Status;
+import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.openmdx.kernel.log.SysLog;
 
 import test.openmdx.app1.jmi1.App1Package;
@@ -80,6 +80,7 @@ import test.openmdx.app1.jmi1.Segment;
 /**
  * Test the lightweight container's transaction management
  */
+@ExtendWith(OpenmdxTestCoreStandardExtension.class)
 public class TransactionTest {
 
     /**
@@ -162,14 +163,13 @@ public class TransactionTest {
             messageTemplate.setText("Ok");
             segment.addMessageTemplate(false, "ok", messageTemplate);
             unitOfWork.commit();
-            fail("Empty description should have been rejected");
+            Assertions.fail("Empty description should have been rejected");
         } catch (JDOFatalDataStoreException jdoException) {
             BasicException exception = (BasicException) jdoException.getCause();
-//          exception.printStackTrace();
-            assertEquals(
-                "Unit fo work failure", 
+            Assertions.assertEquals(
                 BasicException.Code.ROLLBACK,
-                exception.getExceptionCode()
+                exception.getExceptionCode(),
+                "Unit fo work failure"
             );
         }
         unitOfWork.begin();
@@ -183,20 +183,17 @@ public class TransactionTest {
             fail("Callback should have set rollback-only");
         } catch (JDOFatalDataStoreException jdoException) {
             BasicException exception = (BasicException) jdoException.getCause();
-            assertEquals(
-                "Unit fo work failure", 
+            Assertions.assertEquals(
                 BasicException.Code.ROLLBACK,
-                exception.getExceptionCode()
+                exception.getExceptionCode(),
+                "Unit fo work failure"
             );
         }
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void initialize(
     ) throws NamingException{
-        if(!NamingManager.hasInitialContextFactoryBuilder()) {
-            NonManagedInitialContextFactoryBuilder.install(null);
-        }
         entityManagerFactory = JDOHelper.getPersistenceManagerFactory(
             "test-Main-EntityManagerFactory"
         );

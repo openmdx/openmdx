@@ -52,15 +52,15 @@ import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.naming.NamingException;
-import javax.naming.spi.NamingManager;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
+import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 
 import test.openmdx.model1.jmi1.C4;
 import test.openmdx.model1.jmi1.C41;
@@ -70,6 +70,7 @@ import test.openmdx.model1.jmi1.Segment;
 /**
  * Callbacks Test
  */
+@ExtendWith(OpenmdxTestCoreStandardExtension.class)
 public class CallbacksTest {
 
     protected static final String ENTITY_MANAGER_FACTORY_NAME = "test-Main-EntityManagerFactory";
@@ -77,18 +78,15 @@ public class CallbacksTest {
     protected PersistenceManager entityManager;
     
 
-    @BeforeClass
+    @BeforeAll
     public static void createPersistenceManagerFactory(
     ) throws NamingException{
         entityManagerFactory = JDOHelper.getPersistenceManagerFactory(
             ENTITY_MANAGER_FACTORY_NAME
         );
-        if(!NamingManager.hasInitialContextFactoryBuilder()) {
-            NonManagedInitialContextFactoryBuilder.install(null);
-        }
     }
     
-    @Before
+    @BeforeEach
     public void setUp(){
         this.entityManager = entityManagerFactory.getPersistenceManager();
     }

@@ -47,32 +47,25 @@
  */
 package test.openmdx.app1;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 
 import javax.jdo.PersistenceManager;
-import javax.naming.NamingException;
-import javax.naming.spi.NamingManager;
 import javax.xml.datatype.Duration;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.cci.UnitOfWork;
-import org.openmdx.junit.rules.EntityManagerFactoryRule;
-import org.openmdx.junit.rules.EntityManagerRule;
+import org.openmdx.junit5.JDOExtension;
+import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.w3c.spi2.Structures;
 
 import test.openmdx.model1.jmi1.ClassContainingOperations;
@@ -94,15 +87,12 @@ import test.openmdx.model1.jmi1.TestComplexStruct0_n_0_1Result;
 /**
  * Test Operation Arguments
  */
+@ExtendWith(OpenmdxTestCoreStandardExtension.class)
 public class TestOperationArguments {
 
-    @ClassRule
-	public static EntityManagerFactoryRule entityManagerFactoryRule = new EntityManagerFactoryRule() //
-		.setName("test-Main-EntityManagerFactory");
+	@RegisterExtension
+	static JDOExtension jdoExtension = JDOExtension.withEntityManagerFactoryName("test-Main-EntityManagerFactory");
 
-    @Rule
-    public EntityManagerRule entityManagerRule = new EntityManagerRule(entityManagerFactoryRule);
-    
     private static final String TRANSIENT_PROVIDER_NAME = "Transient";    
     
     /**
@@ -137,10 +127,10 @@ public class TestOperationArguments {
         );
         TestComplexStruct0_1_0_1Result out = operations.testComplexStruct0_1_0_1(in);
         this.commit();
-        assertNotNull("CR10011193", out);
-        assertNotNull("CR10011193", out.getResult());
-        assertNotNull("CR10011193", out.getResult().getSimpleStruct0_1Field());
-        assertEquals("CR10011193", out.getResult().getSimpleStruct0_1Field().getStringField());
+        Assertions.assertNotNull(out, "CR10011193");
+        Assertions.assertNotNull(out.getResult(), "CR10011193");
+        Assertions.assertNotNull(out.getResult().getSimpleStruct0_1Field(), "CR10011193");
+        Assertions.assertEquals(out.getResult().getSimpleStruct0_1Field().getStringField(), "CR10011193");
     }
 
     /**
@@ -221,19 +211,19 @@ public class TestOperationArguments {
         );
         TestComplexStruct0_n_0_1Result out = operations.testComplexStruct0_n_0_1(in);
         this.commit();
-        assertNotNull("CR10011473", out);
-        assertNotNull("CR10011473", out.getResult());
-        assertNotNull("CR10011473", out.getResult().getSimpleStruct0_1Field());
-        assertEquals("CR10011473", out.getResult().getSimpleStruct0_1Field().get(0).getStringField());
-        assertEquals("CR10011473bis", out.getResult().getSimpleStruct0_1Field().get(1).getStringField());
-        assertEquals(Integer.valueOf(0), out.getResult().getSimpleStruct0_1Field().get(0).getIntegerField());
-        assertEquals(Integer.valueOf(1), out.getResult().getSimpleStruct0_1Field().get(1).getIntegerField());
-        assertEquals(Sets.asSet("CR10011473a","CR10011473b"), out.getResult().getSimpleStructSetField().get(0).getStringField());
-        assertEquals(Collections.singleton(Integer.valueOf(1)), out.getResult().getSimpleStructSetField().get(1).getIntegerField());
-        assertTrue(out.getResult().getSimpleStructSetField().get(1).getShortField().isEmpty());
+        Assertions.assertNotNull(out, "CR10011473");
+        Assertions.assertNotNull(out.getResult(), "CR10011473");
+        Assertions.assertNotNull(out.getResult().getSimpleStruct0_1Field(), "CR10011473");
+        Assertions.assertEquals(out.getResult().getSimpleStruct0_1Field().get(0).getStringField(), "CR10011473");
+        Assertions.assertEquals(out.getResult().getSimpleStruct0_1Field().get(1).getStringField(), "CR10011473bis");
+        Assertions.assertEquals(Integer.valueOf(0), out.getResult().getSimpleStruct0_1Field().get(0).getIntegerField());
+        Assertions.assertEquals(Integer.valueOf(1), out.getResult().getSimpleStruct0_1Field().get(1).getIntegerField());
+        Assertions.assertEquals(Sets.asSet("CR10011473a","CR10011473b"), out.getResult().getSimpleStructSetField().get(0).getStringField());
+        Assertions.assertEquals(Collections.singleton(Integer.valueOf(1)), out.getResult().getSimpleStructSetField().get(1).getIntegerField());
+        Assertions.assertTrue(out.getResult().getSimpleStructSetField().get(1).getShortField().isEmpty());
     }
     
-    @Test
+	@Test
     public void callOperationWithSetArgument(
     ) throws Exception {
         this.begin();
@@ -309,16 +299,16 @@ public class TestOperationArguments {
         );
         TestComplexStruct0_n_0_1Result out = operations.testComplexStruct0_n_0_1(in);
         this.commit();
-        assertNotNull("CR10011473", out);
-        assertNotNull("CR10011473", out.getResult());
-        assertNotNull("CR10011473", out.getResult().getSimpleStruct0_1Field());
-        assertEquals("CR10011473", out.getResult().getSimpleStruct0_1Field().get(0).getStringField());
-        assertEquals("CR10011473bis", out.getResult().getSimpleStruct0_1Field().get(1).getStringField());
-        assertEquals(Integer.valueOf(0), out.getResult().getSimpleStruct0_1Field().get(0).getIntegerField());
-        assertEquals(Integer.valueOf(1), out.getResult().getSimpleStruct0_1Field().get(1).getIntegerField());
-        assertEquals(Sets.asSet("CR10011473a","CR10011473b"), out.getResult().getSimpleStructSetField().get(0).getStringField());
-        assertEquals(                                     Collections.singleton(Integer.valueOf(1)), out.getResult().getSimpleStructSetField().get(1).getIntegerField());
-        assertTrue(out.getResult().getSimpleStructSetField().get(1).getShortField().isEmpty());
+        Assertions.assertNotNull(out, "CR10011473");
+        Assertions.assertNotNull(out.getResult(), "CR10011473");
+        Assertions.assertNotNull(out.getResult().getSimpleStruct0_1Field(), "CR10011473");
+        Assertions.assertEquals(out.getResult().getSimpleStruct0_1Field().get(0).getStringField(), "CR10011473");
+        Assertions.assertEquals(out.getResult().getSimpleStruct0_1Field().get(1).getStringField(), "CR10011473bis");
+        Assertions.assertEquals(Integer.valueOf(0), out.getResult().getSimpleStruct0_1Field().get(0).getIntegerField());
+        Assertions.assertEquals(Integer.valueOf(1), out.getResult().getSimpleStruct0_1Field().get(1).getIntegerField());
+        Assertions.assertEquals(Sets.asSet("CR10011473a","CR10011473b"), out.getResult().getSimpleStructSetField().get(0).getStringField());
+        Assertions.assertEquals(                                     Collections.singleton(Integer.valueOf(1)), out.getResult().getSimpleStructSetField().get(1).getIntegerField());
+        Assertions.assertTrue(out.getResult().getSimpleStructSetField().get(1).getShortField().isEmpty());
     }
 
     /**
@@ -367,7 +357,7 @@ public class TestOperationArguments {
     }
 
     private PersistenceManager getEntityManager(){
-    	return this.entityManagerRule.getEntityManager();
+    	return jdoExtension.getEntityManager();
     }
     
     private void begin(){
@@ -382,11 +372,4 @@ public class TestOperationArguments {
     	return PersistenceHelper.currentUnitOfWork(getEntityManager());
     }
     
-    @BeforeClass
-    public static void deploy() throws NamingException{
-        if(!NamingManager.hasInitialContextFactoryBuilder()) {
-            NonManagedInitialContextFactoryBuilder.install(null);
-        }
-    }
-
 }

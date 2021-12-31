@@ -47,9 +47,8 @@
  */
 package test.openmdx.base.mof;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -67,40 +66,16 @@ public class ModelTest {
         Model_1_0 model = model1;
         // org:omg:model1:Classifier
         ModelElement_1_0 compositeReferenceClassifier = model.getCompositeReference(model.getElement("org:omg:model1:Classifier"));
-        assertEquals(
-            "Composite reference of 'org:omg:model1:Classifier'", 
-            "org:omg:model1:Segment:element",
-            compositeReferenceClassifier.getQualifiedName()
-        );
+        Assertions.assertEquals("org:omg:model1:Segment:element",compositeReferenceClassifier.getQualifiedName(),"Composite reference of 'org:omg:model1:Classifier'");
         ModelElement_1_0 compositeReferenceClassifierExposedEnd = model.getElement(compositeReferenceClassifier.getExposedEnd());
-        assertEquals(
-            "Exposed end of 'org:omg:model1:Segment:element'", 
-            "org:omg:model1:SegmentContainsElement:segment",
-            compositeReferenceClassifierExposedEnd.getQualifiedName()
-        );
-        assertEquals(
-            "Referenced type of 'org:omg:model1:Segment:element'",
-            "org:omg:model1:Segment",
-            model.getElement(compositeReferenceClassifierExposedEnd.getType()).getQualifiedName()
-        );
+        Assertions.assertEquals("org:omg:model1:SegmentContainsElement:segment",compositeReferenceClassifierExposedEnd.getQualifiedName(),"Exposed end of 'org:omg:model1:Segment:element'");
+        Assertions.assertEquals("org:omg:model1:Segment",model.getElement(compositeReferenceClassifierExposedEnd.getType()).getQualifiedName(),"Referenced type of 'org:omg:model1:Segment:element'");
         // org:omg:model1:Segment
         ModelElement_1_0 compositeReferenceSegment = model.getCompositeReference(model.getElement("org:omg:model1:Segment"));
-        assertEquals(
-            "Composite reference of 'org:omg:model1:Segment'", 
-            "org:openmdx:base:Provider:segment",
-            compositeReferenceSegment.getQualifiedName()
-        );        
+        Assertions.assertEquals("org:openmdx:base:Provider:segment",compositeReferenceSegment.getQualifiedName(),"Composite reference of 'org:omg:model1:Segment'");        
         ModelElement_1_0 compositeReferenceSegmentExposedEnd = model.getElement(compositeReferenceSegment.getExposedEnd());
-        assertEquals(
-            "Exposed end of 'org:openmdx:base:Provider:segment'", 
-            "org:openmdx:base:ProviderProvidesSegment:provider",
-            compositeReferenceSegmentExposedEnd.getQualifiedName()
-        );
-        assertEquals(
-            "Referenced type of 'org:openmdx:base:Provider:segment'",
-            "org:openmdx:base:Provider",
-            model.getElement(compositeReferenceSegmentExposedEnd.getType()).getQualifiedName()
-        );
+        Assertions.assertEquals("org:openmdx:base:ProviderProvidesSegment:provider",compositeReferenceSegmentExposedEnd.getQualifiedName(),"Exposed end of 'org:openmdx:base:Provider:segment'");
+        Assertions.assertEquals("org:openmdx:base:Provider",model.getElement(compositeReferenceSegmentExposedEnd.getType()).getQualifiedName(),"Referenced type of 'org:openmdx:base:Provider:segment'");
     }
 
 }

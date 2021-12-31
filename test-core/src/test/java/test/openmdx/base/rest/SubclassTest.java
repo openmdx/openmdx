@@ -47,9 +47,8 @@
  */
 package test.openmdx.base.rest;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * Subclass Test
@@ -60,23 +59,23 @@ public class SubclassTest {
     public void testX() {
         XInterface x = new XImplementation(System.currentTimeMillis());
         java.util.Date dX = x.getList().get(0); 
-        assertEquals("dX", java.util.Date.class, dX.getClass());
+        Assertions.assertEquals(java.util.Date.class, dX.getClass(), "dX");
         dX = x.list().get(0);
-        assertEquals("dX", java.util.Date.class, dX.getClass());
+        Assertions.assertEquals(java.util.Date.class, dX.getClass(), "dX");
     }
 
     @Test
     public void testY() {
         YInterface y = new YImplementation(System.currentTimeMillis());
         java.sql.Date dY = y.getList().get(0);
-        assertEquals("dY", java.sql.Date.class, dY.getClass());
+        Assertions.assertEquals(java.sql.Date.class, dY.getClass(), "dY");
         java.util.Date dX = y.getList().get(0); 
-        assertEquals("dX", java.sql.Date.class, dX.getClass());
+        Assertions.assertEquals(java.sql.Date.class, dX.getClass(), "dX");
         java.util.List<java.sql.Date> l = y.list();
         dY = l.get(0);
-        assertEquals("dY", java.sql.Date.class, dY.getClass());
+        Assertions.assertEquals(java.sql.Date.class, dY.getClass(), "dY");
         dX = l.get(0); 
-        assertEquals("dX", java.sql.Date.class, dX.getClass());
+        Assertions.assertEquals(java.sql.Date.class, dX.getClass(), "dX");
     }
     
 }

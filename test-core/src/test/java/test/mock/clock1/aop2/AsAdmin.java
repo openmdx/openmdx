@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2020, OMEX AG, Switzerland
+ * Copyright (c) 2020-2021, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -55,7 +55,7 @@ import java.util.List;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.openmdx.base.persistence.cci.UserObjects;
 
 import test.openmdx.clock1.jmi1.Segment;
@@ -101,8 +101,8 @@ public class AsAdmin {
         final PersistenceManager persistenceManager
     ) {
         final MockPlugInConfiguration configuration = (MockPlugInConfiguration)persistenceManager.getUserObject("configuration");
-        Assert.assertNotNull(configuration);
-        Assert.assertEquals("Hello World", configuration.getGreetings());
+        Assertions.assertNotNull(configuration);
+        Assertions.assertEquals("Hello World", configuration.getGreetings());
     }
 
     private static void validatePrincipalChain(
@@ -113,7 +113,7 @@ public class AsAdmin {
             System.getProperty("user.name")
         );
         final List<String> actualPrincipalChain = UserObjects.getPrincipalChain(adminPersistenceManager);
-        Assert.assertEquals("Principal Chain", expectedPrincipalChain, actualPrincipalChain);
+        Assertions.assertEquals(expectedPrincipalChain, actualPrincipalChain, "Principal Chain");
     }
 
 }

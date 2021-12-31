@@ -47,8 +47,6 @@
  */
 package test.openmdx.base.rest;
 
-import static org.junit.Assert.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -75,8 +73,9 @@ import java.util.Map.Entry;
 import javax.resource.cci.MappedRecord;
 import javax.xml.datatype.DatatypeFactory;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.w3c.cci2.MutableDatatypeFactory;
@@ -115,7 +114,7 @@ public class PerformanceTest {
 
     static int sizeReference = 0;
 
-    @Before
+    @BeforeEach
     public void setUp(
     ) throws Exception {
         this.xmlDatatypeFactory = MutableDatatypeFactory.xmlDatatypeFactory();
@@ -1059,15 +1058,15 @@ public class PerformanceTest {
     private final void header(
         DataInputStream in
     ) throws IOException {
-        assertEquals(ValueObject.class.getName(), in.readUTF());
-        assertEquals("7", in.readUTF());
-        assertEquals("identity", in.readUTF());
-        assertEquals("field1", in.readUTF());
-        assertEquals("field2", in.readUTF());
-        assertEquals("field3", in.readUTF());
-        assertEquals("field4", in.readUTF());
-        assertEquals("field5", in.readUTF());
-        assertEquals("field6", in.readUTF());
+        Assertions.assertEquals(ValueObject.class.getName(), in.readUTF());
+        Assertions.assertEquals("7", in.readUTF());
+        Assertions.assertEquals("identity", in.readUTF());
+        Assertions.assertEquals("field1", in.readUTF());
+        Assertions.assertEquals("field2", in.readUTF());
+        Assertions.assertEquals("field3", in.readUTF());
+        Assertions.assertEquals("field4", in.readUTF());
+        Assertions.assertEquals("field5", in.readUTF());
+        Assertions.assertEquals("field6", in.readUTF());
     }
 
     private final void header(

@@ -47,11 +47,10 @@
  */
 package test.openmdx.kernel.exception;
 
-import static org.junit.Assert.fail;
-
 import java.math.BigDecimal;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -71,9 +70,9 @@ public class PerformanceTest {
 
     @Test
     public void testRuntimeServiceException(){
-        org.junit.Assert.assertTrue(
-            "Overhead Excess", 
-            throwAndCatch(false) * ACCEPTABLE_FACTOR > throwAndCatch(true)
+        Assertions.assertTrue(
+            throwAndCatch(false) * ACCEPTABLE_FACTOR > throwAndCatch(true),
+            "Overhead Excess"
         );
     }
     
@@ -91,7 +90,7 @@ public class PerformanceTest {
             }
             try {
                 parse("XYZ", service);
-                fail("The value shoud be unparsable");
+                Assertions.fail("The value shoud be unparsable");
             } catch (RuntimeException expected) {
                 if(i == 0) {
                     System.out.println("Summary: " + expected);

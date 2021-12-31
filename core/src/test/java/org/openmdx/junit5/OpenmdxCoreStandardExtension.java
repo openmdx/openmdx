@@ -1,13 +1,14 @@
 /*
  * ====================================================================
- * Project:     openMDX/Test Core, http://www.openmdx.org/
- * Description: Entity Manager Factory Rule
- * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: JUnit 5 EStandard xtension for openMDX/Core
+ * Owner:       Datura Informatik + Organisation AG, Switzerland, 
+ *              https://www.datura.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2016, OMEX AG, Switzerland
+ * Copyright (c) 2021, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -21,11 +22,11 @@
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *  
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *  
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -42,58 +43,46 @@
  * 
  * ------------------
  * 
- * This product includes software developed by other organizations as
- * listed in the NOTICE file.
+ * This product includes or is based on software developed by other 
+ * organizations as listed in the NOTICE file.
  */
-package org.openmdx.junit.rules;
+package org.openmdx.junit5;
 
-import javax.jdo.PersistenceManager;
+import java.util.Collections;
+import java.util.Properties;
 
-import org.junit.rules.ExternalResource;
+import javax.naming.NamingException;
+import javax.naming.spi.NamingManager;
 
-public class EntityManagerRule extends ExternalResource {
+import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 
-	/**
-	 * Retrieve the factory lazily
-	 * 
-	 * @param entityManagerFactory
-	 */
-	public EntityManagerRule(EntityManagerFactoryRule entityManagerFactoryRule) {
-		this.entityManagerFactoryRule = entityManagerFactoryRule;
-	}
+/**
+ * JUnit 5 Standard Extension for openMDX/Core
+ */
+public class OpenmdxCoreStandardExtension implements BeforeAllCallback {
 
-	/**
-	 * The entity manager factory
-	 */
-	private final EntityManagerFactoryRule entityManagerFactoryRule;
-
-	
-	/**
-	 * The entity manager factory name
-	 */
-	private PersistenceManager entityManager;
-	
-	/* (non-Javadoc)
-	 * @see org.junit.rules.ExternalResource#before()
-	 */
 	@Override
-	protected void before() throws Throwable {
-		this.entityManager = entityManagerFactoryRule.getEntityManagerFactory().getPersistenceManager();
+	public void beforeAll(ExtensionContext context) throws Exception {
+		if (!NamingManager.hasInitialContextFactoryBuilder()) {
+			final Properties buildProperties = BuildProperties.getBuildProperties();
+			configureURLs();
+			configureTimezone(buildProperties);
+			configureJNDI(buildProperties);
+		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.junit.rules.ExternalResource#after()
-	 */
-	@Override
-	protected void after() {
-		this.entityManager.close();
+	private void configureJNDI(final Properties buildProperties) throws NamingException {
+		NonManagedInitialContextFactoryBuilder.install(Collections.emptyMap());
 	}
 
-	/**
-	 * @return the entityManager
-	 */
-	public PersistenceManager getEntityManager() {
-		return this.entityManager;
+	private void configureTimezone(final Properties buildProperties) {
+		System.setProperty("user.timezone", buildProperties.getProperty(BuildProperties.TIMEZONE_KEY));
 	}
-	
+
+	private void configureURLs() {
+		System.setProperty("java.protocol.handler.pkgs", "org.openmdx.kernel.url.protocol");
+	}
+
 }

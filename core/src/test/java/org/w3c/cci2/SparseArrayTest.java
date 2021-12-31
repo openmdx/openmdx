@@ -56,8 +56,6 @@ import java.util.TreeMap;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.w3c.cci2.SortedMaps;
-import org.w3c.cci2.SparseArray;
 
 /**
  * SparseArray Test

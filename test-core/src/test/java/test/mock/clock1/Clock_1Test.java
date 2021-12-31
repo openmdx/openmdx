@@ -52,19 +52,18 @@ import java.text.ParseException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefException;
-import javax.naming.NamingException;
-import javax.naming.spi.NamingManager;
 import javax.resource.ResourceException;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
 
 import test.openmdx.clock1.jmi1.Segment;
 
 /**
  * AOP 2 Test
  */
+@ExtendWith(OpenmdxTestCoreStandardExtension.class)
 public class Clock_1Test {
 
 	/**
@@ -106,13 +105,6 @@ public class Clock_1Test {
         Segments.validateMockedProvider(segment);
         Segments.validateChangedTimePoint(segment);
         Segments.validateChangedTimePointReflectively(segment);
-    }
-
-    @BeforeClass
-    public static void deploy() throws NamingException{
-        if(!NamingManager.hasInitialContextFactoryBuilder()) {
-            NonManagedInitialContextFactoryBuilder.install(null);
-        }
     }
 
 }

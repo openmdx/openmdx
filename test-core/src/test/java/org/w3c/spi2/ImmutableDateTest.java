@@ -55,7 +55,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.w3c.cci2.ImmutableDate;
-import org.w3c.spi2.Datatypes;
 
 /**
  * Test ImmutableDate

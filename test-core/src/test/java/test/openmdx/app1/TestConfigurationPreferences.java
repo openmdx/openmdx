@@ -47,12 +47,12 @@
  */
 package test.openmdx.app1;
 
-import org.junit.Assert;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.openmdx.junit.rules.EntityManagerFactoryRule;
-import org.openmdx.junit.rules.EntityManagerRule;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.openmdx.junit5.JDOExtension;
+import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
 import org.openmdx.preferences2.jmi1.Entry;
 import org.openmdx.preferences2.jmi1.Node;
 import org.openmdx.preferences2.jmi1.Preferences;
@@ -61,15 +61,12 @@ import org.openmdx.preferences2.jmi1.Segment;
 /**
  * Test Configuration Preferences
  */
+@ExtendWith(OpenmdxTestCoreStandardExtension.class)
 public class TestConfigurationPreferences {
 
-	@ClassRule
-	public static EntityManagerFactoryRule entityManagerFactoryRule = new EntityManagerFactoryRule() //
-			.setName("test-Main-EntityManagerFactory");
-
-	@Rule
-	public EntityManagerRule entityManagerRule = new EntityManagerRule(entityManagerFactoryRule);
-
+	@RegisterExtension
+	static JDOExtension jdoExtension = JDOExtension.withEntityManagerFactoryName("test-Main-EntityManagerFactory");
+	
 	private static final String PREFERENCES_SEGMENT_ID = "xri://@openmdx*org:openmdx:preferences2/provider/(@openmdx!configuration)/segment/org.openmdx.jdo.DataManager";
 
 	@Test
@@ -94,11 +91,11 @@ public class TestConfigurationPreferences {
 		// 
 		// Assert
 		//
-		Assert.assertEquals("/dbColumn/nationality", columnPath);
-		Assert.assertEquals("/dbColumn/nationality/stringMacro/0", macroPath);
-		Assert.assertEquals("nationality", columnName);
-		Assert.assertEquals("Extra-Terrestrial", macroValue);
-		Assert.assertEquals("E.T.", macroName);
+		Assertions.assertEquals("/dbColumn/nationality", columnPath);
+		Assertions.assertEquals("/dbColumn/nationality/stringMacro/0", macroPath);
+		Assertions.assertEquals("nationality", columnName);
+		Assertions.assertEquals("Extra-Terrestrial", macroValue);
+		Assertions.assertEquals("E.T.", macroName);
 	}
 	
 	/**
@@ -107,7 +104,7 @@ public class TestConfigurationPreferences {
 	 * @return the Test segment
 	 */
 	private Segment getSegment() {
-		return this.entityManagerRule.getEntityManager().getObjectById(Segment.class, PREFERENCES_SEGMENT_ID);
+		return jdoExtension.getEntityManager().getObjectById(Segment.class, PREFERENCES_SEGMENT_ID);
 	}
 
 }
