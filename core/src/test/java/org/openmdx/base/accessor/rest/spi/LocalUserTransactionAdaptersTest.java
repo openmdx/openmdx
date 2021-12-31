@@ -4,19 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import javax.naming.NamingException;
-import javax.naming.spi.NamingManager;
 import javax.resource.ResourceException;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.openmdx.base.transaction.LocalUserTransaction;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
+import org.openmdx.junit5.OpenmdxCoreStandardExtension;
 import org.openmdx.kernel.loading.Factory;
 import org.openmdx.kernel.platform.Platform;
 
+@ExtendWith(OpenmdxCoreStandardExtension.class)
 class LocalUserTransactionAdaptersTest {
 
     Factory<LocalUserTransaction> jtaUserTransactionFactory;
@@ -25,13 +24,6 @@ class LocalUserTransactionAdaptersTest {
     private static LocalUserTransactionAdapters underTest;
     private String jtaKey;
     private String containerManagedKey;
-
-    @BeforeAll
-    public static void jndiSetUp() throws NamingException {
-        if (!NamingManager.hasInitialContextFactoryBuilder()) {
-            NonManagedInitialContextFactoryBuilder.install(null);
-        }
-    }
 
     @BeforeEach
     void setUp() {
