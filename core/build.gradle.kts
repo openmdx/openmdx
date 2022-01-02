@@ -59,7 +59,6 @@ plugins {
 
 repositories {
 	mavenCentral()
-	jcenter()
 }
 
 var env = Properties()
@@ -205,9 +204,6 @@ sourceSets {
     }
 }
 
-tasks.withType<Test> {
-    this.classpath.forEach { println(it) }
-}
 tasks.test {
     useJUnitPlatform()
     maxHeapSize = "4G"

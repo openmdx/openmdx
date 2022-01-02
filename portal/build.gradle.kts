@@ -60,7 +60,6 @@ plugins {
 
 repositories {
 	mavenCentral()
-	jcenter()
 }
 
 var env = Properties()
@@ -102,7 +101,8 @@ dependencies {
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 	// test
-    testImplementation("junit:junit:4.12")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testImplementation("org.junit.vintage:junit-vintage-engine:5.8.2")
 }
 
 sourceSets {
@@ -295,6 +295,18 @@ tasks {
 	}
 }
 
+tasks.test {
+    useJUnitPlatform()
+    maxHeapSize = "4G"
+}
+
+project.tasks.named("processResources", Copy::class.java) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+project.tasks.named("processTestResources", Copy::class.java) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
 val openmdxPortalIncludes = listOf<String>(  
     "org/openmdx/portal/*/**",
     "org/openmdx/ui1/*/**",
@@ -306,6 +318,7 @@ val openmdxPortalExcludes = listOf<String>(
 )
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-portal.jar") {
+    duplicatesStrategy = DuplicatesStrategy.WARN
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
 	archiveFileName.set("openmdx-portal.jar")
     includeEmptyDirs = false
@@ -328,6 +341,7 @@ tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-portal.jar") {
 }
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-portal-sources.jar") {
+    duplicatesStrategy = DuplicatesStrategy.WARN
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
 	archiveFileName.set("openmdx-portal-sources.jar")
     includeEmptyDirs = false
