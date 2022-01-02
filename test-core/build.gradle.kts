@@ -60,7 +60,6 @@ plugins {
 
 repositories {
 	mavenCentral()
-	jcenter()
 }
 
 var env = Properties()
@@ -152,6 +151,9 @@ tasks.test {
 }
 
 project.tasks.named("processResources", Copy::class.java) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+project.tasks.named("processTestResources", Copy::class.java) {
     duplicatesStrategy = DuplicatesStrategy.WARN
 }
 

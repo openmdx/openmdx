@@ -60,7 +60,6 @@ plugins {
 
 repositories {
 	mavenCentral()
-	jcenter()
 }
 
 var env = Properties()
@@ -95,10 +94,10 @@ val openmdxBootstrap by configurations
 
 dependencies {
     // implementation
+    implementation(project(":core"))
     implementation("javax:javaee-api:8.0.+")
     implementation("javax.jdo:jdo-api:3.1")    
     implementation("org.apache.directory.api:apache-ldap-api:2.0.+")    
-    implementation(project(":core"))
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 }
@@ -165,6 +164,13 @@ tasks {
 	}
 }
 
+project.tasks.named("processResources", Copy::class.java) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+project.tasks.named("processTestResources", Copy::class.java) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
 val openmdxSecurityIncludes = listOf<String>(  
     "org/openmdx/security/*/**",
     "org/openmdx/uses/layout/*",
@@ -179,6 +185,7 @@ val openmdxSecurityExcludes = listOf<String>(
 )
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-security.jar") {
+    duplicatesStrategy = DuplicatesStrategy.WARN
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
 	archiveFileName.set("openmdx-security.jar")
     includeEmptyDirs = false
@@ -201,6 +208,7 @@ tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-security.jar") {
 }
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-security-sources.jar") {
+    duplicatesStrategy = DuplicatesStrategy.WARN
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
 	archiveFileName.set("openmdx-security-sources.jar")
     includeEmptyDirs = false
@@ -229,6 +237,7 @@ val openmdxAuthenticationExcludes = listOf<String>(
 )
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-authentication.jar") {
+    duplicatesStrategy = DuplicatesStrategy.WARN
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
 	archiveFileName.set("openmdx-authentication.jar")
     includeEmptyDirs = false

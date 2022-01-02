@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2021, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -16,16 +16,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -48,7 +48,6 @@
  *
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
- *
  */
 package org.openmdx.test.portal.servlet;
 
@@ -66,11 +65,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import junit.textui.TestRunner;
-
+import org.junit.Ignore;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
@@ -78,7 +73,13 @@ import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.action.LogoffAction;
 import org.openmdx.portal.servlet.action.SelectObjectAction;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import junit.textui.TestRunner;
+
 //---------------------------------------------------------------------------  
+@Ignore("TestThreadSafety.config needs to be provided")
 public class TestThreadSafety 
     extends TestCase {
   
@@ -181,7 +182,7 @@ public class TestThreadSafety
     ) throws MalformedURLException, FileNotFoundException, IOException {
         super(name);
         try(
-            InputStream is = new FileInputStream("c:/temp/TestThreadSafety.config");
+            InputStream is = new FileInputStream("build/temp/TestThreadSafety.config");
             BufferedReader reader = new BufferedReader(
                 new InputStreamReader(is)
             )

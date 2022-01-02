@@ -49,7 +49,6 @@
 buildscript {
     repositories {
         mavenCentral()
-        jcenter()
         maven {
             url = uri("https://www.openmdx.org/repos/releases")
         }
@@ -59,7 +58,7 @@ rootProject.name = "openmdx"
 include(
     ":core",
     ":portal",
-    ":security",
+    ":security", 
     ":client",
     ":test-core",
     ":test-security",

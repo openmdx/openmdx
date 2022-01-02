@@ -142,6 +142,13 @@ tasks {
 	}
 }
 
+project.tasks.named("processResources", Copy::class.java) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+project.tasks.named("processTestResources", Copy::class.java) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
 distributions {
     main {
     	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-" + project.getName() + "-jre-" + targetPlatform)
