@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2011, OMEX AG, Switzerland
+ * Copyright (c) 2007-2021, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -60,6 +60,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -1642,6 +1643,48 @@ public class DateStateViews {
     }
 
     /**
+     * Retrieve a domain object's states valid at a given time point in history
+     * 
+     * @param stateCapable
+     *            a plain JMI object or a date state view
+     * @param validFrom
+     *            include all states ending at validFrom or later
+     * @param validTo
+     *            include all states beginning at validTo or earlier
+     * @param invalidated
+     *            tells whether valid or invalid states excluded
+     *            <ul>
+     *            <li><code>null</code>: Neither valid nor invalid states are excluded
+     *            <li><code>TRUE</code>: Valid states are excluded
+     *            <li><code>FALSE</code>: Invalid states are excluded
+     *            </ul>
+     * @param existsAt
+     *            an (optional) time in history
+     * @return a collection of DateState instance
+     * 
+     * @throws IllegalArgumentException
+     *             if {@code validTo} is less than {@code validFrom}
+     * @exception NullPointerException
+     *             if {@code existsAt} is {@code null}
+     */
+    public static <T extends DateState> List<T> getStatesValidAt(
+    	StateCapable stateCapable, 
+    	XMLGregorianCalendar validFrom, 
+   		XMLGregorianCalendar validTo, 
+   		Date existsAt
+    ) {
+        return getStates(
+        	stateCapable, 
+        	validFrom, 
+        	validTo, 
+        	null, 
+        	Objects.requireNonNull(existsAt, "existsAt, the time point in history, must not be null"), 
+        	AccessMode.FOR_QUERY)
+        ;
+    }
+
+    
+    /**
      * Retrieve states
      * 
      * @param referenceCollection
@@ -1736,11 +1779,13 @@ public class DateStateViews {
      *            <li><code>FALSE</code>: Invalid states are excluded
      *            </ul>
      * @param existsAt
+     *            an (optional) time in history
      * @param mode
+     *            the access mode
      * @return a collection of DateState instance
      * 
      * @throws IllegalArgumentException
-     *             if validTo is less than validFrom
+     *            if {@code validTo} is less than {@code validFrom}
      */
     @SuppressWarnings("unchecked")
     private static <T extends DateState> List<T> getStates(
