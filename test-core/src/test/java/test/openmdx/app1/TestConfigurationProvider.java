@@ -57,8 +57,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.configuration.Configurations;
 import org.openmdx.kernel.configuration.cci.Configuration;
@@ -80,8 +80,8 @@ public class TestConfigurationProvider {
         final Configuration auditConfiguration = plugInConfigurations.get("xri://@openmdx*test.openmdx.app1/provider/Audit/($...)");
         // Assert
         final Optional<String> configuration = auditConfiguration.getOptionalValue("configuration", String.class);
-        Assert.assertTrue(configuration.isPresent());
-        Assert.assertEquals("xri://+resource/META-INF/app1BeforeImageProvider.properties", configuration.get());
+        Assertions.assertTrue(configuration.isPresent());
+        Assertions.assertEquals("xri://+resource/META-INF/app1BeforeImageProvider.properties", configuration.get());
     }
 
     private Map<String, Configuration> createPlugInConfigurations(

@@ -95,7 +95,7 @@ public class UiAttributePaneControl extends AttributePaneControl implements Seri
         SysLog.detail("Preparing attribute tabs");
         List<UiAttributeTabControl> attributeTabControls = new ArrayList<UiAttributeTabControl>();
         for(int i = 0; i < paneDef.getMember().size(); i++) {
-        	SysLog.detail("Preparing attribute tab", new Integer(i));
+        	SysLog.detail("Preparing attribute tab", Integer.valueOf(i));
             org.openmdx.ui1.jmi1.Tab tab = (org.openmdx.ui1.jmi1.Tab) paneDef.getMember().get(i);
             attributeTabControls.add(
                 this.newUiAttributeTabControl(

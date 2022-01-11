@@ -124,13 +124,13 @@ class ArrayPersistenceDelegate extends PersistenceDelegate {
         Class oldClass = oldInstance.getClass();
         return new Expression(oldInstance, Array.class, "newInstance",
                    new Object[]{oldClass.getComponentType(),
-                                new Integer(Array.getLength(oldInstance))});
+                                Integer.valueOf(Array.getLength(oldInstance))});
         }
 
     protected void initialize(Class<?> type, Object oldInstance, Object newInstance, Encoder out) {
         int n = Array.getLength(oldInstance);
         for (int i = 0; i < n; i++) {
-            Object index = new Integer(i);
+            Object index = Integer.valueOf(i);
             // Expression oldGetExp = new Expression(Array.class, "get", new Object[]{oldInstance, index});
             // Expression newGetExp = new Expression(Array.class, "get", new Object[]{newInstance, index});
             Expression oldGetExp = new Expression(oldInstance, "get", new Object[]{index});
@@ -604,7 +604,7 @@ class java_util_List_PersistenceDelegate extends DefaultPersistenceDelegate {
             newSize = 0;
         }
         for (int i = 0; i < newSize; i++) {
-            Object index = new Integer(i);
+            Object index = Integer.valueOf(i);
 
             Expression oldGetExp = new Expression(oldInstance, "get", new Object[]{index});
             Expression newGetExp = new Expression(newInstance, "get", new Object[]{index});

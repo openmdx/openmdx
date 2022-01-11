@@ -544,7 +544,7 @@ public class UiFieldGroupControl extends Control implements Serializable {
             p.write("</div>"); // container-fluid
             p.setProperty(
                 ViewPort.PROPERTY_FIELD_GROUP_ID,
-                new Integer(fieldGroupId + 1000)
+                Integer.valueOf(fieldGroupId + 1000)
             );
     	}
     }

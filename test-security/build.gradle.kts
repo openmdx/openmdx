@@ -100,7 +100,12 @@ dependencies {
     implementation("javax:javaee-api:8.0.+")
     implementation("org.apache.directory.api:apache-ldap-api:2.0.+")
     implementation("org.tinyradius:tinyradius:1.1.+")
-    implementation("junit:junit:4.12") 
+    implementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    // test
+    testImplementation(project(":core"))
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testImplementation("org.mockito:mockito-core:4.2.0")    
+    testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 }

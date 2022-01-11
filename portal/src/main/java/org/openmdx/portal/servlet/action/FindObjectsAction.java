@@ -124,7 +124,7 @@ public class FindObjectsAction extends UnboundAction {
         String positionAsString = Action.getParameter(parameter, Action.PARAMETER_POSITION);
         int position = positionAsString == null ? 0 : Integer.parseInt(positionAsString);         
         String sizeAsString = Action.getParameter(parameter, Action.PARAMETER_SIZE);        
-        int size = sizeAsString == null ? 0 : new Integer(sizeAsString).intValue();
+        int size = sizeAsString == null ? 0 : Integer.parseInt(sizeAsString);
         // Output
         try(
             PrintWriter pw = this.getWriter(

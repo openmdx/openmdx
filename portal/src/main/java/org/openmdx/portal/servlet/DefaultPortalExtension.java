@@ -89,7 +89,6 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Level;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
@@ -566,7 +565,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 		                    	? this.uuidAsString() 
 		                    	: id,
 		                    locale,
-		                    new Integer(localeAsIndex)
+		                    Integer.valueOf(localeAsIndex)
 		                }
 		            );
 	        	} catch(Exception e) {
@@ -587,7 +586,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 		                new Object[]{
 		                    id == null ? this.uuidAsString() : id,
 		                    locale,
-		                    new Integer(localeAsIndex),
+		                    Integer.valueOf(localeAsIndex),
 		                    parameter
 		                }
 		            );
@@ -1145,7 +1144,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
                                             	? field.getLabel().get(locale) 
                                             	: field.getLabel().isEmpty() ? attributeName : field.getLabel().get(0);
                                             lookupReferenceNames.put(
-                                                new Integer(order), 
+                                                Integer.valueOf(order), 
                                                 lookupReferenceName
                                             );
                                             filterByLabels.put(
@@ -1507,7 +1506,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												);
 											}
 										} else if(PrimitiveTypes.INTEGER.equals(featureTypeName)) {
-											Integer mappedNewValue = new Integer(number.intValue());
+											Integer mappedNewValue = Integer.valueOf(number.intValue());
 											if(target instanceof RefObject) {
 												Object value = this.getValue(
 													valueHolder, 
@@ -1643,11 +1642,11 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											if(number != null) {
 												if(PrimitiveTypes.INTEGER.equals(featureTypeName)) {
 													mappedNewValues.add(
-														new Integer(number.intValue())
+														Integer.valueOf(number.intValue())
 													);
 												} else if(PrimitiveTypes.LONG.equals(featureTypeName)) {
 													mappedNewValues.add(
-														new Long(number.longValue())
+														Long.valueOf(number.longValue())
 													);
 												} else if(PrimitiveTypes.DECIMAL.equals(featureTypeName)) {
 													mappedNewValues.add(

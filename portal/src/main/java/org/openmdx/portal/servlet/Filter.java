@@ -205,7 +205,7 @@ public class Filter extends org.openmdx.base.query.Filter implements Serializabl
         int index
     ) {
         return this.order == null
-        ? new Integer(0)
+        ? Integer.valueOf(0)
         : this.order[index];
     }
 

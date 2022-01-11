@@ -287,7 +287,7 @@ public class EventHandler implements InvocationHandler {
         if (method.getDeclaringClass() == Object.class)  {
             // Handle the Object public methods.
             if (methodName.equals("hashCode"))  {
-                return new Integer(System.identityHashCode(proxy));
+                return Integer.valueOf(System.identityHashCode(proxy));
             } else if (methodName.equals("equals")) {
                 return (proxy == arguments[0] ? Boolean.TRUE : Boolean.FALSE);
             } else if (methodName.equals("toString")) {

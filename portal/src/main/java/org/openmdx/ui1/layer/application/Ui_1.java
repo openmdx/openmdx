@@ -564,7 +564,7 @@ public class Ui_1 extends AbstractRestPort {
                 return res;
             }
         }
-        return new Integer(o1.size()).compareTo(new Integer(o2.size()));
+        return o1.size() - o2.size();
     }
 
     private List<?> getOrderFieldGroup(
@@ -697,7 +697,7 @@ public class Ui_1 extends AbstractRestPort {
             fieldFacade.attributeValuesAsList("titleIndex").add(
                 !definitionFacade.attributeValuesAsList("titleIndex").isEmpty() 
                 	? definitionFacade.attributeValue("titleIndex")
-                    : new Integer(0)
+                    : Integer.valueOf(0)
             );
         }
         // string | anyURI | unknown primitive type
@@ -722,11 +722,11 @@ public class Ui_1 extends AbstractRestPort {
         	fieldFacade.getValue().setRecordName("org:openmdx:ui1:NumberField");
             BigDecimal defaultMinValue = null;
             BigDecimal defaultMaxValue = null;
-            Integer defaultDecimalPlaces = new Integer(0);
+            Integer defaultDecimalPlaces = Integer.valueOf(0);
             if(PrimitiveTypes.DECIMAL.equals(typeName)) {
                 defaultMinValue = new BigDecimal(Long.MIN_VALUE);
                 defaultMaxValue = new BigDecimal(Long.MAX_VALUE);
-                defaultDecimalPlaces = new Integer(2);
+                defaultDecimalPlaces = Integer.valueOf(2);
             } else if(PrimitiveTypes.SHORT.equals(typeName)) {
                 defaultMinValue = new BigDecimal(Short.MIN_VALUE);
                 defaultMaxValue = new BigDecimal(Short.MAX_VALUE);
@@ -749,7 +749,7 @@ public class Ui_1 extends AbstractRestPort {
             );
             fieldFacade.attributeValuesAsList("decimalPlaces").add(
                 !definitionFacade.attributeValuesAsList("decimalPlaces").isEmpty()
-	                ? new Integer(((Number)definitionFacade.attributeValue("decimalPlaces")).intValue())
+	                ? Integer.valueOf(((Number)definitionFacade.attributeValue("decimalPlaces")).intValue())
 	                : defaultDecimalPlaces        
             );
             fieldFacade.attributeValuesAsList("increment").add(
@@ -797,7 +797,7 @@ public class Ui_1 extends AbstractRestPort {
         	fieldFacade.attributeValuesAsList("maxLength").add(
                 !definitionFacade.attributeValuesAsList("maxLength").isEmpty()
                 	? (Integer)definitionFacade.attributeValue("maxLength")
-                    : new Integer(Integer.MAX_VALUE)
+                    : Integer.valueOf(Integer.MAX_VALUE)
             );
         	fieldFacade.attributeValuesAsList("autoSize").add(new Boolean(true));
         	fieldFacade.attributeValuesAsList("acceptsTab").add(new Boolean(false));
@@ -1527,7 +1527,7 @@ public class Ui_1 extends AbstractRestPort {
     	            null : 
     	            !Object_2Facade.newInstance(uiDef).attributeValuesAsList("order").isEmpty() ? 
     	                (Number)Object_2Facade.newInstance(uiDef).attributeValue("order") : 
-    	                new Integer(90000);                     
+    	                Integer.valueOf(90000);                     
     	        DecimalFormat orderFormatter= new DecimalFormat("###00"); 
     	        Path paneIdentity = segmentIdentity.getDescendant(
     	            new String[]{
@@ -1902,9 +1902,9 @@ public class Ui_1 extends AbstractRestPort {
 		                if(
 		                    ((!columnBreak.isEmpty() && ((Boolean)columnBreak.get(0)).booleanValue()) || (!customizedGroup && (fieldIndex % defaultColumnHeight == 0)))
 		                ) { 
-		                	groupFacade.attributeValuesAsList("columnSizeMin").add(new Integer(330));
-		                	groupFacade.attributeValuesAsList("columnSizeMax").add(new Integer(currentColumnSizeMax));
-		                	groupFacade.attributeValuesAsList("columnBreakAtElement").add(new Integer(memberIndex));
+		                	groupFacade.attributeValuesAsList("columnSizeMin").add(Integer.valueOf(330));
+		                	groupFacade.attributeValuesAsList("columnSizeMax").add(Integer.valueOf(currentColumnSizeMax));
+		                	groupFacade.attributeValuesAsList("columnBreakAtElement").add(Integer.valueOf(memberIndex));
 		                    currentColumnSizeMax = 0;
 		                    fieldIndex = 0;
 		                }
@@ -1919,9 +1919,9 @@ public class Ui_1 extends AbstractRestPort {
 		                }
 		                fieldIndex++;
 		            }
-		            groupFacade.attributeValuesAsList("columnSizeMin").add(new Integer(330));
-		            groupFacade.attributeValuesAsList("columnSizeMax").add(new Integer(Integer.MAX_VALUE));
-		            groupFacade.attributeValuesAsList("columnBreakAtElement").add(new Integer(Integer.MAX_VALUE));     
+		            groupFacade.attributeValuesAsList("columnSizeMin").add(Integer.valueOf(330));
+		            groupFacade.attributeValuesAsList("columnSizeMax").add(Integer.valueOf(Integer.MAX_VALUE));
+		            groupFacade.attributeValuesAsList("columnBreakAtElement").add(Integer.valueOf(Integer.MAX_VALUE));     
 		            this.storeElement(
 		                segmentIdentity,
 		                group
@@ -2250,8 +2250,8 @@ public class Ui_1 extends AbstractRestPort {
 		            inspectorDefinitionFacade.attributeValue("changeable")
 		        );
 		        inspectorFacade.attributeValuesAsList("forClass").add(forClass);
-		        inspectorFacade.attributeValuesAsList("scaleX").add(new Integer(1));
-		        inspectorFacade.attributeValuesAsList("scaleY").add(new Integer(1));
+		        inspectorFacade.attributeValuesAsList("scaleX").add(Integer.valueOf(1));
+		        inspectorFacade.attributeValuesAsList("scaleY").add(Integer.valueOf(1));
 		        // Get additional inspector definitions
 		        List<MappedRecord> inspectorDefinitions = new ArrayList<MappedRecord>();
 		        inspectorDefinitions.add(inspectorDefinition);
@@ -2286,8 +2286,8 @@ public class Ui_1 extends AbstractRestPort {
 		                (String)definitionFacade.attributeValue("cssClassFieldGroup"),
 		                (String)definitionFacade.attributeValue("cssClassObjectContainer"),
 		                Multiplicity.SINGLE_VALUE.code(),
-		                new Integer(1),
-		                new Integer(0),
+		                Integer.valueOf(1),
+		                Integer.valueOf(0),
 		                false,
 		                false,
 		                false,
@@ -2538,9 +2538,9 @@ public class Ui_1 extends AbstractRestPort {
 		                                Ui_1.this.getMemberDefaultValues(opDef)
 		                            );
 		                        }
-		                        groupFacade.attributeValuesAsList("columnSizeMin").add(new Integer(330));
-		                        groupFacade.attributeValuesAsList("columnSizeMax").add(new Integer(600));
-		                        groupFacade.attributeValuesAsList("columnBreakAtElement").add(new Integer(999)); // no break
+		                        groupFacade.attributeValuesAsList("columnSizeMin").add(Integer.valueOf(330));
+		                        groupFacade.attributeValuesAsList("columnSizeMax").add(Integer.valueOf(600));
+		                        groupFacade.attributeValuesAsList("columnBreakAtElement").add(Integer.valueOf(999)); // no break
 		                        this.storeElement(
 		                            segmentIdentity,
 		                            group
@@ -2761,9 +2761,9 @@ public class Ui_1 extends AbstractRestPort {
 		        if((values == null) || values.isEmpty()) {
 		            values = elementDefinitionFacade.attributeValuesAsList("order");
 		            // all customized fields have lower order than non-customized fields
-		            values.add(new Integer(100000));
-		            values.add(new Integer(0));
-		            values.add(new Integer(0));
+		            values.add(Integer.valueOf(100000));
+		            values.add(Integer.valueOf(0));
+		            values.add(Integer.valueOf(0));
 		        }
 		        // Default isSortable=false, isFilterable=false if non-modeled element
 		        if(feature.getModelElement() == null) {
@@ -2784,7 +2784,7 @@ public class Ui_1 extends AbstractRestPort {
 		            		elementDefinitionFacade.attributeValuesAsList("sizeXWeight");
 		            if((values == null) || values.isEmpty()) {
 		                // set default to weight 3
-		            	elementDefinitionFacade.attributeValuesAsList("sizeXWeight").add(new Integer(3));
+		            	elementDefinitionFacade.attributeValuesAsList("sizeXWeight").add(Integer.valueOf(3));
 		            }
 		        }
 		        return elementDefinition;
