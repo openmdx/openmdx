@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: JUnit 5 EStandard xtension for openMDX/Core
+ * Description: JUnit 5 Standard Extension for openMDX/Core
  * Owner:       Datura Informatik + Organisation AG, Switzerland, 
  *              https://www.datura.ch
  * ====================================================================

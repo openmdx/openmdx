@@ -1558,7 +1558,7 @@ public final class BasicException extends Exception {
          * <ul>
          * <li>  new Parameter("name", "text")
          * <li>  new Parameter("name", new int[]{1,2,3})
-         * <li>  new Parameter("name", new Integer[]{new Integer(1), new Integer(2))
+         * <li>  new Parameter("name", new Integer[]{Integer.valueOf(1), Integer.valueOf(2))
          * <li>  new Parameter("name", null)
          * </ul>
          *

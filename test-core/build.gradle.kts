@@ -104,7 +104,6 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
     testImplementation("org.mockito:mockito-core:4.2.0")    
     testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
-    testCompileOnly("junit:junit:4.12")
  	testRuntimeOnly("org.postgresql:postgresql:42.3.1")
 	testRuntimeOnly("javax.servlet:javax.servlet-api:3.1.0")
     // openmdxBootstrap

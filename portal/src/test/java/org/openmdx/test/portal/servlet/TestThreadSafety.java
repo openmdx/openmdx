@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: TestThreadSafety
+ * Description: ThreadSafetyTest
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2021, OMEX AG, Switzerland
+ * Copyright (c) 2004-2022, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -65,24 +65,18 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Ignore;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.openmdx.base.text.conversion.Base64;
-import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.action.LogoffAction;
 import org.openmdx.portal.servlet.action.SelectObjectAction;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import junit.textui.TestRunner;
 
-//---------------------------------------------------------------------------  
-@Ignore("TestThreadSafety.config needs to be provided")
-public class TestThreadSafety 
-    extends TestCase {
-  
+@Disabled("TestThreadSafety.config needs to be provided")
+public class TestThreadSafety { 
+	
     public class ServletTester
         implements Runnable {
 
@@ -150,7 +144,7 @@ public class TestThreadSafety
                     );
                     int responseCode = connection.getResponseCode(); 
                     if(responseCode != HttpURLConnection.HTTP_OK) {
-                    	TestThreadSafety.fail("Unexpected response: " + url);
+                    	Assertions.fail("Unexpected response: " + url);
                     }
                     URL responseURL = connection.getURL();
                     if(sessionId == null) {
@@ -163,11 +157,11 @@ public class TestThreadSafety
                 }
                 catch (MalformedURLException e) {
                     e.printStackTrace();
-                    TestThreadSafety.fail("MalformedURLException");
+                    Assertions.fail("MalformedURLException");
                 }
                 catch (IOException e) {
                     e.printStackTrace();
-                    TestThreadSafety.fail("IOException");
+                    Assertions.fail("IOException");
                 }
             }            
         }
@@ -180,7 +174,6 @@ public class TestThreadSafety
     public TestThreadSafety(
         String name
     ) throws MalformedURLException, FileNotFoundException, IOException {
-        super(name);
         try(
             InputStream is = new FileInputStream("build/temp/TestThreadSafety.config");
             BufferedReader reader = new BufferedReader(
@@ -197,41 +190,6 @@ public class TestThreadSafety
             }
         }
     }  
-
-    //---------------------------------------------------------------------------     
-    public static void main(
-        String[] args
-    ) throws MalformedURLException, FileNotFoundException, IOException {
-        TestRunner.run(TestThreadSafety.suite());
-    }
-     
-    //---------------------------------------------------------------------------    
-    public static Test suite(
-    ) throws MalformedURLException, FileNotFoundException, IOException {
-        TestSuite suite = new TestSuite();
-        suite.addTest(
-            new TestThreadSafety("TestThreadSafety")
-        );
-        return suite;
-    }
-  
-    //---------------------------------------------------------------------------  
-    protected void setUp(
-    ) throws Exception {  
-        System.out.println(">>>> **** Begin Test: " + this.getName());
-    }
-
-   //---------------------------------------------------------------------------  
-    protected void tearDown(
-    ) {
-        try {
-          System.out.println("<<<< **** End Test: " + this.getName());
-          SysLog.info("End test",this.getName());
-        }
-        catch(Exception e) {
-          System.out.println("error in tearDown");
-        }
-    }
 
     //---------------------------------------------------------------------------
     public void runTest(

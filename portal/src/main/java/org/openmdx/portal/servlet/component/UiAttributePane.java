@@ -152,7 +152,7 @@ public class UiAttributePane extends AttributePane implements Serializable {
     	}
     	p.setProperty(
 			ViewPort.PROPERTY_N_ACTIVE_TAB,
-			new Integer(nActiveTab)
+			Integer.valueOf(nActiveTab)
 		);        
     	// Select all tabs. Show only if tab size > 0
     	if(nActiveTab > 0) {   

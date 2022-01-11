@@ -47,9 +47,6 @@
  */
 package test.openmdx.app1;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -64,8 +61,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openmdx.application.mof.repository.accessor.ModelBuilder_1;
 import org.openmdx.base.accessor.cci.SystemAttributes;
@@ -143,12 +140,12 @@ public class TestModelRepository {
     ) throws ServiceException{
         Set<Path> k1 = r1.keySet();
         Set<Path> k2 = r2.keySet();
-        assertEquals("Model element XRIs", k1.size(), k2.size());
-        assertEquals("Model element XRIs", k1, k2);
+        Assertions.assertEquals(k1.size(), k2.size(), "Model element XRIs");
+        Assertions.assertEquals(k1, k2, "Model element XRIs");
         for(Path k : k1){
             ModelElement_1_0 e1 = r1.get(k);
             ModelElement_1_0 e2 = r2.get(k);
-            assertEquals("Model element class: " + k.toXRI(), e1.objGetClass(), e2.objGetClass());
+            Assertions.assertEquals(e1.objGetClass(), e2.objGetClass(), "Model element class: " + k.toXRI());
             Set<String> f1 = new TreeSet<String>(e1.objDefaultFetchGroup());
             Set<String> f2 = new TreeSet<String>(e2.objDefaultFetchGroup());
             if(!e1.jdoGetObjectId().getLastSegment().toClassicRepresentation().contains("$UNNAMED$")){ 
@@ -156,15 +153,15 @@ public class TestModelRepository {
                 f1.remove(SystemAttributes.MODIFIED_BY);
                 f2.remove(SystemAttributes.CREATED_BY);
                 f2.remove(SystemAttributes.MODIFIED_BY);
-                assertEquals("Model type " + e1.objGetClass() +  ": " + k.toXRI(), f1, f2);
+                Assertions.assertEquals(f1, f2, "Model type " + e1.objGetClass() +  ": " + k.toXRI());
                 for(String f : f1) {
                     Object v1 = e1.getDelegate().get(f);
                     Object v2 = e2.getDelegate().get(f);
                     String property = "Feature " + k.toXRI() + "#" + f;
                     if(v1 == null) {
-                        assertNull(property, v2);
+                        Assertions.assertNull(v2, property);
                     } else {
-                        assertEquals(property, v1, v2);
+                        Assertions.assertEquals(v1, v2, property);
                     }
                 }
             }
@@ -322,6 +319,6 @@ public class TestModelRepository {
         //
         // Assert
         //
-        Assert.assertEquals("org:w3c:dateTime", qualifiedTypeName);
+        Assertions.assertEquals("org:w3c:dateTime", qualifiedTypeName);
     }
 }

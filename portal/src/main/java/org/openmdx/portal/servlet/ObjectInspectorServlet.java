@@ -420,29 +420,29 @@ public class ObjectInspectorServlet extends HttpServlet {
         // Request size
         if(this.getInitParameter("requestSizeThreshold") != null) {
             try {
-                this.requestSizeThreshold = new Integer(this.getInitParameter("requestSizeThreshold")).intValue();
+                this.requestSizeThreshold = Integer.parseInt(this.getInitParameter("requestSizeThreshold"));
             } catch(Exception e) {}
         }
         if(this.getInitParameter("requestSizeMax") != null) {
             try {
-                this.requestSizeMax = new Integer(this.getInitParameter("requestSizeMax")).intValue();
+                this.requestSizeMax = Integer.parseInt(this.getInitParameter("requestSizeMax"));
             } catch(Exception e) {}
         }
-        SysLog.info("requestSizeThreshold", new Integer(this.requestSizeThreshold));
-        SysLog.info("requestSizeMax", new Integer(this.requestSizeMax));
+        SysLog.info("requestSizeThreshold", Integer.valueOf(this.requestSizeThreshold));
+        SysLog.info("requestSizeMax", Integer.valueOf(this.requestSizeMax));
         // Ui refresh rate
         if(this.getInitParameter("uiRefreshRate") != null) {
             try {
-                this.uiRefreshRate = new Integer(this.getInitParameter("uiRefreshRate")).intValue();
+                this.uiRefreshRate = Integer.parseInt(this.getInitParameter("uiRefreshRate"));
             } catch(Exception e) {}
         }
         // Views timeout
         if(this.getInitParameter("viewsTimeout") != null) {
             try {
-                this.viewsTimeoutMinutes = new Integer(this.getInitParameter("viewsTimeout")).intValue();
+                this.viewsTimeoutMinutes = Integer.parseInt(this.getInitParameter("viewsTimeout"));
             } catch(Exception e) {}
         }        
-        SysLog.info("uiRefreshRate", new Integer(this.uiRefreshRate));
+        SysLog.info("uiRefreshRate", Integer.valueOf(this.uiRefreshRate));
         // httpEncoder
         this.htmlEncoder = new DefaultHtmlEncoder();
         try {

@@ -255,7 +255,6 @@ import test.openmdx.model1.jmi1.Model1Package;
 /**
  * Test Main
  */
-@ExtendWith(OpenmdxTestCoreStandardExtension.class)
 public class TestMain {
 
 	protected static final String ENTITY_MANAGER_FACTORY_NAME = "test-Main-EntityManagerFactory";
@@ -280,6 +279,7 @@ public class TestMain {
 	/**
 	 * Abstract Test
 	 */
+	@ExtendWith(OpenmdxTestCoreStandardExtension.class)
 	public abstract static class AbstractTest {
 
 		/**

@@ -213,7 +213,7 @@ public class ObjectHandler extends HandlerBase {
         Object property = attributes.get("property");
         String index = (String)attributes.get("index");
         if (index != null) {
-            property = new Integer(index);
+            property = Integer.valueOf(index);
             e.addArg(property);
         }
         e.setProperty(property);
@@ -261,7 +261,7 @@ public class ObjectHandler extends HandlerBase {
             if (length != null) {
                 e.setTarget(java.lang.reflect.Array.class);
                 e.addArg(subtype);
-                e.addArg(new Integer(length));
+                e.addArg(Integer.valueOf(length));
             }
             else {
                 Class arrayClass = java.lang.reflect.Array.newInstance(subtype, 0).getClass();
