@@ -86,7 +86,7 @@ public class LocalUserTransactionAdapters {
             return jtaUserTransactionFactory.instantiate();
         } catch (RuntimeException exception) {
             throw new LocalTransactionException(
-                "UserTransaction_2_0 acquisition failure",
+            	"JTA " + LocalUserTransaction.class.getName() + " acquisition failure",
                 exception
             );
         }
@@ -98,7 +98,7 @@ public class LocalUserTransactionAdapters {
             return containerManagedLocalUserTransactionFactory.instantiate();
         } catch (RuntimeException exception) {
             throw new LocalTransactionException(
-                "UserTransaction_2_0 acquisition failure",
+        		"Container managed " + LocalUserTransaction.class.getName() + " acquisition failure",
                 exception
             );
         }
