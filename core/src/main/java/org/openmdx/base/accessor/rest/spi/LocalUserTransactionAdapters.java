@@ -61,11 +61,17 @@ import org.openmdx.kernel.platform.Platform;
 public class LocalUserTransactionAdapters {
 
     private static final Factory<LocalUserTransaction> jtaUserTransactionFactory = new LocalUserTransactionFactory(
-        Platform.getProperty("org.openmdx.base.transaction.LocalUserTransaction.jta")
+        Platform.getProperty(
+                "org.openmdx.base.transaction.LocalUserTransaction.jta",
+                "org.openmdx.application.transaction.JTALocalUserTransactionAdapter"
+        )
     );
 
     private static final Factory<LocalUserTransaction> containerManagedLocalUserTransactionFactory = new LocalUserTransactionFactory(
-        Platform.getProperty("org.openmdx.base.transaction.LocalUserTransaction.containerManaged")
+        Platform.getProperty(
+                "org.openmdx.base.transaction.LocalUserTransaction.containerManaged",
+                "org.openmdx.application.transaction.ContainerManagedLocalUserTransactionAdapter"
+        )
     );
 
     public static LocalUserTransaction getResourceLocalUserTransactionAdapter(
