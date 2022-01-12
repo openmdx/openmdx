@@ -47,35 +47,86 @@
  */
 package org.openmdx.base.accessor.rest.spi;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.resource.ResourceException;
+import javax.resource.spi.LocalTransactionException;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.openmdx.application.transaction.ContainerManagedLocalUserTransactionAdapter;
 import org.openmdx.application.transaction.JTALocalUserTransactionAdapter;
 import org.openmdx.base.transaction.LocalUserTransaction;
-import org.openmdx.junit5.OpenmdxCoreStandardExtension;
 
-@ExtendWith(OpenmdxCoreStandardExtension.class)
-public class LocalUserTransactionAdaptersTest {
+public class LocalUserTransactionAdaptersTestWithUserDefinedClasses extends AbstractLocalUserTransactionAdaptersTest {
 
-	@Test
-	void testGetContainerManagedUserTransactionAdapter() throws ResourceException {
+	protected void beforeAll() throws Exception {
+		super.beforeAll();
+		System.setProperty(JTA_KEY, MyJTALocalUserTransactionAdapter.class.getName());
+		System.setProperty(CONTAINER_MANAGED_KEY, MyContainerManagedLocalUserTransactionAdapter.class.getName());
+	}
+
+	protected Void testGetJTAUserTransactionAdapterClass() throws ResourceException {
+		// act
+		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters
+				.getJTAUserTransactionAdapter();
+		// assert
+		assertTrue(localUserTransaction instanceof MyJTALocalUserTransactionAdapter);
+		// implements Callable
+		return null;
+	}
+
+	protected Void testGetContainerManagedUserTransactionAdapter() throws ResourceException {
 		// act
 		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters
 				.getContainerManagedUserTransactionAdapter();
 		// assert
-		assertTrue(localUserTransaction instanceof ContainerManagedLocalUserTransactionAdapter);
+		assertTrue(localUserTransaction instanceof MyContainerManagedLocalUserTransactionAdapter);
+		// implements Callable
+		return null;
 	}
 
-	@Test
-	void testGetJTAUserTransactionAdapter() throws ResourceException {
-		// act
-		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters.getJTAUserTransactionAdapter();
-		// assert
-		assertTrue(localUserTransaction instanceof JTALocalUserTransactionAdapter);
+	public static void main(String... arguments) throws Exception {
+		new LocalUserTransactionAdaptersTestWithUserDefinedClasses().call();
+	}
+
+	static class MyJTALocalUserTransactionAdapter extends JTALocalUserTransactionAdapter {
+
+		/**
+		 * Constructor
+		 * <p>
+		 * Invoked reflectively by org.openmdx.base.accessor.rest.spi.UserTransactions
+		 *
+		 * @see LocalUserTransactionAdapters.getJTAUserTransactionAdapter()
+		 */
+		public MyJTALocalUserTransactionAdapter() throws ResourceException {
+		}
+
+		@Override
+		public void begin() throws ResourceException {
+		}
+
+		@Override
+		public void commit() throws ResourceException {
+		}
+
+		@Override
+		public void rollback() throws ResourceException {
+		}
+	}
+
+	static class MyContainerManagedLocalUserTransactionAdapter extends ContainerManagedLocalUserTransactionAdapter {
+
+		@Override
+		public void begin() throws ResourceException {
+		}
+
+		@Override
+		public void commit() throws ResourceException {
+		}
+
+		@Override
+		public void rollback() throws ResourceException {
+		}
 	}
 
 }

@@ -47,35 +47,35 @@
  */
 package org.openmdx.base.accessor.rest.spi;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import javax.resource.ResourceException;
+import javax.resource.spi.LocalTransactionException;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.openmdx.application.transaction.ContainerManagedLocalUserTransactionAdapter;
-import org.openmdx.application.transaction.JTALocalUserTransactionAdapter;
-import org.openmdx.base.transaction.LocalUserTransaction;
-import org.openmdx.junit5.OpenmdxCoreStandardExtension;
+/**
+ * Must not run with other test classes due to factory caching"
+ */
+public class LocalUserTransactionAdaptersTestWithNoenxistentClasses extends AbstractLocalUserTransactionAdaptersTest {
 
-@ExtendWith(OpenmdxCoreStandardExtension.class)
-public class LocalUserTransactionAdaptersTest {
-
-	@Test
-	void testGetContainerManagedUserTransactionAdapter() throws ResourceException {
-		// act
-		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters
-				.getContainerManagedUserTransactionAdapter();
-		// assert
-		assertTrue(localUserTransaction instanceof ContainerManagedLocalUserTransactionAdapter);
+	protected void beforeAll() throws Exception {
+		super.beforeAll();
+        System.setProperty(JTA_KEY, "com.example.NonExistingClass");
+        System.setProperty(CONTAINER_MANAGED_KEY, "com.example.NonExistingClass");
 	}
 
-	@Test
-	void testGetJTAUserTransactionAdapter() throws ResourceException {
-		// act
-		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters.getJTAUserTransactionAdapter();
-		// assert
-		assertTrue(localUserTransaction instanceof JTALocalUserTransactionAdapter);
-	}
+    protected Void testGetJTAUserTransactionAdapterClass() {
+        assertThrows(LocalTransactionException.class, LocalUserTransactionAdapters::getJTAUserTransactionAdapter);
+		// implements Callable
+		return null;
+    }
+
+    protected Void testGetContainerManagedUserTransactionAdapter() {
+        assertThrows(LocalTransactionException.class, LocalUserTransactionAdapters::getJTAUserTransactionAdapter);
+		// implements Callable
+		return null;
+    }
+	
+    public static void main(String... arguments) throws Exception {
+    	new LocalUserTransactionAdaptersTestWithNoenxistentClasses().call();
+    }
 
 }

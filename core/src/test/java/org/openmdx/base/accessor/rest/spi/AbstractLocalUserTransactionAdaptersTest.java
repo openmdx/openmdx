@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: UnitOfWork_1 Test
+ * Description: Abstract LocalUserTransactionAdapters Test
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  *
- * Copyright (c) 2018-2021, OMEX AG, Switzerland
+ * Copyright (c) 2022, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -47,35 +47,59 @@
  */
 package org.openmdx.base.accessor.rest.spi;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.concurrent.Callable;
 
-import javax.resource.ResourceException;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.openmdx.application.transaction.ContainerManagedLocalUserTransactionAdapter;
-import org.openmdx.application.transaction.JTALocalUserTransactionAdapter;
-import org.openmdx.base.transaction.LocalUserTransaction;
 import org.openmdx.junit5.OpenmdxCoreStandardExtension;
 
-@ExtendWith(OpenmdxCoreStandardExtension.class)
-public class LocalUserTransactionAdaptersTest {
+abstract class AbstractLocalUserTransactionAdaptersTest implements Callable<Void> {
 
-	@Test
-	void testGetContainerManagedUserTransactionAdapter() throws ResourceException {
-		// act
-		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters
-				.getContainerManagedUserTransactionAdapter();
-		// assert
-		assertTrue(localUserTransaction instanceof ContainerManagedLocalUserTransactionAdapter);
+    protected static final String JTA_KEY = "org.openmdx.base.transaction.LocalUserTransaction.jta";
+    protected static final String CONTAINER_MANAGED_KEY = "org.openmdx.base.transaction.LocalUserTransaction.containerManaged";
+
+    private final OpenmdxCoreStandardExtension openmdxCoreStandardExtension = new OpenmdxCoreStandardExtension();
+
+    protected void beforeAll() throws Exception {
+    	openmdxCoreStandardExtension.beforeAll(null);
+    }
+
+    protected void beforeEach() throws Exception {
+    	// Nothing to do yet
+    }
+    
+    protected void afterEach() throws Exception {
+    	// Nothing to do yet
+    }
+    
+    protected void afterAll() {
+        System.clearProperty(JTA_KEY);
+        System.clearProperty(CONTAINER_MANAGED_KEY);
+    }
+
+    protected abstract Void testGetJTAUserTransactionAdapterClass() throws Exception;
+
+    protected abstract Void testGetContainerManagedUserTransactionAdapter() throws Exception;
+
+	@Override
+	public Void call() throws Exception {
+		beforeAll();
+		try {
+			test(this::testGetJTAUserTransactionAdapterClass);
+			test(this::testGetContainerManagedUserTransactionAdapter);
+		} catch (Exception exception) {
+	    	afterAll();
+	    	throw exception;
+		}
+		return null;
 	}
 
-	@Test
-	void testGetJTAUserTransactionAdapter() throws ResourceException {
-		// act
-		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters.getJTAUserTransactionAdapter();
-		// assert
-		assertTrue(localUserTransaction instanceof JTALocalUserTransactionAdapter);
-	}
+    private void test(Callable<Void> testee) throws Exception {
+    	beforeEach();
+    	try {
+	    	testee.call();
+    	} catch (Exception exception) {
+	    	afterEach();
+	    	throw exception;
+    	}
+    }
 
 }
