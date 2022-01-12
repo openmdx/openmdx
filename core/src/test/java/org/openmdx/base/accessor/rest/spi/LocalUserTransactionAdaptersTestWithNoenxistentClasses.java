@@ -56,26 +56,32 @@ import javax.resource.spi.LocalTransactionException;
  */
 public class LocalUserTransactionAdaptersTestWithNoenxistentClasses extends AbstractLocalUserTransactionAdaptersTest {
 
-	protected void beforeAll() throws Exception {
-		super.beforeAll();
-        System.setProperty(JTA_KEY, "com.example.NonExistingClass");
-        System.setProperty(CONTAINER_MANAGED_KEY, "com.example.NonExistingClass");
+	@Override
+	protected String jtaUserTransactionClassName() {
+		return "com.example.NonxistentClass";
 	}
 
-    protected Void testGetJTAUserTransactionAdapterClass() {
-        assertThrows(LocalTransactionException.class, LocalUserTransactionAdapters::getJTAUserTransactionAdapter);
-		// implements Callable
-		return null;
-    }
+	@Override
+	protected String containerManagedUserTransactionClassName() {
+		return "com.example.NonxistentClass";
+	}
 
-    protected Void testGetContainerManagedUserTransactionAdapter() {
-        assertThrows(LocalTransactionException.class, LocalUserTransactionAdapters::getJTAUserTransactionAdapter);
-		// implements Callable
+	@Override
+	protected Void testGetJTAUserTransactionAdapterClass() {
+		assertThrows(LocalTransactionException.class, LocalUserTransactionAdapters::getJTAUserTransactionAdapter);
+		//  implements Callable
 		return null;
-    }
-	
-    public static void main(String... arguments) throws Exception {
-    	new LocalUserTransactionAdaptersTestWithNoenxistentClasses().call();
-    }
+	}
+
+	@Override
+	protected Void testGetContainerManagedUserTransactionAdapter() {
+		assertThrows(LocalTransactionException.class, LocalUserTransactionAdapters::getJTAUserTransactionAdapter);
+		//  implements Callable
+		return null;
+	}
+
+	public static void main(String... arguments) throws Exception {
+		new LocalUserTransactionAdaptersTestWithNoenxistentClasses().call();
+	}
 
 }

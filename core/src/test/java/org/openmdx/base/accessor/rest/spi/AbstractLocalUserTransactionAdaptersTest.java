@@ -53,13 +53,15 @@ import org.openmdx.junit5.OpenmdxCoreStandardExtension;
 
 abstract class AbstractLocalUserTransactionAdaptersTest implements Callable<Void> {
 
-    protected static final String JTA_KEY = "org.openmdx.base.transaction.LocalUserTransaction.jta";
-    protected static final String CONTAINER_MANAGED_KEY = "org.openmdx.base.transaction.LocalUserTransaction.containerManaged";
+    private static final String JTA_KEY = "org.openmdx.base.transaction.LocalUserTransaction.jta";
+    private static final String CONTAINER_MANAGED_KEY = "org.openmdx.base.transaction.LocalUserTransaction.containerManaged";
 
     private final OpenmdxCoreStandardExtension openmdxCoreStandardExtension = new OpenmdxCoreStandardExtension();
 
     protected void beforeAll() throws Exception {
     	openmdxCoreStandardExtension.beforeAll(null);
+        System.setProperty(JTA_KEY, jtaUserTransactionClassName());
+        System.setProperty(CONTAINER_MANAGED_KEY, containerManagedUserTransactionClassName());
     }
 
     protected void beforeEach() throws Exception {
@@ -75,6 +77,9 @@ abstract class AbstractLocalUserTransactionAdaptersTest implements Callable<Void
         System.clearProperty(CONTAINER_MANAGED_KEY);
     }
 
+    protected abstract String jtaUserTransactionClassName();
+    protected abstract String containerManagedUserTransactionClassName();
+    
     protected abstract Void testGetJTAUserTransactionAdapterClass() throws Exception;
 
     protected abstract Void testGetContainerManagedUserTransactionAdapter() throws Exception;

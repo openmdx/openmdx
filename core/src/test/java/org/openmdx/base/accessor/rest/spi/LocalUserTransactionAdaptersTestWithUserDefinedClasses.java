@@ -59,29 +59,34 @@ import org.openmdx.base.transaction.LocalUserTransaction;
 
 public class LocalUserTransactionAdaptersTestWithUserDefinedClasses extends AbstractLocalUserTransactionAdaptersTest {
 
-	protected void beforeAll() throws Exception {
-		super.beforeAll();
-		System.setProperty(JTA_KEY, MyJTALocalUserTransactionAdapter.class.getName());
-		System.setProperty(CONTAINER_MANAGED_KEY, MyContainerManagedLocalUserTransactionAdapter.class.getName());
+	@Override
+	protected String jtaUserTransactionClassName() {
+		return MyJTALocalUserTransactionAdapter.class.getName();
 	}
 
+	@Override
+	protected String containerManagedUserTransactionClassName() {
+		return MyContainerManagedLocalUserTransactionAdapter.class.getName();
+	}
+
+	@Override
 	protected Void testGetJTAUserTransactionAdapterClass() throws ResourceException {
 		// act
-		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters
-				.getJTAUserTransactionAdapter();
+		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters.getJTAUserTransactionAdapter();
 		// assert
 		assertTrue(localUserTransaction instanceof MyJTALocalUserTransactionAdapter);
-		// implements Callable
+		//  implements Callable
 		return null;
 	}
 
+	@Override
 	protected Void testGetContainerManagedUserTransactionAdapter() throws ResourceException {
 		// act
 		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters
 				.getContainerManagedUserTransactionAdapter();
 		// assert
 		assertTrue(localUserTransaction instanceof MyContainerManagedLocalUserTransactionAdapter);
-		// implements Callable
+		//  implements Callable
 		return null;
 	}
 
