@@ -51,7 +51,7 @@ import java.util.concurrent.Callable;
 
 import org.openmdx.junit5.OpenmdxCoreStandardExtension;
 
-abstract class AbstractLocalUserTransactionAdaptersTest implements Callable<Void> {
+abstract class AbstractLocalUserTransactionAdaptersTest {
 
     private static final String JTA_KEY = "org.openmdx.base.transaction.LocalUserTransaction.jta";
     private static final String CONTAINER_MANAGED_KEY = "org.openmdx.base.transaction.LocalUserTransaction.containerManaged";
@@ -84,8 +84,7 @@ abstract class AbstractLocalUserTransactionAdaptersTest implements Callable<Void
 
     protected abstract Void testGetContainerManagedUserTransactionAdapter() throws Exception;
 
-	@Override
-	public Void call() throws Exception {
+	public void testAll() throws Exception {
 		beforeAll();
 		try {
 			test(this::testGetJTAUserTransactionAdapterClass);
@@ -94,7 +93,6 @@ abstract class AbstractLocalUserTransactionAdaptersTest implements Callable<Void
 	    	afterAll();
 	    	throw exception;
 		}
-		return null;
 	}
 
     private void test(Callable<Void> testee) throws Exception {

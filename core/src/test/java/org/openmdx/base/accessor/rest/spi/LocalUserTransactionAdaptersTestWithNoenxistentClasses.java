@@ -81,7 +81,7 @@ public class LocalUserTransactionAdaptersTestWithNoenxistentClasses extends Abst
 	}
 
 	public static void main(String... arguments) throws Exception {
-		new LocalUserTransactionAdaptersTestWithNoenxistentClasses().call();
+		new LocalUserTransactionAdaptersTestWithNoenxistentClasses().testAll();
 	}
 
 }

@@ -84,7 +84,7 @@ public class LocalUserTransactionAdaptersTestWithWrongClasses extends AbstractLo
 	}
 
 	public static void main(String... arguments) throws Exception {
-		new LocalUserTransactionAdaptersTestWithWrongClasses().call();
+		new LocalUserTransactionAdaptersTestWithWrongClasses().testAll();
 	}
 
 	/**

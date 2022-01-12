@@ -89,7 +89,7 @@ public class LocalUserTransactionAdaptersTestWithUserDefinedClasses extends Abst
 	}
 
 	public static void main(String... arguments) throws Exception {
-		new LocalUserTransactionAdaptersTestWithUserDefinedClasses().call();
+		new LocalUserTransactionAdaptersTestWithUserDefinedClasses().testAll();
 	}
 
 	static class MyJTALocalUserTransactionAdapter extends JTALocalUserTransactionAdapter {
