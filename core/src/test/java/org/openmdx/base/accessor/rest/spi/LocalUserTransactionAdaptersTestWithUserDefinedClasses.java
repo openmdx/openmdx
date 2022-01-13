@@ -73,7 +73,7 @@ public class LocalUserTransactionAdaptersTestWithUserDefinedClasses extends Abst
 		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters.getJTAUserTransactionAdapter();
 		// assert
 		assertTrue(localUserTransaction instanceof MyJTALocalUserTransactionAdapter);
-		//  implements Callable
+		// implements Callable
 		return null;
 	}
 
@@ -84,7 +84,7 @@ public class LocalUserTransactionAdaptersTestWithUserDefinedClasses extends Abst
 				.getContainerManagedUserTransactionAdapter();
 		// assert
 		assertTrue(localUserTransaction instanceof MyContainerManagedLocalUserTransactionAdapter);
-		//  implements Callable
+		// implements Callable
 		return null;
 	}
 
@@ -92,43 +92,59 @@ public class LocalUserTransactionAdaptersTestWithUserDefinedClasses extends Abst
 		new LocalUserTransactionAdaptersTestWithUserDefinedClasses().testAll();
 	}
 
-	static class MyJTALocalUserTransactionAdapter extends JTALocalUserTransactionAdapter {
+	static class MyJTALocalUserTransactionAdapter implements LocalUserTransaction {
 
-		/**
-		 * Constructor
-		 * <p>
-		 * Invoked reflectively by org.openmdx.base.accessor.rest.spi.UserTransactions
-		 *
-		 * @see LocalUserTransactionAdapters.getJTAUserTransactionAdapter()
-		 */
-		public MyJTALocalUserTransactionAdapter() throws ResourceException {
+		@Override
+		public void setRollbackOnly() throws ResourceException {
+			// non-functional
+		}
+
+		@Override
+		public boolean isRollbackOnly() throws ResourceException {
+			return false;
 		}
 
 		@Override
 		public void begin() throws ResourceException {
+			// non-functional
 		}
 
 		@Override
 		public void commit() throws ResourceException {
+			// non-functional
 		}
 
 		@Override
 		public void rollback() throws ResourceException {
+			// non-functional
 		}
 	}
 
-	static class MyContainerManagedLocalUserTransactionAdapter extends ContainerManagedLocalUserTransactionAdapter {
+	static class MyContainerManagedLocalUserTransactionAdapter implements LocalUserTransaction {
+
+		@Override
+		public void setRollbackOnly() throws ResourceException {
+			// non-functional
+		}
+
+		@Override
+		public boolean isRollbackOnly() throws ResourceException {
+			return false;
+		}
 
 		@Override
 		public void begin() throws ResourceException {
+			// non-functional
 		}
 
 		@Override
 		public void commit() throws ResourceException {
+			// non-functional
 		}
 
 		@Override
 		public void rollback() throws ResourceException {
+			// non-functional
 		}
 	}
 

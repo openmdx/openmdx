@@ -65,11 +65,11 @@ abstract class AbstractLocalUserTransactionAdaptersTest {
     }
 
     protected void beforeEach() throws Exception {
-    	// Nothing to do yet
+    	// Nothing to do yet
     }
     
     protected void afterEach() throws Exception {
-    	// Nothing to do yet
+    	// Nothing to do yet
     }
     
     protected void afterAll() {

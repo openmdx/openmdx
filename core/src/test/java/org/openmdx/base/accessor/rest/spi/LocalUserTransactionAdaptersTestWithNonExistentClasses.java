@@ -54,34 +54,34 @@ import javax.resource.spi.LocalTransactionException;
 /**
  * Must not run with other test classes due to factory caching"
  */
-public class LocalUserTransactionAdaptersTestWithNoenxistentClasses extends AbstractLocalUserTransactionAdaptersTest {
+public class LocalUserTransactionAdaptersTestWithNonExistentClasses extends AbstractLocalUserTransactionAdaptersTest {
 
 	@Override
 	protected String jtaUserTransactionClassName() {
-		return "com.example.NonxistentClass";
+		return "com.example.NonExistentClass";
 	}
 
 	@Override
 	protected String containerManagedUserTransactionClassName() {
-		return "com.example.NonxistentClass";
+		return "com.example.NonExistentClass";
 	}
 
 	@Override
 	protected Void testGetJTAUserTransactionAdapterClass() {
 		assertThrows(LocalTransactionException.class, LocalUserTransactionAdapters::getJTAUserTransactionAdapter);
-		//  implements Callable
+		// implements Callable
 		return null;
 	}
 
 	@Override
 	protected Void testGetContainerManagedUserTransactionAdapter() {
 		assertThrows(LocalTransactionException.class, LocalUserTransactionAdapters::getJTAUserTransactionAdapter);
-		//  implements Callable
+		// implements Callable
 		return null;
 	}
 
 	public static void main(String... arguments) throws Exception {
-		new LocalUserTransactionAdaptersTestWithNoenxistentClasses().testAll();
+		new LocalUserTransactionAdaptersTestWithNonExistentClasses().testAll();
 	}
 
 }
