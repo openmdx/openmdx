@@ -48,12 +48,9 @@
 package org.openmdx.base.accessor.rest.spi;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.resource.ResourceException;
 
-import org.openmdx.application.transaction.ContainerManagedLocalUserTransactionAdapter;
-import org.openmdx.application.transaction.JTALocalUserTransactionAdapter;
 import javax.resource.cci.LocalTransaction;
 import javax.resource.spi.LocalTransactionException;
 
@@ -72,14 +69,14 @@ public class LocalUserTransactionAdaptersTestWithWrongClasses extends AbstractLo
 	@Override
 	protected Void testGetJTAUserTransactionAdapterClass() throws ResourceException {
 		assertThrows(LocalTransactionException.class, LocalUserTransactionAdapters::getJTAUserTransactionAdapter);
-		//  implements Callable
+		// implements Callable
 		return null;
 	}
 
 	@Override
 	protected Void testGetContainerManagedUserTransactionAdapter() throws ResourceException {
 		assertThrows(LocalTransactionException.class, LocalUserTransactionAdapters::getContainerManagedUserTransactionAdapter);
-		//  implements Callable
+		// implements Callable
 		return null;
 	}
 
@@ -94,17 +91,17 @@ public class LocalUserTransactionAdaptersTestWithWrongClasses extends AbstractLo
 
 		@Override
 		public void begin() throws ResourceException {
-			// Non-functional
+			// Non-functional
 		}
 
 		@Override
 		public void commit() throws ResourceException {
-			// Non-functional
+			// Non-functional
 		}
 
 		@Override
 		public void rollback() throws ResourceException {
-			// Non-functional
+			// Non-functional
 		}
 
 	}
@@ -116,17 +113,17 @@ public class LocalUserTransactionAdaptersTestWithWrongClasses extends AbstractLo
 
 		@Override
 		public void begin() throws ResourceException {
-			// Non-functional
+			// Non-functional
 		}
 
 		@Override
 		public void commit() throws ResourceException {
-			// Non-functional
+			// Non-functional
 		}
 
 		@Override
 		public void rollback() throws ResourceException {
-			// Non-functional
+			// Non-functional
 		}
 
 	}
