@@ -1,13 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: UnitOfWork_1 Test
+ * Description: LocalUserTransactionAdapters Test with user defined
+ *              classes
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  *
- * Copyright (c) 2018-2021, OMEX AG, Switzerland
+ * Copyright (c) 2022, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -51,8 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.resource.ResourceException;
 
-import org.openmdx.application.transaction.ContainerManagedLocalUserTransactionAdapter;
-import org.openmdx.application.transaction.JTALocalUserTransactionAdapter;
 import org.openmdx.base.transaction.LocalUserTransaction;
 
 public class LocalUserTransactionAdaptersTestWithUserDefinedClasses extends AbstractLocalUserTransactionAdaptersTest {

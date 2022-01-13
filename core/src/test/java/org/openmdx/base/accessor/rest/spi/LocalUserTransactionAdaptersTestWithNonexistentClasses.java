@@ -1,13 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: UnitOfWork_1 Test
+ * Description: LocalUserTransactionAdapters Test with nonexistent
+ *              classes
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  *
- * Copyright (c) 2018-2021, OMEX AG, Switzerland
+ * Copyright (c) 2022, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -54,7 +55,7 @@ import javax.resource.spi.LocalTransactionException;
 /**
  * Must not run with other test classes due to factory caching"
  */
-public class LocalUserTransactionAdaptersTestWithNonExistentClasses extends AbstractLocalUserTransactionAdaptersTest {
+public class LocalUserTransactionAdaptersTestWithNonexistentClasses extends AbstractLocalUserTransactionAdaptersTest {
 
 	@Override
 	protected String jtaUserTransactionClassName() {
@@ -81,7 +82,7 @@ public class LocalUserTransactionAdaptersTestWithNonExistentClasses extends Abst
 	}
 
 	public static void main(String... arguments) throws Exception {
-		new LocalUserTransactionAdaptersTestWithNonExistentClasses().testAll();
+		new LocalUserTransactionAdaptersTestWithNonexistentClasses().testAll();
 	}
 
 }
