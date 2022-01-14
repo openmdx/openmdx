@@ -198,6 +198,11 @@ val openmdxSecurityExcludes = listOf<String>(
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-security.jar") {
     duplicatesStrategy = DuplicatesStrategy.WARN
+	dependsOn(
+		":security:compileJava",
+		":security:generate-model",
+		":security:processResources"
+	)
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
 	archiveFileName.set("openmdx-security.jar")
     includeEmptyDirs = false
@@ -250,6 +255,10 @@ val openmdxAuthenticationExcludes = listOf<String>(
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-authentication.jar") {
     duplicatesStrategy = DuplicatesStrategy.WARN
+	dependsOn(
+		":security:compileJava",
+		":security:processResources"
+	)
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
 	archiveFileName.set("openmdx-authentication.jar")
     includeEmptyDirs = false
@@ -305,6 +314,11 @@ val openmdxRadiusExcludes = listOf<String>(
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-radius.jar") {
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
+	dependsOn(
+		":core:openmdx-base.jar",
+		":security:compileJava",
+		":security:processResources"
+	)
 	archiveFileName.set("openmdx-radius.jar")
     includeEmptyDirs = false
 	manifest {
@@ -354,6 +368,10 @@ val openmdxLdapExcludes = listOf<String>(
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-ldap.jar") {
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
+	dependsOn(
+		":security:compileJava",
+		":security:processResources"
+	)
 	archiveFileName.set("openmdx-ldap.jar")
     includeEmptyDirs = false
 	manifest {
@@ -402,6 +420,10 @@ val openmdxPkiExcludes = listOf<String>(
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-pki.jar") {
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
+	dependsOn(
+		":security:compileJava",
+		":security:processResources"
+	)
 	archiveFileName.set("openmdx-pki.jar")
     includeEmptyDirs = false
 	manifest {
@@ -451,6 +473,10 @@ val openmdxResourceExcludes = listOf<String>(
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-resource.jar") {
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
+	dependsOn(
+		":security:compileJava",
+		":security:processResources"
+	)
 	archiveFileName.set("openmdx-resource.jar")
     includeEmptyDirs = false
 	manifest {

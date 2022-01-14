@@ -331,6 +331,10 @@ val openmdxBaseExcludes = listOf<String>(
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-base.jar") {
     duplicatesStrategy = DuplicatesStrategy.WARN
+    dependsOn(
+        ":core:compileJava",
+        ":core:processResources"
+    )
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
 	archiveFileName.set("openmdx-base.jar")
     includeEmptyDirs = false
@@ -387,6 +391,7 @@ val openmdxSystemExcludes = listOf<String>(
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-system.jar") {
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
+    dependsOn(":core:compileJava")
 	archiveFileName.set("openmdx-system.jar")
     includeEmptyDirs = false
 	manifest {

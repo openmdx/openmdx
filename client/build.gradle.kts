@@ -205,6 +205,8 @@ tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-client.jar") {
 	dependsOn(
 		":core:openmdx-base.jar",
 		":core:openmdx-system.jar",
+		":client:compileJava",
+		":client:processResources",
 		":security:openmdx-security.jar"
 	)
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
@@ -314,7 +316,11 @@ val openmdxDalvikExcludes = listOf<String>(
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-dalvik.jar") {
     duplicatesStrategy = DuplicatesStrategy.WARN
-	dependsOn("openmdx-client.jar")
+	dependsOn(
+		"openmdx-client.jar",
+		":client:compileJava",
+		":client:processResources"
+	)
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
 	archiveFileName.set("openmdx-dalvik.jar")
     includeEmptyDirs = false
@@ -361,6 +367,7 @@ tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-dalvik.jar") {
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-dalvik-sources.jar") {
     duplicatesStrategy = DuplicatesStrategy.WARN
+	dependsOn(":client:openmdx-client-sources.jar")
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
 	archiveFileName.set("openmdx-dalvik-sources.jar")
     includeEmptyDirs = false

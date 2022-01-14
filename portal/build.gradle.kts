@@ -318,6 +318,11 @@ val openmdxPortalExcludes = listOf<String>(
 
 tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-portal.jar") {
     duplicatesStrategy = DuplicatesStrategy.WARN
+	dependsOn(
+		":portal:compileJava",
+		":portal:generate-model",
+		":portal:processResources"
+	)
 	destinationDirectory.set(File(getDeliverDir(), "lib"))
 	archiveFileName.set("openmdx-portal.jar")
     includeEmptyDirs = false
