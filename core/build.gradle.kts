@@ -7,7 +7,9 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2020-2021, OMEX AG, Switzerland
+ * Copyright 
+ * (c) 2020-2021, OMEX AG, Switzerland
+ * (c) 2022, Datura Informatik+Organisation AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -204,90 +206,11 @@ sourceSets {
     }
 }
 
-tasks.test {
-    useJUnitPlatform()
-    maxHeapSize = "4G"
-}
-
 project.tasks.named("processResources", Copy::class.java) {
     duplicatesStrategy = DuplicatesStrategy.WARN
 }
 project.tasks.named("processTestResources", Copy::class.java) {
     duplicatesStrategy = DuplicatesStrategy.WARN
-}
-
-tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
-    inputs.dir("${projectDir}/src/model/emf")
-    inputs.dir("${projectDir}/src/main/resources")
-    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
-    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
-    classpath = configurations["openmdxBootstrap"]
-    doFirst {
-        project.copy {
-            from(project.zipTree(project.getConfigurations().getByName("openmdxBase").singleFile))
-            into(File(project.getBuildDir(), "generated/classes/openmdxBootstrap"))
-        }
-    }
-    doLast {
-        copy {
-            from(
-                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
-            )
-            into("$buildDir/generated/sources/java/main")
-            include(
-                "**/*.java"
-            )
-        }
-        copy {
-            from(
-                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
-            )
-            into("$buildDir/generated/resources/main")
-            exclude(
-                "**/orm.xml"
-            )
-        }
-        copy {
-            from(
-                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
-            )
-            into("$buildDir/generated/resources/main")
-            include(
-                "**/openmdxorm.properties"
-            )
-        }
-    }
-}
-
-tasks.compileJava {
-    dependsOn("generate-model")
-    doFirst {
-    	var f: File
-    	// base/Version
-    	f = File("${buildDir}/generated/sources/java/main/org/openmdx/base/Version.java")
-    	touch(f)
-    	f.writeText(getVersionClass("org.openmdx.base"))
-    	// application/Version
-        f = File("${buildDir}/generated/sources/java/main/org/openmdx/application/Version.java")
-        touch(f)
-        f.writeText(getVersionClass("org.openmdx.application"))
-        // system/Version
-        f = File("${buildDir}/generated/sources/java/main/org/openmdx/system/Version.java")
-        touch(f)
-        f.writeText(getVersionClass("org.openmdx.system"))
-    }
-    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
-}
-
-tasks {
-	assemble {
-		dependsOn(
-            "openmdx-base.jar",
-            "openmdx-base-sources.jar",
-            "openmdx-system.jar",
-            "openmdx-system-sources.jar"
-        )
-	}
 }
 
 val openmdxBaseIncludes = listOf<String>(
@@ -323,61 +246,10 @@ val openmdxBaseIncludes = listOf<String>(
 	"META-INF/orm.xml",
 	"META-INF/openmdx*.properties"
 )
-
 val openmdxBaseExcludes = listOf<String>(
 	"org/openmdx/compatibility/kernel/url/protocol/*/**",
 	"org/openmdx/kernel/url/protocol/*/**"
 )
-
-tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-base.jar") {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-    dependsOn(
-        ":core:compileJava",
-        ":core:processResources"
-    )
-	destinationDirectory.set(File(getDeliverDir(), "lib"))
-	archiveFileName.set("openmdx-base.jar")
-    includeEmptyDirs = false
-	manifest {
-        attributes(
-        	getManifest(
-        		"openMDX Base Library",
-        		"openmdx-base"
-        	)
-        )
-    }
-	from(
-		File(buildDir, "classes/java/main"),
-		File(buildDir, "resources/main"),
-		File(buildDir, "generated/resources/main"),
-		"src/main/resources",
-        configurations["cacheApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) },
-        configurations["jdoApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) }
-	)
-	include(openmdxBaseIncludes)
-	exclude(openmdxBaseExcludes)
-}
-
-tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-base-sources.jar") {
-	destinationDirectory.set(File(getDeliverDir(), "lib"))
-	archiveFileName.set("openmdx-base-sources.jar")
-    includeEmptyDirs = false
-	manifest {
-        attributes(
-        	getManifest(
-        		"openMDX Base Sources",
-        		"openmdx-base-sources"
-        	)
-        )
-    }
-	from(
-		"src/main/java",
-		File(buildDir, "generated/sources/java/main")
-	)
-	include(openmdxBaseIncludes)
-	exclude(openmdxBaseExcludes)
-}
-
 val openmdxSystemIncludes = listOf<String>(
 	"org/openmdx/compatibility/kernel/url/protocol/*/**",
 	"org/openmdx/kernel/logging/*/**",
@@ -385,48 +257,184 @@ val openmdxSystemIncludes = listOf<String>(
 	"org/openmdx/kernel/xri/*",
 	"org/openmdx/system/*/**"
 )
-
 val openmdxSystemExcludes = listOf<String>(
 )
 
-tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-system.jar") {
-	destinationDirectory.set(File(getDeliverDir(), "lib"))
-    dependsOn(":core:compileJava")
-	archiveFileName.set("openmdx-system.jar")
-    includeEmptyDirs = false
-	manifest {
-        attributes(
-        	getManifest(
-        		"openMDX System Library",
-        		"openmdx-system"
-        	)
+tasks {
+	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
+	    inputs.dir("${projectDir}/src/model/emf")
+	    inputs.dir("${projectDir}/src/main/resources")
+	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+	    classpath = configurations["openmdxBootstrap"]
+	    doFirst {
+	        project.copy {
+	            from(project.zipTree(project.getConfigurations().getByName("openmdxBase").singleFile))
+	            into(File(project.getBuildDir(), "generated/classes/openmdxBootstrap"))
+	        }
+	    }
+	    doLast {
+	        copy {
+	            from(
+	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+	            )
+	            into("$buildDir/generated/sources/java/main")
+	            include(
+	                "**/*.java"
+	            )
+	        }
+	        copy {
+	            from(
+	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+	            )
+	            into("$buildDir/generated/resources/main")
+	            exclude(
+	                "**/orm.xml"
+	            )
+	        }
+	        copy {
+	            from(
+	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+	            )
+	            into("$buildDir/generated/resources/main")
+	            include(
+	                "**/openmdxorm.properties"
+	            )
+	        }
+	    }
+	}
+	test {
+	    useJUnitPlatform()
+	    maxHeapSize = "4G"
+	}
+	distTar {
+		dependsOn(
+			":core:openmdx-base.jar",
+			":core:openmdx-system.jar",
+			":core:openmdx-base-sources.jar",
+			":core:openmdx-system-sources.jar"
+		)
+	}
+	distZip {
+		dependsOn(
+			":core:openmdx-base.jar",
+			":core:openmdx-system.jar",
+			":core:openmdx-base-sources.jar",
+			":core:openmdx-system-sources.jar"
+		)
+	}
+	compileJava {
+	    dependsOn("generate-model")
+	    doFirst {
+	    	var f: File
+	    	// base/Version
+	    	f = File("${buildDir}/generated/sources/java/main/org/openmdx/base/Version.java")
+	    	touch(f)
+	    	f.writeText(getVersionClass("org.openmdx.base"))
+	    	// application/Version
+	        f = File("${buildDir}/generated/sources/java/main/org/openmdx/application/Version.java")
+	        touch(f)
+	        f.writeText(getVersionClass("org.openmdx.application"))
+	        // system/Version
+	        f = File("${buildDir}/generated/sources/java/main/org/openmdx/system/Version.java")
+	        touch(f)
+	        f.writeText(getVersionClass("org.openmdx.system"))
+	    }
+	    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
+	}
+	assemble {
+		dependsOn(
+            "openmdx-base.jar",
+            "openmdx-base-sources.jar",
+            "openmdx-system.jar",
+            "openmdx-system-sources.jar"
         )
-    }
-    from(
-  		File(buildDir, "classes/java/main")
-  	)
-  	include(openmdxSystemIncludes)
-  	exclude(openmdxSystemExcludes)
-}
-
-tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-system-sources.jar") {
-	destinationDirectory.set(File(getDeliverDir(), "lib"))
-	archiveFileName.set("openmdx-system-sources.jar")
-    includeEmptyDirs = false
-	manifest {
-        attributes(
-        	getManifest(
-        		"openMDX System Sources",
-        		"openmdx-system-sources"
-        	)
-        )
-    }
-	from(
-		"src/main/java",
-		File(buildDir, "generated/sources/java/main")
-	)
-	include(openmdxSystemIncludes)
-	exclude(openmdxSystemExcludes)
+	}
+	register<org.openmdx.gradle.ArchiveTask>("openmdx-base.jar") {
+	    duplicatesStrategy = DuplicatesStrategy.WARN
+	    dependsOn(
+	        ":core:compileJava",
+	        ":core:processResources"
+	    )
+		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		archiveFileName.set("openmdx-base.jar")
+	    includeEmptyDirs = false
+		manifest {
+	        attributes(
+	        	getManifest(
+	        		"openMDX Base Library",
+	        		"openmdx-base"
+	        	)
+	        )
+	    }
+		from(
+			File(buildDir, "classes/java/main"),
+			File(buildDir, "resources/main"),
+			File(buildDir, "generated/resources/main"),
+			"src/main/resources",
+	        configurations["cacheApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) },
+	        configurations["jdoApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) }
+		)
+		include(openmdxBaseIncludes)
+		exclude(openmdxBaseExcludes)
+	}
+	register<org.openmdx.gradle.ArchiveTask>("openmdx-base-sources.jar") {
+		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		archiveFileName.set("openmdx-base-sources.jar")
+	    includeEmptyDirs = false
+		manifest {
+	        attributes(
+	        	getManifest(
+	        		"openMDX Base Sources",
+	        		"openmdx-base-sources"
+	        	)
+	        )
+	    }
+		from(
+			"src/main/java",
+			File(buildDir, "generated/sources/java/main")
+		)
+		include(openmdxBaseIncludes)
+		exclude(openmdxBaseExcludes)
+	}
+	register<org.openmdx.gradle.ArchiveTask>("openmdx-system.jar") {
+		destinationDirectory.set(File(getDeliverDir(), "lib"))
+	    dependsOn(":core:compileJava")
+		archiveFileName.set("openmdx-system.jar")
+	    includeEmptyDirs = false
+		manifest {
+	        attributes(
+	        	getManifest(
+	        		"openMDX System Library",
+	        		"openmdx-system"
+	        	)
+	        )
+	    }
+	    from(
+	  		File(buildDir, "classes/java/main")
+	  	)
+	  	include(openmdxSystemIncludes)
+	  	exclude(openmdxSystemExcludes)
+	}
+	register<org.openmdx.gradle.ArchiveTask>("openmdx-system-sources.jar") {
+		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		archiveFileName.set("openmdx-system-sources.jar")
+	    includeEmptyDirs = false
+		manifest {
+	        attributes(
+	        	getManifest(
+	        		"openMDX System Sources",
+	        		"openmdx-system-sources"
+	        	)
+	        )
+	    }
+		from(
+			"src/main/java",
+			File(buildDir, "generated/sources/java/main")
+		)
+		include(openmdxSystemIncludes)
+		exclude(openmdxSystemExcludes)
+	}
 }
 
 distributions {

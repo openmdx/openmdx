@@ -7,7 +7,9 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2020-2021, OMEX AG, Switzerland
+ * Copyright 
+ * (c) 2020-2021, OMEX AG, Switzerland
+ * (c) 2022, Datura Informatik+Organisation AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -126,38 +128,67 @@ sourceSets {
     }
 }
 
-tasks.test {
-    useJUnitPlatform()
-    maxHeapSize = "4G"
-}
-
-tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
-    inputs.dir("${projectDir}/src/model/emf")
-    inputs.dir("${projectDir}/src/main/resources")
-    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
-    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
-    classpath = configurations["openmdxBootstrap"]
-    doFirst {
-    }
-    doLast {
-        copy {
-            from(
-                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
-            )
-            into("$buildDir/generated/sources/java/main")
-            include(
-                "**/*.java"
-            )
-        }
-    }
-}
-
-tasks.compileJava {
-    dependsOn("generate-model")
-    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
-}
-
 tasks {
+	test {
+	    useJUnitPlatform()
+	    maxHeapSize = "4G"
+	}
+	distTar {
+		dependsOn(
+			":security:openmdx-security.jar",
+			":security:openmdx-authentication.jar",
+			":security:openmdx-ldap.jar",
+			":security:openmdx-pki.jar",
+			":security:openmdx-radius.jar",
+			":security:openmdx-resource.jar",
+			":security:openmdx-security-sources.jar",
+			":security:openmdx-authentication-sources.jar",
+			":security:openmdx-ldap-sources.jar",
+			":security:openmdx-pki-sources.jar",
+			":security:openmdx-radius-sources.jar",
+			":security:openmdx-resource-sources.jar"
+		)
+	}
+	distZip {
+		dependsOn(
+			":security:openmdx-security.jar",
+			":security:openmdx-authentication.jar",
+			":security:openmdx-ldap.jar",
+			":security:openmdx-pki.jar",
+			":security:openmdx-radius.jar",
+			":security:openmdx-resource.jar",
+			":security:openmdx-security-sources.jar",
+			":security:openmdx-authentication-sources.jar",
+			":security:openmdx-ldap-sources.jar",
+			":security:openmdx-pki-sources.jar",
+			":security:openmdx-radius-sources.jar",
+			":security:openmdx-resource-sources.jar"
+		)
+	}
+	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
+	    inputs.dir("${projectDir}/src/model/emf")
+	    inputs.dir("${projectDir}/src/main/resources")
+	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+	    classpath = configurations["openmdxBootstrap"]
+	    doFirst {
+	    }
+	    doLast {
+	        copy {
+	            from(
+	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+	            )
+	            into("$buildDir/generated/sources/java/main")
+	            include(
+	                "**/*.java"
+	            )
+	        }
+	    }
+	}
+	compileJava {
+	    dependsOn("generate-model")
+	    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
+	}
 	assemble {
 		dependsOn(
             "openmdx-security.jar",

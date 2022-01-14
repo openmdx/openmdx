@@ -7,7 +7,9 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2020-2021, OMEX AG, Switzerland
+ * Copyright 
+ * (c) 2020-2021, OMEX AG, Switzerland
+ * (c) 2022, Datura Informatik+Organisation AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -129,36 +131,6 @@ project.tasks.named("processTestResources", Copy::class.java) {
     duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
-tasks.test {
-    useJUnitPlatform()
-    maxHeapSize = "4G"
-}
-
-tasks.compileJava {
-	dependsOn(
-		":core:openmdx-base.jar",
-		":security:openmdx-security.jar"
-	)
-	doFirst {
-		var f = File("$buildDir/resources/main/META-INF/openmdxmof.properties")
-		touch(f)
-		f.writeText(zipTree(File(getDeliverDir(), "../core/lib/openmdx-base.jar")).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText() )
-		f.appendText(zipTree(File(getDeliverDir(), "../security/lib/openmdx-security.jar")).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText() )
-	}
-    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
-}
-
-tasks {
-	assemble {
-		dependsOn(
-            "openmdx-client.jar",
-            "openmdx-client-sources.jar",
-            "openmdx-dalvik.jar",
-            "openmdx-dalvik-sources.jar"
-        )
-	}
-}
-
 val openmdxCommonIncludes = listOf<String>(
 )
 
@@ -200,102 +172,6 @@ val openmdxClientExcludes = listOf<String>(
     "org/openmdx/dalvik/*/**"
 )
 
-tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-client.jar") {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-	dependsOn(
-		":core:openmdx-base.jar",
-		":core:openmdx-system.jar",
-		":client:compileJava",
-		":client:processResources",
-		":security:openmdx-security.jar"
-	)
-	destinationDirectory.set(File(getDeliverDir(), "lib"))
-	archiveFileName.set("openmdx-client.jar")
-    includeEmptyDirs = false
-	manifest {
-        attributes(
-        	getManifest(
-        		"openMDX Client Library",
-        		"openmdx-client"
-        	)
-        )
-    }
-    with(
-    	copySpec {
-			from(
-				File(buildDir, "classes/java/main"),
-				File(buildDir, "resources/main"),
-				"src/main/resources"
-			).include(
-				openmdxClientIncludes
-			).exclude(
-				openmdxClientExcludes
-			)
-		},
-		copySpec {
-			from(
-				zipTree(File(getDeliverDir(), "../core/lib/openmdx-base.jar")),
-				zipTree(File(getDeliverDir(), "../core/lib/openmdx-system.jar")),
-				zipTree(File(getDeliverDir(), "../security/lib/openmdx-security.jar"))
-			).include(
-				openmdxCommonIncludes
-			).exclude(
-				openmdxCommonExcludes
-			)
-		},
-		copySpec {
-			from(
-				configurations["javaeeApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) }	
-			).include(
-				"javax/transaction/Synchronization.*"
-			)
-		}
-	)
-}
-
-tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-client-sources.jar") {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-	dependsOn(
-		":core:openmdx-base-sources.jar",
-		":core:openmdx-system-sources.jar",
-		":security:openmdx-security-sources.jar"
-	)
-	destinationDirectory.set(File(getDeliverDir(), "lib"))
-	archiveFileName.set("openmdx-client-sources.jar")
-    includeEmptyDirs = false
-	manifest {
-        attributes(
-        	getManifest(
-        		"openMDX Client Sources",
-        		"openmdx-client-sources"
-        	)
-        )
-    }
-    with(
-    	copySpec {
-			from(
-				"src/main/java",
-				File(buildDir, "generated/sources/java/main")
-			).include(
-				openmdxClientIncludes
-			).exclude(
-				openmdxClientExcludes
-			)
-		},
-    	copySpec {
-			from(
-				zipTree(File(getDeliverDir(), "../core/lib/openmdx-base-sources.jar")),
-				zipTree(File(getDeliverDir(), "../core/lib/openmdx-system-sources.jar")),
-				zipTree(File(getDeliverDir(), "../security/lib/openmdx-security-sources.jar"))
-			).include(
-				openmdxCommonIncludes
-			).exclude(
-				openmdxCommonExcludes
-			)
-		}
-	)
-}
-
 val openmdxDalvikIncludes = listOf<String>(
 )
 
@@ -314,84 +190,222 @@ val openmdxDalvikExcludes = listOf<String>(
 	"org/omg/primitivetypes/**"
 )
 
-tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-dalvik.jar") {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-	dependsOn(
-		"openmdx-client.jar",
-		":client:compileJava",
-		":client:processResources"
-	)
-	destinationDirectory.set(File(getDeliverDir(), "lib"))
-	archiveFileName.set("openmdx-dalvik.jar")
-    includeEmptyDirs = false
-	manifest {
-        attributes(
-        	getManifest(
-        		"openMDX Dalvik Library",
-        		"openmdx-dalvik"
-        	)
+tasks {
+	test {
+	    useJUnitPlatform()
+	    maxHeapSize = "4G"
+	}
+	compileJava {
+		dependsOn(
+			":core:openmdx-base.jar",
+			":security:openmdx-security.jar"
+		)
+		doFirst {
+			var f = File("$buildDir/resources/main/META-INF/openmdxmof.properties")
+			touch(f)
+			f.writeText(zipTree(File(getDeliverDir(), "../core/lib/openmdx-base.jar")).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText() )
+			f.appendText(zipTree(File(getDeliverDir(), "../security/lib/openmdx-security.jar")).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText() )
+		}
+	    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
+	}
+	distTar {
+		dependsOn(
+			"openmdx-client.jar",
+			"openmdx-dalvik.jar",
+			"openmdx-client-sources.jar",
+			"openmdx-dalvik-sources.jar"
+		)
+	}
+	distZip {
+		dependsOn(
+			"openmdx-client.jar",
+			"openmdx-dalvik.jar",
+			"openmdx-client-sources.jar",
+			"openmdx-dalvik-sources.jar"
+		)
+	}
+	assemble {
+		dependsOn(
+            "openmdx-client.jar",
+            "openmdx-client-sources.jar",
+            "openmdx-dalvik.jar",
+            "openmdx-dalvik-sources.jar"
         )
-    }
-    with(
-    	copySpec {
-    		from(
-    			zipTree(File(getDeliverDir(), "../client/lib/openmdx-client.jar"))
-    		).include(
-				"META-INF/*.properties"
-			).exclude(
-				"META-INF/openmdx-xml-outputfactory.properties"
-			).eachFile {
-				path = "org/openmdx/dalvik/metainf/" + name
+	}
+	register<org.openmdx.gradle.ArchiveTask>("openmdx-client.jar") {
+	    duplicatesStrategy = DuplicatesStrategy.WARN
+		dependsOn(
+			":core:openmdx-base.jar",
+			":core:openmdx-system.jar",
+			":client:compileJava",
+			":client:processResources",
+			":security:openmdx-security.jar"
+		)
+		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		archiveFileName.set("openmdx-client.jar")
+	    includeEmptyDirs = false
+		manifest {
+	        attributes(
+	        	getManifest(
+	        		"openMDX Client Library",
+	        		"openmdx-client"
+	        	)
+	        )
+	    }
+	    with(
+	    	copySpec {
+				from(
+					File(buildDir, "classes/java/main"),
+					File(buildDir, "resources/main"),
+					"src/main/resources"
+				).include(
+					openmdxClientIncludes
+				).exclude(
+					openmdxClientExcludes
+				)
+			},
+			copySpec {
+				from(
+					zipTree(File(getDeliverDir(), "../core/lib/openmdx-base.jar")),
+					zipTree(File(getDeliverDir(), "../core/lib/openmdx-system.jar")),
+					zipTree(File(getDeliverDir(), "../security/lib/openmdx-security.jar"))
+				).include(
+					openmdxCommonIncludes
+				).exclude(
+					openmdxCommonExcludes
+				)
+			},
+			copySpec {
+				from(
+					configurations["javaeeApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) }	
+				).include(
+					"javax/transaction/Synchronization.*"
+				)
 			}
-    	},
-    	copySpec {
-			from(
-				zipTree(File(getDeliverDir(), "../client/lib/openmdx-client.jar"))
-			).include(
-				openmdxDalvikIncludes
-			).exclude(
-				openmdxDalvikExcludes
-			)
-		},
-    	copySpec {
-			from(
-				File(buildDir, "classes/java/main"),
-				File(buildDir, "resources/main"),
-				"src/main/dalvik"
-			).exclude(
-				"META-INF/*/**"
-			)
-		}
-	)
-}
+		)
+	}
+	register<org.openmdx.gradle.ArchiveTask>("openmdx-client-sources.jar") {
+	    duplicatesStrategy = DuplicatesStrategy.WARN
+		dependsOn(
+			":core:openmdx-base-sources.jar",
+			":core:openmdx-system-sources.jar",
+			":security:openmdx-security-sources.jar"
+		)
+		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		archiveFileName.set("openmdx-client-sources.jar")
+	    includeEmptyDirs = false
+		manifest {
+	        attributes(
+	        	getManifest(
+	        		"openMDX Client Sources",
+	        		"openmdx-client-sources"
+	        	)
+	        )
+	    }
+	    with(
+	    	copySpec {
+				from(
+					"src/main/java",
+					File(buildDir, "generated/sources/java/main")
+				).include(
+					openmdxClientIncludes
+				).exclude(
+					openmdxClientExcludes
+				)
+			},
+	    	copySpec {
+				from(
+					zipTree(File(getDeliverDir(), "../core/lib/openmdx-base-sources.jar")),
+					zipTree(File(getDeliverDir(), "../core/lib/openmdx-system-sources.jar")),
+					zipTree(File(getDeliverDir(), "../security/lib/openmdx-security-sources.jar"))
+				).include(
+					openmdxCommonIncludes
+				).exclude(
+					openmdxCommonExcludes
+				)
+			}
+		)
+	}
+	register<org.openmdx.gradle.ArchiveTask>("openmdx-dalvik.jar") {
+	    duplicatesStrategy = DuplicatesStrategy.WARN
+		dependsOn(
+			"openmdx-client.jar",
+			":client:compileJava",
+			":client:processResources"
+		)
+		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		archiveFileName.set("openmdx-dalvik.jar")
+	    includeEmptyDirs = false
+		manifest {
+	        attributes(
+	        	getManifest(
+	        		"openMDX Dalvik Library",
+	        		"openmdx-dalvik"
+	        	)
+	        )
+	    }
+	    with(
+	    	copySpec {
+	    		from(
+	    			zipTree(File(getDeliverDir(), "../client/lib/openmdx-client.jar"))
+	    		).include(
+					"META-INF/*.properties"
+				).exclude(
+					"META-INF/openmdx-xml-outputfactory.properties"
+				).eachFile {
+					path = "org/openmdx/dalvik/metainf/" + name
+				}
+	    	},
+	    	copySpec {
+				from(
+					zipTree(File(getDeliverDir(), "../client/lib/openmdx-client.jar"))
+				).include(
+					openmdxDalvikIncludes
+				).exclude(
+					openmdxDalvikExcludes
+				)
+			},
+	    	copySpec {
+				from(
+					File(buildDir, "classes/java/main"),
+					File(buildDir, "resources/main"),
+					"src/main/dalvik"
+				).exclude(
+					"META-INF/*/**"
+				)
+			}
+		)
+	}
+	
+	register<org.openmdx.gradle.ArchiveTask>("openmdx-dalvik-sources.jar") {
+	    duplicatesStrategy = DuplicatesStrategy.WARN
+		dependsOn(":client:openmdx-client-sources.jar")
+		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		archiveFileName.set("openmdx-dalvik-sources.jar")
+	    includeEmptyDirs = false
+		manifest {
+	        attributes(
+	        	getManifest(
+	        		"openMDX Dalvik Sources",
+	        		"openmdx-dalvik-sources"
+	        	)
+	        )
+	    }
+	    with(
+	    	copySpec {
+				from(
+					"src/main/java",
+					File(buildDir, "generated/sources/java/main"),
+					zipTree(File(getDeliverDir(), "../client/lib/openmdx-client-sources.jar"))
+				).include(
+					openmdxDalvikIncludes
+				).exclude(
+					openmdxDalvikExcludes
+				)
+			}
+		)
+	}
 
-tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-dalvik-sources.jar") {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-	dependsOn(":client:openmdx-client-sources.jar")
-	destinationDirectory.set(File(getDeliverDir(), "lib"))
-	archiveFileName.set("openmdx-dalvik-sources.jar")
-    includeEmptyDirs = false
-	manifest {
-        attributes(
-        	getManifest(
-        		"openMDX Dalvik Sources",
-        		"openmdx-dalvik-sources"
-        	)
-        )
-    }
-    with(
-    	copySpec {
-			from(
-				"src/main/java",
-				File(buildDir, "generated/sources/java/main"),
-				zipTree(File(getDeliverDir(), "../client/lib/openmdx-client-sources.jar"))
-			).include(
-				openmdxDalvikIncludes
-			).exclude(
-				openmdxDalvikExcludes
-			)
-		}
-	)
 }
 
 distributions {

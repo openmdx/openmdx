@@ -7,7 +7,9 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2020-2021, OMEX AG, Switzerland
+ * Copyright 
+ * (c) 2020-2021, OMEX AG, Switzerland
+ * (c) 2022, Datura Informatik+Organisation AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -132,159 +134,161 @@ tasks.test {
     maxHeapSize = "4G"
 }
 
-tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
-    inputs.dir("${projectDir}/src/model/emf")
-    inputs.dir("${projectDir}/src/main/resources")
-    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
-    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
-    classpath = configurations["openmdxBootstrap"]
-    doFirst {
-    }
-    doLast {
-        copy {
-            from(
-                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
-            )
-            into("$buildDir/generated/sources/java/main")
-            include(
-                "**/*.java"
-            )
-        }
-    }
-}
-
-tasks.register<JavaExec>("compress-and-append-prototype") {
-	val fileName = "prototype.js"
-	val dirName = "${projectDir}/src/js/org/prototypejs"
-	classpath = fileTree(
-		File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+tasks.distTar {
+	dependsOn(
+		":portal:openmdx-portal.jar",
+		":portal:openmdx-portal-sources.jar"
 	)
-    args = listOf(
-        "--line-break", "1000",
-        "-o", "$buildDir/generated/sources/js/${fileName}",
-        "${dirName}/${fileName}"
-    )
 }
-
-tasks.register<JavaExec>("compress-and-append-ssf") {
-	val fileName = "ssf.js"
-	val dirName = "${projectDir}/src/js/org/openmdx/portal"
-	classpath = fileTree(
-		File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+tasks.distZip {
+	dependsOn(
+		":portal:openmdx-portal.jar",
+		":portal:openmdx-portal-sources.jar"
 	)
-    args = listOf(
-        "--line-break", "1000",
-        "-o", "$buildDir/generated/sources/js/${fileName}",
-        "${dirName}/${fileName}"
-    )
-}
-
-tasks.register<JavaExec>("compress-and-append-calendar") {
-	val fileName = "calendar.js"
-	val dirName = "${projectDir}/src/js/com/dynarch/calendar"
-	classpath = fileTree(
-		File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
-	)
-    args = listOf(
-        "--line-break", "1000",
-        "-o", "$buildDir/generated/sources/js/${fileName}",
-        "${dirName}/${fileName}"
-    )
-}
-
-tasks.register<JavaExec>("compress-and-append-calendar-setup") {
-	val fileName = "calendar-setup.js"
-	val dirName = "${projectDir}/src/js/com/dynarch/calendar"
-	classpath = fileTree(
-		File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
-	)
-    args = listOf(
-        "--line-break", "1000",
-        "-o", "$buildDir/generated/sources/js/${fileName}",
-        "${dirName}/${fileName}"
-    )
-}
-
-tasks.register<JavaExec>("compress-and-append-guicontrol") {
-	val fileName = "guicontrol.js"
-	val dirName = "${projectDir}/src/js/org/openmdx/portal"
-	classpath = fileTree(
-		File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
-	)
-    args = listOf(
-        "--line-break", "1000",
-        "-o", "$buildDir/generated/sources/js/${fileName}",
-        "${dirName}/${fileName}"
-    )
-}
-
-tasks.register<JavaExec>("compress-and-append-wiky") {
-	val fileName = "wiky.js"
-	val dirName = "${projectDir}/src/js/net/wiky"
-	classpath = fileTree(
-		File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
-	)
-    args = listOf(
-        "--line-break", "1000",
-        "-o", "$buildDir/generated/sources/js/${fileName}",
-        "${dirName}/${fileName}"
-    )
-}
-
-tasks.register<JavaExec>("compress-and-append-wiky-lang") {
-	val fileName = "wiky.lang.js"
-	val dirName = "${projectDir}/src/js/net/wiky"
-	classpath = fileTree(
-		File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
-	)
-    args = listOf(
-        "--line-break", "1000",
-        "-o", "$buildDir/generated/sources/js/${fileName}",
-        "${dirName}/${fileName}"
-    )
-}
-
-tasks.register<JavaExec>("compress-and-append-wiky-math") {
-	val fileName = "wiky.math.js"
-	val dirName = "${projectDir}/src/js/net/wiky"
-	classpath = fileTree(
-		File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
-	)
-    args = listOf(
-        "--line-break", "1000",
-        "-o", "$buildDir/generated/sources/js/${fileName}",
-        "${dirName}/${fileName}"
-    )
-}
-
-tasks.register("compress-and-append-js") {
-	dependsOn("compress-and-append-prototype")
-	dependsOn("compress-and-append-ssf")
-	dependsOn("compress-and-append-calendar")
-	dependsOn("compress-and-append-calendar-setup")
-	dependsOn("compress-and-append-guicontrol")
-	dependsOn("compress-and-append-wiky")
-	dependsOn("compress-and-append-wiky-lang")
-	dependsOn("compress-and-append-wiky-math")
-    doLast {
-    	val f = File(projectDir, "src/war/openmdx-inspector.war/js/portal-all.js")
-        f.writeText(File("$buildDir/generated/sources/js/prototype.js").readText())
-        f.appendText(File("$buildDir/generated/sources/js/ssf.js").readText())
-        f.appendText(File("$buildDir/generated/sources/js/calendar.js").readText())
-        f.appendText(File("$buildDir/generated/sources/js/calendar-setup.js").readText())
-        f.appendText(File("$buildDir/generated/sources/js/guicontrol.js").readText())
-        f.appendText(File("$buildDir/generated/sources/js/wiky.js").readText())
-        f.appendText(File("$buildDir/generated/sources/js/wiky.lang.js").readText())
-        f.appendText(File("$buildDir/generated/sources/js/wiky.math.js").readText())
-    }
-}
-
-tasks.compileJava {
-    dependsOn("generate-model")
-    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
 }
 
 tasks {
+	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
+	    inputs.dir("${projectDir}/src/model/emf")
+	    inputs.dir("${projectDir}/src/main/resources")
+	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+	    classpath = configurations["openmdxBootstrap"]
+	    doFirst {
+	    }
+	    doLast {
+	        copy {
+	            from(
+	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+	            )
+	            into("$buildDir/generated/sources/java/main")
+	            include(
+	                "**/*.java"
+	            )
+	        }
+	    }
+	}
+	register<JavaExec>("compress-and-append-prototype") {
+		val fileName = "prototype.js"
+		val dirName = "${projectDir}/src/js/org/prototypejs"
+		classpath = fileTree(
+			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+		)
+	    args = listOf(
+	        "--line-break", "1000",
+	        "-o", "$buildDir/generated/sources/js/${fileName}",
+	        "${dirName}/${fileName}"
+	    )
+	}
+	register<JavaExec>("compress-and-append-ssf") {
+		val fileName = "ssf.js"
+		val dirName = "${projectDir}/src/js/org/openmdx/portal"
+		classpath = fileTree(
+			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+		)
+	    args = listOf(
+	        "--line-break", "1000",
+	        "-o", "$buildDir/generated/sources/js/${fileName}",
+	        "${dirName}/${fileName}"
+	    )
+	}
+	register<JavaExec>("compress-and-append-calendar") {
+		val fileName = "calendar.js"
+		val dirName = "${projectDir}/src/js/com/dynarch/calendar"
+		classpath = fileTree(
+			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+		)
+	    args = listOf(
+	        "--line-break", "1000",
+	        "-o", "$buildDir/generated/sources/js/${fileName}",
+	        "${dirName}/${fileName}"
+	    )
+	}
+	register<JavaExec>("compress-and-append-calendar-setup") {
+		val fileName = "calendar-setup.js"
+		val dirName = "${projectDir}/src/js/com/dynarch/calendar"
+		classpath = fileTree(
+			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+		)
+	    args = listOf(
+	        "--line-break", "1000",
+	        "-o", "$buildDir/generated/sources/js/${fileName}",
+	        "${dirName}/${fileName}"
+	    )
+	}
+	register<JavaExec>("compress-and-append-guicontrol") {
+		val fileName = "guicontrol.js"
+		val dirName = "${projectDir}/src/js/org/openmdx/portal"
+		classpath = fileTree(
+			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+		)
+	    args = listOf(
+	        "--line-break", "1000",
+	        "-o", "$buildDir/generated/sources/js/${fileName}",
+	        "${dirName}/${fileName}"
+	    )
+	}
+	register<JavaExec>("compress-and-append-wiky") {
+		val fileName = "wiky.js"
+		val dirName = "${projectDir}/src/js/net/wiky"
+		classpath = fileTree(
+			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+		)
+	    args = listOf(
+	        "--line-break", "1000",
+	        "-o", "$buildDir/generated/sources/js/${fileName}",
+	        "${dirName}/${fileName}"
+	    )
+	}
+	register<JavaExec>("compress-and-append-wiky-lang") {
+		val fileName = "wiky.lang.js"
+		val dirName = "${projectDir}/src/js/net/wiky"
+		classpath = fileTree(
+			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+		)
+	    args = listOf(
+	        "--line-break", "1000",
+	        "-o", "$buildDir/generated/sources/js/${fileName}",
+	        "${dirName}/${fileName}"
+	    )
+	}
+	register<JavaExec>("compress-and-append-wiky-math") {
+		val fileName = "wiky.math.js"
+		val dirName = "${projectDir}/src/js/net/wiky"
+		classpath = fileTree(
+			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+		)
+	    args = listOf(
+	        "--line-break", "1000",
+	        "-o", "$buildDir/generated/sources/js/${fileName}",
+	        "${dirName}/${fileName}"
+	    )
+	}
+	register("compress-and-append-js") {
+		dependsOn("compress-and-append-prototype")
+		dependsOn("compress-and-append-ssf")
+		dependsOn("compress-and-append-calendar")
+		dependsOn("compress-and-append-calendar-setup")
+		dependsOn("compress-and-append-guicontrol")
+		dependsOn("compress-and-append-wiky")
+		dependsOn("compress-and-append-wiky-lang")
+		dependsOn("compress-and-append-wiky-math")
+	    doLast {
+	    	val f = File(projectDir, "src/war/openmdx-inspector.war/js/portal-all.js")
+	        f.writeText(File("$buildDir/generated/sources/js/prototype.js").readText())
+	        f.appendText(File("$buildDir/generated/sources/js/ssf.js").readText())
+	        f.appendText(File("$buildDir/generated/sources/js/calendar.js").readText())
+	        f.appendText(File("$buildDir/generated/sources/js/calendar-setup.js").readText())
+	        f.appendText(File("$buildDir/generated/sources/js/guicontrol.js").readText())
+	        f.appendText(File("$buildDir/generated/sources/js/wiky.js").readText())
+	        f.appendText(File("$buildDir/generated/sources/js/wiky.lang.js").readText())
+	        f.appendText(File("$buildDir/generated/sources/js/wiky.math.js").readText())
+	    }
+	}
+	compileJava {
+	    dependsOn("generate-model")
+	    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
+	}
 	assemble {
 		dependsOn(
             "openmdx-portal.jar",

@@ -7,7 +7,9 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2020-2021, OMEX AG, Switzerland
+ * Copyright 
+ * (c) 2020-2021, OMEX AG, Switzerland
+ * (c) 2022, Datura Informatik+Organisation AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -121,24 +123,6 @@ sourceSets {
     }    
 }
 
-tasks.test {
-    useJUnitPlatform()
-    maxHeapSize = "4G"
-}
-
-tasks.compileJava {
-    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
-}
-
-tasks {
-	assemble {
-		dependsOn(
-            "catalina-openmdx.jar",
-            "catalina-openmdx-sources.jar"
-        )
-	}
-}
-
 val openmdxCatalinaIncludes = listOf<String>(  
     "org/openmdx/catalina/*/**"
 )
@@ -146,45 +130,75 @@ val openmdxCatalinaIncludes = listOf<String>(
 val openmdxCatalinaExcludes = listOf<String>(
 )
 
-tasks.register<org.openmdx.gradle.ArchiveTask>("catalina-openmdx.jar") {
-	destinationDirectory.set(File(getDeliverDir(), "lib"))
-	archiveFileName.set("catalina-openmdx.jar")
-    includeEmptyDirs = false
-	manifest {
-        attributes(
-        	getManifest(
-        		"openMDX Catalina",
-        		"catalina-openmdx"
-        	)
+tasks {
+	test {
+	    useJUnitPlatform()
+	    maxHeapSize = "4G"
+	}
+	compileJava {
+ 	   options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
+	}
+	assemble {
+		dependsOn(
+            "catalina-openmdx.jar",
+            "catalina-openmdx-sources.jar"
         )
-    }
-	from(
-		File(buildDir, "classes/java/main"),
-		File(buildDir, "resources/main"),
-		"src/main/resources"
-	)
-	include(openmdxCatalinaIncludes)
-	exclude(openmdxCatalinaExcludes)
-}
-
-tasks.register<org.openmdx.gradle.ArchiveTask>("catalina-openmdx-sources.jar") {
-	destinationDirectory.set(File(getDeliverDir(), "lib"))
-	archiveFileName.set("catalina-openmdx-sources.jar")
-    includeEmptyDirs = false
-	manifest {
-        attributes(
-        	getManifest(
-        		"openMDX Catalina Sources",
-        		"catalina-openmdx-sources"
-        	)
-        )
-    }
-	from(
-		"src/main/java",
-		File(buildDir, "generated/sources/java/main")
-	)
-	include(openmdxCatalinaIncludes)
-	exclude(openmdxCatalinaExcludes)
+	}
+	distTar {
+		dependsOn(
+			"catalina-openmdx.jar",
+			"catalina-openmdx-sources.jar"
+		)
+	}
+	distZip {
+		dependsOn(
+			"catalina-openmdx.jar",
+			"catalina-openmdx-sources.jar"
+		)
+	}
+	register<org.openmdx.gradle.ArchiveTask>("catalina-openmdx.jar") {
+	    dependsOn(
+	        ":tomcat:compileJava",
+	        ":tomcat:processResources"
+	    )
+		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		archiveFileName.set("catalina-openmdx.jar")
+	    includeEmptyDirs = false
+		manifest {
+	        attributes(
+	        	getManifest(
+	        		"openMDX Catalina",
+	        		"catalina-openmdx"
+	        	)
+	        )
+	    }
+		from(
+			File(buildDir, "classes/java/main"),
+			File(buildDir, "resources/main"),
+			"src/main/resources"
+		)
+		include(openmdxCatalinaIncludes)
+		exclude(openmdxCatalinaExcludes)
+	}
+	register<org.openmdx.gradle.ArchiveTask>("catalina-openmdx-sources.jar") {
+		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		archiveFileName.set("catalina-openmdx-sources.jar")
+	    includeEmptyDirs = false
+		manifest {
+	        attributes(
+	        	getManifest(
+	        		"openMDX Catalina Sources",
+	        		"catalina-openmdx-sources"
+	        	)
+	        )
+	    }
+		from(
+			"src/main/java",
+			File(buildDir, "generated/sources/java/main")
+		)
+		include(openmdxCatalinaIncludes)
+		exclude(openmdxCatalinaExcludes)
+	}
 }
 
 distributions {
