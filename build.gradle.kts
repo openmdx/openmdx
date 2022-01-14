@@ -2,13 +2,10 @@
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
  * Description: build.gradle.kts
- * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
- * Copyright (c) 2020-2021, OMEX AG, Switzerland
- * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
@@ -52,5 +49,5 @@ plugins {
 
 allprojects {
     group = "org.openmdx"
-    version = "2.17-20211025"
+    version = "2.18.0"
 }

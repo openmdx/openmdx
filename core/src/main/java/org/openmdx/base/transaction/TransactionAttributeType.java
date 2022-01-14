@@ -2,7 +2,7 @@
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
  * Description: REST Format
- * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Owner:       the original authors.
  * ====================================================================
  *
  * EasyBeans

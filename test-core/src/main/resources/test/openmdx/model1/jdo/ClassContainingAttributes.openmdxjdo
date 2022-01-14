@@ -5,17 +5,11 @@
 >
 <!--===================================================================
  ! Project:     openMDX, http://www.openmdx.org/
- ! Name:        $Id: ClassContainingAttributes.openmdxjdo,v 1.1 2009/09/18 12:45:16 hburger Exp $
  ! Description: ClassContainingAttributes Meta Data
- ! Revision:    $Revision: 1.1 $
- ! Owner:       OMEX AG, Switzerland, http://www.omex.ch
- ! Date:        $Date: 2009/09/18 12:45:16 $
+ ! Owner:       the original authors..
  ! ====================================================================
  ! 
  ! This software is published under the BSD license as listed below.
- ! 
- ! Copyright (c) 2007-2009, OMEX AG, Switzerland
- ! All rights reserved.
  ! 
  ! Redistribution and use in source and binary forms, with or
  ! without modification, are permitted provided that the following

@@ -2,13 +2,10 @@
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
  * Description: ReplyHeaderFilter
- * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
- * Copyright (c) 2007-2013, OMEX AG, Switzerland
- * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions 
@@ -22,7 +19,7 @@
  * the documentation and/or other materials provided with the
  * distribution.
  * 
- * * Neither the name of CRIXP Corp. nor the names of the contributors
+ * * Neither the name of the openMDX team nor the names of the contributors
  * to openCRX may be used to endorse or promote products derived
  * from this software without specific prior written permission
  * 

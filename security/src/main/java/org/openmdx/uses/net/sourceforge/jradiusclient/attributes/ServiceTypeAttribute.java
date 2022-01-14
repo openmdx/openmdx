@@ -1,29 +1,27 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Description: Java Radius Client Derivate
- * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: ServiceTypeAttribute
+ * Owner:       the original authors.
  * ====================================================================
  *
- * Copyright (C) 2004  OMEX AG
- *
- * * This library is free software; you can redistribute it and/or
- *   modify it under the terms of the GNU Lesser General Public
- *   License as published by the Free Software Foundation; either
- *   version 2.1 of the License, or (at your option) any later version.
- *
- * * This library is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *   Lesser General Public License for more details.
- *
- * * You should have received a copy of the GNU Lesser General Public
- *   License along with this library; if not, write to the Free Software
- *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * This software is published under the BSD license as listed below.
  * 
- * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -41,13 +39,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
- * 
- * This library BASED on Java Radius Client 2.0.0
- * (http://http://jradius-client.sourceforge.net/),
- * but it's namespace and content has been MODIFIED by OMEX AG
- * in order to integrate it into the openMDX framework.
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.uses.net.sourceforge.jradiusclient.attributes;
 

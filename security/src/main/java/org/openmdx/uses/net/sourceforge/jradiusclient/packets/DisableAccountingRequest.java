@@ -2,11 +2,11 @@
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
  * Description: Java Radius Client Derivate
- * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Owner:       the original authors.
  * ====================================================================
  *
- * Copyright (C) 2004  OMEX AG
- *
+ * This software is published under the BSD license as listed below.
+ * 
  * * This library is free software; you can redistribute it and/or
  *   modify it under the terms of the GNU Lesser General Public
  *   License as published by the Free Software Foundation; either
@@ -46,7 +46,7 @@
  * 
  * This library BASED on Java Radius Client 2.0.0
  * (http://http://jradius-client.sourceforge.net/),
- * but it's namespace and content has been MODIFIED by OMEX AG
+ * but it's namespace and content has been MODIFIED by the openMDX team
  * in order to integrate it into the openMDX framework.
  */
 package org.openmdx.uses.net.sourceforge.jradiusclient.packets;

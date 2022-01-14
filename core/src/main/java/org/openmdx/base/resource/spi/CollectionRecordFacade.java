@@ -2,13 +2,10 @@
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
  * Description: JCA: IndexedRecord backed-up by an optional object
- * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
- * Copyright (c) 2004-2019, OMEX AG, Switzerland
- * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
