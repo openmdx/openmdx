@@ -10,7 +10,6 @@
     attributes 	(list Attribute_Set)
     quid       	"3C3238A3033A"
     documentation 	
-|$Id: model1.cat,v 1.17 2010/06/24 10:17:37 hburger Exp $ 
 |
 |Name: org::omex::model1
 |
@@ -22,7 +21,7 @@
 |
 |Print size: 12x13'
 |
-|(c) 2000-2002 by OMEX AG
+|(c) 2000-2002 the original authors.
     
     exportControl 	"Public"
     logical_models 	(list unit_reference_list
@@ -7853,7 +7852,7 @@
 |This software is published under the BSD license
 |as listed below.
 |
-|Copyright (c) 2004, OMEX AG, Switzerland
+|Copyright (c) 2004 the original authors.
 |All rights reserved.
 |
 |Redistribution and use in source and binary forms, with or without 
@@ -7872,7 +7871,7 @@
 |the documentation and/or other materials provided with the
 |distribution.
 |
-|* Neither the name of OMEX AG nor the names of the contributors
+|* Neither the name of the openMDX team nor the names of the contributors
 |to openMDX may be used to endorse or promote products derived
 |from this software without specific prior written permission
 |
@@ -7930,7 +7929,7 @@
 |This software is published under the BSD license
 |as listed below.
 |
-|Copyright (c) 2004, OMEX AG, Switzerland
+|Copyright (c) 2004 the original authors.
 |All rights reserved.
 |
 |Redistribution and use in source and binary forms, with or without 
@@ -7949,7 +7948,7 @@
 |the documentation and/or other materials provided with the
 |distribution.
 |
-|* Neither the name of OMEX AG nor the names of the contributors
+|* Neither the name of the openMDX team nor the names of the contributors
 |to openMDX may be used to endorse or promote products derived
 |from this software without specific prior written permission
 |

@@ -1,14 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Unit Of Work
- * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Description: UnitOfWork_1
+ * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
- * Copyright (c) 2004-2017, OMEX AG, Switzerland
- * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
@@ -42,8 +39,8 @@
  * 
  * ------------------
  * 
- * This product includes or is based on software developed by other 
- * organizations as listed in the NOTICE file.
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.accessor.rest;
 
