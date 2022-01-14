@@ -7,7 +7,9 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2020-2021, OMEX AG, Switzerland
+ * Copyright 
+ * (c) 2020-2021, OMEX AG, Switzerland
+ * (c) 2022, Datura Informatik+Organisation AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -60,7 +62,9 @@ plugins {
 
 repositories {
 	mavenCentral()
-	jcenter()
+	maven {
+        url = uri("https://jcenter.bintray.com/")
+    }
 }
 
 var env = Properties()
@@ -131,19 +135,17 @@ sourceSets {
     }    
 }
 
-tasks.test {
-    useJUnitPlatform()
-    maxHeapSize = "4G"
-}
-
-tasks.compileJava {
-    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
-}
-
 tasks {
+	test {
+	    useJUnitPlatform()
+	    maxHeapSize = "4G"
+	}
+	
+	compileJava {
+	    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
+	}
 	assemble {
-		dependsOn(
-        )
+		dependsOn()
 	}
 }
 
