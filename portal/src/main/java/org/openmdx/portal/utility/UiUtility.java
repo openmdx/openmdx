@@ -2,7 +2,7 @@
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
  * Description: UiUtility
- * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
+ * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -20,7 +20,7 @@
  * the documentation and/or other materials provided with the
  * distribution.
  * 
- * * Neither the name of CRIXP Corp. nor the names of the contributors
+ * * Neither the name of the openMDX team nor the names of the contributors
  * to openCRX may be used to endorse or promote products derived
  * from this software without specific prior written permission
  * 

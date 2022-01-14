@@ -2,7 +2,7 @@
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
  * Description: OperationPane
- * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
+ * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license
