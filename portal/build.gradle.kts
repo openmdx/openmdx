@@ -290,13 +290,6 @@ tasks {
         )
 	}
 
-// DUPLICATE BLOCK? find above the first occurrence
-
-//tasks.test {
-//    useJUnitPlatform()
-//    maxHeapSize = "4G"
-//}
-
 	val openmdxPortalIncludes = listOf(
 		"org/openmdx/portal/*/**",
 		"org/openmdx/ui1/*/**",

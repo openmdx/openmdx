@@ -297,7 +297,7 @@ public class TestModelRepository {
         long startLoading = System.currentTimeMillis();
         Model_1_0 model = new ModelBuilder_1(false, url).build();
         long restoreTime = System.currentTimeMillis() - startLoading;
-        SysLog.performance("Restoring openCRX model " + uri, restoreTime);
+        SysLog.performance("Restoring foreign model " + uri, restoreTime);
         return model;
     }
 

@@ -5,8 +5,7 @@
  * Owner:       the original authors.
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions 
@@ -20,10 +19,9 @@
  *   the documentation and/or other materials provided with the
  *   distribution.
  * 
- * * Neither the name of the openMDX team nor the names of the contributors
- *   to openCRX may be used to endorse or promote products derived
- *   from this software without specific prior written permission
- * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
