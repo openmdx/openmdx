@@ -118,12 +118,11 @@ sourceSets {
     }    
 }
 
-val openmdxCatalinaIncludes = listOf<String>(  
+val openmdxCatalinaIncludes = listOf(
     "org/openmdx/catalina/*/**"
 )
 
-val openmdxCatalinaExcludes = listOf<String>(
-)
+val openmdxCatalinaExcludes = listOf<String>( )
 
 tasks {
 	test {

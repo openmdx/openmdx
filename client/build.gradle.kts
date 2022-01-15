@@ -119,76 +119,66 @@ sourceSets {
     }
 }
 
-project.tasks.named("processResources", Copy::class.java) {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-}
-project.tasks.named("processTestResources", Copy::class.java) {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-}
 
-val openmdxCommonIncludes = listOf<String>(
-)
-
-val openmdxCommonExcludes = listOf<String>(
-    "META-INF/MANIFEST.MF",
-	"META-INF/openmdxmof.properties",
-	"META-INF/openmdxExceptionMapper.properties",
-	"org/omg/**/jpa3",
-	"org/omg/**/jpa3/*",
-	"org/openmdx/**/jpa3",
-	"org/openmdx/**/jpa3/*",
-	"org/openmdx/application/airsync/**",
-	"org/openmdx/application/dataprovider/layer/persistence/jdbc/*/**",
-	"org/openmdx/application/mof/externalizer/*/**",
-	"org/openmdx/application/naming/*/**",
-	"org/openmdx/application/dataprovider/kernel/*/**",
-	"org/openmdx/application/rest/adapter/*/**",
-	"org/openmdx/application/rest/ejb/*/**",
-	"org/openmdx/application/rest/http/servlet/*/**",
-	"org/openmdx/application/transaction/*/**",
-	"org/openmdx/kernel/ejb/*/**",
-	"org/openmdx/kernel/lightweight/*/**",
-	"org/openmdx/kernel/naming/*/**",
-	"org/openmdx/kernel/servlet/*/**",
-	"org/openmdx/kernel/sql/*/**",
-	"org/openmdx/uses/org/apache/commons/*/**",
-	"org/openmdx/application/rest/http/RestServlet_*",
-	"org/openmdx/application/rest/http/RemoteUserLoginModule*",
-	"org/openmdx/application/rest/http/RequestCallbackHandler*",
-	"org/openmdx/application/rest/http/TrustingLoginModule*",
-	"org/openmdx/base/resource/adapter/*/**"
-)
-
-val openmdxClientIncludes = listOf<String>(
-)
-
-val openmdxClientExcludes = listOf<String>(
-    "org/ietf/jgss/*/**",
-    "org/openmdx/dalvik/*/**"
-)
-
-val openmdxDalvikIncludes = listOf<String>(
-)
-
-val openmdxDalvikExcludes = listOf<String>(
-	"META-INF/*/**",
-	"javax/transaction/*/**",
-	"org/openmdx/kernel/platform/platform.properties",
-	"org/openmdx/base/**/stream",
-	"org/openmdx/base/**/stream/*",
-	"org/openmdx/application/**/stream",
-	"org/openmdx/application/**/stream/*",
-	"**/*.wbxml",
-	"**/*.xml",
-	"**/*.xsd",
-	"**/xmi1",
-	"org/omg/primitivetypes/**"
-)
 
 tasks {
+	val openmdxCommonIncludes = listOf<String>( )
+	val openmdxCommonExcludes = listOf(
+		"META-INF/MANIFEST.MF",
+		"META-INF/openmdxmof.properties",
+		"META-INF/openmdxExceptionMapper.properties",
+		"org/omg/**/jpa3",
+		"org/omg/**/jpa3/*",
+		"org/openmdx/**/jpa3",
+		"org/openmdx/**/jpa3/*",
+		"org/openmdx/application/airsync/**",
+		"org/openmdx/application/dataprovider/layer/persistence/jdbc/*/**",
+		"org/openmdx/application/mof/externalizer/*/**",
+		"org/openmdx/application/naming/*/**",
+		"org/openmdx/application/dataprovider/kernel/*/**",
+		"org/openmdx/application/rest/adapter/*/**",
+		"org/openmdx/application/rest/ejb/*/**",
+		"org/openmdx/application/rest/http/servlet/*/**",
+		"org/openmdx/application/transaction/*/**",
+		"org/openmdx/kernel/ejb/*/**",
+		"org/openmdx/kernel/lightweight/*/**",
+		"org/openmdx/kernel/naming/*/**",
+		"org/openmdx/kernel/servlet/*/**",
+		"org/openmdx/kernel/sql/*/**",
+		"org/openmdx/uses/org/apache/commons/*/**",
+		"org/openmdx/application/rest/http/RestServlet_*",
+		"org/openmdx/application/rest/http/RemoteUserLoginModule*",
+		"org/openmdx/application/rest/http/RequestCallbackHandler*",
+		"org/openmdx/application/rest/http/TrustingLoginModule*",
+		"org/openmdx/base/resource/adapter/*/**"
+	)
+	val openmdxClientIncludes = listOf<String>( )
+	val openmdxClientExcludes = listOf(
+		"org/ietf/jgss/*/**",
+		"org/openmdx/dalvik/*/**"
+	)
+	val openmdxDalvikIncludes = listOf<String>( )
+	val openmdxDalvikExcludes = listOf(
+		"META-INF/*/**",
+		"javax/transaction/*/**",
+		"org/openmdx/kernel/platform/platform.properties",
+		"org/openmdx/base/**/stream",
+		"org/openmdx/base/**/stream/*",
+		"org/openmdx/application/**/stream",
+		"org/openmdx/application/**/stream/*",
+		"**/*.wbxml",
+		"**/*.xml",
+		"**/*.xsd",
+		"**/xmi1",
+		"org/omg/primitivetypes/**"
+	)
+
+	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+
 	test {
-	    useJUnitPlatform()
-	    maxHeapSize = "4G"
+		useJUnitPlatform()
+		maxHeapSize = "4G"
 	}
 	compileJava {
 		dependsOn(

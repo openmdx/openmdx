@@ -124,25 +124,23 @@ sourceSets {
 
 touch(File(buildDir, "generated/sources/js/portal-all.js"))
 
-tasks.test {
-    useJUnitPlatform()
-    maxHeapSize = "4G"
-}
-
-tasks.distTar {
-	dependsOn(
-		":portal:openmdx-portal.jar",
-		":portal:openmdx-portal-sources.jar"
-	)
-}
-tasks.distZip {
-	dependsOn(
-		":portal:openmdx-portal.jar",
-		":portal:openmdx-portal-sources.jar"
-	)
-}
-
 tasks {
+	test {
+		useJUnitPlatform()
+		maxHeapSize = "4G"
+	}
+	distTar {
+		dependsOn(
+			":portal:openmdx-portal.jar",
+			":portal:openmdx-portal-sources.jar"
+		)
+	}
+	distZip {
+		dependsOn(
+			":portal:openmdx-portal.jar",
+			":portal:openmdx-portal-sources.jar"
+		)
+	}
 	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 	    inputs.dir("${projectDir}/src/model/emf")
 	    inputs.dir("${projectDir}/src/main/resources")
@@ -291,145 +289,139 @@ tasks {
             "openmdx-inspector.war"
         )
 	}
-}
 
-tasks.test {
-    useJUnitPlatform()
-    maxHeapSize = "4G"
-}
+// DUPLICATE BLOCK? find above the first occurrence
 
-project.tasks.named("processResources", Copy::class.java) {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-}
-project.tasks.named("processTestResources", Copy::class.java) {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-}
+//tasks.test {
+//    useJUnitPlatform()
+//    maxHeapSize = "4G"
+//}
 
-val openmdxPortalIncludes = listOf<String>(  
-    "org/openmdx/portal/*/**",
-    "org/openmdx/ui1/*/**",
-    "META-INF/orm.xml",
-    "META-INF/openmdxmof.properties"
-)
-
-val openmdxPortalExcludes = listOf<String>(
-)
-
-tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-portal.jar") {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-	dependsOn(
-		":portal:compileJava",
-		":portal:generate-model",
-		":portal:processResources"
+	val openmdxPortalIncludes = listOf(
+		"org/openmdx/portal/*/**",
+		"org/openmdx/ui1/*/**",
+		"META-INF/orm.xml",
+		"META-INF/openmdxmof.properties"
 	)
-	destinationDirectory.set(File(getDeliverDir(), "lib"))
-	archiveFileName.set("openmdx-portal.jar")
-    includeEmptyDirs = false
-	manifest {
-        attributes(
-        	getManifest(
-        		"openMDX Portal Library",
-        		"openmdx-portal"
-        	)
-        )
-    }
-	from(
-		File(buildDir, "classes/java/main"),
-		File(buildDir, "resources/main"),
-		"src/main/resources",
-		zipTree(File(buildDir, "generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip"))
-	)
-	include(openmdxPortalIncludes)
-	exclude(openmdxPortalExcludes)
-}
 
-tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-portal-sources.jar") {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-	destinationDirectory.set(File(getDeliverDir(), "lib"))
-	archiveFileName.set("openmdx-portal-sources.jar")
-    includeEmptyDirs = false
-	manifest {
-        attributes(
-        	getManifest(
-        		"openMDX Portal Sources",
-        		"openmdx-portal-sources"
-        	)
-        )
-    }
-	from(
-		"src/main/java",
-		File(buildDir, "generated/sources/java/main")
-	)
-	include(openmdxPortalIncludes)
-	exclude(openmdxPortalExcludes)
-}
+	val openmdxPortalExcludes = listOf<String>( )
 
-tasks.register<org.openmdx.gradle.ArchiveTask>("openmdx-inspector.war") {
-	dependsOn("compress-and-append-js")
-	destinationDirectory.set(File(getDeliverDir(), "deployment-unit"))
-	archiveFileName.set("openmdx-inspector.war")
-    includeEmptyDirs = false
-	manifest {
-        attributes(
-        	getManifest(
-        		"openMDX Inspector Library",
-        		"openmdx-inspector"
-        	)
-        )
-    }
-    with(
-    	copySpec {
-			from("src/war/openmdx-inspector.war")
-		},
-    	copySpec {
-			from("src/js/org/openmdx")    	
-			into("js/openmdx")
-    	},
-    	copySpec {
-			from("src/js/org/wymeditor")    	
-			into("js/wymeditor")
-    	},
-    	copySpec {
-			from("src/js/net/wiky")    	
-			into("js/wiky")
-    	},
-    	copySpec {
-			from("src/js/org/jit")    	
-			into("js/jit")
-    	},
-    	copySpec {
-			from("src/js/com/dynarch/calendar/lang")    	
-			into("js/calendar/lang")
-    	},
-    	copySpec {
-			from("src/js/org/prototypejs")    	
-			into("js")
-    	},
-    	copySpec {
-			from("src/js/com/yahoo/yui/assets")    	
-			into("js/yui/build/assets")
-    	},
-    	copySpec {
-			from("src/js/com/bootstrap")    	
-			into("js/bootstrap")
-    	},
-    	copySpec {
-			from("src/js/com/jquery")    	
-			into("js/jquery")
-    	},
-    	copySpec {
-			from("src/js/com/popper")    	
-			into("js/popper")
-    	},
-    	copySpec {
-			from("src/js/org/openmdx/portal")    	
-			into("js")
-			include(
-				"ssf.js",
-				"guicontrol.js"
+	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+	register<org.openmdx.gradle.ArchiveTask>("openmdx-portal.jar") {
+		duplicatesStrategy = DuplicatesStrategy.WARN
+		dependsOn(
+			":portal:compileJava",
+			":portal:generate-model",
+			":portal:processResources"
+		)
+		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		archiveFileName.set("openmdx-portal.jar")
+		includeEmptyDirs = false
+		manifest {
+			attributes(
+				getManifest(
+					"openMDX Portal Library",
+					"openmdx-portal"
+				)
 			)
-    	}
-    )
+		}
+		from(
+			File(buildDir, "classes/java/main"),
+			File(buildDir, "resources/main"),
+			"src/main/resources",
+			zipTree(File(buildDir, "generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip"))
+		)
+		include(openmdxPortalIncludes)
+		exclude(openmdxPortalExcludes)
+	}
+	register<org.openmdx.gradle.ArchiveTask>("openmdx-portal-sources.jar") {
+		duplicatesStrategy = DuplicatesStrategy.WARN
+		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		archiveFileName.set("openmdx-portal-sources.jar")
+		includeEmptyDirs = false
+		manifest {
+			attributes(
+				getManifest(
+					"openMDX Portal Sources",
+					"openmdx-portal-sources"
+				)
+			)
+		}
+		from(
+			"src/main/java",
+			File(buildDir, "generated/sources/java/main")
+		)
+		include(openmdxPortalIncludes)
+		exclude(openmdxPortalExcludes)
+	}
+	register<org.openmdx.gradle.ArchiveTask>("openmdx-inspector.war") {
+		dependsOn("compress-and-append-js")
+		destinationDirectory.set(File(getDeliverDir(), "deployment-unit"))
+		archiveFileName.set("openmdx-inspector.war")
+		includeEmptyDirs = false
+		manifest {
+			attributes(
+				getManifest(
+					"openMDX Inspector Library",
+					"openmdx-inspector"
+				)
+			)
+		}
+		with(
+			copySpec {
+				from("src/war/openmdx-inspector.war")
+			},
+			copySpec {
+				from("src/js/org/openmdx")
+				into("js/openmdx")
+			},
+			copySpec {
+				from("src/js/org/wymeditor")
+				into("js/wymeditor")
+			},
+			copySpec {
+				from("src/js/net/wiky")
+				into("js/wiky")
+			},
+			copySpec {
+				from("src/js/org/jit")
+				into("js/jit")
+			},
+			copySpec {
+				from("src/js/com/dynarch/calendar/lang")
+				into("js/calendar/lang")
+			},
+			copySpec {
+				from("src/js/org/prototypejs")
+				into("js")
+			},
+			copySpec {
+				from("src/js/com/yahoo/yui/assets")
+				into("js/yui/build/assets")
+			},
+			copySpec {
+				from("src/js/com/bootstrap")
+				into("js/bootstrap")
+			},
+			copySpec {
+				from("src/js/com/jquery")
+				into("js/jquery")
+			},
+			copySpec {
+				from("src/js/com/popper")
+				into("js/popper")
+			},
+			copySpec {
+				from("src/js/org/openmdx/portal")
+				into("js")
+				include(
+					"ssf.js",
+					"guicontrol.js"
+				)
+			}
+		)
+	}
 }
 
 distributions {

@@ -134,20 +134,14 @@ tasks {
 	    useJUnitPlatform()
 	    maxHeapSize = "4G"
 	}
-	
 	compileJava {
 	    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
 	}
 	assemble {
 		dependsOn()
 	}
-}
-
-project.tasks.named("processResources", Copy::class.java) {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-}
-project.tasks.named("processTestResources", Copy::class.java) {
-    duplicatesStrategy = DuplicatesStrategy.WARN
+    named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+    named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
 }
 
 distributions {

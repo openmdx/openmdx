@@ -201,61 +201,56 @@ sourceSets {
     }
 }
 
-project.tasks.named("processResources", Copy::class.java) {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-}
-project.tasks.named("processTestResources", Copy::class.java) {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-}
-
-val openmdxBaseIncludes = listOf<String>(
-    "javax/cache/*/**",
-    "javax/jdo/*/**",
-	"javax/jmi/*/**",
-	"net/*/NetPackage*",
-	"net/rfc/*/RfcPackage*",
-	"org/*/OrgPackage*",
-	"org/ietf/*/IetfPackage*",
-	"org/iso/*/IsoPackage*",
-	"org/oasisopen/*/**",
-	"org/omg/*/**",
-	"org/openmdx/*/OpenmdxPackage*",
-	"org/openmdx/*1/**",
-	"org/openmdx/*2/**",
-	"org/openmdx/application/*/**",
-	"org/openmdx/base/*/**",
-	"org/openmdx/dalvik/uses/*/**",
-	"org/openmdx/exception/*/**",
-	"org/openmdx/kernel/*/**",
-	"org/openmdx/jdo/*/**",
-	"org/openmdx/uses/gnu/*/**",
-	"org/openmdx/uses/java/**",
-	"org/openmdx/uses/org/apache/commons/collections/*/**",
-	"org/openmdx/uses/org/apache/commons/fileupload/*/**",
-	"org/openmdx/uses/org/apache/commons/io/*/**",
-	"org/openmdx/uses/org/apache/commons/pool/*/**",
-	"org/openmdx/uses/org/apache/commons/pool2/*/**",
-	"org/un/*/UnPackage*",
-	"org/w3c/*/**",
-	"org/xmi/*",
-	"META-INF/orm.xml",
-	"META-INF/openmdx*.properties"
-)
-val openmdxBaseExcludes = listOf<String>(
-	"org/openmdx/compatibility/kernel/url/protocol/*/**",
-	"org/openmdx/kernel/url/protocol/*/**"
-)
-val openmdxSystemIncludes = listOf<String>(
-	"org/openmdx/compatibility/kernel/url/protocol/*/**",
-	"org/openmdx/kernel/logging/*/**",
-	"org/openmdx/kernel/url/protocol/*/**",
-	"org/openmdx/kernel/xri/*",
-	"org/openmdx/system/*/**"
-)
-val openmdxSystemExcludes = listOf<String>(
-)
-
 tasks {
+
+	val openmdxBaseIncludes = listOf(
+		"javax/cache/*/**",
+		"javax/jdo/*/**",
+		"javax/jmi/*/**",
+		"net/*/NetPackage*",
+		"net/rfc/*/RfcPackage*",
+		"org/*/OrgPackage*",
+		"org/ietf/*/IetfPackage*",
+		"org/iso/*/IsoPackage*",
+		"org/oasisopen/*/**",
+		"org/omg/*/**",
+		"org/openmdx/*/OpenmdxPackage*",
+		"org/openmdx/*1/**",
+		"org/openmdx/*2/**",
+		"org/openmdx/application/*/**",
+		"org/openmdx/base/*/**",
+		"org/openmdx/dalvik/uses/*/**",
+		"org/openmdx/exception/*/**",
+		"org/openmdx/kernel/*/**",
+		"org/openmdx/jdo/*/**",
+		"org/openmdx/uses/gnu/*/**",
+		"org/openmdx/uses/java/**",
+		"org/openmdx/uses/org/apache/commons/collections/*/**",
+		"org/openmdx/uses/org/apache/commons/fileupload/*/**",
+		"org/openmdx/uses/org/apache/commons/io/*/**",
+		"org/openmdx/uses/org/apache/commons/pool/*/**",
+		"org/openmdx/uses/org/apache/commons/pool2/*/**",
+		"org/un/*/UnPackage*",
+		"org/w3c/*/**",
+		"org/xmi/*",
+		"META-INF/orm.xml",
+		"META-INF/openmdx*.properties"
+	)
+	val openmdxBaseExcludes = listOf(
+		"org/openmdx/compatibility/kernel/url/protocol/*/**",
+		"org/openmdx/kernel/url/protocol/*/**"
+	)
+	val openmdxSystemIncludes = listOf(
+		"org/openmdx/compatibility/kernel/url/protocol/*/**",
+		"org/openmdx/kernel/logging/*/**",
+		"org/openmdx/kernel/url/protocol/*/**",
+		"org/openmdx/kernel/xri/*",
+		"org/openmdx/system/*/**"
+	)
+	val openmdxSystemExcludes = listOf<String>( )
+
+	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
 	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 	    inputs.dir("${projectDir}/src/model/emf")
 	    inputs.dir("${projectDir}/src/main/resources")
