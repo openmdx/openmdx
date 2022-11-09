@@ -7,3 +7,4 @@ opt/xstream/
 build
 .gradle/
 /.project
+/bin/

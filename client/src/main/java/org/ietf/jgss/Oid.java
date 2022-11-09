@@ -7,9 +7,9 @@ package org.ietf.jgss;
 
 import java.io.InputStream;
 import java.io.IOException;
-import sun.security.util.DerValue;
-import sun.security.util.DerOutputStream;
-import sun.security.util.ObjectIdentifier;
+import org.openmdx.dalvik.uses.sun.security.util.DerValue;
+import org.openmdx.dalvik.uses.sun.security.util.DerOutputStream;
+import org.openmdx.dalvik.uses.sun.security.util.ObjectIdentifier;
 
 /** 
  * This class represents Universal Object Identifiers (Oids) and their
