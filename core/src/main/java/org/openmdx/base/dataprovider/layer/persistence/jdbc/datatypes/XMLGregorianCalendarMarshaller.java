@@ -49,6 +49,8 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -463,6 +465,28 @@ public class XMLGregorianCalendarMarshaller {
                     break;
                 case MICROSECONDS:
                     target.setFractionalSecond(BigDecimal.valueOf(value.getNanos() / 1000, 6));
+                    break;
+                case SECONDS:
+                    target.setFractionalSecond(BigDecimal.ZERO);
+                    break;
+                default:
+                    break;
+            }
+            return target;
+        } else if(source instanceof java.time.LocalDateTime) {
+        	java.time.LocalDateTime value = (java.time.LocalDateTime)source;
+            java.util.GregorianCalendar calendar = GregorianCalendar.from(ZonedDateTime.of(value, ZoneOffset.UTC));
+            XMLGregorianCalendar target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
+            switch(this.dateTimePrecision) {
+                case NANOSECONDS:
+                    //
+                    // Be aware JAXP 1.4.0 issue:
+                    // we get E notation of BigDecimal if (-scale + coeff.length-1) < -6
+                    //
+                    target.setFractionalSecond(BigDecimal.valueOf(value.getNano(), 9));
+                    break;
+                case MICROSECONDS:
+                    target.setFractionalSecond(BigDecimal.valueOf(value.getNano() / 1000, 6));
                     break;
                 case SECONDS:
                     target.setFractionalSecond(BigDecimal.ZERO);

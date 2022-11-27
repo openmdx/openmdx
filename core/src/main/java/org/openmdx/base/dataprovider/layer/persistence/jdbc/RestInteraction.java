@@ -331,7 +331,15 @@ public class RestInteraction extends AbstractRestInteraction {
                     // Query extension clause
                     if (p.name().endsWith(Database_1_Attributes.QUERY_EXTENSION_CLAUSE)) {
                         String clause = (String) p.getValue(0);
-                        countResultSet |= clause.indexOf(Database_1_Attributes.HINT_COUNT) >= 0;
+                        {
+                            // !COUNT
+                            countResultSet |= clause.indexOf(Database_1_Attributes.HINT_COUNT) >= 0;
+                            int start = clause.indexOf(Database_1_Attributes.HINT_COUNT);
+                            if(start >= 0) {
+                                int end = clause.indexOf("*/", start);
+                                clause = clause.substring(0, start) + clause.substring(end + 2);
+                            }
+                        }
                         {
                             // !COLUMNS
                             int start = clause.indexOf(Database_1_Attributes.HINT_COLUMN_SELECTOR);
@@ -344,8 +352,8 @@ public class RestInteraction extends AbstractRestInteraction {
                                     clause.substring(end + 2);
                             }
                         }
-                        // !ORDER BY
                         {
+                            // !ORDER BY
                             int start = clause.indexOf(Database_1_Attributes.HINT_ORDER_BY);
                             if (start >= 0) {
                                 int end = clause.indexOf("*/", start);
