@@ -51,12 +51,6 @@ import javax.naming.Name;
 import javax.naming.NamingException;
 import javax.naming.NoInitialContextException;
 import javax.naming.spi.ObjectFactory;
-import javax.transaction.TransactionManager;
-
-import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.exception.Throwables;
-import org.openmdx.kernel.lightweight.transaction.LightweightTransactionManager;
-import org.openmdx.kernel.naming.ComponentEnvironment;
 
 /**
  * jdbc URL Context Factory supoporting the following two formats:<ul>
@@ -87,11 +81,11 @@ public class jdbcURLContextFactory implements ObjectFactory {
             object = urls[0]; // Just take the first of the equivalent URLs
         }
         if(object == null){
-            return getDataSourceContext();
+            return dataSourceContext;
         } else if(object instanceof String){
             String url = (String) object;
             if(url.startsWith("jdbc:")) {
-                return getDataSourceContext().lookup(url);
+                return dataSourceContext.lookup(url);
             } else throw new NoInitialContextException(
                 "jdbc URL scheme expected: " + url
             );            
@@ -100,38 +94,11 @@ public class jdbcURLContextFactory implements ObjectFactory {
         );
     }
 
-    private static synchronized Context getDataSourceContext(
-    ) throws NamingException {
-        if(dataSourceContext == null) {
-            final TransactionManager transactionManager = getTransactionManager();
-            try {
-            	dataSourceContext = transactionManager instanceof LightweightTransactionManager ?
-	                new LightweightDataSourceContext(transactionManager) :
-	                new XADataSourceContext();
-            } catch (RuntimeException exception) {
-    			throw Throwables.initCause(
-					new NoInitialContextException("DataSource context acquisition failure"),
-					exception,
-					BasicException.Code.DEFAULT_DOMAIN,
-					BasicException.Code.INITIALIZATION_FAILURE
-				);
-            }
-        } 
-        return dataSourceContext;
+    static void setDataSourceContext(
+    	Context initialContextFactorySpecificDataSourceContext	
+    ){
+    	dataSourceContext = initialContextFactorySpecificDataSourceContext; 
     }
-
-	private static TransactionManager getTransactionManager() throws NamingException {
-		try {
-			return ComponentEnvironment.lookup(TransactionManager.class);
-		} catch (BasicException exception) {
-			throw Throwables.initCause(
-				new NoInitialContextException("TransactionManager acquisition failure"),
-				exception,
-				BasicException.Code.DEFAULT_DOMAIN,
-				BasicException.Code.INITIALIZATION_FAILURE
-			);
-		}
-	}
-
+    
 }
 

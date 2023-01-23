@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Lightweight User Transaction
+ * Description: Atomikos User Transaction
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -49,57 +49,48 @@ import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
-import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
 /**
  * User Transaction Implementation
  * <p>
- * The lightweight user transaction is a thread-safe proxy.
- * 
- * @deprecated in favour of Atomikos' transaction manager
+ * Note:<br>
+ * This is just a workaround as Atomikos does not provide a native
+ * {@code TransactionSynchronizationRegistr}. Especially the interposed 
+ * synchronization is somehow supported but not properly integrated.   
  */
-@Deprecated
-public class LightweightUserTransaction implements UserTransaction {
+public class AtomikosUserTransaction implements UserTransaction {
 
 	/**
      * Constructor
      * 
-	 * @param transactionManager 
+	 * @param transactionManager Atomikos' UserTransaction
+	 * @param transactionSynchronizationRegistry openMDX' TransactionSynchronizationRegistry workaround
 	 */
-	private LightweightUserTransaction(
-        TransactionManager transactionManager
+	public AtomikosUserTransaction(
+        UserTransaction delegate,
+        AtomikosTransactionSynchronizationRegistry transactionSynchronizationRegistry
     ){
-        this.transactionManager = transactionManager;
+        this.delegate = delegate;
+        this.transactionSynchronizationRegistry = transactionSynchronizationRegistry;
 	}
     
     /**
-     * The transaction manager to delegate to.
+     * The user transaction to delegate to.
      */
-    private final TransactionManager transactionManager;    
+    private final UserTransaction delegate;    
 
     /**
-     * A lightweight user transaction instance may be shared
+     * The user transaction to delegate to.
      */
-    private static UserTransaction instance;
+    private final AtomikosTransactionSynchronizationRegistry transactionSynchronizationRegistry;    
     
-    /**
-     * A lightweight user transaction instance may be shared
-     *
-     * @return Returns a lightweight user transaction instance
-     */
-    public static UserTransaction getInstance() {
-        if(LightweightUserTransaction.instance == null) {
-            LightweightUserTransaction.instance = new LightweightUserTransaction(LightweightTransactionManager.getInstance());
-        }
-        return LightweightUserTransaction.instance;
-    }
-
     /* (non-Javadoc)
 	 * @see javax.transaction.UserTransaction#begin()
 	 */
 	public void begin() throws NotSupportedException, SystemException {
-        this.transactionManager.begin();
+        this.delegate.begin();
+		transactionSynchronizationRegistry.enlist();
 	}
 
 	/* (non-Javadoc)
@@ -110,7 +101,7 @@ public class LightweightUserTransaction implements UserTransaction {
 			HeuristicRollbackException, SecurityException,
 			IllegalStateException, SystemException 
 	{
-        this.transactionManager.commit();
+        this.delegate.commit();
 	}
 
 	/* (non-Javadoc)
@@ -118,28 +109,28 @@ public class LightweightUserTransaction implements UserTransaction {
 	 */
 	public void rollback(
 	) throws IllegalStateException, SecurityException, SystemException {
-        this.transactionManager.rollback();
+        this.delegate.rollback();
 	}
 
 	/* (non-Javadoc)
 	 * @see javax.transaction.UserTransaction#setRollbackOnly()
 	 */
 	public void setRollbackOnly() throws IllegalStateException, SystemException {
-        this.transactionManager.setRollbackOnly();
+        this.delegate.setRollbackOnly();
 	}
 
 	/* (non-Javadoc)
 	 * @see javax.transaction.UserTransaction#getStatus()
 	 */
 	public int getStatus() throws SystemException {
-        return this.transactionManager.getStatus();
+        return this.delegate.getStatus();
 	}
 
 	/* (non-Javadoc)
 	 * @see javax.transaction.UserTransaction#setTransactionTimeout(int)
 	 */
 	public void setTransactionTimeout(int timeout) throws SystemException {
-        this.transactionManager.setTransactionTimeout(timeout);
+        this.delegate.setTransactionTimeout(timeout);
 	}
 
 }

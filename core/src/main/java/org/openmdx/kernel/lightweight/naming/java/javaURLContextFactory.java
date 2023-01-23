@@ -62,6 +62,27 @@ import org.openmdx.kernel.lightweight.naming.spi.HashMapContext;
  */
 public class javaURLContextFactory implements ObjectFactory {
     
+	/**
+	 * The {©ode java} JNDI context prefix
+	 */
+	private static final String JAVA_CONTEXT_PREFIX = "java:";
+	
+	/**
+	 * The {©ode java:comp} JNDI context
+	 */
+	private static final String JAVA_COMP_CONTEXT = JAVA_CONTEXT_PREFIX + "comp";
+	
+	/**
+	 * Properties with this prefix define entries in the 
+	 * {@code java:comp
+	 */
+    private static final String JAVA_COMP_PROPERTY_PREFIX = "org.openmdx.comp.";
+
+    /**
+     * The initial java: context
+     */
+    private final static Context javaContext = new HashMapContext(null, null, "");
+
    /**
     * Creates an object using the location or reference information
     * specified.  
@@ -99,7 +120,7 @@ public class javaURLContextFactory implements ObjectFactory {
             return javaContext;
         } else if(object instanceof String){
             String url = (String) object;
-            if(!url.startsWith("java:")) throw new NoInitialContextException(
+            if(!url.startsWith(JAVA_CONTEXT_PREFIX)) throw new NoInitialContextException(
                 "'java' URL scheme expected: " + url
             );
             return javaContext.lookup(url);
@@ -120,9 +141,9 @@ public class javaURLContextFactory implements ObjectFactory {
     private static Context getComponentContext(
     ) throws NamingException {
         try {
-            return (Context) javaContext.lookup("java:comp");
+            return (Context) javaContext.lookup(JAVA_COMP_CONTEXT);
         } catch (NameNotFoundException exception) {
-            return javaContext.createSubcontext("java:comp");
+            return javaContext.createSubcontext(JAVA_COMP_CONTEXT);
         }
     }
     
@@ -142,7 +163,7 @@ public class javaURLContextFactory implements ObjectFactory {
                 Object key = e.getKey();
                 if(key instanceof String) {
                     String name = (String) key;
-                    if(name.startsWith("org.openmdx.comp.")) {
+                    if(name.startsWith(JAVA_COMP_PROPERTY_PREFIX)) {
                         String[] path = name.split("\\.");
                         Context context = compContext;
                         int t = path.length - 1;
@@ -177,10 +198,5 @@ public class javaURLContextFactory implements ObjectFactory {
             );
         }
     }
-
-    /**
-     * The initial java: context
-     */
-    private final static Context javaContext = new HashMapContext(null, null, "");
 
 }

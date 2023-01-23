@@ -74,11 +74,6 @@ public class TestRecord {
 	 */
 	private static boolean USE_RECORDS_AS_KEYS = Boolean.FALSE; // to avoid dead code warning
 
-	/**
-	 * TODO Sparse array support is such a use case!
-	 */
-	private static boolean USE_INTEGERS_AS_KEYS = Boolean.TRUE; // to avoid dead code warning
-
 	private static final String S4711 = "s4711";
 
 	@BeforeEach
@@ -122,9 +117,7 @@ public class TestRecord {
 		Assertions.assertEquals("c", r2m.get("C"), "r2.C");
 		Assertions.assertEquals( 2,  r2m.size(), "r2m.size()");
 		Assertions.assertTrue(map2.equals(r2m), "map2.equals(r2m)");
-		// TODO Auto-generated method stub
 		Assertions.assertFalse(r2m.equals(map2), "r2m.equals(map2)");
-		// TODO Auto-generated method stub
 		if (USE_RECORDS_AS_KEYS)
 			Assertions.assertEquals( map2.hashCode(),  r2m.hashCode(), "map2.hashCode()==r2m.hashCode()");
 
@@ -136,46 +129,44 @@ public class TestRecord {
 		String r2mds = r2md.toString();
 		Assertions.assertTrue(r2mds.equals("r2 (Record 2): {\n" + "\tA = \"a\"\n" + "\tC = \"c\"\n" + "}")
 						|| r2mds.equals("r2 (Record 2): {\n" + "\tC = \"c\"\n" + "\tA = \"a\"\n" + "}"), "r2md");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertTrue(map2.equals(r2md), "map2.equals(r2md)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertFalse(r2md.equals(map2), "r2md.equals(map2)");
-		// TODO Auto-generated method stub
+		
 		if (USE_RECORDS_AS_KEYS)
 			Assertions.assertEquals( map2.hashCode(),  r2md.hashCode(), "map2.hashCode()==r2md.hashCode()");
 		Assertions.assertTrue(r2md.equals(r2m), "r2md.equals(r2m)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertTrue(r2m.equals(r2md), "r2m.equals(r2md)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertEquals( r2md.hashCode(),  r2m.hashCode(), "r2md.hashCode()==r2m.hashCode()");
 
-		if (USE_INTEGERS_AS_KEYS) {
-			// Nested VariableSizeMappedRecords
-			Map<Integer, Map<String, String>> m23 = new TreeMap<Integer, Map<String, String>>();
-			m23.put(Integer.valueOf(2), r2md);
-			MappedRecord r3 = factory.createMappedRecord("r3");
-			r3.putAll(map3);
-			m23.put(Integer.valueOf(3), r3);
-			MappedRecord r23 = factory.createMappedRecord(SparseArrayRecord.NAME);
-			try {
-				r23.setRecordShortDescription("Nested Utilities");
-				Assertions.fail("UnsupportedOperationException expected");
-			} catch (UnsupportedOperationException expected) {
-				r23.putAll(m23);
-			}
-			Assertions.assertEquals("org.openmdx.base.resource.spi.SparseArrayRecord", r23.getClass().getName(), "r23");
-			Assertions.assertEquals("sparsearray: {\n" + "\t2 = r2 (Record 2): {\n" + "\t\tA = \"a\"\n" + "\t\tC = \"c\"\n" + "\t}\n"
-			+ "\t3 = r3: {\n" + "\t\tA = \"a\"\n" + "\t\tB = \"b\"\n" + "\t\tC = \"c\"\n" + "\t}\n"
-			+ "}", r23.toString(), "r23");
-			Assertions.assertTrue(map23.equals(r23), "map23.equals(r23)");
-			// TODO Auto-generated method stub
-			Assertions.assertFalse(r23.equals(map23), "r23.equals(map23)");
-			// TODO Auto-generated method stub
-			Assertions.assertTrue(m23.equals(r23), "m23.equals(r23)");
-			// TODO Auto-generated method stub
-			Assertions.assertFalse(r23.equals(m23), "r23.equals(m23)");
-			// TODO Auto-generated method stub
+		// Nested VariableSizeMappedRecords
+		Map<Integer, Map<String, String>> m23 = new TreeMap<Integer, Map<String, String>>();
+		m23.put(Integer.valueOf(2), r2md);
+		MappedRecord r3 = factory.createMappedRecord("r3");
+		r3.putAll(map3);
+		m23.put(Integer.valueOf(3), r3);
+		MappedRecord r23 = factory.createMappedRecord(SparseArrayRecord.NAME);
+		try {
+			r23.setRecordShortDescription("Nested Utilities");
+			Assertions.fail("UnsupportedOperationException expected");
+		} catch (UnsupportedOperationException expected) {
+			r23.putAll(m23);
 		}
+		Assertions.assertEquals("org.openmdx.base.resource.spi.SparseArrayRecord", r23.getClass().getName(), "r23");
+		Assertions.assertEquals("sparsearray: {\n" + "\t2 = r2 (Record 2): {\n" + "\t\tA = \"a\"\n" + "\t\tC = \"c\"\n" + "\t}\n"
+		+ "\t3 = r3: {\n" + "\t\tA = \"a\"\n" + "\t\tB = \"b\"\n" + "\t\tC = \"c\"\n" + "\t}\n"
+		+ "}", r23.toString(), "r23");
+		Assertions.assertTrue(map23.equals(r23), "map23.equals(r23)");
+		
+		Assertions.assertFalse(r23.equals(map23), "r23.equals(map23)");
+		
+		Assertions.assertTrue(m23.equals(r23), "m23.equals(r23)");
+		
+		Assertions.assertFalse(r23.equals(m23), "r23.equals(m23)");
+		
 	}
 
 	@Test
@@ -189,15 +180,15 @@ public class TestRecord {
 		String r2ms = r2m.toString();
 		Assertions.assertTrue(r2ms.equals("r2: {\n" + "\tA = \"a\"\n" + "\tC = \"c\"\n" + "}")
 						|| r2ms.equals("r2: {\n" + "\tC = \"c\"\n" + "\tA = \"a\"\n" + "}"), "r2m");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertEquals("a", r2m.get("A"), "r2.A");
 		Assertions.assertNull(r2m.get("B"), "r2.B");
 		Assertions.assertEquals("c", r2m.get("C"), "r2.C");
 		Assertions.assertEquals( 2,  r2m.size(), "r2m.size()");
 		Assertions.assertTrue(map2.equals(r2m), "map2.equals(r2m)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertFalse(r2m.equals(map2), "r2m.equals(map2)");
-		// TODO Auto-generated method stub
+		
 		if (USE_RECORDS_AS_KEYS)
 			Assertions.assertEquals( map2.hashCode(),  r2m.hashCode(), "map2.hashCode()==r2m.hashCode()");
 
@@ -209,40 +200,38 @@ public class TestRecord {
 		String r2mds = r2md.toString();
 		Assertions.assertTrue(r2mds.equals("r2 (Record 2): {\n" + "\tA = \"a\"\n" + "\tC = \"c\"\n" + "}")
 						|| r2mds.equals("r2 (Record 2): {\n" + "\tC = \"c\"\n" + "\tA = \"a\"\n" + "}"), "r2md");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertTrue(map2.equals(r2md), "map2.equals(r2md)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertFalse(r2md.equals(map2), "r2md.equals(map2)");
-		// TODO Auto-generated method stub
+		
 		if (USE_RECORDS_AS_KEYS)
 			Assertions.assertEquals( map2.hashCode(),  r2md.hashCode(), "map2.hashCode()==r2md.hashCode()");
 		Assertions.assertTrue(r2md.equals(r2m), "r2md.equals(r2m)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertTrue(r2m.equals(r2md), "r2m.equals(r2md)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertEquals( r2m.hashCode(),  r2md.hashCode(), "r2m.hashCode()==r2md.hashCode()");
 
-		if (USE_INTEGERS_AS_KEYS) {
-			// Nested VariableSizeMappedRecords
-			MappedRecord r23 = factory.createMappedRecord(SparseArrayRecord.NAME);
-			try {
-				r23.setRecordShortDescription("Nested Utilities");
-				Assertions.fail("UnsupportedOperationException expected");
-			} catch (UnsupportedOperationException expected) {
-				r23.put(createIntegerInstance(2), r2md);
-			}
-			MappedRecord r3 = factory.createMappedRecord("r3");
-			r3.putAll(map3);
-			r23.put(createIntegerInstance(3), r3);
-			Assertions.assertEquals("org.openmdx.base.resource.spi.SparseArrayRecord", r23.getClass().getName(), "r23");
-			Assertions.assertEquals("sparsearray: {\n" + "\t2 = r2 (Record 2): {\n" + "\t\tA = \"a\"\n" + "\t\tC = \"c\"\n" + "\t}\n"
-			+ "\t3 = r3: {\n" + "\t\tA = \"a\"\n" + "\t\tB = \"b\"\n" + "\t\tC = \"c\"\n" + "\t}\n"
-			+ "}", r23.toString(), "r23");
-			Assertions.assertTrue(map23.equals(r23), "map23.equals(r23)");
-			// TODO Auto-generated method stub
-			Assertions.assertFalse(r23.equals(map23), "r23.equals(map23)");
-			// TODO Auto-generated method stub
+		// Nested VariableSizeMappedRecords
+		MappedRecord r23 = factory.createMappedRecord(SparseArrayRecord.NAME);
+		try {
+			r23.setRecordShortDescription("Nested Utilities");
+			Assertions.fail("UnsupportedOperationException expected");
+		} catch (UnsupportedOperationException expected) {
+			r23.put(createIntegerInstance(2), r2md);
 		}
+		MappedRecord r3 = factory.createMappedRecord("r3");
+		r3.putAll(map3);
+		r23.put(createIntegerInstance(3), r3);
+		Assertions.assertEquals("org.openmdx.base.resource.spi.SparseArrayRecord", r23.getClass().getName(), "r23");
+		Assertions.assertEquals("sparsearray: {\n" + "\t2 = r2 (Record 2): {\n" + "\t\tA = \"a\"\n" + "\t\tC = \"c\"\n" + "\t}\n"
+		+ "\t3 = r3: {\n" + "\t\tA = \"a\"\n" + "\t\tB = \"b\"\n" + "\t\tC = \"c\"\n" + "\t}\n"
+		+ "}", r23.toString(), "r23");
+		Assertions.assertTrue(map23.equals(r23), "map23.equals(r23)");
+		
+		Assertions.assertFalse(r23.equals(map23), "r23.equals(map23)");
+		
 	}
 
 	@Test
@@ -258,10 +247,10 @@ public class TestRecord {
 		Assertions.assertEquals("c", r2i.get(1), "r2i[1]");
 		Assertions.assertEquals( 2,  r2i.size(), "r2i.size()");
 		Assertions.assertTrue(list2.equals(r2i), "list2.equals(r2i)");
-		// TODO Auto-generated method stub
+		
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r2i.equals(list2), "r2i.equals(list2)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list2.hashCode(),  r2i.hashCode(), "list2.hashCode()==r2i.hashCode()");
 
@@ -272,16 +261,16 @@ public class TestRecord {
 		Assertions.assertEquals("org.openmdx.base.resource.spi.VariableSizeIndexedRecord", r2id.getClass().getName(), "r2id");
 		Assertions.assertEquals("r2 (Record 2): [\n" + "\t0: \"a\"\n" + "\t1: \"c\"\n" + "]", r2id.toString(), "r2id");
 		Assertions.assertTrue(list2.equals(r2id), "list2.equals(r2id)");
-		// TODO Auto-generated method stub
+		
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r2id.equals(list2), "r2id.equals(list2)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list2.hashCode(),  r2id.hashCode(), "list2.hashCode()==r2id.hashCode()");
 		Assertions.assertTrue(r2id.equals(r2i), "r2id.equals(r2i)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertTrue(r2i.equals(r2id), "r2i.equals(r2id)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertEquals( r2id.hashCode(),  r2i.hashCode(), "r2id.hashCode()==r2i.hashCode()");
 
 		// VariableSizeIndexedRecord with description
@@ -297,19 +286,19 @@ public class TestRecord {
 		+ "\t]\n" + "\t1: r3: [\n" + "\t\t0: \"a\"\n" + "\t\t1: \"b\"\n" + "\t\t2: \"c\"\n" + "\t]\n"
 		+ "]", r23.toString(), "r23");
 		Assertions.assertTrue(list23.equals(r23), "list23.equals(r23)");
-		// TODO Auto-generated method stub
+		
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r23.equals(list23), "r23.equals(list23)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
 		Assertions.assertTrue(l23.equals(r23), "l23.equals(r23)");
-		// TODO Auto-generated method stub
+		
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r23.equals(l23), "r23.equals(l23)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( l23.hashCode(),  r23.hashCode(), "l23.hashCode()==r23.hashCode()");
 	}
@@ -328,10 +317,10 @@ public class TestRecord {
 		Assertions.assertEquals( 2,  r2i.size(), "r2i.size()");
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(list2.equals(r2i), "list2.equals(r2i)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r2i.equals(list2), "r2i.equals(list2)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list2.hashCode(),  r2i.hashCode(), "list2.hashCode()==r2i.hashCode()");
 
@@ -342,16 +331,16 @@ public class TestRecord {
 		Assertions.assertEquals("org.openmdx.base.resource.spi.VariableSizeIndexedRecord", r2id.getClass().getName(), "r2id");
 		Assertions.assertEquals("r2 (Record 2): [\n" + "\t0: \"a\"\n" + "\t1: \"c\"\n" + "]", r2id.toString(), "r2id");
 		Assertions.assertTrue(list2.equals(r2id), "list2.equals(r2id)");
-		// TODO Auto-generated method stub
+		
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r2id.equals(list2), "r2id.equals(list2)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list2.hashCode(),  r2id.hashCode(), "list2.hashCode()==r2id.hashCode()");
 		Assertions.assertTrue(r2id.equals(r2i), "r2id.equals(r2i)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertTrue(r2i.equals(r2id), "r2i.equals(r2id)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertEquals( r2id.hashCode(),  r2i.hashCode(), "r2id.hashCode()==r2i.hashCode()");
 
 		// Nested VariableSizeIndexedRecords
@@ -366,19 +355,19 @@ public class TestRecord {
 		+ "\t]\n" + "\t1: r3: [\n" + "\t\t0: \"a\"\n" + "\t\t1: \"b\"\n" + "\t\t2: \"c\"\n" + "\t]\n"
 		+ "]", r23.toString(), "r23");
 		Assertions.assertTrue(list23.equals(r23), "list23.equals(r23)");
-		// TODO Auto-generated method stub
+		
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r23.equals(list23), "r23.equals(list23)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
 		Assertions.assertTrue(l23.equals(r23), "l23.equals(r23)");
-		// TODO Auto-generated method stub
+		
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r23.equals(l23), "r23.equals(l23)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( l23.hashCode(),  r23.hashCode(), "l23.hashCode()==r23.hashCode()");
 	}
@@ -393,15 +382,15 @@ public class TestRecord {
 		Object a2i = Records.nDimensionalArray(r2i);
 		Assertions.assertEquals("[Ljava.lang.String;", a2i.getClass().getName(), "a2i");
 		Assertions.assertTrue(Arrays.equals(array2, (Object[]) a2i), "Arrays.equals(array2,a2i)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertEquals("a", r2i.get(0), "r2i[0]");
 		Assertions.assertEquals("c", r2i.get(1), "r2i[1]");
 		Assertions.assertEquals( 2,  r2i.size(), "r2i.size()");
 		Assertions.assertTrue(list2.equals(r2i), "list.equals(r2i)");
-		// TODO Auto-generated method stub
+		
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r2i.equals(list2), "r2i.equals(list2)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list2.hashCode(),  r2i.hashCode(), "list2.hashCode()==r2i.hashCode()");
 
@@ -411,19 +400,19 @@ public class TestRecord {
 		Object a2id = Records.nDimensionalArray(r2id);
 		Assertions.assertEquals("[Ljava.lang.String;", a2id.getClass().getName(), "a2id");
 		Assertions.assertTrue(Arrays.equals(array2, (Object[]) a2id), "Arrays.equals(array2,a2id)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertEquals("r2 (Record 2): [\n" + "\t0: \"a\"\n" + "\t1: \"c\"\n" + "]", r2id.toString(), "r2id");
 		Assertions.assertTrue(list2.equals(r2id), "list2.equals(r2id)");
-		// TODO Auto-generated method stub
+		
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r2id.equals(list2), "r2id.equals(list2)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list2.hashCode(),  r2id.hashCode(), "list2.hashCode()==r2id.hashCode()");
 		Assertions.assertTrue(r2id.equals(r2i), "r2id.equals(r2i)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertTrue(r2i.equals(r2id), "r2i.equals(r2id)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertEquals( r2id.hashCode(),  r2i.hashCode(), "r2id.hashCode()==r2i.hashCode()");
 
 		// Nested FixedSizeIndexedRecords
@@ -435,16 +424,16 @@ public class TestRecord {
 		Assertions.assertEquals( array23.length,  ((Object[]) a23).length, "array23.length==r23.length");
 		for (int i = 0; i < array23.length; i++) {
 			Assertions.assertTrue(Arrays.equals(array23[i], ((Object[][]) a23)[i]), "Arrays.equals(array23[" + i + "],a23[" + i + "])");
-			// TODO Auto-generated method stub
+			
 		}
 		Assertions.assertEquals("r23 (Nested Utilities): [\n" + "\t0: r2 (Record 2): [\n" + "\t\t0: \"a\"\n" + "\t\t1: \"c\"\n"
 		+ "\t]\n" + "\t1: r3: [\n" + "\t\t0: \"a\"\n" + "\t\t1: \"b\"\n" + "\t\t2: \"c\"\n" + "\t]\n"
 		+ "]", r23.toString(), "r23");
 		Assertions.assertTrue(list23.equals(r23), "list23.equals(r23)");
-		// TODO Auto-generated method stub
+		
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r23.equals(list23), "r23.equals(list23)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
 	}
@@ -459,13 +448,13 @@ public class TestRecord {
 		Object a0i = Records.nDimensionalArray(r0i);
 		Assertions.assertEquals("[Ljava.lang.Integer;", a0i.getClass().getName(), "a01");
 		Assertions.assertTrue(Arrays.equals(array0, (Integer[]) a0i), "Arrays.equals(array0,a0i)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertEquals( 0,  r0i.size(), "r0i.size()");
 		Assertions.assertTrue(list0.equals(r0i), "list0.equals(r0i)");
-		// TODO Auto-generated method stub
+		
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r0i.equals(list0), "r0i.equals(list0)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list0.hashCode(),  r0i.hashCode(), "list0.hashCode()==r0i.hashCode()");
 
@@ -475,13 +464,13 @@ public class TestRecord {
 		Object a1id = Records.nDimensionalArray(r1id);
 		Assertions.assertEquals("[Ljava.lang.Integer;", a1id.getClass().getName(), "a1id");
 		Assertions.assertTrue(Arrays.equals(array1, (Integer[]) a1id), "Arrays.equals(array1,a1id)");
-		// TODO Auto-generated method stub
+		
 		Assertions.assertEquals("r1 (Record 1): [\n" + "\t0: 99\n" + "]", r1id.toString(), "r1id");
 		Assertions.assertTrue(list1.equals(r1id), "list1.equals(r1id)");
-		// TODO Auto-generated method stub
+		
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r1id.equals(list1), "r1id.equals(list1)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list1.hashCode(),  r1id.hashCode(), "list1.hashCode()==r1id.hashCode()");
 
@@ -493,15 +482,15 @@ public class TestRecord {
 		Assertions.assertEquals( array01.length,  ((Object[]) a01).length, "array01.length==r01.length");
 		for (int i = 0; i < array01.length; i++) {
 			Assertions.assertTrue(Arrays.equals(array01[i], ((Integer[][]) a01)[i]), "Arrays.equals(array01[" + i + "],a01[" + i + "])");
-			// TODO Auto-generated method stub
+			
 		}
 		Assertions.assertEquals("r01 (Nested Utilities): [\n" + "\t0: r0: []\n" + "\t1: r1 (Record 1): [\n" + "\t\t0: 99\n"
 		+ "\t]\n" + "]", r01.toString(), "r01");
 		Assertions.assertTrue(list01.equals(r01), "list01.equals(r01)");
-		// TODO Auto-generated method stub
+		
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertTrue(r01.equals(list01), "r01.equals(list01)");
-			// TODO Auto-generated method stub
+			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list01.hashCode(),  r01.hashCode(), "list01.hashCode()==r01.hashCode()");
 	}

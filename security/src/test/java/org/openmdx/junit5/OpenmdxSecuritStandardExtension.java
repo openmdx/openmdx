@@ -45,15 +45,13 @@
  */
 package org.openmdx.junit5;
 
-import java.util.Collections;
+import java.io.IOException;
 import java.util.Properties;
 
 import javax.naming.NamingException;
-import javax.naming.spi.NamingManager;
-
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
+import org.openmdx.kernel.lightweight.naming.LightweightInitialContextFactoryBuilder;
 
 /**
  * JUnit 5 Standard Extension for openMDX/Core
@@ -62,24 +60,17 @@ public class OpenmdxSecuritStandardExtension implements BeforeAllCallback {
 
 	@Override
 	public void beforeAll(ExtensionContext context) throws Exception {
-		if (!NamingManager.hasInitialContextFactoryBuilder()) {
-			final Properties buildProperties = BuildProperties.getBuildProperties();
-			configureURLs();
-			configureTimezone(buildProperties);
-			configureJNDI(buildProperties);
-		}
+		configureTimezone();
+		configureLightweightContainer();
 	}
 
-	private void configureJNDI(final Properties buildProperties) throws NamingException {
-		NonManagedInitialContextFactoryBuilder.install(Collections.emptyMap());
+	private void configureLightweightContainer() throws NamingException {
+		LightweightInitialContextFactoryBuilder.install();
 	}
 
-	private void configureTimezone(final Properties buildProperties) {
+	private void configureTimezone() throws IOException {
+		final Properties buildProperties = BuildProperties.getBuildProperties();
 		System.setProperty("user.timezone", buildProperties.getProperty(BuildProperties.TIMEZONE_KEY));
-	}
-
-	private void configureURLs() {
-		System.setProperty("java.protocol.handler.pkgs", "org.openmdx.kernel.url.protocol");
 	}
 
 }

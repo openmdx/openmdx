@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: DataSource Context 
+ * Description: Connector Context 
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -58,7 +58,7 @@ import org.openmdx.kernel.loading.Factory;
 
 
 /**
- * DataSource Context
+ * Connector Context
  */
 class ConnectorContext extends ResourceContext {
 
@@ -120,5 +120,5 @@ class ConnectorContext extends ResourceContext {
         );
         return managedConnectionFactoryBuilder.instantiate();
     }
-    
+
 }

@@ -372,7 +372,7 @@ public class Database_2
      * @return
      * @throws ServiceException
      */
-    protected Marshaller getDurationMarshaller()
+    protected DurationMarshaller getDurationMarshaller()
         throws ServiceException {
         if (this.durationMarshaller == null) {
             this.durationMarshaller = DurationMarshaller.newInstance(this.durationType);
@@ -3342,7 +3342,7 @@ public class Database_2
                 ps.setString(position, sqlValue.toString());
             }
         } else if(normalizedValue instanceof Duration) {
-            Object sqlValue = this.getDurationMarshaller().marshal(normalizedValue);
+            Object sqlValue = this.getDurationMarshaller().marshal(normalizedValue, getDatabaseProductName(conn));
             if (sqlValue instanceof BigDecimal) {
                 ps.setBigDecimal(position, (BigDecimal) sqlValue);
             } else if (sqlValue instanceof BigInteger) {
@@ -7235,6 +7235,31 @@ public class Database_2
     }
 
     /**
+     * Retrieves the configured duration type
+     * 
+     * @param connection the database connection
+     * 
+     * @return the duration type to be used
+     * 
+     * @throws ServiceException
+     *             if meta data retrieval fails
+	 * 
+	 * Note:<br>
+	 * <em>Will be used after the resolution if issue #58, only!</em>
+     */
+    public String getDurationType(Connection connection)
+        throws ServiceException {
+        return LayerConfigurationEntries.DURATION_TYPE_STANDARD
+            .equals(this.durationType)
+                ? getDriverProperty(
+                    connection,
+                    "DURATION.TYPE.STANDARD",
+                    LayerConfigurationEntries.DURATION_TYPE_CHARACTER
+                )
+                : this.durationType;
+    }
+    
+    /**
      * Retrieves the configured boolean type
      * 
      * @param connection
@@ -7414,7 +7439,7 @@ public class Database_2
     protected static final int ROUND_UP_TO_MAX_SCALE = 15;
 
     protected BooleanMarshaller booleanMarshaller;
-    protected Marshaller durationMarshaller;
+    protected DurationMarshaller durationMarshaller;
     protected XMLGregorianCalendarMarshaller calendarMarshaller;
     protected String booleanType = LayerConfigurationEntries.BOOLEAN_TYPE_CHARACTER;
     protected String booleanFalse = null;

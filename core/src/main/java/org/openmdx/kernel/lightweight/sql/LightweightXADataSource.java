@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Lightweight XADataSource
+ * Description: Lightweight XA Data Source
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -63,8 +63,11 @@ import org.openmdx.uses.org.apache.commons.pool2.ObjectPool;
 import org.openmdx.uses.org.apache.commons.pool2.impl.GenericObjectPool;
 
 /**
- * Lightweight XADataSource
+ * Lightweight XA Data Source
+ * 
+ * @deprecated in favour of Atomikos' JDBC support
  */
+@Deprecated
 final public class LightweightXADataSource
     implements XADataSource 
 {

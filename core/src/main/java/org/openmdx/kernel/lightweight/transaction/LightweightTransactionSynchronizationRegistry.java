@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Lightweight Transaction Manager Registry
+ * Description: Lightweight Transaction Synchronization Registry
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -53,7 +53,10 @@ import javax.transaction.TransactionSynchronizationRegistry;
  * Lightweight Transaction Synchronization Registry
  * <p>
  * The transaction synchronization registry is a thread-safe proxy.
+ * 
+ * @deprecated in favour of Atomikos' transaction manager
  */
+@Deprecated
 public final class LightweightTransactionSynchronizationRegistry 
     implements TransactionSynchronizationRegistry
 {

@@ -51,7 +51,10 @@ import javax.sql.PooledConnection;
 
 /**
  * Validatable Pooled Connection
+ * 
+ * @deprecated in favour of Atomikos' JDBC support
  */
+@Deprecated
 public interface ValidatablePooledConnection extends PooledConnection {
 
 	/**

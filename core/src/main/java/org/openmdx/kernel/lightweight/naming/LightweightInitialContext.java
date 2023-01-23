@@ -54,16 +54,19 @@ import javax.naming.spi.NamingManager;
 import org.openmdx.kernel.lightweight.naming.spi.HashMapContext;
 
 /**
- * NonManagedInitialContext
+ * Lightweight Initial Context
+ * <p>
+ * Note:<b>
+ * This class must not be used in a managed environment!
  */
-class NonManagedInitialContext extends HashMapContext {
+class LightweightInitialContext extends HashMapContext {
 
     /**
      * Constructor 
      *
      * @param environment
      */
-    NonManagedInitialContext(
+    LightweightInitialContext(
         Map<?, ?> environment
     ) {
         super(environment, null, "");

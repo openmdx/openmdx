@@ -208,7 +208,8 @@ class NonRepairingNamespaceContext implements NamespaceContext {
         return mappedPrefixes.iterator();
     }
     
-    private Iterator<String> getSecondaryPrefixes(
+    @SuppressWarnings("unchecked")
+	private Iterator<String> getSecondaryPrefixes(
         final String namespaceURI
     ){
     	return this.next.getPrefixes(namespaceURI);

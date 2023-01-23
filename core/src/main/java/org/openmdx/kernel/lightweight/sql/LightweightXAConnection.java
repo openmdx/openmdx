@@ -61,7 +61,10 @@ import org.openmdx.kernel.exception.Throwables;
 
 /**
  * Lightweight XAConnection
+ * 
+ * @deprecated in favour of Atomikos' JDBC support
  */
+@Deprecated
 public class LightweightXAConnection extends LightweightPooledConnection implements XAConnection {
 
 	/**

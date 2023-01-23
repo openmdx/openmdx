@@ -52,7 +52,10 @@ import org.openmdx.kernel.text.format.HexadecimalFormatter;
 
 /**
  * X/Open Transaction Identifier
+ * 
+ * @deprecated in favour of Atomikos' transaction manager
  */
+@Deprecated
 class TransactionId implements Xid {
 
     /**

@@ -66,8 +66,10 @@ import java.util.concurrent.Executor;
 import org.openmdx.kernel.log.SysLog;
 
 /**
- * Lightweight Connection
+ * 
+ * @deprecated in favour of Atomikos' JDBC support
  */
+@Deprecated
 class LightweightConnection implements Connection {
 
 	/**

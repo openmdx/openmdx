@@ -49,11 +49,10 @@ import java.util.Collections;
 import java.util.Properties;
 
 import javax.naming.NamingException;
-import javax.naming.spi.NamingManager;
 
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
+import org.openmdx.kernel.lightweight.naming.LightweightInitialContextFactoryBuilder;
 
 /**
  * JUnit 5 Standard Extension for openMDX/Test Core
@@ -61,26 +60,26 @@ import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuil
 public class OpenmdxTestCoreStandardExtension implements BeforeAllCallback {
 
 	public void beforeAll(ExtensionContext context) throws Exception {
-		if (!NamingManager.hasInitialContextFactoryBuilder()) {
+		if (!LightweightInitialContextFactoryBuilder.isInstalled()) {
 			final Properties buildProperties = BuildProperties.getBuildProperties();
-			configureURLs();
 		    configureTimezone(buildProperties);
-			configureJNDI(buildProperties);
+			configureLightweightContainer(buildProperties);
 		}
 	}
 
-	private void configureJNDI(final Properties buildProperties) throws NamingException {
-		NonManagedInitialContextFactoryBuilder.install(
-				Collections.singletonMap("org.openmdx.comp.env.jdbc.DataSource", buildProperties.getProperty(BuildProperties.DATASOURCE_KEY))
+	private void configureLightweightContainer(
+		final Properties buildProperties
+	) throws NamingException {
+		LightweightInitialContextFactoryBuilder.install(
+			Collections.singletonMap(
+				"org.openmdx.comp.env.jdbc.DataSource", 
+				buildProperties.getProperty(BuildProperties.DATASOURCE_KEY)
+			)
 		);
 	}
 
 	private void configureTimezone(final Properties buildProperties) {
 		System.setProperty("user.timezone",buildProperties.getProperty(BuildProperties.TIMEZONE_KEY));
-	}
-
-	private void configureURLs() {
-		System.setProperty("java.protocol.handler.pkgs","org.openmdx.kernel.url.protocol");
 	}
 
 }

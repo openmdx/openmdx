@@ -50,7 +50,10 @@ import org.openmdx.kernel.text.format.HexadecimalFormatter;
 
 /**
  *  X/Open Transaction Branch Identifier
+ * 
+ * @deprecated in favour of Atomikos' transaction manager
  */
+@Deprecated
 class TransactionBranchId extends TransactionId {
 
     /**

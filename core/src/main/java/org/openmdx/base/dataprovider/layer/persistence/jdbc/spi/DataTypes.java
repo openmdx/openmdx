@@ -50,7 +50,7 @@ import java.sql.Connection;
 import org.openmdx.base.exception.ServiceException;
 
 /**
- * Date Types 
+ * Data Types 
  */
 public interface DataTypes {
 
@@ -103,6 +103,19 @@ public interface DataTypes {
      * @throws ServiceException if meta data retrieval fails
      */
     String getBooleanType(
+        Connection connection
+    ) throws ServiceException;
+
+    /**
+     * Retrieves the configured duration type
+     * 
+     * @param connection
+     * 
+     * @return the duration type to be used
+     * 
+     * @throws ServiceException if meta data retrieval fails
+     */
+    String getDurationType(
         Connection connection
     ) throws ServiceException;
 

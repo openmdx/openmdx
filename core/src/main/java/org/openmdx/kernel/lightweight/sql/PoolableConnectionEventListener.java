@@ -52,7 +52,10 @@ import org.openmdx.uses.org.apache.commons.pool2.ObjectPool;
 
 /**
  * XA Connection Event Listener
+ * 
+ * @deprecated in favour of Atomikos' JDBC support
  */
+@Deprecated
 class PoolableConnectionEventListener implements ConnectionEventListener {
 
 	/**

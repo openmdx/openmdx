@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Bitronix Initial Context Factory
+ * Description: Atomikos Initial Context Factory
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -47,31 +47,33 @@ package org.openmdx.kernel.lightweight.naming;
 import javax.naming.NamingException;
 import javax.naming.NoInitialContextException;
 import javax.transaction.TransactionManager;
-import javax.transaction.TransactionSynchronizationRegistry;
 import javax.transaction.UserTransaction;
 
 import org.openmdx.kernel.lightweight.naming.jdbc.AbstractDataSourceContext;
-import org.openmdx.kernel.lightweight.naming.jdbc.BitronixDataSourceContext;
+import org.openmdx.kernel.lightweight.naming.jdbc.AtomikosDataSourceContext;
+import org.openmdx.kernel.lightweight.transaction.AtomikosTransactionSynchronizationRegistry;
+import org.openmdx.kernel.lightweight.transaction.AtomikosUserTransaction;
 import org.openmdx.kernel.loading.Classes;
 
 /**
- * Bitronix Initial Context Factory
+ * Atomikos Initial Context Factory
  */
-public class BitronixInitialContextFactory extends AbstractInitialContextFactory {
+public class AtomikosInitialContextFactory extends AbstractInitialContextFactory {
 
-    @Override
+	@Override
     protected LightweightInitialContext createInitialContext(
     ) throws NamingException {
         try {
             //
-            // Bitronix transaction manager set-up
+            // Atomikos transaction manager set-up
             //
-            Class<Object> transactionManagerServices = Classes.getApplicationClass("bitronix.tm.TransactionManagerServices");
-            Object transactionManagerConfiguration = transactionManagerServices.getMethod("getConfiguration").invoke(null);
-            transactionManagerConfiguration.getClass().getMethod("setWarnAboutZeroResourceTransaction", Boolean.TYPE).invoke(transactionManagerConfiguration, Boolean.FALSE);
-            TransactionManager transactionManager = (TransactionManager) transactionManagerServices.getMethod("getTransactionManager").invoke(null);
-            TransactionSynchronizationRegistry transactionSynchronizationRegistry = (TransactionSynchronizationRegistry) transactionManagerServices.getMethod("getTransactionSynchronizationRegistry").invoke(null);
-            UserTransaction userTransaction = (UserTransaction) transactionManager;
+            final Class<TransactionManager> transactionManagerClass = Classes.getApplicationClass("com.atomikos.icatch.jta.UserTransactionManager");
+            final TransactionManager transactionManager = transactionManagerClass.newInstance();
+            final AtomikosTransactionSynchronizationRegistry transactionSynchronizationRegistry = new AtomikosTransactionSynchronizationRegistry(transactionManager);
+            final UserTransaction userTransaction = new AtomikosUserTransaction(
+            	(UserTransaction) transactionManager,
+            	transactionSynchronizationRegistry
+            );
             //
             // Initial context setup
             //
@@ -84,7 +86,7 @@ public class BitronixInitialContextFactory extends AbstractInitialContextFactory
             throw exception;
         } catch (Exception exception) {
             throw (NoInitialContextException) new NoInitialContextException(
-                "Unable to set up the openMDX lightweight container with the Bitronix transaction manager"
+                "Unable to set up the openMDX lightweight container with the Atomikos transaction manager"
             ).initCause(
                 exception
             );
@@ -93,7 +95,7 @@ public class BitronixInitialContextFactory extends AbstractInitialContextFactory
 
 	@Override
 	protected AbstractDataSourceContext createDataSourceContext(){
-		return new BitronixDataSourceContext();
+		return new AtomikosDataSourceContext();
 	}
-	
+
 }

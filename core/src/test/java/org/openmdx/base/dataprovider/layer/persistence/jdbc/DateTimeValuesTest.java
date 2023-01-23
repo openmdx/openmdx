@@ -75,7 +75,8 @@ public class DateTimeValuesTest {
         object.setValue(Records.getRecordFactory().createMappedRecord("org:openmdx:base:dataprovider:layer:persistence:jdbc:TestData"));
     }
     
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void whenDateThenLeaveXMLGregorianCalendar() throws ResourceException{
         // Arrange
         final XMLGregorianCalendar today = DateStateViews.today();
@@ -98,7 +99,8 @@ public class DateTimeValuesTest {
         Assertions.assertTrue(object.getValue().get("now") instanceof Date);
     }
 
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void convertInListWhereNecessary() throws ResourceException{
         // Arrange
         final XMLGregorianCalendar today = DateStateViews.today();

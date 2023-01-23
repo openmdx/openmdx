@@ -50,7 +50,10 @@ import org.openmdx.kernel.id.spi.TimeBasedIdGenerator;
 
 /**
  * A Transaction Id Generator
+ * 
+ * @deprecated in favour of Atomikos' transaction manager
  */
+@Deprecated
 class TransactionIdFactory
     extends TimeBasedIdGenerator
 {

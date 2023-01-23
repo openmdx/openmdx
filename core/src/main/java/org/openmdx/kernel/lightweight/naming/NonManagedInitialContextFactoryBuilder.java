@@ -57,8 +57,13 @@ import org.openmdx.kernel.lightweight.naming.java.javaURLContextFactory;
 
 
 /**
- * Non-Managed Context Factory Builder 
+ * Non-Managed Initial Context Factory Builder 
+ * 
+ * @see LightweightInitialContextFactoryBuilder
+ * 
+ * @deprecated in favour of the {@code LightweightInitialContextFactoryBuilder}
  */
+@Deprecated
 public class NonManagedInitialContextFactoryBuilder implements InitialContextFactoryBuilder {
 
     /**

@@ -54,35 +54,72 @@ import javax.sql.DataSource;
 import javax.sql.XADataSource;
 import javax.transaction.TransactionManager;
 
+/**
+ * Lightweight Data Source
+ * 
+ * @deprecated in favour of Atomikos' JDBC support
+ */
+@Deprecated
 public class LightweightDataSource implements DataSource {
 	
-	public LightweightDataSource(
-		TransactionManager transactionManager,
-        String url
-	) {
-		this.xaDataSource = new LightweightXADataSource(transactionManager, url);
+	private TransactionManager transactionManager;
+    private String driverUrl;
+	private LightweightXADataSource xaDataSource;
+	private Integer loginTimeout;
+
+	private synchronized LightweightXADataSource getXaDataSource() throws SQLException {
+		if(this.xaDataSource == null) {
+			this.xaDataSource = new LightweightXADataSource(this.transactionManager, this.driverUrl);
+			if(this.loginTimeout != null) {
+				this.xaDataSource.setLoginTimeout(this.loginTimeout.intValue());
+				this.loginTimeout = null;
+			}
+		}
+		return this.xaDataSource;
+	}
+	
+	public TransactionManager getTransactionManager() {
+		return transactionManager;
 	}
 
-	private final LightweightXADataSource xaDataSource;
-	
+	public void setTransactionManager(TransactionManager transactionManager) {
+		this.transactionManager = transactionManager;
+	}
+
+	public String getDriverUrl() {
+		return driverUrl;
+	}
+
+	public void setDriverUrl(String url) {
+		this.driverUrl = url;
+	}
+
 	@Override
 	public PrintWriter getLogWriter() throws SQLException {
-		return xaDataSource.getLogWriter();
+		return getXaDataSource().getLogWriter();
 	}
 
 	@Override
 	public void setLogWriter(PrintWriter out) throws SQLException {
-		xaDataSource.setLogWriter(out);
+		getXaDataSource().setLogWriter(out);
 	}
 
 	@Override
 	public void setLoginTimeout(int seconds) throws SQLException {
-		xaDataSource.setLoginTimeout(seconds);
+		if(this.xaDataSource == null) {
+			this.loginTimeout = Integer.valueOf(seconds);
+		} else {
+			this.xaDataSource.setLoginTimeout(seconds);
+		}
 	}
 
 	@Override
 	public int getLoginTimeout() throws SQLException {
-		return xaDataSource.getLoginTimeout();
+		if(this.xaDataSource == null) {
+			return this.loginTimeout == null ? 0 : this.loginTimeout.intValue();
+		} else {
+			return this.xaDataSource.getLoginTimeout();
+		}
 	}
 
 	@Override
@@ -91,7 +128,7 @@ public class LightweightDataSource implements DataSource {
 			return iface.cast(this);	
 		}
 		if(iface.isAssignableFrom(XADataSource.class)){
-			return iface.cast(this.xaDataSource);	
+			return iface.cast(this.getXaDataSource());	
 		}
 		throw new SQLException(getClass().getName() + " is not a wrapper for " + iface.getName());
 	}
@@ -105,26 +142,21 @@ public class LightweightDataSource implements DataSource {
 
 	@Override
 	public Connection getConnection() throws SQLException {
-		return this.xaDataSource.getPooledConnection().getConnection();
+		return this.getXaDataSource().getPooledConnection().getConnection();
 	}
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		return this.xaDataSource.getXAConnection(username, password).getConnection();
+		return this.getXaDataSource().getXAConnection(username, password).getConnection();
 	}
-
 	
-	//------------------------------------------------------------------------
-	// Sonce JRE 7
-    //------------------------------------------------------------------------
-
 	/* (non-Javadoc)
      * @see javax.sql.CommonDataSource#getParentLogger()
      */
-//  @Override
-    public Logger getParentLogger()
-        throws SQLFeatureNotSupportedException {
-        throw new SQLFeatureNotSupportedException("JRE 7 feature not yet supported");
+    @Override
+    public Logger getParentLogger(
+    ) throws SQLFeatureNotSupportedException {
+		throw new SQLFeatureNotSupportedException("JRE 7 features not yet supported");
     }
 
 }

@@ -56,7 +56,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
+import org.openmdx.kernel.lightweight.naming.LightweightInitialContextFactoryBuilder;
 import org.openmdx.resource.cci.ConnectionFactory;
 import org.openmdx.uses.net.sourceforge.jradiusclient.RadiusConnection;
 import org.openmdx.uses.net.sourceforge.jradiusclient.RadiusPacket;
@@ -70,9 +70,6 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.packets.PapAccessRequest;
 @Disabled("RADIUS server is usually not running")
 public class RADIUSConnectorTest {
 
-	/**
-	 * 
-	 */
 	@BeforeAll
 	public static synchronized void setUp(
 	) throws Exception {  
@@ -86,7 +83,7 @@ public class RADIUSConnectorTest {
 				"SocketTimeout=1.5&" + 
 				"Trace=(java.lang.Boolean)true"
 			);
-			NonManagedInitialContextFactoryBuilder.install(resources);
+			LightweightInitialContextFactoryBuilder.install(resources);
 		}
     }
 
@@ -134,8 +131,8 @@ public class RADIUSConnectorTest {
 	private RadiusPacket newAccessRequest(
 	) throws InvalidParameterException{
 		return new PapAccessRequest(
-			"Benutzer", // "John Dow",
-			"0000123456" // "secret"
+			"Benutzer", 
+			"0000123456"
 		);
 	}
 	

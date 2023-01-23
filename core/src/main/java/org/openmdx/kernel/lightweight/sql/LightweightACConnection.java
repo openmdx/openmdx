@@ -49,7 +49,10 @@ import java.sql.SQLException;
 
 /**
  * Lightweight auto-committing connection
+ * 
+ * @deprecated in favour of Atomikos' JDBC support
  */
+@Deprecated
 class LightweightACConnection extends LightweightPooledConnection {
 
 	/**
