@@ -54,7 +54,7 @@ import javax.naming.NamingException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactory;
+import org.openmdx.kernel.lightweight.naming.AtomikosInitialContextFactory;
 
 /**
  * Java Bean URL Test
@@ -70,7 +70,7 @@ public class JavaBeanURLTest {
 	public static void setUp() throws NamingException {
 	    System.setProperty(
 	        Context.INITIAL_CONTEXT_FACTORY, 
-	        NonManagedInitialContextFactory.class.getName()
+	        AtomikosInitialContextFactory.class.getName()
 	    );
 		Map<String, String> javaBeans = new HashMap<String, String>();
 		javaBeans.put(
@@ -81,7 +81,7 @@ public class JavaBeanURLTest {
 		);
         javaBeans.put(
             "org.openmdx.comp.env.foreign",
-            "jndi:java:comp%2Fenv%2Fbean?" + Context.INITIAL_CONTEXT_FACTORY + '=' + NonManagedInitialContextFactory.class.getName()
+            "jndi:java:comp%2Fenv%2Fbean?" + Context.INITIAL_CONTEXT_FACTORY + '=' + AtomikosInitialContextFactory.class.getName()
         );
         javaURLContextFactory.populate(javaBeans);
 	}

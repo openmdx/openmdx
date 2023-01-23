@@ -169,6 +169,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
     testImplementation("org.mockito:mockito-core:4.2.0")    
     testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
+	testRuntimeOnly("com.atomikos:transactions-jta:5.0.9")
+	testRuntimeOnly("com.atomikos:transactions-jdbc:5.0.9")
     // openmdxBase
     openmdxBase("org.openmdx:openmdx-base:2.17.7")
     // openmdxBootstrap

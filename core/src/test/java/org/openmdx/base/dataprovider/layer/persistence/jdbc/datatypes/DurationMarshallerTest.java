@@ -45,8 +45,8 @@
 package org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.postgresql.PGIntervalMarshaller;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -56,27 +56,27 @@ public class DurationMarshallerTest {
 	@Test
 	public void postgresZero() throws ServiceException {
 		// Arrange
-		DurationMarshaller testee = DurationMarshaller.newInstance("INTERVAL");
+		PGIntervalMarshaller testee = new PGIntervalMarshaller();
 		// Act
 		Object duration = testee.unmarshal("0 years 0 mons 0 days 0 hours 0 mins 0.0 secs");
 		// Assert
-		assertEquals("P0D", duration);
+		assertEquals("P0DT0H0M0.0S", duration);
 	}
 	
 	@Test
 	public void postgresPositiveDays() throws ServiceException {
 		// Arrange
-		DurationMarshaller testee = DurationMarshaller.newInstance("INTERVAL");
+		PGIntervalMarshaller testee = new PGIntervalMarshaller();
 		// Act
 		Object duration = testee.unmarshal("0 years 0 mons 30 days 0 hours 0 mins 0.0 secs");
 		// Assert
-		assertEquals("P30D", duration);
+		assertEquals("P30DT0H0M0.0S", duration);
 	}
 
 	@Test
 	public void postgresPositiveMonths() throws ServiceException {
 		// Arrange
-		DurationMarshaller testee = DurationMarshaller.newInstance("INTERVAL");
+		PGIntervalMarshaller testee = new PGIntervalMarshaller();
 		// Act
 		Object duration = testee.unmarshal("0 years 14 mons 0 days 0 hours 0 mins 0.0 secs");
 		// Assert
@@ -86,48 +86,47 @@ public class DurationMarshallerTest {
 	@Test
 	public void postgresPositiveTime() throws ServiceException {
 		// Arrange
-		DurationMarshaller testee = DurationMarshaller.newInstance("INTERVAL");
+		PGIntervalMarshaller testee = new PGIntervalMarshaller();
 		// Act
 		Object duration = testee.unmarshal("0 years 0 mons 0 days 0 hours 1 mins 2.5 secs");
 		// Assert
-		assertEquals("PT1M2.5S", duration);
+		assertEquals("P0DT0H1M2.5S", duration);
 	}
 
 	@Test
 	public void postgresNegativeTime() throws ServiceException {
 		// Arrange
-		DurationMarshaller testee = DurationMarshaller.newInstance("INTERVAL");
+		PGIntervalMarshaller testee = new PGIntervalMarshaller();
 		// Act
 		Object duration = testee.unmarshal("0 years 0 mons 0 days 0 hours -1 mins -2.5 secs");
 		// Assert
-		assertEquals("-PT1M2.5S", duration);
+		assertEquals("-P0DT0H1M2.5S", duration);
 	}
 
 	@Test
 	public void postgresPositiveMonthTime() throws ServiceException {
 		// Arrange
-		DurationMarshaller testee = DurationMarshaller.newInstance("INTERVAL");
+		PGIntervalMarshaller testee = new PGIntervalMarshaller();
 		// Act
 		Object duration = testee.unmarshal("0 years 1 mons 0 days 0 hours 2 mins 3.5 secs");
 		// Assert
-		assertEquals("P1MT2M3.5S", duration);
+		assertEquals("P0Y1M0DT0H2M3.5S", duration);
 	}
 
 	@Test
 	public void postgresNegativeMonthTime() throws ServiceException {
 		// Arrange
-		DurationMarshaller testee = DurationMarshaller.newInstance("INTERVAL");
+		PGIntervalMarshaller testee = new PGIntervalMarshaller();
 		// Act
 		Object duration = testee.unmarshal("0 years -1 mons 0 days 0 hours -2 mins -3.5 secs");
 		// Assert
-		assertEquals("-P1MT2M3.5S", duration);
+		assertEquals("-P0Y1M0DT0H2M3.5S", duration);
 	}
 
-	@Disabled("PostgreSQL marshalling must be fixed first")
 	@Test
 	public void postgresPositiveYearNegativeTime() throws ServiceException {
 		// Arrange
-		DurationMarshaller testee = DurationMarshaller.newInstance("INTERVAL");
+		PGIntervalMarshaller testee = new PGIntervalMarshaller();
 		// Act
 		try {
 			testee.unmarshal("1 years 0 mons 0 days 0 hours -2 mins -3.5 secs");
@@ -140,8 +139,7 @@ public class DurationMarshallerTest {
 	private void assertEquals(
 		String expected, Object actual	
     ) throws ServiceException {
-		DurationMarshaller formatter = DurationMarshaller.newInstance("CHARACTER");
-		Assertions.assertEquals(expected, formatter.unmarshal(actual).toString());
+		Assertions.assertEquals(expected, actual.toString());
 	}
 	
 }

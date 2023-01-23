@@ -509,8 +509,7 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   /**
      * The type used to store boolean values, i.e. one of
      * <ul>
-     * <li><code>BOOLEAN</code> <i>(ignore <code>booleanFalse</code> and
-     * <code>booleanTrue</code> configurations)</i>
+     * <li><code>BOOLEAN</code> <i>(ignore <code>booleanFalse</code> and <code>booleanTrue</code> configurations)</i>
      * <li><code>CHARACTER</code> <i>(default)</i>
      * <li><code>NUMERIC</code>
      * </ul>
@@ -567,13 +566,13 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
      * The type used to store <code>org::w3c::duration</code> values, i.e. one
      * of
      * <ul>
-     * <li><code>INTERVAL</code> <i>(domain defined by the database field
-     * definition)</i>
-     * <li><code>CHARACTER</code> <i>(default)</i>
-     * <li><code>NUMERIC</code> <i>(domain <b>either</b> year-month <b>or</b>
-     * day-time intervals!)</i>
+     * <li><code>STANDARD</code>  <i>(default)</i>
+     * <li><code>INTERVAL</code> <i>(domain defined by the database field definition)</i>
+     * <li><code>CHARACTER</code>
+     * <li><code>NUMERIC</code> <i>(domain <b>either</b> year-month <b>or</b> day-time intervals!)</i>
      * </ul>
      * 
+     * @see LayerConfigurationEntries#DURATION_TYPE_STANDARD
      * @see LayerConfigurationEntries#DURATION_TYPE_INTERVAL
      * @see LayerConfigurationEntries#DURATION_TYPE_CHARACTER
      * @see LayerConfigurationEntries#DURATION_TYPE_NUMERIC
@@ -581,6 +580,22 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   static public final String DURATION_TYPE = "durationType";
   
   /**
+   * Stands for the date type specified by the JDBC driver SQL property
+   * <code>DURATION.TYPE.STANDARD</code>, i.e. one of<ul>
+   * <li><code>INTERVAL</code>
+   * <li><code>CHARACTER</code> 
+   * <li><code>NUMERIC</code>
+   * </ul>
+   * 
+   * @see LayerConfigurationEntries#DATE_TYPE_DATE
+   * @see LayerConfigurationEntries#DATE_TYPE_CHARACTER
+   * 
+   * Note:<br>
+   * <em>Will be supported after the resolution if issue #58, only!</em>
+   */
+  static public final String DURATION_TYPE_STANDARD = "STANDARD";
+
+ /**
     * SQL INTERVAL value
     */
   static public final String DURATION_TYPE_INTERVAL = "INTERVAL";
@@ -639,10 +654,10 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
      * The type used to store <code>org::w3c::dateTime</code> values, i.e. one
      * of
      * <ul>
-     * <li><code>STANDARD</code>
+     * <li><code>STANDARD</code> <i>(default)</i>
      * <li><code>TIMESTAMP</code>
      * <li><code>TIMESTAMP_WITH_TIMEZONE</code>
-     * <li><code>CHARACTER</code> <i>(default)</i>
+     * <li><code>CHARACTER</code>
      * <li><code>NUMERIC</code>
      * </ul>
      * 

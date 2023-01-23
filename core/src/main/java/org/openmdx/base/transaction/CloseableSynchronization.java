@@ -52,10 +52,10 @@ import org.openmdx.base.persistence.cci.Synchronization;
  */
 public interface CloseableSynchronization extends Synchronization {
 
-    /**persistence manager is closed
+    /**
      * Tells whether the corresponding persistence manager is closed or not
      * 
-     * @return if the persistence manager is closed
+     * @return {@code true} if the persistence manager is closed
      */
     boolean isClosed();
     

@@ -57,7 +57,10 @@ import javax.sql.StatementEventListener;
 
 /**
  * Lightweight Pooled Connection
+ * 
+ * @deprecated in favour of Atomikos' JDBC support
  */
+@Deprecated
 abstract class LightweightPooledConnection implements ValidatablePooledConnection {
 
 	/**

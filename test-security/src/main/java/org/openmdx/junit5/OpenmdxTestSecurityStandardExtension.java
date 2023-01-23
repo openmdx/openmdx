@@ -50,27 +50,26 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.NamingException;
-import javax.naming.spi.NamingManager;
 
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
+import org.openmdx.kernel.lightweight.naming.LightweightInitialContextFactoryBuilder;
 
 /**
  * JUnit 5 Standard Extension for openMDX/Test Security
  */
 public class OpenmdxTestSecurityStandardExtension implements BeforeAllCallback {
 
+	@Override
 	public void beforeAll(ExtensionContext context) throws Exception {
-		if (!NamingManager.hasInitialContextFactoryBuilder()) {
+		if (!LightweightInitialContextFactoryBuilder.isInstalled()) {
 			final Properties buildProperties = BuildProperties.getBuildProperties();
-			configureURLs();
 			configureTimezone(buildProperties);
-			configureJNDI(buildProperties);
+			configureLightweightContainer(buildProperties);
 		}
 	}
 
-	private void configureJNDI(final Properties buildProperties) throws NamingException {
+	private void configureLightweightContainer(final Properties buildProperties) throws NamingException {
 		final Map<String, String> environment = new HashMap<>();
 		environment.put(
 			"org.openmdx.comp.env.ldap.bund", 
@@ -89,15 +88,11 @@ public class OpenmdxTestSecurityStandardExtension implements BeforeAllCallback {
 			"ProtocolVersion=(java.lang.Integer)3&" + 
 			"ConnectionURL=ldaps:\\/\\/localhost"
 		);
-		NonManagedInitialContextFactoryBuilder.install(environment);
+		LightweightInitialContextFactoryBuilder.install(environment);
 	}
 
 	private void configureTimezone(final Properties buildProperties) {
 		System.setProperty("user.timezone", buildProperties.getProperty(BuildProperties.TIMEZONE_KEY));
-	}
-
-	private void configureURLs() {
-		System.setProperty("java.protocol.handler.pkgs", "org.openmdx.kernel.url.protocol");
 	}
 
 }

@@ -53,15 +53,15 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
 
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.postgresql.PGIntervalMarshaller;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.spi2.Datatypes;
 
 /**
  * DurationMarshaller
  */
-public class DurationMarshaller implements Marshaller {
+public class DurationMarshaller {
 
 	/**
 	 * Constructor
@@ -88,6 +88,7 @@ public class DurationMarshaller implements Marshaller {
 	private final DurationType durationType;
 	private static final int PRECISION = 3; // milliseconds
 	private static final BigDecimal DAY_TIME_ZERO = BigDecimal.valueOf(0, PRECISION);
+	private static final BigInteger YEAR_MONTHS_ZERO = BigInteger.ZERO;
 	private static final BigInteger MONTHS_PER_YEAR = BigInteger.valueOf(12);
 	private static final BigInteger HOURS_PER_DAY = BigInteger.valueOf(24);
 	private static final BigInteger MINUTES_PER_HOUR = BigInteger.valueOf(60);
@@ -96,14 +97,13 @@ public class DurationMarshaller implements Marshaller {
 	private static final Pattern YEAR_TO_MONTH = Pattern.compile("^(-?)([0-9]+)-([0-9]+)$");
 	private static final Pattern DAY_TO_SECOND = Pattern
 			.compile("^(-?)([0-9]+) ([0-9]+)(?::([0-9]+)(?::([0-9]+(?:\\.[0-9]+))))?$");
-	private static final Pattern POSTGRES = Pattern.compile(
-			"^(-?)([0-9]+) years (-?)([0-9]+) mons (-?)([0-9]+) days (-?)([0-9]+) hours (-?)([0-9]+) mins (-?)([0-9]+(?:\\.[0-9]+)) secs$");
+	private static final PGIntervalMarshaller PG_INTERVAL_MARSHALLER = new PGIntervalMarshaller();
 
 	@SuppressWarnings("unchecked")
 	private <T extends Number> T getValue(Duration duration, DatatypeConstants.Field field) {
 		Number value = duration.getField(field);
 		if (value == null) {
-			value = field == DatatypeConstants.SECONDS ? DAY_TIME_ZERO : BigInteger.ZERO;
+			value = field == DatatypeConstants.SECONDS ? DAY_TIME_ZERO : YEAR_MONTHS_ZERO;
 		}
 		return (T) value;
 	}
@@ -114,37 +114,81 @@ public class DurationMarshaller implements Marshaller {
 	 * @see org.openmdx.compatibility.base.marshalling.Marshaller#marshal(java.lang.
 	 * Object)
 	 */
-	public Object marshal(Object source) throws ServiceException {
+	public Object marshal(Object source, String databaseProductName) throws ServiceException {
 		if (source instanceof Duration) {
 			Duration duration = (Duration) source;
 			ValueType valueType = ValueType.of(duration);
 			if (valueType == null)
 				return null;
+			final int signum = duration.getSign();
 			switch (durationType) {
-			case INTERVAL: {
-				StringBuilder target = new StringBuilder(duration.getSign() < 0 ? "-" : "");
-				switch (valueType) {
-				case YEAR_MONTH: {
-					Number years = getValue(duration, DatatypeConstants.YEARS);
-					Number months = getValue(duration, DatatypeConstants.MONTHS);
-					return target.append(years).append("-").append(months).toString();
-				}
-				case DAY_TIME: {
-					Number days = getValue(duration, DatatypeConstants.DAYS);
-					Number hours = getValue(duration, DatatypeConstants.HOURS);
-					Number minutes = getValue(duration, DatatypeConstants.MINUTES);
-					Number seconds = getValue(duration, DatatypeConstants.SECONDS);
-					return target.append(days).append(" ").append(hours).append(":").append(minutes).append(":")
-							.append(seconds).toString();
-				}
-				case YEAR_MONTH_DAY_TIME:
-					throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
-							BasicException.Code.TRANSFORMATION_FAILURE,
-							"An INTERVAL duration must be either a year-month or a day-time duration",
-							new BasicException.Parameter("duration", duration));
-				default:
-					return null;
-				}
+				case INTERVAL: {
+					if(PGIntervalMarshaller.isApplicableForDatabaseProduct(databaseProductName)) {
+						switch (valueType) {
+							case YEAR_MONTH: {
+								BigInteger years = getValue(duration, DatatypeConstants.YEARS);
+								BigInteger months = getValue(duration, DatatypeConstants.MONTHS);
+								return PG_INTERVAL_MARSHALLER.marshal(signum, years.intValue(), months.intValue(), 0, 0, 0, 0);
+							}
+							case DAY_TIME: {
+								BigInteger days = getValue(duration, DatatypeConstants.DAYS);
+								BigInteger hours = getValue(duration, DatatypeConstants.HOURS);
+								BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
+								BigDecimal seconds = getValue(duration, DatatypeConstants.SECONDS);
+								return PG_INTERVAL_MARSHALLER.marshal(
+									signum, 
+									0, 
+									0, 
+									days.intValue(), 
+									hours.intValue(), 
+									minutes.intValue(), 
+									seconds.doubleValue()
+								);
+							}
+							case YEAR_MONTH_DAY_TIME:
+								BigInteger years = getValue(duration, DatatypeConstants.YEARS);
+								BigInteger months = getValue(duration, DatatypeConstants.MONTHS);
+								BigInteger days = getValue(duration, DatatypeConstants.DAYS);
+								BigInteger hours = getValue(duration, DatatypeConstants.HOURS);
+								BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
+								BigDecimal seconds = getValue(duration, DatatypeConstants.SECONDS);
+								return PG_INTERVAL_MARSHALLER.marshal(
+									signum, 
+									years.intValue(), 
+									months.intValue(), 
+									days.intValue(), 
+									hours.intValue(), 
+									minutes.intValue(), 
+									seconds.doubleValue()
+								);
+							default:
+								return null;
+						}
+					} else {
+						final StringBuilder target = new StringBuilder(signum < 0 ? "-" : "");
+						switch (valueType) {
+							case YEAR_MONTH: {
+								BigInteger years = getValue(duration, DatatypeConstants.YEARS);
+								BigInteger months = getValue(duration, DatatypeConstants.MONTHS);
+								return target.append(years).append("-").append(months).toString();
+							}
+							case DAY_TIME: {
+								BigInteger days = getValue(duration, DatatypeConstants.DAYS);
+								BigInteger hours = getValue(duration, DatatypeConstants.HOURS);
+								BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
+								Number seconds = getValue(duration, DatatypeConstants.SECONDS);
+								return target.append(days).append(" ").append(hours).append(":").append(minutes).append(":")
+										.append(seconds).toString();
+							}
+							case YEAR_MONTH_DAY_TIME:
+								throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
+										BasicException.Code.TRANSFORMATION_FAILURE,
+										"An INTERVAL duration must be either a year-month or a day-time duration",
+										new BasicException.Parameter("duration", duration));
+							default:
+								return null;
+						}
+					}
 			}
 			case NUMERIC:
 				switch (valueType) {
@@ -152,7 +196,7 @@ public class DurationMarshaller implements Marshaller {
 					BigInteger years = getValue(duration, DatatypeConstants.YEARS);
 					BigInteger months = getValue(duration, DatatypeConstants.MONTHS);
 					BigInteger value = months.add(years.multiply(MONTHS_PER_YEAR));
-					return duration.getSign() < 0 ? value.negate() : value;
+					return signum < 0 ? value.negate() : value;
 				}
 				case DAY_TIME:
 					BigInteger days = getValue(duration, DatatypeConstants.DAYS);
@@ -162,7 +206,7 @@ public class DurationMarshaller implements Marshaller {
 					BigDecimal value = seconds.add(new BigDecimal(
 							minutes.add(hours.add(days.multiply(HOURS_PER_DAY)).multiply(MINUTES_PER_HOUR)))
 									.multiply(SECONDS_PER_MINUTE));
-					return duration.getSign() < 0 ? value.negate() : value;
+					return signum < 0 ? value.negate() : value;
 				case YEAR_MONTH_DAY_TIME:
 					throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
 							BasicException.Code.TRANSFORMATION_FAILURE,
@@ -206,7 +250,7 @@ public class DurationMarshaller implements Marshaller {
 				if (normalized) {
 					return duration.toString();
 				} else {
-					StringBuilder target = new StringBuilder(duration.getSign() < 0 ? "-" : "");
+					StringBuilder target = new StringBuilder(signum < 0 ? "-" : "");
 					target.append("P");
 					boolean empty = true;
 					if (years.signum() > 0) {
@@ -261,55 +305,50 @@ public class DurationMarshaller implements Marshaller {
 			case CHARACTER:
 				return Datatypes.create(Duration.class, source.toString());
 			case INTERVAL: {
-				String value = source.toString();
-				Matcher matcher;
-				if ((matcher = DAY_TO_SECOND.matcher(value)).matches()) {
-					StringBuilder duration = new StringBuilder().append(matcher.group(1)).append('P')
-							.append(matcher.group(2)).append("DT").append(matcher.group(3)).append("H");
-					String minutes = matcher.group(4);
-					if (minutes != null)
-						duration.append(minutes).append("M");
-					String seconds = matcher.group(5);
-					if (seconds != null) {
-						int dp = seconds.indexOf('.');
-						if (dp < 0) {
-							dp = seconds.indexOf(',');
-						}
-						int precision;
-						if (dp > 0) {
-							precision = seconds.length() - dp - 1;
-							if (precision > PRECISION) {
-								seconds = seconds.substring(0, dp + PRECISION + 1);
+				if(PGIntervalMarshaller.isApplicableForDataType(source)) {
+					return PG_INTERVAL_MARSHALLER.unmarshal(source);
+				} else {
+					String value = source.toString();
+					Matcher matcher;
+					if ((matcher = DAY_TO_SECOND.matcher(value)).matches()) {
+						StringBuilder duration = new StringBuilder().append(matcher.group(1)).append('P')
+								.append(matcher.group(2)).append("DT").append(matcher.group(3)).append("H");
+						String minutes = matcher.group(4);
+						if (minutes != null)
+							duration.append(minutes).append("M");
+						String seconds = matcher.group(5);
+						if (seconds != null) {
+							int dp = seconds.indexOf('.');
+							if (dp < 0) {
+								dp = seconds.indexOf(',');
 							}
-							duration.append(seconds);
-						} else {
-							precision = 0;
-							duration.append(seconds).append(".");
+							int precision;
+							if (dp > 0) {
+								precision = seconds.length() - dp - 1;
+								if (precision > PRECISION) {
+									seconds = seconds.substring(0, dp + PRECISION + 1);
+								}
+								duration.append(seconds);
+							} else {
+								precision = 0;
+								duration.append(seconds).append(".");
+							}
+							while (precision++ < PRECISION) {
+								duration.append("0");
+							}
+							duration.append("S");
 						}
-						while (precision++ < PRECISION) {
-							duration.append("0");
-						}
-						duration.append("S");
-					}
-					return Datatypes.create(Duration.class, duration.toString());
-				} else if ((matcher = YEAR_TO_MONTH.matcher(value)).matches()) {
-					StringBuilder duration = new StringBuilder().append(matcher.group(1)).append('P')
-							.append(matcher.group(2)).append("Y").append(matcher.group(3)).append("M");
-					return Datatypes.create(Duration.class, duration.toString());
-				} else if ((matcher = POSTGRES.matcher(value)).matches()) {
-					PostgresIntervalBuilder intervalBuilder = new PostgresIntervalBuilder();
-					intervalBuilder.withDays(matcher.group(1), matcher.group(2), 'Y');
-					intervalBuilder.withDays(matcher.group(3), matcher.group(4), 'M');
-					intervalBuilder.withDays(matcher.group(5), matcher.group(6), 'D');
-					intervalBuilder.withTime(matcher.group(7), matcher.group(8), 'H');
-					intervalBuilder.withTime(matcher.group(9), matcher.group(10), 'M');
-					intervalBuilder.withTime(matcher.group(11), matcher.group(12), 'S');
-					return intervalBuilder.build();
-				} else
-					throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
-							BasicException.Code.TRANSFORMATION_FAILURE,
-							getClass().getName() + " expects at least two fields (years and months or days and hours)",
-							new BasicException.Parameter("value", value));
+						return Datatypes.create(Duration.class, duration.toString());
+					} else if ((matcher = YEAR_TO_MONTH.matcher(value)).matches()) {
+						StringBuilder duration = new StringBuilder().append(matcher.group(1)).append('P')
+								.append(matcher.group(2)).append("Y").append(matcher.group(3)).append("M");
+						return Datatypes.create(Duration.class, duration.toString());
+					} else
+						throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
+								BasicException.Code.TRANSFORMATION_FAILURE,
+								getClass().getName() + " expects at least two fields (years and months or days and hours)",
+								new BasicException.Parameter("value", value));
+				}
 			}
 			case NUMERIC: {
 				if (source instanceof Number) {
@@ -389,54 +428,6 @@ public class DurationMarshaller implements Marshaller {
 			return yearMonth ? (dayTime ? YEAR_MONTH_DAY_TIME : YEAR_MONTH) : (dayTime ? DAY_TIME : null);
 		}
 
-	}
-
-	/**
-	 * Postgres Interval Builder
-	 */
-	private static class PostgresIntervalBuilder {
-
-		private final StringBuilder negative = new StringBuilder("P");
-		private final StringBuilder positive = new StringBuilder("P");
-
-		void withDays(String sign, String value, char unit) {
-			if(!"0".equals(value)) {
-				final StringBuilder target = "-".equals(sign) ? negative : positive;
-				target.append(value).append(unit);
-			}
-		}
-		
-		void withTime(String sign, String value, char unit) {
-			if(!"0".equals(value) && !"0.0".equals(value)) {
-				final StringBuilder target = "-".equals(sign) ? negative : positive;
-				if(target.indexOf("T")<0) {
-					target.append('T');
-				}
-				target.append(value).append(unit);
-			}
-		}
-		
- 		Duration build() throws ServiceException {
-			final Duration negativeDuration = negative.length() > 1
-					? Datatypes.create(Duration.class, negative.toString())
-					: null;
-			final Duration positiveDuration = Datatypes.create(
-					Duration.class,
-					positive.length() > 1 ? positive.toString() : "P0D"
-			);
-			if (negativeDuration == null) {
-				return positiveDuration; 
-			}
-			if(positiveDuration.getSign()==0) {
-				return negativeDuration.negate();
-			}
-			// TODO the values seem not to be filled correctly according to postgres standard
-			return negativeDuration.add(positiveDuration).negate();
-//			throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
-//					BasicException.Code.TRANSFORMATION_FAILURE,
-//					Duration.class.getName() + " does not allow to mix positive and negative fields",
-//					new BasicException.Parameter("value", positive + "-" + negative));
-		}
 	}
 
 }

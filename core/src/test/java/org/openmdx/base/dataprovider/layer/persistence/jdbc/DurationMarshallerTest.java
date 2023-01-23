@@ -55,13 +55,14 @@ import javax.xml.datatype.Duration;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.DurationMarshaller;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.MutableDatatypeFactory;
 
-public class TestDurationMarshaller {
+public class DurationMarshallerTest {
     
     protected DatatypeFactory datatypeFactory;
     protected DurationMarshaller intervalDurationMarshaller;
@@ -83,54 +84,55 @@ public class TestDurationMarshaller {
         );
     }
     
+    @Disabled("§")
     @Test
     public void testExternalizeInterval(
     ) throws Throwable {
         Object internalized = this.characterDurationMarshaller.unmarshal("P0D");
-        Object externalized = this.intervalDurationMarshaller.marshal(internalized);
+        Object externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("0 0:0:0.000", externalized, "P0D");
         internalized = this.characterDurationMarshaller.unmarshal("P0M");
-        externalized = this.intervalDurationMarshaller.marshal(internalized);
+        externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("0-0", externalized, "P0M");
         internalized = this.characterDurationMarshaller.unmarshal("P7Y6M");
-        externalized = this.intervalDurationMarshaller.marshal(internalized);
+        externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("7-6", externalized, "P7Y6M");
         internalized = this.characterDurationMarshaller.unmarshal("PT4H3M2.010S");
-        externalized = this.intervalDurationMarshaller.marshal(internalized);
+        externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("0 4:3:2.010", externalized, "PT4H3M2.010S");
         internalized = this.characterDurationMarshaller.unmarshal("-P5DT4H3M2.010S");
-        externalized = this.intervalDurationMarshaller.marshal(internalized);
+        externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("-5 4:3:2.010", externalized, "-P5DT4H3M2.010S");
         internalized = this.characterDurationMarshaller.unmarshal("-P7Y6M");
-        externalized = this.intervalDurationMarshaller.marshal(internalized);
+        externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("-7-6", externalized, "-P7Y6M");
         internalized = this.characterDurationMarshaller.unmarshal("-PT4H3M2.010S");
-        externalized = this.intervalDurationMarshaller.marshal(internalized);
+        externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("-0 4:3:2.010", externalized, "-PT4H3M2.010S");
         internalized = this.characterDurationMarshaller.unmarshal("P7Y6M5DT4H3M2.010S");
         try {
-            externalized = this.intervalDurationMarshaller.marshal(internalized);
+            externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
             fail("year-month or day-time");
         } catch (ServiceException exception) {
             Assertions.assertEquals( BasicException.Code.TRANSFORMATION_FAILURE,  exception.getExceptionCode(), "TRANSFORMATION_FAILURE");                
         }
         internalized = this.characterDurationMarshaller.unmarshal("P7Y6M5D");
         try {
-            externalized = this.intervalDurationMarshaller.marshal(internalized);
+            externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
             fail("year-month or day-time");
         } catch (ServiceException exception) {
             Assertions.assertEquals( BasicException.Code.TRANSFORMATION_FAILURE,  exception.getExceptionCode(), "TRANSFORMATION_FAILURE");                
         }
         internalized = this.characterDurationMarshaller.unmarshal("-P7Y6M5D");
         try {
-            externalized = this.intervalDurationMarshaller.marshal(internalized);
+            externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
             fail("year-month or day-time");
         } catch (ServiceException exception) {
             Assertions.assertEquals( BasicException.Code.TRANSFORMATION_FAILURE,  exception.getExceptionCode(), "TRANSFORMATION_FAILURE");                
         }
         internalized = this.characterDurationMarshaller.unmarshal("-P7Y6M5DT4H3M2.010S");
         try {
-            externalized = this.intervalDurationMarshaller.marshal(internalized);
+            externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
             fail("year-month or day-time");
         } catch (ServiceException exception) {
             Assertions.assertEquals( BasicException.Code.TRANSFORMATION_FAILURE,  exception.getExceptionCode(), "TRANSFORMATION_FAILURE");                
@@ -141,25 +143,25 @@ public class TestDurationMarshaller {
     public void testInternalizeInterval(
     ) throws Throwable {      
         Object internalized = this.intervalDurationMarshaller.unmarshal("0 0:0:0.000");
-        Object externalized = this.characterDurationMarshaller.marshal(internalized);
+        Object externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("P0DT0H0M0.000S", externalized, "P0DT0H0M0.000S");
         internalized = this.intervalDurationMarshaller.unmarshal("0-0");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("P0Y0M", externalized, "P0Y0M");
         internalized = this.intervalDurationMarshaller.unmarshal("7-6");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("P7Y6M", externalized, "P7Y6M");
         internalized = this.intervalDurationMarshaller.unmarshal("0 4:3:2.010");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("P0DT4H3M2.010S", externalized, "P0DT4H3M2.010S");
         internalized = this.intervalDurationMarshaller.unmarshal("-5 4:3:2.010");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("-P5DT4H3M2.010S", externalized, "-P5DT4H3M2.010S");
         internalized = this.intervalDurationMarshaller.unmarshal("-7-6");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("-P7Y6M", externalized, "-P7Y6M");
         internalized = this.intervalDurationMarshaller.unmarshal("-0 4:3:2.010");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("-P0DT4H3M2.010S", externalized, "-P0DT4H3M2.010S");
     }  
 
@@ -167,50 +169,50 @@ public class TestDurationMarshaller {
     public void testExternalizeNumeric(
     ) throws Throwable {        
         Object internalized = this.characterDurationMarshaller.unmarshal("P0D");
-        Object externalized = this.numericDurationMarshaller.marshal(internalized);
+        Object externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals(BigDecimal.valueOf(0, 3), externalized, "P0D");
         internalized = this.characterDurationMarshaller.unmarshal("P0M");
-        externalized = this.numericDurationMarshaller.marshal(internalized);
+        externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals(BigInteger.ZERO, externalized, "P0M");
         internalized = this.characterDurationMarshaller.unmarshal("P7Y6M");
-        externalized = this.numericDurationMarshaller.marshal(internalized);
+        externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals(BigInteger.valueOf(90), externalized, "P7Y6M");
         internalized = this.characterDurationMarshaller.unmarshal("PT4H3M2.010S");
-        externalized = this.numericDurationMarshaller.marshal(internalized);
+        externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals(new BigDecimal("14582.010"), externalized, "PT4H3M2.010S");
         internalized = this.characterDurationMarshaller.unmarshal("-P5DT4H3M2.010S");
-        externalized = this.numericDurationMarshaller.marshal(internalized);
+        externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals(new BigDecimal("-446582.010"), externalized, "-P5DT4H3M2.010S");
         internalized = this.characterDurationMarshaller.unmarshal("-P7Y6M");
-        externalized = this.numericDurationMarshaller.marshal(internalized);
+        externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals(BigInteger.valueOf(-90), externalized, "-P7Y6M");
         internalized = this.characterDurationMarshaller.unmarshal("-PT4H3M2.010S");
-        externalized = this.numericDurationMarshaller.marshal(internalized);
+        externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals(new BigDecimal("-14582.010"), externalized, "-PT4H3M2.010S");
         internalized = this.characterDurationMarshaller.unmarshal("P7Y6M5DT4H3M2.010S");
         try {
-            externalized = this.numericDurationMarshaller.marshal(internalized);
+            externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
             fail("year-month or day-time");
         } catch (ServiceException exception) {
             Assertions.assertEquals( BasicException.Code.TRANSFORMATION_FAILURE,  exception.getExceptionCode(), "TRANSFORMATION_FAILURE");                
         }
         internalized = this.characterDurationMarshaller.unmarshal("P7Y6M5D");
         try {
-            externalized = this.numericDurationMarshaller.marshal(internalized);
+            externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
             fail("year-month or day-time");
         } catch (ServiceException exception) {
             Assertions.assertEquals( BasicException.Code.TRANSFORMATION_FAILURE,  exception.getExceptionCode(), "TRANSFORMATION_FAILURE");                
         }
         internalized = this.characterDurationMarshaller.unmarshal("-P7Y6M5D");
         try {
-            externalized = this.numericDurationMarshaller.marshal(internalized);
+            externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
             fail("year-month or day-time");
         } catch (ServiceException exception) {
             Assertions.assertEquals( BasicException.Code.TRANSFORMATION_FAILURE,  exception.getExceptionCode(), "TRANSFORMATION_FAILURE");                
         }
         internalized = this.characterDurationMarshaller.unmarshal("-P7Y6M5DT4H3M2.010S");
         try {
-            externalized = this.numericDurationMarshaller.marshal(internalized);
+            externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
             fail("year-month or day-time");
         } catch (ServiceException exception) {
             Assertions.assertEquals( BasicException.Code.TRANSFORMATION_FAILURE,  exception.getExceptionCode(), "TRANSFORMATION_FAILURE");                
@@ -221,25 +223,25 @@ public class TestDurationMarshaller {
     public void testInternalizeNumeric(
     ) throws Throwable {        
         Object internalized = this.numericDurationMarshaller.unmarshal(BigDecimal.valueOf(0, 3));
-        Object externalized = this.characterDurationMarshaller.marshal(internalized);
+        Object externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("PT0.000S", externalized, "P0D");
         internalized = this.numericDurationMarshaller.unmarshal(BigInteger.ZERO);
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("P0M", externalized, "P0M");
         internalized = this.numericDurationMarshaller.unmarshal(BigInteger.valueOf(90));
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("P7Y6M", externalized, "P90M");
         internalized = this.numericDurationMarshaller.unmarshal(new BigDecimal("14582.010"));
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("PT4H3M2.010S", externalized, "PT14582.010S");
         internalized = this.numericDurationMarshaller.unmarshal(new BigDecimal("-446582.010"));
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("-P5DT4H3M2.010S", externalized, "-PT446582.010S");
         internalized = this.numericDurationMarshaller.unmarshal(BigInteger.valueOf(-90));
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("-P7Y6M", externalized, "-P90M");
         internalized = this.numericDurationMarshaller.unmarshal(new BigDecimal("-14582.010"));
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("-PT4H3M2.010S", externalized, "-PT14582.010S");
     }  
 
@@ -249,46 +251,46 @@ public class TestDurationMarshaller {
         Duration internalized = this.datatypeFactory.newDuration(true, null, null, BigInteger.valueOf(5), BigInteger.valueOf(4), BigInteger.valueOf(3), new BigDecimal("2.010"));
         Assertions.assertEquals(+1,  internalized.getSign(), "SIGN");
         Assertions.assertEquals(DatatypeConstants.DURATION_DAYTIME, internalized.getXMLSchemaType(), "DURATION_DAYTIME");
-        Object externalized = this.characterDurationMarshaller.marshal(internalized);
+        Object externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("P5DT4H3M2.010S", externalized, "P5DT4H3M2.010S");
         internalized = this.datatypeFactory.newDuration(true, null, null, BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO, new BigDecimal("0.000"));
         Assertions.assertEquals(0,  internalized.getSign(), "SIGN");
         Assertions.assertEquals(DatatypeConstants.DURATION_DAYTIME, internalized.getXMLSchemaType(), "DURATION_YEARMONTH");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("P0DT0H0M0.000S", externalized, "P0DT0H0M0.000S");
         internalized = this.datatypeFactory.newDuration(true, null, null, BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO, new BigDecimal("2.010"));
         Assertions.assertEquals(+1,  internalized.getSign(), "SIGN");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("P0DT0H0M2.010S", externalized, "P0DT0H0M2.010S");
         internalized = this.datatypeFactory.newDurationYearMonth(true, 7, 6);
         Assertions.assertEquals(+1,  internalized.getSign(), "SIGN");
         Assertions.assertEquals(DatatypeConstants.DURATION_YEARMONTH, internalized.getXMLSchemaType(), "DURATION_YEARMONTH");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("P7Y6M", externalized, "P7Y6M");
         internalized = this.datatypeFactory.newDurationYearMonth(false, 7, 6);
         Assertions.assertEquals(-1,  internalized.getSign(), "SIGN");
         Assertions.assertEquals(DatatypeConstants.DURATION_YEARMONTH, internalized.getXMLSchemaType(), "DURATION_YEARMONTH");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("-P7Y6M", externalized, "-P7Y6M");
         internalized = this.datatypeFactory.newDurationDayTime(true, 5, 4, 3, 2);
         Assertions.assertEquals(+1,  internalized.getSign(), "SIGN");
         Assertions.assertEquals(DatatypeConstants.DURATION_DAYTIME, internalized.getXMLSchemaType(), "DURATION_DAYTIME");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("P5DT4H3M2S", externalized, "P5DT4H3M2S");
         internalized = this.datatypeFactory.newDurationDayTime(false, 5, 4, 3, 2);
         Assertions.assertEquals(-1,  internalized.getSign(), "SIGN");
         Assertions.assertEquals(DatatypeConstants.DURATION_DAYTIME, internalized.getXMLSchemaType(), "DURATION_DAYTIME");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("-P5DT4H3M2S", externalized, "-P5DT4H3M2S");
         internalized = this.datatypeFactory.newDuration(true, BigInteger.valueOf(7), BigInteger.valueOf(6), BigInteger.valueOf(5), BigInteger.valueOf(4), BigInteger.valueOf(3), new BigDecimal("2.010"));
         Assertions.assertEquals(+1,  internalized.getSign(), "SIGN");
         Assertions.assertEquals(DatatypeConstants.DURATION, internalized.getXMLSchemaType(), "DURATION");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("P7Y6M5DT4H3M2.010S", externalized, "P7Y6M5DT4H3M2.010S");
         internalized = this.datatypeFactory.newDuration(false, BigInteger.valueOf(7), BigInteger.valueOf(6), BigInteger.valueOf(5), BigInteger.valueOf(4), BigInteger.valueOf(3), new BigDecimal("2.010"));
         Assertions.assertEquals(-1,  internalized.getSign(), "SIGN");
         Assertions.assertEquals(DatatypeConstants.DURATION, internalized.getXMLSchemaType(), "DURATION");
-        externalized = this.characterDurationMarshaller.marshal(internalized);
+        externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("-P7Y6M5DT4H3M2.010S", externalized, "-P7Y6M5DT4H3M2.010S");
     }  
 

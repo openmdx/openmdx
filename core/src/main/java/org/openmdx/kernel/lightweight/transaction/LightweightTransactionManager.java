@@ -66,7 +66,10 @@ import org.openmdx.kernel.log.SysLog;
  * <li>Does not support nested transactions</li>
  * <li>No security</li>
  * </ul>
+ * 
+ * @deprecated in favour of Atomikos' transaction manager
  */
+@Deprecated
 public final class LightweightTransactionManager implements TransactionManager {
 
     /**

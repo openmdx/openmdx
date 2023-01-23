@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Non-Managed Naming Contexts^Test
+ * Description: Legacy Initial Context Factory Test
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Set;
 
 import javax.naming.Binding;
@@ -59,23 +60,52 @@ import javax.naming.NamingException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.openmdx.kernel.lightweight.naming.LightweightInitialContextFactoryBuilder;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactory;
+import org.openmdx.kernel.lightweight.transaction.LightweightTransactionManager;
 
-public class TestNonManaged {
+/**
+ * This test ensures that the Legacy Lightweight Transaction Manager still works
+ * (until it will be removed).
+ * 
+ * @deprecated in favour of {@code TestAtomikosInitialKCntextFactory}
+ * @see AtomikosInitialContextFactoryTest
+ *
+ */
+@Deprecated
+public class NonManagedInitialContextFactoryTest {
 
+	private static Hashtable<String,Object> ENVIRONMENT;
+	
     @BeforeAll
-    public static void initialize() throws NamingException{
-        System.setProperty(Context.INITIAL_CONTEXT_FACTORY, NonManagedInitialContextFactory.class.getName());
-    }
-
+    static void initialize() throws NamingException{
+    	ENVIRONMENT = new Hashtable<String, Object>();
+    	ENVIRONMENT.put(Context.INITIAL_CONTEXT_FACTORY, NonManagedInitialContextFactory.class.getName());
+    	LightweightInitialContextFactoryBuilder.install();
+	}
+	
 	@Test
-	public void foo() throws NamingException{
+	void foo() throws NamingException{
 	    populateNonMangedContext();
 	}
 
     @Test
-    public void bar() throws NamingException{
+    void bar() throws NamingException{
         populateNonMangedContext();
+    }
+    
+    @Test
+    void assertLightweightTransactionManager() throws NamingException {
+	    // Arrange
+        Context root = new InitialContext(ENVIRONMENT);
+    	// Act
+        final Object transactionManager = root.lookup("java:comp/TransactionManager");
+        // Assert
+        Assertions.assertEquals(
+        	LightweightTransactionManager.class, 
+        	transactionManager.getClass(),
+        	"Use the (legacy) lightweight transaction manager"
+        );
     }
 	
 	private void populateNonMangedContext() throws NamingException{
@@ -84,11 +114,10 @@ public class TestNonManaged {
 	    populateTopLevelContexts();
 	    populateThirdLevelContexts();
 	}
-
     	
 	private void reset() throws NamingException{
 	    // Arrange
-        Context root = new InitialContext();
+        Context root = new InitialContext(ENVIRONMENT);
         Collection<String> names = new ArrayList<String>(); 
         for(
             NamingEnumeration<Binding> bindings = root.listBindings("");
@@ -111,7 +140,7 @@ public class TestNonManaged {
 	}
 
 	private void populateInitialContext() throws NamingException{
-		Context root = new InitialContext();
+		Context root = new InitialContext(ENVIRONMENT);
 		root.createSubcontext("org");
 		root.createSubcontext("ch");
 		Set<String> expected = new HashSet<String>(
@@ -133,7 +162,7 @@ public class TestNonManaged {
 	}
 
 	private void populateTopLevelContexts() throws NamingException{
-		Context root = new InitialContext();
+		Context root = new InitialContext(ENVIRONMENT);
 		Context org = (Context) root.lookup("org");
 		org.createSubcontext("openmdx");
 		Context ch = (Context) root.lookup("ch");
@@ -158,7 +187,7 @@ public class TestNonManaged {
 
 	private void populateThirdLevelContexts(
     ) throws NamingException{
-		Context root = new InitialContext();
+		Context root = new InitialContext(ENVIRONMENT);
 		Context openmdx = (Context) root.lookup("org/openmdx");
 		openmdx.bind("value", "2011-04-01");
 		Set<String> expected = new HashSet<String>(

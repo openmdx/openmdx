@@ -57,7 +57,10 @@ import org.openmdx.kernel.text.format.HexadecimalFormatter;
 
 /**
  * Test Transaction Id
+ * 
+ * @deprecated in favour of Atomikos' transaction manager
  */
+@Deprecated
 public class TestTransactionId {
     
     @BeforeEach

@@ -45,15 +45,20 @@
 package org.openmdx.kernel.lightweight.naming;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
-import java.util.logging.Level;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.NoInitialContextException;
 import javax.naming.spi.InitialContextFactory;
+import javax.transaction.TransactionManager;
+import javax.transaction.TransactionSynchronizationRegistry;
+import javax.transaction.UserTransaction;
 
 import org.openmdx.kernel.lightweight.naming.java.javaURLContextFactory;
+import org.openmdx.kernel.lightweight.naming.jdbc.AbstractDataSourceContext;
+import org.openmdx.kernel.lightweight.naming.spi.DelegatingContext;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -61,22 +66,40 @@ import org.openmdx.kernel.log.SysLog;
  */
 public abstract class AbstractInitialContextFactory implements InitialContextFactory {
 
-    /**
-     * Prepare a lightweight initial context
+	protected AbstractInitialContextFactory(){
+    	this.dataSourceContext = createDataSourceContext();
+	}
+
+	/**
+	 * The lightweight JNDI implementation's URL package prefix
+	 */
+	private static final String LIGHTWEIGHT_URL_PKG_PREFIX = "org.openmdx.kernel.lightweight.naming";
+
+	/**
+	 * The Initial Context
+	 */
+	private Context initialContext;
+	
+	/**
+	 * The Data Source Context
+	 */
+	private AbstractDataSourceContext dataSourceContext;
+
+	/**
+     * Create a lightweight initial context
      * 
      * @throws NoInitialContextException 
      */
-    protected static Context newInitialContext(
-        String initialContextFactory,
-        Object transactionManager,
-        Object transactionSynchronizationRegistry,
-        Object userTransaction
+    protected LightweightInitialContext createInitialContext(
+        TransactionManager transactionManager,
+        TransactionSynchronizationRegistry transactionSynchronizationRegistry,
+        UserTransaction userTransaction
     ) throws NoInitialContextException {
         try {
             //
             // Component Context Set-Up
             //
-            Map<String,Object> transactionEnvironment = new HashMap<String,Object>();
+            Map<String,Object> transactionEnvironment = new HashMap<>();
             transactionEnvironment.put(
                 "org.openmdx.comp.TransactionManager",
                 transactionManager
@@ -97,69 +120,54 @@ public abstract class AbstractInitialContextFactory implements InitialContextFac
             Map<String,String> initialContextEnvironment = new HashMap<String,String>();
             initialContextEnvironment.put(
                 Context.INITIAL_CONTEXT_FACTORY,
-                initialContextFactory
+                getClass().getName()
             );
             initialContextEnvironment.put(
                 Context.URL_PKG_PREFIXES,
-                "org.openmdx.kernel.lightweight.naming"
+                LIGHTWEIGHT_URL_PKG_PREFIX
             );
-            return new NonManagedInitialContext(initialContextEnvironment);
+            return new LightweightInitialContext(initialContextEnvironment);
         } catch (NamingException exception) {
-            throw (NoInitialContextException) new NoInitialContextException(
-                "Could not populate the non-managed environment's comp context"
-            ).initCause(
-                exception
+            final NoInitialContextException noInitialContextException = new NoInitialContextException(
+                "Unable to build the lightweight containers initial context"
             );
+            noInitialContextException.setRootCause(exception);
+			throw noInitialContextException;
         }
     }
 
+    protected abstract LightweightInitialContext createInitialContext(
+    ) throws NamingException;
+    
     /**
-     * Assert that a specific value is among the values in a system property's 
-     * value list.
+     * Create the Data Source {@code Context}
      * 
-     * @param name the system property's name
-     * @param value the required value
-     * @param separator the value separator
+     * @return the Transaction Manager specific Data Source {@code Context}
      */
-    private static void prependSystemPropertyValue (
-        String name,
-        String value,
-        char separator
-    ){
-        String values = System.getProperty(name);
-        if(values == null || values.length() == 0){
-            SysLog.log(
-                Level.INFO,
-                "Set system property {0} to \"{1}\"",
-                name,value
-            );
-            System.setProperty(
-                name, 
-                value
-            );
-        } else if ((separator + values + separator).indexOf(separator + value + separator) < 0) {
-            String newValue = value + separator + values; 
-            SysLog.log(
-                Level.INFO,
-                "Change system property {0} from \"{1}\" to \"{2}\"",
-                name, values, newValue
-            );
-            System.setProperty(
-                name,
-                newValue
-            );
+    protected abstract AbstractDataSourceContext createDataSourceContext();
+    
+    /* (non-Javadoc)
+     * @see javax.naming.spi.InitialContextFactory#getInitialContext(java.util.Hashtable)
+     */
+    public Context getInitialContext(
+        Hashtable<?, ?> environment
+    ) throws NamingException {
+        if(initialContext == null) {
+        	this.initialContext = createInitialContext();
         }
+        if(environment != null) {
+            javaURLContextFactory.populate(environment);
+        }
+        dataSourceContext.activate();
+        return new DelegatingContext(environment, initialContext);
     }
-
-    static {
-        //
-        // URL set-up
-        //
-        prependSystemPropertyValue(
-            "java.protocol.handler.pkgs",
-            "org.openmdx.kernel.url.protocol",
-            '|'
-        );
+        
+    public void shutDown() {
+    	try {
+			this.dataSourceContext.close();
+		} catch (Exception e) {
+			SysLog.error("Data Source shut down failure", e);
+		}
     }
 
 }

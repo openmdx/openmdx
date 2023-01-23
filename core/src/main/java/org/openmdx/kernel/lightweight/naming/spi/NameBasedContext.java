@@ -219,7 +219,7 @@ public abstract class NameBasedContext extends AbstractContext {
         Name name
     ) throws NamingException {
         switch(name.size()){
-            case 0: return new DelegatingContext(this);
+            case 0: return new DelegatingContext(null, this);
             case 1: return resolve(name.get(0));
             default: return lookupPrefix1(name).lookup(name.getSuffix(1)); 
         }        
@@ -318,7 +318,7 @@ public abstract class NameBasedContext extends AbstractContext {
                     throw namingException;
                 }
             } else if (object instanceof Context){
-                return new DelegatingContext((Context)object);
+                return new DelegatingContext(null, (Context)object);
             } else {
                 return object;
             }

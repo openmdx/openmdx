@@ -62,43 +62,24 @@ public class DelegatingContext implements Context {
     /**
      * Constructor
      */
-    private DelegatingContext(
+    @SuppressWarnings("unchecked")
+	public DelegatingContext(
         Hashtable<?,?> environment,
-        Context context
+        Context delegate
     ){
-        this.environment = environment == null ? null : new Hashtable<Object,Object>(environment);
-        this.context = context;
+        this.environment = environment == null ? new Hashtable<>() : new Hashtable<>((Hashtable<String,?>)environment);
+        this.delegate = delegate;
     }
 
     /**
-     * Constructor 
-     * 
-     * @param environment
+     * This Context's private environment
      */
-    protected DelegatingContext(
-        Hashtable<?,?> environment
-    ){
-        this(environment, null);
-    }
-
-    /**
-     * Constructor
-     */
-    public DelegatingContext(
-        Context context
-    ){
-        this(null, context);
-    }
-
-    /**
-     * This Context's provate environment
-     */
-    private Hashtable<Object,Object> environment;
+    private Hashtable<String,Object> environment;
     
     /**
      * This Context's delegate
      */
-    private Context context;
+    private Context delegate;
 
     /**
      * The delegate has to be provided by a subclass
@@ -109,7 +90,7 @@ public class DelegatingContext implements Context {
      */
     protected Context getDelegate(
     ) throws NamingException {
-        return this.context;
+        return this.delegate;
     }
 
     /**
@@ -121,24 +102,9 @@ public class DelegatingContext implements Context {
     protected void setDelegate(
         Context context
     ) throws NamingException {
-        this.context = context;
+        this.delegate = context;
     }
 
-    /**
-     * Retrieve the environment
-     * 
-     * @return an environment not affecting the original one
-     * 
-     * @throws NamingException
-     */
-    @SuppressWarnings("unchecked")
-    private Hashtable<Object,Object> environment(
-    ) throws NamingException {
-        return this.environment == null ?
-            this.environment = (Hashtable<Object, Object>) getDelegate().getEnvironment() :
-            this.environment;
-    }
-    
     /* (non-Javadoc)
      * @see javax.naming.Context#addToEnvironment(java.lang.String, java.lang.Object)
      */
@@ -146,7 +112,7 @@ public class DelegatingContext implements Context {
         String propName, 
         Object propVal
     ) throws NamingException {
-        return environment().put(propName, propVal);
+        return this.environment.put(propName, propVal);
     }
     
     /* (non-Javadoc)
@@ -175,7 +141,7 @@ public class DelegatingContext implements Context {
     public void close(
     ) throws NamingException {
         this.environment = null;
-        this.context = null;
+        this.delegate = null;
     }
 
     /* (non-Javadoc)
@@ -239,7 +205,7 @@ public class DelegatingContext implements Context {
      */
     public Hashtable<?,?> getEnvironment(
     ) throws NamingException {
-        return new Hashtable<Object,Object>(environment());
+        return this.environment;
     }
     
     /* (non-Javadoc)
@@ -309,7 +275,7 @@ public class DelegatingContext implements Context {
         String name
     ) throws NamingException {
         return "".equals(name) ?
-                new DelegatingContext(this.environment,  this.context) :
+                new DelegatingContext(this.environment,  this.delegate) :
                 getDelegate().lookup(name);
     }
 
@@ -318,7 +284,7 @@ public class DelegatingContext implements Context {
      */
     public Object lookup(Name name) throws NamingException {
         return name.isEmpty() ?
-            new DelegatingContext(this.environment,  this.context) :
+            new DelegatingContext(this.environment,  this.delegate) :
             getDelegate().lookup(name);
     }
 
@@ -366,7 +332,7 @@ public class DelegatingContext implements Context {
     public Object removeFromEnvironment(
         String propName
     ) throws NamingException {
-        return environment().remove(propName);
+        return this.environment.remove(propName);
     }
 
     /* (non-Javadoc)

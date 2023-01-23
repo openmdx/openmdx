@@ -44,63 +44,34 @@
  */
 package org.openmdx.kernel.lightweight.naming;
 
-import java.util.Hashtable;
-
-import javax.naming.Context;
 import javax.naming.NamingException;
-import javax.naming.NoInitialContextException;
-
+import org.openmdx.kernel.lightweight.naming.jdbc.AbstractDataSourceContext;
+import org.openmdx.kernel.lightweight.naming.jdbc.NonManagedDataSourceContext;
 import org.openmdx.kernel.lightweight.transaction.LightweightTransactionManager;
 import org.openmdx.kernel.lightweight.transaction.LightweightTransactionSynchronizationRegistry;
 import org.openmdx.kernel.lightweight.transaction.LightweightUserTransaction;
 
 /**
  * Non-Managed Initial Context Factory
+ * 
+ * @deprecated in favour of Atomikos' transaction manager
  */
+@Deprecated
 public class NonManagedInitialContextFactory extends AbstractInitialContextFactory {
 
-    /**
-     * Constructor
-     * 
-     * @throws NoInitialContextException 
-     */
-    public NonManagedInitialContextFactory(
-    ) throws NoInitialContextException {
-        if(initialContext == null) {
-            initialize();
-        }
-    }
-    
-    /**
-     * The URL scheme specific initial context
-     */
-    static private volatile Context initialContext;
-
-    /**
-     * This initialization code <b>must not</b> be executed in a managed 
-     * environment.
-     * 
-     * @throws NoInitialContextException 
-     */
-    private static synchronized void initialize(
-    ) throws NoInitialContextException {
-        if(initialContext == null) {
-            initialContext = newInitialContext(
-                NonManagedInitialContextFactory.class.getName(),
-                LightweightTransactionManager.getInstance(),
-                LightweightTransactionSynchronizationRegistry.getInstance(),
-                LightweightUserTransaction.getInstance()
-            );
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see javax.naming.spi.InitialContextFactory#getInitialContext(java.util.Hashtable)
-     */
-    public Context getInitialContext(
-        Hashtable<?, ?> environment
+    @Override
+    protected LightweightInitialContext createInitialContext(
     ) throws NamingException {
-        return (Context) initialContext.lookup("");
+        return createInitialContext(
+            LightweightTransactionManager.getInstance(),
+            LightweightTransactionSynchronizationRegistry.getInstance(),
+            LightweightUserTransaction.getInstance()
+        );
     }
+
+	@Override
+	protected AbstractDataSourceContext createDataSourceContext(){
+        return new NonManagedDataSourceContext();
+	}
 
 }

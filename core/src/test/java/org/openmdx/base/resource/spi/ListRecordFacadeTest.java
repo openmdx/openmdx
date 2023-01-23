@@ -152,6 +152,7 @@ public final class ListRecordFacadeTest {
 		Assertions.assertTrue(testee.isEmpty());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void whenNonEmptyThenRecordValueMayBeChanged() {
 		//
@@ -170,6 +171,7 @@ public final class ListRecordFacadeTest {
 		Assertions.assertSame(newValue, testee.get(0));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void whenEmptyThenRecordValueMayBeNotBeSet() {
 		//
@@ -249,6 +251,7 @@ public final class ListRecordFacadeTest {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void whenEmptyThenSomethingCanBePrepended() {
 		//

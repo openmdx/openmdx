@@ -59,7 +59,11 @@ public class BuildProperties {
 	public static final String DATASOURCE_KEY = "org.openmdx.test-core.datasource";
 
 	private static final String TIMEZONE_DEFAULT = "Europe/Zurich";
-	private static final String DATASOURCE_DEFAULT = "jdbc:postgresql:openmdx-test?user=openmdx-test&password=secret&stringtype=unspecified";
+	/**
+	 * The (legacy) format for non-XA drivers would look like:
+	 * {@code "jdbc:postgresql:\\/\\/localhost\\/openmdx-test?user=openmdx-test&password=secret&driverClassName=org.postgresql.Driver"}
+	 */
+	private static final String DATASOURCE_DEFAULT = "jdbc:xa:org.postgresql.xa.PGXADataSource?user=openmdx-test&password=secret&databaseName=openmdx-test";
 
 	private static final String FILE_NAME = "build.properties";
 

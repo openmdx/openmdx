@@ -56,7 +56,10 @@ import org.openmdx.uses.org.apache.commons.pool2.impl.DefaultPooledObject;
 
 /**
  * Lightweight Connection Factory
+ * 
+ * @deprecated in favour of Atomikos' JDBC support
  */
+@Deprecated
 class PooledConnectionFactory implements PooledObjectFactory<ValidatablePooledConnection> {
 
 	/**

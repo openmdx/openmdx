@@ -49,6 +49,7 @@ import java.util.Map;
 
 import javax.naming.Binding;
 import javax.naming.Context;
+import javax.naming.Name;
 import javax.naming.NameAlreadyBoundException;
 import javax.naming.NameClassPair;
 import javax.naming.NameParser;
@@ -73,7 +74,7 @@ public abstract class ResourceContext extends StringBasedContext {
     /**
      * Lazily established connection factories
      */
-    private final Map<String,Object> connectionFactories = new HashMap<String,Object>();
+    protected final Map<String,Object> connectionFactories = new HashMap<String,Object>();
     
     /* (non-Javadoc)
      * @see javax.naming.Context#bind(java.lang.String, java.lang.Object)
@@ -189,5 +190,18 @@ public abstract class ResourceContext extends StringBasedContext {
     ) throws NamingException {
         this.connectionFactories.remove(name);
     }
+    
+    @Override
+	public void close() throws NamingException {
+    	NameParser nameParser = new CompositNameParser();
+    	for(Map.Entry<String,?> entry : connectionFactories.entrySet()) {
+    		closeConnectionFactory(nameParser.parse(entry.getKey()), entry.getValue());
+    	}
+		super.close();
+	}
+
+	protected void closeConnectionFactory(Name name, Object connectionFactory) throws NamingException {
+		// Maybe a sublcass has something to do
+	}
     
 }

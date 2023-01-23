@@ -116,23 +116,6 @@ public class Classes {
     //------------------------------------------------------------------------
     
     /**
-     * Retrieve the standard class loader
-     * 
-     * @return the standard class loader
-     */
-    private static final ClassLoader getStandardClassLoader(
-    ){
-        switch(ClassLoaderType.getStandardClassLoaderType()) {
-            case CONTEXT_CLASS_LOADER:
-                return Thread.currentThread().getContextClassLoader();
-            case KERNEL_CLASS_LOADER:    
-                return Classes.class.getClassLoader();
-            default: 
-                throw new RuntimeException("Unsupported class loader type: " + ClassLoaderType.getStandardClassLoaderType());
-        }
-    }
-
-    /**
      * Retrieve information about the the class loaders failing to provide the given class
      * 
      * @param type The entity type
@@ -299,7 +282,7 @@ public class Classes {
     ) throws ClassNotFoundException {
         return getClass(
             name,
-            getStandardClassLoader()
+            ClassLoaderType.getStandardClassLoader()
         );
     }
     
@@ -326,7 +309,7 @@ public class Classes {
      *          If I/O errors occur
      */
     public static Enumeration<URL> getResources(String name) throws IOException {
-        return getStandardClassLoader().getResources(name);
+        return ClassLoaderType.getStandardClassLoader().getResources(name);
     }
 
     
@@ -356,7 +339,7 @@ public class Classes {
         Class<?>... interfaces
     ){
         return (T) Proxy.newProxyInstance(
-            getStandardClassLoader(),
+            ClassLoaderType.getStandardClassLoader(),
             interfaces,
             invocationHandler
         );
@@ -652,26 +635,42 @@ public class Classes {
     enum ClassLoaderType {
         
         /**
-         * Appliaction classes are loaded by the context class loader
+         * Application classes are loaded by the context class loader
          */
-        CONTEXT_CLASS_LOADER,
+        CONTEXT_CLASS_LOADER {
+
+        	@Override
+			ClassLoader getClassLoader() {
+                return Thread.currentThread().getContextClassLoader();
+			}
+
+        },
         
         /**
          * Application classes are loaded by the openMDX class loader
          */
-        KERNEL_CLASS_LOADER;
+        KERNEL_CLASS_LOADER {
+			
+			@Override
+			ClassLoader getClassLoader() {
+                return Classes.class.getClassLoader();
+			}
+			
+		};
 
         private static final ClassLoaderType STANDARD = valueOf(
             Platform.getProperty("org.openmdx.kernel.loading.StandardClassLoaderType", CONTEXT_CLASS_LOADER.name())
         );
         
+        abstract ClassLoader getClassLoader();
+        
         /**
-         * Determine the standard application and resource class loader type
+         * Provides the standard application and resource class loader type
          *
-         * @return Returns the standard application and resource class loader type
+         * @return Returns the standard application and resource class loader 
          */
-        static ClassLoaderType getStandardClassLoaderType() {
-            return STANDARD;
+        static ClassLoader getStandardClassLoader() {
+            return STANDARD.getClassLoader();
         }
         
     }

@@ -72,7 +72,10 @@ import org.openmdx.kernel.log.SysLog;
 
 /**
  * JTA Transaction implementation.
+ * 
+ * @deprecated in favour of Atomikos' transaction manager
  */
+@Deprecated
 final class LightweightTransaction implements Transaction {
     
     

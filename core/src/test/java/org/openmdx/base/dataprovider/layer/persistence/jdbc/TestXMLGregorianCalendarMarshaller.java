@@ -148,6 +148,11 @@ public class TestXMLGregorianCalendarMarshaller {
 		) throws ServiceException {
 			return LayerConfigurationEntries.BOOLEAN_TYPE_CHARACTER;
 		}
+
+		@Override
+		public String getDurationType(Connection connection) throws ServiceException {
+			return LayerConfigurationEntries.DURATION_TYPE_CHARACTER;
+		}
 		
 	}
 	

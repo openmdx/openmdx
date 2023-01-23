@@ -53,7 +53,7 @@ import javax.naming.spi.NamingManager;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
+import org.openmdx.kernel.lightweight.naming.LightweightInitialContextFactoryBuilder;
 
 /**
  * Test Key Store Resources
@@ -101,7 +101,7 @@ public class WebLogicKeyStoreResourcesTest {
 				"UserName=KeyStore&" +
 				"Password=secret"
 			);
-            NonManagedInitialContextFactoryBuilder.install(pkiProviders);
+            LightweightInitialContextFactoryBuilder.install(pkiProviders);
 		}
 	}
 
