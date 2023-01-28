@@ -46,7 +46,7 @@ package org.openmdx.application.mof.mapping.cci;
 
 public class MappingTypes {
     
-    protected MappingTypes() {
+    private MappingTypes() {
         // Avoid instantiation
     }
     
@@ -79,6 +79,9 @@ public class MappingTypes {
      */
     public static final String MOF1 = "mof1";
 
+    /**
+     * Java interfaces with the model
+     */
+    public static final String UMLDOC = "umldoc";
+    
 }
-
-//--- End of File -----------------------------------------------------------

@@ -216,7 +216,6 @@ class ModelHelper_1 {
         while(tokenizer.hasMoreTokens()) {
             packageNameComponents.add(tokenizer.nextToken());
         }
-        //javaPackageName
         StringBuffer javaPackageName = new StringBuffer();
         for(
             int i = 0, iLimit = packageNameComponents.size(); 
@@ -227,11 +226,14 @@ class ModelHelper_1 {
             String source = packageNameComponents.get(i);
             AbstractNames.openmdx2NamespaceElement(target, source);
         }
-        return javaPackageName.append(
-            '.'
-        ).append(
-            packageSuffix
-        ).toString();
+        if(packageSuffix != null) {
+            javaPackageName.append(
+                '.'
+            ).append(
+                packageSuffix
+            );
+        }
+        return javaPackageName.toString();
     }
 
 }

@@ -75,7 +75,7 @@ public class XMIExternalizer {
 		String[] arguments	
 	){
         String openmdxjdo = null;
-        String stXMIDialect = "poseidon";
+        String stXMIDialect = "emf";
         final List<String> pathMapSymbols = new ArrayList<String>();
         final List<String> pathMapPaths = new ArrayList<String>();
         final List<String> formats = new ArrayList<String>();
@@ -248,7 +248,7 @@ public class XMIExternalizer {
 		        new LongOpt("out", LongOpt.OPTIONAL_ARGUMENT, null, 'o'),
 		        new LongOpt("format", LongOpt.OPTIONAL_ARGUMENT, null, 't'),
 		        new LongOpt("openmdxjdo", LongOpt.OPTIONAL_ARGUMENT, null, 'j'),
-		        new LongOpt("dataproviderVersion", LongOpt.REQUIRED_ARGUMENT, null, 'd') // temporary option only
+		        new LongOpt("dataproviderVersion", LongOpt.REQUIRED_ARGUMENT, null, 'd') // ignored
 		    }
 		);
 		return options;

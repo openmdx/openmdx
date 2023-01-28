@@ -119,9 +119,9 @@ public interface ModelElement_1_0 {
 
     public boolean isInstanceOf(Collection<Class<? extends ElementRecord>> types);
     
-    public String getName() throws ServiceException;
+    public String getName();
     
-    public String getQualifiedName() throws ServiceException;
+    public String getQualifiedName();
     
     public Path getReferencedEnd() throws ServiceException;
     

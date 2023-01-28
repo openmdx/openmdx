@@ -88,6 +88,8 @@ public class MapperFactory_1 {
             return new org.openmdx.application.mof.mapping.xmi.XMIMapper_1();
         } else if (MappingTypes.MOF1.equals(format)) {
             return new org.openmdx.application.mof.mapping.java.mof.ModelNameConstantsMapper();
+//      } else if (MappingTypes.UMLDOC.equals(format)) {
+//          return new org.openmdx.application.mof.mapping.pimdoc.DocumentationMapper();
         } else {
             try {
                 final String className;

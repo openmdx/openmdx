@@ -47,7 +47,6 @@ package org.openmdx.application.mof.repository.layer.application;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -109,11 +108,7 @@ public class Model_2 extends AbstractRestPort {
     
     protected static final Path PROVIDER_ROOT_PATH = new Path("xri://@openmdx*org.omg.model1/provider/Mof");
 
-    protected static final List<String> STANDARD_FORMAT = Collections.unmodifiableList(
-        Arrays.asList(
-            MappingTypes.XMI1
-        )
-    );
+    protected static final List<String> STANDARD_FORMAT = Collections.singletonList(MappingTypes.XMI1);
 
     @Override
     public Interaction getInteraction(
@@ -171,9 +166,6 @@ public class Model_2 extends AbstractRestPort {
     	 * 
     	 * @throws ResourceException 
     	 */
-		@SuppressWarnings({
-            "synthetic-access"
-        })
         protected RestInteraction(
 			RestConnection connection
 		) throws ResourceException {
@@ -788,7 +780,6 @@ public class Model_2 extends AbstractRestPort {
 		/**
 		 * Recalculate all derived attributes and update repository
 		 */
-		@SuppressWarnings("synthetic-access")
         private boolean invokeEndImport(
 			MessageRecord output, MessageRecord output2
 		) throws ResourceException {
@@ -831,7 +822,6 @@ public class Model_2 extends AbstractRestPort {
 		/**
 		 * Start the import
 		 */
-		@SuppressWarnings("synthetic-access")
         private boolean invokeBeginImport(
 			MessageRecord input,
 			MessageRecord output
@@ -842,19 +832,16 @@ public class Model_2 extends AbstractRestPort {
 			return true;
 		}
 
-        @SuppressWarnings({
-            "rawtypes",
-            "synthetic-access"
-        })
+		@SuppressWarnings("rawtypes")
 		private boolean invokeExternalizePackage(
 			MessageRecord input,
 			MessageRecord output
 		) throws ResourceException {
 			try {
 			    SysLog.trace("activating model");
-			    Model_1_0 model = new ModelBuilder_1(false, Model_2.this.getDelegate()).build();
-			    Path modelPackagePath = input.getResourceIdentifier().getParent().getParent();
-			    String qualifiedPackageName = modelPackagePath.getLastSegment().toClassicRepresentation();
+			    final Model_1_0 model = new ModelBuilder_1(false, Model_2.this.getDelegate()).build();
+			    final Path modelPackagePath = input.getResourceIdentifier().getParent().getParent();
+			    final String qualifiedPackageName = modelPackagePath.getLastSegment().toClassicRepresentation();
    
 			    // only test for existence if not wildcard export
 			    if(
@@ -885,7 +872,7 @@ public class Model_2 extends AbstractRestPort {
         			            mapper instanceof Mapper_1_1
         			        ){
         			            ((Mapper_1_1)mapper).externalize(
-        			                modelPackagePath.getLastSegment().toClassicRepresentation(),
+        			                qualifiedPackageName,
         			                model,
         			                zip,
         			                Model_2.this.openmdxjdoMetadataDirectory
@@ -893,7 +880,7 @@ public class Model_2 extends AbstractRestPort {
         			        } 
         			        else {
         			            mapper.externalize(
-        			                modelPackagePath.getLastSegment().toClassicRepresentation(),
+        			                qualifiedPackageName,
         			                model,
         			                zip
         			            );
