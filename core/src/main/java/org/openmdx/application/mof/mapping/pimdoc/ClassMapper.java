@@ -1,10 +1,10 @@
 /*
+ * ==================================================================== 
+ * Project: openMDX, http://www.openmdx.org
+ * Description: Package Mapper 
+ * Owner: the original authors. 
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Description: build.gradle.kts
- * Owner:       the original authors.
- * ====================================================================
- *
+ * 
  * This software is published under the BSD license as listed below.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -39,15 +39,53 @@
  * 
  * ------------------
  * 
- * This product includes software developed by other organizations as
- * listed in the NOTICE file.
+ * This product includes or is based on software developed by other 
+ * organizations as listed in the NOTICE file.
  */
+package org.openmdx.application.mof.mapping.pimdoc;
 
-plugins {
-	java
-}
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 
-allprojects {
-    group = "org.openmdx"
-    version = "2.18.1"
+/**
+ * Package Mapper 
+ */
+public class ClassMapper extends HTMLMapper {
+
+    /**
+     * Constructor 
+     */
+    public ClassMapper(
+        Sink sink, 
+        ModelElement_1_0 classToBeExported,
+        PIMDocConfiguration configuration
+    ) throws ServiceException {
+		super(sink, classToBeExported, configuration);
+    }    
+
+	@Override
+	protected void htmlBody() {
+		this.pw.println("<body class=\"uml-element\">");
+		columnHead();
+		columnBody();
+		this.pw.println("</body>");
+   }
+
+	private void columnHead() {
+		this.pw.println("\t<div class=\"column-head\">");
+		this.pw.println("\t\t<h2>" + getTitle() + "</h2>");
+		this.pw.println("\t</div>");
+	}
+	
+	private void columnBody() {
+		this.pw.println("\t<div class=\"column-body\">");
+		super.annotation(element);
+		this.pw.println("\t</div>");
+	}
+	
+	@Override
+	protected String getTitle() {
+		return "Class " + getDisplayName();
+	}
+
 }

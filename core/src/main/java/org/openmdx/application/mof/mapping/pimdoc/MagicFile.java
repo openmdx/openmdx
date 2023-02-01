@@ -1,10 +1,10 @@
 /*
+ * ==================================================================== 
+ * Project: openMDX, http://www.openmdx.org
+ * Description: Magic Files
+ * Owner: the original authors. 
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Description: build.gradle.kts
- * Owner:       the original authors.
- * ====================================================================
- *
+ * 
  * This software is published under the BSD license as listed below.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -39,15 +39,57 @@
  * 
  * ------------------
  * 
- * This product includes software developed by other organizations as
- * listed in the NOTICE file.
+ * This product includes or is based on software developed by other 
+ * organizations as listed in the NOTICE file.
  */
+package org.openmdx.application.mof.mapping.pimdoc;
 
-plugins {
-	java
-}
+import java.net.URL;
 
-allprojects {
-    group = "org.openmdx"
-    version = "2.18.1"
+enum MagicFile {
+
+
+	/**
+	 * The PIMDoc main page
+	 */
+	INDEX(null, "index.html"),
+
+	/**
+	 * The PIMDoc banner logo
+	 */
+	LOGO("logo-url", "logo.png"),
+
+	/**
+	 * The PIMDoc welcome page
+	 */
+	WELCOME("welcome-url", "welcome.html"),
+	
+	/**
+	 * The PIMDoc style sheet
+	 */
+	STYLE_SHEET("style-sheet-url","style-sheet.css");
+
+	private MagicFile(
+		String propertyName,
+		String fileName
+	) {
+		this.propertyName = propertyName;
+		this.fileName = fileName;
+	}
+	
+	private final String propertyName;
+	private final String fileName;
+	
+	String getFileName() {
+		return this.fileName;
+	}
+	
+	String getPropertyName() {
+		return this.propertyName;
+	}
+	
+	URL getDefault() {
+		return getClass().getResource("default-" + fileName);
+	}
+
 }

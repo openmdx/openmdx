@@ -56,6 +56,9 @@ plugins {
 
 repositories {
 	mavenCentral()
+	flatDir {
+        dirs("/Users/harry/Repository/flat")
+    }
 }
 
 var env = Properties()
@@ -165,6 +168,7 @@ dependencies {
     implementation("javax:javaee-api:8.0.+")
     implementation("javax.jdo:jdo-api:3.1")
     implementation("javax.cache:cache-api:1.1.+")
+	implementation("com.vladsch.flexmark:flexmark:0.62.2")
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
     testImplementation("org.mockito:mockito-core:4.2.0")    
@@ -172,10 +176,11 @@ dependencies {
 	testRuntimeOnly("com.atomikos:transactions-jta:5.0.9")
 	testRuntimeOnly("com.atomikos:transactions-jdbc:5.0.9")
     // openmdxBase
-    openmdxBase("org.openmdx:openmdx-base:2.17.7")
+    openmdxBase("org.openmdx:openmdx-base:2.18.1")
     // openmdxBootstrap
     openmdxBootstrap(files(File(project.getBuildDir(), "generated/classes/openmdxBootstrap")))
     openmdxBootstrap("javax:javaee-api:8.0.+")
+	openmdxBootstrap("com.vladsch.flexmark:flexmark:0.62.2")
     // jdo-api
     jdoApi("javax.jdo:jdo-api:3.1")
     // cache-api

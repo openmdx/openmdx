@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: build.gradle.kts
+ * Description: Element Name Comparator
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,12 +42,22 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
+package org.openmdx.application.mof.mapping.pimdoc;
 
-plugins {
-	java
-}
+import java.util.Comparator;
 
-allprojects {
-    group = "org.openmdx"
-    version = "2.18.1"
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+
+/**
+ * Element Name Comparator
+ */
+public class ElementNameComparator implements Comparator<ModelElement_1_0> {
+
+	@Override
+	public int compare(final ModelElement_1_0 element1, final ModelElement_1_0 element2) {
+		final String simpleName1 = element1.getName();
+		final String simpleName2 = element2.getName();
+		return simpleName1.compareTo(simpleName2);
+	}
+
 }

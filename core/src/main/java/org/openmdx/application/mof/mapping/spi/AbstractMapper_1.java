@@ -110,17 +110,24 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
         }
         zipEntryName = packageName + "/" + entryName + suffix;
       }
-      SysLog.trace("adding to jar. element " + zipEntryName);
+      addToZip(zip, zipEntryName, os);
+    } catch(IOException e) {
+      throw new ServiceException(e);
+    }
+  }
+
+  protected void addToZip(
+	ZipOutputStream zip, 
+	final String zipEntryName, 
+	ByteArrayOutputStream os
+  ) throws IOException {
+	  SysLog.trace("adding to jar. element " + zipEntryName);
       ZipEntry zipEntry = new JarEntry(
           zipEntryName
       );
       zipEntry.setSize(os.size());
       zip.putNextEntry(zipEntry);
       os.writeTo(zip);
-    }
-    catch(IOException e) {
-      throw new ServiceException(e);
-    }
   }
 
   protected void addToZip(

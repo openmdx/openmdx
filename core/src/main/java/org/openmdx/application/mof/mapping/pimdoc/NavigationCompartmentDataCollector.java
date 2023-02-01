@@ -1,10 +1,10 @@
 /*
+ * ==================================================================== 
+ * Project: openMDX, http://www.openmdx.org
+ * Description: Navigation Compartment Data Collector
+ * Owner: the original authors. 
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Description: MappingTypes 
- * Owner:       the original authors.
- * ====================================================================
- *
+ * 
  * This software is published under the BSD license as listed below.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -42,46 +42,56 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.cci;
+package org.openmdx.application.mof.mapping.pimdoc;
 
-public class MappingTypes {
-    
-    private MappingTypes() {
-        // Avoid instantiation
-    }
-    
-    //------------------------------------------------------------------------
-    // openMDX 2 formats
-    //------------------------------------------------------------------------
-    
-    /**
-     * openMDX model mapping
-     */
-    public static final String XMI1 = "xmi1";
-    
-    /**
-     * Non-JMI mapping
-     */
-    public static final String CCI2 = "cci2";
-    
-    /**
-     * Extends cci2 mapping with JMI's reflective interfaces
-     */
-    public static final String JMI1 = "jmi1";
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
-    /**
-     * Standard JPA mapping
-     */
-    public static final String JPA3 = "jpa3";
+/**
+ * Navigation Compartment Data Collector
+ */
+class NavigationCompartmentDataCollector extends TreeMap<String,SortedSet<String>> {
 
-    /**
-     * Java interfaces with the model
-     */
-    public static final String MOF1 = "mof1";
+	protected NavigationCompartmentDataCollector() {
+		super(COMPARATOR);
+	}
 
-    /**
-     * PIM Documentation
-     */
-    public static final String PIMDOC = "pimdoc";
-    
+	private static final Comparator<String> COMPARATOR = new PackagePatternComparator();
+	
+	private static final long serialVersionUID = -4489160358886710466L;
+	private final Comparator<String> simpleNameComparator = new SimpleNameComparator();
+	
+	void addKey(String qualifiedName) {
+		this.computeIfAbsent(qualifiedName, key -> new TreeSet<String>(simpleNameComparator));
+	}
+
+	void addElement(String qualifiedName) {
+		for(Map.Entry<String,SortedSet<String>> e : entrySet()) {
+			if(isPartOfPackageGroup(e.getKey(), qualifiedName)) {
+				e.getValue().add(qualifiedName);
+			}
+		}
+	}
+	
+	boolean isPartOfPackageGroup(String packagePattern, String qualifiedName) {
+		if(PackagePatternComparator.isWildcardPattern(packagePattern)) {
+			return PackagePatternComparator.isCatchAllPattern(packagePattern) ||
+				qualifiedName.startsWith(PackagePatternComparator.removeWildcard(packagePattern) + ':');
+		} else {
+			return getPackageId(packagePattern).equals(getPackageId(qualifiedName));
+		}
+	}
+
+	protected String getPackageId(String qualifiedName) {
+		return qualifiedName.substring(0, qualifiedName.lastIndexOf(':'));
+	}
+	
+	void normalize() {
+		values().removeIf(Collection::isEmpty);
+	}
+	
 }

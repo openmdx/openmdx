@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: build.gradle.kts
+ * Description: Simple Names Comparator
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,12 +42,24 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
+package org.openmdx.application.mof.mapping.pimdoc;
 
-plugins {
-	java
-}
+import java.util.Comparator;
 
-allprojects {
-    group = "org.openmdx"
-    version = "2.18.1"
+/**
+ * Simple Names Comparator
+ */
+public class SimpleNameComparator implements Comparator<String> {
+
+	@Override
+	public int compare(final String qualifiedName1, final String qualifiedName2) {
+		final String simpleName1 = getSimpleName(qualifiedName1);
+		final String simpleName2 = getSimpleName(qualifiedName2);
+		return simpleName1.compareTo(simpleName2);
+	}
+	
+	private String getSimpleName(String qualifiedName) {
+		return qualifiedName.substring(qualifiedName.lastIndexOf(':')+1);
+	}
+
 }

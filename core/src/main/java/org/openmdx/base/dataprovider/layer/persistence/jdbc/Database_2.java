@@ -137,7 +137,6 @@ import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.FastResultSet;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.LikeFlavour;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Target;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -6196,46 +6195,39 @@ public class Database_2
             // ignore
         }
         loopFilterProperties: for (FilterProperty p : filterProperties) {
-            try {
-                if (referencedTypes != null) {
-                    // get filter property name and eliminate prefixes such as
-                    // role_id, etc.
-                    String filterPropertyName = p.name();
+            if (referencedTypes != null) {
+                // get filter property name and eliminate prefixes such as
+                // role_id, etc.
+                String filterPropertyName = p.name();
+                filterPropertyName = filterPropertyName
+                    .substring(filterPropertyName.lastIndexOf('$') + 1);
+                // Qualified filter property name
+                if (filterPropertyName.indexOf(":") > 0) {
+                    ModelElement_1_0 featureDef = getModel().findElement(filterPropertyName);
+                    if (featureDef != null) {
+                        filterPropertyDefs.add(featureDef);
+                        continue loopFilterProperties;
+                    }
+                }
+                // Non-qualified filter property name. Must look up.
+                else {
                     filterPropertyName = filterPropertyName
-                        .substring(filterPropertyName.lastIndexOf('$') + 1);
-                    // Qualified filter property name
-                    if (filterPropertyName.indexOf(":") > 0) {
-                        ModelElement_1_0 featureDef = getModel().findElement(filterPropertyName);
+                        .substring(filterPropertyName.lastIndexOf(':') + 1);
+                    // try to find filter property in any of the subtypes of
+                    // referencedType
+                    for (ModelElement_1_0 subtype : referencedTypes) {
+                        String qualifiedFilterPropertyName = subtype.getQualifiedName() + ":"
+                            + filterPropertyName;
+                        ModelElement_1_0 featureDef = getModel()
+                            .findElement(qualifiedFilterPropertyName);
                         if (featureDef != null) {
                             filterPropertyDefs.add(featureDef);
                             continue loopFilterProperties;
                         }
                     }
-                    // Non-qualified filter property name. Must look up.
-                    else {
-                        filterPropertyName = filterPropertyName
-                            .substring(filterPropertyName.lastIndexOf(':') + 1);
-                        // try to find filter property in any of the subtypes of
-                        // referencedType
-                        for (ModelElement_1_0 subtype : referencedTypes) {
-                            String qualifiedFilterPropertyName = subtype.getQualifiedName() + ":"
-                                + filterPropertyName;
-                            ModelElement_1_0 featureDef = getModel()
-                                .findElement(qualifiedFilterPropertyName);
-                            if (featureDef != null) {
-                                filterPropertyDefs.add(featureDef);
-                                continue loopFilterProperties;
-                            }
-                        }
-                    }
-                    // No feature definition found for filter property
-                    filterPropertyDefs.add(null);
                 }
-            } catch (ServiceException exception) {
-                SysLog.warning(
-                    "The following error occured when trying to determine multiplicity of filter property",
-                    exception
-                );
+                // No feature definition found for filter property
+                filterPropertyDefs.add(null);
             }
         }
         return filterPropertyDefs;

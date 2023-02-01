@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: build.gradle.kts
+ * Description: Simple Name Comparator Test
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,12 +42,70 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
+package org.openmdx.application.mof.mapping.pimdoc;
 
-plugins {
-	java
-}
+import java.util.Comparator;
 
-allprojects {
-    group = "org.openmdx"
-    version = "2.18.1"
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+/**
+ * Simple Name Comparator Test
+ */
+class SimpleNameComparatorTest {
+
+	@Test
+	void when_simpleNameIsSmaller_then_lessThanZero() {
+		//
+		// Arrange
+		//
+		final Comparator<String> testee = new SimpleNameComparator();
+		final String left = "org:openmdx:state1:DateState";
+		final String right = "org:openmdx:base:Segment";
+		// 
+		// Act		
+		//
+		final int result = testee.compare(left, right);
+		//
+		// Assert
+		//
+		Assertions.assertTrue(result < 0);
+	}
+	
+	@Test
+	void when_simpleNameIsSame_then_zero() {
+		//
+		// Arrange
+		//
+		final Comparator<String> testee = new SimpleNameComparator();
+		final String left = "org:openmdx:model1:Segment";
+		final String right = "org:openmdx:audit1:Segment";
+		// 
+		// Act		
+		//
+		final int result = testee.compare(left, right);
+		//
+		// Assert
+		//
+		Assertions.assertEquals(0, result);
+	}
+
+	@Test
+	void when_simpleNameIsGreater_then_greaterThan0() {
+		//
+		// Arrange
+		//
+		final Comparator<String> testee = new SimpleNameComparator();
+		final String left = "org:openmdx:base:Segment";
+		final String right = "org:openmdx:state2:DateState";
+		// 
+		// Act		
+		//
+		final int result = testee.compare(left, right);
+		//
+		// Assert
+		//
+		Assertions.assertTrue(result > 0);
+	}
+
 }

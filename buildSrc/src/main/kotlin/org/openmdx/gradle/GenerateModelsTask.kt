@@ -70,7 +70,8 @@ open class GenerateModelsTask : JavaExec() {
 			"--format=cci2",
 			"--format=jmi1",
 			"--format=jpa3",
-			"--format=mof1",            
+			"--format=mof1",
+			"--format=pimdoc", 
 			"%"
 		)
 		doLast {
@@ -94,8 +95,18 @@ open class GenerateModelsTask : JavaExec() {
 				)
 			}
 			project.copy {
-				from(project.zipTree(File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + "-models.zip"))) { include("META-INF/") }
+				from(project.zipTree(File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + "-models.zip"))) { 
+					include("META-INF/") 
+				}
 				into(File(project.getBuildDir(), "resources/main"))
+			}
+			project.copy {
+				from(project.zipTree(File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + "-models.zip"))) { 
+					include("**/*.html") 
+					include("style-sheet.css") 
+					include("logo.png") 
+				}
+				into(File(project.getBuildDir(), "pimdoc"))
 			}
 		}
 		

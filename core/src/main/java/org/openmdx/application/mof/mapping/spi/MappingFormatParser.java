@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: MapperFactory_1
+ * Description: Mapping Format Parser
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -44,63 +44,61 @@
  */
 package org.openmdx.application.mof.mapping.spi;
 
-import java.util.Arrays;
-import java.util.List;
-import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
-import org.openmdx.application.mof.mapping.cci.MappingTypes;
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.kernel.loading.Classes;
-
 /**
- * MapperFactory_1
+ * Mapping Format Parser
  */
-public class MapperFactory_1 {
+public class MappingFormatParser {
 
-	private static final List<String> JAVA_FORMATS = Arrays.asList(
-            MappingTypes.CCI2,
-            MappingTypes.JMI1,
-            MappingTypes.JPA3
-	);
-	
-    /**
-     * Create a mapper instance
-     * 
-     * @param format the format, either predefined or as class name
-     * 
-     * @return the mapper instance specified by <code>format</code>
-     * 
-     * @throws ServiceException
-     */
-    public static Mapper_1_0 create(
-        String format
-    ) throws ServiceException {
-    	final MappingFormatParser parser = new MappingFormatParser(format);
-        if(JAVA_FORMATS.contains(parser.getId())) {
-            return new org.openmdx.application.mof.mapping.java.Mapper_1(
-                format,
-                parser.getId(),
-                "java"            
-            );
-        } else if (MappingTypes.XMI1.equals(format)) {
-            return new org.openmdx.application.mof.mapping.xmi.XMIMapper_1();
-        } else if (MappingTypes.MOF1.equals(format)) {
-            return new org.openmdx.application.mof.mapping.java.mof.ModelNameConstantsMapper();
-        } else if (MappingTypes.PIMDOC.equals(format)) {
-          return parser.getArguments().length == 0 ?
-    		  new org.openmdx.application.mof.mapping.pimdoc.PIMDocMapper() :
-    		  new org.openmdx.application.mof.mapping.pimdoc.PIMDocMapper(parser.getArguments()[0]);
+	/**
+	 * Constructor
+	 * 
+	 * @param format the format to be parsed
+	 */
+	MappingFormatParser(String format) {
+        if(format.endsWith(")")){
+            int open = format.indexOf('(');
+            int close = format.length() - 1;
+            id = format.substring(0, open);
+            arguments = format.substring(open+1, close).split(",");
         } else {
-            try {
-                return Classes.<Mapper_1_0>newApplicationInstance(
-                	Mapper_1_0.class, 
-                	parser.getId(), 
-                	(Object[])parser.getArguments()
-                );
-            } catch (Exception exception) {
-                throw new ServiceException(exception);
-            }
+        	int colon = format.indexOf(':') ;
+        	if(colon > 0) {
+        		id = format.substring(0, colon);
+                arguments = format.substring(colon+1).split(",");
+        	} else {
+	            id = format;
+	            arguments = new String[]{};
+        	}
         }
-    }
-
-    
+	}
+	
+	/**
+	 * Either one of the predefined mapping types or a fully qualified class name
+	 * 
+	 * @return the format id
+	 * 
+	 * @see org.openmdx.application.mof.mapping.cci.MappingTypes
+	 */
+	private final String id;
+	
+	/**
+	 * The (optional) arguments
+	 */
+	private final String[] arguments;
+	
+	/**
+	 * Either one of the predefined mapping types or a fully qualified class name
+	 * 
+	 * @return the format id
+	 * 
+	 * @see org.openmdx.application.mof.mapping.cci.MappingTypes
+	 */
+	String getId() {
+		return id;
+	}
+	
+	String[] getArguments() {
+		return arguments;
+	}
+	
 }

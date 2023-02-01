@@ -1,10 +1,10 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: build.gradle.kts
+ * Description: PIMDoc Externalizer
  * Owner:       the original authors.
  * ====================================================================
- *
+ * 
  * This software is published under the BSD license as listed below.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -39,15 +39,16 @@
  * 
  * ------------------
  * 
- * This product includes software developed by other organizations as
- * listed in the NOTICE file.
+ * This product includes or is based on software developed by other 
+ * organizations as listed in the NOTICE file.
  */
+package org.openmdx.application.mof.mapping.pimdoc;
 
-plugins {
-	java
-}
+import java.io.Closeable;
+import java.io.Writer;
 
-allprojects {
-    group = "org.openmdx"
-    version = "2.18.1"
+interface Sink extends Closeable {
+
+    Writer createWriter(String entryName);
+
 }
