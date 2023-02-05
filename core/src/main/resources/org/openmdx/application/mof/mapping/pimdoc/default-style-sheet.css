@@ -71,14 +71,14 @@
 .navigation-column {
 	width: 25%;
 }
-.detail-column {
+.element-column {
 	width: 75%;
     position: relative;
     padding-bottom: 56.25%;
     height: 0;
     overflow: hidden;
 }
-.detail-column iframe {
+.element-column iframe {
     border: none;
     position: absolute;
     top: .6em;

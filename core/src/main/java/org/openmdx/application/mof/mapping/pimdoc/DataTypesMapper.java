@@ -59,39 +59,15 @@ class DataTypesMapper extends CompartmentMapper {
 		ModelElement_1_0 element, 
 		Function<ModelElement_1_0, String> hrefMapper
 	){
-		super(pw, element, hrefMapper);
+		super(
+			"data-types", "Data Types", 
+			pw, element, hrefMapper,
+			"Name", "Type", "Kind"
+		);
 	}
 
 	@Override
-	protected void compartment() {
-		printLine("\t\t<details class=\"uml-data-types\" open>");
-		mapSummary();
-		mapDetails();
-		printLine("\t\t</details>");
-	}
-
-	private void mapSummary() {
-		printLine("\t\t\t<summary>Data Types</summary>");
-	}
-
-	private void mapDetails() {
-		printLine("\t\t\t<table>");
-		mapTableHead();
-		mapTableBody();
-		printLine("\t\t\t</table>");
-	}
-
-	private void mapTableHead() {
-		printLine("\t\t\t\t<thead>");
-		printLine("\t\t\t\t\t<tr>");
-		printLine("\t\t\t\t\t\t<th>Name</th>");
-		printLine("\t\t\t\t\t\t<th>Kind</th>");
-		printLine("\t\t\t\t\t\t<th>Type</th>");
-		printLine("\t\t\t\t\t</tr>");
-		printLine("\t\t\t\t</thead>");
-	}
-
-	private void mapTableBody() {
+	protected void mapTableBody() {
 		printLine("\t\t\t\t<tbody>");
 		containedElements()
 			.filter(ModelElement_1_0::isDataType)
@@ -103,12 +79,12 @@ class DataTypesMapper extends CompartmentMapper {
 	private void mapTableRow(ModelElement_1_0 element) {
 		printLine("\t\t\t\t\t<tr id=\"" + element.getName() + "\">");
 		mapDataTypeName(element);
-		printLine("\t\t\t\t\t\t<td>" + getKind(element) + "</td>");
 		if(element.isAliasType()) {
 			mapType(getType(element));
 		} else {
 			printLine("\t\t\t\t\t\t<td/>");
 		}
+		printLine("\t\t\t\t\t\t<td>" + getKind(element) + "</td>");
 		printLine("\t\t\t\t\t</tr>");
 	}
 
@@ -134,10 +110,10 @@ class DataTypesMapper extends CompartmentMapper {
 	
 	private String getKind(ModelElement_1_0 element) {
 		return 
-			element.isAliasType() ? "alias type" :
-			element.isStructureType() ? "structure type" :
-			element.isPrimitiveType() ? "primitive type" :
-			"other";
+			element.isAliasType() ? "Alias Type" :
+			element.isStructureType() ? "Structure Type " :
+			element.isPrimitiveType() ? "Primitive Type" :
+			element.getDelegate().getRecordName();
 	}
 
 	private void mapType(ModelElement_1_0 type) {

@@ -67,9 +67,11 @@ abstract class HTMLMapper extends MapperTemplate {
 			markdown ? configuration.getMarkdownRendererFactory().instantiate() : Function.identity()
 		);
 		this.configuration = configuration;
-		this.element = element;
 	}
 
+	private static final String UNCHECKED_BOX = "&#x2610;";
+	private static final String CHECKED_BOX = "&#x2611;";
+	
 	protected HTMLMapper(Sink sink, Model_1_0 model, boolean markdown, PIMDocConfiguration configuration) {
 		this(sink, model, null, markdown, configuration);
 	}
@@ -77,8 +79,6 @@ abstract class HTMLMapper extends MapperTemplate {
 	protected HTMLMapper(Sink sink, ModelElement_1_0 element, boolean markdown, PIMDocConfiguration configuration) {
 		this(sink, element.getModel(), element, markdown, configuration);
 	}
-
-	protected final ModelElement_1_0 element;
 	
     protected final PIMDocConfiguration configuration;
     
@@ -143,10 +143,10 @@ abstract class HTMLMapper extends MapperTemplate {
 	 * @return the entry name
 	 */
     private static String getEntryName(ModelElement_1_0 element){
+    	if(element == null) {
+    		return MagicFile.INDEX.getFileName();
+    	}
     	try {
-	    	if(element == null) {
-	    		return MagicFile.INDEX.getFileName();
-	    	}
 	    	final StringBuilder entryName = new StringBuilder(
 	    		element.getModel().toJavaPackageName(element, null).replace('.', '/')
 	    	);
@@ -157,15 +157,8 @@ abstract class HTMLMapper extends MapperTemplate {
     	}
     }
 	
-    private String getBaseURL() {
-    	if(this.element == null) {
-    		return "";
-    	}
-    	StringBuilder baseDir = new StringBuilder();
-    	for(long i = element.getQualifiedName().chars().filter(HTMLMapper::isColon).count(); i > 0L; i--) {
-    		baseDir.append("../");
-    	}
-    	return baseDir.toString();
+    protected String getBaseURL() {
+    	return "";
     }
 
     protected String getFileURL(
@@ -205,12 +198,12 @@ abstract class HTMLMapper extends MapperTemplate {
 		}
     }
 
-    private static boolean isColon(int c) {
-    	return c == ':';
-    }
-    
 	protected Stream<ModelElement_1_0> streamElements(){
 		return this.model.getContent().stream();
+	}
+	
+	static String renderBox(boolean checked) {
+		return checked ? CHECKED_BOX : UNCHECKED_BOX;
 	}
 	
     protected abstract String getTitle();

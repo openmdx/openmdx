@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Class Hierarchy Mapper
+ * Description: Behavioural Features Mapper
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -50,72 +50,26 @@ import java.util.function.Function;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
- * Class Hierarchy Mapper
+ * Behavioural Features Mapper
  */
-class ClassHierarchyMapper extends CompartmentMapper {
+class BehaviouralFeaturesMapper extends CompartmentMapper {
 	
-	ClassHierarchyMapper(
+	BehaviouralFeaturesMapper(
 		PrintWriter pw, 
 		ModelElement_1_0 element, 
 		Function<ModelElement_1_0, String> hrefMapper
 	){
 		super(
-			"class-hierarchy", "Class Hierarchy", 
+			"behavioural-features", "Behavioural Features", 
 			pw, element, hrefMapper,
-			"Direction", "Classes"
+			"to", "be", "defined"
 		);
 	}
 
 	@Override
 	protected void mapTableBody() {
 		printLine("\t\t\t\t<tbody>");
-		mapSupertypes();
-		mapSubtypes();
 		printLine("\t\t\t\t</tbody>");
-	}
-
-	private void mapSupertypes() {
-		printLine("\t\t\t\t\t<tr class=\"uml-supertypes\">");
-		printLine("\t\t\t\t\t\t<td>Superclasses</td>");
-		printLine("\t\t\t\t\t\t<td>");
-		element
-			.objGetSet("allSupertype")
-			.stream()
-			.map(this::getElement)
-			.filter(this::excludeSelf)
-			.sorted(ELEMENT_NAME_COMPARATOR)
-			.forEach(this::mapClass);
-		printLine("\t\t\t\t\t\t</td>");
-		printLine("\t\t\t\t\t</tr>");
-	}
-	
-	private void mapSubtypes() {
-		printLine("\t\t\t\t\t<tr class=\"uml-subtypes\">");
-		printLine("\t\t\t\t\t\t<td>Subclasses</td>");
-		printLine("\t\t\t\t\t\t<td>");
-		element
-			.objGetSet("allSubtype")
-			.stream()
-			.map(this::getElement)
-			.filter(this::excludeSelf)
-			.sorted(ELEMENT_NAME_COMPARATOR)
-			.forEach(this::mapClass);
-		printLine("\t\t\t\t\t\t</td>");
-		printLine("\t\t\t\t\t</tr>");
-	}
-
-	private void mapClass(ModelElement_1_0 suClass) {
-		printLine(
-			"\t\t\t\t\t\t\t<a class=\"uml-enumeration\" href=\"", 
-			getHref(suClass),
-			"\" title=\"",
-			getDisplayName(suClass),
-			"\" target=\"",
-			HTMLMapper.FRAME_NAME,
-			"\">",
-			suClass.getName(),
-			"</a>"
-		);
 	}
 	
 }

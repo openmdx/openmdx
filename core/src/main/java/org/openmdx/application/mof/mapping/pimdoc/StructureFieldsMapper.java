@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Structure Field Mapper
+ * Description: Structure Fields Mapper
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -47,53 +47,27 @@ package org.openmdx.application.mof.mapping.pimdoc;
 import java.io.PrintWriter;
 import java.util.function.Function;
 
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
- * Structure Field Mapper
+ * Structure Fields Mapper
  */
-class StructureFieldMapper extends CompartmentMapper {
+class StructureFieldsMapper extends CompartmentMapper {
 	
-	StructureFieldMapper(
+	StructureFieldsMapper(
 		PrintWriter pw, 
 		ModelElement_1_0 element, 
 		Function<ModelElement_1_0, String> hrefMapper
 	){
-		super(pw, element, hrefMapper);
+		super(
+			"structure-fields", "Structure Fields",
+			pw, element, hrefMapper,
+			"Name", "Multiplicity", "Type"
+		);
 	}
 
 	@Override
-	protected void compartment() {
-		printLine("\t\t<details class=\"uml-structure-fields\" open>");
-		mapSummary();
-		mapDetails();
-		printLine("\t\t</details>");
-	}
-
-	private void mapSummary() {
-		printLine("\t\t\t<summary>Structure Fields</summary>");
-	}
-
-	private void mapDetails() {
-		printLine("\t\t\t<table>");
-		mapTableHead();
-		mapTableBody();
-		printLine("\t\t\t</table>");
-	}
-
-	private void mapTableHead() {
-		printLine("\t\t\t\t<thead>");
-		printLine("\t\t\t\t\t<tr>");
-		printLine("\t\t\t\t\t\t<th>Name</th>");
-		printLine("\t\t\t\t\t\t<th>Multiplicity</th>");
-		printLine("\t\t\t\t\t\t<th>Type</th>");
-		printLine("\t\t\t\t\t</tr>");
-		printLine("\t\t\t\t</thead>");
-	}
-
-	private void mapTableBody() {
+	protected void mapTableBody() {
 		printLine("\t\t\t\t<tbody>");
 		mapFields();
 		printLine("\t\t\t\t</tbody>");
@@ -112,14 +86,6 @@ class StructureFieldMapper extends CompartmentMapper {
 		printLine("\t\t\t\t\t\t<td>", getMultiplicity(element), "</td>");
 		mapType(getType(element));
 		printLine("\t\t\t\t\t</tr>");
-	}
-	
-	private String getMultiplicity(ModelElement_1_0 element) {
-		try {
-			return element.getMultiplicity();
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
 	}
 	
 	private void mapType(ModelElement_1_0 type) {

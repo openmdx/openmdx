@@ -49,7 +49,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 /**
  * Package Mapper 
  */
-public class PackageMapper extends HTMLMapper {
+public class PackageMapper extends ElementMapper {
 
     /**
      * Constructor 
@@ -59,7 +59,7 @@ public class PackageMapper extends HTMLMapper {
         ModelElement_1_0 packageToBeExported,
         boolean markdown, PIMDocConfiguration configuration
     ){
-		super(sink, packageToBeExported, markdown, configuration);
+		super("Package", sink, packageToBeExported, markdown, configuration);
 		this.classesMapper = new ClassesMapper(
 			pw, this.element, this::getHref
 		);
@@ -72,30 +72,12 @@ public class PackageMapper extends HTMLMapper {
 	private final CompartmentMapper dataTypesMapper;
     
 	@Override
-	protected void htmlBody() {
-		printLine("<body class=\"uml-element uml-package\">");
-		columnHead();
-		columnBody();
-		printLine("</body>");
-   }
-
-	private void columnHead() {
-		printLine("\t<div class=\"column-head\">");
-		printLine("\t\t<h2>", getTitle(), "</h2>");
-		printLine("\t</div>");
-	}
-	
-	private void columnBody() {
+	protected  void columnBody() {
 		printLine("\t<div class=\"column-body\">");
 		annotation(element);
-		classesMapper.compartment();
-		dataTypesMapper.compartment();
+		classesMapper.compartment(true);
+		dataTypesMapper.compartment(true);
 		printLine("\t</div>");
 	}
 	
-	@Override
-	protected String getTitle() {
-		return "Package " + getDisplayName(element);
-	}
-
 }

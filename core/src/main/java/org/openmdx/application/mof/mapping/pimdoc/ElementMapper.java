@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Description: Navigation Compartment Data Collector
+ * Description: Element Mapper 
  * Owner: the original authors. 
  * ====================================================================
  * 
@@ -44,54 +44,65 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
- * Navigation Compartment Data Collector
+ * Element Mapper 
  */
-class NavigationCompartmentDataCollector extends TreeMap<String,SortedSet<String>> {
+abstract class ElementMapper extends HTMLMapper {
 
-	protected NavigationCompartmentDataCollector() {
-		super(COMPARATOR);
-	}
-
-	private static final Comparator<String> COMPARATOR = new PackagePatternComparator();
+	/**
+     * Constructor 
+     */
+    protected ElementMapper(
+    	String elementId,
+        Sink sink, 
+        ModelElement_1_0 element,
+        boolean markdown, 
+        PIMDocConfiguration configuration
+    ){
+		super(sink, element, markdown, configuration);
+		this.elementKind = elementId;		
+		this.element = element;
+    }    
+    
+    private final String elementKind;
+	protected final ModelElement_1_0 element;
 	
-	private static final long serialVersionUID = -4489160358886710466L;
-	private final Comparator<String> simpleNameComparator = new SimpleNameComparator();
-	
-	void addKey(String qualifiedName) {
-		this.computeIfAbsent(qualifiedName, key -> new TreeSet<String>(simpleNameComparator));
-	}
+	@Override
+	protected void htmlBody() {
+		printLine("<body class=\"uml-element uml-", elementKind.toLowerCase(), "\">");
+		columnHead();
+		columnBody();
+		printLine("</body>");
+   }
 
-	void addElement(String qualifiedName) {
-		for(Map.Entry<String,SortedSet<String>> e : entrySet()) {
-			if(isPartOfPackageGroup(e.getKey(), qualifiedName)) {
-				e.getValue().add(qualifiedName);
-			}
-		}
-	}
-	
-	boolean isPartOfPackageGroup(String packagePattern, String qualifiedName) {
-		if(PackagePatternComparator.isWildcardPattern(packagePattern)) {
-			return PackagePatternComparator.isCatchAllPattern(packagePattern) ||
-				qualifiedName.startsWith(PackagePatternComparator.removeWildcard(packagePattern) + ':');
-		} else {
-			return getPackageId(packagePattern).equals(getPackageId(qualifiedName));
-		}
-	}
-
-	protected String getPackageId(String qualifiedName) {
-		return qualifiedName.substring(0, qualifiedName.lastIndexOf(':'));
+	protected void columnHead() {
+		printLine("\t<div class=\"column-head\">");
+		printLine("\t\t<h2>", getTitle(), "</h2>");
+		printLine("\t</div>");
 	}
 	
-	void normalize() {
-		values().removeIf(Collection::isEmpty);
+	@Override
+    protected String getBaseURL() {
+    	StringBuilder baseDir = new StringBuilder();
+    	for(long i = element.getQualifiedName().chars().filter(ElementMapper::isColon).count(); i > 0L; i--) {
+    		baseDir.append("../");
+    	}
+    	return baseDir.toString();
+    }
+	
+    private static boolean isColon(int c) {
+    	return c == ':';
+    }
+    
+	@Override
+	protected String getTitle() {
+		return this.elementKind + " " + getDisplayName(element);
 	}
+
+    
+	
+	protected abstract void columnBody();
 	
 }

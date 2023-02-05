@@ -44,12 +44,14 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc;
 
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
  * Class Mapper 
  */
-public class ClassMapper extends HTMLMapper {
+public class ClassMapper extends ElementMapper {
 
 	/**
      * Constructor 
@@ -60,38 +62,40 @@ public class ClassMapper extends HTMLMapper {
         boolean markdown, 
         PIMDocConfiguration configuration
     ){
-		super(sink, classToBeExported, markdown, configuration);
-		this.classHierarchyMapper = new ClassHierarchyMapper(
-			pw, element, this::getHref
-		);		
+		super("Class", sink, classToBeExported, markdown, configuration);
+		this.classPropertiesMapper = new ClassPropertiesMapper(pw, element, this::getHref);		
+		this.classHierarchyMapper = new ClassHierarchyMapper(pw, element, this::getHref);		
+		this.structuralFeaturesMapper = new StructuralFeaturesMapper(pw, element, this::getHref);		
+		this.behaviouralFeatureyMapper = new BehaviouralFeaturesMapper(pw, element, this::getHref);		
     }    
     
+    private final CompartmentMapper classPropertiesMapper;
     private final CompartmentMapper classHierarchyMapper;
+    private final CompartmentMapper structuralFeaturesMapper;
+    private final CompartmentMapper behaviouralFeatureyMapper;
 
 	@Override
-	protected void htmlBody() {
-		printLine("<body class=\"uml-element uml-class\">");
-		columnHead();
-		columnBody();
-		printLine("</body>");
-   }
-
-	private void columnHead() {
-		printLine("\t<div class=\"column-head\">");
-		printLine("\t\t<h2>", getTitle(), "</h2>");
-		printLine("\t</div>");
-	}
-	
-	private void columnBody() {
+	protected void columnBody() {
 		printLine("\t<div class=\"column-body\">");
 		annotation(element);
-		classHierarchyMapper.compartment();
+		classPropertiesMapper.compartment(false);
+		classHierarchyMapper.compartment(false);
+		structuralFeaturesMapper.compartment(true);
+		behaviouralFeatureyMapper.compartment(true);
 		printLine("\t</div>");
 	}
 	
 	@Override
 	protected String getTitle() {
-		return "Class " + getDisplayName(element);
+		return getTitlePrefix() + super.getTitle();
 	}
 
+	private String getTitlePrefix(){
+		try {
+			return element.isAbstract() ? "Abstract " : "";
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
+	}
+	
 }

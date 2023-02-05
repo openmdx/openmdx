@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Class Hierarchy Mapper
+ * Description: Class Properties Mapper
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -47,75 +47,111 @@ package org.openmdx.application.mof.mapping.pimdoc;
 import java.io.PrintWriter;
 import java.util.function.Function;
 
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Stereotypes;
 
 /**
- * Class Hierarchy Mapper
+ * Class Properties Mapper
  */
-class ClassHierarchyMapper extends CompartmentMapper {
+class ClassPropertiesMapper extends CompartmentMapper {
 	
-	ClassHierarchyMapper(
+	ClassPropertiesMapper(
 		PrintWriter pw, 
 		ModelElement_1_0 element, 
 		Function<ModelElement_1_0, String> hrefMapper
 	){
 		super(
-			"class-hierarchy", "Class Hierarchy", 
+			"class-properties", "Class Properties", 
 			pw, element, hrefMapper,
-			"Direction", "Classes"
+			"Name", "Value", "Stereotype"
 		);
 	}
 
 	@Override
 	protected void mapTableBody() {
 		printLine("\t\t\t\t<tbody>");
-		mapSupertypes();
-		mapSubtypes();
+		mapAbstract();
+		mapMixIn();
+		mapAspectCapability();
 		printLine("\t\t\t\t</tbody>");
 	}
 
-	private void mapSupertypes() {
-		printLine("\t\t\t\t\t<tr class=\"uml-supertypes\">");
-		printLine("\t\t\t\t\t\t<td>Superclasses</td>");
-		printLine("\t\t\t\t\t\t<td>");
-		element
+	private void mapAbstract() {
+		printLine("\t\t\t\t\t<tr>");
+		printLine("\t\t\t\t\t\t<td>abstract</td>");
+		printLine("\t\t\t\t\t\t<td>", isAbstract(), "</td>");
+		printLine("\t\t\t\t\t\t<td/>");
+		printLine("\t\t\t\t\t</tr>");
+	}
+
+	private void mapMixIn() {
+		printLine("\t\t\t\t\t<tr>");
+		printLine("\t\t\t\t\t\t<td>mix-in</td>");
+		if(isMixInClass()) {
+			printLine("\t\t\t\t\t\t<td>", true, "</td>");
+			printLine("\t\t\t\t\t\t<td>", Stereotypes.ROOT, "</td>");
+		} else {
+			printLine("\t\t\t\t\t\t<td>", false, "</td>");
+			printLine("\t\t\t\t\t\t<td/>");
+		}
+		printLine("\t\t\t\t\t</tr>");
+	}
+
+	private void mapAspectCapability() {
+		printLine("\t\t\t\t\t<tr>");
+		printLine("\t\t\t\t\t\t<td>aspect-capability</td>");
+		if(isAspect()) {
+			printLine("\t\t\t\t\t\t<td>Aspect</td>");
+			if(isRoleClass()) {
+				printLine("\t\t\t\t\t\t<td>", Stereotypes.ROLE, "</td>");
+			} else {
+				printLine("\t\t\t\t\t\t<td/>");
+			}
+		} else if (isAspectCapable()){
+			printLine("\t\t\t\t\t\t<td>Core</td>");
+			printLine("\t\t\t\t\t\t<td/>");
+		} else {
+			printLine("\t\t\t\t\t\t<td>None</td>");
+			printLine("\t\t\t\t\t\t<td/>");
+		}
+		printLine("\t\t\t\t\t</tr>");
+	}
+
+	
+	private Boolean isAbstract(){
+		try {
+			return element.isAbstract();
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
+	}
+
+	private boolean isMixInClass() {
+		return element.objGetList("stereotype").contains(Stereotypes.ROOT);
+	}
+
+	private boolean isRoleClass() {
+		return element.objGetList("stereotype").contains(Stereotypes.ROLE);
+	}
+	
+	private boolean isAspect() {
+		return isSubclassOf("org:openmdx:base:Aspect");
+	}
+	
+	private boolean isAspectCapable() {
+		return isSubclassOf("org:openmdx:base:AspectCapable");
+	}
+
+	protected boolean isSubclassOf(String superClass) {
+		return element
 			.objGetSet("allSupertype")
 			.stream()
 			.map(this::getElement)
 			.filter(this::excludeSelf)
-			.sorted(ELEMENT_NAME_COMPARATOR)
-			.forEach(this::mapClass);
-		printLine("\t\t\t\t\t\t</td>");
-		printLine("\t\t\t\t\t</tr>");
-	}
-	
-	private void mapSubtypes() {
-		printLine("\t\t\t\t\t<tr class=\"uml-subtypes\">");
-		printLine("\t\t\t\t\t\t<td>Subclasses</td>");
-		printLine("\t\t\t\t\t\t<td>");
-		element
-			.objGetSet("allSubtype")
-			.stream()
-			.map(this::getElement)
-			.filter(this::excludeSelf)
-			.sorted(ELEMENT_NAME_COMPARATOR)
-			.forEach(this::mapClass);
-		printLine("\t\t\t\t\t\t</td>");
-		printLine("\t\t\t\t\t</tr>");
-	}
-
-	private void mapClass(ModelElement_1_0 suClass) {
-		printLine(
-			"\t\t\t\t\t\t\t<a class=\"uml-enumeration\" href=\"", 
-			getHref(suClass),
-			"\" title=\"",
-			getDisplayName(suClass),
-			"\" target=\"",
-			HTMLMapper.FRAME_NAME,
-			"\">",
-			suClass.getName(),
-			"</a>"
-		);
+			.map(ModelElement_1_0::getQualifiedName)
+			.anyMatch(superClass::equals);
 	}
 	
 }

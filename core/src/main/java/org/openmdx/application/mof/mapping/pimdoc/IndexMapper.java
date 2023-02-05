@@ -44,10 +44,14 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -211,14 +215,14 @@ public class IndexMapper extends HTMLMapper {
     * Produces the detail column frame
     */
 	private void detailColumn() {
-		printLine("\t\t<div class=\"page-column detail-column\">");
+		printLine("\t\t<div class=\"page-column element-column\">");
 		printLine("\t\t\t<iframe name=\"", HTMLMapper.FRAME_NAME, "\" src=\"welcome.html\"/>");
 		printLine("\t\t</div>");
 	}
     
-    private NavigationCompartmentDataCollector getPackageGroups(
+    private DataCollector getPackageGroups(
     ){
-    	final NavigationCompartmentDataCollector navigationCompartment = new NavigationCompartmentDataCollector();
+    	final DataCollector navigationCompartment = new DataCollector();
     	configuration
     		.getPackageGroups()
 			.forEach(navigationCompartment::addKey);
@@ -248,4 +252,50 @@ public class IndexMapper extends HTMLMapper {
 		return this.configuration.getTitle();
 	}
 
+    
+    /**
+     * Navigation Compartment Data Collector
+     */
+    static class DataCollector extends TreeMap<String,SortedSet<String>> {
+
+    	protected DataCollector() {
+    		super(COMPARATOR);
+    	}
+
+    	private static final Comparator<String> COMPARATOR = new PackagePatternComparator();
+    	
+    	private static final long serialVersionUID = -4489160358886710466L;
+    	private final Comparator<String> simpleNameComparator = new SimpleNameComparator();
+    	
+    	void addKey(String qualifiedName) {
+    		this.computeIfAbsent(qualifiedName, key -> new TreeSet<String>(simpleNameComparator));
+    	}
+
+    	void addElement(String qualifiedName) {
+    		for(Map.Entry<String,SortedSet<String>> e : entrySet()) {
+    			if(isPartOfPackageGroup(e.getKey(), qualifiedName)) {
+    				e.getValue().add(qualifiedName);
+    			}
+    		}
+    	}
+    	
+    	boolean isPartOfPackageGroup(String packagePattern, String qualifiedName) {
+    		if(PackagePatternComparator.isWildcardPattern(packagePattern)) {
+    			return PackagePatternComparator.isCatchAllPattern(packagePattern) ||
+    				qualifiedName.startsWith(PackagePatternComparator.removeWildcard(packagePattern) + ':');
+    		} else {
+    			return getPackageId(packagePattern).equals(getPackageId(qualifiedName));
+    		}
+    	}
+
+    	protected String getPackageId(String qualifiedName) {
+    		return qualifiedName.substring(0, qualifiedName.lastIndexOf(':'));
+    	}
+    	
+    	void normalize() {
+    		values().removeIf(Collection::isEmpty);
+    	}
+    	
+    }
+    
 }

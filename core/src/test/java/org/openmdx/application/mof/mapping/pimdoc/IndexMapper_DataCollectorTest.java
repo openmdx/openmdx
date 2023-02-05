@@ -52,14 +52,14 @@ import org.junit.jupiter.api.Test;
 /**
  * Navigation Compartment Test
  */
-class NavigationCompartmentTest {
+class IndexMapper_DataCollectorTest {
 
 	@Test
 	void when_wildcardMatch_then_true() {
 		//
 		// Arrange
 		//
-		final NavigationCompartmentDataCollector testee = new NavigationCompartmentDataCollector();
+		final IndexMapper.DataCollector testee = new IndexMapper.DataCollector();
 		final String packagePattern = "org:openmdx:**";
 		final String candidate = "org:openmdx:base:Segment";
 		// 
@@ -77,7 +77,7 @@ class NavigationCompartmentTest {
 		//
 		// Arrange
 		//
-		final NavigationCompartmentDataCollector testee = new NavigationCompartmentDataCollector();
+		final IndexMapper.DataCollector testee = new IndexMapper.DataCollector();
 		final String packagePattern = "org:w3c:**";
 		final String candidate = "org:openmdx:base:Segment";
 		// 
@@ -95,7 +95,7 @@ class NavigationCompartmentTest {
 		//
 		// Arrange
 		//
-		final NavigationCompartmentDataCollector testee = new NavigationCompartmentDataCollector();
+		final IndexMapper.DataCollector testee = new IndexMapper.DataCollector();
 		final String packagePattern = "org:openmdx:base:base";
 		final String candidate = "org:openmdx:base:Segment";
 		// 
@@ -113,7 +113,7 @@ class NavigationCompartmentTest {
 		//
 		// Arrange
 		//
-		final NavigationCompartmentDataCollector testee = new NavigationCompartmentDataCollector();
+		final IndexMapper.DataCollector testee = new IndexMapper.DataCollector();
 		final String packagePattern = "org:openmdx:openmdx";
 		final String candidate = "org:openmdx:base:Segment";
 		// 
@@ -131,7 +131,7 @@ class NavigationCompartmentTest {
 		//
 		// Arrange
 		//
-		final NavigationCompartmentDataCollector testee = new NavigationCompartmentDataCollector();
+		final IndexMapper.DataCollector testee = new IndexMapper.DataCollector();
 		testee.addKey("X");
 		testee.addKey("Y");
 		testee.addKey("Z");
@@ -151,7 +151,7 @@ class NavigationCompartmentTest {
 		//
 		// Arrange
 		//
-		final NavigationCompartmentDataCollector testee = new NavigationCompartmentDataCollector();
+		final IndexMapper.DataCollector testee = new IndexMapper.DataCollector();
 		testee.addKey(PackagePatternComparator.getCatchAllPattern());
 		testee.addElement("com:example:AnyClass");
 		// 

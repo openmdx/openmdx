@@ -49,7 +49,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 /**
  * Structure Mapper 
  */
-public class StructureMapper extends HTMLMapper {
+public class StructureMapper extends ElementMapper {
 
 	/**
      * Constructor 
@@ -60,38 +60,20 @@ public class StructureMapper extends HTMLMapper {
         boolean markdown, 
         PIMDocConfiguration configuration
     ){
-		super(sink, classToBeExported, markdown, configuration);
-		this.structureFieldMapper = new StructureFieldMapper(
+		super("Structure", sink, classToBeExported, markdown, configuration);
+		this.structureFieldsMapper = new StructureFieldsMapper(
 			pw, element, this::getHref
 		);		
     }    
     
-    private final CompartmentMapper structureFieldMapper;
+    private final CompartmentMapper structureFieldsMapper;
 
 	@Override
-	protected void htmlBody() {
-		printLine("<body class=\"uml-element uml-structure\">");
-		columnHead();
-		columnBody();
-		printLine("</body>");
-   }
-
-	private void columnHead() {
-		printLine("\t<div class=\"column-head\">");
-		printLine("\t\t<h2>", getTitle(), "</h2>");
-		printLine("\t</div>");
-	}
-	
-	private void columnBody() {
+	protected void columnBody() {
 		printLine("\t<div class=\"column-body\">");
 		annotation(element);
-		structureFieldMapper.compartment();
+		structureFieldsMapper.compartment(true);
 		printLine("\t</div>");
 	}
 	
-	@Override
-	protected String getTitle() {
-		return "Structure " + getDisplayName(element);
-	}
-
 }

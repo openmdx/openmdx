@@ -62,39 +62,15 @@ class ClassesMapper extends CompartmentMapper {
 		ModelElement_1_0 element, 
 		Function<ModelElement_1_0, String> hrefMapper
 	){
-		super(pw, element, hrefMapper);
+		super(
+			"classes", "Classes", 
+			pw, element, hrefMapper,
+			"Name", "Abstract", "Mix-In"
+		);
 	}
 
 	@Override
-	protected void compartment() {
-		printLine("\t\t<details class=\"uml-classes\" open>");
-		mapSummary();
-		mapDetails();
-		printLine("\t\t</details>");
-	}
-
-	private void mapSummary() {
-		printLine("\t\t\t<summary>Classes</summary>");
-	}
-
-	private void mapDetails() {
-		printLine("\t\t\t<table>");
-		mapTableHead();
-		mapTableBody();
-		printLine("\t\t\t</table>");
-	}
-
-	private void mapTableHead() {
-		printLine("\t\t\t\t<thead>");
-		printLine("\t\t\t\t\t<tr>");
-		printLine("\t\t\t\t\t\t<th>Name</th>");
-		printLine("\t\t\t\t\t\t<th>Abstract</th>");
-		printLine("\t\t\t\t\t\t<th>Mix-In</th>");
-		printLine("\t\t\t\t\t</tr>");
-		printLine("\t\t\t\t</thead>");
-	}
-
-	private void mapTableBody() {
+	protected void mapTableBody() {
 		printLine("\t\t\t\t<tbody>");
 		containedElements()
 			.filter(ModelElement_1_0::isClassType)
@@ -117,8 +93,8 @@ class ClassesMapper extends CompartmentMapper {
 				"</a>"
 			);
 			printLine("\t\t\t\t\t\t</td>");
-			printLine("\t\t\t\t\t\t<td>", Boolean.toString(element.isAbstract()), "</td>");
-			printLine("\t\t\t\t\t\t<td>", Boolean.toString(isMixInClass(element)), "</td>");
+			printLine("\t\t\t\t\t\t<td>", element.isAbstract(), "</td>");
+			printLine("\t\t\t\t\t\t<td>", isMixInClass(element), "</td>");
 			printLine("\t\t\t\t\t</tr>");
 		} catch (ServiceException e) {
 			throw new RuntimeServiceException(e);

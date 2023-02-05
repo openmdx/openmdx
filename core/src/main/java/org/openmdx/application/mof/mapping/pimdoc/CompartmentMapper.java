@@ -52,6 +52,7 @@ import java.util.stream.Stream;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 
 /**
@@ -60,19 +61,66 @@ import org.openmdx.base.mof.cci.Model_1_0;
 abstract class CompartmentMapper {
 
 	protected CompartmentMapper(
+		String compartmentId, 
+		String compartmentTitle, 
 		PrintWriter pw, 
-		ModelElement_1_0 element, 
-		Function<ModelElement_1_0, String> hrefMapper
+		ModelElement_1_0 element, Function<ModelElement_1_0, String> hrefMapper,
+		String... columnTitles
 	) {
+		this.compartmentId = compartmentId;
+		this.compartmentTitle = compartmentTitle;
 		this.pw = pw;
 		this.element = element;
 		this.hrefMapper = hrefMapper;
+		this.columnTitles = columnTitles;
+		this.namespaceFilter = new NamespaceFilter(element);
 	}
 
 	protected final ModelElement_1_0 element;
+	protected final NamespaceFilter namespaceFilter;
 	protected static final Comparator<ModelElement_1_0> ELEMENT_NAME_COMPARATOR = new ElementNameComparator();
+	private final String compartmentId;
+	private final String compartmentTitle;
 	private final PrintWriter pw;
 	private final Function<ModelElement_1_0, String> hrefMapper;
+	private final String[] columnTitles;
+	
+	
+	protected void compartment(boolean open) {
+		printLine(
+			"\t\t<details id=\"",
+			this.compartmentId,
+			"\" class=\"uml-",
+			this.compartmentId,
+			"\"",
+			open ? " open" : "",
+			">"
+		);
+		mapSummary();
+		mapDetails();
+		printLine("\t\t</details>");
+	}
+
+	private void mapSummary() {
+		printLine("\t\t\t<summary>", this.compartmentTitle, "</summary>");
+	}
+
+	private void mapDetails() {
+		printLine("\t\t\t<table>");
+		mapTableHead();
+		mapTableBody();
+		printLine("\t\t\t</table>");
+	}	
+	
+	protected void mapTableHead() {
+		printLine("\t\t\t\t<thead>");
+		printLine("\t\t\t\t\t<tr>");
+		for(String columnTitle : columnTitles) {
+			printLine("\t\t\t\t\t\t<th>", columnTitle, "</th>");
+		}
+		printLine("\t\t\t\t\t</tr>");
+		printLine("\t\t\t\t</thead>");
+	}
 
 	protected String getHref(ModelElement_1_0 element) {
 		return hrefMapper.apply(element);
@@ -95,7 +143,7 @@ abstract class CompartmentMapper {
 	}
 
 	protected Stream<ModelElement_1_0> containedElements(){
-		return getModel().getContent().stream().filter(new NamespaceFilter(element));
+		return getModel().getContent().stream().filter(namespaceFilter);
 	}
 	
 	protected ModelElement_1_0 getType(ModelElement_1_0 element) {
@@ -120,11 +168,27 @@ abstract class CompartmentMapper {
 		}
 		this.pw.println();
 	}
+
+	protected void printLine(CharSequence left, boolean box, CharSequence right) {
+		printLine(left, HTMLMapper.renderBox(box), right); 
+	}
 	
 	protected void newLine() {
 		this.pw.println();
 	}
-		
-	protected abstract void compartment();
+
+	protected boolean excludeSelf(ModelElement_1_0 element) {
+		return !element.equals(this.element);
+	}
+	
+	protected String getMultiplicity(ModelElement_1_0 element) {
+		try {
+			return  ModelHelper.getMultiplicity(element).code();
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
+	}
+	
+	abstract void mapTableBody();
 	
 }
