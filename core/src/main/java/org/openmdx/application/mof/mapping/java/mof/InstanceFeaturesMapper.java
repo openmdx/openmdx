@@ -103,14 +103,16 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
         ReferenceDef referenceDef
     ) throws ServiceException {
         printLine("   /**");
-        printLine(MapperUtils.wrapText(
+        MapperUtils.wrapText(
             "    * ",
-            "Reference feature {@code " + referenceDef.getName() + "}."));
+            "Reference feature {@code " + referenceDef.getName() + "}.",
+            this::printLine
+        );
         printLine("    */");
-        this.pw.print("    java.lang.String ");
-        this.pw.print(getConstantName(referenceDef.getName()));
-        this.pw.print(" = \"");
-        this.pw.print(referenceDef.getName());
+        print("    java.lang.String ");
+        print(getConstantName(referenceDef.getName()));
+        print(" = \"");
+        print(referenceDef.getName());
         printLine("\";");
         newLine();
     }
@@ -126,14 +128,16 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
         OperationDef operationDef
     ) throws ServiceException {
         printLine("   /**");
-        printLine(MapperUtils.wrapText(
+        MapperUtils.wrapText(
             "    * ",
-            "Behavioural feature {@code " + operationDef.getName() + "}."));
+            "Behavioural feature {@code " + operationDef.getName() + "}.",
+            this::printLine
+        );
         printLine("    */");
-        this.pw.print("    java.lang.String ");
-        this.pw.print(getConstantName(operationDef.getName()));
-        this.pw.print(" = \"");
-        this.pw.print(operationDef.getName());
+        print("    java.lang.String ");
+        print(getConstantName(operationDef.getName()));
+        print(" = \"");
+        print(operationDef.getName());
         printLine("\";");
         newLine();
     }
@@ -159,9 +163,9 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
                 .getPackageName(this.classDef.getQualifiedName()))) + ";");
         newLine();
         printLine("/**");
-        printLine(MapperUtils.wrapText(" * ", "Features of class " + this.classDef.getName()));
+        MapperUtils.wrapText(" * ", "Features of class " + this.classDef.getName(), this::printLine);
         printLine(" */");
-        this.pw.print("public interface " + this.classDef.getName() + FEATURES_INTERFACE_SUFFIX);
+        print("public interface " + this.classDef.getName() + FEATURES_INTERFACE_SUFFIX);
         if (!this.classDef.getSupertypes().isEmpty()) {
             String separator = " extends "; 
             for (
@@ -170,8 +174,8 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
                 separator = ", "
             ) {
                 ClassDef supertype = (ClassDef) i.next();
-                this.pw.print(separator);
-                this.pw.print(this.getModelType(supertype.getQualifiedName()) + FEATURES_INTERFACE_SUFFIX);
+                print(separator);
+                print(this.getModelType(supertype.getQualifiedName()) + FEATURES_INTERFACE_SUFFIX);
             }
         }
         printLine(" {");
@@ -183,20 +187,21 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
      * 
      * @param attributeDef
      * @throws ServiceException
-     */
-    
+     */    
     public void mapAttribute(
         AttributeDef attributeDef
     ) throws ServiceException {
         printLine("   /**");
-        printLine(MapperUtils.wrapText(
+        MapperUtils.wrapText(
             "    * ",
-            "Structural feature {@code " + attributeDef.getName() + "}."));
+            "Structural feature {@code " + attributeDef.getName() + "}.",
+            this::printLine
+        );
         printLine("    */");
-        this.pw.print("    java.lang.String ");
-        this.pw.print(getConstantName(attributeDef.getName()));
-        this.pw.print(" = \"");
-        this.pw.print(attributeDef.getName());
+        print("    java.lang.String ");
+        print(getConstantName(attributeDef.getName()));
+        print(" = \"");
+        print(attributeDef.getName());
         printLine("\";");
         newLine();
     }

@@ -47,7 +47,7 @@ package org.openmdx.application.mof.mapping.pimdoc;
 import java.util.Comparator;
 
 /**
- * This comapartor shall ensure that wildcard entries follow the corresponding entries without wildcard.
+ * This comparator shall ensure that wildcard entries follow the corresponding entries without wildcard.
  */
 class PackagePatternComparator implements Comparator<String> {
 

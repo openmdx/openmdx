@@ -78,7 +78,7 @@ public class ClassMapper extends HTMLMapper {
 
 	private void columnHead() {
 		printLine("\t<div class=\"column-head\">");
-		printLine("\t\t<h2>" + getTitle() + "</h2>");
+		printLine("\t\t<h2>", getTitle(), "</h2>");
 		printLine("\t</div>");
 	}
 	

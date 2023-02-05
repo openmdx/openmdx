@@ -116,13 +116,19 @@ class DataTypesMapper extends CompartmentMapper {
 		if(element.isStructureType()) {
 			printLine("\t\t\t\t\t\t<td>");
 			printLine(
-				"\t\t\t\t\t\t\t<a "
-				+ "href=\"" + getHref(element) + "\" "
-				+ "title=\"" + getDisplayName(element) + "\" "
-				+ "target=\"" + HTMLMapper.FRAME_NAME + "\">" + element.getName() + "</a>");
+				"\t\t\t\t\t\t\t<a href=\"",
+				getHref(element),
+				"\" title=\"",
+				getDisplayName(element),
+				"\" target=\"",
+				HTMLMapper.FRAME_NAME,
+				"\">",
+				element.getName(),
+				"</a>"
+			);
 			printLine("\t\t\t\t\t\t</td>");
 		} else {
-			printLine("\t\t\t\t\t\t<td>" + element.getName() + "</td>");
+			printLine("\t\t\t\t\t\t<td>", element.getName(), "</td>");
 		}
 	}
 	
@@ -136,10 +142,17 @@ class DataTypesMapper extends CompartmentMapper {
 
 	private void mapType(ModelElement_1_0 type) {
 		printLine("\t\t\t\t\t\t<td>");
-		printLine("\t\t\t\t\t\t\t<a "
-				+ "href=\"" + getHref(type) + "\" "
-				+ "title=\"" + getDisplayName(type) + "\" "
-				+ "target=\"" + HTMLMapper.FRAME_NAME + "\">" + type.getName() + "</a>");
+		printLine(
+			"\t\t\t\t\t\t\t<a href=\"",
+			getHref(type),
+			"\" title=\"",
+			getDisplayName(type),
+			"\" target=\"",
+			HTMLMapper.FRAME_NAME,
+			"\">",
+			type.getName(),
+			"</a>"
+		);
 		printLine("\t\t\t\t\t\t</td>");
 	}
 

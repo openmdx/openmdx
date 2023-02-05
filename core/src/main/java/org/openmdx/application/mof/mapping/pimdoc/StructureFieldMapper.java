@@ -108,8 +108,8 @@ class StructureFieldMapper extends CompartmentMapper {
 	
 	private void mapField(ModelElement_1_0 element) {
 		printLine("\t\t\t\t\t<tr>");
-		printLine("\t\t\t\t\t\t<td>" + element.getName() + "</td>");
-		printLine("\t\t\t\t\t\t<td>" + getMultiplicity(element) + "</td>");
+		printLine("\t\t\t\t\t\t<td>", element.getName(), "</td>");
+		printLine("\t\t\t\t\t\t<td>", getMultiplicity(element), "</td>");
 		mapType(getType(element));
 		printLine("\t\t\t\t\t</tr>");
 	}
@@ -124,10 +124,17 @@ class StructureFieldMapper extends CompartmentMapper {
 	
 	private void mapType(ModelElement_1_0 type) {
 		printLine("\t\t\t\t\t\t<td>");
-		printLine("\t\t\t\t\t\t\t<a "
-				+ "href=\"" + getHref(type) + "\" "
-				+ "title=\"" + getDisplayName(type) + "\" "
-				+ "target=\"" + HTMLMapper.FRAME_NAME + "\">" + type.getName() + "</a>");
+		printLine(
+			"\t\t\t\t\t\t\t<a href=\"",
+			getHref(type),
+			"\" title=\"",
+			getDisplayName(type),
+			"\" target=\"",
+			HTMLMapper.FRAME_NAME,
+			"\">",
+			type.getName(),
+			"</a>"
+		);
 		printLine("\t\t\t\t\t\t</td>");
 	}
 	

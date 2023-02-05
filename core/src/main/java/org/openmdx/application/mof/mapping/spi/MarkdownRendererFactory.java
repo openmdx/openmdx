@@ -1,10 +1,10 @@
 /*
- * ==================================================================== 
- * Project: openMDX, http://www.openmdx.org
- * Description: Package Mapper 
- * Owner: the original authors. 
  * ====================================================================
- * 
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: Markdown Renderer Factory
+ * Owner:       the original authors.
+ * ====================================================================
+ *
  * This software is published under the BSD license as listed below.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -42,60 +42,56 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.spi;
 
-import org.openmdx.base.mof.cci.ModelElement_1_0;
+import java.util.function.Function;
+
+import org.openmdx.kernel.loading.Factory;
+
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 
 /**
- * Package Mapper 
+ * Markdown Renderer Factory
  */
-public class PackageMapper extends HTMLMapper {
+public class MarkdownRendererFactory implements Factory<Function<String, String>> {
 
-    /**
-     * Constructor 
-     */
-    public PackageMapper(
-    	Sink sink, 
-        ModelElement_1_0 packageToBeExported,
-        boolean markdown, PIMDocConfiguration configuration
-    ){
-		super(sink, packageToBeExported, markdown, configuration);
-		this.classesMapper = new ClassesMapper(
-			pw, this.element, this::getHref
-		);
-		this.dataTypesMapper = new DataTypesMapper(
-			pw, this.element, this::getHref
-		);
-    }    
+	/**
+	 * Cosnstructor using the default link target {@code "_self"}
+	 */
+	public MarkdownRendererFactory() {
+		this("_self");
+	}
 
-	private final CompartmentMapper classesMapper;
-	private final CompartmentMapper dataTypesMapper;
-    
-	@Override
-	protected void htmlBody() {
-		printLine("<body class=\"uml-element uml-package\">");
-		columnHead();
-		columnBody();
-		printLine("</body>");
-   }
-
-	private void columnHead() {
-		printLine("\t<div class=\"column-head\">");
-		printLine("\t\t<h2>", getTitle(), "</h2>");
-		printLine("\t</div>");
+	/**
+	 * Constructor
+	 * 
+	 * @param linkTarget the target tp be used for markdown links
+	 */
+	public MarkdownRendererFactory(
+		String linkTarget
+	) {
+		this.linkTarget = linkTarget;
 	}
 	
-	private void columnBody() {
-		printLine("\t<div class=\"column-body\">");
-		annotation(element);
-		classesMapper.compartment();
-		dataTypesMapper.compartment();
-		printLine("\t</div>");
-	}
-	
-	@Override
-	protected String getTitle() {
-		return "Package " + getDisplayName(element);
+	private final String linkTarget;
+
+	String getLinkTarget() {
+		return linkTarget;
 	}
 
+	@Override
+	public Function<String, String> instantiate() {
+		final MutableDataSet flexmarkOptions = FlexmarkExtensions.getOptions(linkTarget);
+        final Parser parser = Parser.builder(flexmarkOptions).build();
+        final HtmlRenderer renderer = HtmlRenderer.builder(flexmarkOptions).build();
+		return new MarkownRenderer(parser, renderer);
+	}
+
+	@Override
+	public Class<? extends Function<String, String>> getInstanceClass() {
+		return MarkownRenderer.class;
+	}
+	
 }

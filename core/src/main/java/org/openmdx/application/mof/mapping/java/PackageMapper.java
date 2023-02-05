@@ -139,13 +139,11 @@ public class PackageMapper extends AbstractMapper {
         String authorityType = this.getType("org:openmdx:base:Authority", getFormat(), false);
         String xri = MapperUtils.getAuthorityId(nameComponents);
         printLine(" /**");
-        printLine(
-            MapperUtils.wrapText(
-                "  * ",
-                "The {@code AUTHORITY_XRI} <em>\"" + xri + 
-                "\"</em> may be used to look up the Authority the package {@code " + 
-                qualifiedPackageName + "} belongs to:"
-            )
+        MapperUtils.wrapText(
+            "  * ",
+            "The {@code AUTHORITY_XRI} <em>\"" + xri + 
+            "\"</em> may be used to look up the Authority the package {@code " + 
+            qualifiedPackageName + "} belongs to:", this::printLine
         );
         printLine("  * <p>");
         printLine("  * <pre>");
@@ -164,18 +162,16 @@ public class PackageMapper extends AbstractMapper {
         printLine("public interface " + packageType + "  extends javax.jmi.reflect.RefPackage {");  
         newLine();
         printLine(" /**");
-        printLine(
-            MapperUtils.wrapText(
-                "  * ",
-                "The {@code AUTHORITY_XRI} <em>\"" + xri + 
-                "\"</em> may be used to look up the Authority the package {@code " + 
-                qualifiedPackageName + "} belongs to:"
-            )
+        MapperUtils.wrapText(
+            "  * ",
+            "The {@code AUTHORITY_XRI} <em>\"" + xri + 
+            "\"</em> may be used to look up the Authority the package {@code " + 
+            qualifiedPackageName + "} belongs to:", this::printLine
         );
         printLine("   * <p>");
         MapperUtils.wrapText(
             "   * ",
-            "<em>Note: This is an extension to the JMI 1 standard.</em>"
+            "<em>Note: This is an extension to the JMI 1 standard.</em>", this::printLine
         );
         printLine("  */");
         printLine("  java.lang.String AUTHORITY_XRI = \"" + xri + "\";");   

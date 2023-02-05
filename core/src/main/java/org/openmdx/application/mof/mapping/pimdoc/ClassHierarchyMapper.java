@@ -128,10 +128,17 @@ class ClassHierarchyMapper extends CompartmentMapper {
 	}
 
 	private void mapClass(ModelElement_1_0 suClass) {
-		printLine("\t\t\t\t\t\t\t<a class=\"uml-enumeration\""
-			+ "href=\"" + getHref(suClass) + "\" "
-			+ "title=\"" + getDisplayName(suClass) + "\" "
-			+ "target=\"" + HTMLMapper.FRAME_NAME + "\">" + suClass.getName() + "</a>");
+		printLine(
+			"\t\t\t\t\t\t\t<a class=\"uml-enumeration\" href=\"", 
+			getHref(suClass),
+			"\" title=\"",
+			getDisplayName(suClass),
+			"\" target=\"",
+			HTMLMapper.FRAME_NAME,
+			"\">",
+			suClass.getName(),
+			"</a>"
+		);
 	}
 	
 	private boolean excludeSelf(ModelElement_1_0 element) {

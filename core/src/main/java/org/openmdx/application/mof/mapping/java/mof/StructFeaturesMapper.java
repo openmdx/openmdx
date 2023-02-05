@@ -105,14 +105,16 @@ public class StructFeaturesMapper extends FeaturesMapper {
         StructuralFeatureDef structureFieldDef
     ) throws ServiceException {
         printLine("  /**");
-        printLine(MapperUtils.wrapText(
+        MapperUtils.wrapText(
             "   * ",
-            "Struct field {@code " + structureFieldDef.getName() + "}."));
+            "Struct field {@code " + structureFieldDef.getName() + "}.", 
+            this::printLine
+        );
         printLine("   */");
-        this.pw.print("    java.lang.String ");
-        this.pw.print(getConstantName(structureFieldDef.getName()));
-        this.pw.print(" = \"");
-        this.pw.print(structureFieldDef.getName());
+        print("    java.lang.String ");
+        print(getConstantName(structureFieldDef.getName()));
+        print(" = \"");
+        print(structureFieldDef.getName());
         printLine("\";");
         newLine();
     }

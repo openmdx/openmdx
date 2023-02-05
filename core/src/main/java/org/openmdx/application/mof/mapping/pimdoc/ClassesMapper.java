@@ -108,13 +108,17 @@ class ClassesMapper extends CompartmentMapper {
 			printLine("\t\t\t\t\t<tr>");
 			printLine("\t\t\t\t\t\t<td>");
 			printLine(
-				"\t\t\t\t\t\t\t<a "
-				+ "href=\"" + getHref(element) + "\" " 
-				+ "title=\"" + getDisplayName(element) + "\">" 
-				+ element.getName() + "</a>");
+				"\t\t\t\t\t\t\t<a href=\"",
+				getHref(element),
+				"\" title=\"",
+				getDisplayName(element),
+				"\">",
+				element.getName(),
+				"</a>"
+			);
 			printLine("\t\t\t\t\t\t</td>");
-			printLine("\t\t\t\t\t\t<td>" + element.isAbstract() + "</td>");
-			printLine("\t\t\t\t\t\t<td>" + isMixInClass(element) + "</td>");
+			printLine("\t\t\t\t\t\t<td>", Boolean.toString(element.isAbstract()), "</td>");
+			printLine("\t\t\t\t\t\t<td>", Boolean.toString(isMixInClass(element)), "</td>");
 			printLine("\t\t\t\t\t</tr>");
 		} catch (ServiceException e) {
 			throw new RuntimeServiceException(e);

@@ -141,10 +141,16 @@ public class IndexMapper extends HTMLMapper {
 			printLine("\t\t\t\t\t\t<p>");
 			final ModelElement_1_0 contained = this.model.getElement(qualifiedName);
 			printLine(
-				"\t\t\t\t\t\t\t<a "
-				+ "href=\"" + getHref(contained) + "\" "
-				+ "title=\"" + getDisplayName(contained) + "\" "
-				+ "target=\"" + HTMLMapper.FRAME_NAME + "\">" + contained.getName() + "</a>");
+				"\t\t\t\t\t\t\t<a href=\"",
+				getHref(contained),
+				"\" title=\"",
+				getDisplayName(contained),
+				"\" target=\"",
+				HTMLMapper.FRAME_NAME,
+				"\">",
+				contained.getName(),
+				"</a>"
+			);
 			printLine("\t\t\t\t\t\t</p>");
 		} catch (ServiceException e) {
 			throw new RuntimeServiceException(e);
@@ -169,9 +175,14 @@ public class IndexMapper extends HTMLMapper {
 		try {
 			final ModelElement_1_0 packageElement = this.model.getElement(qualifiedName);
 			printLine(
-				"\t\t\t\t\t\t\t<a "
-				+ "href=\"" + getHref(packageElement) + "\" "
-				+ "target=\"" + HTMLMapper.FRAME_NAME + "\">" + getDisplayName(packageElement) + "</a>");
+				"\t\t\t\t\t\t\t<a href=\"",
+				getHref(packageElement),
+				"\" target=\"",
+				HTMLMapper.FRAME_NAME,
+				"\">",
+				getDisplayName(packageElement),
+				"</a>"
+			);
 		} catch (ServiceException e) {
 			throw new RuntimeServiceException(e);
 		}
@@ -186,12 +197,12 @@ public class IndexMapper extends HTMLMapper {
 	private void pageHead(final String title) {
 		printLine("\t<div class=\"page-section page-head\">");
 		printLine("\t\t<div class=\"page-column\">");
-		printLine("\t\t\t<a href=\"" + getFileURL(MagicFile.INDEX) + "\">");
-		printLine("\t\t\t\t<img src=\"" + getFileURL(MagicFile.LOGO) + "\" />");
+		printLine("\t\t\t<a href=\"", getFileURL(MagicFile.INDEX), "\">");
+		printLine("\t\t\t\t<img src=\"", getFileURL(MagicFile.LOGO), "\" />");
 		printLine("\t\t\t</a>");
 		printLine("\t\t</div>");
 		printLine("\t\t<div class=\"page-column\">");
-		printLine("\t\t\t<h1>" + title + "</h1>");
+		printLine("\t\t\t<h1>", title, "</h1>");
 		printLine("\t\t</div>");
 		printLine("\t</div>");
 	}
@@ -201,7 +212,7 @@ public class IndexMapper extends HTMLMapper {
     */
 	private void detailColumn() {
 		printLine("\t\t<div class=\"page-column detail-column\">");
-		printLine("\t\t\t<iframe name=\"" + HTMLMapper.FRAME_NAME + "\" src=\"welcome.html\"/>");
+		printLine("\t\t\t<iframe name=\"", HTMLMapper.FRAME_NAME, "\" src=\"welcome.html\"/>");
 		printLine("\t\t</div>");
 	}
     

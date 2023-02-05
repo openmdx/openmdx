@@ -130,40 +130,31 @@ public class ClassMapper extends AbstractClassMapper {
         printLine("{");
         printLine("");
         printLine("  /**");
-        printLine(
-            MapperUtils.wrapText(
-                "   * ",
-                "Creates an instance of class {@code " + this.className + "}."
-            )
-        );
-        printLine(
-            MapperUtils.wrapText(
-                "   * ",
-                "This is a factory operation used to create instance objects of class {@code " + this.className + "}."
-            )
+        MapperUtils.wrapText("   * ", "Creates an instance of class {@code " + this.className + "}.", this::printLine);
+        MapperUtils.wrapText(
+            "   * ",
+            "This is a factory operation used to create instance objects of class {@code " + this.className + "}.", 
+            this::printLine
         );
         printLine("   */");
         printLine("  public " + this.className + " create" + this.className + "(");
         printLine("  );");
         printLine("");
         printLine("  /**");
-        printLine(
-            MapperUtils.wrapText(
-                "   * ",
-                "Creates an instance of class {@code " + this.className + "} based on the specified Object instance."
-            )
+        MapperUtils.wrapText(
+            "   * ",
+            "Creates an instance of class {@code " + this.className + "} based on the specified Object instance.", 
+            this::printLine
         );
-        printLine(
-            MapperUtils.wrapText(
-                "   * ",
-                "This is a factory operation used to create instance objects of class {@code " + this.className + "}."
-            )
+        MapperUtils.wrapText(
+            "   * ",
+            "This is a factory operation used to create instance objects of class {@code " + this.className + "}.", 
+            this::printLine
         );
-        printLine(
-            MapperUtils.wrapText(
-                "   * ",
-                "@param object The Object instance this class is based on."
-            )
+        MapperUtils.wrapText(
+            "   * ",
+            "@param object The Object instance this class is based on.", 
+            this::printLine
         );
         printLine("   */");
         printLine("  public " + this.className + " get" + this.className + "(");

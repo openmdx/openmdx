@@ -119,7 +119,7 @@ extends AbstractClassMapper {
         );
         newLine();
         printLine("/**");
-        this.pw.print(" * Service Provider Interface {@code " + this.classDef.getName() + "}"); 
+        print(" * Service Provider Interface {@code " + this.classDef.getName() + "}"); 
         mapAnnotation(" * ", this.classDef);
         printLine(" */");
         printLine(
@@ -142,18 +142,16 @@ extends AbstractClassMapper {
             // Accessor
             //
             printLine("  /**");
-            printLine(
-                MapperUtils.wrapText(
-                    "   * ",
-                    "Retrieves the " + (
-                            singlevalued ? "value" : "values"
-                    ) + "for the attribute {@code " + field.getName() + "}."
-                )
+            MapperUtils.wrapText(
+                "   * ",
+                "Retrieves the " + (
+                        singlevalued ? "value" : "values"
+                ) + "for the attribute {@code " + field.getName() + "}.", this::printLine
             );
             printLine("   * @return The value for attribute {@code " + field.getName() + "}.");
             printLine("   */");
-            this.pw.print("   " + field.getFieldType() + " ");
-            this.pw.print(
+            print("   " + field.getFieldType() + " ");
+            print(
                 Identifier.OPERATION_NAME.toIdentifier(
                     field.getName(), 
                     flag ? "is" : null, // removablePrefix 
@@ -169,18 +167,16 @@ extends AbstractClassMapper {
             // Mutator
             //
             printLine("  /**");
-            printLine(
-                MapperUtils.wrapText(
-                    "   * ",
-                    "Sets the " + (
-                            singlevalued ? "value" : "values"
-                    ) + "for the attribute {@code " + field.getName() + "}."
-                )
+            MapperUtils.wrapText(
+                "   * ",
+                "Sets the " + (
+                        singlevalued ? "value" : "values"
+                ) + "for the attribute {@code " + field.getName() + "}.", this::printLine
             );
             printLine("   * @param " + field.getName() + " The new value for attribute {@code " + field.getName() + "}");
             printLine("   */");
-            this.pw.print("  void ");
-            this.pw.print(
+            print("  void ");
+            print(
                 Identifier.OPERATION_NAME.toIdentifier(
                     field.getName(), 
                     flag ? "is" : null, // removablePrefix 

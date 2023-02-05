@@ -48,7 +48,6 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
@@ -62,7 +61,7 @@ import org.openmdx.application.mof.mapping.cci.StructuralFeatureDef;
 import org.openmdx.application.mof.mapping.java.metadata.Visibility;
 import org.openmdx.application.mof.mapping.spi.MapperTemplate;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
-import org.openmdx.application.mof.mapping.spi.MarkdownConfiguration;
+import org.openmdx.application.mof.mapping.spi.MarkdownRendererFactory;
 import org.openmdx.base.Version;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -88,7 +87,7 @@ public abstract class AbstractMapper extends MapperTemplate {
         boolean markdown, 
         PrimitiveTypeMapper primitiveTypeMapper
     ) {
-        super(writer, model, markdown ? Optional.of(new MarkdownConfiguration()) : Optional.empty());
+        super(writer, model, markdown ? new MarkdownRendererFactory().instantiate() : new StandardAnnotationRenderer());
         this.metaData = metaData;
         this.format = format;
         this.packageSuffix = packageSuffix;
@@ -405,22 +404,17 @@ public abstract class AbstractMapper extends MapperTemplate {
         );
     }
     
+	// -----------------------------------------------------------------------
     protected void mapAnnotation(
         String prefix,
         ElementDef elementDef
     ) {
         final String annotation = elementDef.getAnnotation();
 		if (annotation != null) {
-            printLine(MapperUtils.wrapText(prefix, renderAnnotation(annotation)));
+			MapperUtils.wrapText(prefix, renderAnnotation(annotation), this::printLine);
         }
     }
     
-    @Override
-	protected String renderAnnotation(String annotation) {
-		return this.markdown ? super.renderAnnotation(annotation) : ("<p>\n" + annotation); 
-	}
-
-
 	// -----------------------------------------------------------------------
     protected void mapParameter(
         String prefix,

@@ -105,11 +105,22 @@ abstract class CompartmentMapper {
 			throw new RuntimeServiceException(e);
 		}
 	}
+
+	protected void print(CharSequence text) {
+		this.pw.print(text);
+	}
 	
 	protected void printLine(CharSequence text) {
 		this.pw.println(text);
 	}
 
+	protected void printLine(CharSequence... text) {
+		for(CharSequence segment : text) {
+			this.pw.print(segment);
+		}
+		this.pw.println();
+	}
+	
 	protected void newLine() {
 		this.pw.println();
 	}

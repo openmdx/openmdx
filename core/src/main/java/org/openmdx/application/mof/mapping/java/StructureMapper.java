@@ -104,10 +104,10 @@ public class StructureMapper extends AbstractMapper {
         this.trace("StructureType/FieldGetSparseArray");
         this.members.add(fieldDef.getBeanGenericName());
         printLine("  /**");
-        printLine(MapperUtils.wrapText(
+        MapperUtils.wrapText(
             "   * ",
-            "Retrieves a SparseArray containing all the elements for the structure field {@code " + fieldDef.getName() + "}."
-        ));
+            "Retrieves a SparseArray containing all the elements for the structure field {@code " + fieldDef.getName() + "}.", this::printLine
+        );
         mapAnnotation("   * ", fieldDef);
         printLine("   * @return A SparseArray containing all elements for this structure field.");
         printLine("   */");
@@ -124,10 +124,10 @@ public class StructureMapper extends AbstractMapper {
         this.trace("StructureType/FieldGetSet");
         this.members.add(fieldDef.getBeanGenericName());
         printLine("  /**");
-        printLine(MapperUtils
+        MapperUtils
             .wrapText(
                 "   * ",
-                "Retrieves a set containing all the elements for the structure field {@code " + fieldDef.getName() + "}."));
+                "Retrieves a set containing all the elements for the structure field {@code " + fieldDef.getName() + "}.", this::printLine);
         mapAnnotation("   * ", fieldDef);
         printLine("   * @return A set containing all elements for this structure field.");
         printLine("   */");
@@ -145,10 +145,10 @@ public class StructureMapper extends AbstractMapper {
         this.members.add(fieldDef.getBeanGenericName());
         if(getFormat() != Format.JMI1) {
             printLine("  /**");
-            printLine(MapperUtils
+            MapperUtils
                 .wrapText(
                     "   * ",
-                    "Retrieves a list containing all the elements for the structure field {@code " + fieldDef.getName() + "}."));
+                    "Retrieves a list containing all the elements for the structure field {@code " + fieldDef.getName() + "}.", this::printLine);
             mapAnnotation("   * ", fieldDef);
             printLine("   * @return A list containing all elements for this structure field.");
             printLine("   */");
@@ -202,10 +202,10 @@ public class StructureMapper extends AbstractMapper {
         printLine("");
         if (PrimitiveTypes.BINARY.equals(structureFieldDef.getQualifiedTypeName())) {
             printLine("  /**");
-            printLine(MapperUtils
+            MapperUtils
                 .wrapText(
                     "   * ",
-                    "Retrieves the value as java.io.InputStream for the binary structure field {@code " + structureFieldDef.getName() + "}."));
+                    "Retrieves the value as java.io.InputStream for the binary structure field {@code " + structureFieldDef.getName() + "}.", this::printLine);
             mapAnnotation("   * ", structureFieldDef);
             printLine("   * @return A InputStream containing the binary value as stream for this structure field.");
             printLine("   */");
@@ -215,10 +215,10 @@ public class StructureMapper extends AbstractMapper {
         } 
         else if (PrimitiveTypes.STRING.equals(structureFieldDef.getQualifiedTypeName())) {
             printLine("  /**");
-            printLine(MapperUtils
+            MapperUtils
                 .wrapText(
                     "   * ",
-                    "Retrieves the value as java.io.Reader for the string structure field {@code " + structureFieldDef.getName() + "}."));
+                    "Retrieves the value as java.io.Reader for the string structure field {@code " + structureFieldDef.getName() + "}.", this::printLine);
             mapAnnotation("   * ", structureFieldDef);
             printLine("   * @return A Reader containing the string value as stream for this structure field.");
             printLine("   */");
@@ -229,10 +229,10 @@ public class StructureMapper extends AbstractMapper {
         else {
             newLine();
             printLine("  /**");
-            printLine(MapperUtils
+            MapperUtils
                 .wrapText(
                     "   * ",
-                    "Retrieves the value as streaming Collection for the structure field {@code " + structureFieldDef.getName() + "]."));
+                    "Retrieves the value as streaming Collection for the structure field {@code " + structureFieldDef.getName() + "].", this::printLine);
             mapAnnotation("   * ", structureFieldDef);
             printLine("   * @return A Collection containing the value as stream for this structure field.");
             printLine("   */");
@@ -279,7 +279,7 @@ public class StructureMapper extends AbstractMapper {
         newLine();
         printLine("public interface " + this.structName);
         if(getFormat() == Format.JMI1) {            
-            this.pw.print("  extends " + REF_STRUCT_INTERFACE_NAME + ", ");
+            print("  extends " + REF_STRUCT_INTERFACE_NAME + ", ");
         }
         if(getFormat() != Format.CCI2) {
             printLine(

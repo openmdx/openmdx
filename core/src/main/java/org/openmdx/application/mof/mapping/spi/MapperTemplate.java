@@ -47,13 +47,9 @@ package org.openmdx.application.mof.mapping.spi;
 
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Optional;
+import java.util.function.Function;
 
 import org.openmdx.base.mof.cci.Model_1_0;
-
-import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.data.MutableDataSet;
 
 /**
  * Mapper Template
@@ -63,37 +59,39 @@ public abstract class MapperTemplate {
     protected MapperTemplate(
         Writer writer,
         Model_1_0 model, 
-        Optional<MarkdownConfiguration> markdownConfiguration
+        Function<String, String> annotationRenderer
     ) {
         this.pw = new PrintWriter(writer);
         this.model = model;
-        if(this.markdown = markdownConfiguration.isPresent()) {
-    		final MutableDataSet flexmarkOptions = FlexmarkExtensions.getOptions(markdownConfiguration.get().getLinkTarget());
-            this.annotationParser = Parser.builder(flexmarkOptions).build();
-            this.annotationRenderer = HtmlRenderer.builder(flexmarkOptions).build();
-        } else {
-        	this.annotationParser = null;
-        	this.annotationRenderer = null;
-        }
+        this.annotationRenderer = annotationRenderer;
     }
         
     protected final PrintWriter pw;
     protected final Model_1_0 model;
-    protected final boolean markdown;
-    private final Parser annotationParser;
-    private final HtmlRenderer annotationRenderer;
+    protected final Function<String, String> annotationRenderer;
 
     /**
-     * Renders the annotation if markdown is active
+     * Renders the annotation 
      * 
      * @param annotation the provided annotation
      * 
      * @return the rendered annotation
      */
 	protected String renderAnnotation(final String annotation) {
-		return this.markdown && annotation != null ? annotationRenderer.render(annotationParser.parse(annotation)) : annotation;
+		return annotationRenderer.apply(annotation);
 	}
 
+	protected void print(CharSequence text) {
+		this.pw.print(text);
+	}
+	
+	protected void printLine(CharSequence... text) {
+		for(CharSequence segment : text) {
+			this.pw.print(segment);
+		}
+		this.pw.println();
+	}
+	
 	protected void printLine(CharSequence text) {
 		this.pw.println(text);
 	}

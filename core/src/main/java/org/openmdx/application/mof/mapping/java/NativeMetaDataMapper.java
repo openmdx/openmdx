@@ -154,8 +154,8 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
 		if(this.isDeclaringClass(attributeDef)) {
 			Boolean persistent = isPersistent(attributeDef);
 			if(persistent != null) {
-				this.pw.print(attributeDef.getQualifiedName().replaceAll(":", "\\\\:"));
-				this.pw.print(" = ");
+				print(attributeDef.getQualifiedName().replaceAll(":", "\\\\:"));
+				print(" = ");
 				printLine(persistent.booleanValue() ? "PERSISTENT" : "TRANSIENT");
 			}
 		}

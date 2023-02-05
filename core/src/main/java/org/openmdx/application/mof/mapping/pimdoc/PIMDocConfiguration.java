@@ -53,11 +53,13 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Function;
 
-import org.openmdx.application.mof.mapping.spi.MarkdownConfiguration;
+import org.openmdx.application.mof.mapping.spi.MarkdownRendererFactory;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Factory;
 import org.openmdx.kernel.loading.Resources;
 
 
@@ -103,8 +105,8 @@ class PIMDocConfiguration {
 				.orElseGet(() -> Collections.singletonList(PackagePatternComparator.getCatchAllPattern()));
 	}
 	
-	MarkdownConfiguration getMarkdownConfiguration() {
-		return new MarkdownConfiguration(getLinkTarget());
+	Factory<Function<String, String>> getMarkdownRendererFactory() {
+		return new MarkdownRendererFactory(getLinkTarget());
 	}
 	
 	private String getLinkTarget() {

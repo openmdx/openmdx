@@ -100,7 +100,7 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
     /**
      * The (configurable) resources to be added to the archive
      */
-    private final Set<MagicFile> RESOURCES = EnumSet.of(MagicFile.LOGO, MagicFile.STYLE_SHEET, MagicFile.WELCOME);
+    private final static Set<MagicFile> RESOURCES = EnumSet.of(MagicFile.LOGO, MagicFile.STYLE_SHEET, MagicFile.WELCOME);
     
 	@Override
 	public void accept(List<ModelElement_1_0> packagesToExport) {
@@ -178,13 +178,9 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
 	protected void copyBinary(URL url) {
 		final byte[] bytes = new byte[1024];
 		try(InputStream s = url.openStream()){
-			System.err.println("Copying " + url);
-			int l = 0;
 			for(int i = s.read(bytes); i > 0; i = s.read(bytes)){
 				this.buffer.write(bytes, 0, i);
-				l+=i;
 			}
-			System.err.println("Size of " + url + ": " + l);
 		} catch (IOException exception) {
 			throw new RuntimeServiceException(
 				exception,

@@ -1,10 +1,10 @@
 /*
- * ==================================================================== 
- * Project: openMDX, http://www.openmdx.org
- * Description: Package Mapper 
- * Owner: the original authors. 
  * ====================================================================
- * 
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: Markdown Renderer
+ * Owner:       the original authors.
+ * ====================================================================
+ *
  * This software is published under the BSD license as listed below.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -42,60 +42,33 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.spi;
 
-import org.openmdx.base.mof.cci.ModelElement_1_0;
+import java.util.function.Function;
+
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.parser.Parser;
 
 /**
- * Package Mapper 
+ * Markdown Renderer
  */
-public class PackageMapper extends HTMLMapper {
+class MarkownRenderer implements Function<String, String> {
 
-    /**
-     * Constructor 
-     */
-    public PackageMapper(
-    	Sink sink, 
-        ModelElement_1_0 packageToBeExported,
-        boolean markdown, PIMDocConfiguration configuration
-    ){
-		super(sink, packageToBeExported, markdown, configuration);
-		this.classesMapper = new ClassesMapper(
-			pw, this.element, this::getHref
-		);
-		this.dataTypesMapper = new DataTypesMapper(
-			pw, this.element, this::getHref
-		);
-    }    
-
-	private final CompartmentMapper classesMapper;
-	private final CompartmentMapper dataTypesMapper;
-    
-	@Override
-	protected void htmlBody() {
-		printLine("<body class=\"uml-element uml-package\">");
-		columnHead();
-		columnBody();
-		printLine("</body>");
-   }
-
-	private void columnHead() {
-		printLine("\t<div class=\"column-head\">");
-		printLine("\t\t<h2>", getTitle(), "</h2>");
-		printLine("\t</div>");
+	MarkownRenderer(
+        final Parser parser,
+        final HtmlRenderer renderer
+	) {
+		this.parser = parser;
+		this.renderer = renderer;
 	}
+
+    private final Parser parser;
+    private final HtmlRenderer renderer;
 	
-	private void columnBody() {
-		printLine("\t<div class=\"column-body\">");
-		annotation(element);
-		classesMapper.compartment();
-		dataTypesMapper.compartment();
-		printLine("\t</div>");
-	}
 	
 	@Override
-	protected String getTitle() {
-		return "Package " + getDisplayName(element);
+	public String apply(String text) {
+		return text == null ? null : renderer.render(parser.parse(text));
 	}
 
 }

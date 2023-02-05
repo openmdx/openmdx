@@ -1,7 +1,7 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Description: Markdown Configuration
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Description: Standard Annotation Renderer 
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,35 +42,18 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.spi;
+package org.openmdx.application.mof.mapping.java;
+
+import java.util.function.Function;
 
 /**
- * Markdown Configuration
+ * Standard Annotation Renderer 
  */
-public class MarkdownConfiguration {
+public class StandardAnnotationRenderer implements Function<String, String> {
 
-	/**
-	 * Cosnstructor using the default link target {@code "_self"}
-	 */
-	public MarkdownConfiguration() {
-		this("_self");
+	@Override
+	public String apply(String annotation) {
+		return "<p>\n" + annotation;
 	}
 
-	/**
-	 * Constructor
-	 * 
-	 * @param linkTarget the target tp be used for markdown links
-	 */
-	public MarkdownConfiguration(
-		String linkTarget
-	) {
-		this.linkTarget = linkTarget;
-	}
-	
-	private final String linkTarget;
-
-	String getLinkTarget() {
-		return linkTarget;
-	}
-	
 }
