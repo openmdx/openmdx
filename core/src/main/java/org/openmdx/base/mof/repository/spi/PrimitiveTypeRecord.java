@@ -64,7 +64,7 @@ public class PrimitiveTypeRecord
      */
     private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -3262089491337084638L;
 

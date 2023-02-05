@@ -77,12 +77,12 @@ public class Removable_1 extends Interceptor_1 {
     }
 
     /**
-     * The future place holder has actually the value <code>10000-01-01T00:00:00.000Z</code>.
+     * The future place holder has actually the value {@code 10000-01-01T00:00:00.000Z}.
      */
     public static final Date IN_THE_FUTURE = new Date(253402300800000l);
 
     /**
-     * The cached <code<removedBy</code> value
+     * The cached <code<removedBy} value
      */
     private transient List<Object> removedBy;    
 
@@ -148,7 +148,7 @@ public class Removable_1 extends Interceptor_1 {
     class RemovedBy extends AbstractList<Object> {
 
         /**
-         * The data object's <code>removedBy</code> set
+         * The data object's {@code removedBy} set
          */
         private transient List<Object> delegate;
 

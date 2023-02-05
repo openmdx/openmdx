@@ -55,15 +55,15 @@ import org.openmdx.base.transaction.TransactionAttributeType;
 /**
  * Connection Factory Adapter
  * <p>
- * This adapter allows a <code>ConnectionFactory</code> view on a
- * <code>Port</code>.
+ * This adapter allows a {@code ConnectionFactory} view on a
+ * {@code Port}.
  */
 public class RestConnectionFactory extends AbstractConnectionFactory {
 
 	/**
      * Constructor 
      * 
-     * @param port the REST <code>Port</code>
+     * @param port the REST {@code Port}
      * @param supportsLocalTransactionDemarcation 
      * @param transactionAttribute
      */
@@ -78,7 +78,7 @@ public class RestConnectionFactory extends AbstractConnectionFactory {
     }
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
 	private static final long serialVersionUID = -6265231975243515265L;
 

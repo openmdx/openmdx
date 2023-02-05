@@ -182,7 +182,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
      * @param xri 
      * @param input
      * @param output
-     * @return <code>true</code> if the message was processed successfully
+     * @return {@code true} if the message was processed successfully
      * 
      * @throws ServiceException
      */
@@ -204,7 +204,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
      * @param input
      * @param output
      * 
-     * @return <code>true</code> if the message was processed successfully
+     * @return {@code true} if the message was processed successfully
      * 
      * @throws ServiceException
      */
@@ -224,7 +224,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
      * @param message
      * @param output
      * 
-     * @return <code>true</code> if the message was processed successfully
+     * @return {@code true} if the message was processed successfully
      * 
      * @throws ServiceException
      */

@@ -70,7 +70,7 @@ public interface Container<E>
     /**
      * Process all elements for which the predicate evaluates to true.
      * <p>
-     * Processing is terminated prematurely if accept throws a <code>RuntimeException</code>.
+     * Processing is terminated prematurely if accept throws a {@code RuntimeException}.
      * 
      * @param predicate
      *            the predicate to be applied to the elements

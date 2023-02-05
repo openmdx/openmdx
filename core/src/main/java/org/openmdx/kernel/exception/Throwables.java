@@ -77,7 +77,7 @@ public class Throwables {
     }
 
     /**
-     * Set a <code>Throwable</code>'s exception stack.
+     * Set a {@code Throwable}'s exception stack.
      *
      * @param throwable A throwable from which the backtrace and other exception
      * information is used. 
@@ -87,7 +87,7 @@ public class Throwables {
      * @param exceptionCode  An exception code. Negative codes describe common
      * exceptions codes. Positive exception codes are specific for a given
      * exception domain.
-     * @param parameters  Any exception parameters, maybe <code>null</code>
+     * @param parameters  Any exception parameters, maybe {@code null}
      */
     public static <T extends Throwable> T initCause (
         T throwable,
@@ -110,7 +110,7 @@ public class Throwables {
     }
 
     /**
-     * Set a <code>Throwable</code>'s exception stack.
+     * Set a {@code Throwable}'s exception stack.
      *
      * @param throwable A throwable from which the backtrace and other exception
      * information is used. 
@@ -121,7 +121,7 @@ public class Throwables {
      * exceptions codes. Positive exception codes are specific for a given
      * exception domain.
      * @param description the detail message
-     * @param parameters  Any exception parameters, maybe <code>null</code>
+     * @param parameters  Any exception parameters, maybe {@code null}
      */
     public static <T extends Throwable> T initCause (
         T throwable,
@@ -150,11 +150,11 @@ public class Throwables {
      * 
      * @param   exceptionDomain
      *          the desired exception domain,
-     *          or <code>null</code> to retrieve the initial cause.
+     *          or {@code null} to retrieve the initial cause.
      *
      * @return  Either the cause belonging to a specific exception domain
-     *          or the initial cause if <code>exceptionDomain</code> is
-     *          <code>null</code>.  
+     *          or the initial cause if {@code exceptionDomain} is
+     *          {@code null}.  
      */
     public static BasicException getCause(
         Throwable throwable,

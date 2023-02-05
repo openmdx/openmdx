@@ -67,7 +67,7 @@ public class MethodInvocationSpec implements InteractionSpec {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 2223358654830587379L;
 

@@ -8,7 +8,7 @@ public class InvalidNameException extends JmiException {
     private final String invalidName;
     
     /**
-     * Constructs an <code>InvalidNameException</code> without detail message.
+     * Constructs an {@code InvalidNameException} without detail message.
      * @param invalidName Invalid name.
      */
     public InvalidNameException(String invalidName) {
@@ -16,7 +16,7 @@ public class InvalidNameException extends JmiException {
     }
 
     /**
-     * Constructs an <code>InvalidNameException</code> with the specified detail message.
+     * Constructs an {@code InvalidNameException} with the specified detail message.
      * @param invalidName Invalid name.
      * @param msg the detail message.
      */

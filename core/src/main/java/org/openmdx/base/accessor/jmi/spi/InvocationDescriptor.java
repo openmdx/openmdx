@@ -67,7 +67,7 @@ public class InvocationDescriptor {
     }
     
     /**
-     * Some maps require a non-<code>null</code> NULL value
+     * Some maps require a non-{@code null} NULL value
      */
     public static final InvocationDescriptor NULL = new InvocationDescriptor(-1,null);
     

@@ -104,7 +104,7 @@ public interface PrimitiveTypeMapper {
      * @param qualifiedTypeName
      * @param from, either CCI2 or JPA3
      * @param to, either CCI2 or JPA3
-     * @return the pattern to map the value from the <code>from</code> format to the <code>to</code> format
+     * @return the pattern to map the value from the {@code from} format to the {@code to} format
      * 
      * @throws ServiceException in case of an unsupported combination of arguments
      * 

@@ -51,7 +51,7 @@ public class OrFileFilter
     private final List<IOFileFilter> fileFilters;
 
     /**
-     * Constructs a new instance of <code>OrFileFilter</code>.
+     * Constructs a new instance of {@code OrFileFilter}.
      *
      * @since Commons I/O 1.1
      */
@@ -60,7 +60,7 @@ public class OrFileFilter
     }
 
     /**
-     * Constructs a new instance of <code>OrFileFilter</code>
+     * Constructs a new instance of {@code OrFileFilter}
      * with the specified filters.
      *
      * @param fileFilters  the file filters for this filter, copied, null ignored

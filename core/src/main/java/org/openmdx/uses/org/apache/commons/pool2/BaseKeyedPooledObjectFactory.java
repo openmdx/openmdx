@@ -26,7 +26,7 @@
 package org.openmdx.uses.org.apache.commons.pool2;
 
 /**
- * A base implementation of <code>KeyedPooledObjectFactory</code>.
+ * A base implementation of {@code KeyedPooledObjectFactory}.
  * <p>
  * All operations defined here are essentially no-op's.
  * </p>
@@ -89,7 +89,7 @@ public abstract class BaseKeyedPooledObjectFactory<K,V>
      *
      * @param key the key used when selecting the object
      * @param p a {@code PooledObject} wrapping the the instance to be validated
-     * @return always <code>true</code> in the default implementation
+     * @return always {@code true} in the default implementation
      */
     @Override
     public boolean validateObject(K key, PooledObject<V> p) {

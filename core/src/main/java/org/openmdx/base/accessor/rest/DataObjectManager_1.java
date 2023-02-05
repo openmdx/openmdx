@@ -236,17 +236,17 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     private final static int CACHE_THRESHOLD_DEFAULT = 256;
 
     /**
-     * Restricted value for <code>DetachAllOnCommit</code>
+     * Restricted value for {@code DetachAllOnCommit}
      */
     private static final boolean DETACH_ALL_ON_COMMIT = false;
 
     /**
-     * Restricted value for <code>CopyOnAttach</code>
+     * Restricted value for {@code CopyOnAttach}
      */
     private static final boolean COPY_ON_ATTACH = true;
 
     /**
-     * Restricted value for <code>IgnoreCache</code>
+     * Restricted value for {@code IgnoreCache}
      */
     private static final boolean IGNORE_CACHE = false;
 
@@ -325,12 +325,12 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     private transient Transaction transaction;
 
     /**
-     * This connection has transaction policy <code>Mandatory</code>
+     * This connection has transaction policy {@code Mandatory}
      */
     Connection connection;
 
     /**
-     * This connection has transaction policy <code>RequiresNew</code>
+     * This connection has transaction policy {@code RequiresNew}
      */
     Connection connection2;
 
@@ -385,7 +385,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     private final InstanceLifecycleListenerRegistry instanceLifecycleListeners = new InstanceLifecycleListenerRegistry();
 
     /**
-     * This object is shared among all <code>PersistenceManager</code>s in the stack.
+     * This object is shared among all {@code PersistenceManager}s in the stack.
      */
     private final SharedObjects.Accessor sharedObjects = new SharedObjects.Accessor() {
 
@@ -512,9 +512,9 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * Register the plug-ins
      * 
      * @param plugIns
-     *            the (maybe <code>null</code>) plug-in array to be registered
+     *            the (maybe {@code null}) plug-in array to be registered
      * 
-     * @return a maybe empty but never <code>null</code> plug-in array
+     * @return a maybe empty but never {@code null} plug-in array
      */
     private PlugIn_1_0[] getRegisteredPlugIns(PlugIn_1_0[] plugIns) {
         if (plugIns == null) {
@@ -659,7 +659,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /**
      * Tells whether the data objects are proxies or not
      * 
-     * @return <code>true</code> if the data objects are proxies
+     * @return {@code true} if the data objects are proxies
      */
     boolean isProxy() {
         return this.proxy;
@@ -669,7 +669,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * Tells whether the values of transactional objects shall be retained
      * after the completion of a unit of work or after flushing
      * 
-     * @return <code>true</code> if the values of transactional objects shall
+     * @return {@code true} if the values of transactional objects shall
      *         be retained
      */
     boolean isRetainValues() {
@@ -682,7 +682,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @param type
      * @param lenient
      *            exceptions are logged rather than thrown if
-     *            <code>lenient</code> is <code>true</code>
+     *            {@code lenient} is {@code true}
      * @throws ServiceException
      * 
      * @throws ServiceException
@@ -739,7 +739,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @param transientObjectId
      * @param object
      * 
-     * @return <code>null</code> if the object has been added to the cache
+     * @return {@code null} if the object has been added to the cache
      */
     void putUnlessPresent(
         UUID transientObjectId,
@@ -1213,9 +1213,9 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      *            the data object to be attached
      * 
      * @exception NullPointerException
-     *                if pc is <code>null</code>
+     *                if pc is {@code null}
      * @exception ClassCastException
-     *                if pc is not an instance of <code>DataObject_1_0</code>
+     *                if pc is not an instance of {@code DataObject_1_0}
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -1492,7 +1492,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @param feature
      *            the feature's meta-data
      * 
-     * @return <code>true</code> if the feature is exempt
+     * @return {@code true} if the feature is exempt
      *         from the standard validation.
      * 
      * @throws ServiceException
@@ -2111,7 +2111,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /**
      * Tests wherther the persistence manager is closed
      * 
-     * @return <code>true</code> if the persistence manager is closed
+     * @return {@code true} if the persistence manager is closed
      */
     @Override
     public boolean isClosed() {
@@ -2417,7 +2417,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @param the
      *            persistence capable object
      * 
-     * @return the last segment of the actual or future XRI; or <code>null</code> if the object is not contained yet
+     * @return the last segment of the actual or future XRI; or {@code null} if the object is not contained yet
      */
     public String getLastXRISegment(Object pc) {
         return pc instanceof DataObject_1 ? ((DataObject_1) pc).getQualifier() : null;

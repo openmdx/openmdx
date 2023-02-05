@@ -93,7 +93,7 @@ public class Extent_1
     protected final Container_1_0 container;
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -1452567179504985867L;
 

@@ -66,7 +66,7 @@ public class BooleanCallback implements Callback, Serializable {
    }
    
    /**
-    * Implements <code>Serializable</code>
+    * Implements {@code Serializable}
     */
    private static final long serialVersionUID = 2231259468759102232L;
 

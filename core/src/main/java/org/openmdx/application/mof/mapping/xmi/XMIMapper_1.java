@@ -77,7 +77,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
      */
     public XMIMapper_1(
     ) {
-        super(Names.XMI_PACKAGE_SUFFIX);
+        super(false, Names.XMI_PACKAGE_SUFFIX);
     }
 
     /**

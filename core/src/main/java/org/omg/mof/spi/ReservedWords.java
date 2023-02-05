@@ -58,7 +58,7 @@ import java.util.Set;
  * This class enumerates<ul>
  * <li>Java keywords
  * <li>Java literals
- * <li><code>java.lang.Object</code> methods
+ * <li>{@code java.lang.Object} methods
  * </ul>
  */
 public class ReservedWords {
@@ -78,14 +78,14 @@ public class ReservedWords {
     );
 
     /**
-     * Java literals for <code>boolean</code>s and <code>Object</code>s
+     * Java literals for {@code boolean}s and {@code Object}s
      */
     private static final Collection<String> JAVA_LITERALS = Arrays.asList(
         "true", "false", "null"
     );
 
     /**
-     * Methods defined by <code>java.lang.Object</code>
+     * Methods defined by {@code java.lang.Object}
      */
     private static final Collection<String> OBJECT_METHODS = Arrays.asList(
         "clone", "equals", "finalize", "getClass", "hashCode", "notify", 
@@ -98,13 +98,13 @@ public class ReservedWords {
     public static final Set<String> NONE = Collections.emptySet();
 
     /**
-     * Union of <code>JAVA_KEYWORDS</code> and <code>JAVA_LITERALS</code>.
+     * Union of {@code JAVA_KEYWORDS} and {@code JAVA_LITERALS}.
      */
     public static final Set<String> keywordsAndLiterals;
 
     /**
-     * Union of <code>JAVA_KEYWORDS</code>, <code>JAVA_LITERALS</code> and 
-     * <code>OBJECT_METHODS</code>.
+     * Union of {@code JAVA_KEYWORDS}, {@code JAVA_LITERALS} and 
+     * {@code OBJECT_METHODS}.
      */
     public static final Set<String> reservedMethodNames;
     

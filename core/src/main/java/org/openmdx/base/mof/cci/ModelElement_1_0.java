@@ -151,7 +151,7 @@ public interface ModelElement_1_0 {
      * 
      * @param feature the feature to be inspected
      * 
-     * @return <code>true</code> if the given feature is a reference
+     * @return {@code true} if the given feature is a reference
      * 
      * @throws ServiceException
      */
@@ -197,7 +197,7 @@ public interface ModelElement_1_0 {
     /**
      * Get a single-valued attribute.
      * <p>
-     * This method returns a <code>BAD_PARAMETER</code> exception unless the 
+     * This method returns a {@code BAD_PARAMETER} exception unless the 
      * feature is single valued or a stream. 
      *
      * @param       feature
@@ -220,7 +220,7 @@ public interface ModelElement_1_0 {
     /**
      * Get a List attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -242,7 +242,7 @@ public interface ModelElement_1_0 {
     /**
      * Get a Set attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -264,7 +264,7 @@ public interface ModelElement_1_0 {
     /**
      * Get a Map attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature

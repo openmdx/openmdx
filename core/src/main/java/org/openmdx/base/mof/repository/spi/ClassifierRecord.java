@@ -66,7 +66,7 @@ abstract class ClassifierRecord<M extends Enum<M>>
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 5268968762243168949L;
 

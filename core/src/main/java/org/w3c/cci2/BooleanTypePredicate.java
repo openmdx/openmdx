@@ -50,13 +50,13 @@ package org.w3c.cci2;
 public interface BooleanTypePredicate {
 
     /**
-     * Matches if the attribute's value is <code>true</code>
+     * Matches if the attribute's value is {@code true}
      */
     void isTrue(
     );
 
     /**
-     * Matches if the attribute's value is <code>false</code>
+     * Matches if the attribute's value is {@code false}
      */
     void isFalse(
     );

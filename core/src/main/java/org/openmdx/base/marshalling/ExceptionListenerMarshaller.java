@@ -86,7 +86,7 @@ public class ExceptionListenerMarshaller implements Marshaller, Serializable {
 
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 3977302131193624624L;
 

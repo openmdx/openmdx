@@ -114,7 +114,7 @@ public abstract class AbstractLayer extends AbstractRestPort {
      * @param object to be tested
      * @param type the type's refMofId, e.g. 'org:openmdx:base:BasicObject'
      * 
-     * @return <code>true</code> if the object is an instance o f the given type
+     * @return {@code true} if the object is an instance o f the given type
      * 
      * @throws ResourceException
      */
@@ -139,7 +139,7 @@ public abstract class AbstractLayer extends AbstractRestPort {
     
     /**
      * This method is overridden to intercept outgoing objects upon success, i.e. when 
-     * the delegate layer returns <code>true</code>.
+     * the delegate layer returns {@code true}.
      * <p>
      * This method is dedicated to<ul>
      * <li>get

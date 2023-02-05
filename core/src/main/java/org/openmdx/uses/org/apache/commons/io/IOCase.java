@@ -38,7 +38,7 @@ import java.io.Serializable;
  * methods that use the enumeration to perform comparisons/*
 .
  * <p>
- * Wherever possible, you should use the <code>check</code> methods in this
+ * Wherever possible, you should use the {@code check} methods in this
  * class to compare filenames.
  *
  * @version $Id: IOCase.java 1483915 2013-05-17 17:02:35Z sebb $

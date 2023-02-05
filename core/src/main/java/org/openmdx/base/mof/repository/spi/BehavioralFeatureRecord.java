@@ -63,7 +63,7 @@ abstract class BehavioralFeatureRecord<M extends Enum<M>>
     private IndexedRecord parameter;
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -1375930371308186046L;
     

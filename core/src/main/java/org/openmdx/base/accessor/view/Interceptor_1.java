@@ -123,7 +123,7 @@ public class Interceptor_1
     /**
      * Retrieve the next plug-in
      * 
-     * @return the next plug-in, or <code>null</code> if this is the terminal plug-in
+     * @return the next plug-in, or {@code null} if this is the terminal plug-in
      */
     protected Interceptor_1 getNext(){
         try {

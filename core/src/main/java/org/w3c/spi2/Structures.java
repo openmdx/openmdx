@@ -298,7 +298,7 @@ public class Structures {
      * @param target the target bean
      * 
      * @exception IllegalArgumentException if the record can't be saved into the bean
-     * @exception NullPointerException if either the source or the target is <code>null</code>
+     * @exception NullPointerException if either the source or the target is {@code null}
      */
     public static <T> T toJavaBean(
         MappedRecord source,
@@ -321,7 +321,7 @@ public class Structures {
      * @param target the target bean
      * 
      * @exception IllegalArgumentException if the record can't be saved into the bean
-     * @exception NullPointerException if either the source or the target is <code>null</code>
+     * @exception NullPointerException if either the source or the target is {@code null}
      */
     public static <T> T toJavaBean(
         Object source,
@@ -383,7 +383,7 @@ public class Structures {
      * 
      * @return a mapped record view of the given structure
      * 
-     * @exception ClassCastException unless isStructureInstance(structure) evaluates to <code>true</code>
+     * @exception ClassCastException unless isStructureInstance(structure) evaluates to {@code true}
      */
     public static MappedRecord toRecord(
         Object structure,
@@ -398,11 +398,11 @@ public class Structures {
      * @param structure
      * @param mapNullValues if true, fields with value==null are added to the mapped record. 
      *                      They are not added if mapNullValues is false.
-     * @param mofCompliant when <code>true<code> use <code>"::"</code> as separator, <code>":"</code> otherwise       
+     * @param mofCompliant when {@code true{@code  use {@code "::"} as separator, {@code ":"} otherwise       
      * 
      * @return a mapped record view of the given structure
      * 
-     * @exception ClassCastException unless isStructureInstance(structure) evaluates to <code>true</code>
+     * @exception ClassCastException unless isStructureInstance(structure) evaluates to {@code true}
      */
     public static MappedRecord toRecord(
         Object structure,
@@ -418,7 +418,7 @@ public class Structures {
      * @param object
      *            the object to be tested
      * 
-     * @return <code>true</code> if the object is a structure instance
+     * @return {@code true} if the object is a structure instance
      */
     public static boolean isStructureInstance(Object object) {
         return object != null && Proxy.isProxyClass(object.getClass())
@@ -508,7 +508,7 @@ public class Structures {
         }
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = 8952038983241186303L;
 
@@ -925,7 +925,7 @@ public class Structures {
             }
         
             /**
-             * Implements <code>Serializable</code>
+             * Implements {@code Serializable}
              */
             private static final long serialVersionUID = -824731466833965774L;
         
@@ -1078,7 +1078,7 @@ public class Structures {
             private transient Set<Map.Entry<Integer, Object>> entries;
         
             /**
-             * Implements <code>Serializable</code>
+             * Implements {@code Serializable}
              */
             private static final long serialVersionUID = 7457080255902185521L;
         
@@ -1273,7 +1273,7 @@ public class Structures {
         private final T name;
 
         /**
-         * The member's value, which may be <code>null</code> in case of
+         * The member's value, which may be {@code null} in case of
          * optional members.
          */
         private final Object value;
@@ -1538,7 +1538,7 @@ public class Structures {
         /**
          * Retrieve the type of its object equivalent
          * <p>
-         * Converts neither <code>byte</code> nor <code>character</code>!
+         * Converts neither {@code byte} nor {@code character}!
          * 
          * @param type or its object equivalent
          * 
@@ -1828,7 +1828,7 @@ public class Structures {
          * Retrieve the corresponding MOF id
          * 
          * @param javaClass
-         * @param mofCompliant "::" is used as separator if <code>true</code> 
+         * @param mofCompliant "::" is used as separator if {@code true} 
          * 
          * @return the class' MOF id
          */
@@ -1880,7 +1880,7 @@ public class Structures {
          * @param mapNullValues if true, fields with value==null are added
          *        to the mapped record. They are not added if mapNullValues 
          *        is false.
-         * @param mofCompliant when <code>true<code> use <code>"::"</code> as separator, <code>":"</code> otherwise       
+         * @param mofCompliant when {@code true{@code  use {@code "::"} as separator, {@code ":"} otherwise       
          * 
          * @return JCA record representation of the structure
          */

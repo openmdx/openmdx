@@ -65,7 +65,7 @@ import org.openmdx.base.text.Case;
  * <li>Conformance to existing conventions &mdash; identifiers should conform to existing stylistic
  *     conventions.
  * <li>Conflict avoidance &mdash; identifiers must not conflict with keywords, literals and
- *     <code>java.lang.Object</code>'s methods.
+ *     {@code java.lang.Object}'s methods.
  * </ul>
  */
 public enum Identifier {
@@ -177,14 +177,14 @@ public enum Identifier {
      * Retrieve the identifier for a given model element
      * 
      * @param modelElementName the model element name to be converted to an identifier
-     * @param removablePrefix if the <code>modelElementName</code> starts with the word 
-     * <code>removablePrefix</code>, then it is removed unless it is <code>null</code>.
-     * @param prependablePrefix the <code>prependablePrefix</code> is prepended as first
-     * word unless it is <code>null</code>.
-     * @param removableSuffix if the <code>modelElementName</code> ends with the word 
-     * <code>removablePrefix</code>, then it is removed unless it is <code>null</code>
-     * @param appendableSuffix the <code>appendableSuffix</code> is appended as last
-     * word unless it is <code>null</code>.
+     * @param removablePrefix if the {@code modelElementName} starts with the word 
+     * {@code removablePrefix}, then it is removed unless it is {@code null}.
+     * @param prependablePrefix the {@code prependablePrefix} is prepended as first
+     * word unless it is {@code null}.
+     * @param removableSuffix if the {@code modelElementName} ends with the word 
+     * {@code removablePrefix}, then it is removed unless it is {@code null}
+     * @param appendableSuffix the {@code appendableSuffix} is appended as last
+     * word unless it is {@code null}.
      * @return the identifier for the given model element name
      */
     public final String toIdentifier(
@@ -212,7 +212,7 @@ public enum Identifier {
      * 
      * @param modelElementName
      * 
-     * @return the words the <code>modelElementName</code> consists of
+     * @return the words the {@code modelElementName} consists of
      */
     static final List<String> toWords(
         String modelElementName
@@ -309,22 +309,22 @@ public enum Identifier {
     private final Set<String> reserved; 
 
     /**
-     * Java&trade; Metadata Interface (JMI) Specification's <code>APLHA</code> production
+     * Java&trade; Metadata Interface (JMI) Specification's {@code APLHA} production
      */
     private static final String UPPER = "\\p{javaUpperCase}";
     
     /**
-     * Java&trade; Metadata Interface (JMI) Specification's <code>alpha</code> production
+     * Java&trade; Metadata Interface (JMI) Specification's {@code alpha} production
      */
     private static final String LOWER = "\\p{javaLowerCase}";
     
     /**
-     * Java&trade; Metadata Interface (JMI) Specification's <code>num</code> production
+     * Java&trade; Metadata Interface (JMI) Specification's {@code num} production
      */
     private static final String NUM = "\\p{Digit}";
     
     /**
-     * Derived from Java&trade; Metadata Interface (JMI) Specification's <code>word</code> production.
+     * Derived from Java&trade; Metadata Interface (JMI) Specification's {@code word} production.
      * <p>
      * <em>Note:<br>
      * The original production allows for empty words which doesn't lead to the expected results.
@@ -338,7 +338,7 @@ public enum Identifier {
     private static final String STANDARD_WORD = "(?:(?:" + UPPER + "|" + LOWER  + ")(?:[$_]|" + LOWER + "|" + NUM + ")*)";
     
     /**
-     * Java&trade; Metadata Interface (JMI) Specification's <code>non-sig</code> production
+     * Java&trade; Metadata Interface (JMI) Specification's {@code non-sig} production
      */
     private static final String NON_SIG = "[ \\r\\n\\t\\ck\\-_]*";
 

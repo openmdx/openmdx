@@ -253,7 +253,7 @@ public class Object_2Facade {
     /**
      * Tells whether it is a proxy operation
      * 
-     * @return <code>false</code> if the transient object id is <code>null</code> 
+     * @return {@code false} if the transient object id is {@code null} 
      */
     public boolean isProxyOperation(){
     	return this.delegate.getTransientObjectId() != null;
@@ -735,7 +735,7 @@ public class Object_2Facade {
     {
     
         /**
-         * Creates <code>DelegatingSparseList</code>. The value is managed in record at key.
+         * Creates {@code DelegatingSparseList}. The value is managed in record at key.
          */
         public ListFacade(
             MappedRecord record,
@@ -1426,7 +1426,7 @@ public class Object_2Facade {
     {
 
         /**
-         * Creates <code>SparseArrayFacade</code>. 
+         * Creates {@code SparseArrayFacade}. 
          * The value is managed in record at key.
          *
          * @param record

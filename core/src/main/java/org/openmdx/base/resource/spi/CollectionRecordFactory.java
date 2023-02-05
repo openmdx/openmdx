@@ -81,7 +81,7 @@ class CollectionRecordFactory {
     }
 
     /** 
-     * Creates an <code>MappedRecord</code> of the given type.
+     * Creates an {@code MappedRecord} of the given type.
      *  
      *  @param typedInterface the interface the record shall implement, where one of
      *  the following values will lead to an {@code Optional.isPresent()} result:<ul>
@@ -123,7 +123,7 @@ class CollectionRecordFactory {
     }
 
     /** 
-     * Creates an <code>IndexdRecord</code> of the given type.
+     * Creates an {@code IndexdRecord} of the given type.
      *  
      *  @param typedInterface the interface the record shall implement, where one of
      *  the following values will lead to an {@code Optional.isPresent()} result:<ul>
@@ -147,7 +147,7 @@ class CollectionRecordFactory {
     }
 
     /** 
-     * Creates an <code>IndexdRecord</code> facade of the given type.
+     * Creates an {@code IndexdRecord} facade of the given type.
      *  
      *  @param typedInterface the interface the record shall implement, where one of
      *  the following values will lead to an {@code Optional.isPresent()} result:<ul>
@@ -190,9 +190,9 @@ class CollectionRecordFactory {
      * @exception NotSupportedException
      *            Operation not supported
      * @exception NullPointerException
-     *            if <code>values</code> is null
+     *            if {@code values} is null
      * @exception IllegalArgumentException
-     *            if <code>values</code> is neither an array not a list.
+     *            if {@code values} is neither an array not a list.
      * 
      */
     static Optional<IndexedRecord> asIndexedRecord(

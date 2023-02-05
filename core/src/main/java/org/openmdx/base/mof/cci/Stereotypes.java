@@ -47,7 +47,7 @@ package org.openmdx.base.mof.cci;
 
 
 /**
- * The <code>Stereotypes</code> class contains the
+ * The {@code Stereotypes} class contains the
  * known stereotypes.
  */
 public class Stereotypes {

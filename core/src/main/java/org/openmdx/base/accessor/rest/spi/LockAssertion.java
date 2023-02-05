@@ -55,8 +55,8 @@ import org.w3c.spi.DatatypeFactories;
  * Lock Assertion
  * <p>
  * Parses an expresion of the form 
- * <code>&lsaquo;feature&rsaquo;&lsaquo;relation&rsaquo;&lsaquo;value&rsaquo;</code>,
- * e.g. <code>modifiedAt=2000-02-29T00:00:00.000000Z</code>
+ * {@code &lsaquo;feature&rsaquo;&lsaquo;relation&rsaquo;&lsaquo;value&rsaquo;},
+ * e.g. {@code modifiedAt=2000-02-29T00:00:00.000000Z}
  */
 public class LockAssertion {
 	
@@ -102,7 +102,7 @@ public class LockAssertion {
 	 * 
 	 * @param value
 	 * 
-	 * @return the assertion value, or <code>null</code> if the value is empty
+	 * @return the assertion value, or {@code null} if the value is empty
 	 */
 	private static Object toValue(
 		String value

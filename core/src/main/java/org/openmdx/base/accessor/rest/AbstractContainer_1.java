@@ -174,7 +174,7 @@ abstract class AbstractContainer_1 extends AbstractConsumerAwareCollection {
     /**
      * Tells whether the cache must be ignored
      * 
-     * @return <code>true</code> if the cache must be ignored.
+     * @return {@code true} if the cache must be ignored.
      */
     protected abstract boolean isIgnoreCache();
 
@@ -263,7 +263,7 @@ abstract class AbstractContainer_1 extends AbstractConsumerAwareCollection {
     /**
      * Determine whether the members are administered by the proxified container
      * 
-     * @return <code>true</code> if query rely on the proxified container only
+     * @return {@code true} if query rely on the proxified container only
      */
     protected boolean isProxy() {
         return this.openmdxjdoGetDataObjectManager().isProxy() && this.jdoIsPersistent();
@@ -446,7 +446,7 @@ abstract class AbstractContainer_1 extends AbstractConsumerAwareCollection {
      * 
      * @param candidate
      * 
-     * @return <code>true</code> if the object belongs to the container or extent
+     * @return {@code true} if the object belongs to the container or extent
      */
     protected boolean isInContainerOrExtent(
         Object candidate
@@ -1455,7 +1455,7 @@ abstract class AbstractContainer_1 extends AbstractConsumerAwareCollection {
          * 
          * @param index
          * 
-         * @return the requested slice; or <code>null</code> if none is found
+         * @return the requested slice; or {@code null} if none is found
          */
         DataObjectSlice getSlice(
             int index
@@ -1900,7 +1900,7 @@ abstract class AbstractContainer_1 extends AbstractConsumerAwareCollection {
         /**
          * Tells whether the collection refers to the whole container or a sub-set
          *
-         * @return <code>true</code> if the collection refers to the whole container
+         * @return {@code true} if the collection refers to the whole container
          */
         protected final boolean isPlain() {
             return this.plain;
@@ -1942,7 +1942,7 @@ abstract class AbstractContainer_1 extends AbstractConsumerAwareCollection {
          * 
          * @param candidate
          * 
-         * @return <code>true</code> if the object might be included according to its state
+         * @return {@code true} if the object might be included according to its state
          */
         protected final boolean handles(
             Object candidate
@@ -1982,7 +1982,7 @@ abstract class AbstractContainer_1 extends AbstractConsumerAwareCollection {
          * 
          * @param candidate
          * 
-         * @return <code>true</code> if the object might be included according to its state
+         * @return {@code true} if the object might be included according to its state
          */
         protected final boolean handles(
             Object candidate

@@ -76,7 +76,7 @@ public class LockAssertions {
 	 * 
 	 * @param lockAssertion
 	 * 
-	 * @return <code>true</code> if the lock assertion is a read lock assertion
+	 * @return {@code true} if the lock assertion is a read lock assertion
 	 */
 	public static boolean isReadLockAssertion(
 		Object lockAssertion

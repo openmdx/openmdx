@@ -55,13 +55,13 @@ import javax.resource.cci.Interaction;
 public interface Port<C extends Connection> {
 
     /**
-     * Retrieve a JCA <code>Interaction</code>
+     * Retrieve a JCA {@code Interaction}
      * 
-     * @param connection the JCA <code>Connection</code>
+     * @param connection the JCA {@code Connection}
      * 
-     * @return a JCA <code>Interaction</code>
+     * @return a JCA {@code Interaction}
      * 
-     * @exception ResourceException of the <code>Interaction</code> can't be provided
+     * @exception ResourceException of the {@code Interaction} can't be provided
      */
     Interaction getInteraction(
         C connection

@@ -59,14 +59,14 @@ import java.util.logging.Logger;
 import java.sql.SQLFeatureNotSupportedException;
 
 /**
- * Late Binding <code>DataSource</code>
+ * Late Binding {@code DataSource}
  */
 public class LateBindingDataSource implements DataSource {
 
     /**
      * Constructor
      *
-     * @param jndiName the <code>DataSource</code>'s JNDI name
+     * @param jndiName the {@code DataSource}'s JNDI name
      */
     public LateBindingDataSource(
         String jndiName
@@ -75,17 +75,17 @@ public class LateBindingDataSource implements DataSource {
     }
 
     /**
-     * The <code>DataSource</code> is retrieved lazily
+     * The {@code DataSource} is retrieved lazily
      */
     private DataSource delegate;
     
     /**
-     * The JNDI name refers usually to an entry in the <code>java:comp/env/jdbc</code> context 
+     * The JNDI name refers usually to an entry in the {@code java:comp/env/jdbc} context 
      */
     private final String jndiName;
     
     /**
-     * Look up the <code>DataSource</code>
+     * Look up the {@code DataSource}
      * 
      * @return the DataSource corresponding to the JNDI name
      * 

@@ -6,7 +6,7 @@ package javax.jmi.reflect;
 public class CompositionCycleException extends JmiException {
     
     /**
-     * Constructs an <code>CompositionCycleException</code> without detail message.
+     * Constructs an {@code CompositionCycleException} without detail message.
      * @param objectInError An instance that caused the composition cycle.
      * @param elementInError Attribute, Reference or Association that is being updated to form a cycle.
      */
@@ -15,7 +15,7 @@ public class CompositionCycleException extends JmiException {
     }
     
     /**
-     * Constructs an <code>CompositionCycleException</code> with the specified detail message.
+     * Constructs an {@code CompositionCycleException} with the specified detail message.
      * @param objectInError An instance that caused the composition cycle.
      * @param elementInError Attribute, Reference or Association that is being updated to form a cycle.
      * @param msg the detail message.

@@ -68,7 +68,7 @@ public class AssociationEndRecord
     private String aggregation;
     
     /**
-     * Implements <code>Serilaizable</code>
+     * Implements {@code Serilaizable}
      */
     private static final long serialVersionUID = -2748803551515336911L;
     

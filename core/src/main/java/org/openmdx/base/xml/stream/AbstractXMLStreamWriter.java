@@ -91,8 +91,8 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /**
      * Create a namespace scope
      * 
-     * @param namespaceURI the element's namespace URI, may be <code>null</code>
-     * @param prefix the element's prefix, may be <code>XMLConstants.DEFAULT_NS_PREFIX</code> or <code>null</code>
+     * @param namespaceURI the element's namespace URI, may be {@code null}
+     * @param prefix the element's prefix, may be {@code XMLConstants.DEFAULT_NS_PREFIX} or {@code null}
      * @param localName the elements local name
      */
     protected void enterNamespaceScope(
@@ -162,7 +162,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
      * @param namespaceURI
      * @param prefix
      * 
-     * @return <code>true</code> if the namespace is already bound to the given prefix
+     * @return {@code true} if the namespace is already bound to the given prefix
      * @throws XMLStreamException  
      * 
      * @throws XMLStreamException 
@@ -229,7 +229,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
      * 
      * @param namespaceURI
      * 
-     * @return <code>true</code> if the  given namespace URI is the default namespace URI
+     * @return {@code true} if the  given namespace URI is the default namespace URI
      */
     protected boolean isDefaultNamespaceURI(
         String namespaceURI
@@ -348,7 +348,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
      * @param binaryStream
      * @param encoding
      * 
-     * @return a newly created <code>Writer</code>
+     * @return a newly created {@code Writer}
      * @throws UnsupportedEncodingException
      */
     @SuppressWarnings("resource")

@@ -143,7 +143,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 7709571315051480193L;
     
@@ -246,7 +246,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
      * @param proxy the proxy object
      * @param aspectImplementationClass the requested class
      * 
-     * @return the aspect implementation instance, or <code>null</code> if the aspectImplementationClass is not applicable to <code>proxy</code>
+     * @return the aspect implementation instance, or {@code null} if the aspectImplementationClass is not applicable to {@code proxy}
      */
     public static <T> T getAspectImplementationInstance(
         Object proxy,
@@ -943,7 +943,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
      * 
      * @return the validated XRI sub-segment
      * 
-     * @exception JmiException BAD_PARAMETER if the sub-segment is <code>null</code>Y
+     * @exception JmiException BAD_PARAMETER if the sub-segment is {@code null}Y
      */
     private static Object validateSubSegment(
     	Object subSegment
@@ -1419,7 +1419,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         }
     
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = 8761679181457452801L;
         

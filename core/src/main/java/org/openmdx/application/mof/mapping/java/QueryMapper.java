@@ -73,6 +73,7 @@ public class QueryMapper
      * @param format 
      * @param packageSuffix
      * @param metaData 
+     * @param markdown TODO
      * @param primitiveTypeMapper 
      */
     public QueryMapper(
@@ -81,7 +82,8 @@ public class QueryMapper
         Format format, 
         String packageSuffix, 
         MetaData_1_0 metaData, 
-        PrimitiveTypeMapper primitiveTypeMapper
+        boolean markdown, 
+        																																																															PrimitiveTypeMapper primitiveTypeMapper
     ) {
         super(
             writer,
@@ -89,6 +91,7 @@ public class QueryMapper
             format, 
             packageSuffix,
             metaData, 
+            markdown, 
             primitiveTypeMapper
         );
     }
@@ -114,17 +117,17 @@ public class QueryMapper
             //
             // single-valued mandatory feature
             //
-            this.pw.println("  /**");
+            printLine("  /**");
             MapperUtils.wrapText(
                 "   * ",
-                "Adds a constraint for the feature <code>" + featureDef.getName() + "</code> to the predicate. The predicate for <code>" + 
-                classDef.getName() + "</code> evaluates <code>true</code> if its value of feature <code>" + featureDef.getName() + 
-                "</code> satisfies the selected condition."
+                "Adds a constraint for the feature {@code " + featureDef.getName() + "} to the predicate. The predicate for {@code " + 
+                classDef.getName() + "} evaluates {@code true} if its value of feature {@code " + featureDef.getName() + 
+                "} satisfies the selected condition."
             );
-            this.pw.println("   */");
-            this.pw.println("  public " + queryType + ' ' + getPredicateName(null, featureDef) + '(');
-            this.pw.println("  );");
-            this.pw.println();
+            printLine("   */");
+            printLine("  public " + queryType + ' ' + getPredicateName(null, featureDef) + '(');
+            printLine("  );");
+            newLine();
         } else {
             //
             // optional or multi-valued feature
@@ -136,69 +139,69 @@ public class QueryMapper
                 //
                 // is null?
                 // 
-                this.pw.println("  /**");
-                this.pw.println(
+                printLine("  /**");
+                printLine(
                     MapperUtils.wrapText(
                         "   * ",
-                        "Adds a constraint to the predicate for <code>" + classDef.getName() + 
-                        "</code> testing whether the value of the feature <code>" + featureDef.getName() + 
-                        "</code> is <code>null</code> or not."
+                        "Adds a constraint to the predicate for {@code " + classDef.getName() + 
+                        "} testing whether the value of the feature {@code " + featureDef.getName() + 
+                        "} is {@code null} or not."
                     )
                 );
-                this.pw.println("   */");
-                this.pw.println("  public org.w3c.cci2.OptionalFeaturePredicate " + getPredicateName(null, featureDef) + '(');
-                this.pw.println("  );");
-                this.pw.println();
+                printLine("   */");
+                printLine("  public org.w3c.cci2.OptionalFeaturePredicate " + getPredicateName(null, featureDef) + '(');
+                printLine("  );");
+                newLine();
             } else {
                 //
                 // is empty?
                 // 
-                this.pw.println("  /**");
-                this.pw.println(
+                printLine("  /**");
+                printLine(
                     MapperUtils.wrapText(
                         "   * ",
-                        "Adds a constraint to the predicate for <code>" + classDef.getName() + 
-                        "</code> testing whether the feature <code>" + featureDef.getName() + 
-                        "</code> has values or not."
+                        "Adds a constraint to the predicate for {@code " + classDef.getName() + 
+                        "} testing whether the feature {@code " + featureDef.getName() + 
+                        "} has values or not."
                     )
                 );
-                this.pw.println("   */");
-                this.pw.println("  public org.w3c.cci2.MultivaluedFeaturePredicate " + getPredicateName(null, featureDef) + '(');
-                this.pw.println("  );");
-                this.pw.println();
+                printLine("   */");
+                printLine("  public org.w3c.cci2.MultivaluedFeaturePredicate " + getPredicateName(null, featureDef) + '(');
+                printLine("  );");
+                newLine();
             }
             //
             // there exists
             //
-            this.pw.println("  /**");
+            printLine("  /**");
             if (
                 Multiplicity.OPTIONAL.code().equals(featureDef.getMultiplicity())
             ) {
-                this.pw.println(
+                printLine(
                     MapperUtils.wrapText(
                         "   * ",
-                        "Adds a condition for the feature <code>" + featureDef.getName() + "</code> to the predicate for <code>" + 
-                        classDef.getName() + "</code>, which evaluates to <code>false</code> unless the value of the feature <code>" + 
-                        featureDef.getName() + "</code> satisfies the given condition."
+                        "Adds a condition for the feature {@code " + featureDef.getName() + "} to the predicate for {@code " + 
+                        classDef.getName() + "}, which evaluates to {@code false} unless the value of the feature {@code " + 
+                        featureDef.getName() + "} satisfies the given condition."
                     )
                 );
-                this.pw.println(
+                printLine(
                     MapperUtils.wrapText(
                         "   * ",
-                        "<p>Since the attribute is optional its value  may be <code>null</code>, " +
+                        "<p>Since the attribute is optional its value  may be {@code null}, " +
                         "in which case the condition is <em>not satisfied</em>"
                     )
                 );
             } else {
-                this.pw.println(
+                printLine(
                     MapperUtils.wrapText(
                         "   * ",
-                        "Adds a condition for the feature <code>" + featureDef.getName() + "</code> to the predicate for <code>" + 
-                        classDef.getName() + "</code>, which evaluates to <code>false</code> unless the values of the feature <code>" + 
-                        featureDef.getName() + "</code> satisfy the given condition."
+                        "Adds a condition for the feature {@code " + featureDef.getName() + "} to the predicate for {@code " + 
+                        classDef.getName() + "}, which evaluates to {@code false} unless the values of the feature {@code " + 
+                        featureDef.getName() + "} satisfy the given condition."
                     )
                 );
-                this.pw.println(
+                printLine(
                     MapperUtils.wrapText(
                         "   * ",
                         "<p>Since the multiplicity for this attribute is 0..n, the attribute may have no values. " +
@@ -206,42 +209,42 @@ public class QueryMapper
                     )
                 );
             }
-            this.pw.println("   */");
-            this.pw.println("  public " + queryType + ' ' + getPredicateName("thereExists", featureDef) + '(');
-            this.pw.println("  );");
-            this.pw.println();
+            printLine("   */");
+            printLine("  public " + queryType + ' ' + getPredicateName("thereExists", featureDef) + '(');
+            printLine("  );");
+            newLine();
             //
             // for all
             //
-            this.pw.println("  /**");
+            printLine("  /**");
             if (
                 Multiplicity.OPTIONAL.code().equals(featureDef.getMultiplicity())
             ) {
-                this.pw.println(
+                printLine(
                     MapperUtils.wrapText(
                         "   * ",
-                        "Adds a condition for the feature <code>" + featureDef.getName() + "</code> to the predicate for <code>" + 
-                        classDef.getName() + "</code>, which evaluates to <code>false</code> unless the value of the feature <code>" + 
-                        featureDef.getName() + "</code> satisfies the given condition."
+                        "Adds a condition for the feature {@code " + featureDef.getName() + "} to the predicate for {@code " + 
+                        classDef.getName() + "}, which evaluates to {@code false} unless the value of the feature {@code " + 
+                        featureDef.getName() + "} satisfies the given condition."
                     )
                 );
-                this.pw.println(
+                printLine(
                     MapperUtils.wrapText(
                         "   * ",
-                        "<p>Since the attribute is optional its value  may be <code>null</code>, " +
+                        "<p>Since the attribute is optional its value  may be {@code null}, " +
                         "in which case the condition is <em>satisfied</em>"
                     )
                 );
             } else {
-                this.pw.println(
+                printLine(
                     MapperUtils.wrapText(
                         "   * ",
-                        "Adds a condition for the feature <code>" + featureDef.getName() + "</code> to the predicate for <code>" + 
-                        classDef.getName() + "</code>, which evaluates to <code>false</code> unless the values of the feature <code>" + 
-                        featureDef.getName() + "</code> satisfy the given condition."
+                        "Adds a condition for the feature {@code " + featureDef.getName() + "} to the predicate for {@code " + 
+                        classDef.getName() + "}, which evaluates to {@code false} unless the values of the feature {@code " + 
+                        featureDef.getName() + "} satisfy the given condition."
                     )
                 );
-                this.pw.println(
+                printLine(
                     MapperUtils.wrapText(
                         "   * ",
                         "<p>Since the multiplicity for this attribute is 0..n, the attribute may have no values. " +
@@ -249,10 +252,10 @@ public class QueryMapper
                     )
                 );
             }
-            this.pw.println("   */");
-            this.pw.println("  public " + queryType + ' ' + getPredicateName("forAll", featureDef) + '(');
-            this.pw.println("  );");
-            this.pw.println();
+            printLine("   */");
+            printLine("  public " + queryType + ' ' + getPredicateName("forAll", featureDef) + '(');
+            printLine("  );");
+            newLine();
         }
         if(this.model.isPrimitiveType(featureDef.getQualifiedTypeName())) {
             String orderType = getOrderType(featureDef);
@@ -260,24 +263,24 @@ public class QueryMapper
                 //
                 // order by
                 // 
-                this.pw.println("  /**");
-                this.pw.println(
+                printLine("  /**");
+                printLine(
                     MapperUtils.wrapText(
                         "   * ",
-                        "Allows to adds a sort instruction for <code>" + classDef.getName() + 
-                        "</code> depending the feature <code>" + featureDef.getName() + "</code>"
+                        "Allows to adds a sort instruction for {@code " + classDef.getName() + 
+                        "} depending the feature {@code " + featureDef.getName() + "}"
                     )
                 );
-                this.pw.println(
+                printLine(
                     MapperUtils.wrapText(
                         "   * ",
-                        "Note: <em>The order in which </em><code>orderBy&hellip;</code><em> instructions are given is relevant!</em>"
+                        "Note: <em>The order in which </em>{@code orderBy&hellip;}<em> instructions are given is relevant!</em>"
                     )
                 );
-                this.pw.println("   */");
-                this.pw.println("    public " + orderType + ' ' + getPredicateName("orderBy", featureDef) + '(');
-                this.pw.println("  );");
-                this.pw.println();
+                printLine("   */");
+                printLine("    public " + orderType + ' ' + getPredicateName("orderBy", featureDef) + '(');
+                printLine("  );");
+                newLine();
             }
         }
     }
@@ -288,7 +291,7 @@ public class QueryMapper
     public void mapEnd(
     ) {
         this.trace("Query/End");
-        this.pw.println("}        ");
+        printLine("}        ");
     }
 
     /**
@@ -302,25 +305,25 @@ public class QueryMapper
         this.trace("Query/Begin");
         this.fileHeader();
         String qualifiedName = classifierDef.getQualifiedName();
-        this.pw.println(
+        printLine(
             "package " + this.getNamespace(
                 MapperUtils.getNameComponents(
                     MapperUtils.getPackageName(qualifiedName)
                 )
             ) + ';'
         );
-        this.pw.println();
-        this.pw.println("/**");
+        newLine();
+        printLine("/**");
         MapperUtils.wrapText(
             " * ",
-            "A <code>" + classifierDef.getName() + "Query</code> selects a set of instances of class <code>" + classifierDef.getName() + 
-              "</code> based on conditions to be met by their attributes. "
+            "A {@code " + classifierDef.getName() + "Query} selects a set of instances of class {@code " + classifierDef.getName() + 
+              "} based on conditions to be met by their attributes. "
         );
-        this.pw.println(" */");
-        this.pw.println("public interface " + Identifier.CLASS_PROXY_NAME.toIdentifier(MapperUtils.getElementName(qualifiedName), null, null,null, "Query"));
+        printLine(" */");
+        printLine("public interface " + Identifier.CLASS_PROXY_NAME.toIdentifier(MapperUtils.getElementName(qualifiedName), null, null,null, "Query"));
         this.pw.print("  extends ");
         if(classifierDef.getSupertypes().isEmpty()) {
-            this.pw.println("org.w3c.cci2.AnyTypePredicate");
+            printLine("org.w3c.cci2.AnyTypePredicate");
         } else {
             String prefix = "";
             for (
@@ -335,10 +338,10 @@ public class QueryMapper
                     ) + '.' + Identifier.CLASS_PROXY_NAME.toIdentifier(supertypeDef.getName(), null, null, null, "Query")
                 );
             }
-            this.pw.println();
+            newLine();
         }
-        this.pw.println("{");
-        this.pw.println();
+        printLine("{");
+        newLine();
     }
         
 }

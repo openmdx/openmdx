@@ -174,9 +174,9 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
         private UserTransaction userTransaction;
 
         /**
-         * Acquire the <code>TransactionManager</code>
+         * Acquire the {@code TransactionManager}
          * 
-         * @return the <code>TransactionManager</code>
+         * @return the {@code TransactionManager}
          * 
          * @exception ResourceException
          */
@@ -200,7 +200,7 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
         /**
          * Tells whether the transaction manager or a user transaction shall be used
          * 
-         * @return <code>true</code> if the transaction manager shall be used
+         * @return {@code true} if the transaction manager shall be used
          */
         private boolean hasTransactionManager(
         ){

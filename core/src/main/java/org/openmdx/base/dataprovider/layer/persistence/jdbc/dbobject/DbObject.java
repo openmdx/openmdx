@@ -182,7 +182,7 @@ public abstract class DbObject implements Serializable {
 	}
 
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = 5312916031308914829L;
 
@@ -302,13 +302,13 @@ public abstract class DbObject implements Serializable {
 	}
 
 	/**
-	 * Append the lock assertion unless it is <code>null</code>
+	 * Append the lock assertion unless it is {@code null}
 	 * 
 	 * @param statement
 	 * @param parameters
 	 * @param assertion
 	 * 
-	 * @return <code>true</code> if a lock assertion has beend appended
+	 * @return {@code true} if a lock assertion has beend appended
 	 * 
 	 * @throws ServiceException
 	 */
@@ -408,7 +408,7 @@ public abstract class DbObject implements Serializable {
 	 * or both getObjectReference() and getObjectId() (the deprecated way).
 	 * <p><em>
 	 * Note:</br>
-	 * Failing to do either leads to an <code>UnsupportedOperationException</code>!
+	 * Failing to do either leads to an {@code UnsupportedOperationException}!
 	 * </em>
 	 * 
 	 * @param frs fast result set

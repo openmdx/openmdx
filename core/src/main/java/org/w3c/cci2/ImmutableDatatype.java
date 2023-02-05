@@ -52,21 +52,21 @@ public interface ImmutableDatatype<T> extends Cloneable {
     /**
      * Return the value in basic format according to ISO8601:2000
      * 
-     * @return a <code>String</code> representing the value in basic format
+     * @return a {@code String} representing the value in basic format
      */
     String toBasicFormat();
 
     /**
      * Return the value in extended format according to ISO8601:2000
      * 
-     * @return a <code>String</code> representing the value in basic format
+     * @return a {@code String} representing the value in basic format
      */
     String toXMLFormat();
     
     /**
      * <p>Creates and returns a mutable copy of this object.</p>
      * 
-     * @return copy of this <code>ImmutableDatatype</code>
+     * @return copy of this {@code ImmutableDatatype}
      */
    T clone();    
 

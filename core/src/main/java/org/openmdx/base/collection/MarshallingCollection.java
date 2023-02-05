@@ -99,7 +99,7 @@ public class MarshallingCollection<E>
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 3977579212402079801L;
 

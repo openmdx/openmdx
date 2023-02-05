@@ -67,6 +67,7 @@ public class ClassMapper extends AbstractClassMapper {
         Format format, 
         String packageSuffix,
         MetaData_1_0 metaData, 
+        boolean markdown, 
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
@@ -76,6 +77,7 @@ public class ClassMapper extends AbstractClassMapper {
             format, 
             packageSuffix, 
             metaData, 
+            markdown, 
             primitiveTypeMapper
         );
     }
@@ -113,7 +115,7 @@ public class ClassMapper extends AbstractClassMapper {
     //-----------------------------------------------------------------------
     public void mapEnd() {
         this.trace("ClassProxy/End.vm");
-        this.pw.println("}");
+        printLine("}");
     }
 
     //-----------------------------------------------------------------------
@@ -121,52 +123,52 @@ public class ClassMapper extends AbstractClassMapper {
     ) {
         this.trace("ClassProxy/Begin");
         this.fileHeader();
-        this.pw.println("package " + this.getNamespace(MapperUtils.getNameComponents(MapperUtils.getPackageName(this.classDef.getQualifiedName()))) + ";");
-        this.pw.println("");
-        this.pw.println("public interface " + this.className + "Class ");
-        if(getFormat() == Format.JMI1) this.pw.println("  extends javax.jmi.reflect.RefClass");
-        this.pw.println("{");
-        this.pw.println("");
-        this.pw.println("  /**");
-        this.pw.println(
+        printLine("package " + this.getNamespace(MapperUtils.getNameComponents(MapperUtils.getPackageName(this.classDef.getQualifiedName()))) + ";");
+        printLine("");
+        printLine("public interface " + this.className + "Class ");
+        if(getFormat() == Format.JMI1) printLine("  extends javax.jmi.reflect.RefClass");
+        printLine("{");
+        printLine("");
+        printLine("  /**");
+        printLine(
             MapperUtils.wrapText(
                 "   * ",
-                "Creates an instance of class <code>" + this.className + "</code>."
+                "Creates an instance of class {@code " + this.className + "}."
             )
         );
-        this.pw.println(
+        printLine(
             MapperUtils.wrapText(
                 "   * ",
-                "This is a factory operation used to create instance objects of class <code>" + this.className + "</code>."
+                "This is a factory operation used to create instance objects of class {@code " + this.className + "}."
             )
         );
-        this.pw.println("   */");
-        this.pw.println("  public " + this.className + " create" + this.className + "(");
-        this.pw.println("  );");
-        this.pw.println("");
-        this.pw.println("  /**");
-        this.pw.println(
+        printLine("   */");
+        printLine("  public " + this.className + " create" + this.className + "(");
+        printLine("  );");
+        printLine("");
+        printLine("  /**");
+        printLine(
             MapperUtils.wrapText(
                 "   * ",
-                "Creates an instance of class <code>" + this.className + "</code> based on the specified Object instance."
+                "Creates an instance of class {@code " + this.className + "} based on the specified Object instance."
             )
         );
-        this.pw.println(
+        printLine(
             MapperUtils.wrapText(
                 "   * ",
-                "This is a factory operation used to create instance objects of class <code>" + this.className + "</code>."
+                "This is a factory operation used to create instance objects of class {@code " + this.className + "}."
             )
         );
-        this.pw.println(
+        printLine(
             MapperUtils.wrapText(
                 "   * ",
                 "@param object The Object instance this class is based on."
             )
         );
-        this.pw.println("   */");
-        this.pw.println("  public " + this.className + " get" + this.className + "(");
-        this.pw.println("    Object object");
-        this.pw.println("  );");
+        printLine("   */");
+        printLine("  public " + this.className + " get" + this.className + "(");
+        printLine("    Object object");
+        printLine("  );");
     }
 
 }

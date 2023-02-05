@@ -133,17 +133,17 @@ public class VariableSizeIndexedRecord
     private String description;
 
     /**
-     * Implements <code>Freezable</code>
+     * Implements {@code Freezable}
      */
     private boolean immutable = false;
 
     /**
-     * Extends <code>AbstractList</code>
+     * Extends {@code AbstractList}
      */
     private final List<Object> delegate;
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
 	private static final long serialVersionUID = 169692966585077358L;
 

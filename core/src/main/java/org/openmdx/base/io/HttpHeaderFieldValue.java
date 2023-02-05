@@ -105,7 +105,7 @@ public class HttpHeaderFieldValue implements Iterable<HttpHeaderFieldContent>{
     }
     
     /**
-     * This method inspects the <code>q</code> parameter
+     * This method inspects the {@code q} parameter
      * 
      * @param defaultValue the default value is returned in case of an empty enumeration
      * 
@@ -131,7 +131,7 @@ public class HttpHeaderFieldValue implements Iterable<HttpHeaderFieldContent>{
     /**
      * Tells whether there is no content
      * 
-     * @return <code>true</code> if there is no content
+     * @return {@code true} if there is no content
      */
     public boolean isEmpty(){
         return this.content.isEmpty();

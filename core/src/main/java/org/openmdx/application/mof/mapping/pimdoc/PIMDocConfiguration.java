@@ -54,6 +54,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
+import org.openmdx.application.mof.mapping.spi.MarkdownConfiguration;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
@@ -102,7 +103,11 @@ class PIMDocConfiguration {
 				.orElseGet(() -> Collections.singletonList(PackagePatternComparator.getCatchAllPattern()));
 	}
 	
-	String getLinkTarget() {
+	MarkdownConfiguration getMarkdownConfiguration() {
+		return new MarkdownConfiguration(getLinkTarget());
+	}
+	
+	private String getLinkTarget() {
 		return getProperty("link-target").orElse("_top");
 	}
 	
@@ -144,5 +149,5 @@ class PIMDocConfiguration {
 		}
 		return packageGroups;
 	}
-	    
+
 }

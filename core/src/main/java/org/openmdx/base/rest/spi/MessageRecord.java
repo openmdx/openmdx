@@ -83,17 +83,17 @@ public class MessageRecord
     private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 6030385859226659109L;
 
     /**
-     * The <code>"resourceIdentifier"</code> entry
+     * The {@code "resourceIdentifier"} entry
      */
     private Path resourceIdentifier;
     
     /**
-     * The <code>"body"</code> entry
+     * The {@code "body"} entry
      */
     private MappedRecord body = VoidRecord.getInstance();
 
@@ -202,7 +202,7 @@ public class MessageRecord
     /**
      * Tells whether the message id is set
      * 
-     * @return <code>true</code> if the message id is set
+     * @return {@code true} if the message id is set
      */
     private final boolean hasId(){
         return this.resourceIdentifier != null && this.resourceIdentifier.isObjectPath();
@@ -247,7 +247,7 @@ public class MessageRecord
      * 
      * @param record the record to be inspected
      * 
-     * @return <code>true</code> if the record's name equals to <code>org:openmdx:kernel:Message</code>.
+     * @return {@code true} if the record's name equals to {@code org:openmdx:kernel:Message}.
      */
     public static boolean isCompatible(Record record) {
         return NAME.equals(record.getRecordName());

@@ -61,6 +61,7 @@ public class ExceptionMapper extends AbstractMapper {
     
     /**
      * Constructor 
+     * @param markdown TODO
      */
     public ExceptionMapper(
         ModelElement_1_0 exceptionDef,
@@ -69,7 +70,7 @@ public class ExceptionMapper extends AbstractMapper {
         Format format, 
         String packageSuffix, 
         MetaData_1_0 metaData, 
-        PrimitiveTypeMapper primitiveTypeMapper
+        boolean markdown, PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             writer,
@@ -77,6 +78,7 @@ public class ExceptionMapper extends AbstractMapper {
             format, 
             packageSuffix,
             metaData, 
+            markdown,
             primitiveTypeMapper
         );
         this.exceptionDef = new ExceptionDef(exceptionDef, model);

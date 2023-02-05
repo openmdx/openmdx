@@ -88,7 +88,7 @@ final class SingletonMappedRecord
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 11576609986427014L;
 

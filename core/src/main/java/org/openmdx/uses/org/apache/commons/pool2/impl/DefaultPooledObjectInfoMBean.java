@@ -51,7 +51,7 @@ public interface DefaultPooledObjectInfoMBean {
      * Obtain the time that pooled object was created.
      *
      * @return The creation time for the pooled object formated as
-     *         <code>yyyy-MM-dd HH:mm:ss Z</code>
+     *         {@code yyyy-MM-dd HH:mm:ss Z}
      */
     String getCreateTimeFormatted();
 
@@ -67,7 +67,7 @@ public interface DefaultPooledObjectInfoMBean {
      * Obtain the time that pooled object was last borrowed.
      *
      * @return The last borrowed time for the pooled object formated as
-     *         <code>yyyy-MM-dd HH:mm:ss Z</code>
+     *         {@code yyyy-MM-dd HH:mm:ss Z}
      */
     String getLastBorrowTimeFormatted();
 
@@ -92,7 +92,7 @@ public interface DefaultPooledObjectInfoMBean {
      * Obtain the time that pooled object was last returned.
      *
      * @return The last returned time for the pooled object formated as
-     *         <code>yyyy-MM-dd HH:mm:ss Z</code>
+     *         {@code yyyy-MM-dd HH:mm:ss Z}
      */
     String getLastReturnTimeFormatted();
 

@@ -77,9 +77,9 @@ public abstract class AbstractPlugIn implements PlugIn {
     /**
      * Retrieves the default public identifier
      * 
-     * @param defaultNamespaceURI the default name space URI, which may be <code>null</code> 
+     * @param defaultNamespaceURI the default name space URI, which may be {@code null} 
      *
-     * @return the default public identifier, which may be <code>null</code> 
+     * @return the default public identifier, which may be {@code null} 
      */
     @Override
     public String getDefaultDocumentPublicIdentifier(

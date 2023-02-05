@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: JMITemplate 
+ * Description: JMI Template 
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -48,19 +48,21 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.ElementDef;
-import org.openmdx.application.mof.mapping.cci.MapperTemplate;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.OperationDef;
 import org.openmdx.application.mof.mapping.cci.ReferenceDef;
 import org.openmdx.application.mof.mapping.cci.StructuralFeatureDef;
 import org.openmdx.application.mof.mapping.java.metadata.Visibility;
+import org.openmdx.application.mof.mapping.spi.MapperTemplate;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
+import org.openmdx.application.mof.mapping.spi.MarkdownConfiguration;
 import org.openmdx.base.Version;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -72,30 +74,29 @@ import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.rest.cci.VoidRecord;
 import org.openmdx.kernel.exception.BasicException;
 
-// ---------------------------------------------------------------------------
-public abstract class AbstractMapper
-    extends MapperTemplate {
+/**
+ * Abstract Mapper
+ */
+public abstract class AbstractMapper extends MapperTemplate {
     
-    // -----------------------------------------------------------------------
     protected AbstractMapper(
         Writer writer,
         Model_1_0 model,
         Format format, 
         String packageSuffix,
         MetaData_1_0 metaData, 
+        boolean markdown, 
         PrimitiveTypeMapper primitiveTypeMapper
     ) {
-        super(writer, model);
+        super(writer, model, markdown ? Optional.of(new MarkdownConfiguration()) : Optional.empty());
         this.metaData = metaData;
         this.format = format;
         this.packageSuffix = packageSuffix;
         this.primitiveTypeMapper = primitiveTypeMapper;
     }
 
-    // -----------------------------------------------------------------------
-    /**
-     * 
-     */
+    
+	// -----------------------------------------------------------------------
     protected Model_1_0 getModel(){
         return super.model;
     }
@@ -331,7 +332,7 @@ public abstract class AbstractMapper
             return "";
         } else { 
             if(requiresDowncast(featureDef)) {
-                this.pw.println("  @SuppressWarnings(\"unchecked\")");
+                printLine("  @SuppressWarnings(\"unchecked\")");
             } 
             return '(' + (
                 collectionClass == null ? "T" : collectionClass + "<T>"
@@ -349,7 +350,7 @@ public abstract class AbstractMapper
             return "";
         } else { 
             if(getFormat() == Format.JPA3) {
-                this.pw.println("  @SuppressWarnings(\"unchecked\")");
+                printLine("  @SuppressWarnings(\"unchecked\")");
             } 
             return "(java.util.Map<" + keyClass.getName() + ", T>)";
         }
@@ -404,13 +405,29 @@ public abstract class AbstractMapper
         );
     }
     
-    // -----------------------------------------------------------------------
+    protected void mapAnnotation(
+        String prefix,
+        ElementDef elementDef
+    ) {
+        final String annotation = elementDef.getAnnotation();
+		if (annotation != null) {
+            printLine(MapperUtils.wrapText(prefix, renderAnnotation(annotation)));
+        }
+    }
+    
+    @Override
+	protected String renderAnnotation(String annotation) {
+		return this.markdown ? super.renderAnnotation(annotation) : ("<p>\n" + annotation); 
+	}
+
+
+	// -----------------------------------------------------------------------
     protected void mapParameter(
         String prefix,
         StructuralFeatureDef featureDef, 
         String suffix
     ) throws ServiceException {
-        this.pw.println(
+        printLine(
             prefix +
             this.getParameterType(featureDef) +
             ' ' +
@@ -424,11 +441,11 @@ public abstract class AbstractMapper
         String accessModifier,
         StructuralFeatureDef featureDef
     ) throws ServiceException {
-        this.pw.println("  " + accessModifier + ' ' + this.getFeatureType(featureDef, Boolean.TRUE) + ' ' + this.getMethodName(featureDef.getBeanGetterName()) + "(");
-        this.pw.println("  ) {");
-        this.pw.println("    return this." + this.getFeatureName(featureDef) + ';');
-        this.pw.println("  }");
-        this.pw.println();        
+        printLine("  " + accessModifier + ' ' + this.getFeatureType(featureDef, Boolean.TRUE) + ' ' + this.getMethodName(featureDef.getBeanGetterName()) + "(");
+        printLine("  ) {");
+        printLine("    return this." + this.getFeatureName(featureDef) + ';');
+        printLine("  }");
+        newLine();        
     }
 
     // -----------------------------------------------------------------------
@@ -436,7 +453,7 @@ public abstract class AbstractMapper
         StructuralFeatureDef featureDef
     ) throws ServiceException {
         String name = this.getFeatureName(featureDef);
-        this.pw.println("    this." + name + " = " + name + ';');
+        printLine("    this." + name + " = " + name + ';');
     }
     
     // -----------------------------------------------------------------------
@@ -444,7 +461,7 @@ public abstract class AbstractMapper
         StructuralFeatureDef featureDef, 
         String source
     ) throws ServiceException {
-        this.pw.println(
+        printLine(
             "    this." + this.getFeatureName(featureDef) + " = " + 
             source + '.' + this.getMethodName(featureDef.getBeanGetterName()) + "();"
         );
@@ -457,65 +474,65 @@ public abstract class AbstractMapper
     ) throws ServiceException {
     	Multiplicity multiplicity = ModelHelper.toMultiplicity(featureDef.getMultiplicity());
     	if(multiplicity == null) { // TODO verify whether this branch is really necessary
-            this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER, null) + ' ' + featureDef.getBeanGetterName() + " (");
-            this.pw.println("  ) {");
-            this.pw.println("    return (" + this.getType(featureDef, "java.util.List", Boolean.FALSE, TypeMode.MEMBER, null) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
-            this.pw.println("  }");
+            printLine("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER, null) + ' ' + featureDef.getBeanGetterName() + " (");
+            printLine("  ) {");
+            printLine("    return (" + this.getType(featureDef, "java.util.List", Boolean.FALSE, TypeMode.MEMBER, null) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+            printLine("  }");
     	} else {
 	    	switch(multiplicity){
 	    		case OPTIONAL:
-	                this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef.getQualifiedTypeName(), getFormat(), true) + ' ' + featureDef.getBeanGetterName() + " (");
-	                this.pw.println("  ) {");
-	                this.pw.println("    return (" + this.getType(featureDef.getQualifiedTypeName(), getFormat(), true) +  ")this.refGetValue(\"" + featureDef.getName() + "\", 0);");
-	                this.pw.println("  }");
+	                printLine("  " + accessModifier + ' ' + this.getType(featureDef.getQualifiedTypeName(), getFormat(), true) + ' ' + featureDef.getBeanGetterName() + " (");
+	                printLine("  ) {");
+	                printLine("    return (" + this.getType(featureDef.getQualifiedTypeName(), getFormat(), true) +  ")this.refGetValue(\"" + featureDef.getName() + "\", 0);");
+	                printLine("  }");
 	                break;
 	    		case SINGLE_VALUE:
-	                this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef.getQualifiedTypeName(), getFormat(), false) );
-	                this.pw.println(featureDef.getBeanGetterName() + " (");
-	                this.pw.println("  ) {");
-	                this.pw.println("    return (" + this.getType(featureDef.getQualifiedTypeName(), getFormat(), true) +  ")this.refGetValue(\"" + featureDef.getName() + "\", 0);");
-	                this.pw.println("  }");
+	                printLine("  " + accessModifier + ' ' + this.getType(featureDef.getQualifiedTypeName(), getFormat(), false) );
+	                printLine(featureDef.getBeanGetterName() + " (");
+	                printLine("  ) {");
+	                printLine("    return (" + this.getType(featureDef.getQualifiedTypeName(), getFormat(), true) +  ")this.refGetValue(\"" + featureDef.getName() + "\", 0);");
+	                printLine("  }");
 	                break;
 	    		case LIST:
-	                this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER, null) + ' ' + featureDef.getBeanGetterName() + " (");
-	                this.pw.println("  ) {");
-	                this.pw.println("    return (" + this.getType(featureDef, "java.util.List", Boolean.FALSE, TypeMode.MEMBER, null) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
-	                this.pw.println("  }");
+	                printLine("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER, null) + ' ' + featureDef.getBeanGetterName() + " (");
+	                printLine("  ) {");
+	                printLine("    return (" + this.getType(featureDef, "java.util.List", Boolean.FALSE, TypeMode.MEMBER, null) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+	                printLine("  }");
 	                break;
 	    		case SET:
-	                this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.Set", Boolean.TRUE, TypeMode.MEMBER, null) + ' ' + featureDef.getBeanGetterName() + " (");
-	                this.pw.println("  ) {");
-	                this.pw.println("    return (" + this.getType(featureDef, "java.util.Set", Boolean.FALSE, TypeMode.MEMBER, null) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
-	                this.pw.println("  }");
+	                printLine("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.Set", Boolean.TRUE, TypeMode.MEMBER, null) + ' ' + featureDef.getBeanGetterName() + " (");
+	                printLine("  ) {");
+	                printLine("    return (" + this.getType(featureDef, "java.util.Set", Boolean.FALSE, TypeMode.MEMBER, null) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+	                printLine("  }");
 	                break;
 	    		case MAP:
-	                this.pw.println("  " + accessModifier + ' ' + this.getMapType(featureDef, java.lang.String.class, Boolean.TRUE) + ' ' + featureDef.getBeanGetterName() + " (");
-	                this.pw.println("  ) {");
-	                this.pw.println("    return (" + this.getMapType(featureDef, java.lang.String.class, Boolean.FALSE) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
-	                this.pw.println("  }");
+	                printLine("  " + accessModifier + ' ' + this.getMapType(featureDef, java.lang.String.class, Boolean.TRUE) + ' ' + featureDef.getBeanGetterName() + " (");
+	                printLine("  ) {");
+	                printLine("    return (" + this.getMapType(featureDef, java.lang.String.class, Boolean.FALSE) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+	                printLine("  }");
 	                break;
 	    		case SPARSEARRAY:
-	                this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER, null) + ' ' + featureDef.getBeanGetterName() + " (");
-	                this.pw.println("  ) {");
-	                this.pw.println("    return (" + this.getType(featureDef, "org.w3c.cci2.SparseArray", Boolean.FALSE, TypeMode.MEMBER, null) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
-	                this.pw.println("  }");
+	                printLine("  " + accessModifier + ' ' + this.getType(featureDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER, null) + ' ' + featureDef.getBeanGetterName() + " (");
+	                printLine("  ) {");
+	                printLine("    return (" + this.getType(featureDef, "org.w3c.cci2.SparseArray", Boolean.FALSE, TypeMode.MEMBER, null) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+	                printLine("  }");
 	                break;
 	    		case STREAM:
 	                if (PrimitiveTypes.BINARY.equals(featureDef.getQualifiedTypeName())) {
-	                    this.pw.println("  " + accessModifier + " java.io.InputStream " + featureDef.getBeanGetterName() + " (");
-	                    this.pw.println("  ) {");
-	                    this.pw.println("    return (java.io.InputStream)this.refGetValue(\"" + featureDef.getName() + "\", 0);");
-	                    this.pw.println("  }");
+	                    printLine("  " + accessModifier + " java.io.InputStream " + featureDef.getBeanGetterName() + " (");
+	                    printLine("  ) {");
+	                    printLine("    return (java.io.InputStream)this.refGetValue(\"" + featureDef.getName() + "\", 0);");
+	                    printLine("  }");
 	                } else if (PrimitiveTypes.STRING.equals(featureDef.getQualifiedTypeName())) {
-	                    this.pw.println("  " + accessModifier + " java.io.Reader " + featureDef.getBeanGetterName() + " (");
-	                    this.pw.println("  ) {");
-	                    this.pw.println("    return (java.io.Reader)this.refGetValue(\"" + featureDef.getName() + "\", 0);");
-	                    this.pw.println("  }");
+	                    printLine("  " + accessModifier + " java.io.Reader " + featureDef.getBeanGetterName() + " (");
+	                    printLine("  ) {");
+	                    printLine("    return (java.io.Reader)this.refGetValue(\"" + featureDef.getName() + "\", 0);");
+	                    printLine("  }");
 	                } else {
-	                    this.pw.println("  " + accessModifier + " java.io.DataInput " + featureDef.getBeanGetterName() + " (");
-	                    this.pw.println("  ) {");
-	                    this.pw.println("    return (java.io.DataInput)this.refGetValue(\"" + featureDef.getName() + "\", 0);");
-	                    this.pw.println("  }");
+	                    printLine("  " + accessModifier + " java.io.DataInput " + featureDef.getBeanGetterName() + " (");
+	                    printLine("  ) {");
+	                    printLine("    return (java.io.DataInput)this.refGetValue(\"" + featureDef.getName() + "\", 0);");
+	                    printLine("  }");
 	                }
 	                break;
     		}
@@ -527,20 +544,20 @@ public abstract class AbstractMapper
         String accessModifier,
         StructuralFeatureDef featureDef
     ) throws ServiceException {
-        this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef.getQualifiedTypeName(), getFormat(), false) + ' ' + this.getMethodName(featureDef.getBeanGetterName()) + "(");
-        this.pw.println("    int index");
-        this.pw.println("  ) {");
+        printLine("  " + accessModifier + ' ' + this.getType(featureDef.getQualifiedTypeName(), getFormat(), false) + ' ' + this.getMethodName(featureDef.getBeanGetterName()) + "(");
+        printLine("    int index");
+        printLine("  ) {");
         if (PrimitiveTypes.BOOLEAN.equals(featureDef.getQualifiedTypeName())) {
-            this.pw.println("    return ((java.lang.Boolean)this.refGetValue(\"" + featureDef.getQualifiedName() + "\", index)).booleanValue();");
+            printLine("    return ((java.lang.Boolean)this.refGetValue(\"" + featureDef.getQualifiedName() + "\", index)).booleanValue();");
         } else if (PrimitiveTypes.DATETIME.equals(featureDef
             .getQualifiedTypeName())) {
-            this.pw.println("    return (java.util.Date)this.refGetValue(\"" + featureDef.getQualifiedName() + "\", index);");
+            printLine("    return (java.util.Date)this.refGetValue(\"" + featureDef.getQualifiedName() + "\", index);");
         } else if (
             PrimitiveTypes.DATE.equals(featureDef.getQualifiedTypeName()) ||
             PrimitiveTypes.DURATION.equals(featureDef.getQualifiedTypeName()) ||
             PrimitiveTypes.ANYURI.equals(featureDef.getQualifiedTypeName())             
         ) {
-            this.pw.println(
+            printLine(
                 "    return (" +
                 getType(featureDef.getQualifiedTypeName(), getFormat(), false) +
                 ")this.refGetValue(\"" + 
@@ -552,16 +569,16 @@ public abstract class AbstractMapper
             PrimitiveTypes.SHORT.equals(featureDef.getQualifiedTypeName()) || 
             PrimitiveTypes.LONG.equals(featureDef.getQualifiedTypeName())
         ) {
-            this.pw.println("    return ((java.lang.Number)this.refGetValue(\"" + featureDef.getQualifiedName() + "\", index))."
+            printLine("    return ((java.lang.Number)this.refGetValue(\"" + featureDef.getQualifiedName() + "\", index))."
                 + this.getType(featureDef.getQualifiedTypeName(), getFormat(), false)
                 + "Value();");
         } else {
-            this.pw.println("    return ("
+            printLine("    return ("
                 + this.getType(featureDef.getQualifiedTypeName(), getFormat(), false)
                 + ")this.refGetValue(\"" + featureDef.getQualifiedName() + "\", index);");
         }
-        this.pw.println("  }");
-        this.pw.println("");
+        printLine("  }");
+        printLine("");
     }
      
     // -----------------------------------------------------------------------
@@ -569,9 +586,9 @@ public abstract class AbstractMapper
         String accessModifier,
         StructuralFeatureDef featureDef
     ) throws ServiceException {
-        this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef.getQualifiedTypeName(), getFormat(), false) + ' ' + this.getMethodName(featureDef.getBeanGetterName()) + "(");
-        this.pw.println("    String key");
-        this.pw.println("  ) {");
+        printLine("  " + accessModifier + ' ' + this.getType(featureDef.getQualifiedTypeName(), getFormat(), false) + ' ' + this.getMethodName(featureDef.getBeanGetterName()) + "(");
+        printLine("    String key");
+        printLine("  ) {");
         if (PrimitiveTypes.BOOLEAN.equals(featureDef.getQualifiedTypeName())) {
             this.pw
                 .println("    return ((java.lang.Boolean)this.refGetValue(\"" + featureDef.getQualifiedName() + "\", key)).booleanValue();");
@@ -584,7 +601,7 @@ public abstract class AbstractMapper
             PrimitiveTypes.DURATION.equals(featureDef.getQualifiedTypeName()) ||
             PrimitiveTypes.ANYURI.equals(featureDef.getQualifiedTypeName())             
         ) {
-            this.pw.println(
+            printLine(
                 "    return (" +
                 getType(featureDef.getQualifiedTypeName(), getFormat(), false) +
                 ")this.refGetValue(\"" + 
@@ -596,18 +613,18 @@ public abstract class AbstractMapper
             PrimitiveTypes.SHORT.equals(featureDef.getQualifiedTypeName()) || 
             PrimitiveTypes.LONG.equals(featureDef.getQualifiedTypeName())
         ) {
-            this.pw.println(
+            printLine(
                 "    return ((java.lang.Number)this.refGetValue(\"" + featureDef.getQualifiedName() + "\", key))." +
                 this.getType(featureDef.getQualifiedTypeName(), getFormat(), false) +
                 "Value();"
             );
         } else {
-            this.pw.println("    return ("
+            printLine("    return ("
                 + this.getType(featureDef.getQualifiedTypeName(), getFormat(), false)
                 + ")this.refGetValue(\"" + featureDef.getQualifiedName() + "\", key);");
         }
-        this.pw.println("  }");
-        this.pw.println("");        
+        printLine("  }");
+        printLine("");        
     }
 
     // -----------------------------------------------------------------------
@@ -875,14 +892,14 @@ public abstract class AbstractMapper
     // -----------------------------------------------------------------------
     public void fileHeader(
     ) {
-        this.pw.println("//////////////////////////////////////////////////////////////////////////////");
-        this.pw.println("//");
-        this.pw.println("// Generated by " + getMapperId());
-        this.pw.println("// Generated at " + Instant.now());
-        this.pw.println("//");
-        this.pw.println("// GENERATED - DO NOT CHANGE MANUALLY");
-        this.pw.println("//");
-        this.pw.println("//////////////////////////////////////////////////////////////////////////////");
+        printLine("//////////////////////////////////////////////////////////////////////////////");
+        printLine("//");
+        printLine("// Generated by " + getMapperId());
+        printLine("// Generated at " + Instant.now());
+        printLine("//");
+        printLine("// GENERATED - DO NOT CHANGE MANUALLY");
+        printLine("//");
+        printLine("//////////////////////////////////////////////////////////////////////////////");
     }
 
     protected String getMapperId() {

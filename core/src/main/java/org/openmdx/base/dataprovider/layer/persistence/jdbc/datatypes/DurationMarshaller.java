@@ -78,7 +78,7 @@ public class DurationMarshaller {
 	 * 
 	 * @param type the duration type
 	 * 
-	 * @return an new <code>DurationMarshaller</code> instance
+	 * @return an new {@code DurationMarshaller} instance
 	 * @throws ServiceException
 	 */
 	public static DurationMarshaller newInstance(String durationType) throws ServiceException {
@@ -382,22 +382,22 @@ public class DurationMarshaller {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * The type used to store <code>org::w3c::duration</code> values
+	 * The type used to store {@code org::w3c::duration} values
 	 */
 	static enum DurationType {
 
 		/**
-		 * <code>INTERVAL</code> <i>(domain defined by the database field definition)
+		 * {@code INTERVAL} <i>(domain defined by the database field definition)
 		 */
 		INTERVAL,
 
 		/**
-		 * <li><code>CHARACTER</code> <i>(default)</i>
+		 * <li>{@code CHARACTER} <i>(default)</i>
 		 */
 		CHARACTER,
 
 		/**
-		 * <code>NUMERIC</code> <i>(domain <b>either</b> year-month <b>or</b> date-time
+		 * {@code NUMERIC} <i>(domain <b>either</b> year-month <b>or</b> date-time
 		 * intervals!)</i>
 		 */
 		NUMERIC;

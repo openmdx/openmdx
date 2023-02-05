@@ -72,7 +72,7 @@ public class CodeResolution {
      * Attribute Constructor 
      *
      * @param namespaceURI
-     * @param elementName <code>null</code> or <code>""</code> for attributes in the namespace's global scope
+     * @param elementName {@code null} or {@code ""} for attributes in the namespace's global scope
      * @param name
      * @param valueStart
      */

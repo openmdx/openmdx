@@ -65,11 +65,11 @@ public class SortedMaps {
     private static final SparseArray EMPTY_SPARSE_ARRAY = unmodifiableSparseArray(new TreeMap());
 
     /**
-     * Returns a <code>SparseArray</code> backed by the specified sorted map.
+     * Returns a {@code SparseArray} backed by the specified sorted map.
      * Changes to the returned sparse array "write through" to the sorted map.
-     * Setting a value to <code>null</code> is propagated as
-     * <code>remove</code> operation. The returned sparse array is
-     * <code>Serializable</code>.
+     * Setting a value to {@code null} is propagated as
+     * {@code remove} operation. The returned sparse array is
+     * {@code Serializable}.
      * 
      * @param s
      *            the sorted map by which the sparse array will be backed.
@@ -109,8 +109,8 @@ public class SortedMaps {
     }
 
     /**
-     * Returns a <code>SparseArray</code> backed by the specified sorted map.
-     * The returned sparse array is <code>Serializable</code>.
+     * Returns a {@code SparseArray} backed by the specified sorted map.
+     * The returned sparse array is {@code Serializable}.
      * 
      * @param s
      *            the sorted map by which the sparse array will be backed.
@@ -131,7 +131,7 @@ public class SortedMaps {
     //------------------------------------------------------------------------
 
     /**
-     * <code>TreeMap</code> based SparseArray implementation.
+     * {@code TreeMap} based SparseArray implementation.
      */
     static class AsSparseArray<E>
         extends AbstractSparseArray<E>
@@ -149,7 +149,7 @@ public class SortedMaps {
         }
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = -162457543630599238L;
 

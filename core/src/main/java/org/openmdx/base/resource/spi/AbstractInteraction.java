@@ -93,7 +93,7 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     }
 
     /**
-     * The delegate, may be <code>null</code>
+     * The delegate, may be {@code null}
      */
     private final Interaction delegate;
     
@@ -113,7 +113,7 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     private ResourceWarning warnings;
     
     /**
-     * The <code>Interaction</code>'s owner
+     * The {@code Interaction}'s owner
      */
     private final C connection;
     
@@ -137,7 +137,7 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     }
     
     /**
-     * Assert that the <code>Interaction</code> is open
+     * Assert that the {@code Interaction} is open
      * 
      * @throws ResourceException
      */
@@ -153,7 +153,7 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     }
     
     /**
-     * Assert that the <code>Interaction</code> is not closed
+     * Assert that the {@code Interaction} is not closed
      * 
      * @throws ResourceException
      */

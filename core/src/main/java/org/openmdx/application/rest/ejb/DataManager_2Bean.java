@@ -156,7 +156,7 @@ public class DataManager_2Bean implements SessionBean {
     /**
      * A {@link Connection_2Home#create()} invocation leads here
      * 
-     * @param         connectionSpec the REST <code>ConnectionSpec</code> 
+     * @param         connectionSpec the REST {@code {@code ConnectionSpec} 
      * 
      * @throws CreateException
      */

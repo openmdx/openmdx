@@ -68,7 +68,7 @@ public class LocalTransactions {
     /**
      * Acquire a local transaction adapter
      * 
-     * @param delegate a <code>LocalTransaction</code>
+     * @param delegate a {@code LocalTransaction}
      * 
      * @return the local transaction adapter
      * 
@@ -83,7 +83,7 @@ public class LocalTransactions {
     /**
      * Acquire a persistence manager adapter
      * 
-     * @param delegate the <code>Transaction</code>'s owner
+     * @param delegate the {@code Transaction}'s owner
      * 
      * @return a persistence manager adapter
      * 

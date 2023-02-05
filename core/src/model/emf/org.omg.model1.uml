@@ -4,19 +4,20 @@
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3C3238A3033AP" name="omg">
       <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3C3238A3033A" name="model1">
         <ownedComment xmi:type="uml:Comment" xmi:id="_MdqB4N65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3C3238A3033A">
-          <body>$Id: org.omg.model1.uml,v 1.1 2010/04/13 14:58:13 wfro Exp $ 
+          <body>
+$Id: org.omg.model1.uml,v 1.1 2010/04/13 14:58:13 wfro Exp $ 
 
-    Name: org::omex::model1
+Name: org::omex::model1
 
-    Description: MOF model.
+Description: MOF model.
 
-    Authors: wfro
+Authors: wfro
 
-    Status: ready for implementation.
+Status: ready for implementation.
 
-    Print size: 12x13'
+Print size: 12x13'
 
-    (c) 2000-2002 the original authors.
+(c) 2000-2002 the original authors.
     </body>
         </ownedComment>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C2F3E0A0143" name="Class">

@@ -74,7 +74,7 @@ public interface StateContext<V> {
      * Tells which system-time point is reflected
      * <p>
      * All committed changes are taken into consideration in case of 
-     * <code>null</code>.
+     * {@code null}.
      * 
      * @return the view's system-time point
      */

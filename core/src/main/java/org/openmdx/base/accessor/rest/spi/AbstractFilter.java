@@ -78,7 +78,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
      * @exception   IllegalArgumentException
      *              in case of an invalid filter property set
      * @exception   NullPointerException
-     *              if the filter is <code>null</code>
+     *              if the filter is {@code null}
      */
     protected AbstractFilter(
         ConditionRecord[] filter
@@ -116,7 +116,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 8279786822145802222L;
     
@@ -135,7 +135,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
      * @param candidate
      * @param condition
      * 
-     * @return an iterator for the values, never <code>null</code>
+     * @return an iterator for the values, never {@code null}
      * 
      * @exception   Exception
      *              in case of failure
@@ -151,7 +151,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
      * @param candidate the candidate to be compared with the filter value
      * @param filterValue the filter value
      * 
-     * @return <code>true</code> if the two values are considered to be equal 
+     * @return {@code true} if the two values are considered to be equal 
      * in the context of a filter
      */
     protected boolean equal(
@@ -201,7 +201,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
      * @param conditionIndex the condition index
      * @param condition 
      * 
-     * @return <code>true</code> if the object meets the condition
+     * @return {@code true} if the object meets the condition
      */
     protected boolean meetsCondition(Object candidate, int conditionIndex, ConditionRecord condition) {
         Quantifier quantifier = condition.getQuantifier();

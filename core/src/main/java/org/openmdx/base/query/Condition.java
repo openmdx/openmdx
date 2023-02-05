@@ -91,7 +91,7 @@ public abstract class Condition extends ConditionRecord {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
 	private static final long serialVersionUID = 396749318163145090L;
 
@@ -103,9 +103,9 @@ public abstract class Condition extends ConditionRecord {
     );
 
     /**
-     * Set the quantifier's <code>enum</code> representation
+     * Set the quantifier's {@code enum} representation
      * 
-     * @param the quantifier's <code>enum</code> representation
+     * @param the quantifier's {@code enum} representation
      */
     public void setQuantifier(
         Quantifier quantifier

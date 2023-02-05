@@ -83,7 +83,7 @@ public final class UUIDs {
     private static final Class<? extends UUIDGenerator> generatorClass = getGeneratorClass();
 
     /**
-     * Provide thread-local generators for the <code>newUUID</code> method
+     * Provide thread-local generators for the {@code newUUID} method
      */
     private static final ThreadLocal<UUIDGenerator> threadLocalGenerator = new ThreadLocal<UUIDGenerator>(){
 
@@ -124,8 +124,8 @@ public final class UUIDs {
      * Load the configured UUID provider
      * <p>
      * If multiple threads need to generate UUIDs simultaneously then each should<ul>
-     * <li>either obtain its own <code>UUIDGenerator</code> instance (for bulk usage)
-     * <li>or use <code>newUUID()</code> instead (for standard usage)
+     * <li>either obtain its own {@code UUIDGenerator} instance (for bulk usage)
+     * <li>or use {@code newUUID()} instead (for standard usage)
      * </ul>
      * 
      * @return a UUID provider instance
@@ -149,7 +149,7 @@ public final class UUIDs {
     /**
      * Create a UUID
      * 
-     * @return a new <code>UUID</code>
+     * @return a new {@code UUID}
      */
     public static UUID newUUID(){
         return threadLocalGenerator.get().next();
@@ -159,7 +159,7 @@ public final class UUIDs {
      * Load the configured UUID provider
      * <p>
      * If multiple threads need to build UUIDs simultaneously then
-     * each should obtain its own <code>UUIDBuilder</code> instance.
+     * each should obtain its own {@code UUIDBuilder} instance.
      * 
      * @return a UUID provider instance
      */
@@ -173,7 +173,7 @@ public final class UUIDs {
      * Retrieve the configured UUID generator class
      * 
      * @return the configured UUID generator class or 
-     * <code>RandomBasedUUIDGenerator.class</code> in case of failure
+     * {@code RandomBasedUUIDGenerator.class} in case of failure
      */
     private static Class<? extends UUIDGenerator> getGeneratorClass(
     ){

@@ -108,7 +108,7 @@ public class Model_2 extends AbstractRestPort {
     
     protected static final Path PROVIDER_ROOT_PATH = new Path("xri://@openmdx*org.omg.model1/provider/Mof");
 
-    protected static final List<String> STANDARD_FORMAT = Collections.singletonList(MappingTypes.XMI1);
+    protected static final List<String> DEFAULT_FORMAT = Collections.singletonList(MappingTypes.XMI1);
 
     @Override
     public Interaction getInteraction(
@@ -864,9 +864,8 @@ public class Model_2 extends AbstractRestPort {
                 try(ByteArrayOutputStream bs = new ByteArrayOutputStream()){
     			    try(ZipOutputStream zip = new ZipOutputStream(bs)){
                         final List requestedFormat = (List) input.getBody().get("format");
-        			    List<String> formats = requestedFormat.isEmpty() ? STANDARD_FORMAT : requestedFormat;
-        			    for(String format : formats) {
-        			        Mapper_1_0 mapper = MapperFactory_1.create(format);
+        			    final MapperFactory_1 mapperFactory = new MapperFactory_1(requestedFormat.isEmpty() ? DEFAULT_FORMAT : requestedFormat);
+        			    for(Mapper_1_0 mapper : mapperFactory) {
         			        if(
         			            Model_2.this.openmdxjdoMetadataDirectory != null && 
         			            mapper instanceof Mapper_1_1
@@ -877,8 +876,7 @@ public class Model_2 extends AbstractRestPort {
         			                zip,
         			                Model_2.this.openmdxjdoMetadataDirectory
         			            );
-        			        } 
-        			        else {
+        			        }  else {
         			            mapper.externalize(
         			                qualifiedPackageName,
         			                model,

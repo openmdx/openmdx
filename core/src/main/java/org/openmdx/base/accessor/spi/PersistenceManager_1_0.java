@@ -60,7 +60,7 @@ import org.openmdx.kernel.jdo.JDOPersistenceManager;
 public interface PersistenceManager_1_0 extends JDOPersistenceManager {
     
     /**
-     * Retrieve an <code>InteractionSpec</code> specific persistence manager
+     * Retrieve an {@code InteractionSpec} specific persistence manager
      * 
      * @param interactionSpec
      * 
@@ -91,7 +91,7 @@ public interface PersistenceManager_1_0 extends JDOPersistenceManager {
      * @param transientObjectId the object's id
      * @param fieldName the name of the field to be tested
      * 
-     * @return <code>true</code> if the field is already loaded
+     * @return {@code true} if the field is already loaded
      * 
      * @throws JDODataStoreException if the field's state can't be determined
      */
@@ -129,7 +129,7 @@ public interface PersistenceManager_1_0 extends JDOPersistenceManager {
      * @param pc the persistent capable object
      * 
      * @return the transient id of the object's container, 
-     * or <code>null</code> if the object is not contained 
+     * or {@code null} if the object is not contained 
      */
 	public TransientContainerId getContainerId(
     	Object pc

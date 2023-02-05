@@ -59,7 +59,7 @@ public class PlainVanillaSegment extends XRISegment {
 	private final String unifiedRepresentation;
 
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = -1614499628778417508L;
 	

@@ -70,7 +70,7 @@ public final class ImmutableDateTime
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 6757337127635200014L;
 

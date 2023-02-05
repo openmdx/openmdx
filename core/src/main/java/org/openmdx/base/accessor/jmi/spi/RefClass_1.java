@@ -504,7 +504,7 @@ public Object refInvokeOperation(
     private static final Path BASE = new Path("xri://@openmdx*org.openmdx.base");
     
     /**
-     * Imlements <code>Serializable</code>
+     * Imlements {@code Serializable}
      */
     private static final long serialVersionUID = -9097966508977573575L;
 

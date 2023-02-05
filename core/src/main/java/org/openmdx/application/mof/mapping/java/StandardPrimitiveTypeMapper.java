@@ -62,7 +62,7 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
     /**
      * Constructor 
      *
-     * @param hasDefault defines whether unknown primitive types are mapped to <code>java.lang.String</code>
+     * @param hasDefault defines whether unknown primitive types are mapped to {@code java.lang.String}
      */
     protected StandardPrimitiveTypeMapper(
         boolean hasDefault
@@ -71,7 +71,7 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
     }
     
     /**
-     * Constructor for an instance which maps unknown primitive types to <code>java.lang.String</code>
+     * Constructor for an instance which maps unknown primitive types to {@code java.lang.String}
      */
     public StandardPrimitiveTypeMapper(
     ){
@@ -79,7 +79,7 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
     }
     
     /**
-     * Defines whether unknown primitive types are mapped to <code>java.lang.String</code>
+     * Defines whether unknown primitive types are mapped to {@code java.lang.String}
      */
     private final boolean hasDefault;
 

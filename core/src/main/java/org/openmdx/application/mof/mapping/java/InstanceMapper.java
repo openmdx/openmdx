@@ -91,7 +91,7 @@ extends AbstractClassMapper {
         Format format, 
         String packageSuffix,
         MetaData_1_0 metaData, 
-        PrimitiveTypeMapper primitiveTypeMapper
+        boolean markdown, PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             classDef,
@@ -100,6 +100,7 @@ extends AbstractClassMapper {
             format, 
             packageSuffix, 
             metaData, 
+            markdown,
             primitiveTypeMapper
         );
         this.pwSlice = writerJdoSlice == null ? null : new PrintWriter(writerJdoSlice);

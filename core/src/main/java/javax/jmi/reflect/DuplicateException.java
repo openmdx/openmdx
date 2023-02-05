@@ -7,7 +7,7 @@ package javax.jmi.reflect;
 public class DuplicateException extends JmiException {
 
     /**
-     * Constructs an <code>DuplicateException</code> without detail message.
+     * Constructs an {@code DuplicateException} without detail message.
      * @param objectInError object that was duplicated.
      * @param elementInError Attribute, Parameter or Association End that defines the multiplicity which is being violated.
      */
@@ -16,7 +16,7 @@ public class DuplicateException extends JmiException {
     }
     
     /**
-     * Constructs an <code>DuplicateException</code> with the specified detail message.
+     * Constructs an {@code DuplicateException} with the specified detail message.
      * @param objectInError object that was duplicated.
      * @param elementInError Attribute, Parameter or Association End that defines the multiplicity which is being violated.
      * @param msg the detail message.

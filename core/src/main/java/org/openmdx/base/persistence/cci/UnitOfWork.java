@@ -71,7 +71,7 @@ public interface UnitOfWork {
     void rollback();
 
     /** Returns whether there is a unit of work currently active.
-     * @return <code>true</code> if the unit of work is active.
+     * @return {@code true} if the unit of work is active.
      */
     boolean isActive();
     
@@ -80,75 +80,75 @@ public interface UnitOfWork {
      * begun, the rollback-only status is false. Either the 
      * application or the JDO implementation may set this flag
      * using setRollbackOnly.
-     * @return <code>true</code> if the unit of work has been
+     * @return {@code true} if the unit of work has been
      * marked for rollback.
      */
     boolean getRollbackOnly();
 
     /**
-     * Sets the rollback-only status of the unit of work to <code>true</code>.
-     * After this flag is set to <code>true</code>, the unit of work 
+     * Sets the rollback-only status of the unit of work to {@code true}.
+     * After this flag is set to {@code true}, the unit of work 
      * can no longer be committed, and any attempt to commit the 
-     * unit of work will throw <code>JDOFatalDataStoreException<code>.
+     * unit of work will throw {@code JDOFatalDataStoreException{@code .
      */
     void setRollbackOnly();
 
-    /** If <code>true</code>, allow persistent instances to be read without
+    /** If {@code true}, allow persistent instances to be read without
      * a unit of work active.
      * If an implementation does not support this option, a 
-     * <code>JDOUnsupportedOptionException</code> is thrown.
+     * {@code JDOUnsupportedOptionException} is thrown.
      * @param nontransactionalRead the value of the nontransactionalRead 
      * property
      */
     void setNontransactionalRead (boolean nontransactionalRead);
     
-    /** If <code>true</code>, allows persistent instances to be read without
+    /** If {@code true}, allows persistent instances to be read without
      * a unit of work active.
      * @return the value of the nontransactionalRead property
      */
     boolean getNontransactionalRead ();
     
-    /** If <code>true</code>, allow persistent instances to be written without
+    /** If {@code true}, allow persistent instances to be written without
      * a transaction active.
      * If an implementation does not support this option, a 
-     * <code>JDOUnsupportedOptionException</code> is thrown.
+     * {@code JDOUnsupportedOptionException} is thrown.
      * @param nontransactionalWrite the value of the nontransactionalWrite 
      * property
      */
     void setNontransactionalWrite (boolean nontransactionalWrite);
     
-    /** If <code>true</code>, allows persistent instances to be written without
+    /** If {@code true}, allows persistent instances to be written without
      * a transaction active.
      * @return the value of the nontransactionalWrite property
      */
     boolean getNontransactionalWrite ();
     
-    /** If <code>true</code>, at commit instances retain their values and the 
+    /** If {@code true}, at commit instances retain their values and the 
      * instances transition to persistent-nontransactional.
      * If an implementation does not support this option, a 
-     * <code>JDOUnsupportedOptionException</code> is thrown.
+     * {@code JDOUnsupportedOptionException} is thrown.
      * @param retainValues the value of the retainValues property
      */
     void setRetainValues(boolean retainValues);
     
-    /** If <code>true</code>, at commit time instances retain their field 
+    /** If {@code true}, at commit time instances retain their field 
      * values.
      * @return the value of the retainValues property
      */
     boolean getRetainValues();
     
-    /** If <code>true</code>, at rollback, fields of newly persistent instances 
+    /** If {@code true}, at rollback, fields of newly persistent instances 
      * are restored to 
      * their values as of the beginning of the unit of work, and the instances
      * revert to transient.  Additionally, fields of modified
      * instances of primitive types and immutable reference types
      * are restored to their values as of the beginning of the 
      * unit of work.
-     * <P>If <code>false</code>, at rollback, the values of fields of 
+     * <P>If {@code false}, at rollback, the values of fields of 
      * newly persistent instances are unchanged and the instances revert to
      * transient.  Additionally, dirty instances transition to hollow.
      * If an implementation does not support this option, a 
-     * <code>JDOUnsupportedOptionException</code> is thrown.
+     * {@code JDOUnsupportedOptionException} is thrown.
      * @param restoreValues the value of the restoreValues property
      */
     void setRestoreValues(boolean restoreValues);
@@ -160,7 +160,7 @@ public interface UnitOfWork {
     
     /** Optimistic units of work do not hold data store locks until commit time.
      * If an implementation does not support this option, a 
-     * <code>JDOUnsupportedOptionException</code> is thrown.
+     * {@code JDOUnsupportedOptionException} is thrown.
      * @param optimistic the value of the Optimistic flag.
      */
     void setOptimistic(boolean optimistic);
@@ -201,34 +201,34 @@ public interface UnitOfWork {
      */
     void setIsolationLevel(String level);
 
-    /** The user can specify a <code>Synchronization</code> instance to be 
-     * notified on unit of work completions.  The <code>beforeCompletion</code> 
+    /** The user can specify a {@code Synchronization} instance to be 
+     * notified on unit of work completions.  The {@code beforeCompletion} 
      * method is called prior to flushing instances to the data store.
      *
-     * <P>The <code>afterCompletion</code> method is called after performing 
+     * <P>The {@code afterCompletion} method is called after performing 
      * state transitions of persistent and unit of workal instances, following 
      * the data store commit or rollback operation.
-     * <P>Only one <code>Synchronization</code> instance can be registered with 
-     * the  <code>UnitOfWork</code>. If the application requires more than one 
+     * <P>Only one {@code Synchronization} instance can be registered with 
+     * the  {@code UnitOfWork}. If the application requires more than one 
      * instance to receive synchronization callbacks, then the single 
      * application instance is responsible for managing them, and forwarding 
      * callbacks to them.
-     * @param sync the <code>Synchronization</code> instance to be notified; 
-     * <code>null</code> for none
+     * @param sync the {@code Synchronization} instance to be notified; 
+     * {@code null} for none
      */
     void setSynchronization(Synchronization sync);
     
-    /** The user-specified <code>Synchronization</code> instance for this 
-     * <code>UnitOfWork</code> instance.    
-     * @return the user-specified <code>Synchronization</code> instance.
+    /** The user-specified {@code Synchronization} instance for this 
+     * {@code UnitOfWork} instance.    
+     * @return the user-specified {@code Synchronization} instance.
      */
     Synchronization getSynchronization();
 
-    /** The <code>UnitOfWork</code> instance is always associated with exactly 
-     * one <code>PersistenceManager</code>.
+    /** The {@code UnitOfWork} instance is always associated with exactly 
+     * one {@code PersistenceManager}.
      *
-     * @return the <code>PersistenceManager</code> for this 
-     * <code>UnitOfWork</code> instance
+     * @return the {@code PersistenceManager} for this 
+     * {@code UnitOfWork} instance
      */
     PersistenceManager getPersistenceManager();
 
@@ -242,7 +242,7 @@ public interface UnitOfWork {
     /**
      * Tells whether the forget-only flag has been set.
      * 
-     * @return <code>true</code> if the forget-only flag has been set.
+     * @return {@code true} if the forget-only flag has been set.
      */
     boolean isForgetOnly();
 	    

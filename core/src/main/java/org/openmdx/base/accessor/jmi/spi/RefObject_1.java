@@ -164,7 +164,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
 
     /**
-     * Implements <code>java.io.Serializable</code>
+     * Implements {@code java.io.Serializable}
      */
     private static final long serialVersionUID = -276854474114899063L;
 
@@ -191,7 +191,7 @@ class RefObject_1
 
     /**
      * Accessing a mandatory but uninitialized value leads to a 
-     * <code>NullPointerException</code> in case of the following types:
+     * {@code NullPointerException} in case of the following types:
      */
     private static final List<String> NULL_AVERSE_TYPES = Arrays.asList(
     	PrimitiveTypes.BOOLEAN,
@@ -764,7 +764,7 @@ class RefObject_1
     /**
      * Tells, whether an operation must be invoked immediately or not
      * 
-     * @return <code>SYNC_SEND_RECEIVE</code> if an operation must be invoked immediately
+     * @return {@code SYNC_SEND_RECEIVE} if an operation must be invoked immediately
      * 
      * @see InteractionSpec.SYNC_SEND_RECEIVE
      * @see InteractionSpec.SYNC_SEND

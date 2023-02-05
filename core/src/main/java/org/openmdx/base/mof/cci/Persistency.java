@@ -232,7 +232,7 @@ public class Persistency {
      * 
      * @param featureDef the feature's meta-data
      * 
-     * @return <code>true</code> if the given feature is persistent
+     * @return {@code true} if the given feature is persistent
      */
     public boolean isPersistentAttribute(
         ModelElement_1_0 featureDef
@@ -246,7 +246,7 @@ public class Persistency {
      * 
      * @param featureDef the feature's meta-data
      * 
-     * @return <code>true</code> if the given feature is a non-derived attribute
+     * @return {@code true} if the given feature is a non-derived attribute
      */
     private boolean isNonDerivedAttribute(
         ModelElement_1_0 featureDef

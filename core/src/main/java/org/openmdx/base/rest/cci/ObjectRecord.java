@@ -49,7 +49,7 @@ import java.util.UUID;
 import javax.resource.cci.MappedRecord;
 
 /**
- * <code>org::openmdx::kernel::Object</code>
+ * {@code org::openmdx::kernel::Object}
  */
 public interface ObjectRecord extends RequestRecord {
     

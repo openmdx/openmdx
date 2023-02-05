@@ -69,7 +69,7 @@ public class ClassicSegments {
      * @param xriSegment
      *            an XRI segment
      * 
-     * @return <code>true</code> if the given XRI segment is a placeholder
+     * @return {@code true} if the given XRI segment is a placeholder
      */
     public static boolean isPlaceholder(
         String xriSegment
@@ -83,7 +83,7 @@ public class ClassicSegments {
      * @param xriSegment
      *            an XRI segment
      * 
-     * @return <code>true</code> if the given XRI segment is a placeholder
+     * @return {@code true} if the given XRI segment is a placeholder
      */
     public static boolean isPlaceholder(
         XRISegment xriSegment
@@ -112,7 +112,7 @@ public class ClassicSegments {
      * @param xriSegment
      *            an XRI segment
      * 
-     * @return <code>true</code> if the given XRI segment is a placeholder
+     * @return {@code true} if the given XRI segment is a placeholder
      */
     public static boolean isPrivate(
         String xriSegment
@@ -126,7 +126,7 @@ public class ClassicSegments {
      * @param xriSegment
      *            an XRI segment
      * 
-     * @return <code>true</code> if the given XRI segment is a placeholder
+     * @return {@code true} if the given XRI segment is a placeholder
      */
     public static boolean isPrivate(
         XRISegment xriSegment

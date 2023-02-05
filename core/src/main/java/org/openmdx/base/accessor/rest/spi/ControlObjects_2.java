@@ -101,7 +101,7 @@ public class ControlObjects_2 {
      * 
      * @param recordName the candidate's type
      * 
-     * @return <code>true</code> if the candidate is a control object 
+     * @return {@code true} if the candidate is a control object 
      */
     public static boolean isControlObjectType(
         String recordName
@@ -115,7 +115,7 @@ public class ControlObjects_2 {
      * @param candidate
      * @param pattern
      * 
-     * @return <code>true</code> in case of a match
+     * @return {@code true} in case of a match
      */
     private static boolean matches(
         Path candidate,
@@ -131,7 +131,7 @@ public class ControlObjects_2 {
      * 
      * @param candidate
      * 
-     * @return <code>true</code> if the XRI represents a transaction object
+     * @return {@code true} if the XRI represents a transaction object
      */
     public static boolean isTransactionObjectIdentifier(
         Path candidate
@@ -144,7 +144,7 @@ public class ControlObjects_2 {
      * 
      * @param candidate
      * 
-     * @return <code>true</code> if the XRI represents a transaction commit operation
+     * @return {@code true} if the XRI represents a transaction commit operation
      */
     public static boolean isTransactionCommitIdentifier(
         Path candidate
@@ -157,7 +157,7 @@ public class ControlObjects_2 {
      * 
      * @param candidate
      * 
-     * @return <code>true</code> if the XRI represents a connection object
+     * @return {@code true} if the XRI represents a connection object
      */
     public static boolean isConnectionObjectIdentifier(
         Path candidate
@@ -170,7 +170,7 @@ public class ControlObjects_2 {
      * 
      * @param candidate
      * 
-     * @return <code>true</code> if the XRI represents a connection object
+     * @return {@code true} if the XRI represents a connection object
      */
     public static boolean isSessionIdentifier(
         Path candidate

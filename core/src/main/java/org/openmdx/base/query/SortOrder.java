@@ -88,39 +88,39 @@ public enum SortOrder implements Code {
     }
     
     /**
-     * The <code>SortOrder</code> legacy code
+     * The {@code SortOrder} legacy code
      */
     private final short code;
     
     /**
-     * The <code>SortOrder</code> UNICODE symbol
+     * The {@code SortOrder} UNICODE symbol
      */
     private final char symbol;
     
     /**
-     * Retrieve the <code>SortOrder</code>'s code
+     * Retrieve the {@code SortOrder}'s code
      * 
-     * @return the <code>SortOrder</code>'s code
+     * @return the {@code SortOrder}'s code
      */
     public short code(){
         return this.code;
     }
 
     /**
-     * Retrieve the <code>SortOrder</code>'s UNICODE symbol
+     * Retrieve the {@code SortOrder}'s UNICODE symbol
      * 
-     * @return the <code>SortOrder</code>'s UNICODE symbol
+     * @return the {@code SortOrder}'s UNICODE symbol
      */
     public char symbol() {
         return this.symbol;
     }
 
     /**
-     * Retrieve the <code>SortOrder</code>'s code
+     * Retrieve the {@code SortOrder}'s code
      * 
      * @param sortOrder
      * 
-     * @return the <code>SortOrder</code>'s code
+     * @return the {@code SortOrder}'s code
      */
     public static short codeOf(
         SortOrder sortOrder
@@ -129,13 +129,13 @@ public enum SortOrder implements Code {
     }
     
     /**
-     * Retrieve the <code>SortOrder</code> represented by the given code
+     * Retrieve the {@code SortOrder} represented by the given code
      * 
      * @param code
      * 
-     * @return the <code>SortOrder</code> represented by the given code
+     * @return the {@code SortOrder} represented by the given code
      * 
-     * @exception IllegalArgumentException if the code does not represent a <code>SortOrder</code>
+     * @exception IllegalArgumentException if the code does not represent a {@code SortOrder}
      */
     public static SortOrder valueOf(
         short code
@@ -151,13 +151,13 @@ public enum SortOrder implements Code {
     }
 
     /**
-     * Retrieve the <code>SortOrder</code> represented by the given symbol
+     * Retrieve the {@code SortOrder} represented by the given symbol
      * 
      * @param symbol
      * 
-     * @return the <code>SortOrder</code> represented by the given symbol
+     * @return the {@code SortOrder} represented by the given symbol
      * 
-     * @exception IllegalArgumentException if the symbol does not represent a <code>SortOrder</code>
+     * @exception IllegalArgumentException if the symbol does not represent a {@code SortOrder}
      */
     public static SortOrder valueOf(
         char symbol

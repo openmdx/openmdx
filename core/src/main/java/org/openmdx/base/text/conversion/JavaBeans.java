@@ -124,8 +124,8 @@ public class JavaBeans {
      * @param xmlEncodedJavaBean an XML document 
      * @param exceptionListener the (optional) exception listener
      * 
-     * @return a graph of java beans; or <code>null</code> if
-     * the <code>xmlEncodedJavaBean</code> was <code>null</code>
+     * @return a graph of java beans; or {@code null} if
+     * the {@code xmlEncodedJavaBean} was {@code null}
      * 
      * @throws ServiceException in case of TRANSFORMATION_FAILURE
      */
@@ -150,8 +150,8 @@ public class JavaBeans {
      * 
      * @param xmlEncodedJavaBean an XML document 
      * 
-     * @return a graph of java beans; or <code>null</code> if
-     * the <code>xmlEncodedJavaBean</code> was <code>null</code>
+     * @return a graph of java beans; or {@code null} if
+     * the {@code xmlEncodedJavaBean} was {@code null}
      * 
      * @throws ServiceException in case of TRANSFORMATION_FAILURE
      */

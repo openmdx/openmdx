@@ -95,7 +95,7 @@ final class PrimitiveArrayRecord
     }
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 3978138833738936625L;
 

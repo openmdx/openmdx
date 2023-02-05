@@ -146,7 +146,7 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
     private final boolean resourceLocalTransaction;
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 3256437001975641907L;
 
@@ -265,7 +265,7 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
      * 
      * @param initialCause
      * 
-     * @return the failed object, or <code>null</code> if its acquisition fails
+     * @return the failed object, or {@code null} if its acquisition fails
      */
     private Object getFailedObject(
         BasicException initialCause
@@ -339,7 +339,7 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
      * Flush the unit of work to the data store
      * 
      * @param beforeCompletion
-     *            <code>true</code> if the before completion
+     *            {@code true} if the before completion
      *            callbacks shall be included
      * 
      */
@@ -971,7 +971,7 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
     /**
      * Tells whether there is a unit of work currently active.
      * 
-     * @return <code>true</code> if the unit of work is active.
+     * @return {@code true} if the unit of work is active.
      */
     public final boolean isActive() {
         return this.unitOfWorkId != null;
@@ -1182,7 +1182,7 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
      * </ul>
      * </ul>
      * 
-     * @return <code>true</code>
+     * @return {@code true}
      */
     public boolean isReadLockRequired() {
         return Constants.TX_REPEATABLE_READ.equals(this.isolationLevel);

@@ -68,8 +68,8 @@ public class EntryImpl<
     }
 
     /**
-     * Retrieves the value for the attribute <code>name</code>.
-     * @return The non-null value for attribute <code>name</code>.
+     * Retrieves the value for the attribute {@code name}.
+     * @return The non-null value for attribute {@code name}.
      */
     public java.lang.String getName(
     ){

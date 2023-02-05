@@ -92,12 +92,12 @@ public class DirtyObjects {
     }
     
     /**
-     * Test whether two objects are either both <code>null</code> or equal.
+     * Test whether two objects are either both {@code null} or equal.
      * 
      * @param left
      * @param right
      * 
-     * @return <code>true</code> if either both objects are <code>null</code> or equal.
+     * @return {@code true} if either both objects are {@code null} or equal.
      */
     private static boolean equal(
         Object left,
@@ -113,7 +113,7 @@ public class DirtyObjects {
      * 
      * @param feature
      * 
-     * @return <code>true</code> if the feature has been modified
+     * @return {@code true} if the feature has been modified
      * 
      * @throws ServiceException
      */

@@ -62,7 +62,7 @@ public class BooleanMarshaller {
      * 
      * @param type the duration type
      * 
-     * @return an new <code>DurationMarshaller</code> instance
+     * @return an new {@code DurationMarshaller} instance
      * 
      * @throws ServiceException 
      */
@@ -98,9 +98,9 @@ public class BooleanMarshaller {
 
     /**
      * The value corresponding to Boolean.FALSE, e.g.<ul>
-     * <li><code>false</code> <i>(fix in case of <code>booleanType BOOLEAN</code>
-     * <li><code>##false##</code> <i>(default in case of <code>booleanType CHARACTER</code>)</i>
-     * <li><code>0</code> <i>(default in case of <code>booleanType NUMERIC</code>)</i>
+     * <li>{@code false} <i>(fix in case of {@code booleanType BOOLEAN}
+     * <li>{@code ##false##} <i>(default in case of {@code booleanType CHARACTER})</i>
+     * <li>{@code 0} <i>(default in case of {@code booleanType NUMERIC})</i>
      * </ul>
      */
     private Object getBooleanFalse(
@@ -143,9 +143,9 @@ public class BooleanMarshaller {
 
     /**
      * The value corresponding to Boolean.TRUE, e.g.<ul>
-     * <li><code>true</code> <i>(fix in case of <code>booleanType BOOLEAN</code>
-     * <li><code>##true##</code> <i>(default in case of <code>booleanType CHARACTER</code>)</i>
-     * <li><code>1</code> <i>(default in case of <code>booleanType NUMERIC</code>)</i>
+     * <li>{@code true} <i>(fix in case of {@code booleanType BOOLEAN}
+     * <li>{@code ##true##} <i>(default in case of {@code booleanType CHARACTER})</i>
+     * <li>{@code 1} <i>(default in case of {@code booleanType NUMERIC})</i>
      * </ul>
      */
     private Object getBooleanTrue(

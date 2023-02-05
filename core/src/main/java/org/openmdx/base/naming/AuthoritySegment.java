@@ -58,7 +58,7 @@ public class AuthoritySegment extends PlainVanillaSegment {
 	private transient String xriRepresentation;
 
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = -6526342338259682736L;
 	

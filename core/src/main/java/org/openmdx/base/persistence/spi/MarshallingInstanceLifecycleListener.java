@@ -109,7 +109,7 @@ public class MarshallingInstanceLifecycleListener extends InstanceLifecycleListe
      * Retrieve an event's persistent capable object
      * 
      * @param event an event created by another manager
-     * @param reluctant avoid marshalling if <code>true</code>
+     * @param reluctant avoid marshalling if {@code true}
      * 
      * @return the persistence capable object to which the event belongs
      */

@@ -110,14 +110,14 @@ class ObjectView_1
     private DataObject_1_0 dataObject;
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -7826608051595033293L;
 
     /**
      * Tells whether the instance is prepared or not
      * 
-     * @return <code>true</code> if this instance is prepared
+     * @return {@code true} if this instance is prepared
      */
     boolean isInitialized(){
         return this.delegate != null;
@@ -245,9 +245,9 @@ class ObjectView_1
     /**
      * Removes an object. 
      * <p>
-     * Neither <code>getValue()</code> nor <code>setValue()</code>
-     * calls are allowed after an <code>remove()</code> invocation and
-     * <code>isDeleted()</code> will return <code>true</code> unless the
+     * Neither {@code getValue()} nor {@code setValue()}
+     * calls are allowed after an {@code remove()} invocation and
+     * {@code isDeleted()} will return {@code true} unless the
      * object has been transient.
      *
      * @exception   ServiceException NOT_SUPPORTED

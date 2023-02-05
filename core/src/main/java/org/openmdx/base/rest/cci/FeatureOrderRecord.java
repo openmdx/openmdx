@@ -49,7 +49,7 @@ import javax.resource.cci.MappedRecord;
 import org.openmdx.base.query.SortOrder;
 
 /**
- * <code>org::openmdx::kernel::FeatureOrder</code>
+ * {@code org::openmdx::kernel::FeatureOrder}
  */
 public interface FeatureOrderRecord extends MappedRecord {
     
@@ -88,13 +88,13 @@ public interface FeatureOrderRecord extends MappedRecord {
      * Tells whether the feature is recognised by a name only or
      * by a name followed by a path.
      * 
-     * @return <code>false</code> if the feature is identified by a name only
+     * @return {@code false} if the feature is identified by a name only
      */
     boolean hasFeaturePointer();
     
     /**
      * Returns the feature name in case of a feature path.
-     * The same as <code>getFeature()</code> if <code>hasFeaturePointer() is <code>false</code>.
+     * The same as {@code getFeature()} if {@code hasFeaturePointer() is {@code false}.
      * 
      * @return the name
      */
@@ -102,7 +102,7 @@ public interface FeatureOrderRecord extends MappedRecord {
     
     /**
      * Returns the feature pointer (starting with a '/') in case of a path,
-     * or <code>null</code> if <code>hasFeaturePointer() is <code>false</code>.
+     * or {@code null} if {@code hasFeaturePointer() is {@code false}.
      * 
      * @return the feature pointer, e.g. XPath or JSONPointer (RFC 6901)
      */

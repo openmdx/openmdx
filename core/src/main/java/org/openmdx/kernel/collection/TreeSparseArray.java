@@ -142,7 +142,7 @@ public class TreeSparseArray<E>
     }
 
     /**
-     * Implememts <code>Serializable</code>
+     * Implememts {@code Serializable}
      */
     private static final long serialVersionUID = -2274197057634027155L;
 

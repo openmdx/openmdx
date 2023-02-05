@@ -84,7 +84,7 @@ public class LenientPathComparator extends LenientDatatypeComparator {
      * 
      * @param candidate the value to be tested
      * 
-     * @return <code>true</code> if  this comparator is able to compare the given value with another one
+     * @return {@code true} if  this comparator is able to compare the given value with another one
      */
     public static boolean isComparable(
         Object candidate

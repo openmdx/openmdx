@@ -66,7 +66,7 @@ public interface PlugIn {
      * 
      * @param defaultNamespaceURI 
      * 
-     * @return the default public identifier, which may be <code>null</code> 
+     * @return the default public identifier, which may be {@code null} 
      */
     String getDefaultDocumentPublicIdentifier(
         String defaultNamespaceURI
@@ -75,7 +75,7 @@ public interface PlugIn {
     /**
      * Tells whether the (initial or final) WBXL string table is ready during start of document.
      * 
-     * @return <code>false</code> when the string table is not ready until the end of document.
+     * @return {@code false} when the string table is not ready until the end of document.
      */
     boolean isStringTableReadyAtStartOfDocument(
     );
@@ -94,7 +94,7 @@ public interface PlugIn {
     /**
      * Retrieve the string table
      * 
-     * @return the string table; or <code>null</code> if the string table will 
+     * @return the string table; or {@code null} if the string table will 
      * not be ready until later
      */
     ByteBuffer getStringTable(
@@ -105,7 +105,7 @@ public interface PlugIn {
      * 
      * @param value the value to be tokenized
      * 
-     * @return the requested token, or <code>null</code> if no such token can be provided 
+     * @return the requested token, or {@code null} if no such token can be provided 
      */
     StringToken getStringToken(
         String value
@@ -116,7 +116,7 @@ public interface PlugIn {
      * 
      * @param value the value which has already be tokenized
      * 
-     * @return the requested token, or <code>null</code> if no such value has been tokenized 
+     * @return the requested token, or {@code null} if no such value has been tokenized 
      */
     StringToken findStringToken(
         String value
@@ -128,7 +128,7 @@ public interface PlugIn {
      * @param namespaceURI 
      * @param localName the value to be tokenized
      * 
-     * @return the requested token, or <code>null</code> if no such token is available 
+     * @return the requested token, or {@code null} if no such token is available 
      */
     CodeToken getTagToken(
         String namespaceURI, 
@@ -139,10 +139,10 @@ public interface PlugIn {
      * Retrieve the token for the given value
      * 
      * @param namespaceURI 
-     * @param elementName, may be <code>null</code> in case of namespace global scope 
+     * @param elementName, may be {@code null} in case of namespace global scope 
      * @param attributeName the attribute name
      * 
-     * @return the requested token, or <code>null</code> if no such token is available 
+     * @return the requested token, or {@code null} if no such token is available 
      */
     CodeToken getAttributeNameToken(
         String namespaceURI, 
@@ -156,7 +156,7 @@ public interface PlugIn {
      * @param namespaceURI 
      * @param value the attribute value
      * 
-     * @return the requested token, or <code>null</code> if no such token is available 
+     * @return the requested token, or {@code null} if no such token is available 
      */
     CodeToken getAttributeValueToken(
         String namespaceURI, 
@@ -166,14 +166,14 @@ public interface PlugIn {
     /**
      * Retrieve the token for the given value
      * 
-     * @param set if <code>true</code> the complete name/value pair is set, 
-     * otherwise the best match is returned, which rarely is <code>null</code> 
+     * @param set if {@code true} the complete name/value pair is set, 
+     * otherwise the best match is returned, which rarely is {@code null} 
      * @param namespaceURI 
-     * @param elementName, may be <code>null</code> in case of namespace global scope 
+     * @param elementName, may be {@code null} in case of namespace global scope 
      * @param attributeName the attribute name
      * @param value the attribute value
      * 
-     * @return the requested token, or <code>null</code> if no such token is available 
+     * @return the requested token, or {@code null} if no such token is available 
      */
     CodeToken findAttributeStartToken(
         boolean set,
@@ -186,11 +186,11 @@ public interface PlugIn {
      /**
      * Retrieve the token for the given value
      * 
-     * @param set if <code>true</code> the complete value is set, 
-     * otherwise the best match is returned, which may be <code>null</code>
+     * @param set if {@code true} the complete value is set, 
+     * otherwise the best match is returned, which may be {@code null}
      * @param namespaceURI 
      * @param value the attribute value
-     * @return the requested token, or <code>null</code> if no such token is available 
+     * @return the requested token, or {@code null} if no such token is available 
      */
     CodeToken findAttributeValueToken(
         boolean set,
@@ -360,7 +360,7 @@ public interface PlugIn {
     /**
      * Retrieve the namespace context
      * 
-     * @return the namespace context; or <code>null</code> if the standard one shall be used
+     * @return the namespace context; or {@code null} if the standard one shall be used
      */
     NamespaceContext getNamespaceContext();
     

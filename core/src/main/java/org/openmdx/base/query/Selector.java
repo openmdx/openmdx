@@ -54,7 +54,7 @@ public interface Selector {
      * 
      * @param  candidate
      * 
-     * @return <code>true</code> if the candidate matches the selection criteria
+     * @return {@code true} if the candidate matches the selection criteria
      */
     boolean accept(
         Object candidate

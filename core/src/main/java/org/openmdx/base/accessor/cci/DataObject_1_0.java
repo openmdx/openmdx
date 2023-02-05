@@ -64,14 +64,14 @@ import org.openmdx.base.naming.Path;
  * The openMDX Service Data Object interface.
  * <p>
  * The core of the openMDX Data Accessor Framework is the Service Data 
- * Object (<code>SDO</code>), which is a generic object and is not tied to any 
- * specific persistent storage or service mechanism. An <code>SDO</code> is used 
- * in conjunction with data accessors which populate <code>SDO</code>s from back-end 
- * data sources. For more information on <code>SDO</code>s see the
+ * Object ({@code SDO}), which is a generic object and is not tied to any 
+ * specific persistent storage or service mechanism. An {@code SDO} is used 
+ * in conjunction with data accessors which populate {@code SDO}s from back-end 
+ * data sources. For more information on {@code SDO}s see the
  * <a href="http://www.ibm.com/developerworks/java/library/j-sdo/">SDO specification</a>. 
  * <p> 
- * An openMDX <code>SDO</code> implements the <code>DataObject_1_0</code> 
- * interface. The API gives access to typed and untyped <code>SDO</code>s. This 
+ * An openMDX {@code SDO} implements the {@code DataObject_1_0} 
+ * interface. The API gives access to typed and untyped {@code SDO}s. This 
  * has the following advantages:
  * <p>
  * <ul><li>Data Objects often have typed interfaces. However, sometimes it is
@@ -86,10 +86,10 @@ import org.openmdx.base.naming.Path;
  *     <li>When deployment of generated code is not practical.
  *   </ul>
  *   In these situations, it is necessary to use a dynamic store and associated 
- *   API. <code>DataObject_1_0</code> has the ability to represent Data Objects 
+ *   API. {@code DataObject_1_0} has the ability to represent Data Objects 
  *   through a standard generic data API.
  * <li>In cases where metadata is known at development time (for example, the 
- *   UML model or the SQL relational schema is known), <code>DataObject_1_0</code> 
+ *   UML model or the SQL relational schema is known), {@code DataObject_1_0} 
  *   allows a generic interface to access typed objects such as
  *   <ul><li>Popular XML schema languages.
  *     <li>Relational database schemas with queries known at the time of code generation.
@@ -104,28 +104,28 @@ import org.openmdx.base.naming.Path;
  *   of generic or framework code that works with Data Objects, it is important to 
  *   be able to introspect on Data Object metadata, which exposes the data model for 
  *   the Data Objects. The object class of a Data Object allows to retrieve the
- *   object's metadata from a <code>MOF</code> repository.
+ *   object's metadata from a {@code MOF} repository.
  * </ul>N
  * <p>
- * A <code>DataObject_1_0</code> extends from the <code>javax.jdo.spi.PersistenceCapable</code>.
- * As a consequence, a <code>DataObject_1_0</code> offers the semantics as a <code>JDO 
- * PersistenceCapable</code>. A <code>DataObject_1_0</code> is managed by
- * a Data Access Service (which is in turn a <code>javax.jdo.PersistenceManager</code>) 
+ * A {@code DataObject_1_0} extends from the {@code javax.jdo.spi.PersistenceCapable}.
+ * As a consequence, a {@code DataObject_1_0} offers the semantics as a {@code JDO 
+ * PersistenceCapable}. A {@code DataObject_1_0} is managed by
+ * a Data Access Service (which is in turn a {@code javax.jdo.PersistenceManager}) 
  * and maintains the object states and lifecycle defined by the 
  * <a href="http://java.sun.com/jdo/index.jsp">JDO specification</a>.    
  * <p>
- * Summarized a <code>DataObject_1_0</code> 
+ * Summarized a {@code DataObject_1_0} 
  * <ul>
- *   <li>is conceptually an <code>SDO</code> specified by the <a href="http://www.ibm.com/developerworks/java/library/j-sdo/">SDO specification</a>. 
- *     However, it does not implement the <code>commonj.sdo.DataObject</code> interface 
+ *   <li>is conceptually an {@code SDO} specified by the <a href="http://www.ibm.com/developerworks/java/library/j-sdo/">SDO specification</a>. 
+ *     However, it does not implement the {@code commonj.sdo.DataObject} interface 
  *     mainly for the following reasons: 1) The object states and lifecycle are not as complete 
- *     and precisely specified as the <code>javax.jdo.spi.PersistenceCapable</code> does.
+ *     and precisely specified as the {@code javax.jdo.spi.PersistenceCapable} does.
  *     2) The many typed getters and setters are replaced by untyped getters and setters
  *     which make the interface easier to use and to implement. Attribute types can
- *     be derived from a <code>MOF</code> repository.
- *   <li>implements the the interface <code>javax.jdo.spi.PersistenceCapable</code> and adds
+ *     be derived from a {@code MOF} repository.
+ *   <li>implements the the interface {@code javax.jdo.spi.PersistenceCapable} and adds
  *     generic attribute value setters and getters. It also adds methods which allow to
- *     invoke operations on <code>SDO</code>s.
+ *     invoke operations on {@code SDO}s.
  * </ul>
  */
 public interface DataObject_1_0 
@@ -144,7 +144,7 @@ public interface DataObject_1_0
 	
     /** 
      * Return a transient object id in case of transient object instances,
-     * and <code>null</code> for persistent instances <em>(i.e. not the transactional 
+     * and {@code null} for persistent instances <em>(i.e. not the transactional 
      * object id as prescribed by JDO)</em>.
      *
      * @see #jdoGetObjectId()
@@ -195,13 +195,13 @@ public interface DataObject_1_0
      *            the object's new container.
      * @param     criteria
      *            The criteria is used to move the object to the container or 
-     *            <code>null</null>, in which case it is up to the
+     *            {@code null</null>, in which case it is up to the
      *            implementation to define the criteria.
      *
      * @exception ServiceException  ILLEGAL_STATE
      *            if the object is persistent.
      * @exception ServiceException BAD_PARAMETER
-     *            if <code>there</code> is <code>null</code>.
+     *            if {@code there} is {@code null}.
      * @exception ServiceException  
      *            if the move operation fails.
      */
@@ -217,7 +217,7 @@ public interface DataObject_1_0
     /**
      * Set an attribute's value.
      * <p>
-     * This method returns a <code>BAD_PARAMETER</code> exception unless the 
+     * This method returns a {@code BAD_PARAMETER} exception unless the 
      * feature is single valued or a stream. 
      *
      * @param       feature
@@ -242,7 +242,7 @@ public interface DataObject_1_0
     /**
      * Get a single-valued attribute.
      * <p>
-     * This method returns a <code>BAD_PARAMETER</code> exception unless the 
+     * This method returns a {@code BAD_PARAMETER} exception unless the 
      * feature is single valued or a stream. 
      *
      * @param       feature
@@ -265,7 +265,7 @@ public interface DataObject_1_0
     /**
      * Get a List attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -287,7 +287,7 @@ public interface DataObject_1_0
     /**
      * Get a Set attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -309,7 +309,7 @@ public interface DataObject_1_0
     /**
      * Get a SparseArray attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -331,7 +331,7 @@ public interface DataObject_1_0
     /**
      * Get a Map attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -354,7 +354,7 @@ public interface DataObject_1_0
     /**
      * Get a reference feature.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -415,10 +415,10 @@ public interface DataObject_1_0
     /**
      * Return the object's container
      * 
-     * @param lazily if <code>true</code> the method returns <code>null</code> for persistent 
+     * @param lazily if {@code true} the method returns {@code null} for persistent 
      * objects with not yet initialized container reference 
      * 
-     * @return the object's container if <code>objIsContained()</code>, <code>null</code> otherwise 
+     * @return the object's container if {@code objIsContained()}, {@code null} otherwise 
      */
     Container_1_0 getContainer(
         boolean lazily
@@ -450,7 +450,7 @@ public interface DataObject_1_0
     /**
      * Tests whether object is member of a container.
      * 
-     * @return <code>true</code> if object was moved into a container.
+     * @return {@code true} if object was moved into a container.
      */
     boolean objIsContained(
     );
@@ -483,7 +483,7 @@ public interface DataObject_1_0
     /**
      * Used to minimize overhead
      * 
-     * @return <code>true</code> if its persistence manager is neither multi-threaded
+     * @return {@code true} if its persistence manager is neither multi-threaded
      * nor thread isolating
      */
     boolean objThreadSafetyRequired();

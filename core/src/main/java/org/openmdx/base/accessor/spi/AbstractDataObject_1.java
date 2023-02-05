@@ -83,7 +83,7 @@ public abstract class AbstractDataObject_1
     };
 
     /**
-     * <code>null</code> unless the object is inaccessible
+     * {@code null} unless the object is inaccessible
      */
     private transient ServiceException inaccessibilityReason;
     
@@ -112,7 +112,7 @@ public abstract class AbstractDataObject_1
     /**
      * Set the inaccessibility reason
      * 
-     * @param inaccessibilityReason <code>null</code> unless the object is
+     * @param inaccessibilityReason {@code null} unless the object is
      * inaccessible
      */
     protected void setInaccessibilityReason(

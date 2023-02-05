@@ -109,7 +109,7 @@ public class TreeSparseArray<E> extends org.openmdx.kernel.collection.TreeSparse
     }
 
     /**
-     * Implememts <code>Serializable</code>
+     * Implememts {@code Serializable}
      */
     private static final long serialVersionUID = 3594203027758389259L;
 

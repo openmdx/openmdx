@@ -67,7 +67,7 @@ public class ClassicCrossReferenceSegment extends XRISegment {
 	private transient String xriRepresentation;
 
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = -1225320959690566317L;
 	

@@ -47,7 +47,7 @@ package org.openmdx.application.mof.cci;
 
 
 /**
- * The <code>ModelTypeNames</code> class contains the
+ * The {@code ModelTypeNames} class contains the
  * qualified names of the org::omg::model1 types.
  */
 public class ModelAttributes {

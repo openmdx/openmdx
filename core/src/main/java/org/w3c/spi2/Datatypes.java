@@ -67,9 +67,9 @@ public class Datatypes {
      * Create a value from its string representation 
      * 
      * @param valueClass the value's class
-     * @param string the values string representation, which can be <code>null</code>
+     * @param string the values string representation, which can be {@code null}
      * 
-     * @return the value, or <code>null</code> if the value's string was <code>null</code>
+     * @return the value, or {@code null} if the value's string was {@code null}
      * 
      * @exception IllegalArgumentException if the string can't be parsed according to the
      * requested type
@@ -122,7 +122,7 @@ public class Datatypes {
      * Associate a member name with its value
      * 
      * @param name the member's name
-     * @param value the members possibly <code>null</code> value
+     * @param value the members possibly {@code null} value
      * 
      * @return a name/value pair
      */

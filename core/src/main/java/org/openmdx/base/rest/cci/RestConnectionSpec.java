@@ -115,7 +115,7 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
     private boolean bulkLoad;
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -1117165712221772605L;
 
@@ -186,7 +186,7 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
     /**
      * Set the 'BulkLoad' property.
      * 
-     * @param bulkLoad <code>true</code> in case of bulk load
+     * @param bulkLoad {@code true} in case of bulk load
      */
     public void setBulkLoad(boolean bulkLoad) {
         this.bulkLoad = bulkLoad;
@@ -198,7 +198,7 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
      * @param left
      * @param right
      * 
-     * @return <code>true</code> if both are either <code>null</code> or equal
+     * @return {@code true} if both are either {@code null} or equal
      */
     private static boolean areEqual(
         Object left,

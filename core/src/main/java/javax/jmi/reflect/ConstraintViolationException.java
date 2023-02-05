@@ -6,7 +6,7 @@ package javax.jmi.reflect;
 public class ConstraintViolationException extends JmiException {
     
     /**
-     * Constructs new <code>ConstraintViolationException</code> without detail message.
+     * Constructs new {@code ConstraintViolationException} without detail message.
      * @param objectInError object violating the constraint.
      * @param elementInError violated constraint object.
      */
@@ -15,7 +15,7 @@ public class ConstraintViolationException extends JmiException {
     }
 
     /**
-     * Constructs an <code>ConstraintViolationException</code> with the specified detail message.
+     * Constructs an {@code ConstraintViolationException} with the specified detail message.
      * @param objectInError object violating the constraint.
      * @param elementInError violated constraint object.
      * @param msg the detail message.

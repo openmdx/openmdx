@@ -87,7 +87,7 @@ public class StateAccessor
      * 
      * @param pc
      * 
-     * @return <code>null</code>
+     * @return {@code null}
      */
     public PersistenceManager getPersistenceManager(Object pc) {
         return null;
@@ -113,7 +113,7 @@ public class StateAccessor
      * @param xri the detached object's XRI
      * @param version the detached object's version
      * 
-     * @throw ClassCastException if pc is not an instance of <code>AbstractObject</code>
+     * @throw ClassCastException if pc is not an instance of {@code AbstractObject}
      */
     public void initializeDetachedObject(
         Object pc,
@@ -130,7 +130,7 @@ public class StateAccessor
      * @param pc the detached object
      * @param xri the detached object's XRI
      * 
-     * @throw ClassCastException if pc is not an instance of <code>AbstractObject</code>
+     * @throw ClassCastException if pc is not an instance of {@code AbstractObject}
      */
     public void setTransactionalObjectId(
         Object pc,

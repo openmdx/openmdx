@@ -103,14 +103,14 @@ public class TestGregorianCalendar {
     protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
     
     /**
-     * Create a <code>GregorianCalendar</code> for a give time zone and date
+     * Create a {@code GregorianCalendar} for a give time zone and date
      *  
      * @param zone
      * @param year
      * @param month
      * @param date
      * 
-     * @return a <code>GregorianCalendar</code> for a give time zone and date
+     * @return a {@code GregorianCalendar} for a give time zone and date
      */
     protected static Calendar newGregorianCalendar(
         TimeZone zone, 

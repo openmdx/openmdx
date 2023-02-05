@@ -66,7 +66,7 @@ public enum Case {
     },
     
     /**
-     * The first letter of the <code>String</code> is capitalized while all 
+     * The first letter of the {@code String} is capitalized while all 
      * others are decapitalized.
      */
     TITLE_CASE {
@@ -95,7 +95,7 @@ public enum Case {
     },
 
     /**
-     * The first letter of the <code>String</code> is decapitalized.
+     * The first letter of the {@code String} is decapitalized.
      */
     LOWER_CAMEL_CASE {
         
@@ -109,7 +109,7 @@ public enum Case {
     },
     
     /**
-     * The first letter of the <code>String</code> is capitalized.
+     * The first letter of the {@code String} is capitalized.
      */
     UPPER_CAMEL_CASE {
         
@@ -123,11 +123,11 @@ public enum Case {
     };
     
     /**
-     * Convert the characters of a <code>string</code> to their appropriate case.
+     * Convert the characters of a {@code string} to their appropriate case.
      *  
-     * @param string the <code>String</code> to be converted
+     * @param string the {@code String} to be converted
      * 
-     * @return the converted <code>string</code>
+     * @return the converted {@code string}
      */
     public abstract String toCase(String string);
     

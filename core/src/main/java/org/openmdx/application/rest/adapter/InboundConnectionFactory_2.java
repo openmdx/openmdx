@@ -80,8 +80,8 @@ public class InboundConnectionFactory_2 extends AbstractConnectionFactory {
      * 
      * @param entityManagerFactoryName name used for entity manager lookup, 
      * i.e. one of<ul>
-     * <li><code>jdo:<em>&lang;JDO-name&rang;</em>
-     * <li><code>java:comp/env/<em>&lang;JNDI-name&rang;</em>
+     * <li>{@code jdo:<em>&lang;JDO-name&rang;</em>
+     * <li>{@code java:comp/env/<em>&lang;JNDI-name&rang;</em>
      * </ul>
      * @param overrides configuration overrides taken into consideration in 
      * case of a JDO name
@@ -95,7 +95,7 @@ public class InboundConnectionFactory_2 extends AbstractConnectionFactory {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -3251983865328784983L;
 
@@ -154,8 +154,8 @@ public class InboundConnectionFactory_2 extends AbstractConnectionFactory {
      * 
      * @param entityManagerFactoryName name used for entity manager lookup, 
      * i.e. one of<ul>
-     * <li><code>jdo:<em>&lang;JDO-name&rang;</em>
-     * <li><code>java:comp/env/<em>&lang;JNDI-name&rang;</em>
+     * <li>{@code jdo:<em>&lang;JDO-name&rang;</em>
+     * <li>{@code java:comp/env/<em>&lang;JNDI-name&rang;</em>
      * </ul>
      */
     public static ConnectionFactory newInstance(
@@ -172,8 +172,8 @@ public class InboundConnectionFactory_2 extends AbstractConnectionFactory {
      * 
      * @param entityManagerFactoryName name used for entity manager lookup, 
      * i.e. one of<ul>
-     * <li><code>jdo:<em>&lang;JDO-name&rang;</em>
-     * <li><code>java:comp/env/<em>&lang;JNDI-name&rang;</em>
+     * <li>{@code jdo:<em>&lang;JDO-name&rang;</em>
+     * <li>{@code java:comp/env/<em>&lang;JNDI-name&rang;</em>
      * </ul>
      * @param overrides configuration overrides taken into consideration in 
      * case of a JDO name

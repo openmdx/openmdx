@@ -194,7 +194,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
     private MarshallingInstanceLifecycleListener instanceLifecycleListener;
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 4121130329538180151L;
 
@@ -291,9 +291,9 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
     }
 
     /**
-     * Provides the <code>plugIn</code> array
+     * Provides the {@code plugIn} array
      * 
-     * @return the <code>plugIn</code> array
+     * @return the {@code plugIn} array
      */
     @Override
     public List<PlugIn_1_0> getPlugIn() {
@@ -494,7 +494,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
     /**
      * Tells whether the object factory has been closed.
      * 
-     * @return <code>true</code> if the object factory has been closed
+     * @return {@code true} if the object factory has been closed
      */
     @Override
     public boolean isClosed() {
@@ -1653,7 +1653,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
     /**
      * Tells whether the persistence manager represented by this connection is multithreaded or not
      * 
-     * @return <code> true</code> if the the persistence manager is multithreaded
+     * @return {@code  true} if the the persistence manager is multithreaded
      */
     @Override
     public boolean getMultithreaded() {

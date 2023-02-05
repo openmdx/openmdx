@@ -49,6 +49,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.SortedSet;
 
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -64,9 +65,10 @@ public class IndexMapper extends HTMLMapper {
     public IndexMapper(
     	Sink sink, 
         List<ModelElement_1_0> packagesToBeExported,
+        boolean markdown, 
         PIMDocConfiguration configuration
-    ) throws ServiceException {
-		super(sink, getModel(packagesToBeExported), configuration);
+    ){
+		super(sink, getModel(packagesToBeExported), markdown, configuration);
 		this.packagesToBeExported = packagesToBeExported;
     }    
     
@@ -81,112 +83,129 @@ public class IndexMapper extends HTMLMapper {
 	
 	@Override
 	protected void htmlBody() {
-		this.pw.println("<body>");
+		printLine("<body class=\"page\">");
 		pageHead(getTitle());
 		pageBody();
-		this.pw.println("</body>");
+		printLine("</body>");
    }
 
 	private void pageBody() {
-		this.pw.println("\t<div class=\"page-section page-body\">");
+		printLine("\t<div class=\"page-section page-body\">");
 		navigationColumn();
 		detailColumn();
-		this.pw.println("\t</div>");
+		printLine("\t</div>");
 	}
 
 	private void navigationColumn() {
-		this.pw.println("\t\t<div class=\"page-column navigation-column\">");
+		printLine("\t\t<div class=\"page-column navigation-column\">");
 		columnHead();
 		columnBody();
-		this.pw.println("\t\t</div>");
+		printLine("\t\t</div>");
 	}
 
 
 	private void columnBody() {
-		this.pw.println("\t\t\t<div class=\"column-body\">");
-		classesCompartment();
-		this.pw.println("\t\t\t</div>");
+		printLine("\t\t\t<div class=\"column-body\">");
+		navigationCompartment();
+		printLine("\t\t\t</div>");
 	}
 	
-	private void classesCompartment() {
-		this.pw.println("\t\t\t\t<details open>");
-		classesSummary();
-		classesDetails();
-		this.pw.println("\t\t\t\t</details>");
+	private void navigationCompartment() {
+		printLine("\t\t\t\t<details open>");
+		navigationSummary();
+		navigationDetails();
+		printLine("\t\t\t\t</details>");
 	}
 
-	private void classesSummary() {
-		this.pw.println("\t\t\t\t\t<summary class=\"navigation-summary\">Classes</summary>");
+	private void navigationSummary() {
+		printLine("\t\t\t\t\t<summary class=\"navigation-summary\">Package Groups</summary>");
 	}
 
-	private void classesDetails() {
-		getPackagesWithClasses().entrySet().forEach(this::classGroup);
+	private void navigationDetails() {
+		getPackageGroups().entrySet().forEach(this::packageGroup);
 	}
 
-	private void classGroup(Map.Entry<String,SortedSet<String>> classGroup) {
-		this.pw.println("\t\t\t\t\t<details class=\"uml-package-group\">");
-		classGroupSummary(classGroup.getKey());
-		classGroupDetails(classGroup.getValue());
-		this.pw.println("\t\t\t\t\t</details>");
+	private void packageGroup(Map.Entry<String,SortedSet<String>> entry) {
+		printLine("\t\t\t\t\t<details class=\"uml-package-group\">");
+		packageGroupSummary(entry.getKey());
+		packageGroupDetails(entry.getValue());
+		printLine("\t\t\t\t\t</details>");
 	}
 
-	private void classGroupDetails(final SortedSet<String> classes) {
-		classes.forEach(this::classLink);
+	private void packageGroupDetails(final SortedSet<String> classes) {
+		classes.forEach(this::mapPackageMemberName);
 	}
 	
-	private void classLink(String className) {
-		this.pw.println("\t\t\t\t\t\t<p>");
-		this.pw.println("\t\t\t\t\t\t\t<a href=\"" + getElementURL(className) + "\" target=\"uml-element\">" + getSimpleNameOfClass(className) + "</a>");
-		this.pw.println("\t\t\t\t\t\t</p>");
-	}
-	
-	private void classGroupSummary(String packagePattern) {
-		this.pw.println("\t\t\t\t\t\t<summary>");
-		if(PackagePatternComparator.isWildcardPattern(packagePattern)) {
-			packageGroup(packagePattern);
-		} else {
-			packageLink(packagePattern);
+	private void mapPackageMemberName(String qualifiedName) {
+		try {
+			printLine("\t\t\t\t\t\t<p>");
+			final ModelElement_1_0 contained = this.model.getElement(qualifiedName);
+			printLine(
+				"\t\t\t\t\t\t\t<a "
+				+ "href=\"" + getHref(contained) + "\" "
+				+ "title=\"" + getDisplayName(contained) + "\" "
+				+ "target=\"" + HTMLMapper.FRAME_NAME + "\">" + contained.getName() + "</a>");
+			printLine("\t\t\t\t\t\t</p>");
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
 		}
-		this.pw.println("\t\t\t\t\t\t</summary>");
+	}
+	
+	private void packageGroupSummary(String packagePattern) {
+		printLine("\t\t\t\t\t\t<summary>");
+		if(PackagePatternComparator.isWildcardPattern(packagePattern)) {
+			mapPackageGroupName(packagePattern);
+		} else {
+			mapPackageLink(packagePattern);
+		}
+		printLine("\t\t\t\t\t\t</summary>");
 	}
 
-	private void packageGroup(String packagePattern) {
-		this.pw.println("\t\t\t\t\t\t\t"+ getDisplayNameOfPackagePattern(packagePattern));
+	private void mapPackageGroupName(String packagePattern) {
+		printLine("\t\t\t\t\t\t\t"+ getDisplayNameOfPackageGroup(packagePattern));
 	}
 
-	private void packageLink(String qualifiedName) {
-		this.pw.println("\t\t\t\t\t\t\t<a href=\"" + getElementURL(qualifiedName) + "\" target=\"uml-element\">" + getDisplayNameOfPackagePattern(qualifiedName) + "</a>");
+	private void mapPackageLink(String qualifiedName) {
+		try {
+			final ModelElement_1_0 packageElement = this.model.getElement(qualifiedName);
+			printLine(
+				"\t\t\t\t\t\t\t<a "
+				+ "href=\"" + getHref(packageElement) + "\" "
+				+ "target=\"" + HTMLMapper.FRAME_NAME + "\">" + getDisplayName(packageElement) + "</a>");
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
 	}
 
 	private void columnHead() {
-		this.pw.println("\t\t\t<div class=\"column-head\">");
-		this.pw.println("\t\t\t\t<h2>Index</h2>");
-		this.pw.println("\t\t\t</div>");
+		printLine("\t\t\t<div class=\"column-head\">");
+		printLine("\t\t\t\t<h2>Index</h2>");
+		printLine("\t\t\t</div>");
 	}
 
 	private void pageHead(final String title) {
-		this.pw.println("\t<div class=\"page-section page-head\">");
-		this.pw.println("\t\t<div class=\"page-column\">");
-		this.pw.println("\t\t\t<a href=\"" + getFileURL(MagicFile.INDEX) + "\">");
-		this.pw.println("\t\t\t\t<img src=\"" + getFileURL(MagicFile.LOGO) + "\" />");
-		this.pw.println("\t\t\t</a>");
-		this.pw.println("\t\t</div>");
-		this.pw.println("\t\t<div class=\"page-column\">");
-		this.pw.println("\t\t\t<h1>" + title + "</h1>");
-		this.pw.println("\t\t</div>");
-		this.pw.println("\t</div>");
+		printLine("\t<div class=\"page-section page-head\">");
+		printLine("\t\t<div class=\"page-column\">");
+		printLine("\t\t\t<a href=\"" + getFileURL(MagicFile.INDEX) + "\">");
+		printLine("\t\t\t\t<img src=\"" + getFileURL(MagicFile.LOGO) + "\" />");
+		printLine("\t\t\t</a>");
+		printLine("\t\t</div>");
+		printLine("\t\t<div class=\"page-column\">");
+		printLine("\t\t\t<h1>" + title + "</h1>");
+		printLine("\t\t</div>");
+		printLine("\t</div>");
 	}
 
    /**
     * Produces the detail column frame
     */
 	private void detailColumn() {
-		this.pw.println("\t\t<div class=\"page-column detail-column\">");
-		this.pw.println("\t\t\t<iframe name=\"uml-element\" src=\"welcome.html\"/>");
-		this.pw.println("\t\t</div>");
+		printLine("\t\t<div class=\"page-column detail-column\">");
+		printLine("\t\t\t<iframe name=\"" + HTMLMapper.FRAME_NAME + "\" src=\"welcome.html\"/>");
+		printLine("\t\t</div>");
 	}
     
-    private NavigationCompartmentDataCollector getPackagesWithClasses(
+    private NavigationCompartmentDataCollector getPackageGroups(
     ){
     	final NavigationCompartmentDataCollector navigationCompartment = new NavigationCompartmentDataCollector();
     	configuration
@@ -197,27 +216,23 @@ public class IndexMapper extends HTMLMapper {
     			.map(ModelElement_1_0::getQualifiedName)
     			.forEach(navigationCompartment::addKey);
     	}
-    	this.model
-    		.getContent()
-    		.stream()
-    		.filter(ModelElement_1_0::isClassType)
+		streamElements()
+    		.filter(this::isListable)
     		.map(ModelElement_1_0::getQualifiedName)
     		.forEach(navigationCompartment::addElement);
-    	System.out.println("Before normalization: "+navigationCompartment);
     	navigationCompartment.normalize();
-    	System.out.println("After normalization: "+ navigationCompartment);
     	return navigationCompartment;
     }
     
-    private String getDisplayNameOfPackagePattern(String packagePattern) {
+    private boolean isListable(ModelElement_1_0 element) {
+    	return element.isClassType() || element.isDataType();
+    }
+    
+    private String getDisplayNameOfPackageGroup(String packagePattern) {
     	return packagePattern.replaceAll(":", "::");
     }
 
-    private String getSimpleNameOfClass(String qualifiedName) {
-    	return qualifiedName.substring(qualifiedName.lastIndexOf(':') + 1);
-    }
-    
-	@Override
+    @Override
 	protected String getTitle() {
 		return this.configuration.getTitle();
 	}

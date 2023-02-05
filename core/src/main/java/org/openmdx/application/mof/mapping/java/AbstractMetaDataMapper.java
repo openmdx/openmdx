@@ -64,9 +64,6 @@ import org.openmdx.base.mof.cci.Model_1_0;
  */
 public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
 
-	/**
-	 * Constructor
-	 */
 	protected AbstractMetaDataMapper(
         ModelElement_1_0 classDef, 
         Writer writer,
@@ -74,6 +71,7 @@ public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
         Format format, 
         String packageSuffix,
 		String sliceClassName, 
+        boolean markdown, 
         MetaData_1_0 metaData, 
         PrimitiveTypeMapper primitiveTypeMapper, 
         ObjectRepositoryMetadataPlugin plugin
@@ -85,7 +83,7 @@ public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
             format, 
             packageSuffix, 
             metaData, 
-            primitiveTypeMapper
+            markdown, primitiveTypeMapper
         );
         this.writer = writer;
 		this.sliceClassName = sliceClassName;
@@ -109,7 +107,7 @@ public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
      * 
      * @param classDef 
      * 
-     * @return <code>true</code> if the given class is persistence aware
+     * @return {@code true} if the given class is persistence aware
      */
     protected boolean isPersistenceAware(
         ClassDef classDef
@@ -125,7 +123,7 @@ public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
      * 
      * @param attributeDef
      * 
-     * @return <code>true</code> if the method is invoked in its own class specific meta data mapper
+     * @return {@code true} if the method is invoked in its own class specific meta data mapper
      */
     protected boolean isDeclaringClass(
         AttributeDef attributeDef

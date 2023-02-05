@@ -97,7 +97,7 @@ public class RequestCallbackHandler implements CallbackHandler {
 	 * 
 	 * @param callback
 	 * 
-	 * @return <code>true</code> if the callback could be handled
+	 * @return {@code true} if the callback could be handled
 	 */
 	protected boolean handle(Callback callback) {
 		if (callback instanceof NameCallback) {

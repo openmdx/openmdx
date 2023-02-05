@@ -67,7 +67,7 @@ public class SharedObjects {
     }
 
     /**
-     * The <code>PersistenceManager</code>'s user object key for shared objects
+     * The {@code PersistenceManager}'s user object key for shared objects
      */
     private static final Object KEY = Accessor.class;
 
@@ -138,7 +138,7 @@ public class SharedObjects {
      * 
      * @param key the key to be tested
      * 
-     * @return <code>true</code> if the key is the shared object's key
+     * @return {@code true} if the key is the shared object's key
      */
     public static boolean isKey(
         Object key
@@ -170,14 +170,14 @@ public class SharedObjects {
         Aspects aspectObjects();
 
         /**
-         * If set the task identifier's <code>toString()</code> method is evaluated 
+         * If set the task identifier's {@code toString()} method is evaluated 
          * at the beginning of each unit of work.
          * <p>
          * An application may therefore<ul>
          * <li>either replace <em>unmodifiable</em> task identifiers 
-         * (e.g. <code>java.langString</code> instances) to change the task id 
+         * (e.g. {@code java.langString} instances) to change the task id 
          * <li>use a <em>stateful</em> task identifier providing the current task id each time its
-         * <code>toString()</code> method is invoked
+         * {@code toString()} method is invoked
          * </ul>
          * 
          * @param taskIdentifier
@@ -218,7 +218,7 @@ public class SharedObjects {
         /**
          * Set the bulk load flag
          * 
-         * @param bulkLoad <code>true</code> in case of bulk load
+         * @param bulkLoad {@code true} in case of bulk load
          */
         void setBulkLoad(
             boolean bulkLoad
@@ -227,7 +227,7 @@ public class SharedObjects {
         /**
          * Retrieve the bulk load flag value
          * 
-         * @return <code>true</code> in case of bulk load
+         * @return {@code true} in case of bulk load
          */
         boolean isBulkLoad(
         );
@@ -237,7 +237,7 @@ public class SharedObjects {
          * 
          * @param type the plug-in object's type
          * 
-         * @return the plug-in provided object, or <code>null</code> if no 
+         * @return the plug-in provided object, or {@code null} if no 
          * plug-in provides an object of the given type
          */
         <T> T getPlugInObject(

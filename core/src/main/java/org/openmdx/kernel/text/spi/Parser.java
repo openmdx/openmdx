@@ -56,7 +56,7 @@ public interface Parser {
      * 
      * @param type the type of the object to be built
      * 
-     * @return <code>true</code> if the type is handled by this parser
+     * @return {@code true} if the type is handled by this parser
      */
     boolean handles (
     	Class<?> type

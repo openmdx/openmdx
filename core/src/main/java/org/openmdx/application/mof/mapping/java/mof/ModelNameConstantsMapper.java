@@ -77,10 +77,13 @@ public class ModelNameConstantsMapper
 
     /**
      * Constructor 
+     * 
+     * @param markdown {@code true} if annotations use markdown
      */
     public ModelNameConstantsMapper(
+    	boolean markdown
     ){
-        super(PACKAGE_SUFFIX);    
+        super(markdown, PACKAGE_SUFFIX);    
     }
     
     /**
@@ -391,7 +394,7 @@ public class ModelNameConstantsMapper
                             this.model, 
                             MAPPING_FORMAT, 
                             this.packageSuffix,
-                            this.metaData
+                            this.metaData, markdown
                         );
                         InstanceFeaturesMapper instanceIntfMapper = new InstanceFeaturesMapper(
                             element, 
@@ -399,7 +402,7 @@ public class ModelNameConstantsMapper
                             this.model, 
                             MAPPING_FORMAT, 
                             this.packageSuffix,
-                            this.metaData
+                            this.metaData, markdown
                         );
                         this.mapBeginClass(
                             element,
@@ -458,7 +461,7 @@ public class ModelNameConstantsMapper
                                 this.model, 
                                 MAPPING_FORMAT, 
                                 this.packageSuffix,
-                                this.metaData
+                                this.metaData, markdown
                             );
                             this.mapBeginStruct(
                                 element,

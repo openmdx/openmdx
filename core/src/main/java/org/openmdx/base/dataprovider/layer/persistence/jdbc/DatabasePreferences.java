@@ -151,7 +151,7 @@ public class DatabasePreferences {
 	 * 
 	 * @param xri
 	 * 
-	 * @return <code>true</code> if the XRI refers to a configuration request
+	 * @return {@code true} if the XRI refers to a configuration request
 	 */
 	public static boolean isConfigurationRequest(Path xri) {
 		return xri.isLike(CONFIGURATION_PATTERN);

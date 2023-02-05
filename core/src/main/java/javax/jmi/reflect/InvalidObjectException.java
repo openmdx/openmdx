@@ -7,7 +7,7 @@ package javax.jmi.reflect;
 public class InvalidObjectException extends JmiException {
     
     /**
-     * Constructs an <code>InvalidObjectException</code> without detail message.
+     * Constructs an {@code InvalidObjectException} without detail message.
      * @elementInError element in error.
      */
     public InvalidObjectException(RefObject elementInError) {
@@ -15,7 +15,7 @@ public class InvalidObjectException extends JmiException {
     }
 
     /**
-     * Constructs an <code>InvalidObjectException</code> with the specified detail message.
+     * Constructs an {@code InvalidObjectException} with the specified detail message.
      * @elementInError element in error.
      * @param msg the detail message.
      */

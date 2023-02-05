@@ -120,7 +120,7 @@ public class QueryExtensionRecord
     private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
     
     /**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = -2305541713460111707L;
     

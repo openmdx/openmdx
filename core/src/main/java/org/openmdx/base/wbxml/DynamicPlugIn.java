@@ -57,8 +57,8 @@ import org.openmdx.kernel.log.SysLog;
 
 /**
  * The dynamic plug-in is able to amend its tables:<ul>
- * <li><code>ext0()</code> calls amend the code tables
- * <li><code>ext1()</code> calls amend the string table 
+ * <li>{@code ext0()} calls amend the code tables
+ * <li>{@code ext1()} calls amend the string table 
  * </ul>
  */
 public class DynamicPlugIn extends AbstractPlugIn {
@@ -129,7 +129,7 @@ public class DynamicPlugIn extends AbstractPlugIn {
      * @param page0 the target page
      * @param codeSpace the code space the value belongs to
      * @param value the value to be registered
- 	 * @param lenient if <code>true</code> then collisions are logged as warnings,
+ 	 * @param lenient if {@code true} then collisions are logged as warnings,
 	 * otherwise they lead to exceptions.
     */
     protected static void addTo(Page page0, CodeSpace codeSpace, String value, boolean lenient) {
@@ -217,7 +217,7 @@ public class DynamicPlugIn extends AbstractPlugIn {
      * @param readOnly
      * @param value
      * 
-     * @return the corresponding token, or <code>null</code> if no such entry is
+     * @return the corresponding token, or {@code null} if no such entry is
      *         available
      */
     private CodeToken getExactMatch(
@@ -272,7 +272,7 @@ public class DynamicPlugIn extends AbstractPlugIn {
      * @param readOnly
      * @param value
      * 
-     * @return the corresponding token, or <code>null</code> if no such entry is
+     * @return the corresponding token, or {@code null} if no such entry is
      *         available
      */
     private CodeToken getBestMatch(
@@ -664,7 +664,7 @@ public class DynamicPlugIn extends AbstractPlugIn {
      * 
      * @param code
      * 
-     * @return <code>false</code> in case of an exact-match code
+     * @return {@code false} in case of an exact-match code
      */
     static boolean hasAttributeValueFlag(int code) {
         return (code & 0x80) != 0;
@@ -675,7 +675,7 @@ public class DynamicPlugIn extends AbstractPlugIn {
      * 
      * @param code
      * 
-     * @return <code>false</code> in case of an exact-match code
+     * @return {@code false} in case of an exact-match code
      */
     static boolean hasStartsWithFlag(int code) {
         return (code & 0x40) != 0;
@@ -745,7 +745,7 @@ public class DynamicPlugIn extends AbstractPlugIn {
          * @param length
          *            the value's length
          * @param created
-         *            <code>true</code> if the entry has been created on the fly
+         *            {@code true} if the entry has been created on the fly
          * 
          * @return the corresponding token
          */

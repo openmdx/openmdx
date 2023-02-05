@@ -64,7 +64,7 @@ public interface LocalUserTransaction extends LocalTransaction {
      * Tells whether the transaction associated with the current thread is
      * in rollback-only mode.
      * 
-     * @return <code>true</code> if the only possible outcome of the 
+     * @return {@code true} if the only possible outcome of the 
      * transaction is to roll back
      */
     boolean isRollbackOnly(

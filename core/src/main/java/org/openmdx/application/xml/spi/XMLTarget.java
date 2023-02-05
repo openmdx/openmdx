@@ -414,7 +414,7 @@ public class XMLTarget implements ExportTarget {
         /**
          * Tells whether the documents are added to an archive
          * 
-         * @return <code>true</code> if the documents are added to an archive
+         * @return {@code true<} if the documents are added to an archive
          */
         private boolean isMultiFileExport(){
             return this.outputStream instanceof ZipOutputStream;

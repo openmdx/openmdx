@@ -154,7 +154,7 @@ public abstract class AbstractNames {
      * 
      * @param character the character to be tested
      * 
-     * @return <code>true</code> if the character is not significant
+     * @return {@code true} if the character is not significant
      */
     public static boolean isNotSignificant(
         char character

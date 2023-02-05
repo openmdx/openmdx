@@ -61,8 +61,8 @@ public abstract class AbstractLinkedList implements List {
 
     /**
      * A {@link Node} which indicates the start and end of the list and does not
-     * hold a value. The value of <code>next</code> is the first item in the
-     * list. The value of of <code>previous</code> is the last item in the list.
+     * hold a value. The value of {@code next} is the first item in the
+     * list. The value of of {@code previous} is the last item in the list.
      */
     protected transient Node header;
     /** The size of the list */
@@ -93,7 +93,7 @@ public abstract class AbstractLinkedList implements List {
 
     /**
      * The equivalent of a default constructor, broken out so it can be called
-     * by any constructor and by <code>readObject</code>.
+     * by any constructor and by {@code readObject}.
      * Subclasses which override this method should make sure they call super,
      * so the list is initialised properly.
      */
@@ -432,14 +432,14 @@ public abstract class AbstractLinkedList implements List {
 
     /**
      * Creates a new node with the specified object as its 
-     * <code>value</code> and inserts it before <code>node</code>.
+     * {@code value} and inserts it before {@code node}.
      * <p>
      * This implementation uses {@link #createNode(Object)} and
      * {@link #addNode(AbstractLinkedList.Node,AbstractLinkedList.Node)}.
      *
      * @param node  node to insert before
      * @param value  value of the newly added node
-     * @throws NullPointerException if <code>node</code> is null
+     * @throws NullPointerException if {@code node} is null
      */
     protected void addNodeBefore(Node node, Object value) {
         Node newNode = createNode(value);
@@ -448,14 +448,14 @@ public abstract class AbstractLinkedList implements List {
 
     /**
      * Creates a new node with the specified object as its 
-     * <code>value</code> and inserts it after <code>node</code>.
+     * {@code value} and inserts it after {@code node}.
      * <p>
      * This implementation uses {@link #createNode(Object)} and
      * {@link #addNode(AbstractLinkedList.Node,AbstractLinkedList.Node)}.
      * 
      * @param node  node to insert after
      * @param value  value of the newly added node
-     * @throws NullPointerException if <code>node</code> is null
+     * @throws NullPointerException if {@code node} is null
      */
     protected void addNodeAfter(Node node, Object value) {
         Node newNode = createNode(value);
@@ -482,7 +482,7 @@ public abstract class AbstractLinkedList implements List {
      * Removes the specified node from the list.
      *
      * @param node  the node to remove
-     * @throws NullPointerException if <code>node</code> is null
+     * @throws NullPointerException if {@code node} is null
      */
     protected void removeNode(Node node) {
         node.previous.next = node.next;
@@ -569,7 +569,7 @@ public abstract class AbstractLinkedList implements List {
      * Serializes the data held in this object to the stream specified.
      * <p>
      * The first serializable subclass must call this method from
-     * <code>writeObject</code>.
+     * {@code writeObject}.
      */
     protected void doWriteObject(ObjectOutputStream outputStream) throws IOException {
         // Write the size so we know how many nodes to read back
@@ -583,7 +583,7 @@ public abstract class AbstractLinkedList implements List {
      * Deserializes the data held in this object to the stream specified.
      * <p>
      * The first serializable subclass must call this method from
-     * <code>readObject</code>.
+     * {@code readObject}.
      */
     protected void doReadObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
         init();
@@ -597,7 +597,7 @@ public abstract class AbstractLinkedList implements List {
     /**
      * A node within the linked list.
      * <p>
-     * From Commons Collections 3.1, all access to the <code>value</code> property
+     * From Commons Collections 3.1, all access to the {@code value} property
      * is via the methods on this class.
      */
     protected static class Node {
@@ -725,7 +725,7 @@ public abstract class AbstractLinkedList implements List {
 
         /**
          * The last node that was returned by {@link #next()} or {@link
-         * #previous()}. Set to <code>null</code> if {@link #next()} or {@link
+         * #previous()}. Set to {@code null} if {@link #next()} or {@link
          * #previous()} haven't been called, or if the node has been removed
          * with {@link #remove()} or a new node added with {@link #add(Object)}.
          * Should be accessed through {@link #getLastNodeReturned()} to enforce

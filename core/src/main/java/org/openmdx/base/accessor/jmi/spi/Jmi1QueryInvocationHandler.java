@@ -63,7 +63,7 @@ import org.openmdx.base.query.Quantifier;
 public class Jmi1QueryInvocationHandler implements Serializable, InvocationHandler {
 
     /**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = -7362765884533797988L;
 

@@ -53,12 +53,12 @@ public interface LargeObject {
 
     /**
      * Retrieves the number of<ul>
-     * <li><em>bytes</em> in case of <code>BinaryLargeObject</code>s
-     * <li><em>characters</em> in case of <code>CharacterLargeObject</code>s
+     * <li><em>bytes</em> in case of {@code BinaryLargeObject}s
+     * <li><em>characters</em> in case of {@code CharacterLargeObject}s
      * </ul> 
      * 
      * @return the large object's length, 
-     * or <code>null</code> if the length is not known.
+     * or {@code null} if the length is not known.
      */
     Long getLength(
     ) throws IOException;

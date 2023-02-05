@@ -70,7 +70,7 @@ abstract class NamespaceRecord<M extends Enum<M>>
     private IndexedRecord content;
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -5529552168142280814L;
     

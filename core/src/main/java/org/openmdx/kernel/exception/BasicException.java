@@ -64,13 +64,13 @@ import org.openmdx.kernel.log.ForeignLogRecord;
 import org.openmdx.kernel.log.LoggerFactory;
 
 /**
- * An exception stack is a linked list of <code>BasicException</code>s.
- * A <code>BasicException.Holder</code> has an exception stack as member<ul>
+ * An exception stack is a linked list of {@code BasicException}s.
+ * A {@code BasicException.Holder} has an exception stack as member<ul>
  * <li>The exception stack's first element represents its holder
  * <li>The exception stack's last element represents the initial exception 
  * </ul>
  * <p>
- * Each <code>BasicException</code> provides the following information:<ul>
+ * Each {@code BasicException} provides the following information:<ul>
  * <li> an exception domain
  * <li> an exception code
  * <li> a description
@@ -81,8 +81,8 @@ import org.openmdx.kernel.log.LoggerFactory;
  * </ul>
  * <p>
  * <em>Note:<br>
- * A <code>BasicException</code> does not clone exception stacks it accepts
- * or returns (as opposed to other <code>Throwable</code>'s behaviour. 
+ * A {@code BasicException} does not clone exception stacks it accepts
+ * or returns (as opposed to other {@code Throwable}'s behaviour. 
  * 
  */
 public final class BasicException extends Exception {
@@ -119,7 +119,7 @@ public final class BasicException extends Exception {
     }
 
     /**
-     * Creates a <code>BasicException</code> to be completed by <code>initHolder</code>.
+     * Creates a {@code BasicException} to be completed by {@code initHolder}.
      *
      * @param cause An embedded exception
      * @param exceptionDomain An exception domain. A null objects references
@@ -148,13 +148,13 @@ public final class BasicException extends Exception {
     }
     
     /**
-     * Creates the exception stack for a <code>BasicException</code> holder.
+     * Creates the exception stack for a {@code BasicException} holder.
      * @param cause the optional cause
      * @param exceptionDomain the mandatory exception domain
      * @param exceptionCode the mandatory exception code
      * @param parameters the optional parameters
      * @param description an optional description
-     * @param holder the mandatory <code>BasicException</code> holder
+     * @param holder the mandatory {@code BasicException} holder
      */
     public BasicException(
         Throwable cause,
@@ -289,7 +289,7 @@ public final class BasicException extends Exception {
     private StackTraceElement[] stackTrace = null;
         
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -1081067273393341482L;
 
@@ -344,7 +344,7 @@ public final class BasicException extends Exception {
     }
     	
     /**
-     * Log a <code>BasicException.Holder</code>
+     * Log a {@code BasicException.Holder}
      * 
      * @param holder
      */
@@ -367,7 +367,7 @@ public final class BasicException extends Exception {
     }
 
     /**
-     * Creates an exception stack to be initialized by <code>initHolder</code>.
+     * Creates an exception stack to be initialized by {@code initHolder}.
      *
      * @param cause An embedded exception
      */
@@ -383,7 +383,7 @@ public final class BasicException extends Exception {
     }
     
     /**
-     * Creates an exception stack to be initialized by <code>initHolder</code>.
+     * Creates an exception stack to be initialized by {@code initHolder}.
      *
      * @param cause An embedded exception
      * @param exceptionDomain An exception domain. A null objects references
@@ -408,7 +408,7 @@ public final class BasicException extends Exception {
     }
 
     /**
-     * Creates an exception stack to be initialized by <code>initHolder</code>.
+     * Creates an exception stack to be initialized by {@code initHolder}.
      *
      * @param exceptionDomain An exception domain. A null objects references
      * the default exception domain with negative exception codes only.
@@ -500,7 +500,7 @@ public final class BasicException extends Exception {
     /**
      * Retrieve the stack trace
      * 
-     * @param lazily if <code>true</code> <code>null</code> is returned unless
+     * @param lazily if {@code true} {@code null} is returned unless
      * the information is already available
      * 
      * @return the stack trace
@@ -512,15 +512,15 @@ public final class BasicException extends Exception {
     }
     
     /**
-     * Associate the cause, a <code>BasicExcpetion</code> with its holder
+     * Associate the cause, a {@code BasicExcpetion} with its holder
      * 
      * @param throwable
      * 
      * @return the throwable
      * 
-     * @throws NullPointerExceptionn if either the throwable or its cause is <code>null</code>
-     * @throws InvalidArgumentException if the throwable's cause is not a <code>BasicException</code>
-     * @throws IllegalStateException if the <code>BasicException</code> is already connected with a holder
+     * @throws NullPointerExceptionn if either the throwable or its cause is {@code null}
+     * @throws InvalidArgumentException if the throwable's cause is not a {@code BasicException}
+     * @throws IllegalStateException if the {@code BasicException} is already connected with a holder
      */
     public static <T extends Throwable> T initHolder(
         T throwable
@@ -563,7 +563,7 @@ public final class BasicException extends Exception {
      * The cause can only be set once.
      * 
      * @param throwable
-     * @return A reference to this <code>Throwable</code> instance
+     * @return A reference to this {@code Throwable} instance
      * @throws IllegalArgumentException if cause is this throwable. 
      * (A throwable cannot be its own cause.)
      * @throws IllegalStateException if the cause has already been set
@@ -600,12 +600,12 @@ public final class BasicException extends Exception {
     }
 
     /**
-     * Maps a <code>Throwable</code> to a <code>BasicException</code> using the 
+     * Maps a {@code Throwable} to a {@code BasicException} using the 
      * registered exception mappers
      *
      * @param throwable
      * 
-     * @return a <code>BasicException</code> or <code>null</code> if there is 
+     * @return a {@code BasicException} or {@code null} if there is 
      * no mapping
      */
     public static BasicException toExceptionStack(
@@ -623,8 +623,8 @@ public final class BasicException extends Exception {
     }
 
     /**
-     * Create a <code>BasicException</code> representing a <code>cause</code> 
-     * wrapped into a <code>wrapper</code>.
+     * Create a {@code BasicException} representing a {@code cause} 
+     * wrapped into a {@code wrapper}.
      * 
      * @param cause
      * @param holder
@@ -632,8 +632,8 @@ public final class BasicException extends Exception {
      * @param exceptionCode 
      * @param description 
      *
-     * @return a <code>BasicException</code> representing the <code>cause</code> 
-     * wrapped into <code>wrapper</code>
+     * @return a {@code BasicException} representing the {@code cause} 
+     * wrapped into {@code wrapper}
      */
     public static BasicException toStackedException(
         Throwable cause,
@@ -739,7 +739,7 @@ public final class BasicException extends Exception {
     }
     
     /**
-     * Retrieves the class for this <code>BasicException</code> object.
+     * Retrieves the class for this {@code BasicException} object.
      *
      * @return the class
      */
@@ -749,9 +749,9 @@ public final class BasicException extends Exception {
     }
 
     /**
-     * Retrieves the method for this <code>BasicException</code> object.
+     * Retrieves the method for this {@code BasicException} object.
      * 
-     * @param lazily if <code>true</code> <code>null</code> is returned unless
+     * @param lazily if {@code true} {@code null} is returned unless
      * the information is already available
      *
      * @return the method
@@ -768,9 +768,9 @@ public final class BasicException extends Exception {
 
 
     /**
-     * Retrieves the line number for this <code>BasicException</code> object.
+     * Retrieves the line number for this {@code BasicException} object.
      * 
-     * @param lazily if <code>true</code> <code>null</code> is returned unless
+     * @param lazily if {@code true} {@code null} is returned unless
      * the information is already available
      *
      * @return the line nr
@@ -786,7 +786,7 @@ public final class BasicException extends Exception {
     }
 
     /**
-     * Retrieves the timestamp for this <code>BasicException</code> toplevel
+     * Retrieves the timestamp for this {@code BasicException} toplevel
      * object.
      *
      * @return the timestamp
@@ -1009,7 +1009,7 @@ public final class BasicException extends Exception {
     }    
 
     //------------------------------------------------------------------------
-    // Implements <code>Serializable</code>
+    // Implements {@code Serializable}
     //------------------------------------------------------------------------
 
     private void writeObject(
@@ -1342,7 +1342,7 @@ public final class BasicException extends Exception {
         /**
          * A transaction failure. Used with severe transaction manager problems. For
          * all other causes use specific exceptions like
-         * <code>CONCURRENT_ACCESS_FAILURE</code> or <code>TIMEOUT</code>
+         * {@code CONCURRENT_ACCESS_FAILURE} or {@code TIMEOUT}
          *
          * @see #CONCURRENT_ACCESS_FAILURE
          * @see #TIMEOUT
@@ -1382,17 +1382,17 @@ public final class BasicException extends Exception {
     //------------------------------------------------------------------------
     
     /**
-     * A <code>Mapper</code> implementation maps <cod>Throwable</code>s to
-     * <code>BasicException</code>s.
+     * A {@code Mapper} implementation maps <cod>Throwable}s to
+     * {@code BasicException}s.
      */
     public interface Mapper {
 
         /**
-         * Map a <code>Throwable</code> to a <code>BasicException</code>
+         * Map a {@code Throwable} to a {@code BasicException}
          * 
          * @param throwable A throwable
-         * @return  A <code>BasicException</code>; or <code>null</code> if the 
-         * mapper cannot map the <code>Throwable</code>
+         * @return  A {@code BasicException}; or {@code null} if the 
+         * mapper cannot map the {@code Throwable}
          */
        BasicException map(Throwable throwable);
 
@@ -1404,14 +1404,14 @@ public final class BasicException extends Exception {
     //------------------------------------------------------------------------
     
     /**
-     * The interface <code>Holder</code> defines an exception holding an 
+     * The interface {@code Holder} defines an exception holding an 
      * exception stack, i.e. its chain of causes consists of 
-     * <code>BasicException</code>s.
+     * {@code BasicException}s.
      */
     public interface Holder {
         
         /**
-         * Returns the wrapped <code>BasicException</code> exception.
+         * Returns the wrapped {@code BasicException} exception.
          *
          * @return The wrapped exception.
          */
@@ -1421,24 +1421,24 @@ public final class BasicException extends Exception {
         /**
          * Selects a domain specific exception stack element
          * 
-         * @param the requested domain, or <code>null</code> ti retrieve the initial cause.
+         * @param the requested domain, or {@code null} ti retrieve the initial cause.
          *
          * @return the first exception stack element for the requested domain, 
-         * or <code>null</code> if no such element exists
+         * or {@code null} if no such element exists
          */
         BasicException getCause(
             String exceptionDomain
         );
         
         /**
-         * Retrieves the exception domain of this <code>ServiceException</code>.
+         * Retrieves the exception domain of this {@code ServiceException}.
          *
          * @return the exception domain
          */
         String getExceptionDomain();
 
         /**
-         * Retrieves the exception code of this <code>ServiceException</code>.
+         * Retrieves the exception code of this {@code ServiceException}.
          *
          * @return the exception code
          */
@@ -1525,8 +1525,8 @@ public final class BasicException extends Exception {
     public static final class Parameter implements Serializable {
 
         /**
-         * Creates a <code>Parameter</code> object. The constructor converts the passed
-         * values to a <code>String</code> object.
+         * Creates a {@code Parameter} object. The constructor converts the passed
+         * values to a {@code String} object.
          * <ul>
          * <li>  new Parameter("name", "text")
          * <li>  new Parameter("name", Integer.valueOf(1), Integer.valueOf(2))
@@ -1534,7 +1534,7 @@ public final class BasicException extends Exception {
          *
          * @param name The property's name.
          * @param values The property's values are converted internally to a
-         * <code>String</code>.
+         * {@code String}.
          */
         public Parameter(
             String name,
@@ -1545,9 +1545,9 @@ public final class BasicException extends Exception {
         }
 
         /**
-         * Creates a <code>Parameter</code> object. The constructor converts the passed
-         * value to a <code>String</code> object.
-         * <p>null objects are preserved in that the accessor <code>getValue</code>
+         * Creates a {@code Parameter} object. The constructor converts the passed
+         * value to a {@code String} object.
+         * <p>null objects are preserved in that the accessor {@code getValue}
          * returns a null object.
          *
          * <p>The constructor accepts various value types as <String>, array of
@@ -1561,7 +1561,7 @@ public final class BasicException extends Exception {
          *
          * @param name The property's name.
          * @param value The property's value converted internally to a
-         * <code>String</code>.
+         * {@code String}.
          */
         public Parameter(
             String name,
@@ -1578,11 +1578,11 @@ public final class BasicException extends Exception {
 
 
         /**
-         * Creates a <code>Parameter</code> object.
+         * Creates a {@code Parameter} object.
          *
          * @param name The property's name.
          * @param value The property's value converted internally to a
-         * <code>String</code>.
+         * {@code String}.
          */
         public Parameter(
             String name,
@@ -1594,11 +1594,11 @@ public final class BasicException extends Exception {
 
 
         /**
-         * Creates a <code>Parameter</code> object.
+         * Creates a {@code Parameter} object.
          *
          * @param name The property's name.
          * @param value The property's value converted internally to a
-         * <code>String</code>.
+         * {@code String}.
          */
         public Parameter(
             String name,
@@ -1610,11 +1610,11 @@ public final class BasicException extends Exception {
 
 
         /**
-         * Creates a <code>Parameter</code> object.
+         * Creates a {@code Parameter} object.
          *
          * @param name The property's name.
          * @param value The property's value converted internally to a
-         * <code>String</code>.
+         * {@code String}.
          */
         public Parameter(
             String name,
@@ -1626,11 +1626,11 @@ public final class BasicException extends Exception {
 
 
         /**
-         * Creates a <code>Parameter</code> object.
+         * Creates a {@code Parameter} object.
          *
          * @param name The property's name.
          * @param value The property's value converted internally to a
-         * <code>String</code>.
+         * {@code String}.
          */
         public Parameter(
             String name,
@@ -1642,11 +1642,11 @@ public final class BasicException extends Exception {
 
 
         /**
-         * Creates a <code>Parameter</code> object.
+         * Creates a {@code Parameter} object.
          *
          * @param name The property's name.
          * @param value The property's value converted internally to a
-         * <code>String</code>.
+         * {@code String}.
          */
         public Parameter(
             String name,
@@ -1658,11 +1658,11 @@ public final class BasicException extends Exception {
 
 
         /**
-         * Creates a <code>Parameter</code> object.
+         * Creates a {@code Parameter} object.
          *
          * @param name The property's name.
          * @param value The property's value converted internally to a
-         * <code>String</code>.
+         * {@code String}.
          */
         public Parameter(
             String name,
@@ -1673,7 +1673,7 @@ public final class BasicException extends Exception {
         }
 
         /**
-         * Creates a <code>Parameter</code> object.
+         * Creates a {@code Parameter} object.
          * 
          * @param name The parameter's name.
          * @param duration The parameter's duration value.
@@ -1696,11 +1696,11 @@ public final class BasicException extends Exception {
         }
 
         /**
-         * Creates a <code>Parameter</code> object.
+         * Creates a {@code Parameter} object.
          *
          * @param name The property's name.
          * @param value The property's value converted internally to a
-         * <code>String</code>.
+         * {@code String}.
          */
         public Parameter(
             String name,
@@ -1712,11 +1712,11 @@ public final class BasicException extends Exception {
 
 
         /**
-         * Creates a <code>Parameter</code> object.
+         * Creates a {@code Parameter} object.
          *
          * @param name The property's name.
          * @param value The property's value converted internally to a
-         * <code>String</code>.
+         * {@code String}.
          */
         public Parameter(
             String name,
@@ -1727,7 +1727,7 @@ public final class BasicException extends Exception {
         }
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = -7161563495226434698L;
 
@@ -1777,7 +1777,7 @@ public final class BasicException extends Exception {
          * Indicates whether some other object is "equal to" this one.
          *
          * @param   object  the reference object with which to compare.
-         * @return  <code>true<code> if the given object is a Parameter, too, and
+         * @return  {@code true{@code  if the given object is a Parameter, too, and
          * if it has the same name as this parameter.
          */
         @Override
@@ -1790,7 +1790,7 @@ public final class BasicException extends Exception {
         }
 
         /**
-         * Returns a string representation of the <code>Parameter</code> object.
+         * Returns a string representation of the {@code Parameter} object.
          *
          * <p>Format:  "<name>=<value>"
          *

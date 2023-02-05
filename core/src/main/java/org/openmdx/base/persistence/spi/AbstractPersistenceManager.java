@@ -162,7 +162,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager_1
     /**
      * Tells whether the transactions are container managed
      * 
-     * @return <code>true</code> if the transactions are container managed
+     * @return {@code true} if the transactions are container managed
      */ 
     protected boolean isTransactionContainerManaged(){
     	return false;

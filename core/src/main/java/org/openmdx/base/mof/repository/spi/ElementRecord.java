@@ -91,7 +91,7 @@ abstract class ElementRecord<M extends Enum<M>>
     private final static long NULL_DATE = Long.MIN_VALUE;
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -3466367625186217353L;
 

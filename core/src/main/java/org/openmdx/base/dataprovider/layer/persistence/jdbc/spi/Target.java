@@ -61,7 +61,7 @@ public interface Target {
     /**
      * Tells whether no more records shall be offered
      * 
-     * @return <code>true</code> if no more records are acceptable
+     * @return {@code true} if no more records are acceptable
      */
     boolean isSaturated();
     

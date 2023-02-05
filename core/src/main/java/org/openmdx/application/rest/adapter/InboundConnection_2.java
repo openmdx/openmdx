@@ -214,9 +214,9 @@ public class InboundConnection_2 extends AbstractConnection {
      * Retrieve an object by its resource identifier
      * 
      * @param resourceIdentifier
-     *            which may be <code>null</code>
+     *            which may be {@code null}
      * 
-     * @return the requested object or <code>null</code> if the resource identifier is <code>null</code>
+     * @return the requested object or {@code null} if the resource identifier is {@code null}
      */
     protected RefObject getObjectByResourceIdentifier(
         Object resourceIdentifier
@@ -243,8 +243,8 @@ public class InboundConnection_2 extends AbstractConnection {
     /**
      * Retrieve an object's XRO
      * <ul>
-     * <li>a <code>$t*uuid</code> XRI in case of a transient object
-     * <li>an <code>@openmdx</code> XRI in case of a persistent object
+     * <li>a {@code $t*uuid} XRI in case of a transient object
+     * <li>an {@code @openmdx} XRI in case of a persistent object
      * </ul>
      * 
      * @param object
@@ -326,9 +326,9 @@ public class InboundConnection_2 extends AbstractConnection {
     }
 
     /**
-     * Provide the <codePersistenceManager</code> for the inbound interaction
+     * Provide the <codePersistenceManager} for the inbound interaction
      * 
-     * @return the <codePersistenceManager</code>
+     * @return the <codePersistenceManager}
      */
     protected PersistenceManager getPersistenceManager() {
         return this.persistenceManager;
@@ -481,12 +481,12 @@ public class InboundConnection_2 extends AbstractConnection {
         }
 
         /**
-         * Convert a <code>RefStruct</code>'s type name to a <code>MappedRecord</code> record name
+         * Convert a {@code RefStruct}'s type name to a {@code MappedRecord} record name
          * 
          * @param refValue
-         *            the <code>RefStruct</code>
+         *            the {@code RefStruct}
          * 
-         * @return to its <code>MappedRecord</code> record name
+         * @return to its {@code MappedRecord} record name
          */
         private String jcaRecordName(
             RefStruct refValue
@@ -653,12 +653,12 @@ public class InboundConnection_2 extends AbstractConnection {
         }
 
         /**
-         * Convert a <code>RefObject</code> value to a <code>MappedRecord</code> value
+         * Convert a {@code RefObject} value to a {@code MappedRecord} value
          * 
          * @param refValue
-         *            the <code>RefObject</code> value
+         *            the {@code RefObject} value
          * 
-         * @return its <code>MappedRecord</code> value representation
+         * @return its {@code MappedRecord} value representation
          * 
          * @throws ResourceException
          * @throws ServiceException
@@ -685,7 +685,7 @@ public class InboundConnection_2 extends AbstractConnection {
         }
 
         /**
-         * Convert a <code>MappedRecord</code> value to a <code>RefObject</code> value
+         * Convert a {@code MappedRecord} value to a {@code RefObject} value
          * 
          * @param jcaValue
          *            the JCA value
@@ -727,16 +727,16 @@ public class InboundConnection_2 extends AbstractConnection {
         }
 
         /**
-         * Convert a <code>RefObject</code> to a <code>MappedRecord</code>
+         * Convert a {@code RefObject} to a {@code MappedRecord}
          * 
          * @param object
-         *            the <code>RefObject</code>
+         *            the {@code RefObject}
          * @param requestedFeatures,
-         *            the requested features, maybe <code>null</code>
+         *            the requested features, maybe {@code null}
          * @param fetchGroups,
-         *            the requested getch groups maybe <code>null</code>
+         *            the requested getch groups maybe {@code null}
          * 
-         * @return its <code>MappedRecord</code> representation
+         * @return its {@code MappedRecord} representation
          * 
          * @throws ResourceException
          */
@@ -955,16 +955,16 @@ public class InboundConnection_2 extends AbstractConnection {
         }
 
         /**
-         * Propagate the <code>RefObject</code> to indexed <code>IndexedRecord<code>
+         * Propagate the {@code RefObject} to indexed {@code IndexedRecord{@code 
          * 
          * &#64;param refObject
          * &#64;param output
-         * @param requestedFeatures the requested features, may be <code>null</code>
+         * @param requestedFeatures the requested features, may be {@code null}
          * 
          * @param fetchGroups
-         *            the requested fetch groups, may be <code>null</code>
+         *            the requested fetch groups, may be {@code null}
          * 
-         * @return <code>true</code>
+         * @return {@code true}
          * 
          * @throws ResourceException
          */
@@ -1082,13 +1082,13 @@ public class InboundConnection_2 extends AbstractConnection {
         }
 
         /**
-         * Provide the <code>add()</code> argument list
+         * Provide the {@code add()} argument list
          * 
          * @param containerClass
          * @param qualifier
          * @param object
          * 
-         * @return the <code>add()</code> argument list
+         * @return the {@code add()} argument list
          * @throws ServiceException
          */
         @SuppressWarnings("rawtypes")

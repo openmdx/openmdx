@@ -84,7 +84,7 @@ public class OrderSpecifier extends FeatureOrderRecord {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
 	private static final long serialVersionUID = -8465157113272809016L;
 

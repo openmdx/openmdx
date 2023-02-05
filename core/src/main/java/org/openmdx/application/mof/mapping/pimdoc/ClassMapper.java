@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Description: Package Mapper 
+ * Description: Class Mapper 
  * Owner: the original authors. 
  * ====================================================================
  * 
@@ -44,48 +44,54 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc;
 
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
- * Package Mapper 
+ * Class Mapper 
  */
 public class ClassMapper extends HTMLMapper {
 
-    /**
+	/**
      * Constructor 
      */
     public ClassMapper(
         Sink sink, 
         ModelElement_1_0 classToBeExported,
+        boolean markdown, 
         PIMDocConfiguration configuration
-    ) throws ServiceException {
-		super(sink, classToBeExported, configuration);
+    ){
+		super(sink, classToBeExported, markdown, configuration);
+		this.classHierarchyMapper = new ClassHierarchyMapper(
+			pw, element, this::getHref
+		);		
     }    
+    
+    private final CompartmentMapper classHierarchyMapper;
 
 	@Override
 	protected void htmlBody() {
-		this.pw.println("<body class=\"uml-element\">");
+		printLine("<body class=\"uml-element uml-class\">");
 		columnHead();
 		columnBody();
-		this.pw.println("</body>");
+		printLine("</body>");
    }
 
 	private void columnHead() {
-		this.pw.println("\t<div class=\"column-head\">");
-		this.pw.println("\t\t<h2>" + getTitle() + "</h2>");
-		this.pw.println("\t</div>");
+		printLine("\t<div class=\"column-head\">");
+		printLine("\t\t<h2>" + getTitle() + "</h2>");
+		printLine("\t</div>");
 	}
 	
 	private void columnBody() {
-		this.pw.println("\t<div class=\"column-body\">");
-		super.annotation(element);
-		this.pw.println("\t</div>");
+		printLine("\t<div class=\"column-body\">");
+		annotation(element);
+		classHierarchyMapper.compartment();
+		printLine("\t</div>");
 	}
 	
 	@Override
 	protected String getTitle() {
-		return "Class " + getDisplayName();
+		return "Class " + getDisplayName(element);
 	}
 
 }

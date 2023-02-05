@@ -78,7 +78,7 @@ class InstanceCallbackAdapter_1
      * 
      * @param instance
      * 
-     * @return a new <code>InstanceCallbackListener</code> or <code>Null</code>
+     * @return a new {@code InstanceCallbackListener} or {@code Null}
      */
     static InstanceLifecycleListener newInstance(
     	Object instance

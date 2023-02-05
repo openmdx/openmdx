@@ -67,7 +67,7 @@ public class AssociationRecord
     private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -4418370960190878453L;
     

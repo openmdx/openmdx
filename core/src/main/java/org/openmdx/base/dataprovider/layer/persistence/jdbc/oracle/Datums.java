@@ -88,7 +88,7 @@ public class Datums {
     /**
      * Tells whether the native object is an instance of oracle.sql.Datum
      * 
-     * @return <code>true</code> the native object is an instance of oracle.sql.Datum
+     * @return {@code true} the native object is an instance of oracle.sql.Datum
      */
     public static boolean isDatum(
         Object nativeObject
@@ -116,7 +116,7 @@ public class Datums {
      * @return the corresponding JDBC object
      * 
      * @throws SQLException if the conversion fails
-     * @throws NullPointerException if nativeObject is <code>null</code>.
+     * @throws NullPointerException if nativeObject is {@code null}.
      */
     public static Object toJdbcObject(
         Object datum

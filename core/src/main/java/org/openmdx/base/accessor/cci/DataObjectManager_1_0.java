@@ -59,7 +59,7 @@ public interface DataObjectManager_1_0 extends PersistenceManager_1_0 {
      * 
      * @param       objectClass
      *              The model class of the object to be created
-     * @param       transientObjectId, may be <code>null</code> to create a new one
+     * @param       transientObjectId, may be {@code null} to create a new one
      *
      * @return      a new object instance
      *

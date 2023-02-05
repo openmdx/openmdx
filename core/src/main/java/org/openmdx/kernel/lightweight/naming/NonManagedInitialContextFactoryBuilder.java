@@ -82,16 +82,16 @@ public class NonManagedInitialContextFactoryBuilder implements InitialContextFac
     private final InitialContextFactory initialContextFactory;
     
     /**
-     * Install the <code>NonManagedContextFactoryBuilder</code> singleton.
+     * Install the {@code NonManagedContextFactoryBuilder} singleton.
      * <p>
-     * The <code>java:comp/env</code> environment may be populated either through
-     * the <code>componentEnvironment</code> argument or through system properties.
+     * The {@code java:comp/env} environment may be populated either through
+     * the {@code componentEnvironment} argument or through system properties.
      * 
-     * @param componentEnvironment to initialize the <code>java:comp/env</code> 
+     * @param componentEnvironment to initialize the {@code java:comp/env} 
      * environment.<p>
-     * <code>java:comp/env/jdbc/MyDataSource</code> for example might be specified 
-     * by an entry mapping <code>org.openmdx.comp.env.jdbc.MyDataSource</code>
-     * to <code>jdbc:oracle:thin:@localhost:1521:XE?user=MyUserName&password=MyPassword&driver=oracle.jdbc.OracleDriver</code> 
+     * {@code java:comp/env/jdbc/MyDataSource} for example might be specified 
+     * by an entry mapping {@code org.openmdx.comp.env.jdbc.MyDataSource}
+     * to {@code jdbc:oracle:thin:@localhost:1521:XE?user=MyUserName&password=MyPassword&driver=oracle.jdbc.OracleDriver} 
      * 
      * @throws NamingException 
      */

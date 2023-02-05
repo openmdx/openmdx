@@ -111,12 +111,12 @@ public class ImportHandler extends DefaultHandler {
     }
 
     /**
-     * Be aware, <code>SimpleDateFormat</code> instances are not thread safe.
+     * Be aware, {@code SimpleDateFormat} instances are not thread safe.
      */
     private final SimpleDateFormat localSecondFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     /**
-     * Be aware, <code>SimpleDateFormat</code> instances are not thread safe.
+     * Be aware, {@code SimpleDateFormat} instances are not thread safe.
      */
     private final SimpleDateFormat localMillisecondFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
@@ -172,7 +172,7 @@ public class ImportHandler extends DefaultHandler {
     private final ImportMode defaultImportMode;
 
     /**
-     * <code>true</code> in case of a WBXML input
+     * {@code true} in case of a WBXML input
      */
     private final boolean binary;
 
@@ -208,9 +208,9 @@ public class ImportHandler extends DefaultHandler {
      * Determine the document URL
      * 
      * @param source
-     *            the <code>InputSource</code>
+     *            the {@code InputSource}
      * 
-     * @return the document <code>URL</code>
+     * @return the document {@code URL}
      */
     private static URL getDocumentURL(
         InputSource source
@@ -235,9 +235,9 @@ public class ImportHandler extends DefaultHandler {
      * Determine the document is binary
      * 
      * @param source
-     *            the <code>InputSource</code>
+     *            the {@code InputSource}
      * 
-     * @return <code>true</code> in case of WBXML input
+     * @return {@code true} in case of WBXML input
      */
     private static boolean isBinary(
         InputSource source
@@ -262,7 +262,7 @@ public class ImportHandler extends DefaultHandler {
     /**
      * Tells whether we are reading an XML or a WBXML source
      * 
-     * @return <code>true</code> in case of a WBXML source
+     * @return {@code true} in case of a WBXML source
      */
     public boolean isBinary() {
         return this.binary;
@@ -1259,7 +1259,7 @@ public class ImportHandler extends DefaultHandler {
     /**
      * @param schemaUri
      * 
-     * @return the schema input stream, or <code>null</code> in case of failure
+     * @return the schema input stream, or {@code null} in case of failure
      */
     private InputStream getSchemaSource(String schemaUri) {
         try {

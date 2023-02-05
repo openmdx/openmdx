@@ -52,8 +52,8 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 
 /**
- * The facade factory maps <code>ResourceException</code>s to 
- * <code>ServiceException</code>s.
+ * The facade factory maps {@code ResourceException}s to 
+ * {@code ServiceException}s.
  */
 public class Facades {
 

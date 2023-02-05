@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: MappingTypes 
+ * Description: Mapping Types 
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -44,15 +44,19 @@
  */
 package org.openmdx.application.mof.mapping.cci;
 
+/**
+ * Mapping Types
+ */
 public class MappingTypes {
     
     private MappingTypes() {
         // Avoid instantiation
     }
     
-    //------------------------------------------------------------------------
-    // openMDX 2 formats
-    //------------------------------------------------------------------------
+    /**
+     * This is a modifier telling that annotations use markdown
+     */
+    public static final String MARKDOWN = "markdown";
     
     /**
      * openMDX model mapping

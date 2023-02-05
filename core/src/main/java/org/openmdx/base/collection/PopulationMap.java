@@ -446,7 +446,7 @@ public class PopulationMap<V>
          * 
          * @param key
          * 
-         * @return <code>true</code> if the key is in the given sub-range
+         * @return {@code true} if the key is in the given sub-range
          */
         boolean inRange(
             int key
@@ -463,7 +463,7 @@ public class PopulationMap<V>
          * 
          * @param key
          * 
-         * @throws NullPointerException if the key is <code>null</code>
+         * @throws NullPointerException if the key is {@code null}
          * @throws IllegalArgumentException if the key is outside the given range
          */
         private void assertRange(

@@ -69,7 +69,7 @@ public class ReferenceStoredAsAttibute
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 8126786916829317687L;
     

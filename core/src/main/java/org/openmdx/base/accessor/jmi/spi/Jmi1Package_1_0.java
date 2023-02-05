@@ -66,8 +66,8 @@ public interface Jmi1Package_1_0 extends RefPackage_1_0 {
      * Tells whether the RefPackage's delegate is an ObjectFactory_1_0 or
      * a PersistenceManager.
      * 
-     * @return <code>true</code> if the RefPackage's delegate is an 
-     * PersistenceManager_1_1 instance, <code>false</code> if the RefPackage's 
+     * @return {@code true} if the RefPackage's delegate is an 
+     * PersistenceManager_1_1 instance, {@code false} if the RefPackage's 
      * delegate is a PersistenceManager instance
      * 
      * @see DataObjectManager_1_0

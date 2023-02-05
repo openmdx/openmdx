@@ -50,8 +50,8 @@ import java.util.IdentityHashMap;
 import java.util.Set;
 
 /**
- * The keys are restricted to <code>String</code>, <code>Short</code>, 
- * <code>Integer</code> and <code>Long</code> values.
+ * The keys are restricted to {@code String}, {@code Short}, 
+ * {@code Integer} and {@code Long} values.
  */
 public class InternalizedKeyMap<K,V> extends AbstractMap<K, V> {
 

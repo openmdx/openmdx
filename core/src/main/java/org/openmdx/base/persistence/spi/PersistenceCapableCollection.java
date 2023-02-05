@@ -52,7 +52,7 @@ import javax.jdo.spi.PersistenceCapable;
  * Persistence Capable Collection
  * <p>
  * An application program should not use this interface directly. It should use the 
- * <code>PersistenceManager</code> and <code>PersistenceHelper</code> API instead.
+ * {@code PersistenceManager} and {@code PersistenceHelper} API instead.
  * 
  * @see javax.jdo.PersistenceManager
  * @see org.openmdx.base.persistence.cci.PersistenceHelper
@@ -86,12 +86,12 @@ public interface PersistenceCapableCollection extends PersistenceCapable {
      * Load the collection into the cache
      * <p>
      * Retrieve field values of instances from the store.  This tells
-     * the <code>PersistenceManager</code> that the application intends to use 
+     * the {@code PersistenceManager} that the application intends to use 
      * the instances, and their field values should be retrieved.  The fields
      * in the current fetch group must be retrieved, and the implementation
      * might retrieve more fields than the current fetch group.
      * 
-     * @param fetchPlan the fetch plan to be used, or <code>null</code>
+     * @param fetchPlan the fetch plan to be used, or {@code null}
      */
     void openmdxjdoRetrieve(
         FetchPlan fetchPlan

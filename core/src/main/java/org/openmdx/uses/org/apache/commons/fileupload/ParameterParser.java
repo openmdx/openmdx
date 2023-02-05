@@ -40,7 +40,7 @@ import org.openmdx.uses.org.apache.commons.fileupload.util.mime.MimeUtility;
  * Parameter values are optional and can be omitted.
  *
  * <p>
- *  <code>param1 = value; param2 = "anything goes; really"; param3</code>
+ *  {@code param1 = value; param2 = "anything goes; really"; param3}
  * </p>
  *
  * @version $Id: ParameterParser.java 1565253 2014-02-06 13:48:16Z ggregory $

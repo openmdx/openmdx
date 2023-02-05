@@ -65,31 +65,40 @@ public class PIMDocMapper extends AbstractMapper_1 {
      * 
      * Uses default configuration values
      * 
+     * @param markdown {@code true} if annotations use markdown
+     * 
      * @throws ServiceException 
      */
     public PIMDocMapper(
+    	boolean markdown
     ) throws ServiceException{
-        this(new PIMDocConfiguration(null));   
+        this(markdown, new PIMDocConfiguration(null));   
     }
 
     /**
      * Public Constructor
      * 
-     * @param arguments
+     * @param markdown {@code true} if annotations use markdown
+     * @param configurationURL the PIMDoc Configuration Properties URL
      * 
      * @throws ServiceException
      */
-    public PIMDocMapper(String configurationURL) throws ServiceException {
-    	this(new PIMDocConfiguration(configurationURL));
+    public PIMDocMapper(boolean markdown, String configurationURL) throws ServiceException {
+    	this(markdown, new PIMDocConfiguration(configurationURL));
 	}
 
     /**
      * Internal Constructor 
+     * 
+     * @param markdown {@code true} if annotations use markdown
+     * @param configuration the PIMDoc Configuration
+     * 
      */
     private PIMDocMapper(
+    	boolean markdown,
     	PIMDocConfiguration configuration
     ){
-        super(PACKAGE_SUFFIX);    
+        super(markdown, PACKAGE_SUFFIX);    
         this.configuration = configuration;
     }
     
@@ -127,7 +136,7 @@ public class PIMDocMapper extends AbstractMapper_1 {
 					}
 					
 				},
-    			configuration
+    			markdown, configuration
     		)
         ){
         	externalizer.accept(getMatchingPackages(qualifiedPackageName));

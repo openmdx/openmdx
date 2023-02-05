@@ -22,7 +22,7 @@ public class Aspects {
      *  
      * @param qualifiedClassName
      * 
-     * @return <code>true</code> if the class denotes an aspect base class
+     * @return {@code true} if the class denotes an aspect base class
      */
     public static boolean isAspectBaseClass(
         String qualifiedClassName
@@ -35,7 +35,7 @@ public class Aspects {
      * 
      * @param aspectBaseClassCandidate 
      * 
-     * @return the aspect type in case of an aspect base class, <code>null</code> otherwise
+     * @return the aspect type in case of an aspect base class, {@code null} otherwise
      */
     public static String getAspectType(String aspectBaseClassCandidate) {
     	return ASPECT_TYPES.get(aspectBaseClassCandidate);

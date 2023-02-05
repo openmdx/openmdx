@@ -101,7 +101,7 @@ public class ImportHelper {
      * @param importHandler
      * @param errorHandler
      * 
-     * @return a new <code>XMLReader</code>
+     * @return a new {@code XMLReader}
      * 
      * @throws ServiceException
      */
@@ -199,7 +199,7 @@ public class ImportHelper {
      * @param source
      *            the input source specification
      * 
-     * @return the corresponding <code>InputSource Enumeration</code>
+     * @return the corresponding {@code InputSource Enumeration}
      */
     public static Iterable<InputSource> asSource(
         InputSource source
@@ -215,7 +215,7 @@ public class ImportHelper {
      * @param sources
      *            the XML source
      * @param errorHandler
-     *            <code>null</code> leads to standard error handling
+     *            {@code null} leads to standard error handling
      * 
      * @throws ServiceException
      */
@@ -284,7 +284,7 @@ public class ImportHelper {
     //------------------------------------------------------------------------
 
     /**
-     * Allows to iterate once over the <code>InputSource</code> singleton
+     * Allows to iterate once over the {@code InputSource} singleton
      */
     protected static class StandardSource implements Iterable<InputSource> {
 
@@ -302,7 +302,7 @@ public class ImportHelper {
         }
 
         /**
-         * The <code>InputSource</code> singleton
+         * The {@code InputSource} singleton
          */
         private final InputSource singleton;
 

@@ -85,7 +85,7 @@ class AbstractHandler extends DefaultHandler implements LargeObjectWriter {
     /**
      * Tells whether there is either character or binary content available
      * 
-     * @return <code>true</code> if some content is available
+     * @return {@code true} if some content is available
      */
     protected boolean hasData(
     ){

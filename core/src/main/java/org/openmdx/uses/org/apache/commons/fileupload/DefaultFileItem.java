@@ -44,7 +44,7 @@ import org.openmdx.uses.org.apache.commons.fileupload.disk.DiskFileItem;
  *
  * @version $Id: DefaultFileItem.java 1454690 2013-03-09 12:08:48Z simonetripodi $
  *
- * @deprecated 1.1 Use <code>DiskFileItem</code> instead.
+ * @deprecated 1.1 Use {@code DiskFileItem} instead.
  */
 @Deprecated
 public class DefaultFileItem
@@ -58,15 +58,15 @@ public class DefaultFileItem
     private static final long serialVersionUID = 4088572813833518255L;
 
     /**
-     * Constructs a new <code>DefaultFileItem</code> instance.
+     * Constructs a new {@code DefaultFileItem} instance.
      *
      * @param fieldName     The name of the form field.
      * @param contentType   The content type passed by the browser or
-     *                      <code>null</code> if not specified.
+     *                      {@code null} if not specified.
      * @param isFormField   Whether or not this item is a plain form field, as
      *                      opposed to a file upload.
      * @param fileName      The original filename in the user's filesystem, or
-     *                      <code>null</code> if not specified.
+     *                      {@code null} if not specified.
      * @param sizeThreshold The threshold, in bytes, below which items will be
      *                      retained in memory and above which they will be
      *                      stored as a file.
@@ -74,7 +74,7 @@ public class DefaultFileItem
      *                      which files will be created, should the item size
      *                      exceed the threshold.
      *
-     * @deprecated 1.1 Use <code>DiskFileItem</code> instead.
+     * @deprecated 1.1 Use {@code DiskFileItem} instead.
      */
     @Deprecated
     public DefaultFileItem(String fieldName, String contentType,

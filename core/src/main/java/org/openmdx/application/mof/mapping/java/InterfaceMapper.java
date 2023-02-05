@@ -66,6 +66,7 @@ extends AbstractClassMapper {
 
     /**
      * Constructor 
+     * @param markdown TODO
      */
     public InterfaceMapper(
         ModelElement_1_0 classDef,
@@ -74,7 +75,7 @@ extends AbstractClassMapper {
         Format format, 
         String packageSuffix,
         MetaData_1_0 metaData, 
-        PrimitiveTypeMapper primitiveTypeMapper
+        boolean markdown, PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             classDef,
@@ -83,7 +84,7 @@ extends AbstractClassMapper {
             format, 
             packageSuffix, 
             metaData, 
-            primitiveTypeMapper
+            markdown, primitiveTypeMapper
         );
     }
 
@@ -94,9 +95,9 @@ extends AbstractClassMapper {
     public void mapEnd(
     ) throws ServiceException {
         this.trace("Interface/End.vm");
-        this.pw.println();
+        newLine();
         mapPrivateFields();
-        this.pw.println("}");
+        printLine("}");
     }
 
     /**
@@ -107,7 +108,7 @@ extends AbstractClassMapper {
     ) throws ServiceException {
         this.trace("Interface/Begin");
         this.fileHeader();
-        this.pw.println(
+        printLine(
             "package " + this.getNamespace(
                 MapperUtils.getNameComponents(
                     MapperUtils.getPackageName(
@@ -116,15 +117,12 @@ extends AbstractClassMapper {
                 )
             ) + ';'
         );
-        this.pw.println();
-        this.pw.println("/**");
-        this.pw.print(" * Service Provider Interface <code>" + this.classDef.getName() + "</code>"); 
-        if (this.classDef.getAnnotation() != null) {
-            this.pw.println(" *<p>");
-            this.pw.println(MapperUtils.wrapText(" * ", this.classDef.getAnnotation()));
-        }
-        this.pw.println(" */");
-        this.pw.println(
+        newLine();
+        printLine("/**");
+        this.pw.print(" * Service Provider Interface {@code " + this.classDef.getName() + "}"); 
+        mapAnnotation(" * ", this.classDef);
+        printLine(" */");
+        printLine(
             "public interface " + this.className + " extends " +
             this.interfaceType(this.classDef, Visibility.CCI, false) + " {"
         ); 
@@ -143,17 +141,17 @@ extends AbstractClassMapper {
             //
             // Accessor
             //
-            this.pw.println("  /**");
-            this.pw.println(
+            printLine("  /**");
+            printLine(
                 MapperUtils.wrapText(
                     "   * ",
                     "Retrieves the " + (
                             singlevalued ? "value" : "values"
-                    ) + "for the attribute <code>" + field.getName() + "</code>."
+                    ) + "for the attribute {@code " + field.getName() + "}."
                 )
             );
-            this.pw.println("   * @return The value for attribute <code>" + field.getName() + "</code>.");
-            this.pw.println("   */");
+            printLine("   * @return The value for attribute {@code " + field.getName() + "}.");
+            printLine("   */");
             this.pw.print("   " + field.getFieldType() + " ");
             this.pw.print(
                 Identifier.OPERATION_NAME.toIdentifier(
@@ -164,23 +162,23 @@ extends AbstractClassMapper {
                             , null // appendableSuffix
                 )
             );
-            this.pw.println("(");
-            this.pw.println("  );");
-            this.pw.println();
+            printLine("(");
+            printLine("  );");
+            newLine();
             //
             // Mutator
             //
-            this.pw.println("  /**");
-            this.pw.println(
+            printLine("  /**");
+            printLine(
                 MapperUtils.wrapText(
                     "   * ",
                     "Sets the " + (
                             singlevalued ? "value" : "values"
-                    ) + "for the attribute <code>" + field.getName() + "</code>."
+                    ) + "for the attribute {@code " + field.getName() + "}."
                 )
             );
-            this.pw.println("   * @param " + field.getName() + " The new value for attribute <code>" + field.getName() + "</code>");
-            this.pw.println("   */");
+            printLine("   * @param " + field.getName() + " The new value for attribute {@code " + field.getName() + "}");
+            printLine("   */");
             this.pw.print("  void ");
             this.pw.print(
                 Identifier.OPERATION_NAME.toIdentifier(
@@ -191,14 +189,14 @@ extends AbstractClassMapper {
                         , null // appendableSuffix
                 )
             );
-            this.pw.println("(");
-            this.pw.println(
+            printLine("(");
+            printLine(
                 "    " + getType(field) + (
                         singlevalued ? " " : "... "
                 ) + field.getName()
             );
-            this.pw.println("  );");
-            this.pw.println();
+            printLine("  );");
+            newLine();
         }
     }
 

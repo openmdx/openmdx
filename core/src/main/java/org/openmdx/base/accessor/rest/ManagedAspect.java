@@ -658,7 +658,7 @@ final class ManagedAspect
         /**
          * @param value
          * 
-         * @return <code>true</code> if the collection had to be modified
+         * @return {@code true} if the collection had to be modified
          * 
          * @see java.util.Collection#add(java.lang.Object)
          */

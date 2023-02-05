@@ -103,7 +103,7 @@ public class Model_1Validator {
      * @param model the model to be validated
      * @param retry, i.e. 0 for the initial attempt, 1 for the first retry and so on
      * 
-     * @return <code>true</code> if the model is valid, <code>false</code> if the model should be reloaded
+     * @return {@code true} if the model is valid, {@code false} if the model should be reloaded
      * 
      * @throws RuntimeServiceException if no retry attempt should be made
      */
@@ -444,7 +444,7 @@ public class Model_1Validator {
      * 
      * @param validationProperties the (optional) validationProperties
      * 
-     * @return <code>true</code> if validation is required
+     * @return {@code true} if validation is required
      */
     static boolean isValidationRequested(
         Properties validationProperties
@@ -460,7 +460,7 @@ public class Model_1Validator {
      * 
      * @param validationProperties
      * 
-     * @return <code>true</code> if XML validation is requested
+     * @return {@code true} if XML validation is requested
      */
     static boolean isXMLValidationRequested(Properties validationProperties) {
         return isEnabled(validationProperties, "validate-xml");
@@ -472,7 +472,7 @@ public class Model_1Validator {
      * @param validationProperties
      * @param option
      * 
-     * @return <code>true</code> if the given option is enabled
+     * @return {@code true} if the given option is enabled
      */
     private static boolean isEnabled(
         Properties validationProperties,

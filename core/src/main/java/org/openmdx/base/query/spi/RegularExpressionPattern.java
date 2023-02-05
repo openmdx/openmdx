@@ -77,7 +77,7 @@ class RegularExpressionPattern extends AbstractPattern {
 	}
 	
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
     private static final long serialVersionUID = 1340205266230718256L;
     

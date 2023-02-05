@@ -241,7 +241,7 @@ public class DataObject_1
      * 
      * @param that
      * @param beforeImage
-     *            <code>true</code> if the before-image shall be cloned
+     *            {@code true} if the before-image shall be cloned
      * @param identity
      * @param exclude
      *            the features not to be cloned
@@ -374,7 +374,7 @@ public class DataObject_1
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 6246865175754052117L;
 
@@ -561,7 +561,7 @@ public class DataObject_1
      * @param that
      *            the object to be inspected
      * @param lenient
-     *            an exception is thrown for hollow objects unless <code>lenient</code> is <code>true</code>
+     *            an exception is thrown for hollow objects unless {@code lenient} is {@code true}
      * 
      * @return the object's class
      * 
@@ -588,12 +588,12 @@ public class DataObject_1
     }
 
     /**
-     * Test whether two objects are either both <code>null</code> or equal.
+     * Test whether two objects are either both {@code null} or equal.
      * 
      * @param left
      * @param right
      * 
-     * @return <code>true</code> if either both objects are <code>null</code> or equal.
+     * @return {@code true} if either both objects are {@code null} or equal.
      */
     static boolean equal(
         Object left,
@@ -605,7 +605,7 @@ public class DataObject_1
     /**
      * Tells whether the object represents an aspect
      * 
-     * @return <code>true</code> if the object represents an aspect
+     * @return {@code true} if the object represents an aspect
      * 
      * @throws ServiceException
      */
@@ -615,9 +615,9 @@ public class DataObject_1
     }
 
     /**
-     * Tells whether the object is an instance of <code>org::openmdx::base::Modifiable</code>
+     * Tells whether the object is an instance of {@code org::openmdx::base::Modifiable}
      * 
-     * @return <code>true</code> if the object is an instance of <code>org::openmdx::base::Modifiable</code>
+     * @return {@code true} if the object is an instance of {@code org::openmdx::base::Modifiable}
      * 
      * @throws ServiceException
      */
@@ -627,9 +627,9 @@ public class DataObject_1
     }
 
     /**
-     * Tells whether the object is an instance of <code>org::openmdx::base::Creatable</code>
+     * Tells whether the object is an instance of {@code org::openmdx::base::Creatable}
      * 
-     * @return <code>true</code> if the object is an instance of <code>org::openmdx::base::Creatable</code>
+     * @return {@code true} if the object is an instance of {@code org::openmdx::base::Creatable}
      * 
      * @throws ServiceException
      */
@@ -639,9 +639,9 @@ public class DataObject_1
     }
 
     /**
-     * Tells whether the object is an instance of <code>org::openmdx::base::ExtentCapable</code>
+     * Tells whether the object is an instance of {@code org::openmdx::base::ExtentCapable}
      * 
-     * @return <code>true</code> if the object is an instance of <code>org::openmdx::base::ExtentCapable</code>
+     * @return {@code true} if the object is an instance of {@code org::openmdx::base::ExtentCapable}
      * 
      * @throws ServiceException
      */
@@ -653,7 +653,7 @@ public class DataObject_1
     /**
      * Tells whether the object is an instance of Removable
      * 
-     * @return <code>true</code> if the object is an instance of Removable
+     * @return {@code true} if the object is an instance of Removable
      * 
      * @throws ServiceException
      */
@@ -675,7 +675,7 @@ public class DataObject_1
      * @param feature
      *            the feature name
      * 
-     * @return <code>true</code> if the given feature name refers to an aspect's core reference
+     * @return {@code true} if the given feature name refers to an aspect's core reference
      * 
      * @throws ServiceException
      */
@@ -1077,9 +1077,9 @@ public class DataObject_1
     }
 
     /**
-     * Determines whether the object is <code>TRANSIENT</code> or <code>PERSISTENT_NEW</code>
+     * Determines whether the object is {@code TRANSIENT} or {@code PERSISTENT_NEW}
      * 
-     * @return <code>true</code> if the object is <code>TRANSIENT</code> or <code>PERSISTENT_NEW</code>
+     * @return {@code true} if the object is {@code TRANSIENT} or {@code PERSISTENT_NEW}
      */
     protected boolean isTransientOrNew() {
         return !jdoIsPersistent() || jdoIsNew();
@@ -1335,13 +1335,13 @@ public class DataObject_1
      *            the object's new container.
      * @param criteria
      *            The criteria is used to move the object to the container or
-     *            <code>null</null>, in which case it is up to the
+     *            {@code null</null>, in which case it is up to the
      *            implementation to define the criteria.
      *
      * &#64;exception ServiceException  ILLEGAL_STATE
      *            if the object is persistent.
      * &#64;exception ServiceException BAD_PARAMETER
-     *            if <code>there</code> is not an instance of <code>DelegatingContainer</code>.
+     *            if {@code there} is not an instance of {@code DelegatingContainer}.
      * @exception ServiceException
      *                if the move operation fails.
      */
@@ -1500,7 +1500,7 @@ public class DataObject_1
     /**
      * Search the object in the cache and return its registration key
      * 
-     * @return the object's registration key, or <code>null<code> if it is not cached
+     * @return the object's registration key, or {@code null{@code  if it is not cached
      */
     private String getCacheKey() {
         for (Map.Entry<String, DataObject_1_0> e : this.container.getCache().entrySet()) {
@@ -1517,7 +1517,7 @@ public class DataObject_1
      * @param identity
      *            the object id
      * @param flushed
-     *            <code>true</code> if the object is alread flushed
+     *            {@code true} if the object is alread flushed
      * @throws ServiceException
      */
     public void makePersistent(
@@ -1593,9 +1593,9 @@ public class DataObject_1
     /**
      * Removes an object.
      * <p>
-     * Neither <code>getValue()</code> nor <code>setValue()</code>
-     * calls are allowed after an <code>remove()</code> invocation and
-     * <code>isDeleted()</code> will return <code>true</code> unless the
+     * Neither {@code getValue()} nor {@code setValue()}
+     * calls are allowed after an {@code remove()} invocation and
+     * {@code isDeleted()} will return {@code true} unless the
      * object has been transient.
      * 
      * @param updateCache
@@ -1615,9 +1615,9 @@ public class DataObject_1
     /**
      * Removes an object.
      * <p>
-     * Neither <code>getValue()</code> nor <code>setValue()</code>
-     * calls are allowed after an <code>remove()</code> invocation and
-     * <code>isDeleted()</code> will return <code>true</code> unless the
+     * Neither {@code getValue()} nor {@code setValue()}
+     * calls are allowed after an {@code remove()} invocation and
+     * {@code isDeleted()} will return {@code true} unless the
      * object has been transient.
      * 
      * @exception ServiceException
@@ -1842,7 +1842,7 @@ public class DataObject_1
      * @param classDef
      * @param featureDef
      *
-     * @return <code>true</code> if a mandatory feature is missing
+     * @return {@code true} if a mandatory feature is missing
      *
      * @throws ServiceException
      */
@@ -2102,7 +2102,7 @@ public class DataObject_1
      * 
      * @param feature
      * 
-     * @return <code>true</code> if the feature has been modified
+     * @return {@code true} if the feature has been modified
      * 
      * @throws ServiceException
      */
@@ -2158,7 +2158,7 @@ public class DataObject_1
      * @param beforeImage
      *            the object's before-image
      * 
-     * @return <code>true</code> if some non-derived features have been modified
+     * @return {@code true} if some non-derived features have been modified
      * 
      * @throws ServiceException
      */
@@ -2207,7 +2207,7 @@ public class DataObject_1
      * @param attribute
      *            the attribute to be tested
      * 
-     * @return <code>true</code> if the attribute is persistent
+     * @return {@code true} if the attribute is persistent
      * 
      * @throws ServiceException
      */
@@ -2224,7 +2224,7 @@ public class DataObject_1
      * @param attribute
      *            the attribute to be tested
      * 
-     * @return <code>true</code> if the attribute is streamed
+     * @return {@code true} if the attribute is streamed
      * 
      * @throws ServiceException
      */
@@ -2241,7 +2241,7 @@ public class DataObject_1
      * @param attribute
      *            the attribute to be tested
      * 
-     * @return <code>true</code> if the attribute is mandatory
+     * @return {@code true} if the attribute is mandatory
      * 
      * @throws ServiceException
      */
@@ -2512,7 +2512,7 @@ public class DataObject_1
     /**
      * Tells whether the object is out-of-sync with its "remote" counterpart
      * 
-     * @return <code>true</code> if the object is out-of-sync with its
+     * @return {@code true} if the object is out-of-sync with its
      *         "remote" counterpart
      */
     final boolean isOutOfSync() {
@@ -2567,7 +2567,7 @@ public class DataObject_1
     /**
      * Tells whether the object is contained in a container
      * 
-     * @return <code>true</code> if the object is either persistent or has
+     * @return {@code true} if the object is either persistent or has
      *         already been moved to a container
      */
     @Override
@@ -2592,7 +2592,7 @@ public class DataObject_1
     /**
      * Tests whether this object is hollow
      * 
-     * @return <code>true</code> if the object is hollow
+     * @return {@code true} if the object is hollow
      */
     protected boolean objIsHollow() {
         return this.persistentValues == null;
@@ -2601,7 +2601,7 @@ public class DataObject_1
     /**
      * Tests whether this object is a proxy
      * 
-     * @return <code>true</code> if this object is a proxy
+     * @return {@code true} if this object is a proxy
      */
     public boolean isProxy() {
         return this.dataObjectManager.isProxy();
@@ -2610,7 +2610,7 @@ public class DataObject_1
     /**
      * Tests whether this object is a virtual object
      * 
-     * @return <code>true</code> if this object is a virtual object
+     * @return {@code true} if this object is a virtual object
      */
     private boolean isVirtual() {
         return ObjectRecords.isVirtualObjectVersion(this.version);
@@ -2714,7 +2714,7 @@ public class DataObject_1
      * @param beforeImage
      *            load the complete before image
      * @param throwNotFoundException
-     *            if <code>false</code> return <code>null</code>
+     *            if {@code false} return {@code null}
      *            instead of throwing an exception if the object does not exist
      * 
      * @return the retrieved object
@@ -2722,7 +2722,7 @@ public class DataObject_1
      * @exception ServiceException
      *                <ul>
      *                <li>ILLEGAL_STATE if the object is deleted
-     *                <li>NOT_FOUND if the object does not exist and throwNotFoundException is <code>true</code>
+     *                <li>NOT_FOUND if the object does not exist and throwNotFoundException is {@code true}
      *                </ul>
      */
     @SuppressWarnings("unchecked")
@@ -2830,7 +2830,7 @@ public class DataObject_1
      * 
      * @param name
      *            the attribute's name
-     * @return <code>true</code> if the given attribute has to be loaded
+     * @return {@code true} if the given attribute has to be loaded
      * 
      * @throws ServiceException
      */
@@ -2847,7 +2847,7 @@ public class DataObject_1
      * @param name
      *            the attribute's name
      * 
-     * @return <code>true</code> if the given attribute has to be loaded
+     * @return {@code true} if the given attribute has to be loaded
      * 
      * @throws ServiceException
      */
@@ -3087,7 +3087,7 @@ public class DataObject_1
     /**
      * Set an attribute's value.
      * <p>
-     * This method returns a <code>BAD_PARAMETER</code> exception unless the
+     * This method returns a {@code BAD_PARAMETER} exception unless the
      * feature is single valued or a stream.
      *
      * @param feature
@@ -3416,7 +3416,7 @@ public class DataObject_1
     /**
      * Get a List attribute.
      * <p>
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param feature
@@ -3458,7 +3458,7 @@ public class DataObject_1
     /**
      * Get a Set attribute.
      * <p>
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param feature
@@ -3502,7 +3502,7 @@ public class DataObject_1
     /**
      * Get a SparseArray attribute.
      * <p>
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param feature
@@ -3544,7 +3544,7 @@ public class DataObject_1
     /**
      * Get a Map attribute.
      * <p>
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param feature
@@ -3586,7 +3586,7 @@ public class DataObject_1
     /**
      * Get a reference feature.
      * <p>
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param feature
@@ -4331,7 +4331,7 @@ public class DataObject_1
             }
 
             /**
-             * Implements <code>Serializable</code>
+             * Implements {@code Serializable}
              */
             private static final long serialVersionUID = -5790864813300543661L;
 
@@ -4553,7 +4553,7 @@ public class DataObject_1
             }
 
             /**
-             * Implements <code>Serializable</code>
+             * Implements {@code Serializable}
              */
             private static final long serialVersionUID = -5790864813300543661L;
 
@@ -5040,7 +5040,7 @@ public class DataObject_1
             }
 
             /**
-             * Implements <code>Serializable</code>
+             * Implements {@code Serializable}
              */
             private static final long serialVersionUID = 4281239775781185351L;
 
@@ -5487,7 +5487,7 @@ public class DataObject_1
             }
 
             /**
-             * The from-key, or <code>null</code> in case of a head-map
+             * The from-key, or {@code null} in case of a head-map
              */
             private final Integer from;
 
@@ -5498,7 +5498,7 @@ public class DataObject_1
              * }
              * anotherPersistenceManager.currentTransaction().commit();
              * 
-             * The to-key, or <code>null</code> in case of a tail-map
+             * The to-key, or {@code null} in case of a tail-map
              */
             private final Integer to;
 

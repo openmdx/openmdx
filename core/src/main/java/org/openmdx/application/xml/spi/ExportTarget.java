@@ -58,7 +58,7 @@ public interface ExportTarget {
     /**
      * Start export
      * 
-     * @param empty <code>true</code> means that no authorities will be exported
+     * @param empty {@code true} means that no authorities will be exported
      * 
      * @throws ServiceException
      */
@@ -93,7 +93,7 @@ public interface ExportTarget {
     /**
      * Start export of attributes
      * 
-     * @param empty <code>true</code> means that no attributes will be exported
+     * @param empty {@code true} means that no attributes will be exported
      * 
      * @throws ServiceException 
      */
@@ -108,7 +108,7 @@ public interface ExportTarget {
      * @param typeName 
      * @param multiplicity 
      * @param values
-     * @param empty <code>true</code> means that no values will be exported
+     * @param empty {@code true} means that no values will be exported
      * 
      * @throws ServiceException 
      */
@@ -143,7 +143,7 @@ public interface ExportTarget {
      * @param qualifiedName
      * @param multiplicity 
      * @param values
-     * @param empty <code>true</code> means that no values have been
+     * @param empty {@code true} means that no values have been
      * 
      * @throws ServiceException 
      */
@@ -158,7 +158,7 @@ public interface ExportTarget {
     /**
      * Complete export of attributes
      * 
-     * @param empty <code>true</code> means that no attributes have been exported
+     * @param empty {@code true} means that no attributes have been exported
      * 
      * @throws ServiceException 
      */
@@ -169,7 +169,7 @@ public interface ExportTarget {
     /**
      * Start export of children
      * 
-     * @param empty <code>true</code> means that no references will be exported
+     * @param empty {@code true} means that no references will be exported
      * 
      * @throws ServiceException 
      */
@@ -181,7 +181,7 @@ public interface ExportTarget {
      * Start reference export
      * 
      * @param name the simple name of the reference
-     * @param empty <code>true</code> means that no objects will be exported
+     * @param empty {@code true} means that no objects will be exported
      * 
      * @throws ServiceException
      */
@@ -194,7 +194,7 @@ public interface ExportTarget {
 	 * Complete reference export
 	 * 
 	 * @param reference the simple name of the reference
-     * @param empty <code>true</code> means that no objects have been
+     * @param empty {@code true} means that no objects have been
 	 * 
 	 * @throws ServiceException
 	 */
@@ -205,7 +205,7 @@ public interface ExportTarget {
     /**
      * Complete export of children
      * 
-     * @param empty <code>true</code> means that no references have been exported
+     * @param empty {@code true} means that no references have been exported
      * 
      * @throws ServiceException 
      */
@@ -236,7 +236,7 @@ public interface ExportTarget {
     /**
      * Export completed
      * 
-     * @param empty <code>true</code> means that no authorities have been exported
+     * @param empty {@code true} means that no authorities have been exported
      * 
      * @throws ServiceException
      */

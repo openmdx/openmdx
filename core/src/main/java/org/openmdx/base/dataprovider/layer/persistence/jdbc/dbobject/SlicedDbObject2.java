@@ -151,7 +151,7 @@ public class SlicedDbObject2 extends SlicedDbObject {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -211489817333529686L;
 

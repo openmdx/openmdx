@@ -116,7 +116,7 @@ public class ConditionRecord
     private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
     
     /**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = -2195250394522870037L;
 
@@ -320,8 +320,8 @@ public class ConditionRecord
 	}
     
     /**
-     * Retrieve the condition's string representation, e.g.<code> 
-     * &#x2026;(&#x2200; color | color &#x2208; ["RED", "GREEN"])&#x2026;</code> 
+     * Retrieve the condition's string representation, e.g.{@code  
+     * &#x2026;(&#x2200; color | color &#x2208; ["RED", "GREEN"])&#x2026;} 
      * 
      * @return the condition's string representation
      */

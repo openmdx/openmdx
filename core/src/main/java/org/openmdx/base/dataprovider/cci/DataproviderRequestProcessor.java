@@ -271,18 +271,18 @@ public final class DataproviderRequestProcessor implements Channel {
 
     /**
      * Adds a find request selecting all objects where the
-     * <code>referenceFilter</code> as well as the
-     * <code>attributeFilter</code> evaluate to true.
+     * {@code referenceFilter} as well as the
+     * {@code attributeFilter} evaluate to true.
      * No attributes are included.
      *
      * @param referenceFilter
      *            an object may be included into the result sets only if it
      *            is accessible through the path passed as
-     *            <code>referenceFilter</code>
+     *            {@code referenceFilter}
      * @param attributeFilter
      *            an object may be included into the result sets only if all
      *            the filter properties evaluate to true if applied to it;
-     *            this argument may be <code>null</code>.
+     *            this argument may be {@code null}.
      *
      * @return the reply
      *
@@ -320,17 +320,17 @@ public final class DataproviderRequestProcessor implements Channel {
 
     /**
      * Adds a find request selecting all objects where the
-     * <code>referenceFilter</code> as well as the
-     * <code>attributeFilter</code> evaluate to true.
+     * {@code referenceFilter} as well as the
+     * {@code attributeFilter} evaluate to true.
      *
      * @param referenceFilter
      *            an object may be included into the result sets only if it
      *            is accessible through the path passed as
-     *            <code>referenceFilter</code>
+     *            {@code referenceFilter}
      * @param attributeFilter
      *            an object may be included into the result sets only if all
      *            the filter properties evaluate to true if applied to it;
-     *            this argument may be <code>null</code>.
+     *            this argument may be {@code null}.
      * @param attributeSpecifiers
      *            An array of attribute specifiers
      *

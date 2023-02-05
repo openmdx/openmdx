@@ -122,7 +122,7 @@ public class Classes {
      * @param name The entity name
      * @param classLoader
      *  
-     * @return <code>BasicException.Parameter</code>s
+     * @return {@code BasicException.Parameter}s
      */
     private static final BasicException.Parameter[] getInfo(
         String type,
@@ -326,12 +326,12 @@ public class Classes {
      * @return a newly created proxy instance
      * 
      * @throws  IllegalArgumentException if any of the restrictions on the
-     *      parameters that may be passed to <code>getProxyClass</code>
+     *      parameters that may be passed to {@code getProxyClass}
      *      are violated
-     * @throws  NullPointerException if the <code>interfaces</code> array
-     *      argument or any of its elements are <code>null</code>, or
-     *      if the invocation handler, <code>invocationHandler</code>, is
-     *      <code>null</code>
+     * @throws  NullPointerException if the {@code interfaces} array
+     *      argument or any of its elements are {@code null}, or
+     *      if the invocation handler, {@code invocationHandler}, is
+     *      {@code null}
      */
     @SuppressWarnings("unchecked")
     public static <T> T newProxyInstance(
@@ -461,7 +461,7 @@ public class Classes {
      * @param interfaceClass
      * @param arguments
      * 
-     * @return a new platform specific instance, or <code>null</code> in case of failure 
+     * @return a new platform specific instance, or {@code null} in case of failure 
      */
     public static <T> T newPlatformInstance(
         Class<T> interfaceClass,
@@ -555,7 +555,7 @@ public class Classes {
      * 
      * @param object the object to be cloned
      * 
-     * @return a clone, or <code>null</code> if the object is <code>null</code>
+     * @return a clone, or {@code null} if the object is {@code null}
      * 
      * @exception RuntimeException if cloning fails 
      */

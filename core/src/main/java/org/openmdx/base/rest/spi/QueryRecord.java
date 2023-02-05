@@ -144,7 +144,7 @@ public class QueryRecord
     protected static final RestFormatter restFormatter = RestFormatters.getFormatter();
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -2709873653223744925L;
 
@@ -422,7 +422,7 @@ public class QueryRecord
      * 
      * @param record the record to be inspected
      * 
-     * @return <code>true</code> if the record's name equals to <code>org:openmdx:kernel:Query</code>.
+     * @return {@code true} if the record's name equals to {@code org:openmdx:kernel:Query}.
      */
     public static boolean isCompatible(Record record) {
         return NAME.equals(record.getRecordName());

@@ -28,7 +28,7 @@ public class StringInputStream extends ReaderInputStream {
     /**
      * Composes a stream from a String
      *
-     * @param source The string to read from. Must not be <code>null</code>.
+     * @param source The string to read from. Must not be {@code null}.
      */
     public StringInputStream(String source) {
         super(new StringReader(source));
@@ -37,8 +37,8 @@ public class StringInputStream extends ReaderInputStream {
     /**
      * Composes a stream from a String with the specified encoding
      *
-     * @param source The string to read from. Must not be <code>null</code>.
-     * @param encoding The encoding scheme.  Also must not be <code>null</code>.
+     * @param source The string to read from. Must not be {@code null}.
+     * @param encoding The encoding scheme.  Also must not be {@code null}.
      */
     public StringInputStream(String source, String encoding) {
         super(new StringReader(source), encoding);

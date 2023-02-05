@@ -49,30 +49,30 @@ package org.openmdx.base.resource.cci;
  * <p>
  * The function either returns a record or updates a given output record<ul>
  * <li><b>Return Record</b><br>
- * The <code>execute()</code> method with a return record can be applied
+ * The {@code execute()} method with a return record can be applied
  * to interactions belonging to either <em>remote</em> or <em>local</em> connections.<br>
  * The return record<ul>
- * <li>is <code>null</code> in case of {@link InteractionSpec#SYNC_SEND}<br>
- * <li>is an indexed record containing either <code>org:openmdx:kernel:Object</code> 
+ * <li>is {@code null} in case of {@link InteractionSpec#SYNC_SEND}<br>
+ * <li>is an indexed record containing either {@code org:openmdx:kernel:Object} 
  * records or operation results.
  * </ul>
  * <li><b>Output Record</b><br>
- * The <code>execute()</code> method with an output record can be applied
+ * The {@code execute()} method with an output record can be applied
  * only to interactions belonging to <em>local</em> connections.<br>
  * The output record
  * <ul>
  * <li>is ignored in case of {@link InteractionSpec#SYNC_SEND}, 
- * i.e. it can even be <code>null</code>
+ * i.e. it can even be {@code null}
  * <li>must be an indexed record in case of {@link InteractionSpec#SYNC_SEND}<br>
- * which is modified by <code>add()</code> operations for either
- * <code>org:openmdx:kernel:Object</code> records or operation results.
+ * which is modified by {@code add()} operations for either
+ * {@code org:openmdx:kernel:Object} records or operation results.
  * </ul>
  * <li><b>Object Holder</b><br>
- * Each <code>org:openmdx:kernel:Object</code> holder has the following structure:<ul>
- * <li><code>path</code>, a path representing the object's resource identifier (an XRI)
- * <li><code>version</code>, the object's version (an opaque byte[])
- * <li><code>lock</code>, the object's lock (an opaque byte[])
- * <li><code>value</code>, some or all of the object's features (a mapped record)  
+ * Each {@code org:openmdx:kernel:Object} holder has the following structure:<ul>
+ * <li>{@code path}, a path representing the object's resource identifier (an XRI)
+ * <li>{@code version}, the object's version (an opaque byte[])
+ * <li>{@code lock}, the object's lock (an opaque byte[])
+ * <li>{@code value}, some or all of the object's features (a mapped record)  
  * </ul>
  * </ul>
  */
@@ -83,22 +83,22 @@ public enum RestFunction {
      * <p>
      * The input record represents either a query, a retrieval, a refresh or a 
      * verification request:<ul>
-     * <li>An <code>org:openmdx:kernel:Query</code> input record identifies a query request.<ul>
-     * <li><code>queryType</code>, the candidate class' MOF identifier (a string value)
-     * <li><code>query</code>, filter and ordering (a {@link Queries#OPENMDXQL} string value)
-     * <li><code>position</code>, the lower bound (a number value)
-     * <li><code>size</code>, the maximal number of elements to be returned (a number value) 
-     * <li><code>parameters</code>, the parameters (an indexed or mapped record)
-     * <li><code>refresh</code>, a flag telling whether the client asks for the object to be refreshed
+     * <li>An {@code org:openmdx:kernel:Query} input record identifies a query request.<ul>
+     * <li>{@code queryType}, the candidate class' MOF identifier (a string value)
+     * <li>{@code query}, filter and ordering (a {@link Queries#OPENMDXQL} string value)
+     * <li>{@code position}, the lower bound (a number value)
+     * <li>{@code size}, the maximal number of elements to be returned (a number value) 
+     * <li>{@code parameters}, the parameters (an indexed or mapped record)
+     * <li>{@code refresh}, a flag telling whether the client asks for the object to be refreshed
      * </ul>
      * <li>An indexed input record identifies an object retrieval request.<ul>
      * <li>The objects are identified by Path instances representing their XRIs.
      * </ul>
-     * <li>An <code>org:openmdx:kernel:Object</code> input record identifies a 
+     * <li>An {@code org:openmdx:kernel:Object} input record identifies a 
      * verification request.<ul>
-     * <li><code>path</code>, the object's resource identifier (a Path)
-     * <li><code>version</code>, the object's version to be verified.
-     * <li><code>lock</code>, the object's lock to be verified.
+     * <li>{@code path}, the object's resource identifier (a Path)
+     * <li>{@code version}, the object's version to be verified.
+     * <li>{@code lock}, the object's lock to be verified.
      * </ul>
      */
     GET,
@@ -107,22 +107,22 @@ public enum RestFunction {
      * Object modification
      * <p>
      * The input record represents either a touch or an update request:<ul>
-     * <li>An <code>org:openmdx:kernel:Query</code> input record identifies a 
+     * <li>An {@code org:openmdx:kernel:Query} input record identifies a 
      * touch by query request.<ul>
-     * <li><code>queryType</code>, the candidate class' MOF identifier (a string value)
-     * <li><code>query</code>, filter and ordering (a {@link Queries#OPENMDXQL} string value)
-     * <li><code>position</code>, the lower bound (a number value)
-     * <li><code>size</code>, the maximal number of elements to be returned (a number value) 
-     * <li><code>parameters</code>, the parameters (an indexed or mapped record)
+     * <li>{@code queryType}, the candidate class' MOF identifier (a string value)
+     * <li>{@code query}, filter and ordering (a {@link Queries#OPENMDXQL} string value)
+     * <li>{@code position}, the lower bound (a number value)
+     * <li>{@code size}, the maximal number of elements to be returned (a number value) 
+     * <li>{@code parameters}, the parameters (an indexed or mapped record)
      * </ul>
      * <li>An indexed input record identifies a touch request.<ul>
      * <li>The objects are identified by Path instances representing their XRIs.
      * </ul>
-     * <li>An <code>org:openmdx:kernel:Object</code> input record identifies 
+     * <li>An {@code org:openmdx:kernel:Object} input record identifies 
      * an update request.<ul>
-     * <li><code>path</code>, a path representing the object's resource identifier (an XRI)
-     * <li><code>version</code>, the object's version to be verified.
-     * <li><code>lock</code>, the object's lock to be verified.
+     * <li>{@code path}, a path representing the object's resource identifier (an XRI)
+     * <li>{@code version}, the object's version to be verified.
+     * <li>{@code lock}, the object's lock to be verified.
      * </ul>
      */
     PUT,
@@ -132,21 +132,21 @@ public enum RestFunction {
      * <p>
      * The input record represents either a delete by query request, a forced delete
      * request or a verified delete request:<ul>
-     * <li>An <code>org:openmdx:kernel:Query</code> input record identifies a query.<ul>
-     * <li><code>queryType</code>, the candidate class' MOF identifier (a string value)
-     * <li><code>query</code>, filter and ordering (a {@link Queries#OPENMDXQL} string value)
-     * <li><code>position</code>, the lower bound (a number value)
-     * <li><code>size</code>, the maximal number of elements to be returned (a number value) 
-     * <li><code>parameters</code>, the parameters (an indexed or mapped record)
+     * <li>An {@code org:openmdx:kernel:Query} input record identifies a query.<ul>
+     * <li>{@code queryType}, the candidate class' MOF identifier (a string value)
+     * <li>{@code query}, filter and ordering (a {@link Queries#OPENMDXQL} string value)
+     * <li>{@code position}, the lower bound (a number value)
+     * <li>{@code size}, the maximal number of elements to be returned (a number value) 
+     * <li>{@code parameters}, the parameters (an indexed or mapped record)
      * </ul>
      * <li>An indexed input record identifies a forced delete request.<ul>
      * <li>The objects are identified by Path instances representing their XRIs.
      * </ul>
-     * <li>An <code>org:openmdx:kernel:Object</code> input record identifies a 
+     * <li>An {@code org:openmdx:kernel:Object} input record identifies a 
      * verifiedU delete request.<ul>
-     * <li><code>path</code>, a path representing the object's resource identifier (an XRI)
-     * <li><code>version</code>, the object's version to be verified.
-     * <li><code>lock</code>, the object's lock to be verified.
+     * <li>{@code path}, a path representing the object's resource identifier (an XRI)
+     * <li>{@code version}, the object's version to be verified.
+     * <li>{@code lock}, the object's lock to be verified.
      * </ul>
      */
     DELETE,

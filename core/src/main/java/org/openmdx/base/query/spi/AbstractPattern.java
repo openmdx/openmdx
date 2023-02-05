@@ -59,7 +59,7 @@ import org.w3c.cci2.RegularExpressionFlag;
 public abstract class AbstractPattern implements Serializable {
 
     /**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = 5177895128844669908L;
 
@@ -68,7 +68,7 @@ public abstract class AbstractPattern implements Serializable {
      *  
      * @param input
      * 
-     * @return <code>true</code> if the input mtaches the pattern
+     * @return {@code true} if the input mtaches the pattern
      */
     public abstract boolean matches (
         String input

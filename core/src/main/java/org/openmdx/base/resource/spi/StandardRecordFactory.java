@@ -59,7 +59,7 @@ import org.openmdx.base.rest.spi.RestRecordFactory;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
- * This <code>RecordFactory</code> is able to create variable-size and fixed-size
+ * This {@code RecordFactory} is able to create variable-size and fixed-size
  * records.
  */
 public class StandardRecordFactory implements ExtendedRecordFactory { 
@@ -80,7 +80,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
     /**
      * Retrieve the singleton
      * 
-     * @return an <code>ExtendedRecordFactory</code> instance
+     * @return an {@code ExtendedRecordFactory} instance
      */
     public static ExtendedRecordFactory getInstance(
     ){
@@ -218,7 +218,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      * The MappedRecord is backed up by the given arrays.
      * <p>
      * The elements in this map are ordered according to their insertion 
-     * retaining the order of the <code>keys</code> and  <code>values</code>
+     * retaining the order of the {@code keys} and  {@code values}
      * arguments.
      *
      * @param     recordName
@@ -235,7 +235,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      * @exception NotSupportedException
      *            Operation not supported
      * @exception	NullPointerException
-     *						if <code>values</code> is null.
+     *						if {@code values} is null.
      */
     @Override
     public MappedRecord asMappedRecord(
@@ -289,9 +289,9 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      * @exception NotSupportedException
      *            Operation not supported
      * @exception NullPointerException
-     *			  if <code>values</code> is null
+     *			  if {@code values} is null
      * @exception IllegalArgumentException
-     *			  if <code>values</code> is neither an array not a list.
+     *			  if {@code values} is neither an array not a list.
      * 
      */
     @Override

@@ -68,7 +68,7 @@ public class SlicedDbObject2NonIndexedParentRidOnly
 {
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -4682380167908554507L;
 

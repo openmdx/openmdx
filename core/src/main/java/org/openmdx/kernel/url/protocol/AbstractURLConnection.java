@@ -82,7 +82,7 @@ public abstract class AbstractURLConnection
     }
 
     /**
-     * The delegate <code>URLConnection</code>
+     * The delegate {@code URLConnection}
      */
     protected final URLConnection delegate;
 
@@ -91,7 +91,7 @@ public abstract class AbstractURLConnection
      * 
      * @param url
      * 
-     * @return the delegate <code>URL</code>
+     * @return the delegate {@code URL}
      * 
      * @throws MalformedURLException
      * @throws IOException
@@ -103,9 +103,9 @@ public abstract class AbstractURLConnection
     /**
      * This method may be overridden by a subclass.
      * 
-     * @param url the delegate connection's <code>URL</code>
+     * @param url the delegate connection's {@code URL}
      * 
-     * @return the delegate <code>URLConnection</code>
+     * @return the delegate {@code URLConnection}
      * 
      * @throws IOException
      */

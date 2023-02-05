@@ -58,7 +58,7 @@ package org.openmdx.uses.org.apache.commons.pool;
 /**
  * A pooling interface.
  * <p>
- * <code>ObjectPool</code> defines a trivially simple pooling interface. The only 
+ * {@code ObjectPool} defines a trivially simple pooling interface. The only 
  * required methods are {@link #borrowObject borrowObject} and {@link #returnObject returnObject}.
  * <p>
  * Example of use:

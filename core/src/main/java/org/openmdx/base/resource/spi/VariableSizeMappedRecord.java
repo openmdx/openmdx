@@ -67,10 +67,10 @@ import org.w3c.cci2.ImmutableDatatype;
  * A variable-size MappedRecord implementation. 
  * <p>
  * The key values must be of instances of the following types:<ul> 
- * <li><code>java.lang.String<code>
- * <li><code>java.lang.Short<code>
- * <li><code>java.lang.Integer<code>
- * <li><code>java.lang.Long<code>
+ * <li>{@code java.lang.String{@code 
+ * <li>{@code java.lang.Short{@code 
+ * <li>{@code java.lang.Integer{@code 
+ * <li>{@code java.lang.Long{@code 
  * </ul>
  */
 @SuppressWarnings({"rawtypes","unchecked"})
@@ -80,7 +80,7 @@ class VariableSizeMappedRecord
 {
 
     /**
-     * Creates a <code>MappedRecord</code> with the specified name.
+     * Creates a {@code MappedRecord} with the specified name.
      *
      * @param     recordName
      *            The name of the record acts as a pointer to the meta 
@@ -116,7 +116,7 @@ class VariableSizeMappedRecord
     private transient Map<Object,Object> values;
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 7135299628146306393L;
 
@@ -244,13 +244,13 @@ class VariableSizeMappedRecord
      *            if the class of the specified key or value prevents it from
      *            being stored in this map.
      * @exception IllegalArgumentException unless the key is one of<ul>
-     * <li>a <code>java.lang.String</code> instance
-     * <li>a <code>java.lang.Instance</code> instance in the range 
-     * <code>-128</code> to <code>127</code>
+     * <li>a {@code java.lang.String} instance
+     * <li>a {@code java.lang.Instance} instance in the range 
+     * {@code -128} to {@code 127}
      * </ul>
      * @exception NullPointerException 
      *            this map does not permit null keys or values, and the
-     *            specified key or value is <code>null</code>
+     *            specified key or value is {@code null}
      */
     @Override
     public Object put(

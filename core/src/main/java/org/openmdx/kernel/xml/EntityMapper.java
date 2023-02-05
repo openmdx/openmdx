@@ -149,11 +149,11 @@ public class EntityMapper implements EntityResolver {
     }
 
     /**
-     * Handle <code>xri://+resource</code>-URLs internally
+     * Handle {@code xri://+resource}-URLs internally
      * 
      * @param uri
      *            the resource identifier
-     * @return a stream providing the resource; or <code>null</code> if no such stream can be acquired
+     * @return a stream providing the resource; or {@code null} if no such stream can be acquired
      */
     private static InputStream openStreamFromURI(
         String uri
@@ -169,7 +169,7 @@ public class EntityMapper implements EntityResolver {
      * @param uri
      *            the resource identifier
      *            
-     * @return a stream providing the resource; or <code>null</code> if no such stream can be acquired
+     * @return a stream providing the resource; or {@code null} if no such stream can be acquired
      */
     private static InputStream openStreamFromURL(
         String uri
@@ -184,7 +184,7 @@ public class EntityMapper implements EntityResolver {
     }
 
     /**
-     * Extract the name of a resource from <code>xri://+resource</code>-URL 
+     * Extract the name of a resource from {@code xri://+resource}-URL 
      * 
      * @param url the uniform locator of the resource
      * 

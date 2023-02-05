@@ -141,11 +141,11 @@ public class InteractionSpecs {
     private static final InteractionSpecs NOT_RETAINING_VALUES = new InteractionSpecs(false);
     
     /**
-     * REST <code>InteractionSpecs</code> factory method.
+     * REST {@code InteractionSpecs} factory method.
      * 
      * @param retainValues CREATE and PUT return updates if {@code retainValues} is {@code true}
      * 
-     * @return an <code>InteractionSpecs</code> instance
+     * @return an {@code InteractionSpecs} instance
      */
     public static InteractionSpecs getRestInteractionSpecs(
         boolean retainValues 
@@ -157,9 +157,9 @@ public class InteractionSpecs {
      * Method invocation specification factory method.
      * 
      * @param methodName the name of the method to be invoked
-     * @param query the execute method waits for the reply if query is <code>true</code>
+     * @param query the execute method waits for the reply if query is {@code true}
      * 
-     * @return a new <code>InteractionSpec</code> instance
+     * @return a new {@code InteractionSpec} instance
      */
     public static InteractionSpec newMethodInvocationSpec(
         String methodName,
@@ -172,11 +172,11 @@ public class InteractionSpecs {
     }
     
     /**
-     * Test whether the <code>InteractionSpec</code> is logically <code>null</code>
+     * Test whether the {@code InteractionSpec} is logically {@code null}
      * 
-     * @param interactionSpec the  <code>InteractionSpec</code>  to be tested
+     * @param interactionSpec the  {@code InteractionSpec}  to be tested
      * 
-     * @return <code>true</code> if the <code>InteractionSpec</code> is logically <code>null</code>
+     * @return {@code true} if the {@code InteractionSpec} is logically {@code null}
      */
     public static boolean isNull(
         InteractionSpec interactionSpec
@@ -189,12 +189,12 @@ public class InteractionSpecs {
     //----------------------------------------------------------------------------------
     
     /**
-     * The <code>NULL</code> interaction spec
+     * The {@code NULL} interaction spec
      */
     public static final InteractionSpec NULL = new InteractionSpec(){
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = -6765662708933344857L;
 

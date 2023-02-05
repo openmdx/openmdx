@@ -59,7 +59,7 @@ abstract class StructuralFeatureRecord<M extends Enum<M>>
     private String scope;
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -6889607301850506238L;
 

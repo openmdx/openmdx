@@ -83,7 +83,7 @@ class DataproviderRequestConnectionFactory extends AbstractConnectionFactory {
     private final RestConnectionSpec defaultConnectionSpec;
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 6682398895485311772L;    
 

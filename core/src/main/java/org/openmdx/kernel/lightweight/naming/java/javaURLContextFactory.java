@@ -89,10 +89,10 @@ public class javaURLContextFactory implements ObjectFactory {
     * 
     * @param obj The possibly null object containing location or reference 
     *      information that can be used in creating an object.
-    * @param name The name of this object relative to <code>nameCtx</code>,
+    * @param name The name of this object relative to {@code nameCtx},
     *      or null if no name is specified.
-    * @param nameCtx The context relative to which the <code>name</code>
-    *      parameter is specified, or null if <code>name</code> is
+    * @param nameCtx The context relative to which the {@code name}
+    *      parameter is specified, or null if {@code name} is
     *      relative to the default initial context.
     * @param environment The possibly null environment that is used in
     *      creating the object.
@@ -132,7 +132,7 @@ public class javaURLContextFactory implements ObjectFactory {
     }
 
     /**
-     * Retrieve the <code>java:comp</code> context
+     * Retrieve the {@code java:comp} context
      * 
      * @return the component context
      * 
@@ -148,7 +148,7 @@ public class javaURLContextFactory implements ObjectFactory {
     }
     
     /**
-     * Process <code>org.openmdx.comp&hellip;</code> properties
+     * Process {@code org.openmdx.comp&hellip;} properties
      * 
      * @param properties
      * 

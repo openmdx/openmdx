@@ -109,15 +109,15 @@ public class LightweightXAConnection extends LightweightPooledConnection impleme
 	// ------------------------------------------------------------------------
 
 	/**
-	 * Creates and returns a <code>Connection</code> object that is a handle for
-	 * the physical connection that this <code>PooledConnection</code> object
+	 * Creates and returns a {@code Connection} object that is a handle for
+	 * the physical connection that this {@code PooledConnection} object
 	 * represents. The connection pool manager calls this method when an
-	 * application has called the method <code>DataSource.getConnection</code>
-	 * and there are no <code>PooledConnection</code> objects available. See the
+	 * application has called the method {@code DataSource.getConnection}
+	 * and there are no {@code PooledConnection} objects available. See the
 	 * {@link PooledConnection interface description} for more information.
 	 *
-	 * @return a <code>Connection</code> object that is a handle to this
-	 *         <code>PooledConnection</code> object
+	 * @return a {@code Connection} object that is a handle to this
+	 *         {@code PooledConnection} object
 	 * @exception SQLException
 	 *                if a database access error occurs
 	 * @exception SQLFeatureNotSupportedException

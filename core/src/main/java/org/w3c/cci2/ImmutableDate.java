@@ -529,7 +529,7 @@ public final class ImmutableDate
     // Members
     //------------------------------------------------------------------------
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -6028198343774949922L;
 

@@ -66,7 +66,7 @@ interface ClassMapping_1_0 {
      * 
      * @param declaringClass
      * 
-     * @return <code> true</code> the interface is a mixed-in interface
+     * @return {@code true} the interface is a mixed-in interface
      * @throws ServiceException
      */
     boolean isMixedInInterfaces(
@@ -85,7 +85,7 @@ interface ClassMapping_1_0 {
      * Retrieve an invocation descriptor
      * 
      * @param method
-     * @return the invocation descriptor; or <code>null/code>
+     * @return the invocation descriptor; or {@code null/code>
      */
     InvocationDescriptor getInvocationDescriptor(
         Method method

@@ -54,7 +54,7 @@ import javax.resource.cci.RecordFactory;
 
 /**
  * The ExtendedRecordFactory interface is used for creating
- * <code>MappedRecord</code> and <code>IndexedRecord</code> instances wrapping
+ * {@code MappedRecord} and {@code IndexedRecord} instances wrapping
  * the given data.
  */
 public interface ExtendedRecordFactory extends RecordFactory {
@@ -64,7 +64,7 @@ public interface ExtendedRecordFactory extends RecordFactory {
     //--------------------------------------------------------------------------
 
     /**
-     * Creates an <code>MappedRecord</code> of the given type.
+     * Creates an {@code MappedRecord} of the given type.
      * 
      * @param typedInterface
      *            the interface the record shall implement, one of
@@ -132,7 +132,7 @@ public interface ExtendedRecordFactory extends RecordFactory {
      *            information (stored in the metadata repository) for a specific
      *            record type.
      * @param recordShortDescription
-     *            The short description of the Record; or <code>null</null>.
+     *            The short description of the Record; or {@code null</null>.
      * @param key
      *            The key of the single mapped record entry
      * @param value
@@ -150,7 +150,7 @@ public interface ExtendedRecordFactory extends RecordFactory {
     //--------------------------------------------------------------------------
 
     /**
-     * Creates an <code>IndexdRecord</code> of the given type.
+     * Creates an {@code IndexdRecord} of the given type.
      * 
      * @param typedInterface
      *            the interface the record shall implement, one of
@@ -180,7 +180,7 @@ public interface ExtendedRecordFactory extends RecordFactory {
      *            information (stored in the metadata repository) for a specific
      *            record type.
      * @param recordShortDescription
-     *            The short description of the Record; or <code>null</null>.
+     *            The short description of the Record; or {@code null</null>.
      * @param values
      *            The values of the indexed record represented by a List or an
      *            array of objects or primitive types.
@@ -199,7 +199,7 @@ public interface ExtendedRecordFactory extends RecordFactory {
      *            information (stored in the metadata repository) for a specific
      *            record type.
      * @param recordShortDescription
-     *            The short description of the Record; or <code>null</null>.
+     *            The short description of the Record; or {@code null</null>.
      * @param value
      *            The single value of the indexed record.
      *            
@@ -213,7 +213,7 @@ public interface ExtendedRecordFactory extends RecordFactory {
     );
 
     /**
-     * Creates an <code>MappedRecord</code> of the given type.
+     * Creates an {@code MappedRecord} of the given type.
      * 
      * @param typedInterface
      *            the interface the record shall implement, one of

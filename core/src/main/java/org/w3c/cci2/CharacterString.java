@@ -56,11 +56,11 @@ public final class CharacterString implements Final, CharSequence {
      * Constructor 
      *
      * @param buffer a reference to the buffer is kept by 
-     * <code>CharacterString</code>.
+     * {@code CharacterString}.
      * <p><em>
      * Note:<br>
      * The buffer must not be modified by a cooperative
-     * program after it has been used as <code>CharacterString</code>
+     * program after it has been used as {@code CharacterString}
      * constructor argument.
      * </em>
      */
@@ -74,16 +74,16 @@ public final class CharacterString implements Final, CharSequence {
      * Constructor 
      *
      * @param buffer a reference to the buffer is kept by 
-     * <code>CharacterString</code>.
+     * {@code CharacterString}.
      * <p><em>
      * Note:<br>
      * The buffer must not be modified by a cooperative
-     * program after it has been used as <code>CharacterString</code>
+     * program after it has been used as {@code CharacterString}
      * constructor argument.
      * </em>
-     * @param offset the buffer's content before <code>offset</code>
+     * @param offset the buffer's content before {@code offset}
      * is ignored
-     * @param length the buffer's content after <code>offset + length</code>
+     * @param length the buffer's content after {@code offset + length}
      * is ignored
      */
     public CharacterString(
@@ -97,7 +97,7 @@ public final class CharacterString implements Final, CharSequence {
     }
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -3559284554922203039L;
 
@@ -117,7 +117,7 @@ public final class CharacterString implements Final, CharSequence {
     private final int length;
 
     /**
-     * This character string's <code>String</code> representation.
+     * This character string's {@code String} representation.
      */
     private transient String string;
     
@@ -149,7 +149,7 @@ public final class CharacterString implements Final, CharSequence {
     
     
     //------------------------------------------------------------------------
-    // Implements <code>Serializable</code>
+    // Implements {@code Serializable}
     //------------------------------------------------------------------------
     
     /* (non-Javadoc)

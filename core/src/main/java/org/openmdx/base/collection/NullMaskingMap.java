@@ -160,7 +160,7 @@ class NullMaskingMap extends AbstractMapDecorator {
     }
 
     /**
-     * Replace <code>null<code> by <code>nullValue</code>
+     * Replace {@code null{@code  by {@code nullValue}
      * 
      * @param value
      * 
@@ -173,7 +173,7 @@ class NullMaskingMap extends AbstractMapDecorator {
     }
     
     /**
-     * Replace <code>null<nullValue> by <code>null</code>
+     * Replace {@code null<nullValue> by {@code null}
      * 
      * @param value
      * 

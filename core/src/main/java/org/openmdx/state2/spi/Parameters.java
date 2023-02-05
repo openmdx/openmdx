@@ -59,8 +59,8 @@ public class Parameters {
     
     /**
      * If<ul>
-     * <li><code>false</code> then values may be read through a time-range view as long as they are unique
-     * <li><code>true</code> then values may be read through a time-range only if it refers to a single underlying state
+     * <li>{@code false} then values may be read through a time-range view as long as they are unique
+     * <li>{@code true} then values may be read through a time-range only if it refers to a single underlying state
      * </ul>
      */
     public static final boolean STRICT_QUERY = true;

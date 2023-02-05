@@ -94,7 +94,7 @@ public interface ObjectView_1_0
     /**
      * Retrieve the interaction specification associated with this object
      * 
-     * @return <code>null</code> or the interaction specification associated with this object
+     * @return {@code null} or the interaction specification associated with this object
      */
     InteractionSpec getInteractionSpec(
     );

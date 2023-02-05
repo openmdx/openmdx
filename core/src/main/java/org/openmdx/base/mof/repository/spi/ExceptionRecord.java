@@ -63,7 +63,7 @@ public class ExceptionRecord
     private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -4540890453795651971L;
     

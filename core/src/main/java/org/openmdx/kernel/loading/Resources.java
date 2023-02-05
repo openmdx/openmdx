@@ -99,7 +99,7 @@ public class Resources {
      *            fully qualified name of the desired resource
      *
      * @return    a URL for reading the resource,
-     *            or <code>null</code> if the resource could not be found or
+     *            or {@code null} if the resource could not be found or
      *            the caller doesn't have adequate privileges to get the
      *            resource.
      */

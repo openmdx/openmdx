@@ -65,9 +65,17 @@ import org.openmdx.kernel.log.SysLog;
  */
 public abstract class AbstractMapper_1 implements Mapper_1_0 {
 
+  /**
+   * Constructor
+   * 
+   * @param markdown {@code true} if annotations use markdown
+   * @param packageSuffix the (optional) package suffix
+   */
   protected AbstractMapper_1(
+    boolean markdown, 
     String packageSuffix
   ) {
+    this.markdown = markdown;
     this.packageSuffix = packageSuffix;
   }
   
@@ -81,6 +89,10 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
    */
   protected final String packageSuffix;
   
+  /**
+   * Tells whether annoations use markdown.
+   */
+  protected final boolean markdown;
 
   protected void addToZip(
     ZipOutputStream zip,
@@ -182,17 +194,6 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
     );
   }
   
-  String toJavaObjectType(
-    String attributeType
-  ) throws ServiceException {
-	  return 
-		"short".equals(attributeType) ? "java.lang.Short" :
-		"long".equals(attributeType) ? "java.lang.Long" :
-		"int".equals(attributeType) ? "java.lang.Integer" :
-		"boolean".equals(attributeType) ? "java.lang.Boolean" :
-		attributeType;
-  }
-
   /**
    * Return model packages which match the qualified package name. 
    * qualifiedPackageName may contain % as last character serving as wildcard.

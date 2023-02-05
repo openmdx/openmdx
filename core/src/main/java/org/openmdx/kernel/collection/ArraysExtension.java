@@ -78,7 +78,7 @@ public class ArraysExtension {
      * @return a List backed-up by the given array
      * 
      * @exception NullPointerException
-     *            if the array argument is <code>null</code>
+     *            if the array argument is {@code null}
      * @exception ClassCastException 
      *            if the array argument is not an array
      */
@@ -97,7 +97,7 @@ public class ArraysExtension {
      * @return a Map backed-up by the given arrays
      * 
      * @exception NullPointerException
-     *            if either argument is <code>null</code>
+     *            if either argument is {@code null}
      * @exception IllegalArgumentException
      *            if the values argument is not an array
      */
@@ -231,7 +231,7 @@ public class ArraysExtension {
          * @param size the list's size
          * 
          * @exception NullPointerException
-         *            if the array argument is <code>null</code>
+         *            if the array argument is {@code null}
          */
         protected AsList(
             Object array,
@@ -247,7 +247,7 @@ public class ArraysExtension {
          * @param array the array backing up the list
          * 
          * @exception NullPointerException
-         *            if the array argument is <code>null</code>
+         *            if the array argument is {@code null}
          * @exception IllegalArgumentExceptionv 
          *            if the array argument is not an array
          */
@@ -263,12 +263,12 @@ public class ArraysExtension {
         }
 
         /**
-         * Implements <code>Seializable</code>
+         * Implements {@code Seializable}
          */
         private static final long serialVersionUID = 3258134669471267120L;
 
         /**
-         * Implements <code>Freezable</code>
+         * Implements {@code Freezable}
          */
         private boolean immutable;
         
@@ -420,7 +420,7 @@ public class ArraysExtension {
          * @param values
          * 
          * @exception NullPointerException
-         *            if either argument is <code>null</code>
+         *            if either argument is {@code null}
          * @exception IllegalArgumentException
          *            if the values argument is not an array
          */
@@ -434,7 +434,7 @@ public class ArraysExtension {
         }
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = 3202169295074577277L;
 
@@ -709,7 +709,7 @@ public class ArraysExtension {
          * @param right
          *        another object
          *
-         * @return  true if both objects are either <code>null</code> or equal.
+         * @return  true if both objects are either {@code null} or equal.
          */
         protected static boolean areEqual(
             Object left,
@@ -725,7 +725,7 @@ public class ArraysExtension {
          *        the relevant object
          *
          * @return  the object's hash code;
-         *          or 0 if object is <code>null</code>.
+         *          or 0 if object is {@code null}.
          */
         protected static int hashCode(
             Object object

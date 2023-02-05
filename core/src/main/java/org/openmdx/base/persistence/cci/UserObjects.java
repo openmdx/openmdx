@@ -80,14 +80,14 @@ public class UserObjects extends SharedObjects {
     }
 
     /**
-     * If set the task identifier's <code>toString()</code> method is evaluated 
+     * If set the task identifier's {@code toString()} method is evaluated 
      * at the beginning of each unit of work.
      * <p>
      * An application may therefore<ul>
      * <li>either replace <em>unmodifiable</em> task identifiers 
-     * (e.g. <code>java.langString</code> instances) to change the task id 
+     * (e.g. {@code java.langString} instances) to change the task id 
      * <li>use a <em>stateful</em> task identifier providing the current task id each time its
-     * <code>toString()</code> method is invoked
+     * {@code toString()} method is invoked
      * </ul>
      * 
      * @param persistenceManager
@@ -101,7 +101,7 @@ public class UserObjects extends SharedObjects {
     }
     
     /**
-     * If set the transaction time's <code>instantiate()</code> method is evaluated 
+     * If set the transaction time's {@code instantiate()} method is evaluated 
      * at the beginning of each unit of work.
      * 
      * @param persistenceManager
@@ -143,7 +143,7 @@ public class UserObjects extends SharedObjects {
     /**
      * Set the bulk load flag
      * 
-     * @param bulkLoad <code>true</code> in case of bulk load
+     * @param bulkLoad {@code true} in case of bulk load
      */
     public static void setBulkLoad(
         PersistenceManager persistenceManager,
@@ -155,7 +155,7 @@ public class UserObjects extends SharedObjects {
     /**
      * Retrieve the bulk load flag value
      * 
-     * @return <code>true</code> in case of bulk load
+     * @return {@code true} in case of bulk load
      */
     public static boolean isBulkLoad(
         PersistenceManager persistenceManager

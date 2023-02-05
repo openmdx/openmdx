@@ -93,7 +93,7 @@ class Aspect_1 implements Query {
     private Integer datastoreWriteTimeoutMillis;
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 7536537456223904973L;
     

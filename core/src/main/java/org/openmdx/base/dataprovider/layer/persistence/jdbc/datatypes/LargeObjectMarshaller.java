@@ -93,7 +93,7 @@ public class LargeObjectMarshaller {
      * 
      * @param setLargeObjectMethod
      * 
-     * @return <code>true</code> if large objects must be tallied
+     * @return {@code true} if large objects must be tallied
      */
     public boolean isTallyingRequired(
         SetLargeObjectMethod setLargeObjectMethod
@@ -164,7 +164,7 @@ public class LargeObjectMarshaller {
      * 
      * @param clob
      * 
-     * @return the CLOB's length, or <code>null</code> if it is undeterminable
+     * @return the CLOB's length, or {@code null} if it is undeterminable
      */
     private Long getLength(
         Clob clob
@@ -249,7 +249,7 @@ public class LargeObjectMarshaller {
      * 
      * @param blob
      * 
-     * @return the BLOB's length, or <code>null</code> if it is undeterminable
+     * @return the BLOB's length, or {@code null} if it is undeterminable
      */
     private Long getLength(Blob blob) {
         if(this.supportsLargeObjectLength) {

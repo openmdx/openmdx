@@ -337,7 +337,7 @@ public abstract class AbstractUnitOfWork_1 implements UnitOfWork {
      * 
      * @return the delegate of the given type
      * 
-     * @exception NullPointerException if either argument is <code>null</code>
+     * @exception NullPointerException if either argument is {@code null}
      * @exception IllegalArgumentException if the transaction has no delegate of the given type
      */
     public static <T> T getDelegate(

@@ -287,8 +287,8 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
      * 
      * @param ispec the PUT interaction specification
      * @param input the object record
-     * @param output the output record, which may be <code>null</code>
-     * @return <code>true</code> if the object has been made persistent
+     * @param output the output record, which may be {@code null}
+     * @return {@code true} if the object has been made persistent
      */
     protected boolean move(
         RestInteractionSpec ispec, 

@@ -34,7 +34,7 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * <p> This class represents a file or form item that was received within a
- * <code>multipart/form-data</code> POST request.
+ * {@code multipart/form-data} POST request.
  *
  * <p> After retrieving an instance of this class from a {@link
  * org.openmdx.uses.org.apache.commons.fileupload.FileUpload FileUpload} instance (see
@@ -46,11 +46,11 @@ import java.io.UnsupportedEncodingException;
  * it into memory, which may come handy with large files.
  *
  * <p> While this interface does not extend
- * <code>javax.activation.DataSource</code> per se (to avoid a seldom used
+ * {@code javax.activation.DataSource} per se (to avoid a seldom used
  * dependency), several of the defined methods are specifically defined with
  * the same signatures as methods in that interface. This allows an
  * implementation of this interface to also implement
- * <code>javax.activation.DataSource</code> with minimal additional work.
+ * {@code javax.activation.DataSource} with minimal additional work.
  *
  * @version $Id: FileItem.java 1454690 2013-03-09 12:08:48Z simonetripodi $
  * @since FileUpload 1.3 additionally implements FileItemHeadersSupport
@@ -71,10 +71,10 @@ public interface FileItem extends Serializable, FileItemHeadersSupport {
     InputStream getInputStream() throws IOException;
 
     /**
-     * Returns the content type passed by the browser or <code>null</code> if
+     * Returns the content type passed by the browser or {@code null} if
      * not defined.
      *
-     * @return The content type passed by the browser or <code>null</code> if
+     * @return The content type passed by the browser or {@code null} if
      *         not defined.
      */
     String getContentType();
@@ -99,8 +99,8 @@ public interface FileItem extends Serializable, FileItemHeadersSupport {
      * Provides a hint as to whether or not the file contents will be read
      * from memory.
      *
-     * @return <code>true</code> if the file contents will be read from memory;
-     *         <code>false</code> otherwise.
+     * @return {@code true} if the file contents will be read from memory;
+     *         {@code false} otherwise.
      */
     boolean isInMemory();
 
@@ -152,7 +152,7 @@ public interface FileItem extends Serializable, FileItemHeadersSupport {
      * example, file renaming, where possible, rather than copying all of the
      * underlying data, thus gaining a significant performance benefit.
      *
-     * @param file The <code>File</code> into which the uploaded item should
+     * @param file The {@code File} into which the uploaded item should
      *             be stored.
      *
      * @throws Exception if an error occurs.
@@ -162,7 +162,7 @@ public interface FileItem extends Serializable, FileItemHeadersSupport {
     /**
      * Deletes the underlying storage for a file item, including deleting any
      * associated temporary disk file. Although this storage will be deleted
-     * automatically when the <code>FileItem</code> instance is garbage
+     * automatically when the {@code FileItem} instance is garbage
      * collected, this method can be used to ensure that this is done at an
      * earlier time, thus preserving system resources.
      */
@@ -184,20 +184,20 @@ public interface FileItem extends Serializable, FileItemHeadersSupport {
     void setFieldName(String name);
 
     /**
-     * Determines whether or not a <code>FileItem</code> instance represents
+     * Determines whether or not a {@code FileItem} instance represents
      * a simple form field.
      *
-     * @return <code>true</code> if the instance represents a simple form
-     *         field; <code>false</code> if it represents an uploaded file.
+     * @return {@code true} if the instance represents a simple form
+     *         field; {@code false} if it represents an uploaded file.
      */
     boolean isFormField();
 
     /**
-     * Specifies whether or not a <code>FileItem</code> instance represents
+     * Specifies whether or not a {@code FileItem} instance represents
      * a simple form field.
      *
-     * @param state <code>true</code> if the instance represents a simple form
-     *              field; <code>false</code> if it represents an uploaded file.
+     * @param state {@code true} if the instance represents a simple form
+     *              field; {@code false} if it represents an uploaded file.
      */
     void setFormField(boolean state);
 

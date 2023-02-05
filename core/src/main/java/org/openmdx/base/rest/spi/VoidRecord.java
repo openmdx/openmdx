@@ -67,7 +67,7 @@ public class VoidRecord
     private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
 	private static final long serialVersionUID = 239706723820907197L;
 

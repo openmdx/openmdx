@@ -55,12 +55,12 @@ enum BoundaryCrossing {
     STARTS_EARLIER_AND_ENDS_LATER (true, true);
 
     /**
-     * <code>true</code> if a boundary crossing takes place at the beginning
+     * {@code true} if a boundary crossing takes place at the beginning
      */
     final boolean startsEarlier;
     
     /**
-     * <code>true</code> if a boundary crossing takes place at the end
+     * {@code true} if a boundary crossing takes place at the end
      */
     final boolean endsLater;
     

@@ -80,7 +80,7 @@ public abstract class ObjectFilter extends ModelAwareFilter {
      * @exception   IllegalArgumentException
      *              in case of an invalid filter property set
      * @exception   NullPointerException
-     *              if the filter is <code>null</code>
+     *              if the filter is {@code null}
      */
     protected ObjectFilter(
         ObjectFilter superFilter,
@@ -99,7 +99,7 @@ public abstract class ObjectFilter extends ModelAwareFilter {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
 	private static final long serialVersionUID = 1163766975360335130L;
     
@@ -182,7 +182,7 @@ public abstract class ObjectFilter extends ModelAwareFilter {
      * 
      * @param property the filter property to be tested
      * 
-     * @return <code>true</code> if the property contains a transient object id
+     * @return {@code true} if the property contains a transient object id
      */
     private boolean containsTransientObjectId(
         ConditionRecord property

@@ -72,7 +72,7 @@ public class PlugIn_1
      * @param object
      * @param type the model class
      * 
-     * @return <code>true</code> if the object is of the given type
+     * @return {@code true} if the object is of the given type
      * @throws ServiceException
      */
     protected static boolean isInstanceOf(

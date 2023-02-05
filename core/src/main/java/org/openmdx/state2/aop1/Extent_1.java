@@ -78,7 +78,7 @@ public abstract class Extent_1 extends org.openmdx.base.aop1.Extent_1 {
     private transient Container_1_0 stateCapableContainer;
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -7540665569698526423L;
 

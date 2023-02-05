@@ -57,9 +57,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -70,12 +68,19 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
 
     PIMDocExternalizer(
 		BiConsumer<String, ByteArrayOutputStream> archive,
+		boolean markdown, 
 		PIMDocConfiguration configuration
     ){
     	this.archive = archive;
+    	this.markdown = markdown;
         this.configuration = configuration;
         this.buffer = new ByteArrayOutputStream();
     }
+
+    /**
+     * Tells whether annotations use markdown
+     */
+    private final boolean markdown;
     
     /**
      * The configuration providing default values where necessary
@@ -100,23 +105,12 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
 	@Override
 	public void accept(List<ModelElement_1_0> packagesToExport) {
         try {
-	        SysLog.detail("copying magic file");
+	        SysLog.detail("copying magic files");
 	        addResources();
-	        SysLog.detail("exporting packages", packagesToExport);
+	        SysLog.detail("exporting index file", packagesToExport);
         	exportIndexFile(packagesToExport);
-            for(ModelElement_1_0 currentPackage : packagesToExport) {
-            	exportPackageFile(currentPackage);
-                final Model_1_0 model = currentPackage.getModel();
-                String currentPackageName = (String)currentPackage.objGetValue("qualifiedName");
-				for(ModelElement_1_0 element : model.getContent()) {  
-                    if(
-                		model.isClassType(element) &&
-                		model.isLocal(element, currentPackageName)
-                    ){
-                    	exportClassFile(element);
-                    }
-                }   
-            }
+	        SysLog.detail("exporting packages", packagesToExport);
+        	packagesToExport.forEach(this::exportNamespace);
         } catch(Exception exception) {
 			throw new RuntimeServiceException(
 				exception,
@@ -127,6 +121,34 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
         }    
 	}
 
+	private void exportNamespace(
+		final ModelElement_1_0 namespace
+	){
+		exportPackageFile(namespace);
+		exportClassFiles(namespace);
+		exportStructureFiles(namespace);
+	}
+
+	private void exportStructureFiles(final ModelElement_1_0 namespace) {
+		namespace
+			.getModel()
+			.getContent()
+			.stream()
+			.filter(new NamespaceFilter(namespace))
+			.filter(ModelElement_1_0::isStructureType)
+			.forEach(this::exportStructureFile);
+	}
+
+	private void exportClassFiles(final ModelElement_1_0 namespace) {
+		namespace
+			.getModel()
+			.getContent()
+			.stream()
+			.filter(new NamespaceFilter(namespace))
+			.filter(ModelElement_1_0::isClassType)
+			.forEach(this::exportClassFile);
+	}		
+	
 	/**
 	 * Export the (configurable) magic files.
 	 * 
@@ -174,24 +196,38 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
 		}
 	}
 	
-	private void exportIndexFile(List<ModelElement_1_0> packagesToBeExported) throws ServiceException, IOException {
+	private void exportIndexFile(List<ModelElement_1_0> packagesToBeExported) {
 		try (Sink sink = newSink()){
-			new IndexMapper(sink, packagesToBeExported, configuration).createArchiveEntry();
+			new IndexMapper(sink, packagesToBeExported, markdown, configuration).createArchiveEntry();
+		} catch (IOException e) {
+			throw new RuntimeServiceException(e);
 		}
 	}
 
-	private void exportPackageFile(ModelElement_1_0 packageToBeExported) throws ServiceException, IOException {
+	private void exportPackageFile(ModelElement_1_0 packageToBeExported){
 		try (Sink sink = newSink()){
-			new PackageMapper(sink, packageToBeExported, configuration).createArchiveEntry();
+			new PackageMapper(sink, packageToBeExported, markdown, configuration).createArchiveEntry();
+		} catch (IOException e) {
+			throw new RuntimeServiceException(e);
 		}
 	}
 
-	private void exportClassFile(ModelElement_1_0 classToBeExported) throws ServiceException, IOException {
+	private void exportClassFile(ModelElement_1_0 classToBeExported){
 		try (Sink sink = newSink()){
-			new ClassMapper(sink, classToBeExported, configuration).createArchiveEntry();
+			new ClassMapper(sink, classToBeExported, markdown, configuration).createArchiveEntry();
+		} catch (IOException e) {
+			throw new RuntimeServiceException(e);
 		}
 	}
 
+	private void exportStructureFile(ModelElement_1_0 structureToBeExported){
+		try (Sink sink = newSink()){
+			new StructureMapper(sink, structureToBeExported, markdown, configuration).createArchiveEntry();
+		} catch (IOException e) {
+			throw new RuntimeServiceException(e);
+		}
+	}
+	
 	private Sink newSink() {
 		return new Sink() {
 
@@ -220,5 +256,5 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
 	public void close() throws Exception {
 		buffer.close();
 	}
-
+	
 }

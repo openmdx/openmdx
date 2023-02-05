@@ -129,7 +129,7 @@ class Container_1
     private final DataObject_1 owner;
 
     /**
-     * <code>true</code> if cache must be ignored.
+     * {@code true} if cache must be ignored.
      */
     private final boolean ignoreCache;
 
@@ -141,7 +141,7 @@ class Container_1
     /**
      * This collection<ul>
      * <li>does not include <em>PERSISTENT-DELETED</em> or <em>PERSISTENT-NEW-DELETED</em> instances
-     * <li>does include <em>TRANSIENT</code> instances
+     * <li>does include <em>TRANSIENT} instances
      * </ul>
      */
     private Map<String, DataObject_1_0> cache;
@@ -172,7 +172,7 @@ class Container_1
     /**
      * Determine whether the container is composite or not
      * 
-     * @return <code>false</code> unless the container is composite
+     * @return {@code false} unless the container is composite
      */
     private boolean isComposite(
     ){
@@ -192,7 +192,7 @@ class Container_1
     /**
      * Tells whether all objects must be validated
      * 
-     * @return <code>true</code> if all objects must be validated
+     * @return {@code true} if all objects must be validated
      */
     private boolean mustValidate(
     ){
@@ -312,7 +312,7 @@ class Container_1
      * Test whether lookup for this object has already failed in the same unit of work.
      * 
      * @param key
-     * @return <code>true</code> if lookup for this object has already failed in the same unit of work
+     * @return {@code true} if lookup for this object has already failed in the same unit of work
      */
     private boolean notFound(
         Object key

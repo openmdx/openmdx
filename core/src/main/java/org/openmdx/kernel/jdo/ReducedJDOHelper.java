@@ -76,15 +76,15 @@ import org.xml.sax.SAXParseException;
 
 /**
  * This class can be used by a JDO-aware application to call the JDO behavior
- * of <code>PersistenceCapable</code> instances without declaring them to be
- * <code>PersistenceCapable</code>.
- * <P>It is also used to acquire a <code>PersistenceManagerFactory</code> via 
+ * of {@code PersistenceCapable} instances without declaring them to be
+ * {@code PersistenceCapable}.
+ * <P>It is also used to acquire a {@code PersistenceManagerFactory} via 
  * various methods.
  * <P>This helper class defines static methods that allow a JDO-aware
  * application to examine the runtime state of instances.  For example,
  * an application can discover whether the instance is persistent, 
  * transactional, dirty, new, deleted, or detached; and to get its associated
- * <code>PersistenceManager</code> if it has one.
+ * {@code PersistenceManager} if it has one.
  * <p>
  * As opposed to javax.jdo.JDOHelper this class<ul>
  * <li>does not depend on javax.naming
@@ -97,7 +97,7 @@ public class ReducedJDOHelper implements Constants {
     /**
      * The name of the standard service configuration resource text file containing
      * the name of an implementation of {@link PersistenceManagerFactory}.
-     * Constant value is <code>META-INF/services/javax.jdo.PersistenceManagerFactory</code>.
+     * Constant value is {@code META-INF/services/javax.jdo.PersistenceManagerFactory}.
      *
      * @since JDO 2.1
      */
@@ -106,7 +106,7 @@ public class ReducedJDOHelper implements Constants {
 
     /**
      * The name of the standard JDO configuration resource file(s).
-     * Constant value is <code>META-INF/jdoconfig.xml</code>.
+     * Constant value is {@code META-INF/jdoconfig.xml}.
      *
      * @since 2.1
      */
@@ -311,16 +311,16 @@ public class ReducedJDOHelper implements Constants {
             }
         };
 
-    /** Return the associated <code>PersistenceManager</code> if there is one.
+    /** Return the associated {@code PersistenceManager} if there is one.
      * Transactional and persistent instances return the associated
-     * <code>PersistenceManager</code>.  
+     * {@code PersistenceManager}.  
      *
      * <P>Transient non-transactional instances and instances of classes 
-     * that do not implement <code>PersistenceCapable</code> return 
-     * <code>null</code>.
+     * that do not implement {@code PersistenceCapable} return 
+     * {@code null}.
      * @see PersistenceCapable#jdoGetPersistenceManager()
-     * @param pc the <code>PersistenceCapable</code> instance.
-     * @return the <code>PersistenceManager</code> associated with the parameter
+     * @param pc the {@code PersistenceCapable} instance.
+     * @return the {@code PersistenceManager} associated with the parameter
      * instance.
      */
      public static PersistenceManager getPersistenceManager(Object pc) {
@@ -333,16 +333,16 @@ public class ReducedJDOHelper implements Constants {
       }
     
     /** Explicitly mark the parameter instance and field dirty.
-     * Normally, <code>PersistenceCapable</code> classes are able to detect 
+     * Normally, {@code PersistenceCapable} classes are able to detect 
      * changes made to their fields.  However, if a reference to an array is 
      * given to a method outside the class, and the array is modified, then the
      * persistent instance is not aware of the change.  This API allows the
      * application to notify the instance that a change was made to a field.
      *
      * <P>Transient instances and instances of classes 
-     * that do not implement <code>PersistenceCapable</code> ignore this method.
+     * that do not implement {@code PersistenceCapable} ignore this method.
      * @see PersistenceCapable#jdoMakeDirty(String fieldName)
-     * @param pc the <code>PersistenceCapable</code> instance.
+     * @param pc the {@code PersistenceCapable} instance.
      * @param fieldName the name of the field to be marked dirty.
      */
     public static void makeDirty(Object pc, String fieldName) {
@@ -356,21 +356,21 @@ public class ReducedJDOHelper implements Constants {
     /** Return a copy of the JDO identity associated with the parameter 
      * instance.
      *
-     * <P>Persistent instances of <code>PersistenceCapable</code> classes have a
-     * JDO identity managed by the <code>PersistenceManager</code>.  This method
+     * <P>Persistent instances of {@code PersistenceCapable} classes have a
+     * JDO identity managed by the {@code PersistenceManager}.  This method
      * returns a copy of the ObjectId that represents the JDO identity.  
      * 
      * <P>Transient instances and instances of classes that do not implement 
-     * <code>PersistenceCapable</code> return <code>null</code>.
+     * {@code PersistenceCapable} return {@code null}.
      *
      * <P>The ObjectId may be serialized
-     * and later restored, and used with a <code>PersistenceManager</code> from 
+     * and later restored, and used with a {@code PersistenceManager} from 
      * the same JDO implementation to locate a persistent instance with the same
      * data store identity.
      *
      * <P>If the JDO identity is managed by the application, then the ObjectId 
-     * may be used with a <code>PersistenceManager</code> from any JDO 
-     * implementation that supports the <code>PersistenceCapable</code> class.
+     * may be used with a {@code PersistenceManager} from any JDO 
+     * implementation that supports the {@code PersistenceCapable} class.
      *
      * <P>If the JDO identity is not managed by the application or the data 
      * store, then the ObjectId returned is only valid within the current 
@@ -436,7 +436,7 @@ public class ReducedJDOHelper implements Constants {
      *
      * @see PersistenceCapable#jdoGetTransactionalObjectId()
      * @see PersistenceManager#getObjectById(Object oid, boolean validate)
-     * @param pc the <code>PersistenceCapable</code> instance.
+     * @param pc the {@code PersistenceCapable} instance.
      * @return a copy of the ObjectId of the parameter instance as modified in 
      * this transaction.
      */
@@ -465,16 +465,16 @@ public class ReducedJDOHelper implements Constants {
     /** Tests whether the parameter instance is dirty.
      *
      * Instances that have been modified, deleted, or newly 
-     * made persistent in the current transaction return <code>true</code>.
+     * made persistent in the current transaction return {@code true}.
      *
      *<P>Transient instances and instances of classes that do not implement 
-     * <code>PersistenceCapable</code> return <code>false</code>.
+     * {@code PersistenceCapable} return {@code false}.
      *<P>
      * @see javax.jdo.spi.StateManager#makeDirty(PersistenceCapable pc, 
      * String fieldName)
      * @see PersistenceCapable#jdoIsDirty()
-     * @param pc the <code>PersistenceCapable</code> instance.
-     * @return <code>true</code> if the parameter instance has been modified in 
+     * @param pc the {@code PersistenceCapable} instance.
+     * @return {@code true} if the parameter instance has been modified in 
      * the current transaction.
      */
     public static boolean isDirty(Object pc) {
@@ -491,10 +491,10 @@ public class ReducedJDOHelper implements Constants {
      * return true. 
      *
      *<P>Transient instances and instances of classes that do not implement 
-     * <code>PersistenceCapable</code> return <code>false</code>.
+     * {@code PersistenceCapable} return {@code false}.
      * @see PersistenceCapable#jdoIsTransactional()
-     * @param pc the <code>PersistenceCapable</code> instance.
-     * @return <code>true</code> if the parameter instance is transactional.
+     * @param pc the {@code PersistenceCapable} instance.
+     * @return {@code true} if the parameter instance is transactional.
      */
     public static boolean isTransactional(Object pc) {
       if (pc instanceof PersistenceCapable) {
@@ -507,15 +507,15 @@ public class ReducedJDOHelper implements Constants {
     /** Tests whether the parameter instance is persistent.
      *
      * Instances that represent persistent objects in the data store 
-     * return <code>true</code>. 
+     * return {@code true}. 
      *
      *<P>Transient instances and instances of classes that do not implement 
-     * <code>PersistenceCapable</code> return <code>false</code>.
+     * {@code PersistenceCapable} return {@code false}.
      *<P>
      * @see PersistenceManager#makePersistent(Object pc)
      * @see PersistenceCapable#jdoIsPersistent()
-     * @param pc the <code>PersistenceCapable</code> instance.
-     * @return <code>true</code> if the parameter instance is persistent.
+     * @param pc the {@code PersistenceCapable} instance.
+     * @return {@code true} if the parameter instance is persistent.
      */
     public static boolean isPersistent(Object pc) {
       if (pc instanceof PersistenceCapable) {
@@ -528,15 +528,15 @@ public class ReducedJDOHelper implements Constants {
     /** Tests whether the parameter instance has been newly made persistent.
      *
      * Instances that have been made persistent in the current transaction 
-     * return <code>true</code>.
+     * return {@code true}.
      *
      *<P>Transient instances and instances of classes that do not implement 
-     * <code>PersistenceCapable</code> return <code>false</code>.
+     * {@code PersistenceCapable} return {@code false}.
      *<P>
      * @see PersistenceManager#makePersistent(Object pc)
      * @see PersistenceCapable#jdoIsNew()
-     * @param pc the <code>PersistenceCapable</code> instance.
-     * @return <code>true</code> if the parameter instance was made persistent
+     * @param pc the {@code PersistenceCapable} instance.
+     * @return {@code true} if the parameter instance was made persistent
      * in the current transaction.
      */
     public static boolean isNew(Object pc) {
@@ -550,15 +550,15 @@ public class ReducedJDOHelper implements Constants {
     /** Tests whether the parameter instance has been deleted.
      *
      * Instances that have been deleted in the current transaction return 
-     * <code>true</code>.
+     * {@code true}.
      *
      *<P>Transient instances and instances of classes that do not implement 
-     * <code>PersistenceCapable</code> return <code>false</code>.
+     * {@code PersistenceCapable} return {@code false}.
      *<P>
      * @see PersistenceManager#deletePersistent(Object pc)
      * @see PersistenceCapable#jdoIsDeleted()
-     * @param pc the <code>PersistenceCapable</code> instance.
-     * @return <code>true</code> if the parameter instance was deleted
+     * @param pc the {@code PersistenceCapable} instance.
+     * @return {@code true} if the parameter instance was deleted
      * in the current transaction.
      */
     public static boolean isDeleted(Object pc) {
@@ -577,7 +577,7 @@ public class ReducedJDOHelper implements Constants {
      * <P>Transient instances return false.
      * <P>
      * @see PersistenceCapable#jdoIsDetached()
-     * @return <code>true</code> if this instance is detached.
+     * @return {@code true} if this instance is detached.
      * @since JDO 2.0
      * @param pc the instance
      */
@@ -664,11 +664,11 @@ public class ReducedJDOHelper implements Constants {
         }
     }
 
-    /** Get the anonymous <code>PersistenceManagerFactory</code> configured via
+    /** Get the anonymous {@code PersistenceManagerFactory} configured via
      * the standard configuration file resource "META-INF/jdoconfig.xml", using
      * the current thread's context class loader
      * to locate the configuration file resource(s).
-     * @return the anonymous <code>PersistenceManagerFactory</code>.
+     * @return the anonymous {@code PersistenceManagerFactory}.
      * @since openMDX 2.17
      * @see #getPersistenceManagerFactory(Map,String,ClassLoader,ClassLoader)
      */
@@ -678,10 +678,10 @@ public class ReducedJDOHelper implements Constants {
                 null, ANONYMOUS_PERSISTENCE_MANAGER_FACTORY_NAME, cl, cl);
     }
 
-    /** Get the anonymous <code>PersistenceManagerFactory</code> configured via
+    /** Get the anonymous {@code PersistenceManagerFactory} configured via
      * the standard configuration file resource "META-INF/jdoconfig.xml", using
      * the given class loader.
-     * @return the anonymous <code>PersistenceManagerFactory</code>.
+     * @return the anonymous {@code PersistenceManagerFactory}.
      * @param pmfClassLoader the ClassLoader used to load resources and classes
      * @since openMDX 2.17
      * @see #getPersistenceManagerFactory(Map,String,ClassLoader,ClassLoader)
@@ -694,12 +694,12 @@ public class ReducedJDOHelper implements Constants {
                 pmfClassLoader, pmfClassLoader);
     }
 
-    /** Get a <code>PersistenceManagerFactory</code> based on a <code>Properties</code>
+    /** Get a {@code PersistenceManagerFactory} based on a {@code Properties}
      * instance, using the current thread's context class loader to locate the
-     * <code>PersistenceManagerFactory</code> class.
-     * @return the <code>PersistenceManagerFactory</code>.
-     * @param props a <code>Properties</code> instance with properties of the
-     * <code>PersistenceManagerFactory</code>.
+     * {@code PersistenceManagerFactory} class.
+     * @return the {@code PersistenceManagerFactory}.
+     * @param props a {@code Properties} instance with properties of the
+     * {@code PersistenceManagerFactory}.
      * @see #getPersistenceManagerFactory(java.util.Map,ClassLoader)
      * @since openMDX 2.17
      */
@@ -710,17 +710,17 @@ public class ReducedJDOHelper implements Constants {
     }
 
 
-    /** Get a <code>PersistenceManagerFactory</code> based on a 
-     * <code>Map</code> and a class loader.
+    /** Get a {@code PersistenceManagerFactory} based on a 
+     * {@code Map} and a class loader.
      * This method delegates to the getPersistenceManagerFactory
      * method that takes a Map of overrides and a Map of properties,
      * passing null as the overrides parameter.
      * @see #getPersistenceManagerFactory(java.util.Map, java.util.Map, ClassLoader)
-     * @return the <code>PersistenceManagerFactory</code>.
-     * @param props a <code>Map</code> with properties of the 
-     * <code>PersistenceManagerFactory</code>.
+     * @return the {@code PersistenceManagerFactory}.
+     * @param props a {@code Map} with properties of the 
+     * {@code PersistenceManagerFactory}.
      * @param pmfClassLoader the class loader used to load the
-     * <code>PersistenceManagerFactory</code> class
+     * {@code PersistenceManagerFactory} class
      * @since openMDX 2.17
      */
     public static JDOPersistenceManagerFactory getPersistenceManagerFactory
@@ -730,11 +730,11 @@ public class ReducedJDOHelper implements Constants {
     }
 
     /**
-     * Get a <code>PersistenceManagerFactory</code> based on a 
-     * <code>Map</code> of overrides, a <code>Map</code> of 
+     * Get a {@code PersistenceManagerFactory} based on a 
+     * {@code Map} of overrides, a {@code Map} of 
      * properties, and a class loader.
      * The following are standard key names:
-     * <BR><code>"javax.jdo.PersistenceManagerFactoryClass"
+     * <BR>{@code "javax.jdo.PersistenceManagerFactoryClass"
      * <BR>"javax.jdo.option.Optimistic",
      * <BR>"javax.jdo.option.RetainValues",
      * <BR>"javax.jdo.option.RestoreValues",
@@ -760,13 +760,13 @@ public class ReducedJDOHelper implements Constants {
      * <BR>"javax.jdo.option.DatastoreReadTimeoutMillis",
      * <BR>"javax.jdo.option.DatastoreWriteTimeoutMillis",
      * <BR>"javax.jdo.option.Name".
-     * </code>
+     * }
      * and properties of the form
-     * <BR><code>javax.jdo.option.InstanceLifecycleListener.{listenerClass}[=[{pcClasses}]]</code>
-     * where <code>{listenerClass}</code> is the fully qualified name of a
+     * <BR>{@code javax.jdo.option.InstanceLifecycleListener.{listenerClass}[=[{pcClasses}]]}
+     * where {@code {listenerClass}} is the fully qualified name of a
      * class that implements
      * {@link javax.jdo.listener.InstanceLifecycleListener}, and
-     * <code>{pcClasses}</code> is an optional comma- or whitespace-delimited
+     * {@code {pcClasses}} is an optional comma- or whitespace-delimited
      * list of persistence-capable classes to be observed; the absence of a
      * value for a property of this form means that instances of all
      * persistence-capable classes will be observed by an instance of the given
@@ -775,25 +775,25 @@ public class ReducedJDOHelper implements Constants {
      * are permitted to define key values of their own.  Any key values not
      * recognized by the implementation must be ignored.  Key values that are
      * recognized but not supported by an implementation must result in a
-     * <code>JDOFatalUserException</code> thrown by the method.
-     * <P>The returned <code>PersistenceManagerFactory</code> is not 
-     * configurable (the <code>set<I>XXX</I></code> methods will throw an 
+     * {@code JDOFatalUserException} thrown by the method.
+     * <P>The returned {@code PersistenceManagerFactory} is not 
+     * configurable (the {@code set<I>XXX</I>} methods will throw an 
      * exception).
      * <P>JDO implementations might manage a map of instantiated
-     * <code>PersistenceManagerFactory</code> instances based on specified 
+     * {@code PersistenceManagerFactory} instances based on specified 
      * property key values, and return a previously instantiated 
-     * <code>PersistenceManagerFactory</code> instance.  In this case, the 
+     * {@code PersistenceManagerFactory} instance.  In this case, the 
      * properties of the returned instance must exactly match the requested 
      * properties.
-     * @return the <code>PersistenceManagerFactory</code>.
-     * @param props a <code>Properties</code> instance with properties of the 
-     * <code>PersistenceManagerFactory</code>.
+     * @return the {@code PersistenceManagerFactory}.
+     * @param props a {@code Properties} instance with properties of the 
+     * {@code PersistenceManagerFactory}.
      * @param pmfClassLoader the class loader to use to load the
-     * <code>PersistenceManagerFactory</code> class
+     * {@code PersistenceManagerFactory} class
      * @throws JDOFatalUserException if
      * <ul><li>the pmfClassLoader passed is invalid; or 
      * </li><li>a valid class name cannot be obtained from
-     * either <code>props</code> or system resources 
+     * either {@code props} or system resources 
      * (an entry in META-INF/services/javax.jdo.PersistenceManagerFactory); or
      * </li><li>all implementations throw an exception.
      * </li></ul>
@@ -989,15 +989,15 @@ public class ReducedJDOHelper implements Constants {
     /**
      * Returns a {@link PersistenceManagerFactory} configured based
      * on the properties stored in the resource at
-     * <code>name</code>, or, if not found, returns a
+     * {@code name}, or, if not found, returns a
      * {@link PersistenceManagerFactory} with the given
      * name or, if not found, returns a
-     * <code>javax.persistence.EntityManagerFactory</code> cast to a
+     * {@code javax.persistence.EntityManagerFactory} cast to a
      * {@link PersistenceManagerFactory}.  If the name given is null or consists
      * only of whitespace, it is interpreted as
      * {@link Constants#ANONYMOUS_PERSISTENCE_MANAGER_FACTORY_NAME}.
      * The following are standard key names:
-     * <BR><code>"javax.jdo.PersistenceManagerFactoryClass"
+     * <BR>{@code "javax.jdo.PersistenceManagerFactoryClass"
      * <BR>"javax.jdo.option.Optimistic",
      * <BR>"javax.jdo.option.RetainValues",
      * <BR>"javax.jdo.option.RestoreValues",
@@ -1021,13 +1021,13 @@ public class ReducedJDOHelper implements Constants {
      * <BR>"javax.jdo.option.DatastoreReadTimeoutMillis",
      * <BR>"javax.jdo.option.DatastoreWriteTimeoutMillis",
      * <BR>"javax.jdo.option.Name".
-     * </code>
+     * }
      * and properties of the form
-     * <BR><code>javax.jdo.option.InstanceLifecycleListener.{listenerClass}[=[{pcClasses}]]</code>
-     * where <code>{listenerClass}</code> is the fully qualified name of a
+     * <BR>{@code javax.jdo.option.InstanceLifecycleListener.{listenerClass}[=[{pcClasses}]]}
+     * where {@code {listenerClass}} is the fully qualified name of a
      * class that implements
      * {@link javax.jdo.listener.InstanceLifecycleListener}, and
-     * <code>{pcClasses}</code> is an optional comma- or whitespace-delimited
+     * {@code {pcClasses}} is an optional comma- or whitespace-delimited
      * list of persistence-capable classes to be observed; the absence of a
      * value for a property of this form means that instances of all
      * persistence-capable classes will be observed by an instance of the given
@@ -1036,14 +1036,14 @@ public class ReducedJDOHelper implements Constants {
      * are permitted to define key values of their own.  Any key values not
      * recognized by the implementation must be ignored.  Key values that are
      * recognized but not supported by an implementation must result in a
-     * <code>JDOFatalUserException</code> thrown by the method.
-     * <P>The returned <code>PersistenceManagerFactory</code> is not 
-     * configurable (the <code>set<I>XXX</I></code> methods will throw an 
+     * {@code JDOFatalUserException} thrown by the method.
+     * <P>The returned {@code PersistenceManagerFactory} is not 
+     * configurable (the {@code set<I>XXX</I>} methods will throw an 
      * exception).
      * 
-     * This method loads the properties found at <code>name</code>, if any, via
-     * <code>resourceLoader</code>, and creates a {@link
-     * PersistenceManagerFactory} with <code>pmfLoader</code>. Any
+     * This method loads the properties found at {@code name}, if any, via
+     * {@code resourceLoader}, and creates a {@link
+     * PersistenceManagerFactory} with {@code pmfLoader}. Any
      * exceptions thrown during resource loading will
      * be wrapped in a {@link JDOFatalUserException}.
      * If multiple PMFs with the requested name are found, a
@@ -1056,10 +1056,10 @@ public class ReducedJDOHelper implements Constants {
      * order; if name is null, blank or whitespace, it is interpreted as
      * indicating the anonymous {@link PersistenceManagerFactory}.
      * @param resourceLoader the class loader to use to load properties file
-     * resources; must be non-null if <code>name</code> is non-null or blank
+     * resources; must be non-null if {@code name} is non-null or blank
      * @param pmfLoader the class loader to use to load the 
      * {@link PersistenceManagerFactory} or
-     * <code>javax.persistence.EntityManagerFactory</code> classes
+     * {@code javax.persistence.EntityManagerFactory} classes
      * @return the {@link PersistenceManagerFactory} with properties in the
      * given resource, with the given name, or with the given persitence unit
      * name
@@ -1268,7 +1268,7 @@ public class ReducedJDOHelper implements Constants {
      * @param jdoconfigResourceName The name of the configuration file to read.
      * In public usage, this should always be the value of
      * {@link Constants#JDOCONFIG_RESOURCE_NAME}.
-     * @return The named <code>PersistenceManagerFactory</code> properties if
+     * @return The named {@code PersistenceManagerFactory} properties if
      * found, null if not.
      * @since JDO 2.1
      * @throws JDOFatalUserException if multiple named PMF property sets are
@@ -1401,7 +1401,7 @@ public class ReducedJDOHelper implements Constants {
      * javax/jdo/jdoconfig.xsd.
      * @param requestedPMFName The name of the requested
      * persistence unit (allows for fail-fast).
-     * @param factory The <code>DocumentBuilderFactory</code> to use for XML
+     * @param factory The {@code DocumentBuilderFactory} to use for XML
      * parsing.
      * @return a Map<String,Map> holding persistence unit configurations; for
      * the anonymous persistence unit, the
@@ -1685,11 +1685,11 @@ public class ReducedJDOHelper implements Constants {
     /**
      * Returns a {@link PersistenceManagerFactory} configured based
      * on the properties stored in the file at
-     * <code>propsFile</code>. This method is equivalent to
+     * {@code propsFile}. This method is equivalent to
      * invoking {@link
      * #getPersistenceManagerFactory(File,ClassLoader)} with
-     * <code>Thread.currentThread().getContextClassLoader()</code> as
-     * the <code>loader</code> argument.
+     * {@code Thread.currentThread().getContextClassLoader()} as
+     * the {@code loader} argument.
      * @since openMDX 2.17
      * @param propsFile the file containing the Properties
      * @return the PersistenceManagerFactory
@@ -1703,15 +1703,15 @@ public class ReducedJDOHelper implements Constants {
     /**
      * Returns a {@link PersistenceManagerFactory} configured based
      * on the properties stored in the file at
-     * <code>propsFile</code>. Creates a {@link
-     * PersistenceManagerFactory} with <code>loader</code>. Any
-     * <code>IOException</code>s or
-     * <code>FileNotFoundException</code>s thrown during resource
+     * {@code propsFile}. Creates a {@link
+     * PersistenceManagerFactory} with {@code loader}. Any
+     * {@code IOException}s or
+     * {@code FileNotFoundException}s thrown during resource
      * loading will be wrapped in a {@link JDOFatalUserException}.
      * @since openMDX 2.17
      * @param propsFile the file containing the Properties
      * @param loader the class loader to use to load the 
-     * <code>PersistenceManagerFactory</code> class
+     * {@code PersistenceManagerFactory} class
      * @return the PersistenceManagerFactory
      */
     public static JDOPersistenceManagerFactory getPersistenceManagerFactory
@@ -1738,11 +1738,11 @@ public class ReducedJDOHelper implements Constants {
     /**
      * Returns a {@link PersistenceManagerFactory} configured based
      * on the Properties stored in the input stream at
-     * <code>stream</code>. This method is equivalent to
+     * {@code stream}. This method is equivalent to
      * invoking {@link
      * #getPersistenceManagerFactory(InputStream,ClassLoader)} with
-     * <code>Thread.currentThread().getContextClassLoader()</code> as
-     * the <code>loader</code> argument.
+     * {@code Thread.currentThread().getContextClassLoader()} as
+     * the {@code loader} argument.
      * @since openMDX 2.17
      * @param stream the stream containing the Properties
      * @return the PersistenceManagerFactory
@@ -1756,14 +1756,14 @@ public class ReducedJDOHelper implements Constants {
     /**
      * Returns a {@link PersistenceManagerFactory} configured based
      * on the Properties stored in the input stream at
-     * <code>stream</code>. Creates a {@link
-     * PersistenceManagerFactory} with <code>loader</code>. Any
-     * <code>IOException</code>s thrown during resource
+     * {@code stream}. Creates a {@link
+     * PersistenceManagerFactory} with {@code loader}. Any
+     * {@code IOException}s thrown during resource
      * loading will be wrapped in a {@link JDOFatalUserException}.
      * @since openMDX 2.17
      * @param stream the stream containing the Properties
      * @param loader the class loader to use to load the 
-     * <code>PersistenceManagerFactory</code> class
+     * {@code PersistenceManagerFactory} class
      * @return the PersistenceManagerFactory
      */
     public static JDOPersistenceManagerFactory getPersistenceManagerFactory
@@ -1783,9 +1783,9 @@ public class ReducedJDOHelper implements Constants {
     }
 
     /**
-     * Get a <code>JDOEnhancer</code> using the available enhancer(s) specified in
+     * Get a {@code JDOEnhancer} using the available enhancer(s) specified in
      * "META-INF/services/JDOEnhancer" using the context class loader.
-     * @return the <code>JDOEnhancer</code>.
+     * @return the {@code JDOEnhancer}.
      * @throws JDOFatalUserException if no available enhancer
      * @since JDO 3.0
      */
@@ -1794,10 +1794,10 @@ public class ReducedJDOHelper implements Constants {
     }
 
     /**
-     * Get a <code>JDOEnhancer</code> using the available enhancer(s) specified in
+     * Get a {@code JDOEnhancer} using the available enhancer(s) specified in
      * "META-INF/services/JDOEnhancer"
      * @param loader the loader to use for loading the JDOEnhancer class (if any)
-     * @return the <code>JDOEnhancer</code>.
+     * @return the {@code JDOEnhancer}.
      * @throws JDOFatalUserException if no available enhancer
      * @since JDO 3.0
      */

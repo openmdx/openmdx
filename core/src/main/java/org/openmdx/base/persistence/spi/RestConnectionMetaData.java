@@ -82,7 +82,7 @@ public class RestConnectionMetaData implements ConnectionMetaData, Serializable 
 	private final String userName;
 	
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = 7537117823051959371L;
 	

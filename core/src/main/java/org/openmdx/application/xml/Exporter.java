@@ -201,7 +201,7 @@ public class Exporter {
     /**
      * Provide the write operation argument
      * 
-     * @param object either a <code>refObject</code> or a primitive type
+     * @param object either a {@code refObject} or a primitive type
      */
     private static Object toValue(
         Object object
@@ -409,11 +409,11 @@ public class Exporter {
     }
 
     /**
-     * Create an <code>Exporter</code> and export the given objects
+     * Create an {@code Exporter} and export the given objects
      * 
      * @param target
      * @param persistenceManager
-     * @param exportFilter defaults to the <code>AggregationOnlyFilter</code> in case of <code>null</code>
+     * @param exportFilter defaults to the {@code AggregationOnlyFilter} in case of {@code null}
      * @param objectIds the starting points
      * 
      * @throws ServiceException
@@ -442,7 +442,7 @@ public class Exporter {
     }
 
     /**
-     * Support <code>RefObject</code>/<code>String</code> specification
+     * Support {@code RefObject}/{@code String} specification
      * 
      * @param startFrom
      * @param rawFilter
@@ -511,7 +511,7 @@ public class Exporter {
      * 
      * @param filter the stringified filter value
      * 
-     * @return an <code>ExportFilter</code>
+     * @return an {@code ExportFilter}
      */
     public static ExportFilter newFilter(
         String filter
@@ -537,12 +537,12 @@ public class Exporter {
     }
         
     /**
-     * Create a MIME-TYPE specific <code>ExportTarget</code>
+     * Create a MIME-TYPE specific {@code ExportTarget}
      * 
      * @param target the final destination
      * @param mimeType the document's MIME type
      * 
-     * @return the corresponding <code>ExportTarget</code>
+     * @return the corresponding {@code ExportTarget}
      * 
      * @throws ServiceException
      */
@@ -564,12 +564,12 @@ public class Exporter {
     }
 
     /**
-     * Create a MIME-TYPE specific <code>ExportTarget</code>
+     * Create a MIME-TYPE specific {@code ExportTarget}
      * 
      * @param target the final destination
      * @param mimeType the document's MIME type
      * 
-     * @return the corresponding <code>ExportTarget</code>
+     * @return the corresponding {@code ExportTarget}
      * 
      * @throws ServiceException
      */
@@ -602,8 +602,8 @@ public class Exporter {
 	 * Allows to iterate level by level
 	 * <p>
 	 * The entry's value is<ul>
-	 * <li>always <code>null</code> in case of references
-	 * <li><code>null</code> if not the object itself has to be exported but 
+	 * <li>always {@code null} in case of references
+	 * <li>{@code null} if not the object itself has to be exported but 
 	 * but some or all of its aggregate children
 	 * </ul>
 	 */
@@ -625,7 +625,7 @@ public class Exporter {
 	     * 
 	     * @param resourceId
 	     * 
-	     * @return an <code>Iterator</code> for<ul>
+	     * @return an {@code Iterator} for<ul>
 	     * <li>either references of an object
 	     * <li>or objects of a reference
 	     * </ul>
@@ -670,7 +670,7 @@ public class Exporter {
 	    /**
 	     * Retrieve the next pending object
 	     * 
-	     * @return the next pending object, or <code>null</code> at the end.
+	     * @return the next pending object, or {@code null} at the end.
 	     */
 	    protected Map.Entry<Path,RefObject> getPending(
 	    ){
@@ -785,7 +785,7 @@ public class Exporter {
         /**
          * Constructor 
          *
-         * @param exportFilter the export filter must not be <code>null</code>
+         * @param exportFilter the export filter must not be {@code null}
          */
         public Closure(
             ExportFilter exportFilter
@@ -813,7 +813,7 @@ public class Exporter {
          * 
          * @param refId
          * 
-         * @return <code>true</code> if pending modifications have been added
+         * @return {@code true} if pending modifications have been added
          */
         private boolean probe(
             Path refId
@@ -831,7 +831,7 @@ public class Exporter {
          * @param refObject
          * @param distance
          * 
-         * @return <code>true</code> if the tree has been modified
+         * @return {@code true} if the tree has been modified
          * @throws ServiceException  
          */
         private void probe(
@@ -851,7 +851,7 @@ public class Exporter {
          * @param current
          * @param distance
          * 
-         * @return <code>true</code> if there are pending visits
+         * @return {@code true} if there are pending visits
          * 
          * @throws ServiceException
          */

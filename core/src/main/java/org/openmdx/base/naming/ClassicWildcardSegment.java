@@ -60,7 +60,7 @@ public class ClassicWildcardSegment extends XRISegment {
 	private transient String prefix;
 
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = 7275141720000254336L;
 	

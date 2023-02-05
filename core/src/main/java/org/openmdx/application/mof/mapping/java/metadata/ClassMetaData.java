@@ -65,7 +65,7 @@ public interface ClassMetaData extends ExtendableMetaData {
      * 
      * @param visibility the field selector
      * 
-     * @return a non-empty collection with the matching fields, or <code>null</code>
+     * @return a non-empty collection with the matching fields, or {@code null}
      */
     Collection<FieldMetaData> getFieldMetaData(
         Visibility visibility

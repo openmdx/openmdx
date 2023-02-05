@@ -134,7 +134,7 @@ public class Filter extends QueryFilterRecord {
     }
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
 	private static final long serialVersionUID = -2577782503585083499L;
     

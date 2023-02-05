@@ -52,47 +52,47 @@ import javax.jdo.PersistenceManagerFactory;
  */
 public interface JDOPersistenceManagerFactory extends PersistenceManagerFactory {
 
-    /** Get an instance of <code>PersistenceManager</code> from this factory.  
+    /** Get an instance of {@code PersistenceManager} from this factory.  
      * The instance has default values for options.
      *
-     * <P>After the first use of <code>getPersistenceManager</code>, no "set" 
+     * <P>After the first use of {@code getPersistenceManager}, no "set" 
      * methods will succeed.
      *
-     * @return a <code>PersistenceManager</code> instance with default options.
+     * @return a {@code PersistenceManager} instance with default options.
      */
     JDOPersistenceManager getPersistenceManager();
 
     /** Get a thread-safe instance of a proxy that dynamically binds 
-     * on each method call to an instance of <code>PersistenceManager</code>.
-     * <P>When used with a <code>JDOPersistenceManagerFactory</code>
+     * on each method call to an instance of {@code PersistenceManager}.
+     * <P>When used with a {@code JDOPersistenceManagerFactory}
      * that uses TransactionType JTA,
      * the proxy can be used in a server to dynamically bind to an instance 
      * from this factory associated with the thread's current transaction.
      * In this case, the close method is ignored, as the 
-     * <code>JDOPersistenceManager</code> is automatically closed when the
+     * {@code JDOPersistenceManager} is automatically closed when the
      * transaction completes.
-     * <P>When used with a <code>JDOPersistenceManagerFactory</code>
+     * <P>When used with a {@code JDOPersistenceManagerFactory}
      * that uses TransactionType RESOURCE_LOCAL, the proxy uses an inheritable
-     * ThreadLocal to bind to an instance of <code>PersistenceManager</code>
+     * ThreadLocal to bind to an instance of {@code PersistenceManager}
      * associated with the thread. In this case, the close method executed
-     * on the proxy closes the <code>PersistenceManager</code> and then
+     * on the proxy closes the {@code PersistenceManager} and then
      * clears the ThreadLocal.
      * Use of this method does not affect the configurability of the
-     * <code>PersistenceManagerFactory</code>.
+     * {@code PersistenceManagerFactory}.
      *
-     * @return a <code>PersistenceManager</code> proxy.
+     * @return a {@code PersistenceManager} proxy.
      */
     JDOPersistenceManager getPersistenceManagerProxy();
 
-    /** Get an instance of <code>JDOPersistenceManager</code> from this factory.  
+    /** Get an instance of {@code JDOPersistenceManager} from this factory.  
      * The instance has default values for options.  
-     * The parameters <code>userid</code> and <code>password</code> are used 
+     * The parameters {@code userid} and {@code password} are used 
      * when obtaining datastore connections from the connection pool.
      *
-     * <P>After the first use of <code>getPersistenceManager</code>, no "set" 
+     * <P>After the first use of {@code getPersistenceManager}, no "set" 
      * methods will succeed.
      *
-     * @return a <code>JDOPersistenceManager</code> instance with default options.
+     * @return a {@code JDOPersistenceManager} instance with default options.
      * @param userid the userid for the connection
      * @param password the password for the connection
      */
@@ -102,7 +102,7 @@ public interface JDOPersistenceManagerFactory extends PersistenceManagerFactory 
      * Return the {@link JDODataStoreCache} that this factory uses for
      * controlling a second-level cache. If this factory does not use
      * a second-level cache, the returned instance does nothing. This
-     * method never returns <code>null</code>.
+     * method never returns {@code null}.
      * @return the DataStoreCache
      */
     @Override
@@ -111,7 +111,7 @@ public interface JDOPersistenceManagerFactory extends PersistenceManagerFactory 
     /**
      * Tell whether the transaction is container managed 
      * 
-     * @return <code>true</code> if the transaction is container managed
+     * @return {@code true} if the transaction is container managed
      */
     public boolean getContainerManaged();
 

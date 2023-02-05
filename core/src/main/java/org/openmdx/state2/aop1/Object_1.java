@@ -123,12 +123,12 @@ abstract public class Object_1 extends Interceptor_1 {
     }
 
     /**
-     * Create a <code>StateCapable</code> container
+     * Create a {@code StateCapable} container
      * 
      * @param parent
      * @param container
      * @param type
-     * @return a new <code>StateCapable</code> container
+     * @return a new {@code StateCapable} container
      * 
      * @throws ServiceException
      */

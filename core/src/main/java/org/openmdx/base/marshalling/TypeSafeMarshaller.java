@@ -82,7 +82,7 @@ public interface TypeSafeMarshaller<U,M> {
      * 
      * @param value the value to be tested
      * 
-     * @return the value if is an instance of the M, <code>null</code> 
+     * @return the value if is an instance of the M, {@code null} 
      */
     U asUnmarshalledValue(Object value);
     
@@ -91,7 +91,7 @@ public interface TypeSafeMarshaller<U,M> {
      * 
      * @param value the value to be tested
      * 
-     * @return the value if is an instance of the M, <code>null</code> 
+     * @return the value if is an instance of the M, {@code null} 
      */
     M asMarshalledValue(Object value);
     

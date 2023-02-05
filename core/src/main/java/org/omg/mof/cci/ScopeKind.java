@@ -46,15 +46,14 @@
 package org.omg.mof.cci;
 
 /**
- * The <code>ScopeKind</code> class defines the possible scopes for
+ * The {@code ScopeKind} class defines the possible scopes for
  * Attributes and Operations as defined by the OMG Meta Object Facility (MOF)
  * Specification.
  */
 public class ScopeKind {
 
-  // Avoid instantiation
-  protected ScopeKind() {
-      super();
+  private ScopeKind() {
+	  // Avoid instantiation
   }
 
 

@@ -74,7 +74,7 @@ public abstract class DelegatingPersistenceManagerFactory
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 8157804936933793541L;
 

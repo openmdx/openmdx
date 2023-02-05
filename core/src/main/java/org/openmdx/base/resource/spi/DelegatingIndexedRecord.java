@@ -77,7 +77,7 @@ public class DelegatingIndexedRecord
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 3761411910632878384L;
     

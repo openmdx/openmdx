@@ -86,7 +86,7 @@ public class Model_1Factory {
     /**
      * Tells whether the model repository is already prepared
      * 
-     * @return <code>true</code> if the model is loaded
+     * @return {@code true} if the model is loaded
      */
     public static boolean isLoaded() {
         return Model_1Factory.model != null;
@@ -113,7 +113,7 @@ public class Model_1Factory {
      * <em>This method should rarely be used from another class.
      * 
      * @param reload
-     *            if <code>true</code> the current model cache is ignored
+     *            if {@code true} the current model cache is ignored
      * 
      * @exception RuntimeServiceException
      *                in case of a model acquisition failure

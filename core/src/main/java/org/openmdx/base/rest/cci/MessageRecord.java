@@ -70,8 +70,8 @@ public interface MessageRecord extends RequestRecord {
     /**
      * Set the message body
      * 
-     * @param body the message body, or <code>null</code> to assign 
-     * an <code>org::openmdx::base::Void</code> instance
+     * @param body the message body, or {@code null} to assign 
+     * an {@code org::openmdx::base::Void} instance
      */
     void setBody(MappedRecord body);
 

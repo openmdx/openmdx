@@ -107,7 +107,7 @@ public class XMLGregorianCalendarMarshaller {
     }
 
     /**
-     * The precision used for date/time values since <code>1970-01-01T00:00:00Z</code>.
+     * The precision used for date/time values since {@code 1970-01-01T00:00:00Z}.
      */
     private final TimeUnit dateTimePrecision;
     
@@ -122,11 +122,11 @@ public class XMLGregorianCalendarMarshaller {
     private DataTypes sqlDataTypes;
 
     /**
-     * The type used to store <code>org::w3c::time</code> values, i.e. one of<ul>
-     * <li><code>STANDARD</code>
-     * <li><code>TIME</code>
-     * <li><code>CHARACTER</code> <i>(default)</i>
-     * <li><code>NUMERIC</code>
+     * The type used to store {@code org::w3c::time} values, i.e. one of<ul>
+     * <li>{@code STANDARD}
+     * <li>{@code TIME}
+     * <li>{@code CHARACTER} <i>(default)</i>
+     * <li>{@code NUMERIC}
      * </ul>
      * 
      * @see LayerConfigurationEntries#TIME_TYPE_STANDARD
@@ -142,10 +142,10 @@ public class XMLGregorianCalendarMarshaller {
     );
 
     /**
-     * The type used to store <code>org::w3c::date</code> values, i.e. one of<ul>
-     * <li><code>STANDARD</code>
-     * <li><code>DATE</code>
-     * <li><code>CHARACTER</code> <i>(default)</i>
+     * The type used to store {@code org::w3c::date} values, i.e. one of<ul>
+     * <li>{@code STANDARD}
+     * <li>{@code DATE}
+     * <li>{@code CHARACTER} <i>(default)</i>
      * </ul>
      * 
      * @see LayerConfigurationEntries#DATE_TYPE_STANDARD
@@ -159,12 +159,12 @@ public class XMLGregorianCalendarMarshaller {
     );
 
     /**
-     * The type used to store <code>org::w3c::dateTime</code> values, i.e. one of<ul>
-     * <li><code>STANDARD</code>
-     * <li><code>TIMESTAMP</code>
-     * <li><code>TIMESTAMP_WITH_TIMEZONE</code>
-     * <li><code>CHARACTER</code> <i>(default)</i>
-     * <li><code>NUMERIC</code>
+     * The type used to store {@code org::w3c::dateTime} values, i.e. one of<ul>
+     * <li>{@code STANDARD}
+     * <li>{@code TIMESTAMP}
+     * <li>{@code TIMESTAMP_WITH_TIMEZONE}
+     * <li>{@code CHARACTER} <i>(default)</i>
+     * <li>{@code NUMERIC}
      * </ul>
      * @see LayerConfigurationEntries#DATETIME_TYPE_STANDARD
      * @see LayerConfigurationEntries#DATETIME_TYPE_TIMESTAMP
@@ -355,10 +355,10 @@ public class XMLGregorianCalendarMarshaller {
     /**
      * Stringify a Datatype field
      * 
-     * @param value the <code>int</code> representation of the field value
+     * @param value the {@code int} representation of the field value
      * 
-     * @return the <code>String</code> representation of the field value, or 
-     * <code>null</code> if the field is undefined
+     * @return the {@code String} representation of the field value, or 
+     * {@code null} if the field is undefined
      */
     private static String maskUndefined(
         int value

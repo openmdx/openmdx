@@ -44,12 +44,7 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc;
 
-import java.util.Comparator;
-
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Stereotypes;
 
 /**
  * Package Mapper 
@@ -62,96 +57,45 @@ public class PackageMapper extends HTMLMapper {
     public PackageMapper(
     	Sink sink, 
         ModelElement_1_0 packageToBeExported,
-        PIMDocConfiguration configuration
-    ) throws ServiceException {
-		super(sink, packageToBeExported, configuration);
+        boolean markdown, PIMDocConfiguration configuration
+    ){
+		super(sink, packageToBeExported, markdown, configuration);
+		this.classesMapper = new ClassesMapper(
+			pw, this.element, this::getHref
+		);
+		this.dataTypesMapper = new DataTypesMapper(
+			pw, this.element, this::getHref
+		);
     }    
 
-	private final Comparator<ModelElement_1_0> elementNameComparator = new ElementNameComparator();
+	private final CompartmentMapper classesMapper;
+	private final CompartmentMapper dataTypesMapper;
     
 	@Override
 	protected void htmlBody() {
-		this.pw.println("<body class=\"uml-element\">");
+		printLine("<body class=\"uml-element uml-package\">");
 		columnHead();
 		columnBody();
-		this.pw.println("</body>");
+		printLine("</body>");
    }
 
 	private void columnHead() {
-		this.pw.println("\t<div class=\"column-head\">");
-		this.pw.println("\t\t<h2>" + getTitle() + "</h2>");
-		this.pw.println("\t</div>");
+		printLine("\t<div class=\"column-head\">");
+		printLine("\t\t<h2>" + getTitle() + "</h2>");
+		printLine("\t</div>");
 	}
 	
 	private void columnBody() {
-		this.pw.println("\t<div class=\"column-body\">");
+		printLine("\t<div class=\"column-body\">");
 		annotation(element);
-		classesCompartment();
-		this.pw.println("\t</div>");
-	}
-	
-	private void classesCompartment() {
-		this.pw.println("\t\t<details open>");
-		classesSummary();
-		classesDetails();
-		this.pw.println("\t\t</details");
-	}
-
-	private void classesSummary() {
-		this.pw.println("\t\t\t<summary>Classes</summary>");
-	}
-
-	private void classesDetails() {
-		this.pw.println("\t\t\t<table>");
-		classesTableHead();
-		classesTableBody();
-		this.pw.println("\t\t\t</table>");
-	}
-
-	private void classesTableHead() {
-		this.pw.println("\t\t\t\t<thead>");
-		this.pw.println("\t\t\t\t\t<tr>");
-		this.pw.println("\t\t\t\t\t\t<th>Name</th>");
-		this.pw.println("\t\t\t\t\t\t<th>Abstract</th>");
-		this.pw.println("\t\t\t\t\t\t<th>Mix-In</th>");
-		this.pw.println("\t\t\t\t\t</tr>");
-		this.pw.println("\t\t\t\t</thead>");
-	}
-
-	private void classesTableBody() {
-		this.pw.println("\t\t\t\t<tbody>");
-		this.model
-			.getContent()
-			.stream()
-			.filter(ModelElement_1_0::isClassType)
-			.filter(this::isLocal)
-			.sorted(this.elementNameComparator)
-			.forEach(this::classesTableRow);
-		this.pw.println("\t\t\t\t</tbody>");
-	}
-
-	private void classesTableRow(ModelElement_1_0 element) {
-		try {
-			this.pw.println("\t\t\t\t\t<tr>");
-			this.pw.println("\t\t\t\t\t\t<td>");
-			this.pw.println("\t\t\t\t\t\t\t<a href=\"" + getElementURL(element) + "\">"  + element.getName() + "</a>");
-			this.pw.println("\t\t\t\t\t\t</td>");
-			this.pw.println("\t\t\t\t\t\t<td>" + element.isAbstract() + "</td>");
-			this.pw.println("\t\t\t\t\t\t<td>" + isMixInClass(element) + "</td>");
-			this.pw.println("\t\t\t\t\t</tr>");
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
-		
-	}
-
-	private boolean isMixInClass(ModelElement_1_0 element) {
-		return element.objGetList("stereotype").contains(Stereotypes.ROOT);
+		classesMapper.compartment();
+		dataTypesMapper.compartment();
+		printLine("\t</div>");
 	}
 	
 	@Override
 	protected String getTitle() {
-		return "Package " + getDisplayName();
+		return "Package " + getDisplayName(element);
 	}
 
 }

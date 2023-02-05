@@ -130,7 +130,7 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
     private boolean immutable = false;
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -4196205547784874659L;
     
@@ -571,9 +571,9 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
     }
 
     /**
-     * Convert an <code>IndexedRecord</code> to a <code>String</code> array
+     * Convert an {@code IndexedRecord} to a {@code String} array
      * 
-     * @param value the <code>IndexedRecord</code>
+     * @param value the {@code IndexedRecord}
      * 
      * @return an array with the value's components
      */
@@ -608,7 +608,7 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
      * 
      * @param elements the set's elements
      * 
-     * @return an immutable <code>IndexedRecord</code>
+     * @return an immutable {@code IndexedRecord}
      */
     protected static IndexedRecord createImmutableSet(
         String... elements
@@ -655,8 +655,8 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
      * 
      * @param set the JCA set
      * 
-     * @return the set's first element; or <code>null</code> if the
-     * set is <code>null</code> or empty
+     * @return the set's first element; or {@code null} if the
+     * set is {@code null} or empty
      */
     protected String firstOfSet(Collection<?> set) {
         return set == null || set.isEmpty() ? null : set.iterator().next().toString();
@@ -694,12 +694,12 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
     }
     
     /**
-     * Convert the value to a <code>Path</code> if necessaryThrowables.log(
+     * Convert the value to a {@code Path} if necessaryThrowables.log(
                 
      * 
      * @param value
      * 
-     * @return the value as <code>Path</code>
+     * @return the value as {@code Path}
      */
     protected static Path toPath(
         Object value
@@ -711,11 +711,11 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
     }
     
     /**
-     * Convert the value from a <code>Path</code>
+     * Convert the value from a {@code Path}
      * 
      * @param value a Path
      * 
-     * @return the value as <code>String</code>
+     * @return the value as {@code String}
      */
     protected static String toString(
         Path value
@@ -726,11 +726,11 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
     }
     
     /**
-     * Convert the value to a <code>Boolean</code> if necessary
+     * Convert the value to a {@code Boolean} if necessary
      * 
      * @param value
      * 
-     * @return the value as <code>Boolean</code>
+     * @return the value as {@code Boolean}
      */
     protected static boolean toBoolean(
         Object value
@@ -742,11 +742,11 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
     }
 
     /**
-     * Convert the value to a <code>Long</code> if necessary
+     * Convert the value to a {@code Long} if necessary
      * 
      * @param value
      * 
-     * @return the value as <code>Long</code>
+     * @return the value as {@code Long}
      */
     protected static Long toLong(
         Object value
@@ -762,7 +762,7 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
      * 
      * @param code a code instance
      * 
-     * @return the codes <code>Short</code> representation
+     * @return the codes {@code Short} representation
      */
     protected static Short jcaValue(Code code) {
     	return code == null ? null : Short.valueOf(code.code());
@@ -885,7 +885,7 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
      * 
      * @param value the value to be internalized
      * 
-     * @return the internalized value; or <code>null</code> in case of <code>null</code>
+     * @return the internalized value; or {@code null} in case of {@code null}
      */
     protected static String internalize(String value) {
         return value == null ? null : value.intern();
@@ -973,7 +973,7 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
 		 * 
 		 * @param key
 		 * 
-		 * @return the corresponding member, or <code>null</code> if none matches
+		 * @return the corresponding member, or {@code null} if none matches
 		 */
 		M valueOf(Object key) {
 			if(this.memberClass.isInstance(key)) {

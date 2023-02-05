@@ -80,7 +80,7 @@ final class SingletonIndexedRecord
     }
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -4379113944913582714L;
 

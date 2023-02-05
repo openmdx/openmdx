@@ -52,9 +52,9 @@ import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.exception.BasicException.Parameter;
 
 /**
- * A <code>ServiceException</code> is used where an exception chain shall be 
- * thrown as an unchecked <code>Exception</code>, i.e. as a 
- * <code>RuntimeException</code>.
+ * A {@code ServiceException} is used where an exception chain shall be 
+ * thrown as an unchecked {@code Exception}, i.e. as a 
+ * {@code RuntimeException}.
  */
 public final class RuntimeServiceException 
     extends RuntimeException 
@@ -75,12 +75,12 @@ public final class RuntimeServiceException
     }
 
     /**
-     * Creates a new <code>RuntimeServiceException</code>.
+     * Creates a new {@code RuntimeServiceException}.
      *
      * @param   cause
      *          The exception cause.
      * @param   exceptionDomain
-     *          The exception domain or <code>null</code> for the
+     *          The exception domain or {@code null} for the
      *          default exception domain containing negative exception codes
      *          only.
      * @param   exceptionCode
@@ -113,10 +113,10 @@ public final class RuntimeServiceException
     }
 
     /**
-     * Creates a new <code>RuntimeServiceException</code>.
+     * Creates a new {@code RuntimeServiceException}.
      *
      * @param   exceptionDomain
-     *          The exception domain or <code>null</code> for the
+     *          The exception domain or {@code null} for the
      *          default exception domain containing negative exception codes
      *          only.
      * @param   exceptionCode
@@ -144,7 +144,7 @@ public final class RuntimeServiceException
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 4848246373545478513L;
 
@@ -177,7 +177,7 @@ public final class RuntimeServiceException
     }
 
     /**
-     * Retrieves the exception domain of this <code>ServiceException</code>.
+     * Retrieves the exception domain of this {@code ServiceException}.
      *
      * @return the exception domain
      */
@@ -187,7 +187,7 @@ public final class RuntimeServiceException
     }
 
     /**
-     * Retrieves the exception code of this <code>ServiceException</code>.
+     * Retrieves the exception code of this {@code ServiceException}.
      *
      * @return the exception code
      */

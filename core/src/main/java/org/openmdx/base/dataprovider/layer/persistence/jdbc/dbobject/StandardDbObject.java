@@ -513,7 +513,7 @@ public abstract class StandardDbObject extends DbObject {
     private static final String IDENTITY_OVERFLOW = "~~~~~~~~;overflow";
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 5890153090106609559L;
 

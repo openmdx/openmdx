@@ -95,7 +95,7 @@ public class Importer {
      * Import objects 
      * @param target the object sink
      * @param source the XML source
-     * @param errorHandler <code>null</code> leads to standard error handling
+     * @param errorHandler {@code null} leads to standard error handling
      * 
      * @throws ServiceException  
      */
@@ -159,7 +159,7 @@ public class Importer {
      * 
      * @param source the input source specification
      * 
-     * @return the corresponding <code>InputSource Enumeration</code>
+     * @return the corresponding {@code InputSource Enumeration}
      */
     public static Iterable<InputSource> asSource(
         String source
@@ -174,7 +174,7 @@ public class Importer {
      * 
      * @param source the input source specification
      * 
-     * @return the corresponding <code>InputSource Enumeration</code>
+     * @return the corresponding {@code InputSource Enumeration}
      */
     public static Iterable<InputSource> asSource(
         URL source
@@ -189,7 +189,7 @@ public class Importer {
      * 
      * @param source the input source specification
      * 
-     * @return the corresponding <code>InputSource Enumeration</code>
+     * @return the corresponding {@code InputSource Enumeration}
      */
     public static Iterable<InputSource> asSource(
         File source
@@ -204,7 +204,7 @@ public class Importer {
      * 
      * @param source the input source specification
      * 
-     * @return the corresponding <code>InputSource Enumeration</code>
+     * @return the corresponding {@code InputSource Enumeration}
      */
     public static Iterable<InputSource> asSource(
         InputStream source
@@ -220,7 +220,7 @@ public class Importer {
      * @param source the input archive specification
      * @param pattern the archive entry specification
      * 
-     * @return the corresponding <code>InputSource Enumeration</code>
+     * @return the corresponding {@code InputSource Enumeration}
      */
     public static Iterable<InputSource> asSource(
         final URL source,
@@ -251,7 +251,7 @@ public class Importer {
      * @param source the input archive specification
      * @param pattern the archive entry specification
      * 
-     * @return the corresponding <code>InputSource Enumeration</code>
+     * @return the corresponding {@code InputSource Enumeration}
      */
     public static Iterable<InputSource> asSource(
         final File source,
@@ -282,7 +282,7 @@ public class Importer {
      * @param source the input archive specification
      * @param pattern the archive entry specification
      * 
-     * @return the corresponding <code>InputSource Enumeration</code>
+     * @return the corresponding {@code InputSource Enumeration}
      */
     public static Iterable<InputSource> asSource(
         final InputStream source,
@@ -313,11 +313,11 @@ public class Importer {
     }
     
     /**
-     * <code>ImportTarget</code> factory method
+     * {@code ImportTarget} factory method
      * 
      * @param target
      * 
-     * @return the corresponding <code>ImportTarget</code>
+     * @return the corresponding {@code ImportTarget}
      */
     public static ImportTarget asTarget(
         Map<Path,ObjectRecord> target
@@ -326,11 +326,11 @@ public class Importer {
     }
 
     /**
-     * <code>ImportTarget</code> factory method
+     * {@code ImportTarget} factory method
      * 
      * @param target
      * 
-     * @return the corresponding <code>ImportTarget</code>
+     * @return the corresponding {@code ImportTarget}
      */
     public static ImportTarget asTarget(
 		Channel target
@@ -339,11 +339,11 @@ public class Importer {
     }
     
     /**
-     * <code>ImportTarget</code> factory method
+     * {@code ImportTarget} factory method
      * 
      * @param target
      * 
-     * @return the corresponding <code>ImportTarget</code>
+     * @return the corresponding {@code ImportTarget}
      */
     public static ImportTarget asTarget(
         PersistenceManager target

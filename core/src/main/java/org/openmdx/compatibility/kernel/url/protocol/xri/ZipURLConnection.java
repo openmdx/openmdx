@@ -222,7 +222,7 @@ public class ZipURLConnection extends JarURLConnection {
      * can only be called once
      * the connection has been completely verified by reading
      * from the input stream until the end of the stream has been
-     * reached. Otherwise, this method will return <code>null</code>
+     * reached. Otherwise, this method will return {@code null}
      * 
      * @return the Certificate object for this connection if the URL
      * for it points to a JAR file entry, null otherwise.  

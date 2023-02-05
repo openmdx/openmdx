@@ -820,7 +820,7 @@ public class Model_1 implements Model_1_0 {
      * 
      * @param xri the model elements object id
      * 
-     * @return the model element, or <code>null</code> in case of a <code>null</code> XRI
+     * @return the model element, or {@code null} in case of a {@code null} XRI
      * 
      * @exception IllegalArgumentException if no model element can be found for the given XRI
      */
@@ -874,7 +874,7 @@ public class Model_1 implements Model_1_0 {
      * 
      * @param xri the XRI to be analyzed
      * 
-     * @return <code>true</code> if the given XRI contains a shared association 
+     * @return {@code true} if the given XRI contains a shared association 
      * @throws ServiceException 
      */
     @Override
@@ -1071,14 +1071,14 @@ public class Model_1 implements Model_1_0 {
      * Verifies an object
      * 
      * @param object to be verified
-     * @param deepVerify When <code>deepVerify</code> is <code>true</code>, 
+     * @param deepVerify When {@code deepVerify} is {@code true}, 
      * the refVerifyConstraints method carries out a shallowVerify on that
      * object and a deep verify through its containment hierarchy.
      * @param verifyDerived
      * tells whether derived features should be verified as well
      * 
      * @return the null value if no constraint is violated; 
-     * otherwise, a list of <code>ServiceException</code> objects 
+     * otherwise, a list of {@code ServiceException} objects 
      * (each representing a constraint violation) is returned.
      */
     @Override

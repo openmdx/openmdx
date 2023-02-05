@@ -76,7 +76,7 @@ public interface Registry<K,V> {
      * @param   value
      *          the value
      *
-     * @return  <code>null</code> unless there is already another object registered with the given key
+     * @return  {@code null} unless there is already another object registered with the given key
      * 
      * @throws IllegalStateException if the registry is already closed
      */
@@ -91,7 +91,7 @@ public interface Registry<K,V> {
      * @param   key
      *          the key
      * 
-     * @return the cached object, or <code>null</code>
+     * @return the cached object, or {@code null}
      * 
      * @throws IllegalStateException if the registry is already closed
      */
@@ -105,7 +105,7 @@ public interface Registry<K,V> {
      * @param   key
      *          the key
      * 
-     * @return the cached object, or <code>null</code>
+     * @return the cached object, or {@code null}
      * 
      * @throws IllegalStateException if the registry is already closed
      */

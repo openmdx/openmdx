@@ -117,7 +117,7 @@ final class UniqueValue<T> {
     /**
      * Tells whether no value has been set
      * 
-     * @return <code>true</code> if no value has been set
+     * @return {@code true} if no value has been set
      */
     boolean isEmpty(
     ){

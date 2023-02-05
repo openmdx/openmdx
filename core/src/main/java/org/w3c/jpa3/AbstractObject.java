@@ -84,7 +84,7 @@ public abstract class AbstractObject implements Serializable {
     }
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -1472728633796611343L;
 
@@ -99,16 +99,16 @@ public abstract class AbstractObject implements Serializable {
     transient Object openmdxjdoVersion;
     
     /**
-     * Retrieve the <code>openmdxjdoIdentity</code> field value
+     * Retrieve the {@code openmdxjdoIdentity} field value
      * 
-     * @return the <code>openmdxjdoIdentity</code> field value
+     * @return the {@code openmdxjdoIdentity} field value
      */
     protected abstract String getOpenmdxjdoIdentity();
 
     /**
-     * Replace the <code>openmdxjdoIdentity</code> field value
+     * Replace the {@code openmdxjdoIdentity} field value
      * 
-     * @param identity the <code>openmdxjdoIdentity</code> field value
+     * @param identity the {@code openmdxjdoIdentity} field value
      */
     protected abstract void setOpenmdxjdoIdentity(
         String identity
@@ -231,7 +231,7 @@ public abstract class AbstractObject implements Serializable {
 
     
     //------------------------------------------------------------------------
-    // Implements <code>Serializable</code>
+    // Implements {@code Serializable}
     //------------------------------------------------------------------------
     
     /**
@@ -360,11 +360,11 @@ public abstract class AbstractObject implements Serializable {
         }
         
         /**
-         * Assert that the value is not <code>null</code>
+         * Assert that the value is not {@code null}
          * 
          * @param value the value to be tested
          * 
-         * @throws <code>nullPointerException</code> if the value is <code>null</code>
+         * @throws {@code nullPointerException} if the value is {@code null}
          */
         protected static void validateValue(
             Object value
@@ -554,11 +554,11 @@ public abstract class AbstractObject implements Serializable {
         }
         
         /**
-         * Assert that the value is not <code>null</code>
+         * Assert that the value is not {@code null}
          * 
          * @param value the value to be tested
          * 
-         * @throws <code>nullPointerException</code> if the value is <code>null</code>
+         * @throws {@code nullPointerException} if the value is {@code null}
          */
         protected static void validateValue(
             Object value
@@ -573,7 +573,7 @@ public abstract class AbstractObject implements Serializable {
          * 
          * @param index
          * @param size
-         * @param extendable <code>true</code> if size is a valid index value
+         * @param extendable {@code true} if size is a valid index value
          */
         protected void validateIndex(
             int index,
@@ -1472,11 +1472,11 @@ public abstract class AbstractObject implements Serializable {
         }
 
         /**
-         * This method retrieves the JPA identity, a <code>String</code>
+         * This method retrieves the JPA identity, a {@code String}
          *  
          * @param pc
          * 
-         * @return the JPA identity if pc is an instance of<code>AbstractObject</code>
+         * @return the JPA identity if pc is an instance of{@code AbstractObject}
          */
         public String getObjectId(Object pc) {
             return pc instanceof AbstractObject ? ((AbstractObject)pc).getOpenmdxjdoIdentity() : null;
@@ -1487,7 +1487,7 @@ public abstract class AbstractObject implements Serializable {
          * 
          * @param pc
          * 
-         * @return the version if pc is an instance of<code>AbstractObject</code>
+         * @return the version if pc is an instance of{@code AbstractObject}
          * </ul>
          */
         public Object getVersion(Object pc) {
@@ -1500,8 +1500,8 @@ public abstract class AbstractObject implements Serializable {
          * @param pc
          * 
          * @return<ul>
-         * <li><code>null</code> if pc is not an instance of<code>AbstractObject</code>
-         * <li>FALSE</code> if pc is an instance of<code>AbstractObject</code>
+         * <li>{@code null} if pc is not an instance of{@code AbstractObject}
+         * <li>FALSE} if pc is an instance of{@code AbstractObject}
          * </ul>
          */
         public Boolean isDeleted(Object pc) {
@@ -1514,9 +1514,9 @@ public abstract class AbstractObject implements Serializable {
          * @param pc
          * 
          * @return<ul>
-         * <li><code>null</code> if pc is not an instance of<code>AbstractObject</code>
-         * <li><code>FALSE</code> if pc is transient
-         * <li><code>TRUE</code> if pc is detached-clean or detached-dirty
+         * <li>{@code null} if pc is not an instance of{@code AbstractObject}
+         * <li>{@code FALSE} if pc is transient
+         * <li>{@code TRUE} if pc is detached-clean or detached-dirty
          * </ul>
          */
         public Boolean isDetached(Object pc) {
@@ -1534,9 +1534,9 @@ public abstract class AbstractObject implements Serializable {
          * @param pc
          * 
          * @return<ul>
-         * <li><code>null</code> if pc is not an instance of<code>AbstractObject</code>
-         * <li><code>FALSE</code> if pc is transient or detached
-         * <li><code>TRUE</code> if pc is detached-dirty
+         * <li>{@code null} if pc is not an instance of{@code AbstractObject}
+         * <li>{@code FALSE} if pc is transient or detached
+         * <li>{@code TRUE} if pc is detached-dirty
          * </ul>
          */
         public Boolean isDirty(Object pc) {
@@ -1549,8 +1549,8 @@ public abstract class AbstractObject implements Serializable {
          * @param pc
          * 
          * @return<ul>
-         * <li><code>null</code> if pc is not an instance of<code>AbstractObject</code>
-         * <li>FALSE</code> if pc is an instance of<code>AbstractObject</code>
+         * <li>{@code null} if pc is not an instance of{@code AbstractObject}
+         * <li>FALSE} if pc is an instance of{@code AbstractObject}
          * </ul>
          */
         public Boolean isNew(Object pc) {
@@ -1563,8 +1563,8 @@ public abstract class AbstractObject implements Serializable {
          * @param pc
          * 
          * @return<ul>
-         * <li><code>null</code> if pc is not an instance of<code>AbstractObject</code>
-         * <li>FALSE</code> if pc is an instance of<code>AbstractObject</code>
+         * <li>{@code null} if pc is not an instance of{@code AbstractObject}
+         * <li>FALSE} if pc is an instance of{@code AbstractObject}
          * </ul>
          */
         public Boolean isPersistent(Object pc) {
@@ -1577,8 +1577,8 @@ public abstract class AbstractObject implements Serializable {
          * @param pc
          * 
          * @return<ul>
-         * <li><code>null</code> if pc is not an instance of<code>AbstractObject</code>
-         * <li>FALSE</code> if pc is an instance of<code>AbstractObject</code>
+         * <li>{@code null} if pc is not an instance of{@code AbstractObject}
+         * <li>FALSE} if pc is an instance of{@code AbstractObject}
          * </ul>
          */
         public Boolean isTransactional(Object pc) {
@@ -1591,7 +1591,7 @@ public abstract class AbstractObject implements Serializable {
          * @param pc
          * @param fieldName
          * 
-         * @return <code>true</code> if pc is an instance of <code>AbstractObject</code> 
+         * @return {@code true} if pc is an instance of {@code AbstractObject} 
          */
         public boolean makeDirty(Object pc, String fieldName) {
             if(pc instanceof AbstractObject) {
@@ -1608,7 +1608,7 @@ public abstract class AbstractObject implements Serializable {
          * @param pc
          * @param openmdxjdoIdentity
          * 
-         * @throw ClassCastException if pc is not an instance of <code>AbstractObject</code>
+         * @throw ClassCastException if pc is not an instance of {@code AbstractObject}
          */
         protected static void setObjectId(
             Object pc,
@@ -1624,7 +1624,7 @@ public abstract class AbstractObject implements Serializable {
          * @param pc
          * @param openmdxjdoVersion
          * 
-         * @throw ClassCastException if pc is not an instance of <code>AbstractObject</code>
+         * @throw ClassCastException if pc is not an instance of {@code AbstractObject}
          */
         protected static void setVersion(
             Object pc,

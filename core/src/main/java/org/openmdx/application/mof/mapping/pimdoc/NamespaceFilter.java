@@ -1,12 +1,11 @@
 /*
+ * ==================================================================== 
+ * Project: openMDX, http://www.openmdx.org
+ * Description: Namespace Filter
+ * Owner: the original authors. 
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Description: JMITemplate 
- * Owner:       the original authors.
- * ====================================================================
- *
- * This software is published under the BSD license
- * as listed below.
+ * 
+ * This software is published under the BSD license as listed below.
  * 
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
@@ -43,25 +42,33 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
+package org.openmdx.application.mof.mapping.pimdoc;
 
-package org.openmdx.application.mof.mapping.cci;
+import java.util.function.Predicate;
 
-import java.io.PrintWriter;
-import java.io.Writer;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.naming.Path;
 
-import org.openmdx.base.mof.cci.Model_1_0;
+/**
+ * Namespace Filter
+ */
+class NamespaceFilter implements Predicate<ModelElement_1_0> {
+	
+	NamespaceFilter(ModelElement_1_0 namespace) {
+		this.namespaceId = namespace.jdoGetObjectId();
+	}
 
-public class MapperTemplate {
-    
-    protected MapperTemplate(
-        Writer writer,
-        Model_1_0 model
-    ) {
-        this.pw = new PrintWriter(writer);
-        this.model = model;
-    }
-        
-    protected final PrintWriter pw;
-    protected final Model_1_0 model;
-    
+	private final Path namespaceId;
+
+	@Override
+	public boolean test(ModelElement_1_0 t) {
+		try {
+			return namespaceId.equals(t.getContainer());
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
+	}
+	
 }

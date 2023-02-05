@@ -55,11 +55,11 @@ public final class ByteString implements Final {
      * Constructor 
      *
      * @param buffer a reference to the buffer is kept by 
-     * <code>ByteString</code>.
+     * {@code ByteString}.
      * <p><em>
      * Note:<br>
      * The buffer must not be modified by a cooperative
-     * program after it has been used as <code>ByteString</code>
+     * program after it has been used as {@code ByteString}
      * constructor argument.
      * </em>
      */
@@ -73,16 +73,16 @@ public final class ByteString implements Final {
      * Constructor 
      *
      * @param buffer a reference to the buffer is kept by 
-     * <code>ByteString</code>.
+     * {@code ByteString}.
      * <p><em>
      * Note:<br>
      * The buffer must not be modified by a cooperative
-     * program after it has been used as <code>ByteString</code>
+     * program after it has been used as {@code ByteString}
      * constructor argument.
      * </em>
-     * @param offset the buffer's content before <code>offset</code>
+     * @param offset the buffer's content before {@code offset}
      * is ignored
-     * @param length the buffer's content after <code>offset + length</code>
+     * @param length the buffer's content after {@code offset + length}
      * is ignored
      */
     public ByteString(
@@ -253,7 +253,7 @@ public final class ByteString implements Final {
     private final int length;
 
     /**
-     * This byte string's <code>String</code> representation.
+     * This byte string's {@code String} representation.
      */
     private transient String string;
     

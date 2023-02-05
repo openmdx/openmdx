@@ -121,7 +121,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     private final Map<String,Object> views;
 
     /**
-     * <code>true</code> for state views.
+     * {@code true} for state views.
      */
     private boolean enabled = false;
 
@@ -156,7 +156,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
      * 
      * @param feature the feature to be tested
      * 
-     * @return <code>true</code> for state view features
+     * @return {@code true} for state view features
      * 
      * @throws ServiceException  
      */
@@ -181,7 +181,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
      * @param candidate
      * @param context
      * @param accessMode 
-     * @return <code>true</code> if the candidate is involved
+     * @return {@code true} if the candidate is involved
      * 
      * @throws ServiceException
      */
@@ -247,7 +247,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
      * 
      * @param state
      * 
-     * @return <code>true</code> if the state crosses at least one of the 
+     * @return {@code true} if the state crosses at least one of the 
      * time range limits.
      */
     protected abstract BoundaryCrossing getBoundaryCrossing(
@@ -923,7 +923,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
          *
          * @param states         * 
          * @param testPersistency 
-         * @param accessMode, or <code>null</code> if filtering is not required
+         * @param accessMode, or {@code null} if filtering is not required
          *  
          * @throws ServiceException
          */
@@ -1080,7 +1080,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     	/**
     	 * Tells whether the values may be cached
     	 * 
-    	 * @return <code>true</code> if the values may be cached
+    	 * @return {@code true} if the values may be cached
     	 */
     	protected boolean isCacheable(){
     		return jdoIsPersistent();
@@ -1089,7 +1089,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     	/**
     	 * Tells whether the cache can be used or must be (re-)built
     	 * 
-    	 * @return <code>true</code> if the cache may be used without rebuilding
+    	 * @return {@code true} if the cache may be used without rebuilding
     	 * 
     	 * @throws ServiceException
     	 */
@@ -1116,7 +1116,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
          * Retrieve the underlying iterator
          * 
          * @param states
-         * @param testInvolvement <code>true</code> if the states must be filtered 
+         * @param testInvolvement {@code true} if the states must be filtered 
          * @param testPersistency
          * @return a new Iterator
          * @throws ServiceException

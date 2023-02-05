@@ -78,7 +78,7 @@ public class State_2 extends AbstractLayer {
      * Tells whether the transaction time is unique for object hosted by this
      * provider.
      *
-     * @return <code>true</code> if the transaction time is unique for object
+     * @return {@code true} if the transaction time is unique for object
      *         hosted by this provider.
      */
     public boolean isTransactionTimeUnique() {
@@ -90,7 +90,7 @@ public class State_2 extends AbstractLayer {
      * provider.
      * 
      * @param transactionTimeUnique
-     *            <code>true</code> if the transaction time
+     *            {@code true} if the transaction time
      *            shall be unique for for objects hosted by this provider
      */
     public void setTransactionTimeUnique(

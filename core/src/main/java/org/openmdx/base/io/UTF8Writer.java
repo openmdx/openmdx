@@ -51,7 +51,7 @@ import java.io.Writer;
 /**
  * Write UTF-8 characters to an output stream without buffering
  * <p>
- * The methods <code>flush()</code> and <code>close()</code>
+ * The methods {@code flush()} and {@code close()}
  * are not delegated on to the underlying stream on purpose!
  */
 public class UTF8Writer extends Writer {

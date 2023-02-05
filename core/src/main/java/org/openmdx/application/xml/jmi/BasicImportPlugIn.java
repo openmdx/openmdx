@@ -73,7 +73,7 @@ public class BasicImportPlugIn implements ImportPlugIn {
     /**
      * Constructor 
      *
-     * @param target the target <code>PersistenceManager</code>
+     * @param target the target {@code PersistenceManager}
      */
     public BasicImportPlugIn(
     ) {
@@ -153,7 +153,7 @@ public class BasicImportPlugIn implements ImportPlugIn {
         RefObject refObject
     ) throws ServiceException{
         //
-        // Initialize in case of <code>ImportMode</code> <code>SET</code> or </code>CREATE</code>
+        // Initialize in case of {@code ImportMode} {@code SET} or <{@code CREATE}
         //
         if(refObject instanceof RefObject_1_0) try {
             ((RefObject_1_0)refObject).refInitialize(

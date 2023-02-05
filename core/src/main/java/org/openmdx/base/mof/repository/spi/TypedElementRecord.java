@@ -57,7 +57,7 @@ abstract class TypedElementRecord<M extends Enum<M>>
     private Path type;
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -8482940946302427429L;
     

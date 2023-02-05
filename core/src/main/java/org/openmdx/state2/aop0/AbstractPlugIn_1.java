@@ -166,7 +166,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
      * @param object
      * @param type the model class
      * 
-     * @return <code>true</code> if the object is of the given type
+     * @return {@code true} if the object is of the given type
      * @throws ServiceException
      */
     protected static boolean isInstanceOf(
@@ -177,11 +177,11 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
     }
 
     /**
-     * <code>null</code>-safe sucessor implementation
+     * {@code null}-safe sucessor implementation
      * 
      * @param value
      * 
-     * @return the next integer value, or <code>1</code> if <code>value</code> is <code>null</code>
+     * @return the next integer value, or {@code 1} if {@code value} is {@code null}
      */
     private static Integer successor(
         Integer value
@@ -297,7 +297,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
      * 
      * @param object
      * 
-     * @return <code>true</code> if we are processing a state without its core object
+     * @return {@code true} if we are processing a state without its core object
      * 
      * @throws ServiceException
      */

@@ -254,7 +254,7 @@ public class RefRootPackage_1
     final Mapping_1_0 implementationMapper;
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 6682037424274032056L;
 
@@ -279,7 +279,7 @@ public class RefRootPackage_1
     private transient Registry<String,Jmi1Class_1_0> classes;
     
     /**
-     * The user objects have to be propagated to a <code>PersistenceManager</code>
+     * The user objects have to be propagated to a {@code PersistenceManager}
      */
     private final Map<String,Object> userObjects;
 
@@ -741,7 +741,7 @@ public class RefRootPackage_1
      * Retrieve the RefPackage's view context
      * 
      * @return the RefPackage's view context in case of a view,
-     * <code>null</code> otherwise
+     * {@code null} otherwise
      */
     @Override
     public InteractionSpec refInteractionSpec(
@@ -2043,7 +2043,7 @@ public class RefRootPackage_1
          * 
          * @param jmiObject
          * @param jpaObject
-         * @param detach <code>true</code> in case of detach, <code>false</code> in case of attach
+         * @param detach {@code true} in case of detach, {@code false} in case of attach
          * 
          * @throws ServiceException 
          */

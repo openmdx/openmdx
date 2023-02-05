@@ -231,7 +231,7 @@ public class JULIFileHandler extends Handler {
     
     
     /**
-     * Configure from <code>LogManager</code> properties.
+     * Configure from {@code LogManager} properties.
      */
     private void configure() {
 
@@ -294,7 +294,7 @@ public class JULIFileHandler extends Handler {
     
     
     /**
-     * Open the new log file for the date specified by <code>date</code>.
+     * Open the new log file for the date specified by {@code date}.
      */
     private void open() {
 

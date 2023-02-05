@@ -73,7 +73,7 @@ public class LegacyPlugInHelper {
 	 * @param view
 	 * @param type
 	 * 
-	 * @return <code>true</code> if the given type is a sub-type of org::openmdx::state2::Legacy
+	 * @return {@code true} if the given type is a sub-type of org::openmdx::state2::Legacy
 	 * @throws ServiceException
 	 */
 	public static boolean isLegacy(
@@ -84,11 +84,11 @@ public class LegacyPlugInHelper {
 	}
 
 	/**
-	 * Tells whether the container's parent object is an instance of <code>StateCapable</code>
+	 * Tells whether the container's parent object is an instance of {@code StateCapable}
 	 * 
 	 * @param parent the container's parent object
 	 * 
-	 * @return <code>true</code> if the container's parent object is an instance of <code>StateCapable</code>
+	 * @return {@code true} if the container's parent object is an instance of {@code StateCapable}
 	 * 
 	 * @throws ServiceException
 	 */
@@ -102,7 +102,7 @@ public class LegacyPlugInHelper {
 	 * @param value
 	 * @param model
 	 * 
-	 * @return <code>true</code> if the Object is an instance of org::openmdx::state2::Legacy
+	 * @return {@code true} if the Object is an instance of org::openmdx::state2::Legacy
 	 * 
 	 * @throws ServiceException
 	 */
@@ -119,7 +119,7 @@ public class LegacyPlugInHelper {
 	 * @param persistenceManager
 	 * @param xri the object or container id
 	 * 
-	 * @return <code>true</code> if the valid time is unique by configuration
+	 * @return {@code true} if the valid time is unique by configuration
 	 */
 	private static boolean isValidTimeUniqueByConfiguration(
 		PersistenceManager persistenceManager,
@@ -139,7 +139,7 @@ public class LegacyPlugInHelper {
 	 *  
 	 * @param value
 	 * 
-	 * @return <code>true</code> if the valid time is unique by configuration
+	 * @return {@code true} if the valid time is unique by configuration
 	 */
 	private static boolean isValidTimeUniqueByConfiguration(
 		DataObject_1_0 value
@@ -164,7 +164,7 @@ public class LegacyPlugInHelper {
      * @param interceptor
      * @param type
      * 
-     * @return <code>true</code> if the object is a Legacy instance with 
+     * @return {@code true} if the object is a Legacy instance with 
      * unique valid time
      * 
      * @throws ServiceException
@@ -186,7 +186,7 @@ public class LegacyPlugInHelper {
      * @param value
      * @param model
      * 
-     * @return <code>true</code> if the object is a Legacy instance with 
+     * @return {@code true} if the object is a Legacy instance with 
      * unique valid time
      * 
      * @throws ServiceException
@@ -205,7 +205,7 @@ public class LegacyPlugInHelper {
 	 * 
 	 * @param parent
 	 * 
-	 * @return <code>true</code> if the children's valid time is unique
+	 * @return {@code true} if the children's valid time is unique
 	 * 
 	 * @throws ServiceException
 	 */
@@ -226,7 +226,7 @@ public class LegacyPlugInHelper {
 	 * @param parent
 	 * @param containerId
 	 * 
-	 * @return <code>true</code> if the container's valid time is unique 
+	 * @return {@code true} if the container's valid time is unique 
 	 * 
 	 * @throws ServiceException
 	 */

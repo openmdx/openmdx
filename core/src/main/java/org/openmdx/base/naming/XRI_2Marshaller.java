@@ -526,7 +526,7 @@ public final class XRI_2Marshaller
      * 
      * @param segment
      * 
-     * @return <code>true</code> if the segment could be an XRef
+     * @return {@code true} if the segment could be an XRef
      */
     private static boolean isForeignCrossReference(
         String segment
@@ -602,11 +602,11 @@ public final class XRI_2Marshaller
     /**
      * Tests whether the String represents an openMDX object identifier
      * 
-     * @param lenient tells whether exceptions are thrown or mapped to <code>null</code> return values
+     * @param lenient tells whether exceptions are thrown or mapped to {@code null} return values
      * @param xri
-     * @param lenient tells whether exceptions are thrown or mapped to <code>null</code> return values
+     * @param lenient tells whether exceptions are thrown or mapped to {@code null} return values
      * 
-     * @return <code>true</code> if the String repesents an openMDX object identifier 
+     * @return {@code true} if the String repesents an openMDX object identifier 
      * @throws ServiceException 
      */
     private static List<Segment> getObjectIdentifier(
@@ -619,10 +619,10 @@ public final class XRI_2Marshaller
     /**
      * Tests whether the String represents an absolute extensible resource identifier without scheme
      * 
-     * @param lenient tells whether exceptions are thrown or mapped to <code>null</code> return values
+     * @param lenient tells whether exceptions are thrown or mapped to {@code null} return values
      * @param resourceIdentifier
      * 
-     * @return <code>true</code> if the String represents an absolute extensible resource identifier without scheme 
+     * @return {@code true} if the String represents an absolute extensible resource identifier without scheme 
      * @throws ServiceException 
      */
     private static List<Segment> getExtensibleResourceIdentifier(
@@ -683,7 +683,7 @@ public final class XRI_2Marshaller
     /**
      * Retrieve the segments of an absolute extensible resource identifier without scheme
      * 
-     * @param lenient tells whether exceptions are thrown or mapped to <code>null</code> return values
+     * @param lenient tells whether exceptions are thrown or mapped to {@code null} return values
      * @param path
      * 
      * @return the segments of an absolute extensible resource identifier without scheme
@@ -747,10 +747,10 @@ public final class XRI_2Marshaller
     /**
      * Retrieve the sub-segments
      * 
-     * @param lenient tells whether exceptions are thrown or mapped to <code>null</code> return values
+     * @param lenient tells whether exceptions are thrown or mapped to {@code null} return values
      * @param segment
      * 
-     * @return the sub-segments, or <code>null</code> in case of parse failure
+     * @return the sub-segments, or {@code null} in case of parse failure
      */
     static List<String> parseSubSegments(
         boolean lenient, 
@@ -831,7 +831,7 @@ public final class XRI_2Marshaller
     /**
      * Parse the cross reference's segments
      * 
-     * @param lenient tells whether exceptions are thrown or mapped to <code>null</code> return values
+     * @param lenient tells whether exceptions are thrown or mapped to {@code null} return values
      * @param subSegment
      * 
      * @return the cross reference's content
@@ -848,10 +848,10 @@ public final class XRI_2Marshaller
     /**
      * Validate a single sub-segment with delimiter
      * 
-     * @param lenient tells whether exceptions are thrown or mapped to <code>null</code> return values
+     * @param lenient tells whether exceptions are thrown or mapped to {@code null} return values
      * @param subSegment
      * 
-     * @return the subSegment, or <code>null</code> if it is not valid
+     * @return the subSegment, or {@code null} if it is not valid
      */
     private static String parseSubSegment(
         boolean lenient,
@@ -970,7 +970,7 @@ public final class XRI_2Marshaller
      * @param pathSegment
      * @param patternSegment
      * 
-     * @return <code>true</code> if the segments match
+     * @return {@code true} if the segments match
      */
     private static boolean segmentMatchesPattern(
         Segment pathSegment,
@@ -1004,7 +1004,7 @@ public final class XRI_2Marshaller
      * @param candidate
      * @param pattern
      * 
-     * @return <code>true</code> if the segments match
+     * @return {@code true} if the segments match
      */
     static boolean segmentMatchesPattern(
         String candidate,
@@ -1020,17 +1020,17 @@ public final class XRI_2Marshaller
     
     /**
      * Determines whether the path corresponds to the pattern.<ul>
-     * <li><code>($.)</code> matches any sub-segment
-     * <li><code>($.*&lsaquo;prefix&rsaquo;)</code> matches a re-assignable sub-segment with the given prefix
-     * <li><code>($.!&lsaquo;prefix&rsaquo;)</code> matches a persistent sub-segment with the given prefix
-     * <li><code>($..)</code> matches any number of sub-segments, including 0<br>
+     * <li>{@code ($.)} matches any sub-segment
+     * <li>{@code ($.*&lsaquo;prefix&rsaquo;)} matches a re-assignable sub-segment with the given prefix
+     * <li>{@code ($.!&lsaquo;prefix&rsaquo;)} matches a persistent sub-segment with the given prefix
+     * <li>{@code ($..)} matches any number of sub-segments, including 0<br>
      * <em>Note: This wildcard only allowed as last sub-segment in a segment.</em>
-     * <li><code>($...)</code> matches any number of segments, including 0<br>
+     * <li>{@code ($...)} matches any number of segments, including 0<br>
      * <em>Note: This wildcard only allowed as last segment in a path.</em>
      * </ul>
      * @param pattern
      * 
-     * @return <code>true</code> if this path matches the pattern
+     * @return {@code true} if this path matches the pattern
      */
     static boolean pathMatchesPattern(
         String path,
