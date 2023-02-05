@@ -65,7 +65,7 @@ public class PrimitiveTypeMapper_1 extends Mapper_1 {
     public PrimitiveTypeMapper_1(
         String mappingFormat
     ) throws ServiceException {
-        super(mappingFormat, mappingFormat, "java");
+        super(mappingFormat, false, mappingFormat, "java");
     }
     
     /* (non-Javadoc)
