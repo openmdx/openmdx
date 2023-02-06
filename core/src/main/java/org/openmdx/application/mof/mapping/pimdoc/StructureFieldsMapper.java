@@ -57,37 +57,43 @@ class StructureFieldsMapper extends CompartmentMapper {
 	StructureFieldsMapper(
 		PrintWriter pw, 
 		ModelElement_1_0 element, 
-		Function<ModelElement_1_0, String> hrefMapper
+		Function<String, String> annotationRenderer
 	){
-		super(
-			"structure-fields", "Structure Fields",
-			pw, element, hrefMapper,
-			"Name", "Multiplicity", "Type"
+		super( // 
+			"structure-fields", "Structure Fields", "Field ", //
+			ModelElement_1_0::isStructureFieldType, false, //
+			pw, element, annotationRenderer, //
+			"Name", "Multiplicity", "Type" //
 		);
 	}
 
 	@Override
-	protected void mapTableBody() {
-		printLine("\t\t\t\t<tbody>");
-		mapFields();
-		printLine("\t\t\t\t</tbody>");
+	protected void compartmentContent() {
+		streamSortedElements().forEach(this::mapField);
 	}
 
-	private void mapFields() {
-		containedElements()
-			.filter(ModelElement_1_0::isStructureFieldType)
-			.sorted(ELEMENT_NAME_COMPARATOR)
-			.forEach(this::mapField);
-	}
-	
-	private void mapField(ModelElement_1_0 element) {
-		printLine("\t\t\t\t\t<tr>");
-		printLine("\t\t\t\t\t\t<td>", element.getName(), "</td>");
-		printLine("\t\t\t\t\t\t<td>", getMultiplicity(element), "</td>");
-		mapType(getType(element));
+	private void mapField(ModelElement_1_0 current) {
+		printLine("\t\t\t<table>");
+		currentHead(current);
+		printLine("\t\t\t\t<tbody class=\"uml-table-body\">");
+		mapAnnotation(current);
+  		printLine("\t\t\t\t\t<tr>");
+		mapName(current);
+		mapMultiplicity(current);
+		mapType(getType(current));
 		printLine("\t\t\t\t\t</tr>");
+		printLine("\t\t\t\t</tbody>");
+		printLine("\t\t\t</table>");
 	}
-	
+
+	private void mapName(ModelElement_1_0 current) {
+		printLine("\t\t\t\t\t\t<td>", current.getName(), "</td>");
+	}
+
+	private void mapMultiplicity(ModelElement_1_0 current) {
+		printLine("\t\t\t\t\t\t<td>", getMultiplicity(current), "</td>");
+	}
+
 	private void mapType(ModelElement_1_0 type) {
 		printLine("\t\t\t\t\t\t<td>");
 		printLine(
@@ -103,5 +109,16 @@ class StructureFieldsMapper extends CompartmentMapper {
 		);
 		printLine("\t\t\t\t\t\t</td>");
 	}
-	
+
+	/**
+	 * All {@code Structure}s except {@code Void} have fields.
+	 * That's the reason why we present {@code Void}'s empty compartment, too. 
+	 * 
+	 * @return {@code true}
+	 */
+	@Override
+	protected boolean isEnabled() {
+		return true;
+	}
+
 }

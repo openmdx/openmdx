@@ -61,9 +61,7 @@ public class StructureMapper extends ElementMapper {
         PIMDocConfiguration configuration
     ){
 		super("Structure", sink, classToBeExported, markdown, configuration);
-		this.structureFieldsMapper = new StructureFieldsMapper(
-			pw, element, this::getHref
-		);		
+		this.structureFieldsMapper = new StructureFieldsMapper(pw, element, annotationRenderer);		
     }    
     
     private final CompartmentMapper structureFieldsMapper;
@@ -71,8 +69,8 @@ public class StructureMapper extends ElementMapper {
 	@Override
 	protected void columnBody() {
 		printLine("\t<div class=\"column-body\">");
-		annotation(element);
-		structureFieldsMapper.compartment(true);
+		mapAnnotation("\t\t", element);
+		structureFieldsMapper.compartment();
 		printLine("\t</div>");
 	}
 	

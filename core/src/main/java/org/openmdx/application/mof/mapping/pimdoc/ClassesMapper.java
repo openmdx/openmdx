@@ -60,22 +60,19 @@ class ClassesMapper extends CompartmentMapper {
 	ClassesMapper(
 		PrintWriter pw, 
 		ModelElement_1_0 element, 
-		Function<ModelElement_1_0, String> hrefMapper
+		Function<String, String> annotationRenderer
 	){
 		super(
-			"classes", "Classes", 
-			pw, element, hrefMapper,
-			"Name", "Abstract", "Mix-In"
+			"classes", "Classes", "",
+			ModelElement_1_0::isClassType, false,
+			pw, element, annotationRenderer, "Name", "Abstract", "Mix-In"
 		);
 	}
 
 	@Override
-	protected void mapTableBody() {
-		printLine("\t\t\t\t<tbody>");
-		containedElements()
-			.filter(ModelElement_1_0::isClassType)
-			.sorted(ELEMENT_NAME_COMPARATOR)
-			.forEach(this::mapTableRow);
+	protected void compartmentContent() {
+		printLine("\t\t\t\t<tbody class=\"uml-table-body\">");
+		streamSortedElements().forEach(this::mapTableRow);
 		printLine("\t\t\t\t</tbody>");
 	}
 
@@ -93,8 +90,8 @@ class ClassesMapper extends CompartmentMapper {
 				"</a>"
 			);
 			printLine("\t\t\t\t\t\t</td>");
-			printLine("\t\t\t\t\t\t<td>", element.isAbstract(), "</td>");
-			printLine("\t\t\t\t\t\t<td>", isMixInClass(element), "</td>");
+			mapBallotBox("\t\t\t\t\t\t", element.isAbstract());
+			mapBallotBox("\t\t\t\t\t\t", isMixInClass(element));
 			printLine("\t\t\t\t\t</tr>");
 		} catch (ServiceException e) {
 			throw new RuntimeServiceException(e);

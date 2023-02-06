@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Structural Features Mapper
+ * Description: References Mapper
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -52,63 +52,50 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
- * Structural Features Mapper
+ * References Mapper
  */
-class StructuralFeaturesMapper extends CompartmentMapper {
+class DeclaredReferencesMapper extends CompartmentMapper {
 	
-	StructuralFeaturesMapper(
+	DeclaredReferencesMapper(
 		PrintWriter pw, 
 		ModelElement_1_0 element, 
 		Function<String, String> annotationRenderer
 	){
 		super( //
-			"structural-features", "Structural Features", "", //
-			ModelElement_1_0::isStructuralFeatureType, true, //
+			"declared-references", "Declared References", "Reference ", //
+			ModelElement_1_0::isReferenceType, false, //
 			pw, element, annotationRenderer, //
-			"Name", "Multiplicity", "Type", "Kind", "Inherited", "Changeable", "Derived" //
+			"Name", "Multiplicity", "Type", "Changeable", "Derived" //
 		);
 	}
 
 	@Override
 	protected void compartmentContent() {
-		printLine("\t\t\t\t<tbody class=\"uml-table-body\">");
-		streamSortedElements().forEach(this::mapStructuralFeature);
-		printLine("\t\t\t\t</tbody>");
+		streamSortedElements().forEach(this::mapAttribute);
 	}
 
-	private void mapStructuralFeature(ModelElement_1_0 current) {
-		final boolean inherited = !namespaceFilter.test(current);
-		printLine(
-			"\t\t\t\t\t<tr class=\"",
-			getStyleClass(current),
-			" ",
-			getStyleClass(inherited),
-			"\">"
-		);
-		mapName(current);
+	private void mapAttribute(ModelElement_1_0 current) {
+		printLine("\t\t\t<table>");
+		currentHead(current);
+		printLine("\t\t\t\t<tbody class=\"uml-table-body\">");
+		mapAnnotation(current);
+  		printLine("\t\t\t\t\t<tr>");
+  		mapName(current);
 		mapMultiplicity(current);
 		mapType(getType(current));
-		mapKind(current);
-		mapInheritance(inherited);
 		mapChangeable(current);
 		mapDerived(current);
 		printLine("\t\t\t\t\t</tr>");
+		printLine("\t\t\t\t</tbody>");
+		printLine("\t\t\t</table>");
 	}
 
 	private void mapName(ModelElement_1_0 current) {
-		printLine("\t\t\t\t\t\t<td>");
 		printLine(
-			"\t\t\t\t\t\t\t<a href=\"", 
-			getHref(current),
-			"\" title=\"",
-			getDisplayName(current),
-			"\" target=\"",
-			HTMLMapper.FRAME_NAME,
-			"\">",
+			"\t\t\t\t\t\t<td>",
 			current.getName(),
-			"</a>"
+			"</td>"
 		);
-		printLine("\t\t\t\t\t\t</td>");
 	}
 
 	private void mapType(ModelElement_1_0 type) {
@@ -129,14 +116,6 @@ class StructuralFeaturesMapper extends CompartmentMapper {
 	
 	private void mapMultiplicity(ModelElement_1_0 current) {
 		printLine("\t\t\t\t\t\t<td>", getMultiplicity(current), "</td>");
-	}
-
-	private void mapKind(ModelElement_1_0 current) {
-		printLine("\t\t\t\t\t\t<td>", getKind(current), "</td>");
-	}
-
-	private void mapInheritance(boolean inherited) {
-		mapBallotBox("\t\t\t\t\t\t", inherited);
 	}
 
 	private void mapChangeable(ModelElement_1_0 current) {
@@ -163,30 +142,4 @@ class StructuralFeaturesMapper extends CompartmentMapper {
 		}
 	}
 	
-	private String getStyleClass(ModelElement_1_0 current) {
-		try {
-			return 
-				current.isReference() ? "uml-reference" :
-				current.isAttributeType() ? "uml-attribute" :
-				"uml-structural-feature";
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
-	}
-
-	private String getKind(ModelElement_1_0 current) {
-		try {
-			return 
-				current.isReference() ? "Reference" :
-				current.isAttributeType() ? "Attribute" :
-				current.getDelegate().getRecordName();
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
-	}
-	
-	private String getStyleClass(boolean inherited) {
-		return inherited ? "uml-inherited" : "uml-declared";
-	}
-
 }

@@ -58,7 +58,8 @@
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_6XGS0KamEd608rQJr4Jvxw" name="UnitOfWork">
           <ownedComment xmi:type="uml:Comment" xmi:id="_6XGS0aamEd608rQJr4Jvxw" annotatedElement="_6XGS0KamEd608rQJr4Jvxw">
-            <body>&lt;br /></body>
+            <body>
+            </body>
           </ownedComment>
           <generalization xmi:type="uml:Generalization" xmi:id="_6XGS0qamEd608rQJr4Jvxw">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_OdIx0H8vEd2MQvsjduCbTg"/>

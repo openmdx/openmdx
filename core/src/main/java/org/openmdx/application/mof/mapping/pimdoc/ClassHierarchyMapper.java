@@ -57,18 +57,18 @@ class ClassHierarchyMapper extends CompartmentMapper {
 	ClassHierarchyMapper(
 		PrintWriter pw, 
 		ModelElement_1_0 element, 
-		Function<ModelElement_1_0, String> hrefMapper
+		Function<String, String> annotationRenderer
 	){
 		super(
-			"class-hierarchy", "Class Hierarchy", 
-			pw, element, hrefMapper,
-			"Direction", "Classes"
+			"class-hierarchy", "Class Hierarchy", "",
+			null, false,
+			pw, element, annotationRenderer, "Direction", "Classes"
 		);
 	}
 
 	@Override
-	protected void mapTableBody() {
-		printLine("\t\t\t\t<tbody>");
+	protected void compartmentContent() {
+		printLine("\t\t\t\t<tbody class=\"uml-table-body\">");
 		mapSupertypes();
 		mapSubtypes();
 		printLine("\t\t\t\t</tbody>");
@@ -117,5 +117,5 @@ class ClassHierarchyMapper extends CompartmentMapper {
 			"</a>"
 		);
 	}
-	
+
 }

@@ -68,6 +68,7 @@
           <eAnnotations xmi:id="_MkPyI965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
             <details xmi:id="_MkPyJN65EdmrtKJSXC0_FQ" key="struct"/>
           </eAnnotations>
+          <ownedComment xmi:id="_2qnT4KZUEe2v4bFuaq0zRQ"/>
         </packagedElement>
         <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_3C7B8A60016D400E4AD203B8" name="ObjectId"/>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D403CAF5A0142" name="ExtentCapable" isAbstract="true">
@@ -147,7 +148,8 @@
             <details xmi:id="_SP6RIX81Ed2MQvsjduCbTg" key="root"/>
           </eAnnotations>
           <ownedComment xmi:id="_WDUScIyhEd6xh6MVzLqAFg" annotatedElement="_anOBsH8yEd2MQvsjduCbTg">
-            <body>&lt;br /></body>
+            <body>
+			</body>
           </ownedComment>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_PfY_YH83Ed2MQvsjduCbTg" name="Aspect" isAbstract="true">

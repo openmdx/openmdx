@@ -49,6 +49,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.openmdx.application.mof.mapping.spi.MapperTemplate;
+import org.openmdx.application.mof.mapping.spi.MapperUtils;
 import org.openmdx.base.Version;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -142,7 +143,7 @@ abstract class HTMLMapper extends MapperTemplate {
 	 * 
 	 * @return the entry name
 	 */
-    private static String getEntryName(ModelElement_1_0 element){
+    static String getEntryName(ModelElement_1_0 element){
     	if(element == null) {
     		return MagicFile.INDEX.getFileName();
     	}
@@ -187,17 +188,23 @@ abstract class HTMLMapper extends MapperTemplate {
     	return (element.isPackageType() ? qualifiedName.substring(0, qualifiedName.lastIndexOf(':')) : qualifiedName).replace(":", "::");
     }
     
-    protected void annotation(
+    protected void mapAnnotation(
+    	String intent, 
     	ModelElement_1_0 element
     ) {
     	final String annotation  = (String)element.objGetValue("annotation");
-		if(annotation != null && !annotation.isEmpty()) {
-			printLine("<div class=\"uml-comment\">");
-			print(renderAnnotation(annotation));		
-			printLine("</div>");
+		if(annotation != null && !annotation.trim().isEmpty()) {
+			printLine(intent, "<div class=\"uml-comment\">");
+			final String rendered = renderAnnotation(annotation);
+			if(rendered.contains("<pre>")) {
+				print(rendered);
+			} else {
+				MapperUtils.wrapText(intent + '\t', rendered, this::printLine);
+			}
+			printLine(intent, "</div>");
 		}
     }
-
+    
 	protected Stream<ModelElement_1_0> streamElements(){
 		return this.model.getContent().stream();
 	}

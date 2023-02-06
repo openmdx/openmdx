@@ -60,18 +60,18 @@ class ClassPropertiesMapper extends CompartmentMapper {
 	ClassPropertiesMapper(
 		PrintWriter pw, 
 		ModelElement_1_0 element, 
-		Function<ModelElement_1_0, String> hrefMapper
+		Function<String, String> annotationRenderer
 	){
 		super(
-			"class-properties", "Class Properties", 
-			pw, element, hrefMapper,
-			"Name", "Value", "Stereotype"
+			"class-properties", "Class Properties", "",
+			null, false,
+			pw, element, annotationRenderer, "Name", "Value", "Stereotype"
 		);
 	}
 
 	@Override
-	protected void mapTableBody() {
-		printLine("\t\t\t\t<tbody>");
+	protected void compartmentContent() {
+		printLine("\t\t\t\t<tbody class=\"uml-table-body\">");
 		mapAbstract();
 		mapMixIn();
 		mapAspectCapability();
@@ -81,7 +81,7 @@ class ClassPropertiesMapper extends CompartmentMapper {
 	private void mapAbstract() {
 		printLine("\t\t\t\t\t<tr>");
 		printLine("\t\t\t\t\t\t<td>abstract</td>");
-		printLine("\t\t\t\t\t\t<td>", isAbstract(), "</td>");
+		mapBallotBox("\t\t\t\t\t\t", isAbstract());
 		printLine("\t\t\t\t\t\t<td/>");
 		printLine("\t\t\t\t\t</tr>");
 	}
@@ -90,10 +90,10 @@ class ClassPropertiesMapper extends CompartmentMapper {
 		printLine("\t\t\t\t\t<tr>");
 		printLine("\t\t\t\t\t\t<td>mix-in</td>");
 		if(isMixInClass()) {
-			printLine("\t\t\t\t\t\t<td>", true, "</td>");
+			mapBallotBox("\t\t\t\t\t\t", true);
 			printLine("\t\t\t\t\t\t<td>", Stereotypes.ROOT, "</td>");
 		} else {
-			printLine("\t\t\t\t\t\t<td>", false, "</td>");
+			mapBallotBox("\t\t\t\t\t\t", false);
 			printLine("\t\t\t\t\t\t<td/>");
 		}
 		printLine("\t\t\t\t\t</tr>");
@@ -153,5 +153,5 @@ class ClassPropertiesMapper extends CompartmentMapper {
 			.map(ModelElement_1_0::getQualifiedName)
 			.anyMatch(superClass::equals);
 	}
-	
+
 }

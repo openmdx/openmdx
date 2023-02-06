@@ -366,14 +366,14 @@
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3DCC461700FA" name="PersonAddress">
           <ownedComment xmi:type="uml:Comment" xmi:id="_qkWZ0d7CEdmkJO73lqONhA" annotatedElement="_3C7B8A60016D3DCC461700FA">
-            <body>find() requests can be implemented with Database_1 by
-    &lt;ul>
-    &lt;li>configure optimized types for the types Person, Address and PersonAddress&lt;/li>
-    &lt;li>create optimized tables for the types Person, Address&lt;/li>
-    &lt;li>create a database view joining Person and Address returning the view PersonAddress&lt;/li>
-    &lt;/ul>
+            <body>
+find() requests can be implemented with Database_2 by
 
-    NOTE: The view PersonAddress must contain the columns 'person' and 'address' containing the paths to the corresponding Person and Address instances.
+* configure optimized types for the types Person, Address and PersonAddress
+* create optimized tables for the types Person, Address
+* create a database view joining Person and Address returning the view PersonAddress
+
+NOTE: The view PersonAddress must contain the columns `person` and `address` containing the paths to the corresponding Person and Address instances.
     </body>
           </ownedComment>
           <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3FF14CDB00FF">
@@ -616,12 +616,13 @@
             <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_qku0KN7CEdmkJO73lqONhA" key="role"/>
           </eAnnotations>
           <ownedComment xmi:type="uml:Comment" xmi:id="_qku0It7CEdmkJO73lqONhA" annotatedElement="_3C7B8A60016D407480610330">
-            <body>The role id is an ISO 3166-1 alpha-3 code, e.g.&lt;ul>
-    &lt;li>CHF for Switzerland&lt;/li>
-    &lt;li>DEU for Germany&lt;/li>
-    &lt;li>AUT for Austria&lt;/li>
-    &lt;/ul>
-    </body>
+            <body>
+The role id is an ISO 3166-1 alpha-3 code, e.g.
+            
+* CHF for Switzerland
+* DEU for Germany
+* AUT for Austria
+            </body>
           </ownedComment>
           <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D4074814102BA" general="_3C7B8A60016D40747ED50327"/>
           <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D407482D0017E" name="nationality">
@@ -635,10 +636,7 @@
               <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_qku0MN7CEdmkJO73lqONhA" key="set"/>
             </eAnnotations>
             <ownedComment xmi:type="uml:Comment" xmi:id="_qku0LN7CEdmkJO73lqONhA" annotatedElement="_3C7B8A60016D4074820101BC">
-              <body>Place of Citizenship is in the format&lt;pre>
-    B&amp;uuml;rgerort (Kanton)
-    &lt;/pre>
-    </body>
+              <body>Place of Citizenship is in the format `Bürgerort (Kanton)`</body>
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>

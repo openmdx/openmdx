@@ -57,22 +57,19 @@ class DataTypesMapper extends CompartmentMapper {
 	DataTypesMapper(
 		PrintWriter pw, 
 		ModelElement_1_0 element, 
-		Function<ModelElement_1_0, String> hrefMapper
+		Function<String, String> annotationRenderer
 	){
 		super(
-			"data-types", "Data Types", 
-			pw, element, hrefMapper,
-			"Name", "Type", "Kind"
+			"data-types", "Data Types", "",
+			ModelElement_1_0::isDataType, false,
+			pw, element, annotationRenderer, "Name", "Type", "Kind"
 		);
 	}
 
 	@Override
-	protected void mapTableBody() {
-		printLine("\t\t\t\t<tbody>");
-		containedElements()
-			.filter(ModelElement_1_0::isDataType)
-			.sorted(ELEMENT_NAME_COMPARATOR)
-			.forEach(this::mapTableRow);
+	protected void compartmentContent() {
+		printLine("\t\t\t\t<tbody class=\"uml-table-body\">");
+		streamSortedElements().forEach(this::mapTableRow);
 		printLine("\t\t\t\t</tbody>");
 	}
 

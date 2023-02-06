@@ -60,12 +60,8 @@ public class PackageMapper extends ElementMapper {
         boolean markdown, PIMDocConfiguration configuration
     ){
 		super("Package", sink, packageToBeExported, markdown, configuration);
-		this.classesMapper = new ClassesMapper(
-			pw, this.element, this::getHref
-		);
-		this.dataTypesMapper = new DataTypesMapper(
-			pw, this.element, this::getHref
-		);
+		this.classesMapper = new ClassesMapper(pw, this.element, annotationRenderer);
+		this.dataTypesMapper = new DataTypesMapper(pw, this.element, annotationRenderer);
     }    
 
 	private final CompartmentMapper classesMapper;
@@ -74,7 +70,7 @@ public class PackageMapper extends ElementMapper {
 	@Override
 	protected  void columnBody() {
 		printLine("\t<div class=\"column-body\">");
-		annotation(element);
+		mapAnnotation("\t\t", element);
 		classesMapper.compartment(true);
 		dataTypesMapper.compartment(true);
 		printLine("\t</div>");

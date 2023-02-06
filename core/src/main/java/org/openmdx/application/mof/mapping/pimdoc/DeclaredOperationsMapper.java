@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Behavioural Features Mapper
+ * Description: Operations Mapper
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -45,7 +45,9 @@
 package org.openmdx.application.mof.mapping.pimdoc;
 
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -54,69 +56,97 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 /**
  * Behavioural Features Mapper
  */
-class BehaviouralFeaturesMapper extends CompartmentMapper {
+class DeclaredOperationsMapper extends CompartmentMapper {
 	
-	BehaviouralFeaturesMapper(
+	DeclaredOperationsMapper(
 		PrintWriter pw, 
 		ModelElement_1_0 element, 
 		Function<String, String> annotationRenderer
 	){
 		super(
-			"behavioural-features", "Behavioural Features", "", //
-			ModelElement_1_0::isBehaviouralFeatureType, true, //
-			pw, element, annotationRenderer, //
-			"Name", "Kind", "Inherited", "Abstract", "Derived"
+			"declared-operations", "Declared Operations", "Operation ", //
+			ModelElement_1_0::isOperationType, //
+			true, pw, element, annotationRenderer, //
+			"Name", "Abstract<br/>Kind", "Derived<br/>Type", "Query<br>&nbsp;"
 		);
 	}
 
 	@Override
 	protected void compartmentContent() {
-		printLine("\t\t\t\t<tbody class=\"uml-table-body\">");
-		streamSortedElements().forEach(this::mapBehaviouralFeature);
-		printLine("\t\t\t\t</tbody>");
+		streamSortedElements().forEach(this::mapOperation);
 	}
 
-	private void mapBehaviouralFeature(ModelElement_1_0 current) {
-		final boolean inherited = !namespaceFilter.test(current);
-		printLine(
-			"\t\t\t\t\t<tr class=\"",
-			getStyleClass(current),
-			" ",
-			getStyleClass(inherited),
-			"\">"
-		);
-		mapName(current);
-		mapKind(current);
-		mapInheritance(inherited);
-		mapAbstract(current);
-		mapDerived(current);
+	private void mapOperation(ModelElement_1_0 current) {
+		printLine("\t\t\t<table>");
+		currentHead(current);
+		printLine("\t\t\t\t<tbody class=\"uml-table-body\">");
+		mapAnnotation(current);
+  		mapNameAndFlags(current);
+  		streamInParameters(current).forEach(this::mapInParameter);
+  		streamResultParameters(current).forEach(this::mapResultParameter);
+  		streamExceptions(current).forEach(this::mapException);
+		printLine("\t\t\t\t</tbody>");
+		printLine("\t\t\t</table>");
+	}
+
+	private void mapException(ModelElement_1_0 current) {
+		printLine("\t\t\t\t\t<tr>");
+  		mapName("throws ", current, "");
+		printLine("\t\t\t\t\t\t<td>Exception</td>");
+  		mapType(getType(current));
+		printLine("\t\t\t\t\t</tr>");
+	}
+	
+	private void mapInParameter(ModelElement_1_0 current) {
+		printLine("\t\t\t\t\t<tr>");
+  		mapName("in ", current, "");
+		printLine("\t\t\t\t\t\t<td>Parameter</td>");
+  		mapType(getType(current));
 		printLine("\t\t\t\t\t</tr>");
 	}
 
-	private void mapName(ModelElement_1_0 current) {
-		printLine("\t\t\t\t\t\t<td>");
+	private void mapResultParameter(ModelElement_1_0 current) {
+		printLine("\t\t\t\t\t<tr>");
+  		mapName("returns ", current, "");
+		printLine("\t\t\t\t\t\t<td>return Value</td>");
+  		mapType(getType(current));
+		printLine("\t\t\t\t\t</tr>");
+	}
+	
+	private void mapNameAndFlags(ModelElement_1_0 current) {
+		printLine("\t\t\t\t\t<tr>");
+  		mapName("", current, "()");
+		mapAbstract(current);
+		mapDerived(current);
+		mapQuery(current);
+		printLine("\t\t\t\t\t</tr>");
+	}
+
+	private void mapName(String namePrefix, ModelElement_1_0 current, String nameSuffix) {
+		printLine(
+			"\t\t\t\t\t\t<td>",
+			current.getName(),
+			nameSuffix,
+			"</td>"
+		);
+	}
+
+	private void mapType(ModelElement_1_0 type) {
+		printLine("\t\t\t\t\t\t<td colspan=\"2\">");
 		printLine(
 			"\t\t\t\t\t\t\t<a href=\"", 
-			getHref(current),
+			getHref(type),
 			"\" title=\"",
-			getDisplayName(current),
+			getDisplayName(type),
 			"\" target=\"",
 			HTMLMapper.FRAME_NAME,
 			"\">",
-			current.getName(),
+			type.getName(),
 			"</a>"
 		);
 		printLine("\t\t\t\t\t\t</td>");
 	}
-
-	private void mapKind(ModelElement_1_0 current) {
-		printLine("\t\t\t\t\t\t<td>", getKind(current), "</td>");
-	}
-
-	private void mapInheritance(boolean inherited) {
-		mapBallotBox("\t\t\t\t\t\t", inherited);
-	}
-
+	
 	private void mapAbstract(ModelElement_1_0 current) {
 		mapBallotBox("\t\t\t\t\t\t", isAbstract(current));
 	}
@@ -125,6 +155,10 @@ class BehaviouralFeaturesMapper extends CompartmentMapper {
 		mapBallotBox("\t\t\t\t\t\t", isDerived(current));
 	}
 
+	private void mapQuery(ModelElement_1_0 current) {
+		mapBallotBox("\t\t\t\t\t\t", isQuery(current));
+	}
+	
 	private boolean isDerived(ModelElement_1_0 current){
 		try {
 			return Boolean.TRUE.equals(current.isDerived());
@@ -132,7 +166,11 @@ class BehaviouralFeaturesMapper extends CompartmentMapper {
 			throw new RuntimeServiceException(e);
 		}
 	}
-	
+
+	private boolean isQuery(ModelElement_1_0 current){
+		return Boolean.TRUE.equals(current.objGetValue("isQuery"));
+	}
+
 	private boolean isAbstract(ModelElement_1_0 current) {
 		try {
 			return Boolean.TRUE.equals(current.isAbstract());
@@ -141,25 +179,29 @@ class BehaviouralFeaturesMapper extends CompartmentMapper {
 		}
 	}
 
-	private String getKind(ModelElement_1_0 current) {
-		return
-			current.isOperationType() ? "Operation" :
-			current.isExceptionType() ? "Exception" :
-			current.getDelegate().getRecordName();
+	private Stream<ModelElement_1_0> streamReferences(ModelElement_1_0 current, String kind){
+		final List<Object> list = current.objGetList(kind);
+		return list == null ? Stream.empty() : list.stream().map(this::getElement);
+	}
+
+	private Stream<ModelElement_1_0> streamExceptions(ModelElement_1_0 current){
+		return streamReferences(current, "exception");
 	}
 	
-	private String getStyleClass(ModelElement_1_0 current) {
-		return (
-			isAbstract(current) ? "uml-abstract " : ""
-		) + (
-			current.isOperationType() ? "uml-operation" :
-			current.isExceptionType() ? "uml-exception" :
-			"uml-structural-feature"
-		);
+	private Stream<ModelElement_1_0> streamInParameters(ModelElement_1_0 current){
+		return streamReferences(current, "content").filter(this::isInParameter);
 	}
 	
-	private String getStyleClass(boolean inherited) {
-		return inherited ? "uml-inherited" : "uml-declared";
+	private Stream<ModelElement_1_0> streamResultParameters(ModelElement_1_0 current){
+		return streamReferences(current, "content").filter(this::isResultParameter);
+	}
+	
+	private boolean isInParameter(ModelElement_1_0 param) {
+        return org.omg.mof.cci.DirectionKind.IN_DIR.equals(param.objGetValue("direction"));
+	}
+
+	private boolean isResultParameter(ModelElement_1_0 param) {
+        return "result".equals(param.getName());
 	}
 	
 }

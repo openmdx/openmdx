@@ -63,25 +63,34 @@ public class ClassMapper extends ElementMapper {
         PIMDocConfiguration configuration
     ){
 		super("Class", sink, classToBeExported, markdown, configuration);
-		this.classPropertiesMapper = new ClassPropertiesMapper(pw, element, this::getHref);		
-		this.classHierarchyMapper = new ClassHierarchyMapper(pw, element, this::getHref);		
-		this.structuralFeaturesMapper = new StructuralFeaturesMapper(pw, element, this::getHref);		
-		this.behaviouralFeatureyMapper = new BehaviouralFeaturesMapper(pw, element, this::getHref);		
+		this.classPropertiesMapper = new ClassPropertiesMapper(pw, element, annotationRenderer);		
+		this.classHierarchyMapper = new ClassHierarchyMapper(pw, element, annotationRenderer);		
+		this.structuralFeaturesMapper = new StructuralFeaturesMapper(pw, element, annotationRenderer);		
+		this.behaviouralFeaturesMapper = new BehaviouralFeaturesMapper(pw, element, annotationRenderer);		
+		this.declaredAttributesMapper = new DeclaredAttributesMapper(pw, element, annotationRenderer);		
+		this.declaredReferencesMapper = new DeclaredReferencesMapper(pw, element, annotationRenderer);		
+		this.declaredOperationsMapper = new DeclaredOperationsMapper(pw, element, annotationRenderer);		
     }    
     
     private final CompartmentMapper classPropertiesMapper;
     private final CompartmentMapper classHierarchyMapper;
     private final CompartmentMapper structuralFeaturesMapper;
-    private final CompartmentMapper behaviouralFeatureyMapper;
+    private final CompartmentMapper behaviouralFeaturesMapper;
+    private final CompartmentMapper declaredAttributesMapper;
+    private final CompartmentMapper declaredReferencesMapper;
+    private final CompartmentMapper declaredOperationsMapper;
 
 	@Override
 	protected void columnBody() {
 		printLine("\t<div class=\"column-body\">");
-		annotation(element);
+		mapAnnotation("\t\t", element);
 		classPropertiesMapper.compartment(false);
 		classHierarchyMapper.compartment(false);
-		structuralFeaturesMapper.compartment(true);
-		behaviouralFeatureyMapper.compartment(true);
+		structuralFeaturesMapper.compartment(false);
+		behaviouralFeaturesMapper.compartment(false);
+		declaredAttributesMapper.compartment();
+		declaredReferencesMapper.compartment();
+		declaredOperationsMapper.compartment();
 		printLine("\t</div>");
 	}
 	

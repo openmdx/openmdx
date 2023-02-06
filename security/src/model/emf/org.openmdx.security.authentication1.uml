@@ -111,10 +111,12 @@
                 <details xmi:id="_3pt4gfJPEdqAh-jti9npDQ" key="0..1"/>
               </eAnnotations>
               <ownedComment xmi:id="_klsnQPJKEdqAh-jti9npDQ" annotatedElement="_n-GYYPJIEdqAh-jti9npDQ">
-                <body>The following mapping is applied as long enumerations are not supported&lt;ul>&#xD;
-      &lt;li>0: Completion.ABORTED&#xD;
-      &lt;li>1: Completion.COMMITED&#xD;
-      &lt;/ul></body>
+                <body>
+The following mapping is applied as long enumerations are not supported
+  
+* 0: Completion.ABORTED
+* 1: Completion.COMMITED
+      </body>
               </ownedComment>
               <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B63110001"/>
             </ownedAttribute>

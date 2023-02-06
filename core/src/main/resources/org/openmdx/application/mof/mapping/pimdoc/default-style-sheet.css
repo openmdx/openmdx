@@ -106,6 +106,9 @@
 body {
 	font-family: "Segoe UI Light", "Segoe UI", "Segoe", Tahoma, Helvetica, Arial, sans-serif;
 }
+.uml-abstract {
+	font-style:italic;
+}
 
 /*
  * Navigation Style
@@ -157,6 +160,43 @@ body {
 .uml-element th {
 	color: white;
 }
-.uml-element tr:nth-child(even) {
+.uml-table-body tr:nth-child(even) {
 	background-color: rgb(212, 230, 242);
+}
+.uml-table-head tr:nth-child(even) {
+	background-color: rgb(125, 184, 244);
+	font-weight: lighter;
+}
+.uml-structure-fields-1 {
+	width: 20%;
+}
+.uml-structure-fields-2 {
+	width: 10%;
+}
+.uml-declared-operations-1 {
+	width: 50%
+}
+.uml-declared-attributes-5 {
+	width: 10%;
+}
+.uml-declared-attributes-4 {
+	width: 10%;
+}
+.uml-declared-attributes-3 {
+	width: 15%;
+}
+.uml-declared-attributes-2 {
+	width: 15%;
+}
+.uml-declared-references-5 {
+	width: 10%;
+}
+.uml-declared-references-4 {
+	width: 10%;
+}
+.uml-declared-references-3 {
+	width: 15%;
+}
+.uml-declared-references-2 {
+	width: 15%;
 }

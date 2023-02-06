@@ -29,32 +29,26 @@
           </ownedAttribute>
           <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3F35750301BA" name="mimeType">
             <ownedComment xmi:type="uml:Comment" xmi:id="_MlS7At65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3F35750301BA">
-              <body>contentType see
+              <body>
+contentType see
 
-    http://rfc.net/rfc2045.html
-    ftp://ftp.isi.edu/in-notes/iana/assignments/media-types/media-types
+- [RFC 2045](https://www.rfc-editor.org/rfc/rfc2045)
+- [IANA Media Types](https://www.iana.org/assignments/media-types/media-types.xhtml)
 
-    content := &quot;Content-Type&quot; &quot;:&quot; type &quot;/&quot; subtype
-		  *(&quot;;&quot; parameter)
-		  ; Matching of media type and subtype
-		  ; is ALWAYS case-insensitive.
+content := "Content-Type" ":" type "/" subtype *(";" parameter) ; Matching of media type and subtype is ALWAYS case-insensitive.
 
-	type := discrete-type / composite-type
+type := discrete-type / composite-type
 
-	discrete-type := &quot;text&quot; / &quot;image&quot; / &quot;audio&quot; / &quot;video&quot; /
-			&quot;application&quot; / extension-token
+discrete-type := "text" / "image" / "audio" / "video" / "application" / extension-token
 
-	composite-type := &quot;message&quot; / &quot;multipart&quot; / extension-token
+composite-type := "message" / "multipart" / extension-token
 
-	extension-token := ietf-token / x-token
+extension-token := ietf-token / x-token
 
-	ietf-token := &lt;An extension token defined by a
-		      standards-track RFC and registered
-		      with IANA.>
+ietf-token := ‹An extension token defined by a standards-track RFC and registered with IANA.›
 
-	x-token := &lt;The two characters &quot;X-&quot; or &quot;x-&quot; followed, with
-		    no intervening white space, by any token>
-    </body>
+x-token := ‹The two characters "X-" or "x-" followed, with no intervening white space, by any token›
+              </body>
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="platform:resource/openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MlS7Bd65EdmrtKJSXC0_FQ"/>
@@ -97,9 +91,10 @@
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3EE0858000E3" name="FieldGroup">
           <ownedComment xmi:type="uml:Comment" xmi:id="_MlAnMN65EdmrtKJSXC0_FQ" annotatedElement="_3C7B8A60016D3EE0858000E3">
-            <body>Allowed container: Tab
+            <body>
+Allowed container: Tab
 
-    A  FieldGroup is backed up by exaclty one value object. 
+A  FieldGroup is backed up by exaclty one value object. 
     </body>
           </ownedComment>
           <generalization xmi:type="uml:Generalization" xmi:id="_3C7B8A60016D3F67844F035D" general="_3C7B8A60016D3F67833E0364"/>

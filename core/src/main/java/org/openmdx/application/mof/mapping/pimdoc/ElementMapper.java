@@ -44,6 +44,9 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc;
 
+import org.openmdx.application.mof.mapping.spi.MapperUtils;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
@@ -79,7 +82,11 @@ abstract class ElementMapper extends HTMLMapper {
 
 	protected void columnHead() {
 		printLine("\t<div class=\"column-head\">");
-		printLine("\t\t<h2>", getTitle(), "</h2>");
+		if(isAbstract()) {
+			printLine("\t\t<h2 class=\"uml-abstract\" >", getTitle(), "</h2>");
+		} else {
+			printLine("\t\t<h2>", getTitle(), "</h2>");
+		}
 		printLine("\t</div>");
 	}
 	
@@ -92,7 +99,7 @@ abstract class ElementMapper extends HTMLMapper {
     	return baseDir.toString();
     }
 	
-    private static boolean isColon(int c) {
+    static boolean isColon(int c) {
     	return c == ':';
     }
     
@@ -100,9 +107,15 @@ abstract class ElementMapper extends HTMLMapper {
 	protected String getTitle() {
 		return this.elementKind + " " + getDisplayName(element);
 	}
-
-    
 	
+	protected boolean isAbstract() {
+		try {
+			return Boolean.TRUE.equals(element.isAbstract());
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
+	}
+
 	protected abstract void columnBody();
 	
 }

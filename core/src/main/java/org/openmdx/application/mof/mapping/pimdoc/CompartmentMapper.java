@@ -46,92 +46,175 @@ package org.openmdx.application.mof.mapping.pimdoc;
 
 import java.io.PrintWriter;
 import java.util.Comparator;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.openmdx.application.mof.mapping.spi.MapperTemplate;
+import org.openmdx.application.mof.mapping.spi.MapperUtils;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 
 /**
  * Compartment Mapper
  */
-abstract class CompartmentMapper {
+abstract class CompartmentMapper extends MapperTemplate {
 
 	protected CompartmentMapper(
 		String compartmentId, 
 		String compartmentTitle, 
+		String currentTitlePrefix, 
+		Predicate<ModelElement_1_0> typeFilter, 
+		boolean inherit,
 		PrintWriter pw, 
-		ModelElement_1_0 element, Function<ModelElement_1_0, String> hrefMapper,
-		String... columnTitles
+		ModelElement_1_0 element, 
+		Function<String, String> annotationRenderer, String... columnTitles
 	) {
+		super(pw, element.getModel(), annotationRenderer);
 		this.compartmentId = compartmentId;
 		this.compartmentTitle = compartmentTitle;
-		this.pw = pw;
+		this.typeFilter = typeFilter;
+		this.inherit = inherit;
 		this.element = element;
-		this.hrefMapper = hrefMapper;
 		this.columnTitles = columnTitles;
+		this.currentTitlePrefix = currentTitlePrefix;
 		this.namespaceFilter = new NamespaceFilter(element);
 	}
 
 	protected final ModelElement_1_0 element;
-	protected final NamespaceFilter namespaceFilter;
-	protected static final Comparator<ModelElement_1_0> ELEMENT_NAME_COMPARATOR = new ElementNameComparator();
+	protected final Predicate<ModelElement_1_0> namespaceFilter;
+	protected final Predicate<ModelElement_1_0> typeFilter;
+	private final boolean inherit;
 	private final String compartmentId;
 	private final String compartmentTitle;
-	private final PrintWriter pw;
-	private final Function<ModelElement_1_0, String> hrefMapper;
+	private final String currentTitlePrefix;
 	private final String[] columnTitles;
-	
+	protected static final Comparator<ModelElement_1_0> ELEMENT_NAME_COMPARATOR = new ElementNameComparator();
 	
 	protected void compartment(boolean open) {
-		printLine(
-			"\t\t<details id=\"",
-			this.compartmentId,
-			"\" class=\"uml-",
-			this.compartmentId,
-			"\"",
-			open ? " open" : "",
-			">"
-		);
-		mapSummary();
-		mapDetails();
-		printLine("\t\t</details>");
+		if(isEnabled()) {
+			printLine(
+				"\t\t<details id=\"",
+				this.compartmentId,
+				"\" class=\"uml-",
+				this.compartmentId,
+				"\"",
+				open ? " open" : "",
+				">"
+			);
+			compartmentSummary();
+			compartmentDetails();
+			printLine("\t\t</details>");
+		}
 	}
 
-	private void mapSummary() {
+	protected void compartment() {
+		if(isEnabled()) {
+			printLine(
+				"\t\t<div id=\"",
+				this.compartmentId,
+				"\" class=\"uml-",
+				this.compartmentId,
+				"\">"
+			);
+			compartmentTitle();
+			compartmentContent();
+			printLine("\t\t</div>");
+		}
+	}
+	
+
+	private void compartmentTitle() {
+		printLine("\t\t\t<h3>", this.compartmentTitle, "</h3>");
+	}
+	
+	private void compartmentSummary() {
 		printLine("\t\t\t<summary>", this.compartmentTitle, "</summary>");
 	}
 
-	private void mapDetails() {
+	private void compartmentDetails() {
 		printLine("\t\t\t<table>");
-		mapTableHead();
-		mapTableBody();
+		compartmentHead();
+		compartmentContent();
 		printLine("\t\t\t</table>");
 	}	
 	
-	protected void mapTableHead() {
-		printLine("\t\t\t\t<thead>");
-		printLine("\t\t\t\t\t<tr>");
-		for(String columnTitle : columnTitles) {
-			printLine("\t\t\t\t\t\t<th>", columnTitle, "</th>");
-		}
-		printLine("\t\t\t\t\t</tr>");
+	protected void compartmentHead() {
+		printLine("\t\t\t\t<thead class=\"uml-table-head\">");
+		compartmentColumnHeaders();
 		printLine("\t\t\t\t</thead>");
 	}
 
-	protected String getHref(ModelElement_1_0 element) {
-		return hrefMapper.apply(element);
+	protected void currentHead(ModelElement_1_0 current) {
+		printLine("\t\t\t\t<thead class=\"uml-table-head\">");
+		currentElementHeader(current);
+		compartmentColumnHeaders();
+		printLine("\t\t\t\t</thead>");
 	}
 
-	protected String getDisplayName(ModelElement_1_0 element) {
-		return HTMLMapper.getDisplayName(element);
+	private void currentElementHeader(ModelElement_1_0 current) {
+		printLine("\t\t\t\t\t<tr>");
+		printLine(
+			"\t\t\t\t\t\t<th colspan=\"",
+			Integer.toString(columnTitles.length),
+			"\" id=\"",
+			this.currentTitlePrefix,
+			element.getName(),
+			"\">",
+			getDisplayName(current),
+			"</th>"
+		);
+		printLine("\t\t\t\t\t</tr>");
+	}
+
+	private void compartmentColumnHeaders() {
+		printLine("\t\t\t\t\t<tr>");
+		int i = 0;
+		for(String columnTitle : columnTitles) {
+			printLine(
+				"\t\t\t\t\t\t<th class=\"uml-",
+				this.compartmentId,
+				"-",
+				Integer.toString(++i),
+				"\">",
+				columnTitle, 
+				"</th>"
+			);
+		}
+		printLine("\t\t\t\t\t</tr>");
+	}
+	
+	protected String getHref(ModelElement_1_0 current) {
+    	if(current.isPackageType() || current.isClassType() || current.isStructureType()){
+        	return getBaseURL() + HTMLMapper.getEntryName(current);
+    	} else try {
+    		final ModelElement_1_0 container = this.model.getElement(current.getContainer());
+        	return getBaseURL() + HTMLMapper.getEntryName(container) + "#" + current.getName();
+    	} catch (ServiceException e) {
+    		throw new RuntimeServiceException(e);
+    	}
+	}
+	
+	private String getBaseURL() {
+    	StringBuilder baseDir = new StringBuilder();
+    	for(long i = element.getQualifiedName().chars().filter(ElementMapper::isColon).count(); i > 0L; i--) {
+    		baseDir.append("../");
+    	}
+    	return baseDir.toString();
+    }
+	
+
+	protected String getDisplayName(ModelElement_1_0 elcurrentement) {
+		return HTMLMapper.getDisplayName(elcurrentement);
 	}
 	
 	protected Model_1_0 getModel() {
-		return this.element.getModel();
+		return super.model;
 	}
 	
 	protected ModelElement_1_0 getElement(Object objectId) {
@@ -142,10 +225,23 @@ abstract class CompartmentMapper {
 		}
 	}
 
-	protected Stream<ModelElement_1_0> containedElements(){
-		return getModel().getContent().stream().filter(namespaceFilter);
+	private Predicate<ModelElement_1_0> getSupertypeFilter() {
+		final Set<?> supertypes = element.objGetSet("allSupertype");
+		return new Predicate<ModelElement_1_0>() {
+
+			@Override
+			public boolean test(ModelElement_1_0 t) {
+				try {
+					final Path container = t.getContainer();
+					return container != null && supertypes.contains(container);
+				} catch (ServiceException e) {
+					throw new RuntimeServiceException(e);
+				}
+			}
+			
+		};
 	}
-	
+
 	protected ModelElement_1_0 getType(ModelElement_1_0 element) {
 		try {
 			return element.getModel().getElement(element.getType());
@@ -154,30 +250,33 @@ abstract class CompartmentMapper {
 		}
 	}
 
-	protected void print(CharSequence text) {
-		this.pw.print(text);
+	protected void mapBallotBox(String indent, boolean value) {
+		printLine(indent, "<td class=\"uml-ballot-box\">", HTMLMapper.renderBox(value), "</td>"); 
 	}
 	
-	protected void printLine(CharSequence text) {
-		this.pw.println(text);
-	}
-
-	protected void printLine(CharSequence... text) {
-		for(CharSequence segment : text) {
-			this.pw.print(segment);
+    protected void mapAnnotation(
+    	ModelElement_1_0 element
+    ) {
+    	final String annotation  = (String)element.objGetValue("annotation");
+		if(annotation != null && !annotation.trim().isEmpty()) {
+			final String rendered = renderAnnotation(annotation);
+	  		printLine("\t\t\t\t\t<tr>");
+	  		printLine(
+	  			"\t\t\t\t\t\t<td colspan=\"",
+	  			Integer.toString(this.columnTitles.length),
+	  			"\" class=\"uml-comment\"",
+	  			">");
+			if(rendered.contains("<pre>")) {
+				print(rendered);
+			} else {
+				MapperUtils.wrapText("\t\t\t\t\t\t\t", rendered, this::printLine);
+			}
+	  		printLine("\t\t\t\t\t\t</td");
+	  		printLine("\t\t\t\t\t</tr>");
 		}
-		this.pw.println();
-	}
+    }
 
-	protected void printLine(CharSequence left, boolean box, CharSequence right) {
-		printLine(left, HTMLMapper.renderBox(box), right); 
-	}
-	
-	protected void newLine() {
-		this.pw.println();
-	}
-
-	protected boolean excludeSelf(ModelElement_1_0 element) {
+    protected boolean excludeSelf(ModelElement_1_0 element) {
 		return !element.equals(this.element);
 	}
 	
@@ -188,7 +287,37 @@ abstract class CompartmentMapper {
 			throw new RuntimeServiceException(e);
 		}
 	}
+
+	protected Stream<ModelElement_1_0> streamTypeElements(){
+		return getModel()
+			.getContent()
+			.stream()
+			.filter(namespaceFilter);
+	}
 	
-	abstract void mapTableBody();
+	protected Stream<ModelElement_1_0> streamSupertypesElements(){
+		return getModel()
+			.getContent()
+			.stream()
+			.filter(getSupertypeFilter());
+	}
+	
+	protected Stream<ModelElement_1_0> streamCompartmentElements() {
+		if(typeFilter == null) {
+			return Stream.empty();
+		}
+		final Stream<ModelElement_1_0> anyElementStream = inherit ? streamSupertypesElements() : streamTypeElements();
+		return anyElementStream.filter(typeFilter);
+	}
+
+	protected Stream<ModelElement_1_0> streamSortedElements() {
+		return streamCompartmentElements().sorted(ELEMENT_NAME_COMPARATOR);
+	}
+
+	protected boolean isEnabled() {
+		return typeFilter == null || streamCompartmentElements().findAny().isPresent();
+	}
+
+	protected abstract void compartmentContent();
 	
 }
