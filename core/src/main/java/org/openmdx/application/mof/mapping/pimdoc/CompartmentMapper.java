@@ -163,9 +163,9 @@ abstract class CompartmentMapper extends MapperTemplate {
 			"\t\t\t\t\t\t<th colspan=\"",
 			Integer.toString(columnTitles.length),
 			"\" id=\"",
-			this.currentTitlePrefix,
 			element.getName(),
 			"\">",
+			this.currentTitlePrefix,
 			getDisplayName(current),
 			"</th>"
 		);
@@ -187,6 +187,28 @@ abstract class CompartmentMapper extends MapperTemplate {
 			);
 		}
 		printLine("\t\t\t\t\t</tr>");
+	}
+	
+	protected void mapLink(String indent, ModelElement_1_0 current) {
+		printLine(
+			"<a href=\"", 
+			getHref(current),
+			"\" title=\"",
+			getDisplayName(current),
+			"\" target=\"",
+			HTMLMapper.FRAME_NAME,
+			"\">",
+			current.getName(),
+			"</a>"
+		);
+	}
+	
+	protected ModelElement_1_0 getContainer(ModelElement_1_0 current){
+		try {
+			return getElement(current.getContainer());
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
 	}
 	
 	protected String getHref(ModelElement_1_0 current) {
@@ -250,8 +272,16 @@ abstract class CompartmentMapper extends MapperTemplate {
 		}
 	}
 
-	protected void mapBallotBox(String indent, boolean value) {
-		printLine(indent, "<td class=\"uml-ballot-box\">", HTMLMapper.renderBox(value), "</td>"); 
+	protected void mapBallotBox(String indent, boolean value, ModelElement_1_0 link) {
+		printLine(
+			indent, 
+			"<td class=\"uml-ballot-box\">", 
+			HTMLMapper.renderBox(value)
+		); 
+		if(link != null) {
+			mapLink("\t", link);
+		}
+		printLine("</td>");
 	}
 	
     protected void mapAnnotation(

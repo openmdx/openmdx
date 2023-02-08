@@ -76,22 +76,14 @@ class ClassesMapper extends CompartmentMapper {
 		printLine("\t\t\t\t</tbody>");
 	}
 
-	private void mapTableRow(ModelElement_1_0 element) {
+	private void mapTableRow(ModelElement_1_0 current) {
 		try {
 			printLine("\t\t\t\t\t<tr>");
 			printLine("\t\t\t\t\t\t<td>");
-			printLine(
-				"\t\t\t\t\t\t\t<a href=\"",
-				getHref(element),
-				"\" title=\"",
-				getDisplayName(element),
-				"\">",
-				element.getName(),
-				"</a>"
-			);
+			mapLink("\t\t\t\t\t\t\t", current);
 			printLine("\t\t\t\t\t\t</td>");
-			mapBallotBox("\t\t\t\t\t\t", element.isAbstract());
-			mapBallotBox("\t\t\t\t\t\t", isMixInClass(element));
+			mapBallotBox("\t\t\t\t\t\t", current.isAbstract(), null);
+			mapBallotBox("\t\t\t\t\t\t", isMixInClass(current), null);
 			printLine("\t\t\t\t\t</tr>");
 		} catch (ServiceException e) {
 			throw new RuntimeServiceException(e);

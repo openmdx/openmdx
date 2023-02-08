@@ -62,7 +62,7 @@ public class MapperFactory_1 implements Iterable<Mapper_1_0> {
 	/**
 	 * Constructor
 	 * 
-	 * @param extendedFormats the formats, optionally including {@code "markdown"} flag)
+	 * @param extendedFormats the formats, optionally including {@code "--markdown-annotations"} flag)
 	 * 
 	 * @see MappingTypes#MARKDOWN
 	 */

@@ -96,17 +96,7 @@ class StructureFieldsMapper extends CompartmentMapper {
 
 	private void mapType(ModelElement_1_0 type) {
 		printLine("\t\t\t\t\t\t<td>");
-		printLine(
-			"\t\t\t\t\t\t\t<a href=\"",
-			getHref(type),
-			"\" title=\"",
-			getDisplayName(type),
-			"\" target=\"",
-			HTMLMapper.FRAME_NAME,
-			"\">",
-			type.getName(),
-			"</a>"
-		);
+		mapLink("\t\t\t\t\t\t\t", type);
 		printLine("\t\t\t\t\t\t</td>");
 	}
 

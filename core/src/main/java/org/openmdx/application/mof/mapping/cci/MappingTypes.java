@@ -56,7 +56,7 @@ public class MappingTypes {
     /**
      * This is a modifier telling that annotations use markdown
      */
-    public static final String MARKDOWN = "markdown";
+    public static final String MARKDOWN = "--markdown-annotations";
     
     /**
      * openMDX model mapping

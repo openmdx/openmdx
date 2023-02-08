@@ -189,19 +189,19 @@ abstract class HTMLMapper extends MapperTemplate {
     }
     
     protected void mapAnnotation(
-    	String intent, 
+    	String indent, 
     	ModelElement_1_0 element
     ) {
     	final String annotation  = (String)element.objGetValue("annotation");
 		if(annotation != null && !annotation.trim().isEmpty()) {
-			printLine(intent, "<div class=\"uml-comment\">");
+			printLine(indent, "<div class=\"uml-comment\">");
 			final String rendered = renderAnnotation(annotation);
 			if(rendered.contains("<pre>")) {
 				print(rendered);
 			} else {
-				MapperUtils.wrapText(intent + '\t', rendered, this::printLine);
+				MapperUtils.wrapText(indent + '\t', rendered, this::printLine);
 			}
-			printLine(intent, "</div>");
+			printLine(indent, "</div>");
 		}
     }
     

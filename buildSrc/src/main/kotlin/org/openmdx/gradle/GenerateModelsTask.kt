@@ -66,13 +66,13 @@ open class GenerateModelsTask : JavaExec() {
 			"--url=file:src/model/emf/models.uml",
 			"--out=" + File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + "-models.zip"),
 			"--openmdxjdo=" + File(project.getProjectDir(), "src/main/resources"),
-			"--markdown", 
+/*			"--markdown-annotations", 
+			"--format=pimdoc", */
 			"--format=xmi1",
 			"--format=cci2",
 			"--format=jmi1",
 			"--format=jpa3",
 			"--format=mof1",
-			"--format=pimdoc", 
 			"%"
 		)
 		doLast {

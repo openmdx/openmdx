@@ -81,7 +81,7 @@ class ClassPropertiesMapper extends CompartmentMapper {
 	private void mapAbstract() {
 		printLine("\t\t\t\t\t<tr>");
 		printLine("\t\t\t\t\t\t<td>abstract</td>");
-		mapBallotBox("\t\t\t\t\t\t", isAbstract());
+		mapBallotBox("\t\t\t\t\t\t", isAbstract(), null);
 		printLine("\t\t\t\t\t\t<td/>");
 		printLine("\t\t\t\t\t</tr>");
 	}
@@ -90,10 +90,10 @@ class ClassPropertiesMapper extends CompartmentMapper {
 		printLine("\t\t\t\t\t<tr>");
 		printLine("\t\t\t\t\t\t<td>mix-in</td>");
 		if(isMixInClass()) {
-			mapBallotBox("\t\t\t\t\t\t", true);
+			mapBallotBox("\t\t\t\t\t\t", true, null);
 			printLine("\t\t\t\t\t\t<td>", Stereotypes.ROOT, "</td>");
 		} else {
-			mapBallotBox("\t\t\t\t\t\t", false);
+			mapBallotBox("\t\t\t\t\t\t", false, null);
 			printLine("\t\t\t\t\t\t<td/>");
 		}
 		printLine("\t\t\t\t\t</tr>");

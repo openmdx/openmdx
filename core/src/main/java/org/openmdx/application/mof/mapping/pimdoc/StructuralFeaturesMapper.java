@@ -89,7 +89,7 @@ class StructuralFeaturesMapper extends CompartmentMapper {
 		mapMultiplicity(current);
 		mapType(getType(current));
 		mapKind(current);
-		mapInheritance(inherited);
+		mapInheritance(inherited, current);
 		mapChangeable(current);
 		mapDerived(current);
 		printLine("\t\t\t\t\t</tr>");
@@ -97,33 +97,13 @@ class StructuralFeaturesMapper extends CompartmentMapper {
 
 	private void mapName(ModelElement_1_0 current) {
 		printLine("\t\t\t\t\t\t<td>");
-		printLine(
-			"\t\t\t\t\t\t\t<a href=\"", 
-			getHref(current),
-			"\" title=\"",
-			getDisplayName(current),
-			"\" target=\"",
-			HTMLMapper.FRAME_NAME,
-			"\">",
-			current.getName(),
-			"</a>"
-		);
+		mapLink("\t\t\t\t\t\t\t", current);
 		printLine("\t\t\t\t\t\t</td>");
 	}
 
 	private void mapType(ModelElement_1_0 type) {
 		printLine("\t\t\t\t\t\t<td>");
-		printLine(
-			"\t\t\t\t\t\t\t<a href=\"", 
-			getHref(type),
-			"\" title=\"",
-			getDisplayName(type),
-			"\" target=\"",
-			HTMLMapper.FRAME_NAME,
-			"\">",
-			type.getName(),
-			"</a>"
-		);
+		mapLink("\t\t\t\t\t\t\t", type);
 		printLine("\t\t\t\t\t\t</td>");
 	}
 	
@@ -135,12 +115,12 @@ class StructuralFeaturesMapper extends CompartmentMapper {
 		printLine("\t\t\t\t\t\t<td>", getKind(current), "</td>");
 	}
 
-	private void mapInheritance(boolean inherited) {
-		mapBallotBox("\t\t\t\t\t\t", inherited);
+	private void mapInheritance(boolean inherited, ModelElement_1_0 current) {
+		mapBallotBox("\t\t\t\t\t\t", inherited, inherited ? getContainer(current) : null);
 	}
 
 	private void mapChangeable(ModelElement_1_0 current) {
-		mapBallotBox("\t\t\t\t\t\t", isChangeable(current));
+		mapBallotBox("\t\t\t\t\t\t", isChangeable(current), null);
 	}
 
 	private boolean isChangeable(ModelElement_1_0 current){
@@ -152,7 +132,7 @@ class StructuralFeaturesMapper extends CompartmentMapper {
 	}
 	
 	private void mapDerived(ModelElement_1_0 current) {
-		mapBallotBox("\t\t\t\t\t\t", isDerived(current));
+		mapBallotBox("\t\t\t\t\t\t", isDerived(current), null);
 	}
 
 	private boolean isDerived(ModelElement_1_0 current){

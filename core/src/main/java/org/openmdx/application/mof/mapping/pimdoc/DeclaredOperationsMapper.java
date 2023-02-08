@@ -133,30 +133,20 @@ class DeclaredOperationsMapper extends CompartmentMapper {
 
 	private void mapType(ModelElement_1_0 type) {
 		printLine("\t\t\t\t\t\t<td colspan=\"2\">");
-		printLine(
-			"\t\t\t\t\t\t\t<a href=\"", 
-			getHref(type),
-			"\" title=\"",
-			getDisplayName(type),
-			"\" target=\"",
-			HTMLMapper.FRAME_NAME,
-			"\">",
-			type.getName(),
-			"</a>"
-		);
+		mapLink("\t\t\t\t\t\t\t", type);
 		printLine("\t\t\t\t\t\t</td>");
 	}
 	
 	private void mapAbstract(ModelElement_1_0 current) {
-		mapBallotBox("\t\t\t\t\t\t", isAbstract(current));
+		mapBallotBox("\t\t\t\t\t\t", isAbstract(current), null);
 	}
 
 	private void mapDerived(ModelElement_1_0 current) {
-		mapBallotBox("\t\t\t\t\t\t", isDerived(current));
+		mapBallotBox("\t\t\t\t\t\t", isDerived(current), null);
 	}
 
 	private void mapQuery(ModelElement_1_0 current) {
-		mapBallotBox("\t\t\t\t\t\t", isQuery(current));
+		mapBallotBox("\t\t\t\t\t\t", isQuery(current), null);
 	}
 	
 	private boolean isDerived(ModelElement_1_0 current){

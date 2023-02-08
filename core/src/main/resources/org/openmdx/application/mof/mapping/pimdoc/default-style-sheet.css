@@ -74,7 +74,7 @@
 .element-column {
 	width: 75%;
     position: relative;
-    padding-bottom: 56.25%;
+    padding-bottom: 82vh;
     height: 0;
     overflow: hidden;
 }
@@ -104,7 +104,7 @@
  * Font Style 
  */
 body {
-	font-family: "Segoe UI Light", "Segoe UI", "Segoe", Tahoma, Helvetica, Arial, sans-serif;
+	font-family: "Segoe UI", "Segoe", Tahoma, Helvetica, Arial, sans-serif;
 }
 .uml-abstract {
 	font-style:italic;
@@ -157,8 +157,14 @@ body {
 	background-color: rgb(104,154,204);
 	text-align: left;
 }
+.uml-table-head th {
+            padding: 0.3em;
+}
 .uml-element th {
 	color: white;
+}
+.uml-table-body td {
+            padding: 0.3em;
 }
 .uml-table-body tr:nth-child(even) {
 	background-color: rgb(212, 230, 242);

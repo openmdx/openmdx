@@ -100,17 +100,7 @@ class DeclaredReferencesMapper extends CompartmentMapper {
 
 	private void mapType(ModelElement_1_0 type) {
 		printLine("\t\t\t\t\t\t<td>");
-		printLine(
-			"\t\t\t\t\t\t\t<a href=\"", 
-			getHref(type),
-			"\" title=\"",
-			getDisplayName(type),
-			"\" target=\"",
-			HTMLMapper.FRAME_NAME,
-			"\">",
-			type.getName(),
-			"</a>"
-		);
+		mapLink("\t\t\t\t\t\t\t", type);
 		printLine("\t\t\t\t\t\t</td>");
 	}
 	
@@ -119,7 +109,7 @@ class DeclaredReferencesMapper extends CompartmentMapper {
 	}
 
 	private void mapChangeable(ModelElement_1_0 current) {
-		mapBallotBox("\t\t\t\t\t\t", isChangeable(current));
+		mapBallotBox("\t\t\t\t\t\t", isChangeable(current), null);
 	}
 
 	private boolean isChangeable(ModelElement_1_0 current){
@@ -131,7 +121,7 @@ class DeclaredReferencesMapper extends CompartmentMapper {
 	}
 	
 	private void mapDerived(ModelElement_1_0 current) {
-		mapBallotBox("\t\t\t\t\t\t", isDerived(current));
+		mapBallotBox("\t\t\t\t\t\t", isDerived(current), null);
 	}
 
 	private boolean isDerived(ModelElement_1_0 current){

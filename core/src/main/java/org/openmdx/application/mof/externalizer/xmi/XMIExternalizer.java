@@ -247,7 +247,7 @@ public class XMIExternalizer {
 		    new LongOpt[]{
 		        new LongOpt("dataproviderVersion", LongOpt.REQUIRED_ARGUMENT, null, 'd'), // ignored
 		        new LongOpt("openmdxjdo", LongOpt.REQUIRED_ARGUMENT, null, 'j'),
-		        new LongOpt("markdown", LongOpt.NO_ARGUMENT, null, 'm'),
+		        new LongOpt("markdown-annotations", LongOpt.NO_ARGUMENT, null, 'm'),
 		        new LongOpt("out", LongOpt.REQUIRED_ARGUMENT, null, 'o'),
 		        new LongOpt("pathMapPath", LongOpt.REQUIRED_ARGUMENT, null, 'p'),
 		        new LongOpt("pathMapSymbol", LongOpt.REQUIRED_ARGUMENT, null, 's'),

@@ -88,17 +88,7 @@ class DataTypesMapper extends CompartmentMapper {
 	private void mapDataTypeName(ModelElement_1_0 element) {
 		if(element.isStructureType()) {
 			printLine("\t\t\t\t\t\t<td>");
-			printLine(
-				"\t\t\t\t\t\t\t<a href=\"",
-				getHref(element),
-				"\" title=\"",
-				getDisplayName(element),
-				"\" target=\"",
-				HTMLMapper.FRAME_NAME,
-				"\">",
-				element.getName(),
-				"</a>"
-			);
+			mapLink("\t\t\t\t\t\t\t", element);
 			printLine("\t\t\t\t\t\t</td>");
 		} else {
 			printLine("\t\t\t\t\t\t<td>", element.getName(), "</td>");
@@ -115,17 +105,7 @@ class DataTypesMapper extends CompartmentMapper {
 
 	private void mapType(ModelElement_1_0 type) {
 		printLine("\t\t\t\t\t\t<td>");
-		printLine(
-			"\t\t\t\t\t\t\t<a href=\"",
-			getHref(type),
-			"\" title=\"",
-			getDisplayName(type),
-			"\" target=\"",
-			HTMLMapper.FRAME_NAME,
-			"\">",
-			type.getName(),
-			"</a>"
-		);
+		mapLink("\t\t\t\t\t\t\t", type);
 		printLine("\t\t\t\t\t\t</td>");
 	}
 

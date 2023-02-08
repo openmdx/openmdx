@@ -87,7 +87,7 @@ class BehaviouralFeaturesMapper extends CompartmentMapper {
 		);
 		mapName(current);
 		mapKind(current);
-		mapInheritance(inherited);
+		mapInheritance(inherited, current);
 		mapAbstract(current);
 		mapDerived(current);
 		printLine("\t\t\t\t\t</tr>");
@@ -95,17 +95,7 @@ class BehaviouralFeaturesMapper extends CompartmentMapper {
 
 	private void mapName(ModelElement_1_0 current) {
 		printLine("\t\t\t\t\t\t<td>");
-		printLine(
-			"\t\t\t\t\t\t\t<a href=\"", 
-			getHref(current),
-			"\" title=\"",
-			getDisplayName(current),
-			"\" target=\"",
-			HTMLMapper.FRAME_NAME,
-			"\">",
-			current.getName(),
-			"</a>"
-		);
+		mapLink("\t\t\t\t\t\t\t", current);
 		printLine("\t\t\t\t\t\t</td>");
 	}
 
@@ -113,16 +103,16 @@ class BehaviouralFeaturesMapper extends CompartmentMapper {
 		printLine("\t\t\t\t\t\t<td>", getKind(current), "</td>");
 	}
 
-	private void mapInheritance(boolean inherited) {
-		mapBallotBox("\t\t\t\t\t\t", inherited);
+	private void mapInheritance(boolean inherited, ModelElement_1_0 current) {
+		mapBallotBox("\t\t\t\t\t\t", inherited, inherited ? getContainer(current) : null);
 	}
 
 	private void mapAbstract(ModelElement_1_0 current) {
-		mapBallotBox("\t\t\t\t\t\t", isAbstract(current));
+		mapBallotBox("\t\t\t\t\t\t", isAbstract(current), null);
 	}
 
 	private void mapDerived(ModelElement_1_0 current) {
-		mapBallotBox("\t\t\t\t\t\t", isDerived(current));
+		mapBallotBox("\t\t\t\t\t\t", isDerived(current), null);
 	}
 
 	private boolean isDerived(ModelElement_1_0 current){
@@ -154,7 +144,7 @@ class BehaviouralFeaturesMapper extends CompartmentMapper {
 		) + (
 			current.isOperationType() ? "uml-operation" :
 			current.isExceptionType() ? "uml-exception" :
-			"uml-structural-feature"
+			"uml-behavioural-feature"
 		);
 	}
 	
