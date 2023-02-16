@@ -55,6 +55,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.openmdx.application.mof.mapping.pimdoc.spi.PackagePatternComparator;
 import org.openmdx.application.mof.mapping.spi.MarkdownRendererFactory;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -66,7 +67,7 @@ import org.openmdx.kernel.loading.Resources;
 /**
  * PIMDoc configuration
  */
-class PIMDocConfiguration {
+public class PIMDocConfiguration {
 
 	/**
 	 * Constructor
@@ -95,17 +96,17 @@ class PIMDocConfiguration {
 	
     private static final String RESOURCE_URL_PREFIX = "xri://+resource/";
     
-	boolean enumeratePackages() {
+	public boolean enumeratePackages() {
 		return Optional.ofNullable(this.properties.getProperty("package-groups")) != null;
 	}
 	
-	Collection<String> getPackageGroups(){
+	public Collection<String> getPackageGroups(){
 		return Optional.ofNullable(this.properties.getProperty("package-groups"))
 				.map(PIMDocConfiguration::toPackageGroups)
 				.orElseGet(() -> Collections.singletonList(PackagePatternComparator.getCatchAllPattern()));
 	}
 	
-	Factory<Function<String, String>> getMarkdownRendererFactory() {
+	public Factory<Function<String, String>> getMarkdownRendererFactory() {
 		return new MarkdownRendererFactory(getLinkTarget());
 	}
 	
@@ -113,7 +114,7 @@ class PIMDocConfiguration {
 		return getProperty("link-target").orElse("_top");
 	}
 	
-	String getTitle(){
+	public String getTitle(){
 		return getProperty("title").orElse("openMDX PIM Documentation");
 	}
 

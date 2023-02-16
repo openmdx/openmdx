@@ -1,10 +1,10 @@
 /*
- * ==================================================================== 
- * Project: openMDX, http://www.openmdx.org
- * Description: Package Mapper 
- * Owner: the original authors. 
  * ====================================================================
- * 
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: Classes Mapper
+ * Owner:       the original authors.
+ * ====================================================================
+ *
  * This software is published under the BSD license as listed below.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -39,41 +39,59 @@
  * 
  * ------------------
  * 
- * This product includes or is based on software developed by other 
- * organizations as listed in the NOTICE file.
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
+import java.io.PrintWriter;
+import java.util.function.Function;
+
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Stereotypes;
 
 /**
- * Package Mapper 
+ * Classes Mapper
  */
-public class PackageMapper extends ElementMapper {
-
-    /**
-     * Constructor 
-     */
-    public PackageMapper(
-    	Sink sink, 
-        ModelElement_1_0 packageToBeExported,
-        boolean markdown, PIMDocConfiguration configuration
-    ){
-		super("Package", sink, packageToBeExported, markdown, configuration);
-		this.classesMapper = new ClassesMapper(pw, this.element, annotationRenderer);
-		this.dataTypesMapper = new DataTypesMapper(pw, this.element, annotationRenderer);
-    }    
-
-	private final CompartmentMapper classesMapper;
-	private final CompartmentMapper dataTypesMapper;
-    
-	@Override
-	protected  void columnBody() {
-		printLine("\t<div class=\"column-body\">");
-		mapAnnotation("\t\t", element);
-		classesMapper.compartment(true);
-		dataTypesMapper.compartment(true);
-		printLine("\t</div>");
-	}
+class ClassesMapper extends CompartmentMapper {
 	
+	ClassesMapper(
+		PrintWriter pw, 
+		ModelElement_1_0 element, 
+		Function<String, String> annotationRenderer
+	){
+		super(
+			"classes", "Classes", "",
+			ModelElement_1_0::isClassType, false,
+			pw, element, annotationRenderer, "Name", "Abstract", "Mix-In"
+		);
+	}
+
+	@Override
+	protected void compartmentContent() {
+		printLine("\t\t\t\t<tbody class=\"uml-table-body\">");
+		streamSortedElements().forEach(this::mapTableRow);
+		printLine("\t\t\t\t</tbody>");
+	}
+
+	private void mapTableRow(ModelElement_1_0 current) {
+		try {
+			printLine("\t\t\t\t\t<tr>");
+			printLine("\t\t\t\t\t\t<td>");
+			mapLink("\t\t\t\t\t\t\t", current);
+			printLine("\t\t\t\t\t\t</td>");
+			mapBallotBox("\t\t\t\t\t\t", current.isAbstract(), null);
+			mapBallotBox("\t\t\t\t\t\t", isMixInClass(current), null);
+			printLine("\t\t\t\t\t</tr>");
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
+	}
+
+	private boolean isMixInClass(ModelElement_1_0 element) {
+		return element.objGetList("stereotype").contains(Stereotypes.ROOT);
+	}
+
 }

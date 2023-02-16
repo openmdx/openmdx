@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Class Hierarchy Mapper
+ * Description: Element Name Comparator
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,80 +42,22 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
-import java.io.PrintWriter;
-import java.util.function.Function;
+import java.util.Comparator;
 
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
- * Class Hierarchy Mapper
+ * Element Name Comparator
  */
-class ClassHierarchyMapper extends CompartmentMapper {
-	
-	ClassHierarchyMapper(
-		PrintWriter pw, 
-		ModelElement_1_0 element, 
-		Function<String, String> annotationRenderer
-	){
-		super(
-			"class-hierarchy", "Class Hierarchy", "",
-			null, false,
-			pw, element, annotationRenderer, "Direction", "Classes"
-		);
-	}
+public class ElementNameComparator implements Comparator<ModelElement_1_0> {
 
 	@Override
-	protected void compartmentContent() {
-		printLine("\t\t\t\t<tbody class=\"uml-table-body\">");
-		mapSupertypes();
-		mapSubtypes();
-		printLine("\t\t\t\t</tbody>");
-	}
-
-	private void mapSupertypes() {
-		printLine("\t\t\t\t\t<tr class=\"uml-supertypes\">");
-		printLine("\t\t\t\t\t\t<td>Superclasses</td>");
-		printLine("\t\t\t\t\t\t<td>");
-		element
-			.objGetSet("allSupertype")
-			.stream()
-			.map(this::getElement)
-			.filter(this::excludeSelf)
-			.sorted(ELEMENT_NAME_COMPARATOR)
-			.forEach(this::mapClass);
-		printLine("\t\t\t\t\t\t</td>");
-		printLine("\t\t\t\t\t</tr>");
-	}
-	
-	private void mapSubtypes() {
-		printLine("\t\t\t\t\t<tr class=\"uml-subtypes\">");
-		printLine("\t\t\t\t\t\t<td>Subclasses</td>");
-		printLine("\t\t\t\t\t\t<td>");
-		element
-			.objGetSet("allSubtype")
-			.stream()
-			.map(this::getElement)
-			.filter(this::excludeSelf)
-			.sorted(ELEMENT_NAME_COMPARATOR)
-			.forEach(this::mapClass);
-		printLine("\t\t\t\t\t\t</td>");
-		printLine("\t\t\t\t\t</tr>");
-	}
-
-	private void mapClass(ModelElement_1_0 suClass) {
-		printLine(
-			"\t\t\t\t\t\t\t<a class=\"uml-enumeration\" href=\"", 
-			getHref(suClass),
-			"\" title=\"",
-			getDisplayName(suClass),
-			"\" target=\"",
-			HTMLMapper.FRAME_NAME,
-			"\">",
-			suClass.getName(),
-			"</a>"
-		);
+	public int compare(final ModelElement_1_0 element1, final ModelElement_1_0 element2) {
+		final String simpleName1 = element1.getName();
+		final String simpleName2 = element2.getName();
+		return simpleName1.compareTo(simpleName2);
 	}
 
 }

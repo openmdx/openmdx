@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: References Mapper
+ * Description: Attributes Mapper
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,7 +42,7 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import java.io.PrintWriter;
 import java.util.function.Function;
@@ -52,18 +52,18 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
- * References Mapper
+ * Attributes Mapper
  */
-class DeclaredReferencesMapper extends CompartmentMapper {
+class DeclaredAttributesMapper extends CompartmentMapper {
 	
-	DeclaredReferencesMapper(
+	DeclaredAttributesMapper(
 		PrintWriter pw, 
 		ModelElement_1_0 element, 
 		Function<String, String> annotationRenderer
 	){
 		super( //
-			"declared-references", "Declared References", "Reference ", //
-			ModelElement_1_0::isReferenceType, false, //
+			"declared-attributes", "Declared Attributes", "Attribute ", //
+			ModelElement_1_0::isAttributeType, false, //
 			pw, element, annotationRenderer, //
 			"Name", "Multiplicity", "Type", "Changeable", "Derived" //
 		);

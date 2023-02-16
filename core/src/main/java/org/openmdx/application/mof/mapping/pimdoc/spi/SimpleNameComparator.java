@@ -1,10 +1,10 @@
 /*
- * ==================================================================== 
- * Project: openMDX, http://www.openmdx.org
- * Description: Namespace Filter
- * Owner: the original authors. 
  * ====================================================================
- * 
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: Simple Names Comparator
+ * Owner:       the original authors.
+ * ====================================================================
+ *
  * This software is published under the BSD license as listed below.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -39,36 +39,27 @@
  * 
  * ------------------
  * 
- * This product includes or is based on software developed by other 
- * organizations as listed in the NOTICE file.
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.spi;
 
-import java.util.function.Predicate;
-
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.naming.Path;
+import java.util.Comparator;
 
 /**
- * Namespace Filter
+ * Simple Names Comparator
  */
-class NamespaceFilter implements Predicate<ModelElement_1_0> {
-	
-	NamespaceFilter(ModelElement_1_0 namespace) {
-		this.namespaceId = namespace.jdoGetObjectId();
-	}
-
-	private final Path namespaceId;
+public class SimpleNameComparator implements Comparator<String> {
 
 	@Override
-	public boolean test(ModelElement_1_0 t) {
-		try {
-			return namespaceId.equals(t.getContainer());
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
+	public int compare(final String qualifiedName1, final String qualifiedName2) {
+		final String simpleName1 = getSimpleName(qualifiedName1);
+		final String simpleName2 = getSimpleName(qualifiedName2);
+		return simpleName1.compareTo(simpleName2);
 	}
 	
+	private String getSimpleName(String qualifiedName) {
+		return qualifiedName.substring(qualifiedName.lastIndexOf(':')+1);
+	}
+
 }

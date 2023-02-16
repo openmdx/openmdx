@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Description: Structure Mapper 
+ * Description: Element Mapper 
  * Owner: the original authors. 
  * ====================================================================
  * 
@@ -42,36 +42,81 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
+import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
+import org.openmdx.application.mof.mapping.pimdoc.spi.Sink;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
- * Structure Mapper 
+ * Element Mapper 
  */
-public class StructureMapper extends ElementMapper {
+abstract class ElementMapper extends HTMLMapper {
 
 	/**
      * Constructor 
      */
-    public StructureMapper(
+    protected ElementMapper(
+    	String elementId,
         Sink sink, 
-        ModelElement_1_0 classToBeExported,
+        ModelElement_1_0 element,
         boolean markdown, 
         PIMDocConfiguration configuration
     ){
-		super("Structure", sink, classToBeExported, markdown, configuration);
-		this.structureFieldsMapper = new StructureFieldsMapper(pw, element, annotationRenderer);		
+		super(sink, element, markdown, configuration);
+		this.elementKind = elementId;		
+		this.element = element;
     }    
     
-    private final CompartmentMapper structureFieldsMapper;
-
+    private final String elementKind;
+	protected final ModelElement_1_0 element;
+	
 	@Override
-	protected void columnBody() {
-		printLine("\t<div class=\"column-body\">");
-		mapAnnotation("\t\t", element);
-		structureFieldsMapper.compartment();
+	protected void htmlBody() {
+		printLine("<body class=\"uml-element uml-", elementKind.toLowerCase(), "\">");
+		columnHead();
+		columnBody();
+		printLine("</body>");
+   }
+
+	protected void columnHead() {
+		printLine("\t<div class=\"column-head\">");
+		if(isAbstract()) {
+			printLine("\t\t<h2 class=\"uml-abstract\" >", getTitle(), "</h2>");
+		} else {
+			printLine("\t\t<h2>", getTitle(), "</h2>");
+		}
 		printLine("\t</div>");
 	}
+	
+	@Override
+    protected String getBaseURL() {
+    	StringBuilder baseDir = new StringBuilder();
+    	for(long i = element.getQualifiedName().chars().filter(ElementMapper::isColon).count(); i > 0L; i--) {
+    		baseDir.append("../");
+    	}
+    	return baseDir.toString();
+    }
+	
+    static boolean isColon(int c) {
+    	return c == ':';
+    }
+    
+	@Override
+	protected String getTitle() {
+		return this.elementKind + " " + getDisplayName(element);
+	}
+	
+	protected boolean isAbstract() {
+		try {
+			return Boolean.TRUE.equals(element.isAbstract());
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
+	}
+
+	protected abstract void columnBody();
 	
 }

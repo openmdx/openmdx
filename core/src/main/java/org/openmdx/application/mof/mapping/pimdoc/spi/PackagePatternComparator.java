@@ -42,14 +42,14 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.spi;
 
 import java.util.Comparator;
 
 /**
  * This comparator shall ensure that wildcard entries follow the corresponding entries without wildcard.
  */
-class PackagePatternComparator implements Comparator<String> {
+public class PackagePatternComparator implements Comparator<String> {
 
 	/**
 	 * The wildard (asterisks) is allowed as last segment of the package name only!
@@ -85,11 +85,11 @@ class PackagePatternComparator implements Comparator<String> {
 	 * 
 	 * @return {@code true} falls der Eintrag auf {@code '*'} endet.
 	 */
-	static boolean isWildcardPattern(String packagePattern) {
+	public static boolean isWildcardPattern(String packagePattern) {
 		return isCatchAllPattern(packagePattern) || packagePattern.endsWith(SEPARATOR + WILDCARD);
 	}
 	
-	static String removeWildcard(String packagePattern) {
+	public static String removeWildcard(String packagePattern) {
 		if(isWildcardPattern(packagePattern)) {
 			return isCatchAllPattern(packagePattern) ? "" :
 				packagePattern.substring(0, packagePattern.length() - TO_STRIP);
@@ -98,7 +98,7 @@ class PackagePatternComparator implements Comparator<String> {
 		}
 	}
 
-	static boolean isCatchAllPattern(String packagePattern) {
+	public static boolean isCatchAllPattern(String packagePattern) {
 		return WILDCARD.equals(packagePattern);
 	}
 
@@ -107,7 +107,7 @@ class PackagePatternComparator implements Comparator<String> {
 	 * 
 	 * @return {@code "**"}
 	 */
-	static String getCatchAllPattern() {
+	public static String getCatchAllPattern() {
 		return WILDCARD;
 	}
 	

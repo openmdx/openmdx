@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import javax.jdo.identity.IntIdentity;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
@@ -560,9 +561,9 @@ public class TestRecord {
 		return null;
 	}
 
-	@SuppressWarnings("removal")
 	private Integer createIntegerInstance(int value) {
-		return new Integer(value);
+		IntIdentity intIdentity = new IntIdentity(Void.class, value);
+		return (Integer) intIdentity.getKeyAsObject();
 	}
 	
 	

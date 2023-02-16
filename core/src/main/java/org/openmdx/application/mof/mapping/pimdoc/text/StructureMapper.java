@@ -1,10 +1,10 @@
 /*
+ * ==================================================================== 
+ * Project: openMDX, http://www.openmdx.org
+ * Description: Structure Mapper 
+ * Owner: the original authors. 
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Description: Element Name Comparator
- * Owner:       the original authors.
- * ====================================================================
- *
+ * 
  * This software is published under the BSD license as listed below.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -39,25 +39,41 @@
  * 
  * ------------------
  * 
- * This product includes software developed by other organizations as
- * listed in the NOTICE file.
+ * This product includes or is based on software developed by other 
+ * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
-import java.util.Comparator;
-
+import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
+import org.openmdx.application.mof.mapping.pimdoc.spi.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
- * Element Name Comparator
+ * Structure Mapper 
  */
-public class ElementNameComparator implements Comparator<ModelElement_1_0> {
+public class StructureMapper extends ElementMapper {
+
+	/**
+     * Constructor 
+     */
+    public StructureMapper(
+        Sink sink, 
+        ModelElement_1_0 classToBeExported,
+        boolean markdown, 
+        PIMDocConfiguration configuration
+    ){
+		super("Structure", sink, classToBeExported, markdown, configuration);
+		this.structureFieldsMapper = new StructureFieldsMapper(pw, element, annotationRenderer);		
+    }    
+    
+    private final CompartmentMapper structureFieldsMapper;
 
 	@Override
-	public int compare(final ModelElement_1_0 element1, final ModelElement_1_0 element2) {
-		final String simpleName1 = element1.getName();
-		final String simpleName2 = element2.getName();
-		return simpleName1.compareTo(simpleName2);
+	protected void columnBody() {
+		printLine("\t<div class=\"column-body\">");
+		mapAnnotation("\t\t", element);
+		structureFieldsMapper.compartment();
+		printLine("\t</div>");
 	}
-
+	
 }

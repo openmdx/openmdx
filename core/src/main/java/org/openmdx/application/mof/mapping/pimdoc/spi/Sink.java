@@ -1,10 +1,10 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Simple Name Comparator Test
+ * Description: PIMDoc Externalizer
  * Owner:       the original authors.
  * ====================================================================
- *
+ * 
  * This software is published under the BSD license as listed below.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -39,73 +39,16 @@
  * 
  * ------------------
  * 
- * This product includes software developed by other organizations as
- * listed in the NOTICE file.
+ * This product includes or is based on software developed by other 
+ * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.spi;
 
-import java.util.Comparator;
+import java.io.Closeable;
+import java.io.Writer;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+public interface Sink extends Closeable {
 
-/**
- * Simple Name Comparator Test
- */
-class SimpleNameComparatorTest {
-
-	@Test
-	void when_simpleNameIsSmaller_then_lessThanZero() {
-		//
-		// Arrange
-		//
-		final Comparator<String> testee = new SimpleNameComparator();
-		final String left = "org:openmdx:state1:DateState";
-		final String right = "org:openmdx:base:Segment";
-		// 
-		// Act		
-		//
-		final int result = testee.compare(left, right);
-		//
-		// Assert
-		//
-		Assertions.assertTrue(result < 0);
-	}
-	
-	@Test
-	void when_simpleNameIsSame_then_zero() {
-		//
-		// Arrange
-		//
-		final Comparator<String> testee = new SimpleNameComparator();
-		final String left = "org:openmdx:model1:Segment";
-		final String right = "org:openmdx:audit1:Segment";
-		// 
-		// Act		
-		//
-		final int result = testee.compare(left, right);
-		//
-		// Assert
-		//
-		Assertions.assertEquals(0, result);
-	}
-
-	@Test
-	void when_simpleNameIsGreater_then_greaterThan0() {
-		//
-		// Arrange
-		//
-		final Comparator<String> testee = new SimpleNameComparator();
-		final String left = "org:openmdx:base:Segment";
-		final String right = "org:openmdx:state2:DateState";
-		// 
-		// Act		
-		//
-		final int result = testee.compare(left, right);
-		//
-		// Assert
-		//
-		Assertions.assertTrue(result > 0);
-	}
+    Writer createWriter(String entryName);
 
 }

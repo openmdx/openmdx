@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Description: Magic Files
+ * Description: Image Style Sheet Test
  * Owner: the original authors. 
  * ====================================================================
  * 
@@ -42,59 +42,82 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.image;
 
 import java.net.URL;
 
-public enum MagicFile {
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 
+/**
+ * Image Style Sheet Test
+ */
+public class ImageStyleSheetTest {
 
-	/**
-	 * The PIMDoc main page
-	 */
-	INDEX(null, "index.html"),
-
-	/**
-	 * The PIMDoc banner logo
-	 */
-	LOGO("logo-url", "logo.png"),
-
-	/**
-	 * The PIMDoc welcome page
-	 */
-	WELCOME("welcome-url", "welcome.html"),
-	
-	/**
-	 * The PIMDoc text style sheet
-	 */
-	TEXT_STYLE_SHEET("text-style-sheet-url","text-style-sheet.css"),
-
-	/**
-	 * The PIMDoc image style sheet
-	 */
-	IMAGE_STYLE_SHEET("image-style-sheet-url","image-style-sheet.iss");
-	
-	private MagicFile(
-		String propertyName,
-		String fileName
-	) {
-		this.propertyName = propertyName;
-		this.fileName = fileName;
+	@Test
+	void when_comment_then_removed() {
+		//
+		// Arrange
+		//
+		URL url = MagicFile.IMAGE_STYLE_SHEET.getDefault(); 
+		//
+		// Act
+		//
+		final String styleSheet = ImageStyleSheet.readContent(url);
+		//
+		// Assert
+		//
+		Assertions.assertTrue(styleSheet.contains("graph["));
+		Assertions.assertFalse(styleSheet.contains("http://www.openmdx.org"));
 	}
 	
-	private final String propertyName;
-	private final String fileName;
-	
-	public String getFileName() {
-		return this.fileName;
+	@Test
+	void when_umlClass_then_withCompartment() {
+		//
+		// Arrange
+		//
+		ImageStyleSheet testee = new ImageStyleSheet(MagicFile.IMAGE_STYLE_SHEET.getDefault()); 
+		//
+		// Act
+		//
+		final String value = testee.getSection(".uml-class").get("compartments");
+		//
+		// Assert
+		//
+		Assertions.assertEquals("true", value);
+	}
+
+	@Test
+	void when_umlImportedClass_then_withoutCompartment() {
+		//
+		// Arrange
+		//
+		ImageStyleSheet testee = new ImageStyleSheet(MagicFile.IMAGE_STYLE_SHEET.getDefault()); 
+		//
+		// Act
+		//
+		final String value = testee.getSection(".uml-imported-class").get("compartments");
+		//
+		// Assert
+		//
+		Assertions.assertEquals("false", value);
 	}
 	
-	public String getPropertyName() {
-		return this.propertyName;
-	}
-	
-	public URL getDefault() {
-		return getClass().getResource("default-" + fileName);
+	@Test
+	void when_node_then_shapeRecord() {
+		//
+		// Arrange
+		//
+		ImageStyleSheet testee = new ImageStyleSheet(MagicFile.IMAGE_STYLE_SHEET.getDefault()); 
+		//
+		// Act
+		//
+		final String value = testee.getSection("node").get("shape");
+		//
+		// Assert
+		//
+		Assertions.assertEquals("record", value);
 	}
 
 }

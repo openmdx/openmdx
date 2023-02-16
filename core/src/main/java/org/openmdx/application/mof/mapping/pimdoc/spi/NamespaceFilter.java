@@ -1,8 +1,8 @@
 /*
- * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Description: PIMDoc Externalizer
- * Owner:       the original authors.
+ * ==================================================================== 
+ * Project: openMDX, http://www.openmdx.org
+ * Description: Namespace Filter
+ * Owner: the original authors. 
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -42,13 +42,33 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.spi;
 
-import java.io.Closeable;
-import java.io.Writer;
+import java.util.function.Predicate;
 
-interface Sink extends Closeable {
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.naming.Path;
 
-    Writer createWriter(String entryName);
+/**
+ * Namespace Filter
+ */
+public class NamespaceFilter implements Predicate<ModelElement_1_0> {
+	
+	public NamespaceFilter(ModelElement_1_0 namespace) {
+		this.namespaceId = namespace.jdoGetObjectId();
+	}
 
+	private final Path namespaceId;
+
+	@Override
+	public boolean test(ModelElement_1_0 t) {
+		try {
+			return namespaceId.equals(t.getContainer());
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
+	}
+	
 }

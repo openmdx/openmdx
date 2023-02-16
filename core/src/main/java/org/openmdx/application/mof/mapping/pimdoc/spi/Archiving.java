@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Description: Magic Files
+ * Description: Archiving 
  * Owner: the original authors. 
  * ====================================================================
  * 
@@ -42,59 +42,13 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.spi;
 
-import java.net.URL;
-
-public enum MagicFile {
-
-
-	/**
-	 * The PIMDoc main page
-	 */
-	INDEX(null, "index.html"),
-
-	/**
-	 * The PIMDoc banner logo
-	 */
-	LOGO("logo-url", "logo.png"),
-
-	/**
-	 * The PIMDoc welcome page
-	 */
-	WELCOME("welcome-url", "welcome.html"),
+/**
+ * Archiving
+ */
+public interface Archiving {
 	
-	/**
-	 * The PIMDoc text style sheet
-	 */
-	TEXT_STYLE_SHEET("text-style-sheet-url","text-style-sheet.css"),
-
-	/**
-	 * The PIMDoc image style sheet
-	 */
-	IMAGE_STYLE_SHEET("image-style-sheet-url","image-style-sheet.iss");
-	
-	private MagicFile(
-		String propertyName,
-		String fileName
-	) {
-		this.propertyName = propertyName;
-		this.fileName = fileName;
-	}
-	
-	private final String propertyName;
-	private final String fileName;
-	
-	public String getFileName() {
-		return this.fileName;
-	}
-	
-	public String getPropertyName() {
-		return this.propertyName;
-	}
-	
-	public URL getDefault() {
-		return getClass().getResource("default-" + fileName);
-	}
+    void createArchiveEntry();
 
 }

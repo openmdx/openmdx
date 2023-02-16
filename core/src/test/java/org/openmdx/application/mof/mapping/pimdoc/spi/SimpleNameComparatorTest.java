@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Data Types Mapper
+ * Description: Simple Name Comparator Test
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,71 +42,70 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.spi;
 
-import java.io.PrintWriter;
-import java.util.function.Function;
+import java.util.Comparator;
 
-import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * Data Types Mapper
+ * Simple Name Comparator Test
  */
-class DataTypesMapper extends CompartmentMapper {
-	
-	DataTypesMapper(
-		PrintWriter pw, 
-		ModelElement_1_0 element, 
-		Function<String, String> annotationRenderer
-	){
-		super(
-			"data-types", "Data Types", "",
-			ModelElement_1_0::isDataType, false,
-			pw, element, annotationRenderer, "Name", "Type", "Kind"
-		);
-	}
+class SimpleNameComparatorTest {
 
-	@Override
-	protected void compartmentContent() {
-		printLine("\t\t\t\t<tbody class=\"uml-table-body\">");
-		streamSortedElements().forEach(this::mapTableRow);
-		printLine("\t\t\t\t</tbody>");
-	}
-
-	private void mapTableRow(ModelElement_1_0 element) {
-		printLine("\t\t\t\t\t<tr id=\"" + element.getName() + "\">");
-		mapDataTypeName(element);
-		if(element.isAliasType()) {
-			mapType(getType(element));
-		} else {
-			printLine("\t\t\t\t\t\t<td/>");
-		}
-		printLine("\t\t\t\t\t\t<td>" + getKind(element) + "</td>");
-		printLine("\t\t\t\t\t</tr>");
-	}
-
-	private void mapDataTypeName(ModelElement_1_0 element) {
-		if(element.isStructureType()) {
-			printLine("\t\t\t\t\t\t<td>");
-			mapLink("\t\t\t\t\t\t\t", element);
-			printLine("\t\t\t\t\t\t</td>");
-		} else {
-			printLine("\t\t\t\t\t\t<td>", element.getName(), "</td>");
-		}
+	@Test
+	void when_simpleNameIsSmaller_then_lessThanZero() {
+		//
+		// Arrange
+		//
+		final Comparator<String> testee = new SimpleNameComparator();
+		final String left = "org:openmdx:state1:DateState";
+		final String right = "org:openmdx:base:Segment";
+		// 
+		// Act		
+		//
+		final int result = testee.compare(left, right);
+		//
+		// Assert
+		//
+		Assertions.assertTrue(result < 0);
 	}
 	
-	private String getKind(ModelElement_1_0 element) {
-		return 
-			element.isAliasType() ? "Alias Type" :
-			element.isStructureType() ? "Structure Type " :
-			element.isPrimitiveType() ? "Primitive Type" :
-			element.getDelegate().getRecordName();
+	@Test
+	void when_simpleNameIsSame_then_zero() {
+		//
+		// Arrange
+		//
+		final Comparator<String> testee = new SimpleNameComparator();
+		final String left = "org:openmdx:model1:Segment";
+		final String right = "org:openmdx:audit1:Segment";
+		// 
+		// Act		
+		//
+		final int result = testee.compare(left, right);
+		//
+		// Assert
+		//
+		Assertions.assertEquals(0, result);
 	}
 
-	private void mapType(ModelElement_1_0 type) {
-		printLine("\t\t\t\t\t\t<td>");
-		mapLink("\t\t\t\t\t\t\t", type);
-		printLine("\t\t\t\t\t\t</td>");
+	@Test
+	void when_simpleNameIsGreater_then_greaterThan0() {
+		//
+		// Arrange
+		//
+		final Comparator<String> testee = new SimpleNameComparator();
+		final String left = "org:openmdx:base:Segment";
+		final String right = "org:openmdx:state2:DateState";
+		// 
+		// Act		
+		//
+		final int result = testee.compare(left, right);
+		//
+		// Assert
+		//
+		Assertions.assertTrue(result > 0);
 	}
 
 }

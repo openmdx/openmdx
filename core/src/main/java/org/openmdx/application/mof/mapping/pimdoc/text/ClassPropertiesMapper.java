@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Classes Mapper
+ * Description: Class Properties Mapper
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,7 +42,7 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import java.io.PrintWriter;
 import java.util.function.Function;
@@ -53,45 +53,105 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Stereotypes;
 
 /**
- * Classes Mapper
+ * Class Properties Mapper
  */
-class ClassesMapper extends CompartmentMapper {
+class ClassPropertiesMapper extends CompartmentMapper {
 	
-	ClassesMapper(
+	ClassPropertiesMapper(
 		PrintWriter pw, 
 		ModelElement_1_0 element, 
 		Function<String, String> annotationRenderer
 	){
 		super(
-			"classes", "Classes", "",
-			ModelElement_1_0::isClassType, false,
-			pw, element, annotationRenderer, "Name", "Abstract", "Mix-In"
+			"class-properties", "Class Properties", "",
+			null, false,
+			pw, element, annotationRenderer, "Name", "Value", "Stereotype"
 		);
 	}
 
 	@Override
 	protected void compartmentContent() {
 		printLine("\t\t\t\t<tbody class=\"uml-table-body\">");
-		streamSortedElements().forEach(this::mapTableRow);
+		mapAbstract();
+		mapMixIn();
+		mapAspectCapability();
 		printLine("\t\t\t\t</tbody>");
 	}
 
-	private void mapTableRow(ModelElement_1_0 current) {
+	private void mapAbstract() {
+		printLine("\t\t\t\t\t<tr>");
+		printLine("\t\t\t\t\t\t<td>abstract</td>");
+		mapBallotBox("\t\t\t\t\t\t", isAbstract(), null);
+		printLine("\t\t\t\t\t\t<td/>");
+		printLine("\t\t\t\t\t</tr>");
+	}
+
+	private void mapMixIn() {
+		printLine("\t\t\t\t\t<tr>");
+		printLine("\t\t\t\t\t\t<td>mix-in</td>");
+		if(isMixInClass()) {
+			mapBallotBox("\t\t\t\t\t\t", true, null);
+			printLine("\t\t\t\t\t\t<td>", Stereotypes.ROOT, "</td>");
+		} else {
+			mapBallotBox("\t\t\t\t\t\t", false, null);
+			printLine("\t\t\t\t\t\t<td/>");
+		}
+		printLine("\t\t\t\t\t</tr>");
+	}
+
+	private void mapAspectCapability() {
+		printLine("\t\t\t\t\t<tr>");
+		printLine("\t\t\t\t\t\t<td>aspect-capability</td>");
+		if(isAspect()) {
+			printLine("\t\t\t\t\t\t<td>Aspect</td>");
+			if(isRoleClass()) {
+				printLine("\t\t\t\t\t\t<td>", Stereotypes.ROLE, "</td>");
+			} else {
+				printLine("\t\t\t\t\t\t<td/>");
+			}
+		} else if (isAspectCapable()){
+			printLine("\t\t\t\t\t\t<td>Core</td>");
+			printLine("\t\t\t\t\t\t<td/>");
+		} else {
+			printLine("\t\t\t\t\t\t<td>None</td>");
+			printLine("\t\t\t\t\t\t<td/>");
+		}
+		printLine("\t\t\t\t\t</tr>");
+	}
+
+	
+	private Boolean isAbstract(){
 		try {
-			printLine("\t\t\t\t\t<tr>");
-			printLine("\t\t\t\t\t\t<td>");
-			mapLink("\t\t\t\t\t\t\t", current);
-			printLine("\t\t\t\t\t\t</td>");
-			mapBallotBox("\t\t\t\t\t\t", current.isAbstract(), null);
-			mapBallotBox("\t\t\t\t\t\t", isMixInClass(current), null);
-			printLine("\t\t\t\t\t</tr>");
+			return element.isAbstract();
 		} catch (ServiceException e) {
 			throw new RuntimeServiceException(e);
 		}
 	}
 
-	private boolean isMixInClass(ModelElement_1_0 element) {
+	private boolean isMixInClass() {
 		return element.objGetList("stereotype").contains(Stereotypes.ROOT);
+	}
+
+	private boolean isRoleClass() {
+		return element.objGetList("stereotype").contains(Stereotypes.ROLE);
+	}
+	
+	private boolean isAspect() {
+		return isSubclassOf("org:openmdx:base:Aspect");
+	}
+	
+	private boolean isAspectCapable() {
+		return isSubclassOf("org:openmdx:base:AspectCapable");
+	}
+
+	protected boolean isSubclassOf(String superClass) {
+		return element
+			.objGetSet("allSupertype")
+			.stream()
+			.map(this::getElement)
+			.filter(this::excludeSelf)
+			.map(ModelElement_1_0::getQualifiedName)
+			.anyMatch(superClass::equals);
 	}
 
 }

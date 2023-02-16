@@ -56,10 +56,18 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import org.openmdx.application.mof.mapping.pimdoc.spi.Archiving;
+import org.openmdx.application.mof.mapping.pimdoc.spi.NamespaceFilter;
+import org.openmdx.application.mof.mapping.pimdoc.spi.Sink;
+import org.openmdx.application.mof.mapping.pimdoc.text.ClassMapper;
+import org.openmdx.application.mof.mapping.pimdoc.text.IndexMapper;
+import org.openmdx.application.mof.mapping.pimdoc.text.PackageMapper;
+import org.openmdx.application.mof.mapping.pimdoc.text.StructureMapper;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
+import org.w3c.cci2.BinaryLargeObjects;
 
 /**
  * PIM documentation in HTML format
@@ -100,7 +108,7 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
     /**
      * The (configurable) resources to be added to the archive
      */
-    private final static Set<MagicFile> RESOURCES = EnumSet.of(MagicFile.LOGO, MagicFile.STYLE_SHEET, MagicFile.WELCOME);
+    private final static Set<MagicFile> RESOURCES = EnumSet.of(MagicFile.LOGO, MagicFile.TEXT_STYLE_SHEET, MagicFile.WELCOME);
     
 	@Override
 	public void accept(List<ModelElement_1_0> packagesToExport) {
@@ -156,7 +164,7 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
 	 * 
 	 * @see MagicFile#LOGO
 	 * @see MagicFile#WELCOME
-	 * @see MagicFile#STYLE_SHEET
+	 * @see MagicFile#TEXT_STYLE_SHEET
 	 */
 	private void addResources(){
 		RESOURCES.forEach(this::addResource);
@@ -176,17 +184,14 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
 	 * @throws RuntimeServiceException in case of failure
 	 */
 	protected void copyBinary(URL url) {
-		final byte[] bytes = new byte[1024];
 		try(InputStream s = url.openStream()){
-			for(int i = s.read(bytes); i > 0; i = s.read(bytes)){
-				this.buffer.write(bytes, 0, i);
-			}
+			BinaryLargeObjects.streamCopy(s, 0, buffer);
 		} catch (IOException exception) {
 			throw new RuntimeServiceException(
 				exception,
 				BasicException.Code.DEFAULT_DOMAIN,
 				BasicException.Code.PROCESSING_FAILURE,
-				"Unable to retrieve resource",
+				"Unable to copy resource",
 				new BasicException.Parameter("url", url)
 			);
 		}
@@ -194,7 +199,8 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
 	
 	private void exportIndexFile(List<ModelElement_1_0> packagesToBeExported) {
 		try (Sink sink = newSink()){
-			new IndexMapper(sink, packagesToBeExported, markdown, configuration).createArchiveEntry();
+			final Archiving indexMapper = new IndexMapper(sink, packagesToBeExported, markdown, configuration);
+			indexMapper.createArchiveEntry();
 		} catch (IOException e) {
 			throw new RuntimeServiceException(e);
 		}
@@ -202,7 +208,8 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
 
 	private void exportPackageFile(ModelElement_1_0 packageToBeExported){
 		try (Sink sink = newSink()){
-			new PackageMapper(sink, packageToBeExported, markdown, configuration).createArchiveEntry();
+			final Archiving packageMapper = new PackageMapper(sink, packageToBeExported, markdown, configuration);
+			packageMapper.createArchiveEntry();
 		} catch (IOException e) {
 			throw new RuntimeServiceException(e);
 		}
@@ -210,7 +217,8 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
 
 	private void exportClassFile(ModelElement_1_0 classToBeExported){
 		try (Sink sink = newSink()){
-			new ClassMapper(sink, classToBeExported, markdown, configuration).createArchiveEntry();
+			final Archiving classMapper = new ClassMapper(sink, classToBeExported, markdown, configuration);
+			classMapper.createArchiveEntry();
 		} catch (IOException e) {
 			throw new RuntimeServiceException(e);
 		}
@@ -218,7 +226,8 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
 
 	private void exportStructureFile(ModelElement_1_0 structureToBeExported){
 		try (Sink sink = newSink()){
-			new StructureMapper(sink, structureToBeExported, markdown, configuration).createArchiveEntry();
+			final Archiving structureMapper = new StructureMapper(sink, structureToBeExported, markdown, configuration);
+			structureMapper.createArchiveEntry();
 		} catch (IOException e) {
 			throw new RuntimeServiceException(e);
 		}

@@ -42,12 +42,13 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import java.util.Collections;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.openmdx.application.mof.mapping.pimdoc.spi.PackagePatternComparator;
 
 /**
  * Navigation Compartment Test

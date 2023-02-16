@@ -42,12 +42,16 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import java.time.Instant;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
+import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
+import org.openmdx.application.mof.mapping.pimdoc.spi.Archiving;
+import org.openmdx.application.mof.mapping.pimdoc.spi.Sink;
 import org.openmdx.application.mof.mapping.spi.MapperTemplate;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
 import org.openmdx.base.Version;
@@ -59,7 +63,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 /**
  * HTML Mapper
  */
-abstract class HTMLMapper extends MapperTemplate {
+abstract class HTMLMapper extends MapperTemplate implements Archiving {
 
 	private HTMLMapper(Sink sink, Model_1_0 model, ModelElement_1_0 element, boolean markdown, PIMDocConfiguration configuration) {
 		super(
@@ -89,7 +93,7 @@ abstract class HTMLMapper extends MapperTemplate {
         return getClass().getSimpleName() + " " + Version.getImplementationVersion();
     }
 	
-    void createArchiveEntry() {
+    public void createArchiveEntry() {
     	fileHeader();
         htmlPage();
     }
@@ -125,7 +129,7 @@ abstract class HTMLMapper extends MapperTemplate {
     protected void htmlHead() {
         printLine("<head>");
         printLine("\t<meta charset=\"utf-8\">");
-        printLine("\t<link rel=\"stylesheet\" href=\"", getFileURL(MagicFile.STYLE_SHEET), "\" />");
+        printLine("\t<link rel=\"stylesheet\" href=\"", getFileURL(MagicFile.TEXT_STYLE_SHEET), "\" />");
         htmlTitle(getTitle());
         printLine("</head>");
     }

@@ -42,8 +42,10 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
+import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
+import org.openmdx.application.mof.mapping.pimdoc.spi.Sink;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
