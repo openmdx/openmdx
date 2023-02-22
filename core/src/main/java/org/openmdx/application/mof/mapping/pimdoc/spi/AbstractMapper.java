@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Description: Structure Mapper 
+ * Description: Abstract Mapper 
  * Owner: the original authors. 
  * ====================================================================
  * 
@@ -42,38 +42,78 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc.text;
+package org.openmdx.application.mof.mapping.pimdoc.spi;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
+import org.openmdx.application.mof.mapping.spi.MapperTemplate;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.io.Sink;
-import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
- * Structure Mapper 
+ * Abstract Mapper
  */
-public class StructureMapper extends ElementMapper {
+public abstract class AbstractMapper extends MapperTemplate implements Archiving {
 
-	/**
-     * Constructor 
-     */
-    public StructureMapper(
-        Sink sink, 
-        ModelElement_1_0 classToBeExported,
-        boolean markdown, 
-        PIMDocConfiguration configuration
-    ){
-		super("Structure", sink, classToBeExported, markdown, configuration);
-		this.structureFieldsMapper = new StructureFieldsMapper(pw, element, annotationRenderer);		
-    }    
-    
-    private final CompartmentMapper structureFieldsMapper;
-
-	@Override
-	protected void columnBody() {
-		printLine("\t<div class=\"column-body\">");
-		mapAnnotation("\t\t", element);
-		structureFieldsMapper.compartment();
-		printLine("\t</div>");
+	private AbstractMapper(
+		Sink sink, 
+		Model_1_0 model, 
+		boolean markdown, 
+		PIMDocConfiguration configuration, 
+		ByteArrayOutputStream stream
+	) {
+		super(
+			new OutputStreamWriter(stream, StandardCharsets.UTF_8), 
+			model, 
+			markdown ? configuration.getMarkdownRendererFactory().instantiate() : Function.identity()
+		);
+		this.sink = sink;
+		this.buffer = stream;
+		this.configuration = configuration;
 	}
 	
+	protected AbstractMapper(
+		Sink sink, 
+		Model_1_0 model, 
+		boolean markdown, 
+		PIMDocConfiguration configuration
+	){
+		this(sink, model, markdown, configuration, new ByteArrayOutputStream());
+	}
+
+	private final Sink sink;
+	protected final PIMDocConfiguration configuration;
+	private final ByteArrayOutputStream buffer;
+	
+	@Override
+	public void close() throws RuntimeServiceException {
+		sink.accept(getEntryName(), buffer.size(), this::writeToSink);
+	}
+
+    private void writeToSink(OutputStream stream) {
+    	try {
+    		this.pw.flush();
+			this.buffer.writeTo(stream);
+			this.buffer.close();
+		} catch (IOException exception) {
+			throw new RuntimeServiceException(
+				exception,
+				BasicException.Code.DEFAULT_DOMAIN,
+				BasicException.Code.MEDIA_ACCESS_FAILURE,
+				"Unable to propagate the data",
+				new BasicException.Parameter("entry-name", getEntryName())
+			);
+		}
+    }
+
+    protected abstract String getEntryName();
+    
 }

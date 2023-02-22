@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Description: Structure Mapper 
+ * Description: Package Group Builder 
  * Owner: the original authors. 
  * ====================================================================
  * 
@@ -42,38 +42,56 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc.text;
+package org.openmdx.application.mof.mapping.pimdoc.spi;
 
-import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
-import org.openmdx.base.io.Sink;
-import org.openmdx.base.mof.cci.ModelElement_1_0;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
- * Structure Mapper 
+ * Package Group Builder
  */
-public class StructureMapper extends ElementMapper {
+public class PackageGroupBuilder extends TreeMap<String,SortedSet<String>> {
 
-	/**
-     * Constructor 
-     */
-    public StructureMapper(
-        Sink sink, 
-        ModelElement_1_0 classToBeExported,
-        boolean markdown, 
-        PIMDocConfiguration configuration
-    ){
-		super("Structure", sink, classToBeExported, markdown, configuration);
-		this.structureFieldsMapper = new StructureFieldsMapper(pw, element, annotationRenderer);		
-    }    
-    
-    private final CompartmentMapper structureFieldsMapper;
+	public PackageGroupBuilder() {
+		super(COMPARATOR);
+	}
 
-	@Override
-	protected void columnBody() {
-		printLine("\t<div class=\"column-body\">");
-		mapAnnotation("\t\t", element);
-		structureFieldsMapper.compartment();
-		printLine("\t</div>");
+	private static final Comparator<String> COMPARATOR = new PackagePatternComparator();
+	
+	private static final long serialVersionUID = -4489160358886710466L;
+	private final Comparator<String> simpleNameComparator = new SimpleNameComparator();
+	
+	public void addKey(String qualifiedName) {
+		this.computeIfAbsent(qualifiedName, key -> new TreeSet<String>(simpleNameComparator));
+	}
+
+	public void addElement(String qualifiedName) {
+		for(Map.Entry<String,SortedSet<String>> e : entrySet()) {
+			if(isPartOfPackageGroup(e.getKey(), qualifiedName)) {
+				e.getValue().add(qualifiedName);
+			}
+		}
+	}
+	
+	boolean isPartOfPackageGroup(String packagePattern, String qualifiedName) {
+		if(PackagePatternComparator.isWildcardPattern(packagePattern)) {
+			return PackagePatternComparator.isCatchAllPattern(packagePattern) ||
+				qualifiedName.startsWith(PackagePatternComparator.removeWildcard(packagePattern) + ':');
+		} else {
+			return getPackageId(packagePattern).equals(getPackageId(qualifiedName));
+		}
+	}
+
+	private String getPackageId(String qualifiedName) {
+		return qualifiedName.substring(0, qualifiedName.lastIndexOf(':'));
+	}
+	
+	public void normalize() {
+		values().removeIf(Collection::isEmpty);
 	}
 	
 }

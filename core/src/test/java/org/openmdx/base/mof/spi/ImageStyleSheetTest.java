@@ -42,7 +42,7 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc.image;
+package org.openmdx.base.mof.spi;
 
 import java.net.URL;
 
@@ -60,7 +60,7 @@ public class ImageStyleSheetTest {
 		//
 		// Arrange
 		//
-		URL url = MagicFile.IMAGE_STYLE_SHEET.getDefault(); 
+		URL url = imageStyleSheetDefaultURL(); 
 		//
 		// Act
 		//
@@ -71,17 +71,21 @@ public class ImageStyleSheetTest {
 		Assertions.assertTrue(styleSheet.contains("graph["));
 		Assertions.assertFalse(styleSheet.contains("http://www.openmdx.org"));
 	}
+
+	private URL imageStyleSheetDefaultURL() {
+		return MagicFile.STYLE.getDefault(MagicFile.Type.IMAGE);
+	}
 	
 	@Test
 	void when_umlClass_then_withCompartment() {
 		//
 		// Arrange
 		//
-		ImageStyleSheet testee = new ImageStyleSheet(MagicFile.IMAGE_STYLE_SHEET.getDefault()); 
+		ImageStyleSheet testee = new ImageStyleSheet(imageStyleSheetDefaultURL()); 
 		//
 		// Act
 		//
-		final String value = testee.getSection(".uml-class").get("compartments");
+		final String value = testee.getStyle(".uml-class").get("compartments");
 		//
 		// Assert
 		//
@@ -93,11 +97,11 @@ public class ImageStyleSheetTest {
 		//
 		// Arrange
 		//
-		ImageStyleSheet testee = new ImageStyleSheet(MagicFile.IMAGE_STYLE_SHEET.getDefault()); 
+		ImageStyleSheet testee = new ImageStyleSheet(imageStyleSheetDefaultURL()); 
 		//
 		// Act
 		//
-		final String value = testee.getSection(".uml-imported-class").get("compartments");
+		final String value = testee.getStyle(".uml-imported-class").get("compartments");
 		//
 		// Assert
 		//
@@ -109,11 +113,11 @@ public class ImageStyleSheetTest {
 		//
 		// Arrange
 		//
-		ImageStyleSheet testee = new ImageStyleSheet(MagicFile.IMAGE_STYLE_SHEET.getDefault()); 
+		ImageStyleSheet testee = new ImageStyleSheet(imageStyleSheetDefaultURL()); 
 		//
 		// Act
 		//
-		final String value = testee.getSection("node").get("shape");
+		final String value = testee.getStyle("node").get("shape");
 		//
 		// Assert
 		//

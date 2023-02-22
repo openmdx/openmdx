@@ -92,18 +92,14 @@ public class PIMDocConfiguration {
 		}
 	}
 
+	static final String TABLE_OF_CONTENT_ENTRIES = "table-of-content-entries";
+	
 	private final Properties properties = new Properties();
 	
-    private static final String RESOURCE_URL_PREFIX = "xri://+resource/";
-    
-	public boolean enumeratePackages() {
-		return Optional.ofNullable(this.properties.getProperty("package-groups")) != null;
-	}
-	
-	public Collection<String> getPackageGroups(){
-		return Optional.ofNullable(this.properties.getProperty("package-groups"))
-				.map(PIMDocConfiguration::toPackageGroups)
-				.orElseGet(() -> Collections.singletonList(PackagePatternComparator.getCatchAllPattern()));
+	public Collection<String> getTableOfContentEntries(){
+		return getProperty(TABLE_OF_CONTENT_ENTRIES)
+			.map(PIMDocConfiguration::toPackageGroups)
+			.orElse(Collections.emptyList());
 	}
 	
 	public Factory<Function<String, String>> getMarkdownRendererFactory() {
@@ -115,33 +111,19 @@ public class PIMDocConfiguration {
 	}
 	
 	public String getTitle(){
-		return getProperty("title").orElse("openMDX PIM Documentation");
+		return getProperty("custom-title").orElse("openMDX PIM Documentation");
 	}
 
-	URL getActualFile(MagicFile magicFile) {
-		return getProperty(magicFile.getPropertyName()).map(PIMDocConfiguration::toURL).orElseGet(() -> magicFile.getDefault());
+	URL getActualFile(MagicFile magicFile, MagicFile.Type type) {
+		return getProperty(magicFile.getPropertyName(type))
+			.map(Resources::fromURI)
+			.orElseGet(() -> magicFile.getDefault(type));
 	}
 	
 	private Optional<String> getProperty(String propertyName){
 		return Optional.ofNullable(this.properties.getProperty(propertyName));
 	}
 	
-	private static URL toURL(String url) {
-		try {
-			return url.startsWith(RESOURCE_URL_PREFIX) ? 
-				Resources.getResource(url.substring(RESOURCE_URL_PREFIX.length())) : 
-				new URL(url);
-		} catch (MalformedURLException exception) {
-			throw new RuntimeServiceException(
-				exception,
-				BasicException.Code.DEFAULT_DOMAIN,
-				BasicException.Code.BAD_PARAMETER,
-				"Unable to acquire the configured URL",
-				new BasicException.Parameter("url", url)
-			);
-		}
-	}
-
 	private static Collection<String> toPackageGroups(String groups){
 		final Set<String> packageGroups = new HashSet<>();
 		for(String entry : groups.split("::")) {

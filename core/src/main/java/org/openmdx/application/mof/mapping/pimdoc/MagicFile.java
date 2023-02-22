@@ -45,56 +45,64 @@
 package org.openmdx.application.mof.mapping.pimdoc;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public enum MagicFile {
 
+	/**
+	 * Logo & Welcome Page
+	 */
+	CUSTOM("custom", "html", "png", null),
 
 	/**
-	 * The PIMDoc main page
+	 * PIMDoc style sheets
 	 */
-	INDEX(null, "index.html"),
+	STYLE("style-sheet", "css", "gvs", null),
 
 	/**
-	 * The PIMDoc banner logo
+	 * Package Group Files
 	 */
-	LOGO("logo-url", "logo.png"),
-
-	/**
-	 * The PIMDoc welcome page
-	 */
-	WELCOME("welcome-url", "welcome.html"),
+	PACKAGE_GROUP("catch", "html", "svg", "gvs"),
 	
 	/**
-	 * The PIMDoc text style sheet
+	 * The table of content
 	 */
-	TEXT_STYLE_SHEET("text-style-sheet-url","text-style-sheet.css"),
-
-	/**
-	 * The PIMDoc image style sheet
-	 */
-	IMAGE_STYLE_SHEET("image-style-sheet-url","image-style-sheet.iss");
-	
+	TABLE_OF_CONTENT("index", "html", null, null);
+		
 	private MagicFile(
-		String propertyName,
-		String fileName
+		String baseName,
+		String textExtension,
+		String imageExtension,
+		String sourceExtension
 	) {
-		this.propertyName = propertyName;
-		this.fileName = fileName;
+		setFileName(baseName, Type.TEXT, textExtension);
+		setFileName(baseName, Type.IMAGE, imageExtension);
+		setFileName(baseName, Type.SOURCE, sourceExtension);
 	}
 	
-	private final String propertyName;
-	private final String fileName;
-	
-	public String getFileName() {
-		return this.fileName;
+	private void setFileName(String baseName, Type type, String extension) {
+		if(extension != null) {
+			this.fileName.put(type, baseName + '.' + extension);
+		}
 	}
 	
-	public String getPropertyName() {
-		return this.propertyName;
+	private final Map<Type,String> fileName = new HashMap<>();
+	
+	public String getFileName(Type type) {
+		return this.fileName.get(type);
 	}
 	
-	public URL getDefault() {
-		return getClass().getResource("default-" + fileName);
+	public String getPropertyName(Type type) {
+		return type.name().toLowerCase() + "-" + this.name().toLowerCase() + "-url";
+	}
+	
+	public URL getDefault(Type type) {
+		return getClass().getResource("default-" + getFileName(type));
 	}
 
+	public enum Type {
+		TEXT, IMAGE, SOURCE
+	}
+	
 }

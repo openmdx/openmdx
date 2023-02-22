@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Default PIMDoc Text Style Sheet
+ * Description: Default PIMDoc HTML Style Sheet
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -43,7 +43,7 @@
  * listed in the NOTICE file.
  */
 
-/* 
+/** 
  * Page layout
  */
 * {
@@ -100,7 +100,7 @@
 	background-color: rgb(224, 242, 255);
 }
 
-/* 
+/** 
  * Font Style 
  */
 body {
@@ -131,7 +131,7 @@ body {
 	margin-bottom: 0.1em;
 }
 
-/* 
+/** 
  * Detail Style
  */
 .uml-element h2 {

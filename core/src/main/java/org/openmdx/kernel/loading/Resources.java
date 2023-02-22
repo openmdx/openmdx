@@ -46,10 +46,13 @@ package org.openmdx.kernel.loading;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.platform.Platform;
 
 /**
@@ -64,6 +67,8 @@ public class Resources {
         // Avoid instantiation
     }
 
+    private static final String RESOURCE_XRI_PREFIX = "xri://+resource/";
+    
     /**
      * Retrieve the context class loader
      * 
@@ -83,7 +88,7 @@ public class Resources {
      * @param  name
      *         The resource name
      *
-     * @return  An input stream for reading the resource, or <tt>null</tt>
+     * @return  An input stream for reading the resource, or {@code null}
      *          if the resource could not be found
      */
     public static InputStream getResourceAsStream(
@@ -118,7 +123,7 @@ public class Resources {
     public static String toMetaInfXRI(
         String entry
     ){
-        return "xri://+resource/" + toMetaInfPath(entry); 
+        return toResourceXRI(toMetaInfPath(entry)); 
     }
         
     public static Iterable<URL> getMetaInfResources(
@@ -127,7 +132,6 @@ public class Resources {
         return getMetaInfResources(getClassLoader(), entry);
     }
 
-    
     public static Iterable<URL> getMetaInfResources(
         ClassLoader classLoader,
         String entry
@@ -135,6 +139,76 @@ public class Resources {
         return new AsIterable(classLoader, toMetaInfPath(entry));
     }
 
+    /**
+     * This URL factory resolves XRI resources
+     * 
+     * @param uri the URI is either a resource XRI or another URL
+     * 
+     * @return either the corresponding URL, a resource URL in case of an XRI resource specification or {@code null} in case of a malformed URL
+     */
+	public static URL fromURI(String uri){
+		try {
+			return isResourceXRI(uri) ? getResource(toResourceName(uri)) : new URL(uri);
+		} catch (MalformedURLException exception) {
+			return null;
+		}
+	}
+
+	public static boolean isResourceXRI(String uri) {
+		return uri.startsWith(RESOURCE_XRI_PREFIX);
+	}
+
+	/**
+	 * Converts a resource XRI to the corresponding resource name.
+	 * <p>
+	 * This method must not be used unless the argument is a resource XRI
+	 *
+	 * 
+	 * @param xri the resource XRI 
+	 * 
+	 * @return the corresponding resource name
+	 * 
+	 * @see #toResourceXRI(String)
+	 * @see #isResourceXRI(String)
+	 */
+	private static String toResourceName(String xri) {
+		return xri.substring(RESOURCE_XRI_PREFIX.length());
+	}
+
+    /**
+     * This URL factory resolves XRI resources
+     * 
+     * @param url the URL string representation
+     * 
+     * @return either the given URL or a resource URL in case of an XRI resource specification
+     * 
+     * @throws RuntimeServiceException in case of a malformed URL
+     */
+	public static Iterable<URL> findResolvedURLs(String url){
+		if(isResourceXRI(url)) {
+			return new AsIterable(getClassLoader(), toResourceName(url));
+		} else {
+			try {
+				return Collections.singleton(new URL(url));
+			} catch (MalformedURLException exception) {
+				return Collections.emptySet();
+			}
+		}
+	}	
+	
+	/**
+	 * Converts a resource name to a resource XRI
+	 * 
+	 * @param resourceName the resource name 
+	 * 
+	 * @return the corresponding XRI
+	 * 
+	 * @see #toResourceName(String)
+	 */
+	public static String toResourceXRI(String resourceName) {
+		return RESOURCE_XRI_PREFIX + resourceName;
+	}
+	
     /**
      * META-INF Resources
      */

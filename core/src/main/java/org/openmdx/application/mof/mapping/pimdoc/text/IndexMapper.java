@@ -45,21 +45,17 @@
 package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
+import org.openmdx.application.mof.mapping.pimdoc.spi.PackageGroupBuilder;
 import org.openmdx.application.mof.mapping.pimdoc.spi.PackagePatternComparator;
-import org.openmdx.application.mof.mapping.pimdoc.spi.SimpleNameComparator;
-import org.openmdx.application.mof.mapping.pimdoc.spi.Sink;
+import org.openmdx.application.mof.repository.accessor.NamespaceLocation;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 
@@ -73,23 +69,13 @@ public class IndexMapper extends HTMLMapper {
      */
     public IndexMapper(
     	Sink sink, 
-        List<ModelElement_1_0> packagesToBeExported,
+        Model_1_0 model,
         boolean markdown, 
         PIMDocConfiguration configuration
     ){
-		super(sink, getModel(packagesToBeExported), markdown, configuration);
-		this.packagesToBeExported = packagesToBeExported;
+		super(sink, model, MagicFile.TABLE_OF_CONTENT, markdown, configuration);
     }    
     
-    private final List<ModelElement_1_0> packagesToBeExported;
-    
-	private static Model_1_0 getModel(List<ModelElement_1_0> packagesToExport) {
-		if(packagesToExport.isEmpty()) {
-			throw new NoSuchElementException("No matching model packages to be exported");
-		}
-		return packagesToExport.get(0).getModel();
-	}
-	
 	@Override
 	protected void htmlBody() {
 		printLine("<body class=\"page\">");
@@ -169,15 +155,26 @@ public class IndexMapper extends HTMLMapper {
 	private void packageGroupSummary(String packagePattern) {
 		printLine("\t\t\t\t\t\t<summary>");
 		if(PackagePatternComparator.isWildcardPattern(packagePattern)) {
-			mapPackageGroupName(packagePattern);
+			mapPackageGroupLink(packagePattern);
 		} else {
 			mapPackageLink(packagePattern);
 		}
 		printLine("\t\t\t\t\t\t</summary>");
 	}
 
-	private void mapPackageGroupName(String packagePattern) {
-		printLine("\t\t\t\t\t\t\t"+ getDisplayNameOfPackageGroup(packagePattern));
+	private void mapPackageGroupLink(String packagePattern) {
+    	final String namespace = PackagePatternComparator.removeWildcard(packagePattern);
+		printLine(
+			"\t\t\t\t\t\t\t<a href=\"",
+			getBaseURL(),
+			NamespaceLocation.getLocation(namespace), 
+			MagicFile.PACKAGE_GROUP.getFileName(MagicFile.Type.TEXT),
+			"\" target=\"",
+			HTMLMapper.FRAME_NAME,
+			"\">",
+			namespace.replace(":", "::"),
+			"</a>"
+		);
 	}
 
 	private void mapPackageLink(String qualifiedName) {
@@ -206,8 +203,14 @@ public class IndexMapper extends HTMLMapper {
 	private void pageHead(final String title) {
 		printLine("\t<div class=\"page-section page-head\">");
 		printLine("\t\t<div class=\"page-column\">");
-		printLine("\t\t\t<a href=\"", getFileURL(MagicFile.INDEX), "\">");
-		printLine("\t\t\t\t<img src=\"", getFileURL(MagicFile.LOGO), "\" />");
+		printLine(
+			"\t\t\t<a href=\"", 
+			getFileURL(MagicFile.CUSTOM, MagicFile.Type.TEXT), 
+			"\" target=\"",
+			HTMLMapper.FRAME_NAME,
+			"\">"
+		);
+		printLine("\t\t\t\t<img src=\"", getFileURL(MagicFile.CUSTOM, MagicFile.Type.IMAGE), "\"/>");
 		printLine("\t\t\t</a>");
 		printLine("\t\t</div>");
 		printLine("\t\t<div class=\"page-column\">");
@@ -221,20 +224,28 @@ public class IndexMapper extends HTMLMapper {
     */
 	private void detailColumn() {
 		printLine("\t\t<div class=\"page-column element-column\">");
-		printLine("\t\t\t<iframe name=\"", HTMLMapper.FRAME_NAME, "\" src=\"welcome.html\"/>");
+		printLine(
+			"\t\t\t<iframe name=\"", 
+			HTMLMapper.FRAME_NAME, 
+			"\" src=\"", 
+			getFileURL(MagicFile.CUSTOM, MagicFile.Type.TEXT), 
+			"\"/>"
+		);
 		printLine("\t\t</div>");
 	}
     
-    private DataCollector getPackageGroups(
+    private PackageGroupBuilder getPackageGroups(
     ){
-    	final DataCollector navigationCompartment = new DataCollector();
-    	configuration
-    		.getPackageGroups()
-			.forEach(navigationCompartment::addKey);
-    	if(configuration.enumeratePackages()) {
-        	this.packagesToBeExported.stream()
+    	final PackageGroupBuilder navigationCompartment = new PackageGroupBuilder();
+    	final Collection<String> tableOfContentEntries = configuration.getTableOfContentEntries();
+    	if(tableOfContentEntries.isEmpty()) {
+    		streamElements()
+    			.filter(ModelElement_1_0::isPackageType)
     			.map(ModelElement_1_0::getQualifiedName)
     			.forEach(navigationCompartment::addKey);
+    		navigationCompartment.addElement(PackagePatternComparator.getCatchAllPattern());
+    	} else {
+    		tableOfContentEntries.forEach(navigationCompartment::addKey);
     	}
 		streamElements()
     		.filter(this::isListable)
@@ -248,59 +259,9 @@ public class IndexMapper extends HTMLMapper {
     	return element.isClassType() || element.isDataType();
     }
     
-    private String getDisplayNameOfPackageGroup(String packagePattern) {
-    	return packagePattern.replaceAll(":", "::");
-    }
-
     @Override
 	protected String getTitle() {
 		return this.configuration.getTitle();
 	}
-
-    
-    /**
-     * Navigation Compartment Data Collector
-     */
-    static class DataCollector extends TreeMap<String,SortedSet<String>> {
-
-    	protected DataCollector() {
-    		super(COMPARATOR);
-    	}
-
-    	private static final Comparator<String> COMPARATOR = new PackagePatternComparator();
-    	
-    	private static final long serialVersionUID = -4489160358886710466L;
-    	private final Comparator<String> simpleNameComparator = new SimpleNameComparator();
-    	
-    	void addKey(String qualifiedName) {
-    		this.computeIfAbsent(qualifiedName, key -> new TreeSet<String>(simpleNameComparator));
-    	}
-
-    	void addElement(String qualifiedName) {
-    		for(Map.Entry<String,SortedSet<String>> e : entrySet()) {
-    			if(isPartOfPackageGroup(e.getKey(), qualifiedName)) {
-    				e.getValue().add(qualifiedName);
-    			}
-    		}
-    	}
-    	
-    	boolean isPartOfPackageGroup(String packagePattern, String qualifiedName) {
-    		if(PackagePatternComparator.isWildcardPattern(packagePattern)) {
-    			return PackagePatternComparator.isCatchAllPattern(packagePattern) ||
-    				qualifiedName.startsWith(PackagePatternComparator.removeWildcard(packagePattern) + ':');
-    		} else {
-    			return getPackageId(packagePattern).equals(getPackageId(qualifiedName));
-    		}
-    	}
-
-    	protected String getPackageId(String qualifiedName) {
-    		return qualifiedName.substring(0, qualifiedName.lastIndexOf(':'));
-    	}
-    	
-    	void normalize() {
-    		values().removeIf(Collection::isEmpty);
-    	}
-    	
-    }
     
 }

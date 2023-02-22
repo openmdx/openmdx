@@ -42,7 +42,7 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc.image;
+package org.openmdx.base.mof.spi;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
@@ -66,22 +66,22 @@ public class ImageStyleSheet {
 
 	public ImageStyleSheet(URL url) {
 		final String content = readContent(url);
-		final Matcher sections = SECTION.matcher(content);
+		final Matcher sections = STYLES.matcher(content);
 		while(sections.find()) {
 			final String name = sections.group(1).toLowerCase();
 			final Matcher entries = ENTRY.matcher(sections.group(2));
-			final Map<String,String> section = new HashMap<>();
+			final Map<String,String> style = new HashMap<>();
 			while(entries.find()) {
 				final String key = entries.group(1).toLowerCase();
 				final String value = entries.group(2).trim();
-				section.put(key, value);
+				style.put(key, value);
 			}
-			styleSheet.put(name, section);
+			styles.put(name, style);
 		}
 	}
 
-	private final Map<String,Map<String,String>> styleSheet = new HashMap<>();
-	private static final Pattern SECTION = Pattern.compile("([-\\w\\.]+)\\s*\\[([^\\]]+)\\]", Pattern.DOTALL);
+	private final Map<String,Map<String,String>> styles = new HashMap<>();
+	private static final Pattern STYLES = Pattern.compile("([-\\w\\.]+)\\s*\\[([^\\]]+)\\]", Pattern.DOTALL);
 	private static final Pattern ENTRY = Pattern.compile("([-\\w]+)\\s*=([^,]+)", Pattern.DOTALL);
 	
 	static String readContent(URL url) {
@@ -96,11 +96,11 @@ public class ImageStyleSheet {
 	}
 
 	private static String removeComments(final String text) {
-		return text.replaceAll("//[^\r\n]*[\r\n]", "\n");
+		return text.replaceAll("(?s)//[^\\v]*[\\v]|/\\*.*?\\*/", "\n");
 	}
 
-	public Map<String, String> getSection(String name) {
-		return styleSheet.getOrDefault(name, Collections.emptyMap());
+	public Map<String, String> getStyle(String name) {
+		return styles.getOrDefault(name, Collections.emptyMap());
 	}
 	
 }

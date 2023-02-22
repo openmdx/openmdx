@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: PIMDoc Externalizer
+ * Description: Zip Sink
  * Owner:       the original authors.
  * ====================================================================
  * 
@@ -42,13 +42,64 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc.spi;
+package org.openmdx.base.io;
 
-import java.io.Closeable;
-import java.io.Writer;
+import java.io.OutputStream;
+import java.util.function.Consumer;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
-public interface Sink extends Closeable {
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.kernel.exception.BasicException;
 
-    Writer createWriter(String entryName);
+/**
+ * Zip Sink
+ */
+public class ZipSink implements Sink {
+
+	public ZipSink(
+		ZipOutputStream zip
+	) {
+		this(zip, "");
+	}
+
+	private ZipSink(
+		ZipOutputStream zip,
+		String prefix
+	) {
+		this.zip = zip;
+		this.prefix = prefix;
+	}
+	
+	private final ZipOutputStream zip;
+	private final String prefix;
+	
+	@Override
+	public void accept(String name, long length, Consumer<OutputStream> streamer) {
+		final String entryName = newName(name);
+		try {
+			final ZipEntry entry = new ZipEntry(entryName);
+			entry.setSize(length);
+			zip.putNextEntry(entry);
+			streamer.accept(zip);
+		} catch (Exception exception) {
+			throw new RuntimeServiceException(
+				exception,
+				BasicException.Code.DEFAULT_DOMAIN,
+				BasicException.Code.MEDIA_ACCESS_FAILURE,
+				"Unable to add entry to zip file",
+				new BasicException.Parameter("entry-name", entryName)
+			);
+		}
+	}
+
+	private String newName(String suffix) {
+		return this.prefix + '/' + suffix;
+	}
+	
+	@Override
+	public Sink nested(String suffix) {
+		return new ZipSink(this.zip, newName(suffix));
+	}
 
 }

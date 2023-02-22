@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Navigation Compartment Test
+ * Description: Package Group Builder Test
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,25 +42,24 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc.text;
+package org.openmdx.application.mof.mapping.pimdoc.spi;
 
 import java.util.Collections;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.openmdx.application.mof.mapping.pimdoc.spi.PackagePatternComparator;
 
 /**
- * Navigation Compartment Test
+ * Package Group Builder Test
  */
-class IndexMapper_DataCollectorTest {
+class PackageGroupBuilderTest {
 
 	@Test
 	void when_wildcardMatch_then_true() {
 		//
 		// Arrange
 		//
-		final IndexMapper.DataCollector testee = new IndexMapper.DataCollector();
+		final PackageGroupBuilder testee = new PackageGroupBuilder();
 		final String packagePattern = "org:openmdx:**";
 		final String candidate = "org:openmdx:base:Segment";
 		// 
@@ -78,7 +77,7 @@ class IndexMapper_DataCollectorTest {
 		//
 		// Arrange
 		//
-		final IndexMapper.DataCollector testee = new IndexMapper.DataCollector();
+		final PackageGroupBuilder testee = new PackageGroupBuilder();
 		final String packagePattern = "org:w3c:**";
 		final String candidate = "org:openmdx:base:Segment";
 		// 
@@ -96,7 +95,7 @@ class IndexMapper_DataCollectorTest {
 		//
 		// Arrange
 		//
-		final IndexMapper.DataCollector testee = new IndexMapper.DataCollector();
+		final PackageGroupBuilder testee = new PackageGroupBuilder();
 		final String packagePattern = "org:openmdx:base:base";
 		final String candidate = "org:openmdx:base:Segment";
 		// 
@@ -114,7 +113,7 @@ class IndexMapper_DataCollectorTest {
 		//
 		// Arrange
 		//
-		final IndexMapper.DataCollector testee = new IndexMapper.DataCollector();
+		final PackageGroupBuilder testee = new PackageGroupBuilder();
 		final String packagePattern = "org:openmdx:openmdx";
 		final String candidate = "org:openmdx:base:Segment";
 		// 
@@ -132,7 +131,7 @@ class IndexMapper_DataCollectorTest {
 		//
 		// Arrange
 		//
-		final IndexMapper.DataCollector testee = new IndexMapper.DataCollector();
+		final PackageGroupBuilder testee = new PackageGroupBuilder();
 		testee.addKey("X");
 		testee.addKey("Y");
 		testee.addKey("Z");
@@ -152,7 +151,7 @@ class IndexMapper_DataCollectorTest {
 		//
 		// Arrange
 		//
-		final IndexMapper.DataCollector testee = new IndexMapper.DataCollector();
+		final PackageGroupBuilder testee = new PackageGroupBuilder();
 		testee.addKey(PackagePatternComparator.getCatchAllPattern());
 		testee.addElement("com:example:AnyClass");
 		// 

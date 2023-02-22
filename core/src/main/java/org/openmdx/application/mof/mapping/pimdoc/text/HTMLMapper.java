@@ -45,49 +45,39 @@
 package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import java.time.Instant;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
-import org.openmdx.application.mof.mapping.pimdoc.spi.Archiving;
-import org.openmdx.application.mof.mapping.pimdoc.spi.Sink;
-import org.openmdx.application.mof.mapping.spi.MapperTemplate;
+import org.openmdx.application.mof.mapping.pimdoc.spi.AbstractMapper;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
 import org.openmdx.base.Version;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 
 /**
  * HTML Mapper
  */
-abstract class HTMLMapper extends MapperTemplate implements Archiving {
+abstract class HTMLMapper extends AbstractMapper {
 
-	private HTMLMapper(Sink sink, Model_1_0 model, ModelElement_1_0 element, boolean markdown, PIMDocConfiguration configuration) {
-		super(
-			sink.createWriter(getEntryName(element)), 
-			model, 
-			markdown ? configuration.getMarkdownRendererFactory().instantiate() : Function.identity()
-		);
-		this.configuration = configuration;
-	}
-
-	private static final String UNCHECKED_BOX = "&#x2610;";
-	private static final String CHECKED_BOX = "&#x2611;";
-	
-	protected HTMLMapper(Sink sink, Model_1_0 model, boolean markdown, PIMDocConfiguration configuration) {
-		this(sink, model, null, markdown, configuration);
+	protected HTMLMapper(Sink sink, Model_1_0 model, MagicFile entryType, boolean markdown, PIMDocConfiguration configuration) {
+		super(sink, model, markdown, configuration);
+		this.entryName = entryType.getFileName(MagicFile.Type.TEXT);
 	}
 
 	protected HTMLMapper(Sink sink, ModelElement_1_0 element, boolean markdown, PIMDocConfiguration configuration) {
-		this(sink, element.getModel(), element, markdown, configuration);
+		super(sink, element.getModel(), markdown, configuration);
+		this.entryName = getEntryName(element);
 	}
+
+	private final String entryName;
 	
-    protected final PIMDocConfiguration configuration;
-    
     static String FRAME_NAME = "uml-element";
+	private static final String UNCHECKED_BOX = "&#x2610;";
+	private static final String CHECKED_BOX = "&#x2611;";
     
     protected String getMapperId() {
         return getClass().getSimpleName() + " " + Version.getImplementationVersion();
@@ -129,7 +119,7 @@ abstract class HTMLMapper extends MapperTemplate implements Archiving {
     protected void htmlHead() {
         printLine("<head>");
         printLine("\t<meta charset=\"utf-8\">");
-        printLine("\t<link rel=\"stylesheet\" href=\"", getFileURL(MagicFile.TEXT_STYLE_SHEET), "\" />");
+        printLine("\t<link rel=\"stylesheet\" href=\"", getFileURL(MagicFile.STYLE, MagicFile.Type.TEXT), "\" />");
         htmlTitle(getTitle());
         printLine("</head>");
     }
@@ -148,9 +138,6 @@ abstract class HTMLMapper extends MapperTemplate implements Archiving {
 	 * @return the entry name
 	 */
     static String getEntryName(ModelElement_1_0 element){
-    	if(element == null) {
-    		return MagicFile.INDEX.getFileName();
-    	}
     	try {
 	    	final StringBuilder entryName = new StringBuilder(
 	    		element.getModel().toJavaPackageName(element, null).replace('.', '/')
@@ -162,14 +149,20 @@ abstract class HTMLMapper extends MapperTemplate implements Archiving {
     	}
     }
 	
-    protected String getBaseURL() {
+    @Override
+	protected String getEntryName() {
+    	return this.entryName;
+	}
+
+	protected String getBaseURL() {
     	return "";
     }
 
     protected String getFileURL(
-    	MagicFile magicFile
+    	MagicFile magicFile,
+    	MagicFile.Type type
     ) {
-    	return getBaseURL() + magicFile.getFileName();
+    	return getBaseURL() + magicFile.getFileName(type);
     }
 
     protected String getHref(

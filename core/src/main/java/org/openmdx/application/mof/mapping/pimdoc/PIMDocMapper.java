@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: UML Documentation Mapper
+ * Description: The PIM Documentation Mapper
  * Owner:       the original authors.
  * ====================================================================
  * 
@@ -44,21 +44,18 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.function.BiConsumer;
 import java.util.zip.ZipOutputStream;
 
-import org.openmdx.application.mof.mapping.spi.AbstractMapper_1;
-import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.io.ZipSink;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * UML Model documentation in HTML format
  */
-public class PIMDocMapper extends AbstractMapper_1 {
+public class PIMDocMapper implements Mapper_1_0 {
 
     /**
      * Public Constructor 
@@ -98,51 +95,37 @@ public class PIMDocMapper extends AbstractMapper_1 {
     	boolean markdown,
     	PIMDocConfiguration configuration
     ){
-        super(markdown, PACKAGE_SUFFIX);    
+    	this.markdown = markdown;
         this.configuration = configuration;
     }
     
+    private final boolean markdown;
     private final PIMDocConfiguration configuration;
+    private static final String EXPORT_ALL = "%";
 
-	/**
-     * The UML documentation directories doen't need a package suffix
-     */
-    private static final String PACKAGE_SUFFIX = null;
-    
     @Override
 	public void externalize(
 		final String qualifiedPackageName, 
 		final Model_1_0 model,
 		final ZipOutputStream zip
 	) throws ServiceException {
-        super.model = model;
-        try (
-    		PIMDocExternalizer externalizer = new PIMDocExternalizer(
-    			new BiConsumer<String, ByteArrayOutputStream>() {
-					
-					@Override
-					public void accept(String entryName, ByteArrayOutputStream content) {
-						try {
-							addToZip(zip, entryName, content);
-						} catch (IOException ioException) {
-							throw new RuntimeServiceException(
-								ioException,
-								BasicException.Code.DEFAULT_DOMAIN,
-								BasicException.Code.TRANSFORMATION_FAILURE,
-								"Unable to add content to the archive",
-								new BasicException.Parameter("entry-name", entryName)
-							);
-						}
-					}
-					
-				},
-    			markdown, configuration
-    		)
-        ){
-        	externalizer.accept(getMatchingPackages(qualifiedPackageName));
-	    } catch(Exception ex) {
-	        throw new ServiceException(ex).log();
-	    }    
+    	validateArguments(qualifiedPackageName);
+    	final PIMDocExternalizer pimDocExternalizer = new PIMDocExternalizer(model, new ZipSink(zip), markdown, configuration);
+    	pimDocExternalizer.externalize();
     }
+
+	private void validateArguments(final String qualifiedPackageName) throws ServiceException {
+		if(!EXPORT_ALL.equals(qualifiedPackageName)) {
+    		throw new ServiceException(
+    			BasicException.Code.DEFAULT_DOMAIN,
+    			BasicException.Code.BAD_PARAMETER,
+    			"The PIM Documentation Mapper requires the whole model to be taken into account, "
+    			+ "provide a configuration with a 'table-of-content' property to customize the table of content",
+    			new BasicException.Parameter("expected", EXPORT_ALL),
+    			new BasicException.Parameter("actual", qualifiedPackageName),
+    			new BasicException.Parameter("table-of-content", configuration.getTableOfContentEntries())
+    		);
+    	}
+	}
 
 }

@@ -1,8 +1,8 @@
 /*
- * ==================================================================== 
- * Project: openMDX, http://www.openmdx.org
- * Description: Structure Mapper 
- * Owner: the original authors. 
+ * ====================================================================
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: A Binary Sink
+ * Owner:       the original authors.
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -42,38 +42,18 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc.text;
+package org.openmdx.base.io;
 
-import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
-import org.openmdx.base.io.Sink;
-import org.openmdx.base.mof.cci.ModelElement_1_0;
+import java.io.OutputStream;
+import java.util.function.Consumer;
 
 /**
- * Structure Mapper 
+ * A Binary Sink
  */
-public class StructureMapper extends ElementMapper {
+public interface Sink {
 
-	/**
-     * Constructor 
-     */
-    public StructureMapper(
-        Sink sink, 
-        ModelElement_1_0 classToBeExported,
-        boolean markdown, 
-        PIMDocConfiguration configuration
-    ){
-		super("Structure", sink, classToBeExported, markdown, configuration);
-		this.structureFieldsMapper = new StructureFieldsMapper(pw, element, annotationRenderer);		
-    }    
+    void accept(String name, long length, Consumer<OutputStream> streamer);
     
-    private final CompartmentMapper structureFieldsMapper;
+    Sink nested(String name);
 
-	@Override
-	protected void columnBody() {
-		printLine("\t<div class=\"column-body\">");
-		mapAnnotation("\t\t", element);
-		structureFieldsMapper.compartment();
-		printLine("\t</div>");
-	}
-	
 }

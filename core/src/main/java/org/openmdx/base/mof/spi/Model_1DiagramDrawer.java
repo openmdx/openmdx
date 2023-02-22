@@ -72,7 +72,6 @@ public class Model_1DiagramDrawer {
 
     /**
      * GraphvizNode
-     *
      */
     public static class GraphvizNode {
 
@@ -435,16 +434,13 @@ public class Model_1DiagramDrawer {
     /**
      * Draw given diagrams and store in destination directory.
      * 
-     * @param names
-     * @param destDir
      * @throws ServiceException
      */
     static void drawDiagrams(
-        File sourceDir,
-        File destDir
-    )
-        throws ServiceException {
-        Model_1_0 model = Model_1Factory.getModel();
+        final Model_1_0 model,
+        final File sourceDir, 
+        final File destDir
+    ) throws ServiceException {
         try {
             if (sourceDir.exists()) {
                 final String[] sourceDirs = sourceDir.list();
@@ -453,7 +449,8 @@ public class Model_1DiagramDrawer {
                         File f = new File(sourceDir, name);
                         if (f.isDirectory()) {
                             drawDiagrams(
-                                f,
+                                model,
+                                f, 
                                 new File(destDir, f.getName())
                             );
                         } else if (name.endsWith(".dott")) {
@@ -646,7 +643,8 @@ public class Model_1DiagramDrawer {
                 System.out.println("INFO: Mapping model diagram templates from " + sourceDir + " to " + destDir);
                 System.out.flush();
                 drawDiagrams(
-                    new File(sourceDir),
+            		Model_1Factory.getModel(),
+                    new File(sourceDir), 
                     new File(destDir)
                 );
             } catch (Exception exception) {

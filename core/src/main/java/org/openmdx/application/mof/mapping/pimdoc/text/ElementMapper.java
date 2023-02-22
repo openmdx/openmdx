@@ -45,9 +45,9 @@
 package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
-import org.openmdx.application.mof.mapping.pimdoc.spi.Sink;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
@@ -75,12 +75,16 @@ abstract class ElementMapper extends HTMLMapper {
 	
 	@Override
 	protected void htmlBody() {
-		printLine("<body class=\"uml-element uml-", elementKind.toLowerCase(), "\">");
+		printLine("<body class=\"uml-element ", getImageClass(), "\">");
 		columnHead();
 		columnBody();
 		printLine("</body>");
    }
 
+	protected String getImageClass() {
+		return "uml-" + elementKind.toLowerCase().replace(' ', '-');
+	}
+	
 	protected void columnHead() {
 		printLine("\t<div class=\"column-head\">");
 		if(isAbstract()) {
@@ -106,7 +110,11 @@ abstract class ElementMapper extends HTMLMapper {
     
 	@Override
 	protected String getTitle() {
-		return this.elementKind + " " + getDisplayName(element);
+		return this.elementKind + " " + getDisplayName();
+	}
+	
+	protected String getDisplayName() {
+		return getDisplayName(element); 
 	}
 	
 	protected boolean isAbstract() {

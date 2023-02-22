@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Description: Structure Mapper 
+ * Description: Package Group Mapper 
  * Owner: the original authors. 
  * ====================================================================
  * 
@@ -44,35 +44,37 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc.text;
 
+import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
 import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
- * Structure Mapper 
+ * Package Group Mapper 
  */
-public class StructureMapper extends ElementMapper {
+public class PackageGroupTextMapper extends ElementMapper {
 
-	/**
+    /**
      * Constructor 
      */
-    public StructureMapper(
-        Sink sink, 
-        ModelElement_1_0 classToBeExported,
+    public PackageGroupTextMapper(
+    	Sink sink, 
+        ModelElement_1_0 ancestor,
         boolean markdown, 
         PIMDocConfiguration configuration
     ){
-		super("Structure", sink, classToBeExported, markdown, configuration);
-		this.structureFieldsMapper = new StructureFieldsMapper(pw, element, annotationRenderer);		
+		super("Package Group", sink, ancestor, markdown, configuration);
     }    
-    
-    private final CompartmentMapper structureFieldsMapper;
 
 	@Override
-	protected void columnBody() {
+	protected String getDisplayName() {
+		return super.getDisplayName() + "::**";
+	}
+
+	@Override
+	protected  void columnBody() {
 		printLine("\t<div class=\"column-body\">");
-		mapAnnotation("\t\t", element);
-		structureFieldsMapper.compartment();
+		printLine("\t\t<img src=\"", MagicFile.PACKAGE_GROUP.getFileName(MagicFile.Type.IMAGE), "\" alt=\"", getTitle(), "\">");
 		printLine("\t</div>");
 	}
 	

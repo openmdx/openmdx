@@ -45,9 +45,9 @@
 package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
-import org.openmdx.application.mof.mapping.pimdoc.spi.Sink;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**

@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Model Provider 
+ * Description: Namespace Location 
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -44,77 +44,24 @@
  */
 package org.openmdx.application.mof.repository.accessor;
 
-import java.util.Collections;
-import java.util.Map;
+/**
+ * Namespace Location
+ */
+public class NamespaceLocation {
 
-import javax.resource.ResourceException;
-import javax.resource.cci.Interaction;
-
-import org.openmdx.base.dataprovider.kernel.Dataprovider_2;
-import org.openmdx.base.resource.spi.Port;
-import org.openmdx.base.rest.cci.RestConnection;
-import org.openmdx.base.rest.spi.AbstractRestPort;
-import org.openmdx.kernel.loading.Resources;
-
-public class ModelProvider_2 extends AbstractRestPort {
+	private NamespaceLocation() {
+		// Avoid instantiation
+	}
 
 	/**
-	 * Constructor_
+	 * This method is Java namespace mapping aware
+	 * 
+	 * @param namespace the namespace
+	 * 
+	 * @return the location including a trailing '/'
 	 */
-	private ModelProvider_2(
-		Port<RestConnection> delegate
-	){
-		setDelegate(delegate);
-	}
-
-	private static final String MODEL_DATAPROVIDER_CONFIGURATION_URI = Resources.toResourceXRI(
-		"org/openmdx/application/mof/repository/accessor/model-dataprovider.properties"
-	);
-	private static final String META_MODEL_DATAPROVIDER_CONFIGURATION_URI = Resources.toResourceXRI(
-		"org/openmdx/application/mof/repository/accessor/meta-model-dataprovider.properties"
-	);
-	
-	private static Port<RestConnection> newDelegate(
-		boolean metaModel
-	){
-		return new Dataprovider_2(
-			metaModel ? META_MODEL_DATAPROVIDER_CONFIGURATION_URI : MODEL_DATAPROVIDER_CONFIGURATION_URI
-		);
-	}
-
-	public static Port<RestConnection> newModelExternalizationDataprovider(
-		String openmdxjdoMetadataDirectory
-	){
-		return new Dataprovider_2(
-			META_MODEL_DATAPROVIDER_CONFIGURATION_URI,
-			Collections.<String,Map<String,?>>singletonMap(
-				"APPLICATION",
-				Collections.singletonMap(
-					"openmdxjdoMetadataDirectory", 
-					openmdxjdoMetadataDirectory
-				)
-			)	
-		);
+	public static String getLocation(String namespace) {
+		return ModelHelper_1.toJavaPackageName(namespace, null).replace('.', '/') + '/';
 	}
 	
-    /**
-     * Constructs the in-memory provider for a model repository..
-     * 
-     * @return a new in-memory provider
-     */
-    static Port<RestConnection> newInstance(
-    	boolean metaModel
-    ){
-    	return new ModelProvider_2(
-    		newDelegate(metaModel)
-    	);
-    }
- 
-	@Override
-	public Interaction getInteraction(
-		RestConnection connection
-	) throws ResourceException {
-		return newDelegateInteraction(connection);
-	}
-    
 }

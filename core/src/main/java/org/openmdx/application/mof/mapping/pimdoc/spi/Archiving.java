@@ -44,11 +44,16 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc.spi;
 
+import org.openmdx.base.exception.RuntimeServiceException;
+
 /**
  * Archiving
  */
-public interface Archiving {
+public interface Archiving extends AutoCloseable {
 	
     void createArchiveEntry();
+
+	@Override
+	void close() throws RuntimeServiceException;
 
 }

@@ -1,12 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Mapper Template 
+ * Description: A File Sink
  * Owner:       the original authors.
  * ====================================================================
- *
- * This software is published under the BSD license
- * as listed below.
+ * 
+ * This software is published under the BSD license as listed below.
  * 
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
@@ -43,61 +42,79 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.spi;
+package org.openmdx.base.io;
 
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.util.function.Function;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.function.Consumer;
 
-import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
- * Mapper Template
+ * File Sink
  */
-public abstract class MapperTemplate {
-    
-    protected MapperTemplate(
-        Writer writer,
-        Model_1_0 model, 
-        Function<String, String> annotationRenderer
-    ){
-        this.pw = new PrintWriter(writer);
-        this.model = model;
-        this.annotationRenderer = annotationRenderer;
-    }
-        
-    protected final PrintWriter pw;
-    protected final Model_1_0 model;
-    protected final Function<String, String> annotationRenderer;
+public class FileSink implements Sink {
 
-    /**
-     * Renders the annotation 
-     * 
-     * @param annotation the provided annotation
-     * 
-     * @return the rendered annotation
-     */
-	protected String renderAnnotation(final String annotation) {
-		return annotationRenderer.apply(annotation);
+	public FileSink(
+		File directory
+	) {
+		this.directory = directory;
 	}
 
-	protected void print(CharSequence text) {
-		this.pw.print(text);
-	}
+	private final File directory;
 	
-	protected void printLine(CharSequence... text) {
-		for(CharSequence segment : text) {
-			this.pw.print(segment);
+	@Override
+	public void accept(String name, long length, Consumer<OutputStream> streamer) {
+		final File file = getFile(name);
+		try (OutputStream stream = getStream(file)) {
+			streamer.accept(stream);
+		} catch (IOException exception) {
+			throw new RuntimeServiceException(
+				exception,
+				BasicException.Code.DEFAULT_DOMAIN,
+				BasicException.Code.MEDIA_ACCESS_FAILURE,
+				"Unable to create file",
+				new BasicException.Parameter("file", file)
+			);
 		}
-		this.pw.println();
-	}
-	
-	protected void printLine(CharSequence text) {
-		this.pw.println(text);
 	}
 
-	protected void newLine() {
-		this.pw.println();
+	private OutputStream getStream(File file) {
+		try {
+			return new FileOutputStream(file);
+		} catch (Exception ioException) {
+			throw new RuntimeServiceException(
+				ioException,
+				BasicException.Code.DEFAULT_DOMAIN,
+				BasicException.Code.CREATION_FAILURE,
+				"Unable to create file",
+				new BasicException.Parameter("file", file)
+			);
+		}
+	}
+	
+	private File getFile(String name) {
+		return new File(getDirectory(), name);
+	}
+
+	private File getDirectory() {
+		if(!this.directory.exists() && !this.directory.mkdir() && !this.directory.exists()){
+			throw new RuntimeServiceException(
+				BasicException.Code.DEFAULT_DOMAIN,
+				BasicException.Code.CREATION_FAILURE,
+				"Unable to create directory",
+				new BasicException.Parameter("directory", directory)
+			);
+		}
+		return this.directory;
+	}
+	
+	@Override
+	public Sink nested(String base) {
+		return new FileSink(new File(this.directory, base));
 	}
 
 }

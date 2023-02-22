@@ -44,47 +44,39 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.URL;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
 import org.openmdx.application.mof.mapping.pimdoc.spi.Archiving;
 import org.openmdx.application.mof.mapping.pimdoc.spi.NamespaceFilter;
-import org.openmdx.application.mof.mapping.pimdoc.spi.Sink;
+import org.openmdx.application.mof.mapping.pimdoc.spi.PackagePatternComparator;
 import org.openmdx.application.mof.mapping.pimdoc.text.ClassMapper;
 import org.openmdx.application.mof.mapping.pimdoc.text.IndexMapper;
+import org.openmdx.application.mof.mapping.pimdoc.text.PackageGroupTextMapper;
 import org.openmdx.application.mof.mapping.pimdoc.text.PackageMapper;
 import org.openmdx.application.mof.mapping.pimdoc.text.StructureMapper;
 import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
-import org.w3c.cci2.BinaryLargeObjects;
 
 /**
- * PIM documentation in HTML format
+ * This class externalizes the PIM documentation 
  */
-class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoCloseable {
+class PIMDocExternalizer {
 
     PIMDocExternalizer(
-		BiConsumer<String, ByteArrayOutputStream> archive,
+    	Model_1_0 model,
+		Sink sink,
 		boolean markdown, 
 		PIMDocConfiguration configuration
     ){
-    	this.archive = archive;
+    	this.model = model;
+    	this.sink = sink;
     	this.markdown = markdown;
         this.configuration = configuration;
-        this.buffer = new ByteArrayOutputStream();
     }
 
+    private final Model_1_0 model;
+    
     /**
      * Tells whether annotations use markdown
      */
@@ -98,27 +90,14 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
 	/**
      * The archive for the produced entries
      */
-	private final BiConsumer<String, ByteArrayOutputStream> archive;
+	private final Sink sink;
 
-	/**
-	 * The re-usable {@code Stream}
-	 */
-    private final ByteArrayOutputStream buffer;
-    
-    /**
-     * The (configurable) resources to be added to the archive
-     */
-    private final static Set<MagicFile> RESOURCES = EnumSet.of(MagicFile.LOGO, MagicFile.TEXT_STYLE_SHEET, MagicFile.WELCOME);
-    
-	@Override
-	public void accept(List<ModelElement_1_0> packagesToExport) {
+	public void externalize() {
         try {
-	        SysLog.detail("copying magic files");
-	        addResources();
-	        SysLog.detail("exporting index file", packagesToExport);
-        	exportIndexFile(packagesToExport);
-	        SysLog.detail("exporting packages", packagesToExport);
-        	packagesToExport.forEach(this::exportNamespace);
+	        exportResources();
+        	exportIndexFile();
+        	exportNamespaces();
+        	exportPackageGroups();
         } catch(Exception exception) {
 			throw new RuntimeServiceException(
 				exception,
@@ -129,6 +108,23 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
         }    
 	}
 
+	private void exportPackageGroups() {
+		configuration
+			.getTableOfContentEntries()
+			.stream()
+			.map(PackagePatternComparator::getAncestor)
+			.map(model::findElement)
+			.forEach(this::exportPackageGroup);
+	}
+
+	private void exportNamespaces() {
+		this.model
+			.getContent()
+			.stream()
+			.filter(ModelElement_1_0::isPackageType)
+			.forEach(this::exportNamespace);
+	}
+	
 	private void exportNamespace(
 		final ModelElement_1_0 namespace
 	){
@@ -160,106 +156,68 @@ class PIMDocExternalizer implements Consumer<List<ModelElement_1_0>>, AutoClosea
 	/**
 	 * Export the (configurable) magic files.
 	 * 
-	 * @throws IOException 
-	 * 
-	 * @see MagicFile#LOGO
-	 * @see MagicFile#WELCOME
-	 * @see MagicFile#TEXT_STYLE_SHEET
+	 * @see MagicFile#CUSTOM
+	 * @see MagicFile#STYLE
 	 */
-	private void addResources(){
-		RESOURCES.forEach(this::addResource);
-	}
-	
-	private void addResource(MagicFile magicFile) {
-		this.buffer.reset();
-		copyBinary(configuration.getActualFile(magicFile));
-		this.archive.accept(magicFile.getFileName(), this.buffer);
+	private void exportResources(){
+		addResources(MagicFile.STYLE);
+		addResources(MagicFile.CUSTOM);
 	}
 
 	/**
-	 * Copies a resource to the buffer
-	 *
-	 * @param url the resource's URL
+	 * Export the (configurable) magic files.
+	 * @param buffer TODO
 	 * 
-	 * @throws RuntimeServiceException in case of failure
+	 * @see MagicFile.Type#TEXT
+	 * @see MagicFile.Type#IMAGE
 	 */
-	protected void copyBinary(URL url) {
-		try(InputStream s = url.openStream()){
-			BinaryLargeObjects.streamCopy(s, 0, buffer);
-		} catch (IOException exception) {
-			throw new RuntimeServiceException(
-				exception,
-				BasicException.Code.DEFAULT_DOMAIN,
-				BasicException.Code.PROCESSING_FAILURE,
-				"Unable to copy resource",
-				new BasicException.Parameter("url", url)
-			);
-		}
+	private void addResources(MagicFile magicFile){
+		addResource(magicFile, MagicFile.Type.TEXT);
+		addResource(magicFile, MagicFile.Type.IMAGE);
 	}
 	
-	private void exportIndexFile(List<ModelElement_1_0> packagesToBeExported) {
-		try (Sink sink = newSink()){
-			final Archiving indexMapper = new IndexMapper(sink, packagesToBeExported, markdown, configuration);
+	/**
+	 * Export the (configurable) magic file.
+	 * @param buffer TODO
+	 */
+	private void addResource(MagicFile magicFile, MagicFile.Type type) {
+		final MagicResource resource = newResource(magicFile, type);
+		resource.copyTo(sink);
+	}
+
+	private void exportIndexFile() {
+		try (Archiving indexMapper = new IndexMapper(sink, model, markdown, configuration)){
 			indexMapper.createArchiveEntry();
-		} catch (IOException e) {
-			throw new RuntimeServiceException(e);
 		}
 	}
 
 	private void exportPackageFile(ModelElement_1_0 packageToBeExported){
-		try (Sink sink = newSink()){
-			final Archiving packageMapper = new PackageMapper(sink, packageToBeExported, markdown, configuration);
+		try (Archiving packageMapper = new PackageMapper(sink, packageToBeExported, markdown, configuration)){
 			packageMapper.createArchiveEntry();
-		} catch (IOException e) {
-			throw new RuntimeServiceException(e);
 		}
 	}
 
 	private void exportClassFile(ModelElement_1_0 classToBeExported){
-		try (Sink sink = newSink()){
-			final Archiving classMapper = new ClassMapper(sink, classToBeExported, markdown, configuration);
+		try (Archiving classMapper = new ClassMapper(sink, classToBeExported, markdown, configuration)){
 			classMapper.createArchiveEntry();
-		} catch (IOException e) {
-			throw new RuntimeServiceException(e);
 		}
 	}
 
 	private void exportStructureFile(ModelElement_1_0 structureToBeExported){
-		try (Sink sink = newSink()){
-			final Archiving structureMapper = new StructureMapper(sink, structureToBeExported, markdown, configuration);
+		try (Archiving structureMapper = new StructureMapper(sink, structureToBeExported, markdown, configuration)){
 			structureMapper.createArchiveEntry();
-		} catch (IOException e) {
-			throw new RuntimeServiceException(e);
 		}
 	}
-	
-	private Sink newSink() {
-		return new Sink() {
 
-			private String entryName;
-  			private Writer writer;
-			
-			@Override
-			public Writer createWriter(String entryName) {
-		    	this.entryName = entryName;
-		    	buffer.reset();
-				return this.writer = new OutputStreamWriter(buffer);
-			}
-			
-			@Override
-			public void close() throws IOException {
-				this.writer.flush();
-				archive.accept(this.entryName, buffer);
-				this.writer = null;
-				this.entryName = null;
-			}
+	private void exportPackageGroup(ModelElement_1_0 ancestor){
+		try (Archiving packageGroupMapper = new PackageGroupTextMapper(sink, ancestor, markdown, configuration)){
+			packageGroupMapper.createArchiveEntry();
+		}
+	}
 
-		};
+
+	MagicResource newResource(MagicFile magicFile, MagicFile.Type type) {
+		return new MagicResource(configuration.getActualFile(magicFile, type), magicFile.getFileName(type));
 	}
-	
-	@Override
-	public void close() throws Exception {
-		buffer.close();
-	}
-	
+
 }
