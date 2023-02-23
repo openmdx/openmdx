@@ -93,6 +93,7 @@ import org.openmdx.base.rest.spi.RestSource;
 import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.state2.spi.Order;
 import org.w3c.cci2.ImmutableDatatype;
@@ -801,7 +802,7 @@ public class DatatypesTest  {
         Importer.importObjects(
             Importer.asTarget(persistenceManager),
             Importer.asSource(
-                new URL("xri://+resource/test/openmdx/datatypes1/data.xml")
+                new URL(Resources.toResourceXRI("test/openmdx/datatypes1/data.xml"))
             )
         );
         persistenceManager.currentTransaction().rollback();
@@ -883,7 +884,7 @@ public class DatatypesTest  {
     ) throws SAXException {
         RestSource restSource = new RestSource(
             "./",           
-            new InputSource("xri://+resource/test/openmdx/datatypes1/GetConfigResultT.xml"),
+            new InputSource(Resources.toResourceXRI("test/openmdx/datatypes1/GetConfigResultT.xml")),
             "application/xml",
             null
         );

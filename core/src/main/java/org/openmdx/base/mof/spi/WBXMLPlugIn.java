@@ -57,6 +57,7 @@ import org.openmdx.base.wbxml.CodeResolution;
 import org.openmdx.base.wbxml.CodeToken;
 import org.openmdx.base.wbxml.StandardPlugIn;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Resources;
 
 /**
  * XMI WBXML Plug-In 
@@ -201,12 +202,12 @@ public class WBXMLPlugIn extends StandardPlugIn {
         }, { // xml  
             "xmlns:xsi=http://www.w3.org/2001/XMLSchema-instance"
         }, { // xsi
-            "noNamespaceSchemaLocation=xri://+resource/org/omg/model1/xmi1/model1.xsd"
+            "noNamespaceSchemaLocation=" + Resources.toResourceXRI("org/omg/model1/xmi1/model1.xsd")
         }
     };
     
     static final String[] NAMESPACE_URIS = {
-        "xri://+resource/org/omg/model1/xmi1/model1.xsd", // 0
+    	Resources.toResourceXRI("org/omg/model1/xmi1/model1.xsd"), // 0
         "http://www.w3.org/2000/xmlns/", // 1
         "http://www.w3.org/2001/XMLSchema-instance" // 2
     };

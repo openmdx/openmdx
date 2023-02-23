@@ -69,6 +69,7 @@ import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.base.text.conversion.XMLEncoder;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
+import org.openmdx.kernel.loading.Resources;
 import org.w3c.format.DateTimeFormat;
 
 /**
@@ -204,7 +205,7 @@ public class XMLTarget implements ExportTarget {
             );
             atts.put(
                 "xsi:noNamespaceSchemaLocation", 
-                "xri://+resource/" + namespace.replace(':', '/') + "/" + modelName + "/xmi1/" + modelName + ".xsd"
+                Resources.toResourceXRI(namespace.replace(':', '/') + "/" + modelName + "/xmi1/" + modelName + ".xsd")
             );
         }
         this.xmlWriter.startElement("", "", toXML(qualifiedTypeName), atts, false);

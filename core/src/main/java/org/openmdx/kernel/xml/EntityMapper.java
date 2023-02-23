@@ -46,10 +46,10 @@ package org.openmdx.kernel.xml;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Optional;
 
 import org.openmdx.kernel.loading.Resources;
 import org.xml.sax.EntityResolver;
@@ -66,11 +66,6 @@ public class EntityMapper implements EntityResolver {
     private EntityMapper() {
         // Avoid instantiation
     }
-
-    /**
-     * Helps to identify and transform XRI resource URLs
-     */
-    private static final String RESOURCE_URL_PREFIX = "xri://+resource/";
 
     /**
      * The singleton
@@ -133,22 +128,27 @@ public class EntityMapper implements EntityResolver {
      */
     @Override
     public InputSource resolveEntity(String publicId, String systemId){
-        if (publicId != null) {
-            String url = publicIdMappings.get(publicId);
-            if (url != null) {
-                return new InputSource(openStreamFromURI(url));
-            }
-        }
-        if (systemId != null) {
-            String url = systemIdMappings.get(systemId);
-            if (url != null) {
-                return new InputSource(openStreamFromURI(url));
-            }
-        }
-        return null;
+    	return resolvePublicId(publicId).orElseGet(
+    		() -> resolveSystemId(systemId)
+    	);
     }
 
-    /**
+    private Optional<InputSource> resolvePublicId(String systemId){
+    	return Optional.ofNullable(systemId)
+    		.map(systemIdMappings::get)
+    		.map(EntityMapper::openStreamFromURI)
+    		.map(InputSource::new);
+    }
+
+    private InputSource resolveSystemId(String publicId){
+    	return Optional.ofNullable(publicId)
+    		.map(publicIdMappings::get)
+    		.map(EntityMapper::openStreamFromURI)
+    		.map(InputSource::new)
+    		.orElse(null);
+    }
+    
+	/**
      * Handle {@code xri://+resource}-URLs internally
      * 
      * @param uri
@@ -158,40 +158,12 @@ public class EntityMapper implements EntityResolver {
     private static InputStream openStreamFromURI(
         String uri
     ){
-        return uri.startsWith(RESOURCE_URL_PREFIX)
-            ? Resources.getResourceAsStream(toResourceName(uri))
-            : openStreamFromURL(uri);
-    }
-
-    /**
-     * Open a stream for a given URL
-     * 
-     * @param uri
-     *            the resource identifier
-     *            
-     * @return a stream providing the resource; or {@code null} if no such stream can be acquired
-     */
-    private static InputStream openStreamFromURL(
-        String uri
-    ){
-        try {
-            return new URL(uri).openStream();
-        } catch (MalformedURLException exception) {
-            return null;
-        } catch (IOException exception) {
-            return null;
-        }
-    }
-
-    /**
-     * Extract the name of a resource from {@code xri://+resource}-URL 
-     * 
-     * @param url the uniform locator of the resource
-     * 
-     * @return the name of a resource
-     */
-    private static String toResourceName(String url) {
-        return url.substring(RESOURCE_URL_PREFIX.length());
+    	final URL url = Resources.fromURI(uri);
+    	try {
+			return url == null ? null : url.openStream();
+		} catch (IOException e) {
+			return null;
+		}
     }
 
 }

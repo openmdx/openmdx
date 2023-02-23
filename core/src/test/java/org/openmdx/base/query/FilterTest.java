@@ -59,6 +59,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.spi.QueryExtension;
 import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.base.text.conversion.JavaBeans;
+import org.openmdx.kernel.loading.Resources;
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -170,7 +171,7 @@ public class FilterTest {
         //
         try(
             XMLDecoder decoder = new XMLDecoder(
-                new URL(null, "xri://+resource/org/openmdx/base/query/CR20018833.xml", new org.openmdx.kernel.url.protocol.xri.Handler()).openStream()
+                new URL(null, Resources.toResourceXRI("org/openmdx/base/query/CR20018833.xml"), new org.openmdx.kernel.url.protocol.xri.Handler()).openStream()
             )
         ){
             Filter filter1 = (Filter) decoder.readObject();

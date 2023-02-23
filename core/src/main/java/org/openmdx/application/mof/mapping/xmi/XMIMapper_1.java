@@ -64,6 +64,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.wbxml.cci.StringTable;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -83,7 +84,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
     /**
      * The model1 schema location
      */
-    private final static String MODEL1_XSD = "xri://+resource/org/omg/model1/" + Names.XMI_PACKAGE_SUFFIX + "/model1.xsd";
+    private final static String MODEL1_XSD = Resources.toResourceXRI("org/omg/model1/" + Names.XMI_PACKAGE_SUFFIX + "/model1.xsd");
 
     /**
      * For multi-package export

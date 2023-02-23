@@ -56,6 +56,7 @@ import java.net.URLClassLoader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.openmdx.kernel.loading.Resources;
 
 /**
  * Test XRI Protocol Handler
@@ -76,7 +77,7 @@ public class XRIProtocolHandlerTest {
     public static void setUp(
     ) throws Exception {
 	    System.setProperty("java.protocol.handler.pkgs","org.openmdx.kernel.url.protocol");
-        base = newURL("xri://+resource/!b!b/c*c/(xri://@d*d/e)?q"); 
+        base = newURL(Resources.toResourceXRI("!b!b/c*c/(xri://@d*d/e)?q")); 
     }
 
     protected static URL newURL(
@@ -128,7 +129,7 @@ public class XRIProtocolHandlerTest {
     @Test
     public void testResourceAuthority2(
     ) throws Exception {
-        URL aResource = newURL("xri://+resource/org/openmdx/kernel/xri/resource.txt");
+        URL aResource = newURL(Resources.toResourceXRI("org/openmdx/kernel/xri/resource.txt"));
         verifyContent(
             aResource.toString(),
             aResource.openStream(),

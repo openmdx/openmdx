@@ -60,6 +60,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.configuration.Configurations;
 import org.openmdx.kernel.configuration.cci.Configuration;
 import org.openmdx.kernel.configuration.cci.ConfigurationProvider;
+import org.openmdx.kernel.loading.Resources;
 import org.w3c.cci2.SparseArray;
 
 /**
@@ -78,7 +79,7 @@ public class TestConfigurationProvider {
         // Assert
         final Optional<String> configuration = auditConfiguration.getOptionalValue("configuration", String.class);
         Assertions.assertTrue(configuration.isPresent());
-        Assertions.assertEquals("xri://+resource/META-INF/app1BeforeImageProvider.properties", configuration.get());
+        Assertions.assertEquals(Resources.toMetaInfXRI("app1BeforeImageProvider.properties"), configuration.get());
     }
 
     private Map<String, Configuration> createPlugInConfigurations(
