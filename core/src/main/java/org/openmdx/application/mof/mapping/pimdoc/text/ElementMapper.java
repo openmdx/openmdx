@@ -75,13 +75,13 @@ abstract class ElementMapper extends HTMLMapper {
 	
 	@Override
 	protected void htmlBody() {
-		printLine("<body class=\"uml-element ", getImageClass(), "\">");
+		printLine("<body class=\"uml-element ", getElementClass(), "\">");
 		columnHead();
 		columnBody();
 		printLine("</body>");
    }
 
-	protected String getImageClass() {
+	protected String getElementClass() {
 		return "uml-" + elementKind.toLowerCase().replace(' ', '-');
 	}
 	
@@ -97,17 +97,9 @@ abstract class ElementMapper extends HTMLMapper {
 	
 	@Override
     protected String getBaseURL() {
-    	StringBuilder baseDir = new StringBuilder();
-    	for(long i = element.getQualifiedName().chars().filter(ElementMapper::isColon).count(); i > 0L; i--) {
-    		baseDir.append("../");
-    	}
-    	return baseDir.toString();
+    	return getBaseURL(element.getQualifiedName());
     }
 	
-    static boolean isColon(int c) {
-    	return c == ':';
-    }
-    
 	@Override
 	protected String getTitle() {
 		return this.elementKind + " " + getDisplayName();

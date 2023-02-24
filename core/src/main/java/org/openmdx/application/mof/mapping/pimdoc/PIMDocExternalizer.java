@@ -44,12 +44,13 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc;
 
+import org.openmdx.application.mof.mapping.pimdoc.image.ClusterImageMapper;
 import org.openmdx.application.mof.mapping.pimdoc.spi.Archiving;
 import org.openmdx.application.mof.mapping.pimdoc.spi.NamespaceFilter;
 import org.openmdx.application.mof.mapping.pimdoc.spi.PackagePatternComparator;
 import org.openmdx.application.mof.mapping.pimdoc.text.ClassMapper;
 import org.openmdx.application.mof.mapping.pimdoc.text.IndexMapper;
-import org.openmdx.application.mof.mapping.pimdoc.text.PackageGroupTextMapper;
+import org.openmdx.application.mof.mapping.pimdoc.text.ClusterTextMapper;
 import org.openmdx.application.mof.mapping.pimdoc.text.PackageMapper;
 import org.openmdx.application.mof.mapping.pimdoc.text.StructureMapper;
 import org.openmdx.base.exception.RuntimeServiceException;
@@ -114,7 +115,7 @@ class PIMDocExternalizer {
 			.stream()
 			.map(PackagePatternComparator::getAncestor)
 			.map(model::findElement)
-			.forEach(this::exportPackageGroup);
+			.forEach(this::exportPackageCluster);
 	}
 
 	private void exportNamespaces() {
@@ -192,26 +193,29 @@ class PIMDocExternalizer {
 	}
 
 	private void exportPackageFile(ModelElement_1_0 packageToBeExported){
-		try (Archiving packageMapper = new PackageMapper(sink, packageToBeExported, markdown, configuration)){
-			packageMapper.createArchiveEntry();
+		try (Archiving mapper = new PackageMapper(sink, packageToBeExported, markdown, configuration)){
+			mapper.createArchiveEntry();
 		}
 	}
 
 	private void exportClassFile(ModelElement_1_0 classToBeExported){
-		try (Archiving classMapper = new ClassMapper(sink, classToBeExported, markdown, configuration)){
-			classMapper.createArchiveEntry();
+		try (Archiving mapper = new ClassMapper(sink, classToBeExported, markdown, configuration)){
+			mapper.createArchiveEntry();
 		}
 	}
 
 	private void exportStructureFile(ModelElement_1_0 structureToBeExported){
-		try (Archiving structureMapper = new StructureMapper(sink, structureToBeExported, markdown, configuration)){
-			structureMapper.createArchiveEntry();
+		try (Archiving mapper = new StructureMapper(sink, structureToBeExported, markdown, configuration)){
+			mapper.createArchiveEntry();
 		}
 	}
 
-	private void exportPackageGroup(ModelElement_1_0 ancestor){
-		try (Archiving packageGroupMapper = new PackageGroupTextMapper(sink, ancestor, markdown, configuration)){
-			packageGroupMapper.createArchiveEntry();
+	private void exportPackageCluster(ModelElement_1_0 ancestor){
+		try (Archiving mapper = new ClusterTextMapper(sink, ancestor, markdown, configuration)){
+			mapper.createArchiveEntry();
+		}
+		try (Archiving mapper = new ClusterImageMapper(sink, ancestor, markdown, configuration)){
+			mapper.createArchiveEntry();
 		}
 	}
 

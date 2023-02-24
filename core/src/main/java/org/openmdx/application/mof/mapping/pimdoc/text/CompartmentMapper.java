@@ -51,6 +51,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.openmdx.application.mof.mapping.pimdoc.spi.AbstractMapper;
 import org.openmdx.application.mof.mapping.pimdoc.spi.NamespaceFilter;
 import org.openmdx.application.mof.mapping.spi.MapperTemplate;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
@@ -58,7 +59,6 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
-import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 
 /**
@@ -224,25 +224,16 @@ abstract class CompartmentMapper extends MapperTemplate {
 	}
 	
 	private String getBaseURL() {
-    	StringBuilder baseDir = new StringBuilder();
-    	for(long i = element.getQualifiedName().chars().filter(ElementMapper::isColon).count(); i > 0L; i--) {
-    		baseDir.append("../");
-    	}
-    	return baseDir.toString();
+    	return AbstractMapper.getBaseURL(element.getQualifiedName());
     }
-	
 
 	protected String getDisplayName(ModelElement_1_0 elcurrentement) {
 		return HTMLMapper.getDisplayName(elcurrentement);
 	}
 	
-	protected Model_1_0 getModel() {
-		return super.model;
-	}
-	
 	protected ModelElement_1_0 getElement(Object objectId) {
 		try {
-			return getModel().getElement(objectId);
+			return super.model.getElement(objectId);
 		} catch (ServiceException e) {
 			throw new RuntimeServiceException(e);
 		}
@@ -320,14 +311,14 @@ abstract class CompartmentMapper extends MapperTemplate {
 	}
 
 	protected Stream<ModelElement_1_0> streamTypeElements(){
-		return getModel()
+		return super.model
 			.getContent()
 			.stream()
 			.filter(namespaceFilter);
 	}
 	
 	protected Stream<ModelElement_1_0> streamSupertypesElements(){
-		return getModel()
+		return super.model
 			.getContent()
 			.stream()
 			.filter(getSupertypeFilter());

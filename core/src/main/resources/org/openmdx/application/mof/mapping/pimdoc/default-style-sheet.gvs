@@ -47,37 +47,33 @@
   * Elements
   */
 graph[
-  splines=ortho;
+	splines="ortho"
+	fontname="Arial"
+	fontsize="10px"
 ]
 node[
-	shape=record,
-	style=filled,
-	fillcolor="#FFFFCB",
-	color="#A52A2A",
-	fontname="Arial",
+	fontname="Arial"
 	fontsize="10px"
 ]
 edge[
-	dir=both,
-	arrowhead=empty,
-	color="#A52A2A",
-	fontname="Arial",
+	fontname="Arial"
 	fontsize="10px"
 ]
 
 /**
  * Image Style Sheet Classes
  */
-.uml-class[
- 	compartments=true, 
-	width=5
-];
-.uml-imported-class[
-	compartments=false,
-	fillcolor="#FFBD9D"
+_uml_class[
+ 	compartments="true" 
+	fillcolor="khaki1"	
 ]
-.uml-package[
-	width=2,
-	height=1,
-	fontsize="14px"
+_uml_class_imported[
+	compartments="false"
+	fillcolor="lightsalmon"
+]
+_uml_package[
+	fillcolor="khaki1"	
+]
+_uml_cluster[
+	fillcolor="lightcyan"
 ]

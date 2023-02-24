@@ -114,6 +114,14 @@ public abstract class AbstractMapper extends MapperTemplate implements Archiving
 		}
     }
 
+	public static String getBaseURL(final String qualifiedName) {
+		final StringBuilder baseDir = new StringBuilder();
+		for(long i = qualifiedName.chars().filter(c -> c == ':').count(); i > 0L; i--) {
+    		baseDir.append("../");
+    	}
+    	return baseDir.toString();
+	}
+	
     protected abstract String getEntryName();
     
 }

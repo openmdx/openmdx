@@ -121,12 +121,12 @@ body {
 	padding: 0.25em;
 	color: white;
 }
-.uml-package-group p {
+.uml-cluster p {
 	margin-top: 0.1em;
 	margin-bottom: 0.1em;
 	margin-left: 2em;
 }
-.uml-package-group summary {
+.uml-cluster summary {
 	margin-top: 0.1em;
 	margin-bottom: 0.1em;
 }

@@ -639,7 +639,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
      */
     @Override
     public String getSegmentName(
-    ) throws ServiceException {
+    ){
         return this.delegate.getObjectId().getSegment(4).toClassicRepresentation();
     }
     

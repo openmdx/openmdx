@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Description: Image Style Sheet Test
+ * Description: Graphviz Style Sheet Test
  * Owner: the original authors. 
  * ====================================================================
  * 
@@ -51,9 +51,9 @@ import org.junit.jupiter.api.Test;
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 
 /**
- * Image Style Sheet Test
+ * Graphviz Style Sheet Test
  */
-public class ImageStyleSheetTest {
+public class GraphvizStyleSheetTest {
 
 	@Test
 	void when_comment_then_removed() {
@@ -64,7 +64,7 @@ public class ImageStyleSheetTest {
 		//
 		// Act
 		//
-		final String styleSheet = ImageStyleSheet.readContent(url);
+		final String styleSheet = GraphvizStyleSheet.readContent(url);
 		//
 		// Assert
 		//
@@ -81,11 +81,11 @@ public class ImageStyleSheetTest {
 		//
 		// Arrange
 		//
-		ImageStyleSheet testee = new ImageStyleSheet(imageStyleSheetDefaultURL()); 
+		GraphvizStyleSheet testee = new GraphvizStyleSheet(imageStyleSheetDefaultURL()); 
 		//
 		// Act
 		//
-		final String value = testee.getStyle(".uml-class").get("compartments");
+		final String value = testee.getClassStyle("uml_class").get("compartments");
 		//
 		// Assert
 		//
@@ -97,11 +97,11 @@ public class ImageStyleSheetTest {
 		//
 		// Arrange
 		//
-		ImageStyleSheet testee = new ImageStyleSheet(imageStyleSheetDefaultURL()); 
+		GraphvizStyleSheet testee = new GraphvizStyleSheet(imageStyleSheetDefaultURL()); 
 		//
 		// Act
 		//
-		final String value = testee.getStyle(".uml-imported-class").get("compartments");
+		final String value = testee.getClassStyle("uml_class_imported").get("compartments");
 		//
 		// Assert
 		//
@@ -113,15 +113,15 @@ public class ImageStyleSheetTest {
 		//
 		// Arrange
 		//
-		ImageStyleSheet testee = new ImageStyleSheet(imageStyleSheetDefaultURL()); 
+		GraphvizStyleSheet testee = new GraphvizStyleSheet(imageStyleSheetDefaultURL()); 
 		//
 		// Act
 		//
-		final String value = testee.getStyle("node").get("shape");
+		final String value = testee.getElementStyle("graph").get("splines");
 		//
 		// Assert
 		//
-		Assertions.assertEquals("record", value);
+		Assertions.assertEquals("ortho", value);
 	}
 
 }

@@ -45,7 +45,6 @@
 package org.openmdx.application.mof.mapping.pimdoc;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,8 +56,8 @@ import java.util.function.Function;
 
 import org.openmdx.application.mof.mapping.pimdoc.spi.PackagePatternComparator;
 import org.openmdx.application.mof.mapping.spi.MarkdownRendererFactory;
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.spi.GraphvizStyleSheet;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Factory;
 import org.openmdx.kernel.loading.Resources;
@@ -90,15 +89,17 @@ public class PIMDocConfiguration {
 				new BasicException.Parameter("url", url)
 			);
 		}
+		this.imageStyleSheet = new GraphvizStyleSheet(getActualFile(MagicFile.STYLE, MagicFile.Type.IMAGE));
 	}
 
 	static final String TABLE_OF_CONTENT_ENTRIES = "table-of-content-entries";
 	
 	private final Properties properties = new Properties();
+	private final GraphvizStyleSheet imageStyleSheet;
 	
 	public Collection<String> getTableOfContentEntries(){
 		return getProperty(TABLE_OF_CONTENT_ENTRIES)
-			.map(PIMDocConfiguration::toPackageGroups)
+			.map(PIMDocConfiguration::toTableOfContentEntries)
 			.orElse(Collections.emptyList());
 	}
 	
@@ -114,6 +115,10 @@ public class PIMDocConfiguration {
 		return getProperty("custom-title").orElse("openMDX PIM Documentation");
 	}
 
+	public GraphvizStyleSheet getImageStyleSheet() {
+		return imageStyleSheet;
+	}
+
 	URL getActualFile(MagicFile magicFile, MagicFile.Type type) {
 		return getProperty(magicFile.getPropertyName(type))
 			.map(Resources::fromURI)
@@ -124,15 +129,15 @@ public class PIMDocConfiguration {
 		return Optional.ofNullable(this.properties.getProperty(propertyName));
 	}
 	
-	private static Collection<String> toPackageGroups(String groups){
-		final Set<String> packageGroups = new HashSet<>();
-		for(String entry : groups.split("::")) {
+	private static Collection<String> toTableOfContentEntries(String entries){
+		final Set<String> tableOfContentEntries = new HashSet<>();
+		for(String entry : entries.split("::")) {
 			if(!PackagePatternComparator.isWildcardPattern(entry)) {
 				entry = entry + "::" + entry.substring(entry.lastIndexOf(':') + 1);
 			}
-			packageGroups.add(entry.replaceAll("::", ":"));
+			tableOfContentEntries.add(entry.replaceAll("::", ":"));
 		}
-		return packageGroups;
+		return tableOfContentEntries;
 	}
 
 }

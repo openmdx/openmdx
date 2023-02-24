@@ -47,9 +47,7 @@ package org.openmdx.application.mof.mapping.pimdoc;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
-import java.util.function.Consumer;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.io.Sink;
@@ -71,10 +69,10 @@ class MagicResource {
 
 	void copyTo(Sink sink) {
 		try(final ByteArrayOutputStream source = readSource()) {
-			sink.accept(entryName, source.size(), new Consumer<OutputStream>() {
-
-				@Override
-				public void accept(OutputStream target) {
+			sink.accept(
+				entryName, 
+				source.size(), 
+				target -> {
 					try {
 						source.writeTo(target);
 					} catch (IOException exception) {
@@ -88,8 +86,7 @@ class MagicResource {
 						);
 					}
 				}
-				
-			});
+			);
 		} catch (IOException exception) {
 			throw new RuntimeServiceException(
 				exception,

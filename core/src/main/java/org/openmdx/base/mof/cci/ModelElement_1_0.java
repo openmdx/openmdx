@@ -123,6 +123,8 @@ public interface ModelElement_1_0 {
     
     public String getQualifiedName();
     
+    public String getSegmentName();
+    
     public Path getReferencedEnd() throws ServiceException;
     
     public Path getExposedEnd() throws ServiceException;
@@ -142,8 +144,6 @@ public interface ModelElement_1_0 {
     public String getMultiplicity() throws ServiceException;
     
     public Path getQualifierType() throws ServiceException;
-    
-    public String getSegmentName() throws ServiceException;
     
     /**
      * Tells whether the given feature is a reference. The same as 

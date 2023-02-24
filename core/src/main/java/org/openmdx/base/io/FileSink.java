@@ -101,7 +101,7 @@ public class FileSink implements Sink {
 	}
 
 	private File getDirectory() {
-		if(!this.directory.exists() && !this.directory.mkdir() && !this.directory.exists()){
+		if(!this.directory.exists() && !this.directory.mkdirs() && !this.directory.exists()){
 			throw new RuntimeServiceException(
 				BasicException.Code.DEFAULT_DOMAIN,
 				BasicException.Code.CREATION_FAILURE,

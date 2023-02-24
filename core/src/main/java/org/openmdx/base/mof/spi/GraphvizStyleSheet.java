@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Description: Image Style Sheet
+ * Description: Graphviz Style Sheet
  * Owner: the original authors. 
  * ====================================================================
  * 
@@ -52,6 +52,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,11 +61,16 @@ import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.CharacterLargeObjects;
 
 /**
- * Image Style Sheet
+ * Graphviz Style Sheet
  */
-public class ImageStyleSheet {
+public class GraphvizStyleSheet {
 
-	public ImageStyleSheet(URL url) {
+	/**
+	 * Read the Graphvis style sheet information from the given URL
+	 * 
+	 * @param url the Graphvis stylesheet source URL
+	 */
+	public GraphvizStyleSheet(URL url) {
 		final String content = readContent(url);
 		final Matcher sections = STYLES.matcher(content);
 		while(sections.find()) {
@@ -79,10 +85,17 @@ public class ImageStyleSheet {
 			styles.put(name, style);
 		}
 	}
+	
+	/**
+	 * All information must be provided in the template files themselves
+	 */
+	public GraphvizStyleSheet() {
+		super();
+	}
 
 	private final Map<String,Map<String,String>> styles = new HashMap<>();
 	private static final Pattern STYLES = Pattern.compile("([-\\w\\.]+)\\s*\\[([^\\]]+)\\]", Pattern.DOTALL);
-	private static final Pattern ENTRY = Pattern.compile("([-\\w]+)\\s*=([^,]+)", Pattern.DOTALL);
+	private static final Pattern ENTRY = Pattern.compile("([-\\w]+)\\s*=\"([^\"]+)\"", Pattern.DOTALL);
 	
 	static String readContent(URL url) {
 		try (Reader reader = new InputStreamReader(url.openStream()); CharArrayWriter buffer = new CharArrayWriter()) {
@@ -99,8 +112,12 @@ public class ImageStyleSheet {
 		return text.replaceAll("(?s)//[^\\v]*[\\v]|/\\*.*?\\*/", "\n");
 	}
 
-	public Map<String, String> getStyle(String name) {
-		return styles.getOrDefault(name, Collections.emptyMap());
+	public Map<String, String> getElementStyle(String name) {
+		return new TreeMap<>(styles.getOrDefault(name.toLowerCase(), Collections.emptyMap()));
+	}
+
+	public Map<String, String> getClassStyle(String name) {
+		return new TreeMap<>(styles.getOrDefault('_' + name.toLowerCase(), Collections.emptyMap()));
 	}
 	
 }

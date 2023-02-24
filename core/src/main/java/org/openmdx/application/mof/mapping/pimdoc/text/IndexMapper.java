@@ -117,11 +117,11 @@ public class IndexMapper extends HTMLMapper {
 	}
 
 	private void navigationDetails() {
-		getPackageGroups().entrySet().forEach(this::packageGroup);
+		getPackageGroups().entrySet().forEach(this::packageCluster);
 	}
 
-	private void packageGroup(Map.Entry<String,SortedSet<String>> entry) {
-		printLine("\t\t\t\t\t<details class=\"uml-package-group\">");
+	private void packageCluster(Map.Entry<String,SortedSet<String>> entry) {
+		printLine("\t\t\t\t\t<details class=\"uml-package-cluster\">");
 		packageGroupSummary(entry.getKey());
 		packageGroupDetails(entry.getValue());
 		printLine("\t\t\t\t\t</details>");
@@ -168,7 +168,7 @@ public class IndexMapper extends HTMLMapper {
 			"\t\t\t\t\t\t\t<a href=\"",
 			getBaseURL(),
 			NamespaceLocation.getLocation(namespace), 
-			MagicFile.PACKAGE_GROUP.getFileName(MagicFile.Type.TEXT),
+			MagicFile.PACKAGE_CLUSTER.getFileName(MagicFile.Type.TEXT),
 			"\" target=\"",
 			HTMLMapper.FRAME_NAME,
 			"\">",
@@ -248,15 +248,11 @@ public class IndexMapper extends HTMLMapper {
     		tableOfContentEntries.forEach(navigationCompartment::addKey);
     	}
 		streamElements()
-    		.filter(this::isListable)
+    		.filter(element -> element.isClassType() || element.isDataType())
     		.map(ModelElement_1_0::getQualifiedName)
     		.forEach(navigationCompartment::addElement);
     	navigationCompartment.normalize();
     	return navigationCompartment;
-    }
-    
-    private boolean isListable(ModelElement_1_0 element) {
-    	return element.isClassType() || element.isDataType();
     }
     
     @Override

@@ -44,38 +44,109 @@
  */
 package org.openmdx.base.mof.spi;
 
-import java.io.ByteArrayInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.omg.mof.cci.DirectionKind;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.io.FileSink;
+import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.kernel.exception.BasicException;
-import org.w3c.cci2.BinaryLargeObjects;
+import org.openmdx.kernel.loading.Resources;
+import org.openmdx.uses.org.apache.commons.io.output.StringBuilderWriter;
+import org.w3c.cci2.CharacterLargeObjects;
 
 /**
  * Diagram Drawer
  */
 public class Model_1DiagramDrawer {
+	
+	/**
+	 * Graphviz Attributes
+	 */
+	static class GraphvizAttributes {
+		
+		GraphvizAttributes(GraphvizStyleSheet styleSheet, String... controlKeys) {
+			this.styleSheet = styleSheet;
+			this.controlKeys = Arrays.asList(controlKeys);
+		}
+		
+		private final GraphvizStyleSheet styleSheet;
+		private final Properties defaultValues = new Properties();
+		private final Properties styleValues = new Properties(defaultValues);
+		private final Properties parameterValues = new Properties(styleValues);
+		private final Properties strictValues = new Properties(parameterValues);
+		private final Collection<String> controlKeys;
+		
+		public String toString() {
+			styleValues.putAll(styleSheet.getElementStyle(strictValues.getProperty("_class","")));
+			final Map<String,String> attributes = new HashMap<String, String>();
+			for(String key : strictValues.stringPropertyNames()) {
+				if(!controlKeys.contains(key)) {
+					attributes.put(key, getValue(key));
+				}
+			}
+			return toAttributeList(attributes);
+		}
 
+		
+		String getValue(String key) {
+			return this.strictValues.getProperty(key);
+		}
+		
+		void setDefaultValue(String key, String value) {
+			this.defaultValues.put(key, value);
+		}
+		void setStrictValue(String key, String value) {
+			this.strictValues.put(key, value);
+		}
+		
+		void parseParameters(CharSequence parameterList) {
+			for (String parameter : parameterList.toString().split(",")) {
+	            String[] nv = parameter.split("=");
+	            this.parameterValues.put(nv[0].toLowerCase(), unquote(nv[1]));
+			}
+		}
+		
+		private static String unquote(String value) {
+			return value.startsWith("\"") && value.endsWith("\"") ? value.substring(1, value.length() - 1) : value;
+		}
+		
+	}
+	
+	
     /**
      * GraphvizNode
      */
-    public static class GraphvizNode {
+    static class GraphvizNode {
 
-        public Map<String, String> getParameters() {
+        GraphvizNode(GraphvizStyleSheet styleSheet) {
+			this.parameters = new GraphvizAttributes(styleSheet, "name", "compartments");
+			this.parameters.setDefaultValue("compartments", "false");
+		}
+
+		public GraphvizAttributes getParameters() {
             return this.parameters;
         }
 
@@ -122,27 +193,24 @@ public class Model_1DiagramDrawer {
                     );
                 } else {
                     Model_1_0 model = this.classDef.getModel();
-                    String s = "\"" + this.id + "\"[";
                     String label = "<{";
                     // Stereotypes
                     List<Object> stereotypes = this.classDef.objGetList("stereotype");
                     if (!stereotypes.isEmpty()) {
-                        label += "&lt;&lt;";
+                        label += "&laquo;";
                         for (Object stereotype : stereotypes) {
                             label += stereotype.toString();
                         }
-                        label += "&gt;&gt;<br />";
+                        label += "&raquo;<br />";
                     }
                     // Name
                     boolean isAbstract = Boolean.TRUE.equals(this.classDef.isAbstract());
                     label += "<b>" + (isAbstract ? "<i>" : "") + this.classDef.getName() + (isAbstract ? "</i>" : "") + "</b>";
                     // Compartments for attributes and operations
-                    if (this.showCompartments) {
+                    if (isShowCompartments()) {
                         if (this.classDef != null) {
-                            double widthInInches = 2.0;
-                            if (this.parameters.containsKey("width")) {
-                                widthInInches = Double.parseDouble(this.parameters.get("width"));
-                            }
+                        	this.parameters.setDefaultValue("width", "2.0");
+                            final double widthInInches = Double.parseDouble(this.parameters.getValue("width"));
                             List<Object> containedElements = this.classDef.objGetList("content");
                             List<ModelElement_1_0> attributeDefs = new ArrayList<ModelElement_1_0>();
                             List<ModelElement_1_0> operationDefs = new ArrayList<ModelElement_1_0>();
@@ -199,13 +267,9 @@ public class Model_1DiagramDrawer {
                         }
                     }
                     label += "}>";
-                    s += "label=" + label;
-                    s += ",tooltip=\"" + this.classDef.getQualifiedName() + "\"";
-                    for (Map.Entry<String, String> parameter : this.parameters.entrySet()) {
-                        s += "," + parameter.getKey() + "=" + parameter.getValue();
-                    }
-                    s += "]";
-                    return s;
+                    this.parameters.setStrictValue("label", label);
+                    this.parameters.setStrictValue("tooltip", toDisplayName(this.classDef.getQualifiedName()));
+                    return quote(this.id) + this.parameters;
                 }
             } catch (Exception e) {
                 throw new RuntimeServiceException(e);
@@ -218,23 +282,12 @@ public class Model_1DiagramDrawer {
          * @return Returns the showCompartments.
          */
         public boolean isShowCompartments() {
-            return this.showCompartments;
-        }
-
-        /**
-         * Set showCompartments.
-         * 
-         * @param showCompartments
-         *            The showCompartments to set.
-         */
-        public void setShowCompartments(boolean showCompartments) {
-            this.showCompartments = showCompartments;
+            return Boolean.parseBoolean(this.parameters.getValue("compartments"));
         }
 
         private String id;
         private ModelElement_1_0 classDef;
-        private boolean showCompartments;
-        private Map<String, String> parameters = new HashMap<String, String>();
+        private final GraphvizAttributes parameters;
     }
 
     /**
@@ -243,7 +296,13 @@ public class Model_1DiagramDrawer {
      */
     public static class GraphvizEdge {
 
-        public Map<String, String> getParameters() {
+    	GraphvizEdge(GraphvizStyleSheet styleSheet) {
+			this.parameters = new GraphvizAttributes(styleSheet, "name", "dir");
+			this.parameters.setDefaultValue("dir", "forward");
+            this.parameters.setDefaultValue("style","");
+		}
+    	
+        public GraphvizAttributes getParameters() {
             return this.parameters;
         }
 
@@ -297,16 +356,11 @@ public class Model_1DiagramDrawer {
 
         /**
          * Get arrowhead for given association ends.
-         * 
-         * @param associationEnd
-         * @return
-         * @throws ServiceException
          */
         private String getArrowhead(
             ModelElement_1_0 end1,
             ModelElement_1_0 end2
-        )
-            throws ServiceException {
+        ) throws ServiceException {
             if (AggregationKind.SHARED.equals(end1.getAggregation())) {
                 return "oboxodiamond";
             } else if (AggregationKind.COMPOSITE.equals(end1.objGetValue("aggregation"))) {
@@ -328,49 +382,28 @@ public class Model_1DiagramDrawer {
         @Override
         public String toString() {
             try {
-                if (this.fieldDef != null) {
-                    Model_1_0 model = this.fieldDef.getModel();
-                    ModelElement_1_0 exposedEndType = model.getElement(this.fieldDef.getContainer());
-                    ModelElement_1_0 referencedEndType = this.fieldDef.getDereferencedType();
-                    String dir = "forward";
-                    if (this.parameters.containsKey("dir")) {
-                        dir = this.parameters.get("dir");
-                        this.parameters.remove("dir");
-                    }
-                    String s = ("forward".equals(dir)
-                        ? "\"" + exposedEndType.getQualifiedName() + "\" -> \"" + referencedEndType.getQualifiedName()
-                        : "\"" + referencedEndType.getQualifiedName() + "\" -> \"" + exposedEndType.getQualifiedName()) +
-                        "\" [";
-                    s += "label=\"\"";
-                    s += ",tooltip=\"\"";
-                    s += ",headlabel=\"[1..1]\"";
-                    s += ",taillabel=\"" + this.fieldDef.getName() + " [" + ModelHelper.getMultiplicity(this.fieldDef) + "]\"";
-                    s += ",arrowhead=tee";
-                    s += ",arrowtail=vee";
-                    s += ",color=\"#0000FF\"";
-                    boolean hasContraint = false;
-                    boolean hasLabelDistance = false;
-                    boolean hasStyleInvis = false;
-                    for (Map.Entry<String, String> parameter : this.parameters.entrySet()) {
-                        s += "," + parameter.getKey() + "=" + parameter.getValue();
-                        hasContraint = "constraint".equals(parameter.getKey());
-                        hasLabelDistance = "labeldistance".equals(parameter.getKey());
-                        hasStyleInvis = "style".equals(parameter.getKey()) && "invis".equals(parameter.getValue());
-                    }
-                    if (!hasContraint) {
-                        s += ",contraint=false";
-                    }
-                    if (!hasLabelDistance) {
-                        s += ",labeldistance=3";
-                    }
-                    s += "]";
-                    return hasStyleInvis ? "" : s;
+            	if(hasStyleInvis()) {
+            		return "";
+            	} else if (this.fieldDef != null) {
+                    final Model_1_0 model = this.fieldDef.getModel();
+                    final ModelElement_1_0 exposedEndType = model.getElement(this.fieldDef.getContainer());
+                    final ModelElement_1_0 referencedEndType = this.fieldDef.getDereferencedType();
+                    this.parameters.setStrictValue("label", "");
+                    this.parameters.setStrictValue("tooltip", "");
+                    this.parameters.setStrictValue("headlabel", "[1..1]");
+                    this.parameters.setStrictValue("taillabel", this.fieldDef.getName() + " [" + ModelHelper.getMultiplicity(this.fieldDef) + "]");
+                    this.parameters.setStrictValue("arrowhead", "tee");
+                    this.parameters.setStrictValue("arrowtail", "vee");
+                    this.parameters.setDefaultValue("color", "#0000FF");
+                    this.parameters.setDefaultValue("constraint", "false");
+                    this.parameters.setDefaultValue("labeldistance", "3");
+                    return createEdge(exposedEndType, referencedEndType);
                 } else if (this.associationDef != null) {
-                    Model_1_0 model = this.associationDef.getModel();
-                    ModelElement_1_0 end1 = model.getElement(this.associationDef.objGetList("content").get(0));
-                    ModelElement_1_0 end2 = model.getElement(this.associationDef.objGetList("content").get(1));
-                    ModelElement_1_0 referencedEnd = null;
-                    ModelElement_1_0 exposedEnd = null;
+                	final Model_1_0 model = this.associationDef.getModel();
+                    final ModelElement_1_0 end1 = model.getElement(this.associationDef.objGetList("content").get(0));
+                    final ModelElement_1_0 end2 = model.getElement(this.associationDef.objGetList("content").get(1));
+                    final ModelElement_1_0 referencedEnd;
+                    final ModelElement_1_0 exposedEnd;
                     if (Boolean.TRUE.equals(end1.objGetValue("isNavigable"))) {
                         referencedEnd = end1;
                         exposedEnd = end2;
@@ -378,41 +411,18 @@ public class Model_1DiagramDrawer {
                         referencedEnd = end2;
                         exposedEnd = end1;
                     }
-                    ModelElement_1_0 referencedEndType = model.getElementType(referencedEnd);
-                    ModelElement_1_0 exposedEndType = model.getElementType(exposedEnd);
-                    String dir = "forward";
-                    if (this.parameters.containsKey("dir")) {
-                        dir = this.parameters.get("dir");
-                        this.parameters.remove("dir");
-                    }
-                    String s = ("forward".equals(dir)
-                        ? "\"" + exposedEndType.getQualifiedName() + "\" -> \"" + referencedEndType.getQualifiedName()
-                        : "\"" + referencedEndType.getQualifiedName() + "\" -> \"" + exposedEndType.getQualifiedName()) +
-                        "\" [";
-                    s += "label=\"" + this.associationDef.getName() + "\"";
-                    s += ",tooltip=\"" + this.associationDef.getQualifiedName() + "\"";
-                    s += ",headlabel=\"" + exposedEnd.getName() + " [" + ModelHelper.getMultiplicity(exposedEnd) + "]\"";
-                    s += ",taillabel=\"" + referencedEnd.getName() + " [" + ModelHelper.getMultiplicity(referencedEnd) + "]\"";
-                    s += ",arrowhead=" + this.getArrowhead(referencedEnd, exposedEnd);
-                    s += ",arrowtail=" + this.getArrowhead(exposedEnd, referencedEnd);
-                    s += ",color=\"#0000FF\"";
-                    boolean hasContraint = false;
-                    boolean hasLabelDistance = false;
-                    boolean hasStyleInvis = false;
-                    for (Map.Entry<String, String> parameter : this.parameters.entrySet()) {
-                        s += "," + parameter.getKey() + "=" + parameter.getValue();
-                        hasContraint = "constraint".equals(parameter.getKey());
-                        hasLabelDistance = "labeldistance".equals(parameter.getKey());
-                        hasStyleInvis = "style".equals(parameter.getKey()) && "invis".equals(parameter.getValue());
-                    }
-                    if (!hasContraint) {
-                        s += ",contraint=false";
-                    }
-                    if (!hasLabelDistance) {
-                        s += ",labeldistance=3";
-                    }
-                    s += "]";
-                    return hasStyleInvis ? "" : s;
+                    final ModelElement_1_0 referencedEndType = model.getElementType(referencedEnd);
+                    final ModelElement_1_0 exposedEndType = model.getElementType(exposedEnd);
+                    this.parameters.setStrictValue("label", this.associationDef.getName());
+                    this.parameters.setStrictValue("tooltip", toDisplayName(this.associationDef.getQualifiedName()));
+                    this.parameters.setStrictValue("headlabel",exposedEnd.getName() + " [" + ModelHelper.getMultiplicity(exposedEnd) + "]");
+                    this.parameters.setStrictValue("taillabel",referencedEnd.getName() + " [" + ModelHelper.getMultiplicity(referencedEnd) + "]");
+                    this.parameters.setStrictValue("arrowhead",this.getArrowhead(referencedEnd, exposedEnd));
+                    this.parameters.setStrictValue("arrowtail",this.getArrowhead(exposedEnd, referencedEnd));
+                    this.parameters.setDefaultValue("color","#0000FF");
+                    this.parameters.setDefaultValue("constraint","false");
+                    this.parameters.setDefaultValue("labeldistance","3");
+                    return createEdge(exposedEndType, referencedEndType);
                 } else {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
@@ -425,227 +435,355 @@ public class Model_1DiagramDrawer {
             }
         }
 
+		private String createEdge(final ModelElement_1_0 exposedEndType, final ModelElement_1_0 referencedEndType) {
+			final ModelElement_1_0 left;
+			final ModelElement_1_0 right;
+			if(isDirForward()) {
+				left = exposedEndType;
+				right = referencedEndType;
+			} else {
+				 left = referencedEndType;
+				 right = exposedEndType;
+			}
+			return quote(left.getQualifiedName()) + " -> " + quote(right.getQualifiedName()) + this.parameters;
+		}
+
+        private boolean isDirForward() {
+        	return "forward".equals(this.parameters.getValue("dir"));
+        }
+        
+		private boolean hasStyleInvis() {
+			return "invis".equals(this.parameters.getValue("style"));
+		}
+
         private String id;
         private ModelElement_1_0 associationDef;
         private ModelElement_1_0 fieldDef;
-        private final Map<String, String> parameters = new HashMap<String, String>();
+        private final GraphvizAttributes parameters;
     }
 
     /**
-     * Draw given diagrams and store in destination directory.
+     * Draw given diagrams and send them to the sink
+     * 
+     * @param styleSheet the Graphviz style sheet
+     * @param fileExtension the file extension, either "dot" or "gv"
      * 
      * @throws ServiceException
      */
     static void drawDiagrams(
         final Model_1_0 model,
         final File sourceDir, 
-        final File destDir
+        final Sink sink, 
+        final GraphvizStyleSheet styleSheet, 
+        final String fileExtension
     ) throws ServiceException {
-        try {
+    	try {
             if (sourceDir.exists()) {
-                final String[] sourceDirs = sourceDir.list();
-                if (sourceDirs != null)
-                    for (String name : sourceDir.list()) {
-                        File f = new File(sourceDir, name);
-                        if (f.isDirectory()) {
-                            drawDiagrams(
-                                model,
-                                f, 
-                                new File(destDir, f.getName())
-                            );
-                        } else if (name.endsWith(".dott")) {
-                            System.out.println("INFO: Processing diagram " + f.getAbsolutePath());
-                            System.out.flush();
-                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                            try (FileInputStream source = new FileInputStream(f)) {
-                                BinaryLargeObjects.streamCopy(source, 0L, bos);
-                            }
-                            String dot = bos.toString("UTF-8");
-                            Map<String, GraphvizNode> classNodes = new HashMap<String, GraphvizNode>();
-                            // ${CLASS[name=...,compartments=...,n1=v1,...]}
-                            while (dot.indexOf("${CLASS[") >= 0) {
-                                int startPos = dot.indexOf("${CLASS[");
-                                int endPos = dot.indexOf("]}", startPos);
-                                if (endPos > startPos) {
-                                    GraphvizNode classNode = new GraphvizNode();
-                                    String[] parameters = dot.substring(startPos + 8, endPos).split(",");
-                                    for (String parameter : parameters) {
-                                        String[] nv = parameter.split("=");
-                                        if ("name".equals(nv[0])) {
-                                            ModelElement_1_0 classDef = model.getElement(nv[1]);
-                                            classNode.setClassDef(classDef);
-                                            classNode.setId(classDef.getQualifiedName());
-                                            classNodes.put(
-                                                classNode.getId(),
-                                                classNode
-                                            );
-                                        } else if ("compartments".equals(nv[0])) {
-                                            classNode.setShowCompartments(Boolean.parseBoolean(nv[1]));
-                                        } else {
-                                            classNode.getParameters().put(
-                                                nv[0],
-                                                nv[1]
-                                            );
-                                        }
-                                    }
-                                    dot = dot.substring(0, startPos) +
-                                        (classNode == null ? "" : classNode.toString()) +
-                                        dot.substring(endPos + 2);
-                                } else {
-                                    throw new ServiceException(
-                                        BasicException.Code.DEFAULT_DOMAIN,
-                                        BasicException.Code.PARSE_FAILURE,
-                                        "${CLASS[...]} place holder is not properly closed",
-                                        new BasicException.Parameter("dot", dot.substring(startPos))
-                                    );
-                                }
-                            }
-                            // ${INSTANCE_OF}
-                            if (dot.indexOf("${INSTANCE_OF}") >= 0) {
-                                String instanceOfEdges = "";
-                                for (GraphvizNode classNode : classNodes.values()) {
-                                    ModelElement_1_0 classDef = model.getElement(classNode.getId());
-                                    List<Object> supertypes = classDef.objGetList("supertype");
-                                    for (Object supertype : supertypes) {
-                                        ModelElement_1_0 supertypeDef = model.getElement(supertype);
-                                        if (classNodes.containsKey(supertypeDef.getQualifiedName())) {
-                                            instanceOfEdges += "\n\t\"" + classNode.getId() + "\" -> \"" + supertypeDef.getQualifiedName()
-                                                + "\" [dir=forward,arrowtail=onormal];";
-                                        }
-                                    }
-                                }
-                                dot = dot.replace("${INSTANCE_OF}", instanceOfEdges);
-                            }
-                            // ${ASSOCIATION[name=...,n1=v1,...]}
-                            Map<String, GraphvizEdge> associationNodes = new HashMap<String, GraphvizEdge>();
-                            while (dot.indexOf("${ASSOCIATION[") >= 0) {
-                                int startPos = dot.indexOf("${ASSOCIATION[");
-                                int endPos = dot.indexOf("]}", startPos);
-                                boolean isWildcard = false;
-                                if (endPos > startPos) {
-                                    GraphvizEdge associationNode = new GraphvizEdge();
-                                    String[] parameters = dot.substring(startPos + 14, endPos).split(",");
-                                    for (String parameter : parameters) {
-                                        String[] nv = parameter.split("=");
-                                        if ("name".equals(nv[0])) {
-                                            isWildcard = "*".equals(nv[1]);
-                                            if (!isWildcard) {
-                                                ModelElement_1_0 associationDef = model.getElement(nv[1]);
-                                                associationNode.setId(associationDef.getQualifiedName());
-                                                associationNode.setAssociationDef(associationDef);
-                                                associationNodes.put(
-                                                    associationNode.getId(),
-                                                    associationNode
-                                                );
-                                            }
-                                        } else {
-                                            associationNode.getParameters().put(
-                                                nv[0],
-                                                nv[1]
-                                            );
-                                        }
-                                    }
-                                    if (isWildcard) {
-                                        break;
-                                    } else {
-                                        dot = dot.substring(0, startPos) +
-                                            (associationNode == null ? "" : associationNode.toString()) +
-                                            dot.substring(endPos + 2);
-                                    }
-                                } else {
-                                    throw new ServiceException(
-                                        BasicException.Code.DEFAULT_DOMAIN,
-                                        BasicException.Code.PARSE_FAILURE,
-                                        "${ASSOCIATION[...]} place holder is not properly closed",
-                                        new BasicException.Parameter("dot", dot.substring(startPos))
-                                    );
-                                }
-                            }
-                            // ${ASSOCIATION[name=*]}
-                            if (dot.indexOf("${ASSOCIATION[name=*]}") >= 0) {
-                                String associationEdges = "";
-                                // Associations
-                                for (ModelElement_1_0 elementDef : model.getContent()) {
-                                    if (elementDef.isAssociationType()) {
-                                        ModelElement_1_0 end1 = model.getElement(elementDef.objGetList("content").get(0));
-                                        ModelElement_1_0 end1Type = model.getElementType(end1);
-                                        ModelElement_1_0 end2 = model.getElement(elementDef.objGetList("content").get(1));
-                                        ModelElement_1_0 end2Type = model.getElementType(end2);
-                                        if (classNodes.containsKey(end1Type.getQualifiedName()) &&
-                                            classNodes.containsKey(end2Type.getQualifiedName()) &&
-                                            !associationNodes.containsKey(elementDef.getQualifiedName())) {
-                                            GraphvizEdge associationNode = new GraphvizEdge();
-                                            associationNode.setId(elementDef.getQualifiedName());
-                                            associationNode.setAssociationDef(elementDef);
-                                            associationEdges += "\n\t" + associationNode.toString() + ";";
-                                        }
-                                    }
-                                }
-                                // Complex structure fields as edges
-                                for (GraphvizNode classNode : classNodes.values()) {
-                                    ModelElement_1_0 classDef = classNode.getClassDef();
-                                    if (model.isStructureType(classDef)) {
-                                        List<Object> elements = classDef.objGetList("content");
-                                        for (Object element : elements) {
-                                            ModelElement_1_0 fieldDef = model.getElement(element);
-                                            if (model.isStructureFieldType(fieldDef)) {
-                                                ModelElement_1_0 fieldDefType = fieldDef.getDereferencedType();
-                                                if (fieldDefType.isStructureType() && classNodes.containsKey(
-                                                    fieldDefType.getQualifiedName()
-                                                )) {
-                                                    GraphvizEdge fieldNode = new GraphvizEdge();
-                                                    fieldNode.setId(fieldDef.getQualifiedName());
-                                                    fieldNode.setFieldDef(fieldDef);
-                                                    fieldNode.getParameters().put("minlen", "3");
-                                                    associationEdges += "\n\t" + fieldNode.toString() + ";";
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                dot = dot.replace("${ASSOCIATION[name=*]}", associationEdges);
-                            }
-                            destDir.mkdirs();
-                            File destFile = new File(destDir, name.replace(".dott", ".dot"));
-                            try (FileOutputStream destOs = new FileOutputStream(destFile)) {
-                                BinaryLargeObjects.streamCopy(
-                                    new ByteArrayInputStream(dot.getBytes("UTF-8")),
-                                    0L,
-                                    destOs
-                                );
-                            }
-
-                        }
+                for (final File file : sourceDir.listFiles()) {
+                    if (file.isDirectory()) {
+                        drawDiagrams(
+                            model,
+                            file, 
+                            sink.nested(file.getName()),
+                            styleSheet, 
+                            fileExtension
+                        );
+                    } else if (file.getName().endsWith(".dott")) {
+                        final StringBuilder dot = readTemplate(file);
+                        final Map<String, GraphvizNode> classNodes = processClasses(dot, model, styleSheet);
+                        processAttributeStatement(dot, styleSheet);
+                        processInstanceOf(dot, model, classNodes);
+                        final Map<String, GraphvizEdge> associationNodes = processNamedAssociations(dot, model, styleSheet);
+                        processWildcardAssoications(dot, model, styleSheet, classNodes, associationNodes);
+                        final byte[] data = toByteArray(dot);
+                        final String entryName = file.getName().replace(".dott", "." + fileExtension);
+						writeDiagram(sink, entryName, data);
                     }
+                }
             }
         } catch (Exception e) {
             throw new ServiceException(e);
         }
     }
 
+	private static void writeDiagram(final Sink sink, final String entryName, final byte[] data) {
+		sink.accept(
+			entryName,
+			data.length,
+			target -> {
+				try {
+					target.write(data);
+				} catch (IOException exception) {
+					throw new RuntimeServiceException(
+						exception,
+						BasicException.Code.DEFAULT_DOMAIN,
+						BasicException.Code.MEDIA_ACCESS_FAILURE,
+						"Unable to save image source"
+					);
+				}
+			}
+		);
+	}
+
+	private static byte[] toByteArray(final StringBuilder dot) throws IOException {
+		final byte[] data;
+		try (
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			Writer writer = new OutputStreamWriter(buffer, StandardCharsets.UTF_8)
+		){
+			writer.append(dot);
+			writer.flush();
+			data = buffer.toByteArray();
+		}
+		return data;
+	}
+
+    /**
+     * ${ASSOCIATION[name=*]}
+     */
+	private static void processWildcardAssoications(
+		final StringBuilder dot, 
+		final Model_1_0 model,
+		final GraphvizStyleSheet styleSheet, 
+		final Map<String, GraphvizNode> classNodes, 
+		final Map<String, GraphvizEdge> associationNodes
+	) throws ServiceException {
+		final int startPos = dot.indexOf("${ASSOCIATION[name=*]}");
+		if (startPos >= 0) {
+			final int endPos = startPos + "${ASSOCIATION[name=*]}".length();
+		    String associationEdges = "";
+		    // Associations
+		    for (ModelElement_1_0 elementDef : model.getContent()) {
+		        if (elementDef.isAssociationType()) {
+		            ModelElement_1_0 end1 = model.getElement(elementDef.objGetList("content").get(0));
+		            ModelElement_1_0 end1Type = model.getElementType(end1);
+		            ModelElement_1_0 end2 = model.getElement(elementDef.objGetList("content").get(1));
+		            ModelElement_1_0 end2Type = model.getElementType(end2);
+		            if (classNodes.containsKey(end1Type.getQualifiedName()) &&
+		                classNodes.containsKey(end2Type.getQualifiedName()) &&
+		                !associationNodes.containsKey(elementDef.getQualifiedName())) {
+		                GraphvizEdge associationNode = new GraphvizEdge(styleSheet);
+		                associationNode.setId(elementDef.getQualifiedName());
+		                associationNode.setAssociationDef(elementDef);
+		                associationEdges += "\n\t" + associationNode.toString() + ";";
+		            }
+		        }
+		    }
+		    // Complex structure fields as edges
+		    for (GraphvizNode classNode : classNodes.values()) {
+		        ModelElement_1_0 classDef = classNode.getClassDef();
+		        if (model.isStructureType(classDef)) {
+		            List<Object> elements = classDef.objGetList("content");
+		            for (Object element : elements) {
+		                ModelElement_1_0 fieldDef = model.getElement(element);
+		                if (model.isStructureFieldType(fieldDef)) {
+		                    ModelElement_1_0 fieldDefType = fieldDef.getDereferencedType();
+		                    if (fieldDefType.isStructureType() && classNodes.containsKey(
+		                        fieldDefType.getQualifiedName()
+		                    )) {
+		                        GraphvizEdge fieldNode = new GraphvizEdge(styleSheet);
+		                        fieldNode.setId(fieldDef.getQualifiedName());
+		                        fieldNode.setFieldDef(fieldDef);
+		                        fieldNode.getParameters().setStrictValue("minlen", "3");
+		                        associationEdges += "\n\t" + fieldNode.toString() + ";";
+		                    }
+		                }
+		            }
+		        }
+		    }
+		    dot.replace(startPos, endPos, associationEdges);
+		}
+	}
+
+    /**
+     * ${ASSOCIATION[name=...,n1=v1,...]}
+     */
+	private static Map<String, GraphvizEdge> processNamedAssociations(
+		final StringBuilder dot, 
+		final Model_1_0 model, GraphvizStyleSheet styleSheet
+	) throws ServiceException {
+		final Map<String, GraphvizEdge> associationNodes = new HashMap<String, GraphvizEdge>();
+		for (int startPos = dot.indexOf("${ASSOCIATION["); startPos >= 0; startPos = dot.indexOf("${ASSOCIATION[")) {
+		    final int endPos = dot.indexOf("]}", startPos);
+		    if (endPos > startPos) {
+		        final GraphvizEdge associationNode = new GraphvizEdge(styleSheet);
+		        associationNode.getParameters().parseParameters(dot.subSequence(startPos + 14, endPos));
+		        final String qualifiedName = associationNode.getParameters().getValue("name");
+                if (!isWildcard(qualifiedName)) {
+                    ModelElement_1_0 associationDef = model.getElement(qualifiedName);
+                    associationNode.setId(associationDef.getQualifiedName());
+                    associationNode.setAssociationDef(associationDef);
+                    associationNodes.put(associationNode.getId(), associationNode);
+		            dot.replace(startPos, endPos + 2, associationNode.toString());
+		        }
+		    } else {
+		        throw new ServiceException(
+		            BasicException.Code.DEFAULT_DOMAIN,
+		            BasicException.Code.PARSE_FAILURE,
+		            "${ASSOCIATION[...]} place holder is not properly closed",
+		            new BasicException.Parameter("dot", dot.substring(startPos))
+		        );
+		    }
+		}
+		return associationNodes;
+	}
+
+	private static boolean isWildcard(final String qualifiedName) {
+		return "*".equals(qualifiedName);
+	}
+
+    /**
+     * ${INSTANCE_OF}
+     */
+	private static void processInstanceOf(
+		final StringBuilder dot, 
+		final Model_1_0 model,
+		final Map<String, GraphvizNode> classNodes
+	) throws ServiceException {
+		final int startPos = dot.indexOf("${INSTANCE_OF}");
+		if (startPos >= 0) {
+			final int endPos = startPos + "${INSTANCE_OF}".length();
+		    String instanceOfEdges = "";
+		    for (GraphvizNode classNode : classNodes.values()) {
+		        ModelElement_1_0 classDef = model.getElement(classNode.getId());
+		        List<Object> supertypes = classDef.objGetList("supertype");
+		        for (Object supertype : supertypes) {
+		            ModelElement_1_0 supertypeDef = model.getElement(supertype);
+		            if (classNodes.containsKey(supertypeDef.getQualifiedName())) {
+		                instanceOfEdges += "\n\t\"" + classNode.getId() + "\" -> \"" + supertypeDef.getQualifiedName()
+		                    + "\" [dir=forward,arrowtail=onormal];";
+		            }
+		        }
+		    }
+		    dot.replace(startPos, endPos, instanceOfEdges);
+		}
+	}
+
+	/**
+	 * ${ATTRIBUTE_STATEMENTS}
+	 */
+	private static void processAttributeStatement(
+		final StringBuilder dot, 
+		final GraphvizStyleSheet styleSheet
+	) {
+		final int startPos = dot.indexOf("${ATTRIBUTE_STATEMENTS}");
+		if (startPos >= 0) {
+			final int endPos = startPos + "${ATTRIBUTE_STATEMENTS}".length();
+		    StringBuilder attributeStatements = new StringBuilder();
+		    for(String kind : Arrays.asList("graph", "node", "edge")) {
+		    	final Map<String, String> style = styleSheet.getElementStyle(kind);
+		    	if(!style.isEmpty()) {
+		    		attributeStatements.append("\n\t").append(kind).append(toAttributeList(style));
+		    	}
+		    }
+		    dot.replace(startPos, endPos, attributeStatements.toString());
+		}
+	}
+
+    /**
+     * ${CLASS[name=...,compartments=...,n1=v1,...]}
+     */
+	private static Map<String, GraphvizNode> processClasses(
+		final StringBuilder dot, 
+		final Model_1_0 model, 
+		final GraphvizStyleSheet styleSheet
+	) throws ServiceException {
+		final Map<String, GraphvizNode> classNodes = new HashMap<String, GraphvizNode>();
+		for (int startPos = dot.indexOf("${CLASS["); startPos >= 0; startPos = dot.indexOf("${CLASS[")) {
+		    final int endPos = dot.indexOf("]}", startPos);
+		    if (endPos > startPos) {
+		        final GraphvizNode classNode = new GraphvizNode(styleSheet);
+		        classNode.getParameters().setDefaultValue("compartments", "false");
+		        classNode.getParameters().parseParameters(dot.subSequence(startPos + "${CLASS[".length(), endPos));
+		        final String qualifiedName = classNode.getParameters().getValue("name");
+                final ModelElement_1_0 classDef = model.getElement(qualifiedName);
+                classNode.setClassDef(classDef);
+                classNode.setId(classDef.getQualifiedName());
+                classNodes.put(classNode.getId(), classNode);
+		        dot.replace(startPos, endPos + 2, classNode.toString());
+		    } else {
+		        throw new ServiceException(
+		            BasicException.Code.DEFAULT_DOMAIN,
+		            BasicException.Code.PARSE_FAILURE,
+		            "${CLASS[...]} place holder is not properly closed",
+		            new BasicException.Parameter("dot", dot.substring(startPos))
+		        );
+		    }
+		}
+		return classNodes;
+	}
+
+	static String toDisplayName(String qualifiedName) {
+		return qualifiedName.replace(":", "::");
+	}
+	
+    /**
+     * Read the DOTT file
+     * 
+     * @param f the source file
+     * 
+     * @return a {@code StringBuilder} with the source file's content
+     * 
+     * @throws IOException
+     */
+	private static StringBuilder readTemplate(final File f) throws IOException {
+		System.out.println("INFO: Processing diagram " + f.getAbsolutePath());
+		System.out.flush();
+		StringBuilderWriter target = new StringBuilderWriter();
+		try (
+			Reader source = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8));
+		){
+		    CharacterLargeObjects.streamCopy(source, 0L, target);
+		    
+		}
+		return target.getBuilder();
+	}
+	
+	static String toAttributeList(Map<String,String> attributes) {
+		final StringBuilder attributeList = new StringBuilder();
+		char delimiter='[';
+		for(Map.Entry<String, String> e : attributes.entrySet()) {
+			attributeList.append(delimiter).append(e.getKey()).append('=');
+			delimiter = ',';
+			final String value = e.getValue();
+			attributeList.append(isHTML(value) ? value : quote(value));
+		}
+		return attributeList.toString();
+	}
+	
+	private static boolean isHTML(String value) {
+		return value.startsWith("<{") && value.endsWith("}>");
+	}
+
+	private static String quote(String value) {
+		return '"' + value + "'";
+	}
+
     /**
      * Completes diagram templates with model information.
      * 
-     * @param diagram
-     *            source dir
-     * @param diagram
-     *            destination dir
+     * @param arguments ‹source-directory› ‹destination-directory› [‹style-sheet-file›]
      */
     public static void main(
         String... arguments
     ) {
-        if (arguments == null || arguments.length != 2) {
-            System.err.println("Usage: java " + Model_1DiagramDrawer.class.getName() + " <sourceDir> <destDir>");
+    	System.out.println("Style sheet: " + getStyleSheet(null));
+        if (arguments == null || arguments.length < 2 || arguments.length > 3) {
+            System.err.println("Usage: java " + Model_1DiagramDrawer.class.getName() + " ‹source-directory› ‹destination-directory› [‹style-sheet-file›]");
         } else {
-            String sourceDir = arguments[0];
-            String destDir = arguments[1];
+            final String sourceDir = arguments[0];
+            final String destDir = arguments[1];
+            final File styleFile = arguments.length == 3 ? new File(arguments[2]) : null;
             try {
                 System.out.println("INFO: Mapping model diagram templates from " + sourceDir + " to " + destDir);
                 System.out.flush();
                 drawDiagrams(
             		Model_1Factory.getModel(),
                     new File(sourceDir), 
-                    new File(destDir)
+                    new FileSink(new File(destDir)),
+                    getStyleSheet(styleFile), 
+                    "dot"
+                    
                 );
             } catch (Exception exception) {
                 exception.printStackTrace();
@@ -654,4 +792,22 @@ public class Model_1DiagramDrawer {
         }
     }
 
+    private static GraphvizStyleSheet getStyleSheet(File styleFile) {
+    	if(styleFile == null) {
+    		System.out.println("INFO: Do not use a Graphviz style file");
+    		return new GraphvizStyleSheet();
+    	}
+    	if(styleFile.exists() && styleFile.isFile()) {
+    		try {
+				return new GraphvizStyleSheet(styleFile.toURI().toURL());
+			} catch (Exception e) {
+				System.err.println("WARNING: Unable to read " + styleFile);
+			}
+    	}
+		System.out.println("INFO: falling back to default-style-sheet.gvs");
+    	return new GraphvizStyleSheet(
+    		Resources.getResource("org/openmdx/application/mof/mapping/pimdoc/default-style-sheet.gvs")
+    	);
+    }
+        
 }

@@ -46,24 +46,26 @@ package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
  * Package Group Mapper 
  */
-public class PackageGroupTextMapper extends ElementMapper {
+public class ClusterTextMapper extends ElementMapper {
 
     /**
      * Constructor 
      */
-    public PackageGroupTextMapper(
+    public ClusterTextMapper(
     	Sink sink, 
         ModelElement_1_0 ancestor,
         boolean markdown, 
         PIMDocConfiguration configuration
     ){
-		super("Package Group", sink, ancestor, markdown, configuration);
+		super("Package Cluster", sink, ancestor, markdown, configuration);
     }    
 
 	@Override
@@ -74,8 +76,24 @@ public class PackageGroupTextMapper extends ElementMapper {
 	@Override
 	protected  void columnBody() {
 		printLine("\t<div class=\"column-body\">");
-		printLine("\t\t<img src=\"", MagicFile.PACKAGE_GROUP.getFileName(MagicFile.Type.IMAGE), "\" alt=\"", getTitle(), "\">");
+		printLine("\t\t<img src=\"", MagicFile.PACKAGE_CLUSTER.getFileName(MagicFile.Type.IMAGE), "\" alt=\"", getTitle(), "\">");
 		printLine("\t</div>");
+	}
+
+	@Override
+	protected String getEntryName() {
+		return ClusterTextMapper.getEntryName(element, MagicFile.Type.TEXT);
+	}
+	
+	public static String getEntryName(ModelElement_1_0 ancestor, MagicFile.Type fileType) {
+    	final StringBuilder entryName = new StringBuilder();
+    	if(ancestor != null) try {
+    		entryName.append(ancestor.getModel().toJavaPackageName(ancestor, null).replace('.', '/')).append('/');
+		} catch (ServiceException exception) {
+			throw new RuntimeServiceException(exception);
+    	}
+    	entryName.append(MagicFile.PACKAGE_CLUSTER.getFileName(fileType));
+    	return entryName.toString();
 	}
 	
 }

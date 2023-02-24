@@ -63,7 +63,7 @@ public enum MagicFile {
 	/**
 	 * Package Group Files
 	 */
-	PACKAGE_GROUP("catch", "html", "svg", "gvs"),
+	PACKAGE_CLUSTER("catch", "html", "svg", "gv"),
 	
 	/**
 	 * The table of content
