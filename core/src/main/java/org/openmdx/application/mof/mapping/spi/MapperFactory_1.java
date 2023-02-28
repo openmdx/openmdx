@@ -112,7 +112,7 @@ public class MapperFactory_1 implements Iterable<Mapper_1_0> {
             return new org.openmdx.application.mof.mapping.xmi.XMIMapper_1();
         } else if (MappingTypes.MOF1.equals(format)) {
             return new org.openmdx.application.mof.mapping.java.mof.ModelNameConstantsMapper(markdown);
-        } else if (MappingTypes.PIMDOC.equals(format)) {
+        } else if (MappingTypes.PIMDOC.equals(parser.getId())) {
           return parser.getArguments().length == 0 ? new org.openmdx.application.mof.mapping.pimdoc.PIMDocMapper(
         	  markdown
           ) : new org.openmdx.application.mof.mapping.pimdoc.PIMDocMapper(

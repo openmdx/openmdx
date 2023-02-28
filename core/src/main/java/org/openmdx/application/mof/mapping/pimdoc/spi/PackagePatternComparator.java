@@ -123,20 +123,4 @@ public class PackagePatternComparator implements Comparator<String> {
 		return namespacePlusColon + WILDCARD;
 	}
 	
-	/**
-	 * Retrieve the qualified name of the ancestor
-	 * 
-	 * @param wildcardPattern a wildcard pattern
-	 * 
-	 * @return the qualified package name of the ancestor
-	 */
-	public static String getAncestor(String wildcardPattern) {
-		if(!isWildcardPattern(wildcardPattern)) {
-			throw new IllegalArgumentException("Not a wildcard pattern: " + wildcardPattern);
-		}
-		final String namespace = removeWildcard(wildcardPattern);
-		final String colonPlusPackageName = namespace.substring(namespace.lastIndexOf(':'));
-		return namespace + colonPlusPackageName;
-	}	
-
 }

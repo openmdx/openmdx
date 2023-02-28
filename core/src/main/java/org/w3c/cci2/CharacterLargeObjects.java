@@ -44,6 +44,7 @@
  */
 package org.w3c.cci2;
 
+import java.io.ByteArrayOutputStream;
 import java.io.CharArrayReader;
 import java.io.CharArrayWriter;
 import java.io.EOFException;
@@ -54,12 +55,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.io.Writer;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Object Relational Mapping
@@ -223,6 +226,23 @@ public class CharacterLargeObjects {
         return count;
     }
 
+    /**
+     * The given character data will be UTF-8 encoded
+     * 
+     * @param from the data to be written to the sink
+     * 
+     * @throws IOException if UTF-8 conversion fails
+     */
+    public static ByteArrayOutputStream createByteArrayOutputStream(
+    	CharSequence from
+    ) throws IOException {
+    	final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    	try(Writer writer = new OutputStreamWriter(buffer, StandardCharsets.UTF_8)){
+    		writer.append(from);
+    	}
+    	return buffer;
+    }
+        
     
     //------------------------------------------------------------------------
     // Class StringLargeObject
@@ -627,5 +647,5 @@ public class CharacterLargeObjects {
         }
 
     }
-    
- }
+
+}

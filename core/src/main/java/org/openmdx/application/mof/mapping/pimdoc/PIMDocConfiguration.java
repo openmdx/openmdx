@@ -44,7 +44,10 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
@@ -56,11 +59,11 @@ import java.util.function.Function;
 
 import org.openmdx.application.mof.mapping.pimdoc.spi.PackagePatternComparator;
 import org.openmdx.application.mof.mapping.spi.MarkdownRendererFactory;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.spi.GraphvizStyleSheet;
+import org.openmdx.base.mof.image.GraphvizStyle;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Factory;
-import org.openmdx.kernel.loading.Resources;
 
 
 /**
@@ -71,35 +74,82 @@ public class PIMDocConfiguration {
 	/**
 	 * Constructor
 	 * 
-	 * @param url the (maybe {@code null}) PIMDoc configuration property file URL
+	 * @param configurationDir the (maybe {@code null}) PIMDoc configuration base directory
 	 * 
 	 * @throws ServiceException if the configuration can't be loaded from the specified property file
 	 */
 	PIMDocConfiguration(
-		String url
+		String baseDir
 	) throws ServiceException {
-		if(url != null) try {
-			properties.load(new URL(url).openStream());
+		if(baseDir == null)  {
+			this.configurationDir = null;
+			this.graphvizStyleSheet = new GraphvizStyle();
+		} else try {
+			this.configurationDir = new File(baseDir);
+			final File configurationFile = new File(this.configurationDir, CONFIGURATION_FILE);
+			if(configurationFile.exists()) {
+				properties.load(new FileInputStream(configurationFile));
+			}
+			this.graphvizStyleSheet = new GraphvizStyle(getSource(MagicFile.STYLE_SHEET, MagicFile.Type.IMAGE));
 		} catch (IOException exception) {
 			throw new ServiceException(
 				exception,
 				BasicException.Code.DEFAULT_DOMAIN,
 				BasicException.Code.BAD_PARAMETER,
-				"Unable to load UML documentation configuration",
-				new BasicException.Parameter("url", url)
+				"Unable to load 'pimdoc-configuration.properties'",
+				new BasicException.Parameter("pimdoc-configuration-directory", baseDir),
+				new BasicException.Parameter("pimdoc-configuration-file", CONFIGURATION_FILE)
 			);
 		}
-		this.imageStyleSheet = new GraphvizStyleSheet(getActualFile(MagicFile.STYLE, MagicFile.Type.IMAGE));
 	}
 
-	static final String TABLE_OF_CONTENT_ENTRIES = "table-of-content-entries";
+	/**
+	 * The PIMDoc configuration file has to be located in the (configurable) PIMDoc
+	 * configuration directory and must be named {@code pimdoc-configuration.properties}.
+	 */
+	private final static String CONFIGURATION_FILE = "pimdoc-configuration.properties";
 	
+	/**
+	 * The table of contents defaults to all non-empty packages followed by {@code "**"}.
+	 */
+	private final static String TABLE_OF_CONTENT = "table-of-content";
+	
+	/**
+	 * The title defaults to {@code "openMDX PIM Documentation"}
+	 * 
+	 * @see #DEFAULT_TITLE
+	 */
+	private final static String TITLE = "title";
+	
+	/**
+	 * The default title for the  PIM documentation
+	 */
+	private static final String DEFAULT_TITLE = "openMDX PIM Documentation";
+
+	/**
+	 * The logo defaults to openMDX logo
+	 */
+	private final static String LOGO = "logo";
+	
+	/**
+	 * The link target for markdown URLs defaults to {@code "_top"}
+	 * 
+	 * @see #DEFAULT_LINK_TARGET
+	 */
+	private final static String LINK_TARGET = "link-target";
+
+	/**
+	 * The default link target for markdown URLs
+	 */
+	private final static String DEFAULT_LINK_TARGET = "_top";
+	
+	private final File configurationDir;
 	private final Properties properties = new Properties();
-	private final GraphvizStyleSheet imageStyleSheet;
+	private final GraphvizStyle graphvizStyleSheet;
 	
 	public Collection<String> getTableOfContentEntries(){
-		return getProperty(TABLE_OF_CONTENT_ENTRIES)
-			.map(PIMDocConfiguration::toTableOfContentEntries)
+		return getProperty(TABLE_OF_CONTENT)
+			.map(PIMDocConfiguration::toTableOfContents)
 			.orElse(Collections.emptyList());
 	}
 	
@@ -108,30 +158,64 @@ public class PIMDocConfiguration {
 	}
 	
 	private String getLinkTarget() {
-		return getProperty("link-target").orElse("_top");
+		return getProperty(LINK_TARGET).orElse(DEFAULT_LINK_TARGET);
 	}
 	
 	public String getTitle(){
-		return getProperty("custom-title").orElse("openMDX PIM Documentation");
+		return getProperty(TITLE).orElse(DEFAULT_TITLE);
 	}
 
-	public GraphvizStyleSheet getImageStyleSheet() {
-		return imageStyleSheet;
+	public GraphvizStyle getGraphvizStyleSheet() {
+		return graphvizStyleSheet;
+	}
+	
+	public Optional<File> getGraphvizTemplateDirectory() {
+		return Optional.of(this.configurationDir);
 	}
 
-	URL getActualFile(MagicFile magicFile, MagicFile.Type type) {
-		return getProperty(magicFile.getPropertyName(type))
-			.map(Resources::fromURI)
-			.orElseGet(() -> magicFile.getDefault(type));
+	URL getSource(MagicFile magicFile, MagicFile.Type type) {
+		final File file = getSourceFile(magicFile, type);
+		if(file == null) {
+			return magicFile.getDefault(type);
+		} else try {
+			return file.toURI().toURL();
+		} catch (MalformedURLException e) {
+			throw new RuntimeServiceException(e);
+		}
+	}
+
+	private File getSourceFile(MagicFile magicFile, MagicFile.Type type) {
+		if(this.configurationDir != null) {
+			final File file = new File(this.configurationDir, getSourceName(magicFile, type));
+			if(file.exists()) {
+				return file;
+			}
+		}
+		return null;
+	}
+
+	private String getSourceName(MagicFile magicFile, MagicFile.Type type) {
+		if(magicFile == MagicFile.WELCOME_PAGE && type == MagicFile.Type.IMAGE) {
+			 final Optional<String> logo = getProperty(LOGO);
+			 if(logo.isPresent()) {
+				 return logo.get();
+			 }
+		}
+		return magicFile.getFileName(type);
+	}
+
+	public String getTargetName(MagicFile magicFile, MagicFile.Type type) {
+		final String sourceName = getSourceName(magicFile, type);
+		return sourceName.substring(sourceName.lastIndexOf('/') + 1);
 	}
 	
 	private Optional<String> getProperty(String propertyName){
 		return Optional.ofNullable(this.properties.getProperty(propertyName));
 	}
 	
-	private static Collection<String> toTableOfContentEntries(String entries){
+	private static Collection<String> toTableOfContents(String entries){
 		final Set<String> tableOfContentEntries = new HashSet<>();
-		for(String entry : entries.split("::")) {
+		for(String entry : entries.split(",")) {
 			if(!PackagePatternComparator.isWildcardPattern(entry)) {
 				entry = entry + "::" + entry.substring(entry.lastIndexOf(':') + 1);
 			}

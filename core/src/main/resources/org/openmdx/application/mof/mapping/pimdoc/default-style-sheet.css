@@ -71,14 +71,14 @@
 .navigation-column {
 	width: 25%;
 }
-.element-column {
+.frame-column {
 	width: 75%;
     position: relative;
     padding-bottom: 82vh;
     height: 0;
     overflow: hidden;
 }
-.element-column iframe {
+.frame-column iframe {
     border: none;
     position: absolute;
     top: .6em;
@@ -130,6 +130,9 @@ body {
 	margin-top: 0.1em;
 	margin-bottom: 0.1em;
 }
+.uml-symbol {
+	height: 1em
+} 
 
 /** 
  * Detail Style

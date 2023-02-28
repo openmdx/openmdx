@@ -44,62 +44,48 @@
  */
 package org.openmdx.base.io;
 
-import java.io.OutputStream;
-import java.util.function.Consumer;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URI;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Zip Sink
  */
-public class ZipSink implements Sink {
+public class ZipSink extends AbstractSink {
 
 	public ZipSink(
 		ZipOutputStream zip
-	) {
-		this(zip, "");
+	){
+		this.zip = zip;
 	}
 
 	private ZipSink(
-		ZipOutputStream zip,
-		String prefix
+		ZipSink parent,
+		String baseName
 	) {
-		this.zip = zip;
-		this.prefix = prefix;
+		super(parent, baseName);
+		this.zip = parent.zip;
 	}
 	
 	private final ZipOutputStream zip;
-	private final String prefix;
 	
 	@Override
-	public void accept(String name, long length, Consumer<OutputStream> streamer) {
-		final String entryName = newName(name);
-		try {
-			final ZipEntry entry = new ZipEntry(entryName);
-			entry.setSize(length);
-			zip.putNextEntry(entry);
-			streamer.accept(zip);
-		} catch (Exception exception) {
-			throw new RuntimeServiceException(
-				exception,
-				BasicException.Code.DEFAULT_DOMAIN,
-				BasicException.Code.MEDIA_ACCESS_FAILURE,
-				"Unable to add entry to zip file",
-				new BasicException.Parameter("entry-name", entryName)
-			);
-		}
+	public void accept(String name, String title, ByteArrayOutputStream data) throws IOException {
+		final URI entryURI = path().resolve(name);
+		final String entryName = entryURI.getPath().substring(1);
+		final ZipEntry entry = new ZipEntry(entryName);
+		final int size = data.size();
+		entry.setSize(size);
+		zip.putNextEntry(entry);
+		data.writeTo(zip);
+		accept(entryURI, title);
 	}
 
-	private String newName(String suffix) {
-		return this.prefix + '/' + suffix;
-	}
-	
 	@Override
-	public Sink nested(String suffix) {
-		return new ZipSink(this.zip, newName(suffix));
+	public Sink nested(String baseName) {
+		return new ZipSink(this, baseName);
 	}
 
 }

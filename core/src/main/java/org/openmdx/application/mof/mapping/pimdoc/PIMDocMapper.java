@@ -44,6 +44,8 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.zip.ZipOutputStream;
 
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
@@ -76,12 +78,12 @@ public class PIMDocMapper implements Mapper_1_0 {
      * Public Constructor
      * 
      * @param markdown {@code true} if annotations use markdown
-     * @param configurationURL the PIMDoc Configuration Properties URL
+     * @param configurationDirectory the PIMDoc Configuration Directory
      * 
      * @throws ServiceException
      */
-    public PIMDocMapper(boolean markdown, String configurationURL) throws ServiceException {
-    	this(markdown, new PIMDocConfiguration(configurationURL));
+    public PIMDocMapper(boolean markdown, String configurationDirectory) throws ServiceException {
+    	this(markdown, new PIMDocConfiguration(configurationDirectory));
 	}
 
     /**
@@ -101,7 +103,11 @@ public class PIMDocMapper implements Mapper_1_0 {
     
     private final boolean markdown;
     private final PIMDocConfiguration configuration;
-    private static final String EXPORT_ALL = "%";
+    
+    /**
+     * We may support both representations as they are not propagated for further processing anyway.
+     */
+    private static final List<String> EXPORT_ALL = Arrays.asList("%", "%:%"); 
 
     @Override
 	public void externalize(
@@ -115,7 +121,7 @@ public class PIMDocMapper implements Mapper_1_0 {
     }
 
 	private void validateArguments(final String qualifiedPackageName) throws ServiceException {
-		if(!EXPORT_ALL.equals(qualifiedPackageName)) {
+		if(!EXPORT_ALL.contains(qualifiedPackageName)) {
     		throw new ServiceException(
     			BasicException.Code.DEFAULT_DOMAIN,
     			BasicException.Code.BAD_PARAMETER,

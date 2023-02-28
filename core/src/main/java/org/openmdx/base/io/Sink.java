@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: A Binary Sink
+ * Description: A Sink
  * Owner:       the original authors.
  * ====================================================================
  * 
@@ -44,16 +44,24 @@
  */
 package org.openmdx.base.io;
 
-import java.io.OutputStream;
-import java.util.function.Consumer;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Map;
 
 /**
- * A Binary Sink
+ * A Sink
  */
 public interface Sink {
 
-    void accept(String name, long length, Consumer<OutputStream> streamer);
+    void accept(String name, String title, ByteArrayOutputStream data) throws IOException;
     
     Sink nested(String name);
 
+	URI path();
+
+	URI relativize(URI uri);
+
+	Map<URI, String> getTableOfContent();
+	
 }

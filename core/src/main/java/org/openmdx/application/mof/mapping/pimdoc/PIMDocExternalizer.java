@@ -44,20 +44,29 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc;
 
-import org.openmdx.application.mof.mapping.pimdoc.image.ClusterImageMapper;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.openmdx.application.mof.mapping.pimdoc.image.ClusterDiagramMapper;
 import org.openmdx.application.mof.mapping.pimdoc.spi.Archiving;
 import org.openmdx.application.mof.mapping.pimdoc.spi.NamespaceFilter;
-import org.openmdx.application.mof.mapping.pimdoc.spi.PackagePatternComparator;
 import org.openmdx.application.mof.mapping.pimdoc.text.ClassMapper;
+import org.openmdx.application.mof.mapping.pimdoc.text.ImageFrameMapper;
 import org.openmdx.application.mof.mapping.pimdoc.text.IndexMapper;
-import org.openmdx.application.mof.mapping.pimdoc.text.ClusterTextMapper;
 import org.openmdx.application.mof.mapping.pimdoc.text.PackageMapper;
 import org.openmdx.application.mof.mapping.pimdoc.text.StructureMapper;
 import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.image.GraphvizTemplates;
+import org.openmdx.base.mof.spi.PIMDocFileType;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.BinaryLargeObjects;
 
 /**
  * This class externalizes the PIM documentation 
@@ -66,7 +75,7 @@ class PIMDocExternalizer {
 
     PIMDocExternalizer(
     	Model_1_0 model,
-		Sink sink,
+    	Sink sink,
 		boolean markdown, 
 		PIMDocConfiguration configuration
     ){
@@ -95,10 +104,12 @@ class PIMDocExternalizer {
 
 	public void externalize() {
         try {
+        	exportDiagrams();
 	        exportResources();
         	exportIndexFile();
         	exportNamespaces();
-        	exportPackageGroups();
+        	exportAllPackageCluster();
+        	exportImageFrames();
         } catch(Exception exception) {
 			throw new RuntimeServiceException(
 				exception,
@@ -109,15 +120,19 @@ class PIMDocExternalizer {
         }    
 	}
 
-	private void exportPackageGroups() {
-		configuration
-			.getTableOfContentEntries()
-			.stream()
-			.map(PackagePatternComparator::getAncestor)
-			.map(model::findElement)
-			.forEach(this::exportPackageCluster);
+	private void exportDiagrams() {
+		configuration.getGraphvizTemplateDirectory().ifPresent(this::drawDiagrams);
 	}
-
+	
+	private void drawDiagrams(File sourceDir) {
+		try {
+			final GraphvizTemplates graphvizDiagrams = new GraphvizTemplates(model, configuration.getGraphvizStyleSheet(), sink);
+			graphvizDiagrams.drawDiagrams(sourceDir);
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
+	}
+	
 	private void exportNamespaces() {
 		this.model
 			.getContent()
@@ -132,6 +147,7 @@ class PIMDocExternalizer {
 		exportPackageFile(namespace);
 		exportClassFiles(namespace);
 		exportStructureFiles(namespace);
+		exportPackageCluster(namespace);
 	}
 
 	private void exportStructureFiles(final ModelElement_1_0 namespace) {
@@ -153,37 +169,69 @@ class PIMDocExternalizer {
 			.filter(ModelElement_1_0::isClassType)
 			.forEach(this::exportClassFile);
 	}		
-	
+
 	/**
-	 * Export the (configurable) magic files.
+	 * This must be called after the package cluster export
 	 * 
-	 * @see MagicFile#CUSTOM
-	 * @see MagicFile#STYLE
+	 * @see #exportNamespaces()
+	 * @see #exportPackageCluster(ModelElement_1_0)
+	 * @see #exportAllPackageCluster()
 	 */
-	private void exportResources(){
-		addResources(MagicFile.STYLE);
-		addResources(MagicFile.CUSTOM);
+	private void exportImageFrames() {
+		getGraphvizSourceEntries().forEach(this::exportImageFrame);
 	}
 
 	/**
-	 * Export the (configurable) magic files.
-	 * @param buffer TODO
+	 * The entries must be copied into a new Map as adding image 
+	 * frames will modify the table of content.
 	 * 
-	 * @see MagicFile.Type#TEXT
-	 * @see MagicFile.Type#IMAGE
+	 * @return a Map containing the Graphviz source entries
 	 */
-	private void addResources(MagicFile magicFile){
-		addResource(magicFile, MagicFile.Type.TEXT);
-		addResource(magicFile, MagicFile.Type.IMAGE);
+	private Map<URI, String> getGraphvizSourceEntries() {
+		final Map<URI, String> dotFiles = new HashMap<>();
+		for(Map.Entry<URI, String> e : sink.getTableOfContent().entrySet()) {
+			if(PIMDocFileType.GRAPHVIZ_SOURCE.test(e.getKey().getPath())) {
+				dotFiles.put(e.getKey(), e.getValue());
+			}
+		}
+		return dotFiles;
 	}
 	
 	/**
+	 * Export the (configurable) magic files.
+	 * 
+	 * @see MagicFile#WELCOME_PAGE
+	 * @see MagicFile#STYLE_SHEET
+	 * @see MagicFile#UML_SYMBOL
+	 */
+	private void exportResources(){
+		addResource(MagicFile.STYLE_SHEET, MagicFile.Type.TEXT);
+		addResource(MagicFile.STYLE_SHEET, MagicFile.Type.IMAGE);
+		addResource(MagicFile.WELCOME_PAGE, MagicFile.Type.TEXT);
+		addResource(MagicFile.WELCOME_PAGE, MagicFile.Type.IMAGE);
+		addResource(MagicFile.UML_SYMBOL, MagicFile.Type.IMAGE);
+	}
+
+	/**
 	 * Export the (configurable) magic file.
-	 * @param buffer TODO
 	 */
 	private void addResource(MagicFile magicFile, MagicFile.Type type) {
-		final MagicResource resource = newResource(magicFile, type);
-		resource.copyTo(sink);
+		try {
+			sink.accept(
+				configuration.getTargetName(magicFile, type), 
+				magicFile.name() + " (" + type.name() + ")",
+				BinaryLargeObjects.createByteArrayOutputStream(configuration.getSource(magicFile, type))
+			);
+		} catch (IOException exception) {
+			throw new RuntimeServiceException(
+				exception,
+				BasicException.Code.DEFAULT_DOMAIN,
+				BasicException.Code.PROCESSING_FAILURE,
+				"Unable to add resource",
+				new BasicException.Parameter("magic-file", magicFile),
+				new BasicException.Parameter("magic-file-type", type)
+			);
+		}
 	}
 
 	private void exportIndexFile() {
@@ -210,18 +258,24 @@ class PIMDocExternalizer {
 		}
 	}
 
-	private void exportPackageCluster(ModelElement_1_0 ancestor){
-		try (Archiving mapper = new ClusterTextMapper(sink, ancestor, markdown, configuration)){
+	private void exportAllPackageCluster(){
+		try (Archiving mapper = new ClusterDiagramMapper(sink, model, markdown, configuration)){
 			mapper.createArchiveEntry();
 		}
-		try (Archiving mapper = new ClusterImageMapper(sink, ancestor, markdown, configuration)){
+	}
+	
+	private void exportPackageCluster(ModelElement_1_0 ancestor){
+		try (Archiving mapper = new ClusterDiagramMapper(sink, ancestor, markdown, configuration)){
 			mapper.createArchiveEntry();
 		}
 	}
 
-
-	MagicResource newResource(MagicFile magicFile, MagicFile.Type type) {
-		return new MagicResource(configuration.getActualFile(magicFile, type), magicFile.getFileName(type));
+	private void exportImageFrame(URI name, String title){
+		if(PIMDocFileType.GRAPHVIZ_SOURCE.test(name.getPath())) {
+			try (Archiving mapper = new ImageFrameMapper(sink, model, name, title, markdown, configuration)){
+				mapper.createArchiveEntry();
+			}
+		}
 	}
 
 }

@@ -1,6 +1,6 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: Meta Data Provider
  * Owner:       the original authors.
  * ====================================================================
@@ -42,7 +42,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.application.mof.mapping.java;
 
 import java.io.File;

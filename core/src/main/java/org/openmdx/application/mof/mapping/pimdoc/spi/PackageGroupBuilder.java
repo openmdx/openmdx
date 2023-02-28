@@ -87,7 +87,11 @@ public class PackageGroupBuilder extends TreeMap<String,SortedSet<String>> {
 	}
 
 	private String getPackageId(String qualifiedName) {
-		return qualifiedName.substring(0, qualifiedName.lastIndexOf(':'));
+		final int end = qualifiedName.lastIndexOf(':');
+		if(end < 0) {
+			System.out.println("Wait a moment");
+		}
+		return qualifiedName.substring(0, end);
 	}
 	
 	public void normalize() {

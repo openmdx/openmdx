@@ -1,0 +1,21 @@
+digraph "Diagram Main [Package org::openmdx::role2]" {
+
+	${ATTRIBUTE_STATEMENTS}
+	
+	{
+		${LAYER[layer=0]}
+		${CLASS[name=org:openmdx:role2:RoleCapable]}
+		${CLASS[name=org:openmdx:base:AspectCapable]}
+	}
+	
+	{
+		${LAYER[layer=1]}
+		${CLASS[name=org:openmdx:role2:Role]}
+		${CLASS[name=org:openmdx:base:Aspect]}
+	}
+
+	${LAYERS}
+	${ASSOCIATION[name=*]}
+	${INSTANCE_OF}
+
+}

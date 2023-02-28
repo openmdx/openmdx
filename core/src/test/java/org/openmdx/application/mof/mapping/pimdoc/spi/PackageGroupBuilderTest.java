@@ -48,6 +48,8 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.spi.Model_1Factory;
 
 /**
  * Package Group Builder Test
@@ -147,7 +149,7 @@ class PackageGroupBuilderTest {
 	}
 
 	@Test
-	void when_default_then_catchAll() {
+	void when_catchAll_then_anyMatch() {
 		//
 		// Arrange
 		//
@@ -161,7 +163,34 @@ class PackageGroupBuilderTest {
 		//
 		// Assert
 		//
-		Assertions.assertEquals(Collections.singletonMap(PackagePatternComparator.getCatchAllPattern(),Collections.singleton("com:example:AnyClass")), testee);
+		Assertions.assertEquals(
+			Collections.singletonMap(PackagePatternComparator.getCatchAllPattern(), Collections.singleton("com:example:AnyClass")), 
+			testee
+		);
+	}
+
+	@Test
+	void when_default_then_allMatch() {
+		//
+		// Arrange
+		//
+		final PackageGroupBuilder testee = new PackageGroupBuilder();
+		// 
+		// Act		
+		//
+		testee.addKey(PackagePatternComparator.getCatchAllPattern());
+		Model_1Factory
+			.getModel()
+			.getContent()
+			.stream()
+			.filter(ModelElement_1_0::isPackageType)
+			.map(ModelElement_1_0::getQualifiedName)
+			.forEach(testee::addKey);
+		//
+		// Assert
+		//
+		Assertions.assertTrue(testee.size() > 1);
+		Assertions.assertTrue(testee.lastKey().contains(PackagePatternComparator.getCatchAllPattern()));
 	}
 	
 }

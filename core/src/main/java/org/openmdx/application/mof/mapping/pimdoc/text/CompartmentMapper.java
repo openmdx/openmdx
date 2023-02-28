@@ -74,7 +74,8 @@ abstract class CompartmentMapper extends MapperTemplate {
 		boolean inherit,
 		PrintWriter pw, 
 		ModelElement_1_0 element, 
-		Function<String, String> annotationRenderer, String... columnTitles
+		Function<String, String> annotationRenderer, 
+		String... columnTitles
 	) {
 		super(pw, element.getModel(), annotationRenderer);
 		this.compartmentId = compartmentId;

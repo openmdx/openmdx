@@ -195,22 +195,6 @@ class PackagePatternComparatorTest {
 	}
 
 	@Test
-	void when_wildcardPattern_then_qualifiedPackageName() {
-		//
-		// Arrange
-		//
-		final String wildcardPattern = "com:example:**";
-		// 
-		// Act		
-		//
-		final String transformed = PackagePatternComparator.getAncestor(wildcardPattern);
-		//
-		// Assert
-		//
-		Assertions.assertEquals("com:example:example", transformed);
-	}
-	
-	@Test
 	void when_qualifiedPackageName_then_wildcardPattern() {
 		//
 		// Arrange

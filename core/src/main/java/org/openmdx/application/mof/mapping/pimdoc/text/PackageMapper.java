@@ -44,30 +44,42 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc.text;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.spi.PIMDocFileType;
 
 /**
  * Package Mapper 
  */
 public class PackageMapper extends ElementMapper {
 
-    /**
+	/**
      * Constructor 
      */
     public PackageMapper(
     	Sink sink, 
         ModelElement_1_0 packageToBeExported,
-        boolean markdown, PIMDocConfiguration configuration
+        boolean markdown, 
+        PIMDocConfiguration configuration
     ){
 		super("Package", sink, packageToBeExported, markdown, configuration);
 		this.classesMapper = new ClassesMapper(pw, this.element, annotationRenderer);
 		this.dataTypesMapper = new DataTypesMapper(pw, this.element, annotationRenderer);
+		this.albumMapper = new AlbumMapper(pw, this.element, annotationRenderer, getAlbum());
     }    
 
 	private final CompartmentMapper classesMapper;
 	private final CompartmentMapper dataTypesMapper;
+	private final CompartmentMapper albumMapper;
     
 	@Override
 	protected  void columnBody() {
@@ -75,7 +87,28 @@ public class PackageMapper extends ElementMapper {
 		mapAnnotation("\t\t", element);
 		classesMapper.compartment(true);
 		dataTypesMapper.compartment(true);
+		albumMapper.compartment(true);
 		printLine("\t</div>");
+	}
+	
+	private SortedMap<String,String> getAlbum()  {
+		final URI directory = getPackage();
+		final SortedMap<String,String> album = new TreeMap<>();
+		for(Map.Entry<URI,String> e : sink.getTableOfContent().entrySet()) {
+			final String p = directory.relativize(e.getKey()).getPath();
+			if(PIMDocFileType.GRAPHVIZ_SOURCE.test(p) && p.indexOf('/') < 0) {
+				album.put(p, e.getValue());
+			}
+		}
+		return album;
+	}
+	
+	private URI getPackage() {
+		try {
+			return new URI('/' + element.getModel().toJavaPackageName(element, null).replace('.', '/') + '/');
+		} catch (URISyntaxException | ServiceException exception) {
+			throw new RuntimeServiceException(exception);
+		}
 	}
 	
 }

@@ -100,4 +100,8 @@ public abstract class MapperTemplate {
 		this.pw.println();
 	}
 
+	protected void flush() {
+		this.pw.flush();
+	}
+
 }

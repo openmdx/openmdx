@@ -46,7 +46,6 @@ package org.openmdx.application.mof.mapping.pimdoc.spi;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
@@ -56,7 +55,6 @@ import org.openmdx.application.mof.mapping.spi.MapperTemplate;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Abstract Mapper
@@ -89,30 +87,19 @@ public abstract class AbstractMapper extends MapperTemplate implements Archiving
 		this(sink, model, markdown, configuration, new ByteArrayOutputStream());
 	}
 
-	private final Sink sink;
+	protected final Sink sink;
 	protected final PIMDocConfiguration configuration;
 	private final ByteArrayOutputStream buffer;
 	
 	@Override
 	public void close() throws RuntimeServiceException {
-		sink.accept(getEntryName(), buffer.size(), this::writeToSink);
-	}
-
-    private void writeToSink(OutputStream stream) {
-    	try {
-    		this.pw.flush();
-			this.buffer.writeTo(stream);
-			this.buffer.close();
+		try {
+			flush();
+			sink.accept(getEntryName(), getTitle(), buffer);
 		} catch (IOException exception) {
-			throw new RuntimeServiceException(
-				exception,
-				BasicException.Code.DEFAULT_DOMAIN,
-				BasicException.Code.MEDIA_ACCESS_FAILURE,
-				"Unable to propagate the data",
-				new BasicException.Parameter("entry-name", getEntryName())
-			);
+			throw new RuntimeServiceException(exception);
 		}
-    }
+	}
 
 	public static String getBaseURL(final String qualifiedName) {
 		final StringBuilder baseDir = new StringBuilder();
@@ -123,5 +110,6 @@ public abstract class AbstractMapper extends MapperTemplate implements Archiving
 	}
 	
     protected abstract String getEntryName();
+    protected abstract String getTitle();
     
 }

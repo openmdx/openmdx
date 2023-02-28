@@ -53,22 +53,27 @@ public enum MagicFile {
 	/**
 	 * Logo & Welcome Page
 	 */
-	CUSTOM("custom", "html", "png", null),
+	WELCOME_PAGE("welcome-page", "html", "png", null),
 
 	/**
 	 * PIMDoc style sheets
 	 */
-	STYLE("style-sheet", "css", "gvs", null),
+	STYLE_SHEET("style-sheet", "css", "dots", null),
 
 	/**
 	 * Package Group Files
 	 */
-	PACKAGE_CLUSTER("catch", "html", "svg", "gv"),
+	PACKAGE_CLUSTER("+package-cluster", "html", "svg", "dot"),
 	
 	/**
 	 * The table of content
 	 */
-	TABLE_OF_CONTENT("index", "html", null, null);
+	TABLE_OF_CONTENT("index", "html", null, null),
+	
+	/**
+	 * The table of content
+	 */	
+	UML_SYMBOL("uml-symbol", null, "svg", null);
 		
 	private MagicFile(
 		String baseName,
@@ -91,10 +96,6 @@ public enum MagicFile {
 	
 	public String getFileName(Type type) {
 		return this.fileName.get(type);
-	}
-	
-	public String getPropertyName(Type type) {
-		return type.name().toLowerCase() + "-" + this.name().toLowerCase() + "-url";
 	}
 	
 	public URL getDefault(Type type) {

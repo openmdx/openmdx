@@ -44,19 +44,19 @@
  */
 package org.openmdx.base.io;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.function.Consumer;
 
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 
 /**
  * File Sink
  */
-public class FileSink implements Sink {
+public class FileSink extends AbstractSink {
 
 	public FileSink(
 		File directory
@@ -64,48 +64,32 @@ public class FileSink implements Sink {
 		this.directory = directory;
 	}
 
+	private FileSink(
+		FileSink parent,	
+		String baseName
+	) {
+		super(parent, baseName);
+		this.directory = new File(parent.directory, baseName);
+	}
+	
 	private final File directory;
 	
 	@Override
-	public void accept(String name, long length, Consumer<OutputStream> streamer) {
-		final File file = getFile(name);
-		try (OutputStream stream = getStream(file)) {
-			streamer.accept(stream);
-		} catch (IOException exception) {
-			throw new RuntimeServiceException(
-				exception,
-				BasicException.Code.DEFAULT_DOMAIN,
-				BasicException.Code.MEDIA_ACCESS_FAILURE,
-				"Unable to create file",
-				new BasicException.Parameter("file", file)
-			);
+	public void accept(String name, String title, ByteArrayOutputStream data) throws IOException {
+		final File file = new File(getDirectory(), name);
+		try (OutputStream stream = new FileOutputStream(file)) {
+			data.writeTo(stream);
 		}
+		accept(path().resolve(name), title);
 	}
 
-	private OutputStream getStream(File file) {
-		try {
-			return new FileOutputStream(file);
-		} catch (Exception ioException) {
-			throw new RuntimeServiceException(
-				ioException,
-				BasicException.Code.DEFAULT_DOMAIN,
-				BasicException.Code.CREATION_FAILURE,
-				"Unable to create file",
-				new BasicException.Parameter("file", file)
-			);
-		}
-	}
-	
-	private File getFile(String name) {
-		return new File(getDirectory(), name);
-	}
-
-	private File getDirectory() {
+	private File getDirectory() throws IOException {
 		if(!this.directory.exists() && !this.directory.mkdirs() && !this.directory.exists()){
-			throw new RuntimeServiceException(
+			throw Throwables.initCause(
+				new IOException("Unable to create directory"),
+				null,
 				BasicException.Code.DEFAULT_DOMAIN,
 				BasicException.Code.CREATION_FAILURE,
-				"Unable to create directory",
 				new BasicException.Parameter("directory", directory)
 			);
 		}
@@ -113,8 +97,8 @@ public class FileSink implements Sink {
 	}
 	
 	@Override
-	public Sink nested(String base) {
-		return new FileSink(new File(this.directory, base));
+	public Sink nested(String baseName) {
+		return new FileSink(this, baseName);
 	}
-
+	
 }

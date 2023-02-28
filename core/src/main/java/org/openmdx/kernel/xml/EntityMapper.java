@@ -133,16 +133,16 @@ public class EntityMapper implements EntityResolver {
     	);
     }
 
-    private Optional<InputSource> resolvePublicId(String systemId){
-    	return Optional.ofNullable(systemId)
-    		.map(systemIdMappings::get)
+    private Optional<InputSource> resolvePublicId(String publicId){
+    	return Optional.ofNullable(publicId)
+	   		.map(publicIdMappings::get)
     		.map(EntityMapper::openStreamFromURI)
     		.map(InputSource::new);
     }
 
     private InputSource resolveSystemId(String publicId){
     	return Optional.ofNullable(publicId)
-    		.map(publicIdMappings::get)
+    		.map(systemIdMappings::get)
     		.map(EntityMapper::openStreamFromURI)
     		.map(InputSource::new)
     		.orElse(null);

@@ -228,6 +228,23 @@ public class BinaryLargeObjects {
         return count;
     }
 
+	/**
+	 * Create a pre-filled binary sinkable from a given resource
+	 * 
+	 * @param from resource location to retrieve the content
+	 * 
+	 * @return a pre-filled binary ssink
+	 * 
+	 * @throws IOException
+	 */
+	public static ByteArrayOutputStream createByteArrayOutputStream(URL from) throws IOException {
+		final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		try(InputStream s = from.openStream()){
+			streamCopy(s, 0, buffer);
+		}
+		return buffer;
+	}
+       
     
     //------------------------------------------------------------------------
     // Class ArrayLargeObject
@@ -600,5 +617,5 @@ public class BinaryLargeObjects {
         }
 
     }
-       
+
 }

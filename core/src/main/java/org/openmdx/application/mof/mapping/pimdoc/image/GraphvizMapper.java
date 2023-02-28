@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Description: HTML Mapper 
+ * Description: Graphviz Mapper 
  * Owner: the original authors. 
  * ====================================================================
  * 
@@ -45,20 +45,21 @@
 package org.openmdx.application.mof.mapping.pimdoc.image;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
+import org.openmdx.application.mof.mapping.pimdoc.MagicFile.Type;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
 import org.openmdx.application.mof.mapping.pimdoc.spi.AbstractMapper;
-import org.openmdx.application.mof.mapping.spi.MapperUtils;
+import org.openmdx.application.mof.mapping.pimdoc.text.AlbumMapper;
 import org.openmdx.base.Version;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.spi.PIMDocFileType;
 
 /**
  * Graphviz Mapper
@@ -110,19 +111,19 @@ abstract class GraphvizMapper extends AbstractMapper {
 	}
 
 	protected Map<String, String> getGraphStyle(){
-    	return configuration.getImageStyleSheet().getElementStyle("graph");
+    	return configuration.getGraphvizStyleSheet().getElementStyle("graph");
     }
 
     protected Map<String, String> getNodeStyle(){
-    	return configuration.getImageStyleSheet().getElementStyle("node");
+    	return configuration.getGraphvizStyleSheet().getElementStyle("node");
     }
     
     protected Map<String, String> getEdgeStyle(){
-    	return configuration.getImageStyleSheet().getElementStyle("edge");
+    	return configuration.getGraphvizStyleSheet().getElementStyle("edge");
     }
 
     protected Map<String, String> getClassStyle(String className){
-    	return configuration.getImageStyleSheet().getElementStyle(className);
+    	return configuration.getGraphvizStyleSheet().getElementStyle(className);
     }
     
     protected void fileHeader(
@@ -146,35 +147,16 @@ abstract class GraphvizMapper extends AbstractMapper {
 	 * Provide the entry name (using HTML entries)
 	 * 
 	 * @param element the model element used to derive the entry name
+	 * @param type The package cluster file type
 	 * 
 	 * @return the entry name
 	 */
-    static String getElementPath(ModelElement_1_0 element){
-    	try {
-	    	final StringBuilder entryName = new StringBuilder(
-	    		element.getModel().toJavaPackageName(element, null).replace('.', '/')
-	    	);
-			entryName.append('/').append(element.getName()).append(".html");
-	    	return entryName.toString();
-		} catch (ServiceException exception) {
-			throw new RuntimeServiceException(exception);
-    	}
-    }
-
-	/**
-	 * Provide the entry name (using HTML entries)
-	 * 
-	 * @param element the model element used to derive the entry name
-	 * 
-	 * @return the entry name
-	 */
-    static String getClusterPath(ModelElement_1_0 element){
-    	try {
-	    	final StringBuilder entryName = new StringBuilder(
-	    		element.getModel().toJavaPackageName(element, null).replace('.', '/')
-	    	);
-			entryName.append('/').append(MagicFile.PACKAGE_CLUSTER.getFileName(MagicFile.Type.TEXT));
-	    	return entryName.toString();
+    static String getClusterPath(ModelElement_1_0 element, Type type){
+		final String baseName = MagicFile.PACKAGE_CLUSTER.getFileName(type);
+		if(element == null) {
+			return baseName;
+		} else try {
+			return element.getModel().toJavaPackageName(element, null).replace('.', '/') + '/' + baseName;
 		} catch (ServiceException exception) {
 			throw new RuntimeServiceException(exception);
     	}
@@ -184,23 +166,16 @@ abstract class GraphvizMapper extends AbstractMapper {
     	return "";
     }
 
-    protected String getFileURL(
-    	MagicFile magicFile,
-    	MagicFile.Type type
-    ) {
-    	return getBaseURL() + magicFile.getFileName(type);
-    }
-
     protected String getHref(
     	ModelElement_1_0 element
     ){
     	if(element.isPackageType()){
-        	return getBaseURL() + getElementPath(element) + "#diagrams";
+        	return getBaseURL() + GraphvizMapper.getElementPath(element) + '#' + AlbumMapper.COMPARTMENT_ID;
     	} else if(element.isClassType() || element.isStructureType()){
-        	return getBaseURL() + getElementPath(element);
+        	return getBaseURL() + GraphvizMapper.getElementPath(element);
     	} else try {
     		final ModelElement_1_0 container = this.model.getElement(element.getContainer());
-        	return getBaseURL() + getElementPath(container) + "#" + element.getName();
+        	return getBaseURL() + GraphvizMapper.getElementPath(container) + "#" + element.getName();
     	} catch (ServiceException e) {
     		throw new RuntimeServiceException(e);
     	}
@@ -213,23 +188,6 @@ abstract class GraphvizMapper extends AbstractMapper {
     	return (element.isPackageType() ? qualifiedName.substring(0, qualifiedName.lastIndexOf(':')) : qualifiedName).replace(":", "::");
     }
     
-    protected void mapAnnotation(
-    	String indent, 
-    	ModelElement_1_0 element
-    ) {
-    	final String annotation  = (String)element.objGetValue("annotation");
-		if(annotation != null && !annotation.trim().isEmpty()) {
-			printLine(indent, "<div class=\"uml-comment\">");
-			final String rendered = renderAnnotation(annotation);
-			if(rendered.contains("<pre>")) {
-				print(rendered);
-			} else {
-				MapperUtils.wrapText(indent + '\t', rendered, this::printLine);
-			}
-			printLine(indent, "</div>");
-		}
-    }
-    
 	protected Stream<ModelElement_1_0> streamElements(){
 		return this.model.getContent().stream();
 	}
@@ -238,5 +196,23 @@ abstract class GraphvizMapper extends AbstractMapper {
     
     protected abstract void graphBody();
 
+	/**
+	 * Provide the entry name (using HTML entries)
+	 * 
+	 * @param element the model element used to derive the entry name
+	 * 
+	 * @return the entry name
+	 */
+	public static String getElementPath(ModelElement_1_0 element){
+		try {
+	    	final StringBuilder entryName = new StringBuilder(
+	    		element.getModel().toJavaPackageName(element, null).replace('.', '/')
+	    	);
+			entryName.append('/').append(element.getName()).append(PIMDocFileType.TEXT.extension());
+	    	return entryName.toString();
+		} catch (ServiceException exception) {
+			throw new RuntimeServiceException(exception);
+		}
+	}
     
 }

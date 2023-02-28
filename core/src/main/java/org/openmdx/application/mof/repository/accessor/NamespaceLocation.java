@@ -61,7 +61,7 @@ public class NamespaceLocation {
 	 * @return the location including a trailing '/'
 	 */
 	public static String getLocation(String namespace) {
-		return ModelHelper_1.toJavaPackageName(namespace, null).replace('.', '/') + '/';
+		return namespace.isEmpty() ? "" : (ModelHelper_1.toJavaPackageName(namespace, null).replace('.', '/') + '/');
 	}
 	
 }

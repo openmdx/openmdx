@@ -87,7 +87,7 @@ public class IndexMapper extends HTMLMapper {
 	private void pageBody() {
 		printLine("\t<div class=\"page-section page-body\">");
 		navigationColumn();
-		detailColumn();
+		frameColumn();
 		printLine("\t</div>");
 	}
 
@@ -172,7 +172,7 @@ public class IndexMapper extends HTMLMapper {
 			"\" target=\"",
 			HTMLMapper.FRAME_NAME,
 			"\">",
-			namespace.replace(":", "::"),
+			packagePattern.replace(":", "::"),
 			"</a>"
 		);
 	}
@@ -188,6 +188,23 @@ public class IndexMapper extends HTMLMapper {
 				"\">",
 				getDisplayName(packageElement),
 				"</a>"
+			);
+			printLine(
+				"\t\t\t\t\t\t\t<a href=\"",
+				getHref(packageElement),
+				"#",
+				AlbumMapper.COMPARTMENT_ID,
+				"\" target=\"",
+				HTMLMapper.FRAME_NAME,
+				"\">"
+			);
+			printLine(
+				"\t\t\t\t\t\t\t\t<img alt=\"UML\" class=\"uml-symbol\" src=\"",
+				MagicFile.UML_SYMBOL.getFileName(MagicFile.Type.IMAGE),
+				"\"/>"
+			);
+			printLine(
+				"\t\t\t\t\t\t\t</a>"
 			);
 		} catch (ServiceException e) {
 			throw new RuntimeServiceException(e);
@@ -205,12 +222,12 @@ public class IndexMapper extends HTMLMapper {
 		printLine("\t\t<div class=\"page-column\">");
 		printLine(
 			"\t\t\t<a href=\"", 
-			getFileURL(MagicFile.CUSTOM, MagicFile.Type.TEXT), 
+			configuration.getTargetName(MagicFile.WELCOME_PAGE, MagicFile.Type.TEXT), 
 			"\" target=\"",
 			HTMLMapper.FRAME_NAME,
 			"\">"
 		);
-		printLine("\t\t\t\t<img src=\"", getFileURL(MagicFile.CUSTOM, MagicFile.Type.IMAGE), "\"/>");
+		printLine("\t\t\t\t<img src=\"", configuration.getTargetName(MagicFile.WELCOME_PAGE, MagicFile.Type.IMAGE), "\"/>");
 		printLine("\t\t\t</a>");
 		printLine("\t\t</div>");
 		printLine("\t\t<div class=\"page-column\">");
@@ -222,13 +239,13 @@ public class IndexMapper extends HTMLMapper {
    /**
     * Produces the detail column frame
     */
-	private void detailColumn() {
-		printLine("\t\t<div class=\"page-column element-column\">");
+	private void frameColumn() {
+		printLine("\t\t<div class=\"page-column frame-column\">");
 		printLine(
 			"\t\t\t<iframe name=\"", 
 			HTMLMapper.FRAME_NAME, 
 			"\" src=\"", 
-			getFileURL(MagicFile.CUSTOM, MagicFile.Type.TEXT), 
+			configuration.getTargetName(MagicFile.WELCOME_PAGE, MagicFile.Type.TEXT), 
 			"\"/>"
 		);
 		printLine("\t\t</div>");
@@ -243,7 +260,7 @@ public class IndexMapper extends HTMLMapper {
     			.filter(ModelElement_1_0::isPackageType)
     			.map(ModelElement_1_0::getQualifiedName)
     			.forEach(navigationCompartment::addKey);
-    		navigationCompartment.addElement(PackagePatternComparator.getCatchAllPattern());
+    		navigationCompartment.addKey(PackagePatternComparator.getCatchAllPattern());
     	} else {
     		tableOfContentEntries.forEach(navigationCompartment::addKey);
     	}

@@ -44,6 +44,7 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc.text;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.stream.Stream;
 
@@ -57,12 +58,18 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.spi.PIMDocFileType;
 
 /**
  * HTML Mapper
  */
 abstract class HTMLMapper extends AbstractMapper {
 
+	protected HTMLMapper(Sink sink, Model_1_0 model, URI entryName, boolean markdown, PIMDocConfiguration configuration) {
+		super(sink, model, markdown, configuration);
+		this.entryName = entryName.getPath().substring(1);
+	}
+	
 	protected HTMLMapper(Sink sink, Model_1_0 model, MagicFile entryType, boolean markdown, PIMDocConfiguration configuration) {
 		super(sink, model, markdown, configuration);
 		this.entryName = entryType.getFileName(MagicFile.Type.TEXT);
@@ -75,7 +82,7 @@ abstract class HTMLMapper extends AbstractMapper {
 
 	private final String entryName;
 	
-    static String FRAME_NAME = "uml-element";
+    static String FRAME_NAME = "frame";
 	private static final String UNCHECKED_BOX = "&#x2610;";
 	private static final String CHECKED_BOX = "&#x2611;";
     
@@ -120,7 +127,7 @@ abstract class HTMLMapper extends AbstractMapper {
     protected void htmlHead() {
         printLine("<head>");
         printLine("\t<meta charset=\"utf-8\">");
-        printLine("\t<link rel=\"stylesheet\" href=\"", getFileURL(MagicFile.STYLE, MagicFile.Type.TEXT), "\" />");
+        printLine("\t<link rel=\"stylesheet\" href=\"", getFileURL(MagicFile.STYLE_SHEET, MagicFile.Type.TEXT), "\" />");
         htmlTitle(getTitle());
         printLine("</head>");
     }
@@ -143,7 +150,7 @@ abstract class HTMLMapper extends AbstractMapper {
 	    	final StringBuilder entryName = new StringBuilder(
 	    		element.getModel().toJavaPackageName(element, null).replace('.', '/')
 	    	);
-			entryName.append('/').append(element.getName()).append(".html");
+			entryName.append('/').append(element.getName()).append(PIMDocFileType.TEXT.extension());
 	    	return entryName.toString();
 		} catch (ServiceException exception) {
 			throw new RuntimeServiceException(exception);
