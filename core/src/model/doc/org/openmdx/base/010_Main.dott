@@ -5,7 +5,6 @@ digraph "Diagram Main [Package org::openmdx::base]" {
 	{
 		${LAYER[layer=0]}
 		${CLASS[name=org:openmdx:base:Authority]}
-		${CLASS[name=org:openmdx:base:uuid]}
 		${CLASS[name=org:openmdx:base:Void]}
 		${CLASS[name=org:openmdx:base:ObjectId]}
 	}

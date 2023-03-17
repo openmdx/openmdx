@@ -107,8 +107,8 @@ class GraphvizAttributesTest {
 		// Arrange
 		//
 		final GraphvizAttributes testee = new GraphvizAttributes(new GraphvizStyle(GraphvizStyleTest.imageStyleSheetDefaultURL()));
+		testee.setDefaultValue("_class", "uml_class declared_class");
 		testee.setDefaultValue("compartments","maybe");
-		testee.setDefaultValue("_class", "uml_class uml_declared_class");
 		// Act
 		final String value = testee.getAttributes().get("compartments");
 		// Assert
@@ -123,7 +123,7 @@ class GraphvizAttributesTest {
 		final GraphvizAttributes testee = new GraphvizAttributes(new GraphvizStyle(GraphvizStyleTest.imageStyleSheetDefaultURL()));
 		testee.setDefaultValue("compartments","maybe");
 		testee.setDefaultValue("_class", "uml_class");
-		testee.parseParameters("_class=uml_imported_class,foo=bar");
+		testee.parseParameters("_class=imported_class,foo=bar");
 		// Act
 		final String value = testee.getAttributes().get("compartments");
 		// Assert
@@ -138,7 +138,7 @@ class GraphvizAttributesTest {
 		final GraphvizAttributes testee = new GraphvizAttributes(new GraphvizStyle(GraphvizStyleTest.imageStyleSheetDefaultURL()));
 		testee.setDefaultValue("compartments","maybe");
 		testee.setDefaultValue("_class", "uml_class");
-		testee.parseParameters("compartments=\"for sure\",_class=uml_class_imported,foo=bar");
+		testee.parseParameters("compartments=\"for sure\",_class=\"uml_class imported_class\",foo=\"bar\"");
 		// Act
 		final String value = testee.getAttributes().get("compartments");
 		// Assert
@@ -153,7 +153,7 @@ class GraphvizAttributesTest {
 		final GraphvizAttributes testee = new GraphvizAttributes(new GraphvizStyle(GraphvizStyleTest.imageStyleSheetDefaultURL()));
 		testee.setDefaultValue("compartments","maybe");
 		testee.setDefaultValue("_class", "uml_class");
-		testee.parseParameters("compartments=\"for sure\",_class=uml_class_imported,foo=bar");
+		testee.parseParameters("compartments=\"for sure\",_class=\"uml_class imported_class\",foo=\"bar\"");
 		testee.setStrictValue("compartments","never");
 		// Act
 		final String value = testee.getAttributes().get("compartments");

@@ -50,6 +50,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+
 /**
  * Graphviz Attributes
  */
@@ -67,8 +69,8 @@ class GraphvizAttributes {
 	private final Properties strictValues = new Properties(parameterValues);
 	private final Collection<String> controlKeys;
 	
-	public String toString() {
-		return GraphvizTemplates.toAttributeList(getAttributes());
+	void appendTo(StringBuilder target, String indent) {
+		appendAttributeList(target, indent, getAttributes());
 	}
 
 	// Default visibility for testing
@@ -77,7 +79,7 @@ class GraphvizAttributes {
 		final Map<String,String> attributes = new HashMap<String, String>();
 		for(String key : strictValues.stringPropertyNames()) {
 			if(!controlKeys.contains(key)) {
-				attributes.put(key, getValue(key));
+				attributes.put(key, this.strictValues.getProperty(key));
 			}
 		}
 		return attributes;
@@ -93,12 +95,14 @@ class GraphvizAttributes {
 	}
 		
 	String getValue(String key) {
+		applyStyles();
 		return this.strictValues.getProperty(key);
 	}
 	
 	void setDefaultValue(String key, String value) {
 		this.defaultValues.put(key, value);
 	}
+	
 	void setStrictValue(String key, String value) {
 		if(value == null) {
 			this.strictValues.remove(key);
@@ -111,9 +115,83 @@ class GraphvizAttributes {
 		for (String parameter : parameterList.toString().split("\\s*,\\s*")) {
 			if(!parameter.isEmpty()) {
 	            String[] nv = parameter.split("=");
-	            this.parameterValues.put(nv[0].toLowerCase(), GraphvizTemplates.unquote(nv[1]));
+	            this.parameterValues.put(nv[0].toLowerCase(), unquote(nv[1]));
 			}
 		}
 	}
+	
+	private static String unquote(String value) {
+		return value.startsWith("\"") && value.endsWith("\"") ? value.substring(1, value.length() - 1) : value;
+	}
+	
+	private static boolean isHTML(String value) {
+		return value.startsWith("<") && value.endsWith(">");
+	}
+
+	static void appendAttributeList(
+		final StringBuilder target, 
+		final String indent, 
+		final Map<String, String> attributes
+	) {
+		target.append(" [");
+		final String indent1 = indent + '\t';
+		for (Map.Entry<String, String> e : attributes.entrySet()) {
+			target.append('\n').append(indent1).append(e.getKey()).append(" = ");
+			appendFormatted(target, indent1, e.getValue());
+		}
+		target.append('\n').append(indent).append(']');
+	}
+
+	private static void appendFormatted(
+		StringBuilder target,
+		String indent,
+		String value
+	) {
+		if(isHTML(value)) {
+			final int prefixPosition;
+			final int suffixPosition;
+			if(value.startsWith("<{") && value.endsWith("}>")){
+				prefixPosition = 2;
+				suffixPosition = value.length() - 2;
+			} else {
+				prefixPosition = 1;
+				suffixPosition = value.length() - 1;
+			}
+			target.append(value.substring(0, prefixPosition));
+			final String[] lines = value.substring(prefixPosition, suffixPosition).split("\n");
+			final String indent1 = indent + '\t';
+			for(String line : lines) {
+				target.append('\n').append(indent1).append(line);
+			}
+			target.append('\n').append(indent).append(value.substring(suffixPosition));
+		} else {
+			target.append('"').append(value).append('"');
+		}
+	}
+	
+	static void appendQuoted(
+		StringBuilder target,
+		String value
+	) {
+		if(isHTML(value)) {
+			target.append(value);
+		} else {
+			target.append('"').append(value).append('"');
+		}
+	}
+	
+	/**
+	 * Provide a model element's display name
+	 * 
+	 * @param element the model element
+	 * 
+	 * @return its display name
+	 */
+    static String getDisplayName(
+    	ModelElement_1_0 element
+    ) {
+    	String qualifiedName = element.getQualifiedName();
+    	return (element.isPackageType() ? qualifiedName.substring(0, qualifiedName.lastIndexOf(':')) : qualifiedName).replace(":", "::");
+    }
 	
 }

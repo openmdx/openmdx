@@ -189,13 +189,13 @@ public class GraphvizTemplates {
 				final GraphvizLayer layerNode = new GraphvizLayer(styleSheet);
 				layerNode.getParameters().parseParameters(dot.subSequence(startPos + "${LAYER[".length(), endPos));
 				dot.replace(startPos, endPos + 2, layerNode.toString());
-				final GraphvizLayer previous = layerNodes.put(layerNode.getLayer(), layerNode);
-				if(previous != null) {
+				final GraphvizLayer conflict = layerNodes.put(layerNode.getLayer(), layerNode);
+				if(conflict != null) {
 					throw new ServiceException(
 						BasicException.Code.DEFAULT_DOMAIN, 
 						BasicException.Code.ASSERTION_FAILURE,
 						"${LAYER[layer=…]}: The 'layer' value is not unique within this digraph",
-						new BasicException.Parameter("layer", previous.getLayer())
+						new BasicException.Parameter("layer", conflict.getLayer())
 					);
 				}
 			} else {
@@ -228,12 +228,11 @@ public class GraphvizTemplates {
 					while(nodes.hasNext()) {
 						GraphvizLayer successor = nodes.next();
 						parameters.setStrictValue("minlen", successor.getMinDist());
-						layerEdges
-							.append("\n\t")
-							.append(GraphvizTemplates.quote(predecessor.getId()))
-							.append(" -> ")
-							.append(GraphvizTemplates.quote(successor.getId()))
-							.append(parameters);
+						layerEdges.append("\n\t");
+						GraphvizAttributes.appendQuoted(layerEdges, predecessor.getId());
+						layerEdges.append(" -> ");
+						GraphvizAttributes.appendQuoted(layerEdges, successor.getId());
+						parameters.appendTo(layerEdges, "\t");
 						predecessor = successor;
 					}
 					dot.replace(startPos, endPos + 2, layerEdges.toString());
@@ -309,8 +308,9 @@ public class GraphvizTemplates {
 			final int endPos = dot.indexOf("]}", startPos);
 			if (endPos > startPos) {
 				final GraphvizEdge associationNode = new GraphvizEdge(styleSheet);
-				associationNode.getParameters().parseParameters(dot.subSequence(startPos + 14, endPos));
-				final String qualifiedName = associationNode.getParameters().getValue("name");
+				final GraphvizAttributes parameters = associationNode.getParameters();
+				parameters.parseParameters(dot.subSequence(startPos + "${ASSOCIATION[".length(), endPos));
+				final String qualifiedName = parameters.getValue("name");
 				if (!isWildcard(qualifiedName)) {
 					ModelElement_1_0 associationDef = model.getElement(qualifiedName);
 					associationNode.setId(associationDef.getQualifiedName());
@@ -353,12 +353,11 @@ public class GraphvizTemplates {
 						attributes.setDefaultValue("_class", "uml_instance_of");
 						attributes.setStrictValue("dir", "forward");
 						attributes.setStrictValue("arrowtail", "onormal");
-						instanceOfEdges
-							.append("\n\t")
-							.append(GraphvizTemplates.quote(classNode.getId()))
-							.append(" -> ")
-							.append(GraphvizTemplates.quote(supertypeDef.getQualifiedName()))
-							.append(attributes).append(";");
+						instanceOfEdges.append("\n\t");
+						GraphvizAttributes.appendQuoted(instanceOfEdges, classNode.getId());
+						instanceOfEdges.append(" -> ");
+						GraphvizAttributes.appendQuoted(instanceOfEdges, supertypeDef.getQualifiedName());
+						attributes.appendTo(instanceOfEdges, "\t");
 					}
 				}
 			}
@@ -373,18 +372,24 @@ public class GraphvizTemplates {
 		final int startPos = dot.indexOf("${ATTRIBUTE_STATEMENTS}");
 		if (startPos >= 0) {
 			final int endPos = startPos + "${ATTRIBUTE_STATEMENTS}".length();
-			StringBuilder attributeStatements = new StringBuilder();
+			final StringBuilder attributeStatements = new StringBuilder();
 			for (String kind : Arrays.asList("graph", "node", "edge")) {
 				final Map<String, String> style = styleSheet.getElementStyle(kind);
 				if (!style.isEmpty()) {
-					attributeStatements.append("\n\t").append(kind).append(GraphvizTemplates.toAttributeList(style));
+					attributeStatements.append("\n\t").append(kind);
+					GraphvizAttributes.appendAttributeList(attributeStatements, "\t", style);
 				}
 			}
 			getTitle(dot).ifPresent(
-				title -> attributeStatements.append("\n\tlabel=").append(quote(title))
+				title -> appendTitle(attributeStatements, title)
 			);
 			dot.replace(startPos, endPos, attributeStatements.toString());
 		}
+	}
+
+	private void appendTitle(final StringBuilder target, String title) {
+		target.append("\n\tlabel=");
+		GraphvizAttributes.appendQuoted(target, title);
 	}
 
 	/**
@@ -435,34 +440,6 @@ public class GraphvizTemplates {
 			CharacterLargeObjects.streamCopy(source, 0L, target);
 			return target.getBuilder();
 		}
-	}
-
-	static String unquote(String value) {
-		return value.startsWith("\"") && value.endsWith("\"") ? value.substring(1, value.length() - 1) : value;
-	}
-
-	static String quote(String value) {
-		return '"' + value + '"';
-	}
-
-	static String toDisplayName(String qualifiedName) {
-		return qualifiedName.replace(":", "::");
-	}
-
-	static String toAttributeList(Map<String, String> attributes) {
-		final StringBuilder attributeList = new StringBuilder();
-		char delimiter = '[';
-		for (Map.Entry<String, String> e : attributes.entrySet()) {
-			attributeList.append(delimiter).append(e.getKey()).append('=');
-			delimiter = ',';
-			final String value = e.getValue();
-			attributeList.append(isHTML(value) ? value : quote(value));
-		}
-		return attributeList.append(']').toString();
-	}
-
-	private static boolean isHTML(String value) {
-		return value.startsWith("<{") && value.endsWith("}>");
 	}
 
 }

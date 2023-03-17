@@ -1,7 +1,7 @@
 /* 
  * ====================================================================
  * Project:     openMDX, http: *www.openmdx.org/
- * Description: Default PIMDoc Graphviz Style Sheet
+ * Description: Custom PIMDoc Graphviz Style Sheet
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -82,42 +82,14 @@ edge[
 .uml_composite_aggregation[
 	minlen="3"	
 ]
-.uml_declared_class[
- 	compartments="true" 
- 	width="2"
-]
-.uml_declared_alias[
-]
-.uml_declared_exception[
-]
-.uml_declared_primitive[
-]
-.uml_declared_structure[
-]
 .uml_exception[
 ]
 .uml_field[
 ]
 .uml_instance_of[
 ]
-.uml_imported_class[
-	compartments="false"
-	fillcolor="lightsalmon"
-]
-.uml_imported_alias[
-]
-.uml_imported_exception[
-]
-.uml_imported_primitive[
-	compartments=true
-	width=2
-]
-.uml_imported_structure[
-]
-.uml_layer[
-]
 .uml_package[
-	fillcolor="khaki1"	
+	fillcolor="khaki1"
 ]
 .uml_primitive[]
 .uml_shared_aggregation[
@@ -127,9 +99,55 @@ edge[
 ]
 
 // ------------------
+// Diagram Classes
+// ------------------
+.declared_class[
+ 	compartments="true" 
+ 	width="2"
+]
+.declared_alias[
+ 	compartments="true" 
+ 	width="2"
+]
+.declared_exception[
+ 	compartments="true" 
+ 	width="2"
+]
+.declared_primitive[
+ 	compartments="true" 
+ 	width="2"
+]
+.declared_structure[
+ 	compartments="true" 
+ 	width="2"
+]
+.imported_class[
+	compartments="false"
+	fillcolor="lightsalmon"
+]
+.imported_alias[
+	compartments="false"
+	fillcolor="lightsalmon"
+]
+.imported_exception[
+	compartments="false"
+	fillcolor="lightsalmon"
+]
+.imported_primitive[
+	compartments="false"
+	fillcolor="lightsalmon"
+]
+.uml_imported_structure[
+	compartments="false"
+	fillcolor="lightsalmon"
+]
+
+
+// ------------------
 // Custom Classes
 // ------------------
 .detailed_class[
  	compartments="true" 
+	fillcolor="lightsalmon"
  	width="2"
 ]

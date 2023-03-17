@@ -92,7 +92,8 @@ public class ClusterDiagramMapper extends GraphvizMapper {
     
 	@Override
 	protected void graphBody() {
-		printLine("\tlabel=\"", getTitle(), "\"");
+		printLine("\tlabel = \"", getTitle(), "\"");
+		printLine("\thref = \"", getBaseURL(), getClusterPath(null, MagicFile.Type.TEXT), "\"");
 		mapSubgraphs("\t", null, new TreeMap<>());
 	}
 
@@ -113,7 +114,9 @@ public class ClusterDiagramMapper extends GraphvizMapper {
 				for(String v : e.getValue()) {
 					printLine(indent, "\t\"package ", v, "\"");
 				}
-			printLine(indent, "}[style=\"invis\"]");
+				printLine(indent, "} [");
+				printLine(indent, "\tstyle = \"invis\"");
+				printLine(indent, "]");
 		}
 	}
 

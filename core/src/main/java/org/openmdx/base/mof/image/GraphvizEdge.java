@@ -194,7 +194,7 @@ public class GraphvizEdge {
                 this.parameters.setDefaultValue("constraint","false");
                 this.parameters.setDefaultValue("labeldistance","3");
                 this.parameters.setStrictValue("xlabel", this.associationDef.getName());
-                this.parameters.setStrictValue("tooltip", GraphvizTemplates.toDisplayName(this.associationDef.getQualifiedName()));
+                this.parameters.setStrictValue("tooltip", GraphvizAttributes.getDisplayName(this.associationDef));
                 this.parameters.setStrictValue("headlabel",exposedEnd.getName() + " [" + ModelHelper.getMultiplicity(exposedEnd) + "]");
                 this.parameters.setStrictValue("taillabel",referencedEnd.getName() + " [" + ModelHelper.getMultiplicity(referencedEnd) + "]");
                 this.parameters.setStrictValue("arrowhead",this.getArrowhead(referencedEnd, exposedEnd));
@@ -235,7 +235,12 @@ public class GraphvizEdge {
 			 left = referencedEndType;
 			 right = exposedEndType;
 		}
-		return GraphvizTemplates.quote(left.getQualifiedName()) + " -> " + GraphvizTemplates.quote(right.getQualifiedName()) + this.parameters;
+		final StringBuilder edge = new StringBuilder();
+		GraphvizAttributes.appendQuoted(edge, left.getQualifiedName());
+		edge.append(" -> ");
+		GraphvizAttributes.appendQuoted(edge, right.getQualifiedName());
+		this.parameters.appendTo(edge, "\t");
+		return edge.toString();
 	}
 
 	private boolean isNavigable(final ModelElement_1_0 end1) {

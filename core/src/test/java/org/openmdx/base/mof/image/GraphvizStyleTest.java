@@ -85,7 +85,7 @@ public class GraphvizStyleTest {
 		//
 		// Act
 		//
-		final String value = testee.getClassStyle("uml_declared_class").get("compartments");
+		final String value = testee.getClassStyle("declared_class").get("compartments");
 		//
 		// Assert
 		//
@@ -101,7 +101,7 @@ public class GraphvizStyleTest {
 		//
 		// Act
 		//
-		final String value = testee.getClassStyle("uml_imported_class").get("compartments");
+		final String value = testee.getClassStyle("imported_class").get("compartments");
 		//
 		// Assert
 		//

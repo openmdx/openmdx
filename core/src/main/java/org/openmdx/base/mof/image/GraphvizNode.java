@@ -119,7 +119,7 @@ class GraphvizNode {
     private String decorate(String type) {
     	return new StringBuilder("uml_")
     		.append(type)
-    		.append(isLocal() ? " uml_declared_" : " uml_imported_")
+    		.append(isLocal() ? " declared_" : " imported_")
     		.append(type).toString();
     }
     
@@ -137,18 +137,22 @@ class GraphvizNode {
                     BasicException.Code.ASSERTION_FAILURE,
                     "Unknown class definition. Specify qualified class name with attribute 'name'"
                 );
-            } else {
-            	this.parameters.setDefaultValue("_class", defaultClass());
-        		this.parameters.setDefaultValue("compartments", "false");
-                StringBuilder label = new StringBuilder("<{");
-                appendStereotypes(label);
-                appendName(label);
-                appendCompartments(label);
-                this.parameters.setStrictValue("label", label.append("}>").toString());
-                this.parameters.setStrictValue("tooltip", GraphvizTemplates.toDisplayName(this.elementDef.getQualifiedName()));
-                this.parameters.setStrictValue("href", relativeURI(elementDef).toString());
-                return GraphvizTemplates.quote(this.id) + this.parameters;
             }
+        	this.parameters.setDefaultValue("_class", defaultClass());
+    		this.parameters.setDefaultValue("compartments", "false");
+            this.parameters.setStrictValue("tooltip", GraphvizAttributes.getDisplayName(this.elementDef));
+            this.parameters.setStrictValue("href", relativeURI(elementDef).toString());
+
+            final StringBuilder label = new StringBuilder("<{");
+            appendStereotypes(label);
+            appendName(label);
+            appendCompartments(label);
+            this.parameters.setStrictValue("label", label.append("}>").toString());
+            
+            final StringBuilder node = new StringBuilder();
+            GraphvizAttributes.appendQuoted(node, this.id);
+            this.parameters.appendTo(node, "\t\t");
+            return node.toString();
         } catch (Exception e) {
             throw new RuntimeServiceException(e);
         }
@@ -173,12 +177,12 @@ class GraphvizNode {
 	private void appendStereotypes(StringBuilder label) {
 		final List<Object> stereotypes = this.elementDef.objGetList("stereotype");
 		if (!stereotypes.isEmpty()) {
-		    String delimiter ="&laquo;";
+		    String delimiter = "&laquo;";
 		    for (Object stereotype : stereotypes) {
 		        label.append(delimiter).append(stereotype);
 		        delimiter = ", ";
 		    }
-		    label.append("&raquo;<br />");
+		    label.append("&raquo;\n<br/>");
 		}
 	}
 
@@ -206,22 +210,22 @@ class GraphvizNode {
 			if (!attributeDefs.isEmpty()) {
 			    label.append("|<table border=\"0\" cellspacing=\"0\" width=\"").append(Double.valueOf(75.0 * widthInInches).intValue()).append("px\">");
 			    for (ModelElement_1_0 attributeDef : attributeDefs) {
-			        label.append("<tr><td align=\"left\"><a href=\"").append(relativeURI(attributeDef)).append("\">");
+			        label.append("<tr><td align=\"left\" href=\"").append(relativeURI(attributeDef)).append("\">");
 			        label.append("+ ");
 			        if(ModelHelper.isDerived(attributeDef)) label.append("/");
-			        label.append(attributeDef.getName()).append(" : ").append(model.getElementType(attributeDef).getQualifiedName());
+			        label.append(attributeDef.getName()).append(" : ").append(getType(attributeDef));
 			        Multiplicity multiplicity = ModelHelper.getMultiplicity(attributeDef);
 			        if (multiplicity != Multiplicity.SINGLE_VALUE) {
 			            label.append(" [").append(multiplicity).append("]");
 			        }
-			        label.append("</a></td></tr>");
+			        label.append("</td></tr>");
 			    }
 			    label.append("</table>");
 			}
 			if (!operationDefs.isEmpty()) {
 			    label.append("|<table border=\"0\" cellspacing=\"0\" width=\"").append(Double.valueOf(75.0 * widthInInches).intValue()).append("px\">");
 			    for (ModelElement_1_0 operationDef : operationDefs) {
-			        label.append("<tr><td align=\"left\"><a href=\"").append(relativeURI(operationDef)).append("\">");
+			        label.append("<tr><td align=\"left\" href=\"").append(relativeURI(operationDef)).append("\">");
 			        label.append("+ ").append(operationDef.getName()).append("(");
 			        List<Object> params = operationDef.objGetList("content");
 			        String sep = "";
@@ -232,17 +236,21 @@ class GraphvizNode {
 			            if (DirectionKind.RETURN_DIR.equals(direction)) {
 			                returnParamDef = paramDef;
 			            } else if (DirectionKind.IN_DIR.equals(direction)) {
-			                label.append(sep).append(paramDef.getName()).append(" : ").append(model.getElementType(paramDef).getQualifiedName());
+			                label.append(sep).append(paramDef.getName()).append(" : ").append(getType(paramDef));
 			                sep = ", ";
 			            }
 			        }
 			        label.append(") : ");
-			        label.append(returnParamDef == null ? "void" : model.getElementType(returnParamDef).getQualifiedName());
-			        label.append("</a></td></tr>");
+			        label.append(returnParamDef == null ? "void" : getType(returnParamDef));
+			        label.append("</td></tr>");
 			    }
 			    label.append("</table>");
 			}
 		}
+	}
+
+	private String getType(ModelElement_1_0 elementDef) throws ServiceException {
+		return GraphvizAttributes.getDisplayName(elementDef.getModel().getElementType(elementDef));
 	}
 
 	private boolean isAbstract() throws ServiceException {
@@ -255,7 +263,8 @@ class GraphvizNode {
      * @return the showCompartments value.
      */
     private boolean isShowCompartments() {
-        return Boolean.parseBoolean(this.parameters.getValue("compartments"));
+        final boolean showCompartments = Boolean.parseBoolean(this.parameters.getValue("compartments"));
+		return showCompartments;
     }
 
 	/**
@@ -268,7 +277,7 @@ class GraphvizNode {
 	 */
     private URI relativeURI(ModelElement_1_0 element){
     	try {
-	    	return this.sink.relativize(new URI(getPath(element).toString()));
+    		return this.sink.relativize(new URI(getPath(element).toString()));
 		} catch (ServiceException | URISyntaxException exception) {
 			throw new RuntimeServiceException(exception);
     	}
@@ -304,4 +313,5 @@ class GraphvizNode {
 				.append('/').append(element.getName()).append(PIMDocFileType.TEXT.extension());
 		}
 	}
+	
 }

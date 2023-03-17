@@ -152,9 +152,9 @@ public class BasicImportPlugIn implements ImportPlugIn {
         Path objectId,
         RefObject refObject
     ) throws ServiceException{
-        //
-        // Initialize in case of {@code ImportMode} {@code SET} or <{@code CREATE}
-        //
+        /**
+         * Initialize in case of {@code ImportMode} {@code SET} or {@code CREATE}
+         */
         if(refObject instanceof RefObject_1_0) try {
             ((RefObject_1_0)refObject).refInitialize(
                 true, // setRequiredToNull
@@ -164,9 +164,9 @@ public class BasicImportPlugIn implements ImportPlugIn {
         } catch (JmiException exception) {
             throw new ServiceException(exception);
         }
-        //
-        // Make transient instances persistent
-        //
+        /**
+         * Make transient instances persistent
+         */ 
         if(!ReducedJDOHelper.isPersistent(refObject)) {
             Path containerId = objectId.getParent();
             String qualifier = objectId.getLastSegment().toClassicRepresentation();

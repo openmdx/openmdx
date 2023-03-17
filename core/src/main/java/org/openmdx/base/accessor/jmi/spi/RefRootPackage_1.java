@@ -1743,7 +1743,7 @@ public class RefRootPackage_1
                             this.copy(
                                 target,
                                 source,
-                                false //  // JPA -> JMI
+                                false // detach
                             );
                         } catch (ServiceException exception) {
                             throw new JDOFatalUserException(
@@ -1763,7 +1763,7 @@ public class RefRootPackage_1
                             copy(
                                 target,
                                 source,
-                                false //  // JPA -> JMI
+                                false // detach
                             );
                         } catch (ServiceException exception) {
                             throw new JDOFatalUserException(

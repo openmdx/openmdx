@@ -98,10 +98,12 @@ class GraphvizLayer {
     @Override
     public String toString() {
         try {
-        	this.parameters.setDefaultValue("_class", "uml_layer");
             this.parameters.setStrictValue("style", "invis");
             this.layer = Integer.valueOf(this.parameters.getValue("layer"));
-            return "rank=same " + GraphvizTemplates.quote(getId()) + this.parameters;
+            final StringBuilder layer = new StringBuilder("rank=same ");
+            GraphvizAttributes.appendQuoted(layer, getId());
+            this.parameters.appendTo(layer, "\t");
+            return layer.toString();
         } catch (Exception e) {
             throw new RuntimeServiceException(e);
         }
