@@ -276,5 +276,10 @@ public class IndexMapper extends HTMLMapper {
 	protected String getTitle() {
 		return this.configuration.getTitle();
 	}
+
+	@Override
+	protected String getBaseURL() {
+		return "";
+	}
     
 }

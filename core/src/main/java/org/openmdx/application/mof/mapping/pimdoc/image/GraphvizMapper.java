@@ -162,10 +162,6 @@ abstract class GraphvizMapper extends AbstractMapper {
     	}
     }
     
-	protected String getBaseURL() {
-    	return "";
-    }
-
     protected String getHref(
     	ModelElement_1_0 element
     ){
@@ -215,4 +211,6 @@ abstract class GraphvizMapper extends AbstractMapper {
 		}
 	}
     
+	protected abstract String getBaseURL();
+
 }

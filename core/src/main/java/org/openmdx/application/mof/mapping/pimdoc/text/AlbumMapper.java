@@ -74,7 +74,7 @@ public class AlbumMapper extends CompartmentMapper {
 
 	private final Map<String,String> diagrams;
 	private static final int COLUMNS = 4;
-	public static final String COMPARTMENT_ID = "uml-album";
+	public static final String COMPARTMENT_ID = "diagram-album";
 	
 	protected void compartmentHead() {
 		// none
@@ -91,11 +91,11 @@ public class AlbumMapper extends CompartmentMapper {
 		final int rows = (diagrams.size() + COLUMNS - 1) / COLUMNS;
 		final Iterator<Entry<String, String>> i = this.diagrams.entrySet().iterator();
 		for(int r = 0; r < rows; r++) {
-			printLine("\t\t\t\t\t<tr>");
+			printLine("\t\t\t\t\t<tr class=\"album-row\">");
 			for(int c = 0; c < COLUMNS; c++) {
 				if(i.hasNext()) {
-					printLine("\t\t\t\t\t\t<td>");
 					final Entry<String, String> e = i.next();
+					printLine("\t\t\t\t\t\t<td class=\"album-cell\" title=\"", e.getValue(), "\">");
 					mapDiagram(e.getKey(), e.getValue());
 					printLine("\t\t\t\t\t\t</td>");
 				} else {
@@ -116,7 +116,7 @@ public class AlbumMapper extends CompartmentMapper {
 			HTMLMapper.FRAME_NAME,
 			"\">"
 		);
-		printLine("\t\t\t\t\t\t\t\t<img class=\"uml-thumbnail\" src=\"", imageName, "\">");
+		printLine("\t\t\t\t\t\t\t\t<img class=\"album-thumbnail\" src=\"", imageName, "\" alt=\"", title, "\">");
 		printLine("\t\t\t\t\t\t\t</a>");
 	}
 

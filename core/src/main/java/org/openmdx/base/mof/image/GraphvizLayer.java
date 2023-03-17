@@ -45,7 +45,6 @@
 package org.openmdx.base.mof.image;
 
 import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -54,7 +53,7 @@ import org.openmdx.kernel.exception.BasicException;
 class GraphvizLayer {
 
     GraphvizLayer(GraphvizStyle styleSheet) {
-		this.parameters = new GraphvizAttributes(styleSheet, "_class", "layer");
+		this.parameters = new GraphvizAttributes(styleSheet, "_class", "layer", "mindist");
 	}
 
     private final GraphvizAttributes parameters;
@@ -65,21 +64,32 @@ class GraphvizLayer {
         return this.parameters;
     }
 
-    public Integer getLayer() throws ServiceException {
+    public Integer getLayer(){
     	if(this.layer == null) {
-	        throw new ServiceException(
-	            BasicException.Code.DEFAULT_DOMAIN,
-	            BasicException.Code.ASSERTION_FAILURE,
-	            "Unknown rank. Specify layer with attribute 'layer'"
-	        );
+    		final String layer = this.parameters.getValue("layer");
+    		if(layer == null) {
+    			throw new RuntimeServiceException(
+					BasicException.Code.DEFAULT_DOMAIN,
+					BasicException.Code.ASSERTION_FAILURE,
+					"Unknown rank. Specify layer with attribute 'layer'"
+				);
+    		}
+    		this.layer = Integer.valueOf(layer);
     	}
 		return layer;
 	}
 
 	public String getId() {
+		if(this.id == null) {
+			this.id = "LAYER[" + getLayer() + "]";
+		}
 		return id;
 	}
 
+	public String getMinDist() {
+		return this.parameters.getValue("mindist");
+	}
+	
 	/*
      * (non-Javadoc)
      * 
@@ -89,14 +99,13 @@ class GraphvizLayer {
     public String toString() {
         try {
         	this.parameters.setDefaultValue("_class", "uml_layer");
-            this.parameters.setDefaultValue("minlen", "1");
             this.parameters.setStrictValue("style", "invis");
             this.layer = Integer.valueOf(this.parameters.getValue("layer"));
-            this.id = "LAYER[" + getLayer() + "]";
-            return "rank=same " + GraphvizTemplates.quote(getId()) + "[style=invis]";
+            return "rank=same " + GraphvizTemplates.quote(getId()) + this.parameters;
         } catch (Exception e) {
             throw new RuntimeServiceException(e);
         }
     }
 
+    
 }

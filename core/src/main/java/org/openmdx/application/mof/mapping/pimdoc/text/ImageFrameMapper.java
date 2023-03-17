@@ -80,33 +80,37 @@ public class ImageFrameMapper extends HTMLMapper {
 
 	@Override
 	protected void htmlBody() {
-		printLine("<body class=\"uml-image-frame\">");
+		printLine("<body class=\"image-column\">");
 		columnHead();
 		columnBody();
 		printLine("</body>");
    }
 
 	protected void columnHead() {
-		printLine("\t<div class=\"column-head\">");
+		printLine("\t<div class=\"column-head image-head\">");
 		printLine("\t\t<h2>", getTitle(), "</h2>");
 		printLine("\t</div>");
 	}
 
 	private void columnBody() {
-		printLine("\t<div class=\"column-body\">");
-		printLine("\t\t<img src=\"", getImageURI(), "\" alt=\"", getTitle(), "\">");
+		printLine("\t<div class=\"column-body image-body\">");
+		printLine("\t\t${SVG}");
 		printLine("\t</div>");
 	}
 
-	private static URI toFrameURI(URI svgImage) {
+	private static URI toFrameURI(URI graphvizSourceURI) {
 		return URI.create(
-			PIMDocFileType.TEXT.from(svgImage.getPath(), PIMDocFileType.GRAPHVIZ_SOURCE)
+			PIMDocFileType.TEXT.from(graphvizSourceURI.getPath(), PIMDocFileType.GRAPHVIZ_SOURCE)
 		);
 	}
 
-	private String getImageURI() {
-		final String entryName = getEntryName();
-		return PIMDocFileType.IMAGE.from(entryName.substring(entryName.lastIndexOf('/') + 1), PIMDocFileType.TEXT);
+	@Override
+	protected String getBaseURL() {
+		final StringBuilder baseURL = new StringBuilder();
+		for(long i = getEntryName().chars().filter(c -> c == '/').count(); i > 0; i--) {
+			baseURL.append("../");
+		}
+		return baseURL.toString();
 	}
-	
+
 }

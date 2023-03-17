@@ -144,10 +144,10 @@ class PIMDocExternalizer {
 	private void exportNamespace(
 		final ModelElement_1_0 namespace
 	){
+		exportPackageCluster(namespace);
 		exportPackageFile(namespace);
 		exportClassFiles(namespace);
 		exportStructureFiles(namespace);
-		exportPackageCluster(namespace);
 	}
 
 	private void exportStructureFiles(final ModelElement_1_0 namespace) {

@@ -56,7 +56,10 @@ plugins {
 
 repositories {
 	mavenCentral()
-/*	mavenLocal() */ 
+	mavenLocal() 
+   flatDir {
+       dirs("/Users/harry/Repository/flat")
+   }
 }
 
 var env = Properties()
@@ -174,7 +177,7 @@ dependencies {
 	testRuntimeOnly("com.atomikos:transactions-jta:5.0.9")
 	testRuntimeOnly("com.atomikos:transactions-jdbc:5.0.9")
     // openmdxBase
-    openmdxBase("org.openmdx:openmdx-base:2.18.0") 
+    openmdxBase("org.openmdx:openmdx-base:2.18.2") 
     // openmdxBootstrap
     openmdxBootstrap(files(File(project.getBuildDir(), "generated/classes/openmdxBootstrap")))
     openmdxBootstrap("javax:javaee-api:8.0.+")

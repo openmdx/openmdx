@@ -63,7 +63,7 @@ class ClassesMapper extends CompartmentMapper {
 		Function<String, String> annotationRenderer
 	){
 		super(
-			"uml-classes", "Classes", "",
+			"model-classes", "Classes", "",
 			ModelElement_1_0::isClassType, false,
 			pw, element, annotationRenderer, "Name", "Abstract", "Mix-In"
 		);

@@ -121,7 +121,6 @@ abstract class HTMLMapper extends AbstractMapper {
 	}
 
     protected void fileFooter() {
-        printLine("</html>");
     }
 
     protected void htmlHead() {
@@ -162,9 +161,7 @@ abstract class HTMLMapper extends AbstractMapper {
     	return this.entryName;
 	}
 
-	protected String getBaseURL() {
-    	return "";
-    }
+	protected abstract String getBaseURL();
 
     protected String getFileURL(
     	MagicFile magicFile,

@@ -167,7 +167,7 @@ public class GraphvizEdge {
                 this.parameters.setDefaultValue("color", "#0000FF");
                 this.parameters.setDefaultValue("constraint", "false");
                 this.parameters.setDefaultValue("labeldistance", "3");
-                this.parameters.setStrictValue("label", "");
+                this.parameters.setStrictValue("xlabel", "");
                 this.parameters.setStrictValue("tooltip", "");
                 this.parameters.setStrictValue("headlabel", "[1..1]");
                 this.parameters.setStrictValue("taillabel", this.fieldDef.getName() + " [" + ModelHelper.getMultiplicity(this.fieldDef) + "]");
@@ -193,7 +193,7 @@ public class GraphvizEdge {
                 this.parameters.setDefaultValue("color","#0000FF");
                 this.parameters.setDefaultValue("constraint","false");
                 this.parameters.setDefaultValue("labeldistance","3");
-                this.parameters.setStrictValue("label", this.associationDef.getName());
+                this.parameters.setStrictValue("xlabel", this.associationDef.getName());
                 this.parameters.setStrictValue("tooltip", GraphvizTemplates.toDisplayName(this.associationDef.getQualifiedName()));
                 this.parameters.setStrictValue("headlabel",exposedEnd.getName() + " [" + ModelHelper.getMultiplicity(exposedEnd) + "]");
                 this.parameters.setStrictValue("taillabel",referencedEnd.getName() + " [" + ModelHelper.getMultiplicity(referencedEnd) + "]");

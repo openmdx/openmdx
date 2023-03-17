@@ -100,13 +100,19 @@ class GraphvizAttributes {
 		this.defaultValues.put(key, value);
 	}
 	void setStrictValue(String key, String value) {
-		this.strictValues.put(key, value);
+		if(value == null) {
+			this.strictValues.remove(key);
+		} else {
+			this.strictValues.put(key, value);
+		}
 	}
 	
 	void parseParameters(CharSequence parameterList) {
-		for (String parameter : parameterList.toString().split(",")) {
-            String[] nv = parameter.split("=");
-            this.parameterValues.put(nv[0].toLowerCase(), GraphvizTemplates.unquote(nv[1]));
+		for (String parameter : parameterList.toString().split("\\s*,\\s*")) {
+			if(!parameter.isEmpty()) {
+	            String[] nv = parameter.split("=");
+	            this.parameterValues.put(nv[0].toLowerCase(), GraphvizTemplates.unquote(nv[1]));
+			}
 		}
 	}
 	

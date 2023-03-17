@@ -110,6 +110,12 @@ open class GenerateModelsTask : JavaExec() {
 				}
 				into(File(project.getBuildDir(), "pimdoc"))
 			}
+			project.copy {
+				from(project.zipTree(File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + "-models.zip"))) { 
+					include("**/*.dot")
+				}
+				into(File(project.getBuildDir(), "generated/sources/dot"))
+			}
 		}
 		
 	}

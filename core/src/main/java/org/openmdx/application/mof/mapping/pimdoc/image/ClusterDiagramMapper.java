@@ -45,6 +45,7 @@
 package org.openmdx.application.mof.mapping.pimdoc.image;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -133,11 +134,9 @@ public class ClusterDiagramMapper extends GraphvizMapper {
 		final String indent1 = indent + '\t';
 		printLine(indent, "subgraph \"cluster ", elementPrefix, "\" {");
 		mapSubgraphStyle(indent1, element);
-		if(elementPrefix.startsWith(clusterPrefix)) {
-			mapPackage(indent1, element);
-			if(anchestor != null) {
-				dependencies.computeIfAbsent(anchestor.getQualifiedName(), k -> new ArrayList<>()).add(element.getQualifiedName());
-			}
+		mapPackage(indent1, element, elementPrefix.startsWith(clusterPrefix));
+		if(anchestor != null) {
+			dependencies.computeIfAbsent(anchestor.getQualifiedName(), k -> new ArrayList<>()).add(element.getQualifiedName());
 		}
 		mapSubgraphs(indent1, element, dependencies);
 		printLine(indent,"}");
@@ -152,19 +151,26 @@ public class ClusterDiagramMapper extends GraphvizMapper {
 		mapStyle(indent, style);
 	}
 
-	private void mapPackage(String indent, ModelElement_1_0 element) {
+	private void mapPackage(String indent, ModelElement_1_0 element, boolean visible) {
 		printLine(indent, "\"package ", element.getQualifiedName(), "\" [");
-		mapPackageStyle(indent + '\t', element);
+		mapPackageStyle(indent + '\t', element, visible);
 		printLine(indent, "]");
 	}
 
-	private void mapPackageStyle(final String indent, ModelElement_1_0 element) {
-		final Map<String, String> style = getClassStyle("uml_package");
-		style.put("label", element.getName());
-		style.put("style", "filled");
-		style.put("shape","tab");
-		style.put("href", getHref(element));
-		style.put("tooltip", getDisplayName(element));
+	private void mapPackageStyle(final String indent, ModelElement_1_0 element, boolean visible) {
+		final Map<String, String> style;
+		if(visible) {
+			style = getClassStyle("uml_package");
+			style.put("label", element.getName());
+			style.put("style", "filled");
+			style.put("shape","tab");
+			style.put("href", getHref(element));
+			style.put("tooltip", getDisplayName(element));
+		} else {
+			style = new HashMap<>();
+			style.put("style", "invis");
+			style.put("height", "0");
+		}
 		mapStyle(indent, style);
 	}
 	

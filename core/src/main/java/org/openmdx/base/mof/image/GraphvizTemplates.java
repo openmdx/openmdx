@@ -93,7 +93,7 @@ public class GraphvizTemplates {
 	private final Sink sink;
 	
 	private static final Pattern HTML_TITLE = Pattern.compile("\\s*(?:di)?graph\\s*(<.*)", Pattern.DOTALL);
-	private static final Pattern TITLE = Pattern.compile("\\s*(?:di)?graph\\s*(\"(?:[^\"]|\\\\\")+\"|[A-Za-z0-9_.-]+)\\s*\\{");
+	private static final Pattern TITLE = Pattern.compile("\\s*(?:di)?graph\\s*(\"(?:[^\"]|\\\\\")+\"|[A-Za-z0-9_.-]+)\\s*\\{.*", Pattern.DOTALL);
 
 	public GraphvizTemplates nested(String name) {
 		return new GraphvizTemplates(this, name);
@@ -156,7 +156,7 @@ public class GraphvizTemplates {
 						n++; 
 					} else if (c == '>') {
 						if(--n == 0) {
-							return Optional.of(tail.substring(0, i + 1));
+							return Optional.of(tail.substring(1, i));
 						}
 						
 					}
@@ -179,7 +179,7 @@ public class GraphvizTemplates {
 	}	
 	
 	/**
-	 * ${LAYER[layer=…]}
+	 * ${LAYER[layer=…,mindist=…,n1=v1,…]}
 	 */
 	private SortedMap<Integer, GraphvizLayer> processLayer(StringBuilder dot) throws ServiceException {
 		final SortedMap<Integer, GraphvizLayer> layerNodes = new TreeMap<>();
@@ -219,20 +219,32 @@ public class GraphvizTemplates {
 			final int startPos = dot.indexOf("${LAYERS}");
 			if (startPos >= 0) {
 				final int endPos = startPos + "${LAYERS}".length();
-				StringBuilder layerEdges = new StringBuilder();
-				final Iterator<GraphvizLayer> nodes = layerNodes.values().iterator();
-				GraphvizLayer predecessor = nodes.next();
-				while(nodes.hasNext()) {
-					GraphvizLayer successor = nodes.next();
-					layerEdges
-						.append("\n\t")
-						.append(GraphvizTemplates.quote(predecessor.getId()))
-						.append(" -> ")
-						.append(GraphvizTemplates.quote(successor.getId()))
-						.append(successor.getParameters());
-					predecessor = successor;
+				if(endPos > startPos) {
+					final GraphvizAttributes parameters = new GraphvizAttributes(styleSheet, "_class");
+		            parameters.setStrictValue("style", "invis");
+					StringBuilder layerEdges = new StringBuilder();
+					final Iterator<GraphvizLayer> nodes = layerNodes.values().iterator();
+					GraphvizLayer predecessor = nodes.next();
+					while(nodes.hasNext()) {
+						GraphvizLayer successor = nodes.next();
+						parameters.setStrictValue("minlen", successor.getMinDist());
+						layerEdges
+							.append("\n\t")
+							.append(GraphvizTemplates.quote(predecessor.getId()))
+							.append(" -> ")
+							.append(GraphvizTemplates.quote(successor.getId()))
+							.append(parameters);
+						predecessor = successor;
+					}
+					dot.replace(startPos, endPos + 2, layerEdges.toString());
+				} else {
+					throw new ServiceException(
+						BasicException.Code.DEFAULT_DOMAIN, 
+						BasicException.Code.PARSE_FAILURE,
+						"${LAYERS[…]} place holder is not properly closed",
+						new BasicException.Parameter("dot", dot.substring(startPos))
+					);
 				}
-				dot.replace(startPos, endPos, layerEdges.toString());
 			}
 		}
 	}
@@ -368,6 +380,9 @@ public class GraphvizTemplates {
 					attributeStatements.append("\n\t").append(kind).append(GraphvizTemplates.toAttributeList(style));
 				}
 			}
+			getTitle(dot).ifPresent(
+				title -> attributeStatements.append("\n\tlabel=").append(quote(title))
+			);
 			dot.replace(startPos, endPos, attributeStatements.toString());
 		}
 	}

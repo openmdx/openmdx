@@ -209,3 +209,9 @@ body {
 .uml-declared-references-2 {
 	width: 15%;
 }
+.album-cell {
+	width: 25%;
+}
+.album-thumbnail {
+	width: 100%;
+}
