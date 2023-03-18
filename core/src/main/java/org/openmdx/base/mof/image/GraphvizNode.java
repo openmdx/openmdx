@@ -162,13 +162,13 @@ class GraphvizNode {
      * Name
      */
 	private void appendName(StringBuilder label) throws ServiceException {
-		label.append("<b>");
+		label.append("<b>\n\t");
 		if(isAbstract()) {
-			label.append("<i>").append(this.elementDef.getName()).append("</i>");
+			label.append("<i>\n\t\t").append(this.elementDef.getName()).append("\n\t</i>");
 		} else { 
 			label.append(this.elementDef.getName());
 		}
-		label.append("</b>");
+		label.append("\n</b>");
 	}
 
 	/**
@@ -182,7 +182,7 @@ class GraphvizNode {
 		        label.append(delimiter).append(stereotype);
 		        delimiter = ", ";
 		    }
-		    label.append("&raquo;\n<br/>");
+		    label.append("&raquo;\n<br/>\n");
 		}
 	}
 
@@ -208,9 +208,9 @@ class GraphvizNode {
 			    }
 			}
 			if (!attributeDefs.isEmpty()) {
-			    label.append("|<table border=\"0\" cellspacing=\"0\" width=\"").append(Double.valueOf(75.0 * widthInInches).intValue()).append("px\">");
+			    label.append("\n|\n<table border=\"0\" cellspacing=\"0\" width=\"").append(Double.valueOf(75.0 * widthInInches).intValue()).append("px\">");
 			    for (ModelElement_1_0 attributeDef : attributeDefs) {
-			        label.append("<tr><td align=\"left\" href=\"").append(relativeURI(attributeDef)).append("\">");
+			        label.append("\n\t<tr>\n\t\t<td align=\"left\" href=\"").append(relativeURI(attributeDef)).append("\">\n\t\t\t");
 			        label.append("+ ");
 			        if(ModelHelper.isDerived(attributeDef)) label.append("/");
 			        label.append(attributeDef.getName()).append(" : ").append(getType(attributeDef));
@@ -218,14 +218,14 @@ class GraphvizNode {
 			        if (multiplicity != Multiplicity.SINGLE_VALUE) {
 			            label.append(" [").append(multiplicity).append("]");
 			        }
-			        label.append("</td></tr>");
+			        label.append("\n\t\t</td>\n\t</tr>");
 			    }
-			    label.append("</table>");
+			    label.append("\n</table>");
 			}
 			if (!operationDefs.isEmpty()) {
-			    label.append("|<table border=\"0\" cellspacing=\"0\" width=\"").append(Double.valueOf(75.0 * widthInInches).intValue()).append("px\">");
+			    label.append("\n|\n<table border=\"0\" cellspacing=\"0\" width=\"").append(Double.valueOf(75.0 * widthInInches).intValue()).append("px\">");
 			    for (ModelElement_1_0 operationDef : operationDefs) {
-			        label.append("<tr><td align=\"left\" href=\"").append(relativeURI(operationDef)).append("\">");
+			        label.append("\n\t<tr>\n\t\t<td align=\"left\" href=\"").append(relativeURI(operationDef)).append("\">\n\t\t\t");
 			        label.append("+ ").append(operationDef.getName()).append("(");
 			        List<Object> params = operationDef.objGetList("content");
 			        String sep = "";
@@ -242,9 +242,9 @@ class GraphvizNode {
 			        }
 			        label.append(") : ");
 			        label.append(returnParamDef == null ? "void" : getType(returnParamDef));
-			        label.append("</td></tr>");
+			        label.append("\n\t\t</td>\n\t</tr>");
 			    }
-			    label.append("</table>");
+			    label.append("\n</table>");
 			}
 		}
 	}

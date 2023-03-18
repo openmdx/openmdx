@@ -270,7 +270,7 @@ public class GraphvizTemplates {
 						GraphvizEdge associationNode = new GraphvizEdge(styleSheet);
 						associationNode.setId(elementDef.getQualifiedName());
 						associationNode.setAssociationDef(elementDef);
-						associationEdges.append("\n\t").append(associationNode).append(";");
+						associationEdges.append("\n\t").append(associationNode);
 					}
 				}
 			}
@@ -289,7 +289,7 @@ public class GraphvizTemplates {
 								fieldNode.setId(fieldDef.getQualifiedName());
 								fieldNode.setFieldDef(fieldDef);
 								fieldNode.getParameters().setStrictValue("minlen", "3");
-								associationEdges.append("\n\t").append(fieldNode).append(";");
+								associationEdges.append("\n\t").append(fieldNode);
 							}
 						}
 					}
@@ -388,7 +388,7 @@ public class GraphvizTemplates {
 	}
 
 	private void appendTitle(final StringBuilder target, String title) {
-		target.append("\n\tlabel=");
+		target.append("\n\tlabel = ");
 		GraphvizAttributes.appendQuoted(target, title);
 	}
 

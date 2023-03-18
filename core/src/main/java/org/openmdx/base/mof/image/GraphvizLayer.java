@@ -100,9 +100,9 @@ class GraphvizLayer {
         try {
             this.parameters.setStrictValue("style", "invis");
             this.layer = Integer.valueOf(this.parameters.getValue("layer"));
-            final StringBuilder layer = new StringBuilder("rank=same ");
+            final StringBuilder layer = new StringBuilder("rank = \"same\"\n\t\t");
             GraphvizAttributes.appendQuoted(layer, getId());
-            this.parameters.appendTo(layer, "\t");
+            this.parameters.appendTo(layer, "\t\t");
             return layer.toString();
         } catch (Exception e) {
             throw new RuntimeServiceException(e);
