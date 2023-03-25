@@ -127,4 +127,8 @@ public class GraphvizStyle {
 		return new TreeMap<>(styles.getOrDefault('.' + name.toLowerCase(), Collections.emptyMap()));
 	}
 	
+	public Splines getSplines() {
+		return Splines.fromAttribute(getElementStyle("graph").get("splines"));
+	}
+	
 }

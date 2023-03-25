@@ -1,0 +1,21 @@
+digraph "Diagram Structure Types [Package org::omg::model1]" {
+
+	${ATTRIBUTE_STATEMENTS}
+
+	{
+		${LAYER[layer=0]}
+		${CLASS[name=org:omg:model1:PackageExternalizeParams]}
+	}
+
+	{
+		${LAYER[layer=1]}
+		${CLASS[name=org:omg:model1:NamespaceLookupElementResult]}
+		${CLASS[name=org:omg:model1:NamespaceResolveQualifiedNameResult]}
+		${CLASS[name=org:omg:model1:PackageExternalizeResult]}
+	}
+
+	${LAYERS}
+	${ASSOCIATION[name=*]}
+	${INSTANCE_OF}
+
+}

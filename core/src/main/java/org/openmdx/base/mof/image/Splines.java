@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Description: Package Group Builder 
+ * Description: Graphviz Splines
  * Owner: the original authors. 
  * ====================================================================
  * 
@@ -42,57 +42,66 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc.spi;
-
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+package org.openmdx.base.mof.image;
 
 /**
- * Package Group Builder
+ * Graphviz Splines
  */
-public class PackageGroupBuilder extends TreeMap<String,SortedSet<String>> {
+public enum Splines {
 
-	public PackageGroupBuilder() {
-		super(COMPARATOR);
-	}
-
-	private static final Comparator<String> COMPARATOR = new PackagePatternComparator();
+	/**
+	 * No edges are drawn at all.
+	 */
+	NONE,
 	
-	private static final long serialVersionUID = -4489160358886710466L;
-	private final Comparator<String> simpleNameComparator = new SimpleNameComparator();
+	/**
+	 * Edges are drawn as line segments.
+	 */
+	LINE,
 	
-	public void addKey(String qualifiedName) {
-		this.computeIfAbsent(qualifiedName, key -> new TreeSet<String>(simpleNameComparator));
-	}
-
-	public void addElement(String qualifiedName) {
-		for(Map.Entry<String,SortedSet<String>> e : entrySet()) {
-			if(isPartOfPackageGroup(e.getKey(), qualifiedName)) {
-				e.getValue().add(qualifiedName);
-			}
+	/**
+	 * Edges should be drawn as polylines.
+	 */
+	POLYLINE,
+	
+	/**
+	 *  Edges should be drawn as curved arcs
+	 */
+	CURVED,
+	
+	/**
+	 * Edges should be routed as polylines of axis-aligned segments. Currently, the routing does not handle ports or, in dot, edge labels.
+	 */
+	ORTHO,
+	
+	/**
+	 * Edges are drawn as splines routed around nodes.
+	 */
+	SPLINE;
+	
+	public static Splines fromAttribute(String value) {
+		if(value == null) {
+			return SPLINE; // The default value for the dot engine
 		}
-	}
-	
-	boolean isPartOfPackageGroup(String packagePattern, String qualifiedName) {
-		if(PackagePatternComparator.isWildcardPattern(packagePattern)) {
-			return PackagePatternComparator.isCatchAllPattern(packagePattern) ||
-				qualifiedName.startsWith(PackagePatternComparator.removeWildcard(packagePattern) + ':');
-		} else {
-			return getPackageId(packagePattern).equals(getPackageId(qualifiedName));
+		if("".equals(value) || "none".equalsIgnoreCase(value)) {
+			return NONE;
 		}
-	}
-
-	private String getPackageId(String qualifiedName) {
-		final int end = qualifiedName.lastIndexOf(':');
-		return qualifiedName.substring(0, end);
-	}
-	
-	public void normalize() {
-		values().removeIf(Collection::isEmpty);
+		if("line".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
+			return LINE;
+		}
+		if("polyline".equalsIgnoreCase(value) ) {
+			return POLYLINE;
+		}
+		if("curved".equalsIgnoreCase(value) ) {
+			return CURVED;
+		}
+		if("ortho".equalsIgnoreCase(value) ) {
+			return ORTHO;
+		}
+		if("spline".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value)) {
+			return LINE;
+		}
+		throw new IllegalArgumentException("Usupported Splines: " + value);
 	}
 	
 }

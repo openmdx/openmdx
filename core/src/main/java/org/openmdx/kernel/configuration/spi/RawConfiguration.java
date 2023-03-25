@@ -222,9 +222,6 @@ class RawConfiguration implements Configuration, MultiLineStringRepresentation {
         String section, 
         char separator
     ){
-        if(section == null) {
-            System.out.println("Wait a moment");
-        }
         final int sl = section.length();
         if(
             key.length() - sl > 1 && 

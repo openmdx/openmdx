@@ -165,7 +165,7 @@ abstract class CompartmentMapper extends MapperTemplate {
 			"\t\t\t\t\t\t<th colspan=\"",
 			Integer.toString(columnTitles.length),
 			"\" id=\"",
-			element.getName(),
+			current.getName(),
 			"\">",
 			this.currentTitlePrefix,
 			getDisplayName(current),

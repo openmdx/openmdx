@@ -2598,7 +2598,7 @@
       </children>
       <styles xmi:type="notation:FontStyle" xmi:id="_jfRAIcgQEe23XtiijqFkmA"/>
       <element xmi:type="uml:Association" href="platform:/resource/openMDX%202%20~%20Core/src/model/emf/org.openmdx.database2.uml#_63VDAHNkEeG9T95WWtTPPR"/>
-      <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_jfRAIsgQEe23XtiijqFkmA" points="[0, 0, -643984, -643984]$[0, 0, -643984, -643984]"/>
+      <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_jfRAIsgQEe23XtiijqFkmA" points="[80, 120, -643984, -643984]$[80, 160, -643984, -643984]$[80, 220, -643984, -643984]"/>
       <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_jxupIMgQEe23XtiijqFkmA" id="(0.22099447513812154,1.0)"/>
       <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_jxupIcgQEe23XtiijqFkmA" id="(0.22099447513812154,0.0)"/>
     </edges>

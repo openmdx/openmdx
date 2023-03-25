@@ -210,11 +210,20 @@ class GraphvizNode {
 			if (!attributeDefs.isEmpty()) {
 			    label.append("\n|\n<table border=\"0\" cellspacing=\"0\" width=\"").append(Double.valueOf(75.0 * widthInInches).intValue()).append("px\">");
 			    for (ModelElement_1_0 attributeDef : attributeDefs) {
-			        label.append("\n\t<tr>\n\t\t<td align=\"left\" href=\"").append(relativeURI(attributeDef)).append("\">\n\t\t\t");
-			        label.append("+ ");
-			        if(ModelHelper.isDerived(attributeDef)) label.append("/");
-			        label.append(attributeDef.getName()).append(" : ").append(getType(attributeDef));
-			        Multiplicity multiplicity = ModelHelper.getMultiplicity(attributeDef);
+			        label
+			        	.append("\n\t<tr>\n\t\t<td align=\"left\" href=\"")
+			        	.append(relativeURI(attributeDef))
+			        	.append("\" tooltip=\"")
+			        	.append(GraphvizAttributes.getDisplayName(attributeDef))
+			        	.append("\">\n\t\t\t+");
+			        if(ModelHelper.isDerived(attributeDef)) {
+			        	label.append("/");
+			        }
+			        label
+			        	.append(attributeDef.getName())
+			        	.append(" : ")
+			        	.append(getType(attributeDef));
+			        final Multiplicity multiplicity = ModelHelper.getMultiplicity(attributeDef);
 			        if (multiplicity != Multiplicity.SINGLE_VALUE) {
 			            label.append(" [").append(multiplicity).append("]");
 			        }
@@ -277,7 +286,7 @@ class GraphvizNode {
 	 */
     private URI relativeURI(ModelElement_1_0 element){
     	try {
-    		return this.sink.relativize(new URI(getPath(element).toString()));
+    		return this.sink.relativize(GraphvizAttributes.getURI(element));
 		} catch (ServiceException | URISyntaxException exception) {
 			throw new RuntimeServiceException(exception);
     	}
@@ -291,27 +300,5 @@ class GraphvizNode {
     private boolean isLocal() {
     	return this.relativeURI(this.elementDef).getPath().indexOf('/') < 0;
     }
-    
-   /**
-	* 
-	* Provide the path (using HTML entries)
-	* 
-	* @param element the model element used to derive the path
-	* 
-	* @return the path
-	* 
-	* @throws ServiceException in case of failure
-	*/
-	private StringBuilder getPath(ModelElement_1_0 element) throws ServiceException{
-		if(element.isAttributeType() || element.isStructureFieldType() || element.isOperationType()) {
-			return getPath(element.getModel().getElement(element.getContainer()))
-				.append('#')
-				.append(element.getName());
-		} else {
-			return new StringBuilder("/")
-				.append(element.getModel().toJavaPackageName(element, null).replace('.', '/'))
-				.append('/').append(element.getName()).append(PIMDocFileType.TEXT.extension());
-		}
-	}
-	
+    	
 }

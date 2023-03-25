@@ -1,0 +1,15 @@
+digraph "Diagram Types [Package org::openmdx::base]" {
+
+	${ATTRIBUTE_STATEMENTS}
+
+	{
+		${LAYER[layer=0]}
+		${CLASS[name=org:openmdx:base:Void]}
+		${CLASS[name=org:openmdx:base:ObjectId]}
+	}
+	
+	${LAYERS}
+	${ASSOCIATION[name=*]}
+	${INSTANCE_OF}
+
+}

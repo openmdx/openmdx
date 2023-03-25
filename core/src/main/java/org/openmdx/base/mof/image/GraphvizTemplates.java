@@ -267,7 +267,7 @@ public class GraphvizTemplates {
 					if (classNodes.containsKey(end1Type.getQualifiedName())
 							&& classNodes.containsKey(end2Type.getQualifiedName())
 							&& !associationNodes.containsKey(elementDef.getQualifiedName())) {
-						GraphvizEdge associationNode = new GraphvizEdge(styleSheet);
+						GraphvizEdge associationNode = new GraphvizEdge(styleSheet, sink);
 						associationNode.setId(elementDef.getQualifiedName());
 						associationNode.setAssociationDef(elementDef);
 						associationEdges.append("\n\t").append(associationNode);
@@ -285,7 +285,7 @@ public class GraphvizTemplates {
 							ModelElement_1_0 fieldDefType = fieldDef.getDereferencedType();
 							if (fieldDefType.isStructureType()
 									&& classNodes.containsKey(fieldDefType.getQualifiedName())) {
-								GraphvizEdge fieldNode = new GraphvizEdge(styleSheet);
+								GraphvizEdge fieldNode = new GraphvizEdge(styleSheet, sink);
 								fieldNode.setId(fieldDef.getQualifiedName());
 								fieldNode.setFieldDef(fieldDef);
 								fieldNode.getParameters().setStrictValue("minlen", "3");
@@ -307,7 +307,7 @@ public class GraphvizTemplates {
 		for (int startPos = dot.indexOf("${ASSOCIATION["); startPos >= 0; ) {
 			final int endPos = dot.indexOf("]}", startPos);
 			if (endPos > startPos) {
-				final GraphvizEdge associationNode = new GraphvizEdge(styleSheet);
+				final GraphvizEdge associationNode = new GraphvizEdge(styleSheet, sink);
 				final GraphvizAttributes parameters = associationNode.getParameters();
 				parameters.parseParameters(dot.subSequence(startPos + "${ASSOCIATION[".length(), endPos));
 				final String qualifiedName = parameters.getValue("name");

@@ -123,7 +123,7 @@ abstract class GraphvizMapper extends AbstractMapper {
     }
 
     protected Map<String, String> getClassStyle(String className){
-    	return configuration.getGraphvizStyleSheet().getElementStyle(className);
+    	return configuration.getGraphvizStyleSheet().getClassStyle(className);
     }
     
     protected void fileHeader(

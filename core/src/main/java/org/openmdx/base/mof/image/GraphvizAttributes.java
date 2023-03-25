@@ -44,13 +44,21 @@
  */
 package org.openmdx.base.mof.image;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.spi.PIMDocFileType;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Graphviz Attributes
@@ -194,4 +202,63 @@ class GraphvizAttributes {
     	return (element.isPackageType() ? qualifiedName.substring(0, qualifiedName.lastIndexOf(':')) : qualifiedName).replace(":", "::");
     }
 	
+    /**
+  	 * 
+ 	 * Provide the URI (using HTML entries)
+ 	 * 
+ 	 * @param element the model element used to derive the URI
+ 	 * 
+ 	 * @return the URI
+ 	 * 
+ 	 * @throws ServiceException in case of failure
+ 	 */
+	static URI getURI(ModelElement_1_0 element) throws URISyntaxException, ServiceException {
+		return new URI(getPath(element).toString());
+	}
+
+   /**
+	* 
+	* Provide the path (using HTML entries)
+	* 
+	* @param element the model element used to derive the path
+	* 
+	* @return the path
+	* 
+	* @throws ServiceException in case of failure
+	*/
+	private static StringBuilder getPath(ModelElement_1_0 element) throws ServiceException{
+		final Model_1_0 model = element.getModel();
+		if(
+			element.isAttributeType() || 
+			element.isStructureFieldType() || 
+			element.isOperationType() || 
+			element.isPrimitiveType() || 
+			element.isAliasType()
+		) {
+			return getPath(model.getElement(element.getContainer()))
+				.append('#')
+				.append(element.getName());
+		} else if (element.isAssociationEndType()) {
+			final ModelElement_1_0 association = model.getElement(element.getContainer());
+	        for(Object xri : association.objGetList("content")) {
+	        	if(!xri.equals(element.jdoGetObjectId())) {
+	        		final ModelElement_1_0 exposedEnd = model.getElement(xri);
+	    			return getPath(model.getElementType(exposedEnd))
+    					.append('#')
+    					.append(element.getName());
+	        	}
+	        }
+			throw new RuntimeServiceException(
+				BasicException.Code.DEFAULT_DOMAIN,
+				BasicException.Code.ASSERTION_FAILURE,
+				"Unable to resolve the URI",
+				new BasicException.Parameter("xri", element.jdoGetObjectId())
+			);
+		} else {
+			return new StringBuilder("/")
+				.append(model.toJavaPackageName(element, null).replace('.', '/'))
+				.append('/').append(element.getName()).append(PIMDocFileType.TEXT.extension());
+		}
+	}
+
 }

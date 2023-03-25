@@ -99,7 +99,7 @@ public class Model_1Dumper {
             final String targetFileName = arguments[0];
             final String mimeType = arguments.length > 1 ? arguments[1] : "application/vnd.openmdx-xmi.wbxml";
             try {
-                System.out.println("Saving the model repository to " + targetFileName + "...");
+                System.out.println("Saving the model repository to " + targetFileName + "…");
                 final Model_1_0 model = Model_1Factory.getModel();
                 try (final FileOutputStream target = new FileOutputStream(targetFileName)) {
                     save(target, mimeType, model);

@@ -1,0 +1,15 @@
+digraph "Diagram PrimitiveTypes [Package org::oasis-open]" {
+
+	${ATTRIBUTE_STATEMENTS}
+
+	{
+		${LAYER[layer=0]}
+		${CLASS[name=org:oasis-open:XRI]}
+		${CLASS[name=org:oasis-open:xri]}
+	}
+	
+	${LAYERS}
+	${ASSOCIATION[name=*]}
+	${INSTANCE_OF}
+
+}

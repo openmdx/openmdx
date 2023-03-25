@@ -1,0 +1,29 @@
+digraph "Diagram Main [Package org::openmdx::database2]" {
+
+	${ATTRIBUTE_STATEMENTS}
+
+	{
+		${LAYER[layer=0]}
+		${CLASS[name=org:openmdx:base:Segment]}
+	}
+
+	{
+		${LAYER[layer=1]}
+		${CLASS[name=org:openmdx:database2:Segment]}
+	}
+
+	{
+		${LAYER[layer=2,mindist=3]}
+		${CLASS[name=org:openmdx:database2:Sequence]}
+	}
+
+	{
+		${LAYER[layer=3]}
+		${CLASS[name=org:openmdx:database2:NextValueResult]}
+	}
+	
+	${LAYERS}
+	${ASSOCIATION[name=*]}
+	${INSTANCE_OF}
+
+}

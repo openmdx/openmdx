@@ -1,0 +1,30 @@
+digraph "Diagram Main [Package org::openmdx::audit2]" {
+
+	${ATTRIBUTE_STATEMENTS}
+
+	{
+		${LAYER[layer=0]}
+		${CLASS[name=org:openmdx:base:Segment]}
+		${CLASS[name=org:openmdx:base:Modifiable,width=8]}
+	}
+
+	{
+		${LAYER[layer=1]}
+		${CLASS[name=org:openmdx:audit2:Segment]}
+	}
+
+	{
+		${LAYER[layer=2,mindist=3]}
+		${CLASS[name=org:openmdx:audit2:UnitOfWork]}
+	}
+
+	{
+		${LAYER[layer=3,mindist=3]}
+		${CLASS[name=org:openmdx:audit2:Involvement,width=10]}
+	}
+	
+	${LAYERS}
+	${ASSOCIATION[name=*]}
+	${INSTANCE_OF}
+
+}
