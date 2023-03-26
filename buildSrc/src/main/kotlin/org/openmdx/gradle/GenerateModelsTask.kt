@@ -64,15 +64,16 @@ open class GenerateModelsTask : JavaExec() {
 			"--pathMapSymbol=openMDX 2 ~ Portal (EMF)",
 			"--pathMapPath=file:" + File(project.getRootDir(), "portal/src/model/emf") + "/",
 			"--url=file:src/model/emf/models.uml",
+			"--xmi=emf",
 			"--out=" + File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + "-models.zip"),
 			"--openmdxjdo=" + File(project.getProjectDir(), "src/main/resources"),
-			"--markdown-annotations", 
+//			"--markdown-annotations", 
 			"--format=xmi1",
 			"--format=cci2",
 			"--format=jmi1",
 			"--format=jpa3",
 			"--format=mof1",
-			"--format=pimdoc:" + File(project.getProjectDir(), "src/model/doc"),
+//			"--format=pimdoc:" + File(project.getProjectDir(), "src/model/doc"),
 			"%"
 		)
 		doLast {
