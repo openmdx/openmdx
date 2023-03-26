@@ -482,7 +482,7 @@ public class Query_2Facade {
      * Tells whether a NOT_FOUND exception shall be thrown rather than 
      * returning an empty result set in case a requested object does not exist.
      * 
-     * @return <code>true</code> if a NOT_FOUND exception shall be thrown when 
+     * @return {@code true} if a NOT_FOUND exception shall be thrown when 
      * the requested object does not exist
      */
     public boolean isPreferringNotFoundException(){
@@ -492,7 +492,7 @@ public class Query_2Facade {
     /**
      * Tells whether a collection of objects or a single object shall be retrieved
      * 
-     * @return <code>true</code> if a collection of objects shall be retrieved
+     * @return {@code true} if a collection of objects shall be retrieved
      */
     public boolean isFindRequest(
     ){
@@ -502,7 +502,7 @@ public class Query_2Facade {
     /**
      * Tells whether a collection of objects or a single object shall be retrieved
      * 
-     * @return <code>true</code> if a collection of objects shall be retrieved
+     * @return {@code true} if a collection of objects shall be retrieved
      */
     public static boolean isFindRequest(
     	Path xri	
@@ -513,7 +513,7 @@ public class Query_2Facade {
     /**
      * Tells whether refresh is required before answering the query
      * 
-     * @return <code>true</code> if refresh is required before answering the query
+     * @return {@code true} if refresh is required before answering the query
      */
     public boolean isRefresh(){
         return this.delegate.isRefresh();
@@ -522,7 +522,7 @@ public class Query_2Facade {
     /**
      * Tells whether the object shall be refreshed before answering the query.
      * 
-     * @param refresh <code>true</code> if the object shall be refreshed before 
+     * @param refresh {@code true} if the object shall be refreshed before 
      * answering the query
      * @throws ResourceException 
      */

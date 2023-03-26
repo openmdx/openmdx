@@ -3,3 +3,5 @@
 .project
 .settings/
 bin/
+/tmlog*.log
+/tmlog.lck

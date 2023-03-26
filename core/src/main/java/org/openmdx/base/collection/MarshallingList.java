@@ -97,7 +97,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 3761694498107044406L;
     

@@ -76,7 +76,7 @@ final public class LightweightXADataSource
      * Constructor
      * 
      * @param transactionManager the transaction manager to enlist the data source
-     * @param url a database url of the form <code>jdbc:subprotocol:subname</code>
+     * @param url a database url of the form {@code jdbc:subprotocol:subname}
      */
 	LightweightXADataSource(
 		TransactionManager transactionManager,

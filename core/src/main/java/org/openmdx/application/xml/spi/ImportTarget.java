@@ -63,7 +63,7 @@ public interface ImportTarget {
     /**
      * Import an object
      * 
-     * @param mode the import mode, or <code>null</code> for <em>set</em> operations
+     * @param mode the import mode, or {@code null} for <em>set</em> operations
      * @param objectHolder the holder for the object to be imported
      * 
      * @exception ServiceException if the import fails

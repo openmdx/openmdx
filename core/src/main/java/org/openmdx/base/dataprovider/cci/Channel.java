@@ -17,7 +17,7 @@ public interface Channel extends Cloneable {
 	/**
 	 * Determines whether the request processor is in batching mode 
 	 * 
-	 * @return <code>true< if the request processor is in batching mode
+	 * @return {@code true< if the request processor is in batching mode
 	 */
 	boolean isBatching();
 
@@ -34,7 +34,7 @@ public interface Channel extends Cloneable {
 	 * The requests embedded by beginUnitOfWork() and endUnitOfWork() are 
 	 * processed together.
 	 * 
-	 * @return <code>true</code> if all requests have been executed successfully
+	 * @return {@code true} if all requests have been executed successfully
 	 *
 	 * @exception   ServiceException    ILLEGAL_STATE
 	 *              if the collection is not in working unit mode
@@ -54,7 +54,7 @@ public interface Channel extends Cloneable {
 	 * @param       resourceIdentifier
 	 *              the object's resource identifier
 	 *
-	 * @return      the reply, which may be <code>null</code> in synchronous mode only.
+	 * @return      the reply, which may be {@code null} in synchronous mode only.
 	 *              A non-existing instance leads to a runtime exception during access in batching mode.
 	 *              To avoid this behaviour you may use {@link #addFindRequest(Path)} with the same resource identifier.
 	 *
@@ -112,12 +112,12 @@ public interface Channel extends Cloneable {
 
 	/**
 	 * Adds a find request selecting all objects where the
-	 * <code>referenceFilter</code> evaluates to <code>true</code>.
+	 * {@code referenceFilter} evaluates to {@code true}.
 	 *
 	 * @param       referenceFilter
 	 *              an object may be included into the result sets only if it
 	 *              is accessible through the path passed as
-	 *              <code>referenceFilter</code>
+	 *              {@code referenceFilter}
 	 *
 	 * @return      the reply
 	 *

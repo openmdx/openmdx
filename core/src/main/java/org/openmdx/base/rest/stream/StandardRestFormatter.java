@@ -112,7 +112,7 @@ public class StandardRestFormatter implements RestFormatter {
     private static final boolean INCLUDE_STACK_TRACE = true;
     
     /**
-     * An <code>XMLOutputFactory</code> cache
+     * An {@code XMLOutputFactory} cache
      */
     private final ConcurrentMap<String,XMLOutputFactory> xmlOutputFactories = new ConcurrentHashMap<String, XMLOutputFactory>();
 
@@ -138,11 +138,11 @@ public class StandardRestFormatter implements RestFormatter {
     }
     
     /**
-     * Provide a <code>format()</code> target
+     * Provide a {@code format()} target
      * 
-     * @param output the <code>ObjectOutput</code>
+     * @param output the {@code ObjectOutput}
      * 
-     * @return a <code>Target</code>
+     * @return a {@code Target}
      */
     @Override
     public Target asTarget(
@@ -673,7 +673,7 @@ public class StandardRestFormatter implements RestFormatter {
      * 
      * @param value
      * 
-     * @return <code>true</code> if we are processing a struct value
+     * @return {@code true} if we are processing a struct value
      */
     private static boolean isStructureType(
         Map<?,?> value
@@ -794,12 +794,12 @@ public class StandardRestFormatter implements RestFormatter {
     }
 
 	/**
-	 * Determines whether value's type is modeled as <code>org::w3c::anyType</code>
+	 * Determines whether value's type is modeled as {@code org::w3c::anyType}
 	 * 
 	 * @param recordName the value holder's model type
 	 * @param feature the unqualified feature name
 	 * 
-	 * @return <code>true</code> if the value's type is modeled as <code>org::w3c::anyType</code>
+	 * @return {@code true} if the value's type is modeled as {@code org::w3c::anyType}
 	 */
 	private static boolean isAnyType(String recordName, String feature) {
 		return "value".equals(feature) && "org:openmdx:kernel:Condition".equals(recordName);

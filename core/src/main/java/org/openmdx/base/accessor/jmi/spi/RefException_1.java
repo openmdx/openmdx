@@ -196,7 +196,7 @@ public class RefException_1
     }
 
     /**
-     * Retrieves the exception domain of this <code>ServiceException</code>.
+     * Retrieves the exception domain of this {@code ServiceException}.
      *
      * @return the exception domain
      */
@@ -206,7 +206,7 @@ public class RefException_1
     }
 
     /**
-     * Retrieves the exception code of this <code>ServiceException</code>.
+     * Retrieves the exception code of this {@code ServiceException}.
      *
      * @return the exception code
      */

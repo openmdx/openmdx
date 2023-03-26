@@ -55,11 +55,11 @@ import org.openmdx.kernel.loading.Factory;
 import org.openmdx.kernel.log.SysLog;
 
 /**
- * This <code>TransactionManager<code> factory supports<ol>
- * <li><code>java:comp/TransactionManager</code> JNDI lookup <em>(Standard)</em>
- * <li><code>java:/TransactionManager</code> JNDI lookup <em>(JBoss)</em>
- * <li><code>java:appserver/TransactionManager JNDI lookup <em>(GlassFish)</em>
- * <li><code>com.ibm.ws.Transaction.TransactionManagerFactory.getTransactionManager()</code> <em>(WebSphere)</em> 
+ * This {@code TransactionManager{@code  factory supports<ol>
+ * <li>{@code java:comp/TransactionManager} JNDI lookup <em>(Standard)</em>
+ * <li>{@code java:/TransactionManager} JNDI lookup <em>(JBoss)</em>
+ * <li>{@code java:appserver/TransactionManager JNDI lookup <em>(GlassFish)</em>
+ * <li>{@code com.ibm.ws.Transaction.TransactionManagerFactory.getTransactionManager()} <em>(WebSphere)</em> 
  * </ul>
  * <p>
  * This class is registered in the org.openmdx.kernel.naming.ComponentEnvironment by
@@ -131,8 +131,8 @@ public class TransactionManagerFactory
      * Replace the JNDI and method name lists by a singleton list and an
      * empty list respectively.
      * 
-     * @param jndi <code>true</code> if the JNDI lookup was successful,
-     * <code>false</code> if the method call was successful
+     * @param jndi {@code true} if the JNDI lookup was successful,
+     * {@code false} if the method call was successful
      * @param names the single elemen array to be used in future
      */
     private void fix(
@@ -157,7 +157,7 @@ public class TransactionManagerFactory
     }
     
     /**
-     * Try to find the <code>TransactionManager</code> in the JNDI tree
+     * Try to find the {@code TransactionManager} in the JNDI tree
      * 
      * @param context the initial context
      * @param name the JNDI name to be tried
@@ -178,11 +178,11 @@ public class TransactionManagerFactory
     }
 
     /**
-     * Try to find the <code>TransactionManager</code> in the JNDI tree
+     * Try to find the {@code TransactionManager} in the JNDI tree
      *  
      * @param names the JNDI names to be tried
      * 
-     * @return the <code>TransactionManager</code> or <code>null</code>
+     * @return the {@code TransactionManager} or {@code null}
      */
     private TransactionManager byLookup(
         String[] names
@@ -209,7 +209,7 @@ public class TransactionManagerFactory
     }
 
     /**
-     * Try to find the <code>TransactionManager</code> by through a vendor specific factory
+     * Try to find the {@code TransactionManager} by through a vendor specific factory
      * 
      * @param name the method name to be tried
      */
@@ -235,11 +235,11 @@ public class TransactionManagerFactory
     }
     
     /**
-     * Try to find the <code>TransactionManager</code> through a vendor specific factory
+     * Try to find the {@code TransactionManager} through a vendor specific factory
      *  
      * @param names the method names to be tried
      * 
-     * @return the <code>TransactionManager</code> or <code>null</code>
+     * @return the {@code TransactionManager} or {@code null}
      */
     private TransactionManager byFactory(
         String[] names

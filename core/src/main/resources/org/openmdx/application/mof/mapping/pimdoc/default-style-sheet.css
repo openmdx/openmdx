@@ -1,0 +1,217 @@
+/*
+ * ====================================================================
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: Default PIMDoc HTML Style Sheet
+ * Owner:       the original authors.
+ * ====================================================================
+ *
+ * This software is published under the BSD license as listed below.
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * ------------------
+ * 
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
+ */
+
+/** 
+ * Page layout
+ */
+* {
+	box-sizing: border-box;
+}
+/* Clear floats after the columns */
+.page-section:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+.page-head h1 {
+	font-size: 3em;
+	margin: .25em;
+}
+.page-body {
+	margin: .5em;
+	background-color: rgb(76, 110, 166);
+}
+/* Create two unequal columns that floats next to each other */
+.page-column {
+	float: left;
+	padding: 10px;
+}
+.navigation-column {
+	width: 25%;
+}
+.frame-column {
+	width: 75%;
+    position: relative;
+    padding-bottom: 82vh;
+    height: 0;
+    overflow: hidden;
+}
+.frame-column iframe {
+    border: none;
+    position: absolute;
+    top: .6em;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+.column-head h2 {
+	color: white;
+}
+.column-body {
+	margin-top: 0;
+	margin-left: 0;
+	margin-right: .5em;
+	padding-top: .25em;
+	padding-left: .5em;
+	padding-right: .5em;
+	padding-bottom: .5em;
+	background-color: rgb(224, 242, 255);
+}
+
+/** 
+ * Font Style 
+ */
+body {
+	font-family: "Segoe UI", "Segoe", Tahoma, Helvetica, Arial, sans-serif;
+}
+.uml-abstract {
+	font-style:italic;
+}
+
+/*
+ * Navigation Style
+ */
+.navigation-summary {
+	background-color: rgb(104,154,204);
+	text-align: left;
+	font-weight: bold;
+	font-size: 1.17em;
+	padding: 0.25em;
+	color: white;
+}
+.uml-cluster p {
+	margin-top: 0.1em;
+	margin-bottom: 0.1em;
+	margin-left: 2em;
+}
+.uml-cluster summary {
+	margin-top: 0.1em;
+	margin-bottom: 0.1em;
+}
+.uml-symbol {
+	height: 1em
+} 
+
+/** 
+ * Detail Style
+ */
+.uml-element h2 {
+	font-weight: normal;
+	color: white;
+}
+.uml-element table {
+	margin-top: 0;
+	width: 100%;
+    position: relative;
+	border-style: inset;
+	border-color: rgb(223, 223, 223);
+}
+.uml-element summary {
+	background-color: rgb(104,154,204);
+	text-align: left;
+	font-weight: bold;
+	font-size: 1.17em;
+	padding: 0.25em;
+	color: white;
+}
+.uml-element thead {
+	background-color: rgb(104,154,204);
+	text-align: left;
+}
+.uml-table-head th {
+            padding: 0.3em;
+}
+.uml-element th {
+	color: white;
+}
+.uml-table-body td {
+            padding: 0.3em;
+}
+.uml-table-body tr:nth-child(even) {
+	background-color: rgb(212, 230, 242);
+}
+.uml-table-head tr:nth-child(even) {
+	background-color: rgb(125, 184, 244);
+	font-weight: lighter;
+}
+.uml-structure-fields-1 {
+	width: 20%;
+}
+.uml-structure-fields-2 {
+	width: 10%;
+}
+.uml-declared-operations-1 {
+	width: 50%
+}
+.uml-declared-attributes-5 {
+	width: 10%;
+}
+.uml-declared-attributes-4 {
+	width: 10%;
+}
+.uml-declared-attributes-3 {
+	width: 15%;
+}
+.uml-declared-attributes-2 {
+	width: 15%;
+}
+.uml-declared-references-5 {
+	width: 10%;
+}
+.uml-declared-references-4 {
+	width: 10%;
+}
+.uml-declared-references-3 {
+	width: 15%;
+}
+.uml-declared-references-2 {
+	width: 15%;
+}
+.album-cell {
+	width: 25%;
+}
+.album-thumbnail {
+	width: 100%;
+}

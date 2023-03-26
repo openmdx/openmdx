@@ -45,7 +45,7 @@
 package org.openmdx.base.dataprovider.layer.persistence.jdbc;
 
 /**
- * The <code>PersistenceLayerConfigurationEntries</code> class contains
+ * The {@code PersistenceLayerConfigurationEntries} class contains
  * constants identifying the configuration entries of the dataprovider's
  * persistence layer.
  */
@@ -59,11 +59,11 @@ public class LayerConfigurationEntries {
   }
 
   /**
-   * The precision used for date/time values since <code>1970-01-01T00:00:00Z</code> 
-   * <em>(defaults to <code>MICROSECONDS</code>).</em>
+   * The precision used for date/time values since {@code 1970-01-01T00:00:00Z} 
+   * <em>(defaults to {@code MICROSECONDS}).</em>
    * <p>
-   * The precision used for date/time values before <code>1970-01-01T00:00:00Z</code> is
-   * <code>MILLISECONDS</code>.
+   * The precision used for date/time values before {@code 1970-01-01T00:00:00Z} is
+   * {@code MILLISECONDS}.
    * 
    * @see java.util.concurrent.TimeUnit
    */
@@ -83,19 +83,19 @@ public class LayerConfigurationEntries {
 
   /**
      * Allows to specify an autonum column. The format is
-     * <code>dbObject.columnName [AS format]</code>, The database plugin
+     * {@code dbObject.columnName [AS format]}, The database plugin
      * handles autonum colums as follows:
      * <ul>
      * <li>autonum is applied for object slice creation with index 0
      * <li>when a column is specified as autonum and no value is supplied with
      * the create request, a value of the form
-     * <code>NEXTVAL(sequence name)</code> is generated in the
-     * <code>VALUES</code> clause of the <code>INSERT</code> statement
+     * {@code NEXTVAL(sequence name)} is generated in the
+     * {@code VALUES} clause of the {@code INSERT} statement
      * <li>a corresponding sequence with name
-     * <code>namespace_columnName_SEQ</code> must exist. For databases which
-     * do not support sequences a table <code>namespace_columnName_SEQ</code>
+     * {@code namespace_columnName_SEQ} must exist. For databases which
+     * do not support sequences a table {@code namespace_columnName_SEQ}
      * must exist with column nextval.
-     * <li>if the optional format is specified with <code>AS format</code> a
+     * <li>if the optional format is specified with {@code AS format} a
      * cast is applied to the sequence value, e.g. CAST(sequence name AS
      * CHAR(20)).
      */
@@ -152,7 +152,7 @@ public class LayerConfigurationEntries {
   static public final String DB_OBJECT_HINT = "dbObjectHint";
 
   /**
-     * <code>dbObjectForQuery</code> defines the primary view name of a
+     * {@code dbObjectForQuery} defines the primary view name of a
      * database object for a the specified type which is used for querying
      * objects. The view must return the single-valued attributes of an object
      * if a secondary object for query is configured. It must return object
@@ -161,23 +161,23 @@ public class LayerConfigurationEntries {
   static public final String DB_OBJECT_FOR_QUERY = "dbObjectForQuery";
 
   /**
-     * <code>dbObjectForQuery2</code> defines the optional secondary view
+     * {@code dbObjectForQuery2} defines the optional secondary view
      * name. The view must return the multi-valued attributes of an object.
      */
   static public final String DB_OBJECT_FOR_QUERY_2 = "dbObjectForQuery2";
 
   /**
-     * <code>dbObjectsForQueryJoinColumn</code> specifies the column which is
-     * used to join <code>dbObjectForQuery</code> and
-     * <code>dbObjectForQuery2</code>. If not specified the default join
-     * column is <code>object_id</code>. The SELECT is constructed as
-     * <code>SELECT * FROM 'dbObject' WHERE 'join column' IN (SELECT
-   * object_id FROM 'dbObject2' WHERE 'filter criteria')</code>.
+     * {@code dbObjectsForQueryJoinColumn} specifies the column which is
+     * used to join {@code dbObjectForQuery} and
+     * {@code dbObjectForQuery2}. If not specified the default join
+     * column is {@code object_id}. The SELECT is constructed as
+     * {@code SELECT * FROM 'dbObject' WHERE 'join column' IN (SELECT
+   * object_id FROM 'dbObject2' WHERE 'filter criteria')}.
      */
   static public final String DB_OBJECTS_FOR_QUERY_JOIN_COLUMN = "dbObjectsForQueryJoinColumn";
   
   /**
-     * The <code>sliced</code> format of a DB_OBJECT contains an index-slice
+     * The {@code sliced} format of a DB_OBJECT contains an index-slice
      * of an object in one row. The schema of a DB_OBJECT with format 'sliced'
      * is: object_objectId, object_referenceId, object_idx, \u00aba0\u00bb, ...,
      * \u00aban\u00bb$
@@ -380,9 +380,9 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
    * Reference id pattern
    * <p>
    * Format: a white space separated list of 
-   * <code>&lt;feature-name&gt;=&lt;reference-id-pattern&gt;</code> entries, 
+   * {@code &lt;feature-name&gt;=&lt;reference-id-pattern&gt;} entries, 
    * e.g.<ul>
-   * <li><code>beforeImage=^([^.]+)[.](.+)$ object=^([^.]+)[.](.+)$</code>
+   * <li>{@code beforeImage=^([^.]+)[.](.+)$ object=^([^.]+)[.](.+)$}
    * </ul>
    */
   static public final String REFERENCE_ID_PATTERN = "referenceIdPattern";
@@ -509,9 +509,9 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   /**
      * The type used to store boolean values, i.e. one of
      * <ul>
-     * <li><code>BOOLEAN</code> <i>(ignore <code>booleanFalse</code> and <code>booleanTrue</code> configurations)</i>
-     * <li><code>CHARACTER</code> <i>(default)</i>
-     * <li><code>NUMERIC</code>
+     * <li>{@code BOOLEAN} <i>(ignore {@code booleanFalse} and {@code booleanTrue} configurations)</i>
+     * <li>{@code CHARACTER} <i>(default)</i>
+     * <li>{@code NUMERIC}
      * </ul>
      */
   static public final String BOOLEAN_TYPE = "booleanType";
@@ -522,11 +522,11 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   
   /**
    * Stands for the date type specified by the JDBC driver SQL property
-   * <code>BOOLEAN.TYPE.STANDARD</code>, i.e. one of<ul>
-     * <li><code>BOOLEAN</code>
-     * <li><code>YN</code>
-     * <li><code>CHARACTER</code>
-     * <li><code>NUMERIC</code>
+   * {@code BOOLEAN.TYPE.STANDARD}, i.e. one of<ul>
+     * <li>{@code BOOLEAN}
+     * <li>{@code YN}
+     * <li>{@code CHARACTER}
+     * <li>{@code NUMERIC}
    * </ul>
    * 
    * @see LayerConfigurationEntries#BOOLEAN_TYPE_BOOLEAN
@@ -539,12 +539,12 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   /**
     * The value corresponding to Boolean.FALSE, e.g.
     * <ul>
-    * <li><code>false</code> <i>(fix in case of
-    * <code>booleanType BOOLEAN</code>
-    * <li><code>##false##</code> <i>(default in case of
-    * <code>booleanType CHARACTER</code>)</i>
-    * <li><code>0</code> <i>(default in case of
-    * <code>booleanType NUMERIC</code>)</i>
+    * <li>{@code false} <i>(fix in case of
+    * {@code booleanType BOOLEAN}
+    * <li>{@code ##false##} <i>(default in case of
+    * {@code booleanType CHARACTER})</i>
+    * <li>{@code 0} <i>(default in case of
+    * {@code booleanType NUMERIC})</i>
     * </ul>
     */
   static public final String BOOLEAN_FALSE = "booleanFalse";
@@ -552,24 +552,24 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   /**
     * The value corresponding to Boolean.TRUE, e.g.
     * <ul>
-    * <li><code>true</code> <i>(fix in case of
-    * <code>booleanType BOOLEAN</code>
-    * <li><code>##true##</code> <i>(default in case of
-    * <code>booleanType CHARACTER</code>)</i>
-    * <li><code>1</code> <i>(default in case of
-    * <code>booleanType NUMERIC</code>)</i>
+    * <li>{@code true} <i>(fix in case of
+    * {@code booleanType BOOLEAN}
+    * <li>{@code ##true##} <i>(default in case of
+    * {@code booleanType CHARACTER})</i>
+    * <li>{@code 1} <i>(default in case of
+    * {@code booleanType NUMERIC})</i>
     * </ul>
     */
   static public final String BOOLEAN_TRUE = "booleanTrue";
 
   /**
-     * The type used to store <code>org::w3c::duration</code> values, i.e. one
+     * The type used to store {@code org::w3c::duration} values, i.e. one
      * of
      * <ul>
-     * <li><code>STANDARD</code>  <i>(default)</i>
-     * <li><code>INTERVAL</code> <i>(domain defined by the database field definition)</i>
-     * <li><code>CHARACTER</code>
-     * <li><code>NUMERIC</code> <i>(domain <b>either</b> year-month <b>or</b> day-time intervals!)</i>
+     * <li>{@code STANDARD}  <i>(default)</i>
+     * <li>{@code INTERVAL} <i>(domain defined by the database field definition)</i>
+     * <li>{@code CHARACTER}
+     * <li>{@code NUMERIC} <i>(domain <b>either</b> year-month <b>or</b> day-time intervals!)</i>
      * </ul>
      * 
      * @see LayerConfigurationEntries#DURATION_TYPE_STANDARD
@@ -581,10 +581,10 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   
   /**
    * Stands for the date type specified by the JDBC driver SQL property
-   * <code>DURATION.TYPE.STANDARD</code>, i.e. one of<ul>
-   * <li><code>INTERVAL</code>
-   * <li><code>CHARACTER</code> 
-   * <li><code>NUMERIC</code>
+   * {@code DURATION.TYPE.STANDARD}, i.e. one of<ul>
+   * <li>{@code INTERVAL}
+   * <li>{@code CHARACTER} 
+   * <li>{@code NUMERIC}
    * </ul>
    * 
    * @see LayerConfigurationEntries#DATE_TYPE_DATE
@@ -615,11 +615,11 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   static public final String DURATION_TYPE_NUMERIC = "NUMERIC";
   
   /**
-    * The type used to store <code>org::w3c::date</code> values, i.e. one of
+    * The type used to store {@code org::w3c::date} values, i.e. one of
     * <ul>
-    * <li><code>STANDARD</code>
-    * <li><code>DATE</code>
-    * <li><code>CHARACTER</code> <i>(default)</i>
+    * <li>{@code STANDARD}
+    * <li>{@code DATE}
+    * <li>{@code CHARACTER} <i>(default)</i>
     * </ul>
     * 
     * @see LayerConfigurationEntries#DATE_TYPE_STANDARD
@@ -630,9 +630,9 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   
   /**
     * Stands for the date type specified by the JDBC driver SQL property
-    * <code>DATE.TYPE.STANDARD</code>, i.e. one of<ul>
-    * <li><code>DATE</code>
-    * <li><code>CHARACTER</code> <i>(default)</i>
+    * {@code DATE.TYPE.STANDARD}, i.e. one of<ul>
+    * <li>{@code DATE}
+    * <li>{@code CHARACTER} <i>(default)</i>
     * </ul>
     * 
     * @see LayerConfigurationEntries#DATE_TYPE_DATE
@@ -651,14 +651,14 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   static public final String DATE_TYPE_CHARACTER = "CHARACTER";
   
   /**
-     * The type used to store <code>org::w3c::dateTime</code> values, i.e. one
+     * The type used to store {@code org::w3c::dateTime} values, i.e. one
      * of
      * <ul>
-     * <li><code>STANDARD</code> <i>(default)</i>
-     * <li><code>TIMESTAMP</code>
-     * <li><code>TIMESTAMP_WITH_TIMEZONE</code>
-     * <li><code>CHARACTER</code>
-     * <li><code>NUMERIC</code>
+     * <li>{@code STANDARD} <i>(default)</i>
+     * <li>{@code TIMESTAMP}
+     * <li>{@code TIMESTAMP_WITH_TIMEZONE}
+     * <li>{@code CHARACTER}
+     * <li>{@code NUMERIC}
      * </ul>
      * 
      * @see LayerConfigurationEntries#DATETIME_TYPE_STANDARD
@@ -671,11 +671,11 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
 
   /**
    * Stands for the datetime type specified by the JDBC driver SQL property
-   * <code>DATETIME.TYPE.STANDARD</code>, i.e. one of<ul>
-   * <li><code>TIMESTAMP</code>
-   * <li><code>TIMESTAMP_WITH_TIMEZONE</code>
-   * <li><code>CHARACTER</code> <i>(default)</i>
-   * <li><code>NUMERIC</code>
+   * {@code DATETIME.TYPE.STANDARD}, i.e. one of<ul>
+   * <li>{@code TIMESTAMP}
+   * <li>{@code TIMESTAMP_WITH_TIMEZONE}
+   * <li>{@code CHARACTER} <i>(default)</i>
+   * <li>{@code NUMERIC}
    * </ul>
    * 
    * @see LayerConfigurationEntries#DATETIME_TYPE_TIMESTAMP
@@ -706,12 +706,12 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   static public final String DATETIME_TYPE_NUMERIC = "NUMERIC";
   
   /**
-     * The type used to store <code>org::w3c::time</code> values, i.e. one of
+     * The type used to store {@code org::w3c::time} values, i.e. one of
      * <ul>
-     * <li><code>STANDARD</code>
-     * <li><code>TIME</code>
-     * <li><code>CHARACTER</code> <i>(default)</i>
-     * <li><code>NUMERIC</code>
+     * <li>{@code STANDARD}
+     * <li>{@code TIME}
+     * <li>{@code CHARACTER} <i>(default)</i>
+     * <li>{@code NUMERIC}
      * </ul>
      * 
      * @see LayerConfigurationEntries#TIME_TYPE_STANDARD
@@ -723,10 +723,10 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
 
   /**
    * Stands for the time type specified by the JDBC driver SQL property
-   * <code>TIME.TYPE.STANDARD</code>, i.e. one of<ul>
-   * <li><code>TIME</code>
-   * <li><code>CHARACTER</code> <i>(default)</i>
-   * <li><code>NUMERIC</code>
+   * {@code TIME.TYPE.STANDARD}, i.e. one of<ul>
+   * <li>{@code TIME}
+   * <li>{@code CHARACTER} <i>(default)</i>
+   * <li>{@code NUMERIC}
    * </ul>
    * 
    * @see LayerConfigurationEntries#TIME_TYPE_TIME
@@ -736,14 +736,14 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   static public final String TIME_TYPE_STANDARD = "STANDARD";
 
   /**
-   * The time zone used to store <code>org::w3c::dateTime</code> values in
-   * case of <code>TIMESTAMP WITH TIMEZONE</code> database fields, e.g.<ul>
-   * <li><code>UTC</code>
-   * <li><code>GMT+02:00</code>
-   * <li><code>Europe/Zurich</code>
-   * <li>&#133;</code>
+   * The time zone used to store {@code org::w3c::dateTime} values in
+   * case of {@code TIMESTAMP WITH TIMEZONE} database fields, e.g.<ul>
+   * <li>{@code UTC}
+   * <li>{@code GMT+02:00}
+   * <li>{@code Europe/Zurich}
+   * <li>&#133;}
    * </ul>
-   * <i>Defaults to <code>TimeZone.getDefault().getID()</code> in 
+   * <i>Defaults to {@code TimeZone.getDefault().getID()} in 
    * absence of an entry.</i>
    * <p>
    * @see java.util.TimeZone#getDefault()
@@ -751,11 +751,11 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   static public final String DATETIME_TIMEZONE = "dateTimeZone";
 
   /**
-   * The daylight saving time zone used to store <code>org::w3c::dateTime</code> values in
-   * case of <code>TIMESTAMP WITH TIMEZONE</code> database fields, e.g.<ul>
-   * <li><code>Europe/Zurich CEST</code>
-   * <li><code>US/Eastern EDT</code>
-   * <li>&#133;</code>
+   * The daylight saving time zone used to store {@code org::w3c::dateTime} values in
+   * case of {@code TIMESTAMP WITH TIMEZONE} database fields, e.g.<ul>
+   * <li>{@code Europe/Zurich CEST}
+   * <li>{@code US/Eastern EDT}
+   * <li>&#133;}
    * </ul>
    * <i>Defaults to the same value as DATETIME_TIMEZONE in absence of an entry leading 
    * to incorrect values when switching from daylight saving time back to standard time</i>
@@ -781,9 +781,9 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
 
   /**
     * The result set type used for prepareStatement. The default is
-    * <code>RESULT_SET_TYPE_FORWARD_ONLY</code>. The result set types
-    * <code>RESULT_SET_TYPE_SCROLL_INSENSITIVE</code> and
-    * <code>RESULT_SET_TYPE_SCROLL_SENSITIVE</code> allow the plugin to use
+    * {@code RESULT_SET_TYPE_FORWARD_ONLY}. The result set types
+    * {@code RESULT_SET_TYPE_SCROLL_INSENSITIVE} and
+    * {@code RESULT_SET_TYPE_SCROLL_SENSITIVE} allow the plugin to use
     * the method ResultSet.absolute(n) for iteration requests in case of
     * non-indexed db objects. This may speed up iteration requests
     * significantly. However, server-side scrolling may not work for all JDBC
@@ -802,13 +802,13 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
 
   /**
    * Tells whether views shall be used to retrieve redundant columns.<br>
-   * Defaults to <code>true</code>.
+   * Defaults to {@code true}.
    */
   static public final String USE_VIEWS_FOR_REDUNDANT_COLUMNS = "useViewsForRedundantColumns";
   
   /**
    * Tells whether the preferences table shall be used to amend the configuration.<br>
-   * Defaults to <code>true</code>.
+   * Defaults to {@code true}.
    */
   static public final String USE_PREFERENCES_TABLE = "usePreferencesTable";
 
@@ -830,13 +830,13 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   
   /**
    * The flag tells whether large object input streams shall be copied into memory
-   * Defaults to <code>true</code>.
+   * Defaults to {@code true}.
    */
   static public final String GET_LARGE_OBJECT_BY_VALUE = "getLargeObjectByValue";
 
   /**
    * Tells whether descendants shall be deleted by the persistence layer.<br>
-   * Defaults to <code>true</code>.
+   * Defaults to {@code true}.
    */
   static public final String CASCADE_DELETES = "cascadeDeletes";
 
@@ -844,7 +844,7 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
    * Order nulls as empty string when ordering. If true, ORDER BY ... ASC is 
    * expanded to ORDER BY ... ASC NULLS FIRST. if false, ORDER BY ... DESC
    * is expanded to ORDER BY ... DESC NULLS LAST.
-   * Defaults to <code>false</code>
+   * Defaults to {@code false}
    */
   static public final String ORDER_NULLS_AS_EMPTY = "orderNullsAsEmpty";
   

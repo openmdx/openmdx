@@ -60,7 +60,7 @@ public class AliasTypeRecord
 {
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 6458160532979232117L;
     

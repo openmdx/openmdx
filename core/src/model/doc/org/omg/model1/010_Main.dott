@@ -1,0 +1,39 @@
+digraph "Diagram Main [Package org::omg::model1]" {
+
+	${ATTRIBUTE_STATEMENTS}
+
+	${CLASS[name=org:omg:model1:Segment]}
+	${LAYER[layer=2,mindist=3]}
+	${CLASS[name=org:omg:model1:AliasType]}
+	${CLASS[name=org:omg:model1:Association]}
+	${CLASS[name=org:omg:model1:AssociationEnd]}
+	${CLASS[name=org:omg:model1:Attribute]}
+	${CLASS[name=org:omg:model1:BehaviouralFeature]}
+	${CLASS[name=org:omg:model1:Class]}
+	${CLASS[name=org:omg:model1:Classifier]}
+	${CLASS[name=org:omg:model1:CollectionType]}
+	${CLASS[name=org:omg:model1:Constant]}
+	${CLASS[name=org:omg:model1:Constraint]}
+	${CLASS[name=org:omg:model1:Datatype]}
+	${CLASS[name=org:omg:model1:Element]}
+	${CLASS[name=org:omg:model1:EnumerationType]}
+	${CLASS[name=org:omg:model1:Exception]}
+	${CLASS[name=org:omg:model1:Feature]}
+	${CLASS[name=org:omg:model1:GeneralizableElement]}
+	${CLASS[name=org:omg:model1:Import]}
+	${CLASS[name=org:omg:model1:Namespace]}
+	${CLASS[name=org:omg:model1:Operation]}
+	${CLASS[name=org:omg:model1:Package]}
+	${CLASS[name=org:omg:model1:Parameter]}
+	${CLASS[name=org:omg:model1:PrimitiveType]}
+	${CLASS[name=org:omg:model1:Reference]}
+	${CLASS[name=org:omg:model1:StructuralFeature]}
+	${CLASS[name=org:omg:model1:StructureField]}
+	${CLASS[name=org:omg:model1:StructureType]}
+	${CLASS[name=org:omg:model1:Tag]}
+	${CLASS[name=org:omg:model1:TypedElement]}
+
+	${ASSOCIATION[name=*]}
+	${INSTANCE_OF}
+
+}

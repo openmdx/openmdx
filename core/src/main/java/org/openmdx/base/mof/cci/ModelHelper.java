@@ -100,7 +100,7 @@ public class ModelHelper {
 	 * 
 	 * @param featureDef
 	 * 
-	 * @return <code>true</code> if the given feature is derived
+	 * @return {@code true} if the given feature is derived
 	 * 
 	 * @throws ServiceException
 	 */
@@ -123,7 +123,7 @@ public class ModelHelper {
 	 * @param feature
 	 *            the feature to be inspected
 	 * 
-	 * @return <code>true</code> if the given feature is changeable
+	 * @return {@code true} if the given feature is changeable
 	 * 
 	 * @throws ServiceException
 	 */
@@ -140,7 +140,7 @@ public class ModelHelper {
 	 * @param feature
 	 *            the feature to be inspected
 	 * 
-	 * @return <code>true</code> if he feature is an attribute or a reference
+	 * @return {@code true} if he feature is an attribute or a reference
 	 *         stored as attribute
 	 * 
 	 * @throws ServiceException
@@ -155,10 +155,10 @@ public class ModelHelper {
 	 * Parse the multiplicity
 	 * 
 	 * @param value
-	 *            the value's String representation, or <code>null</code>
+	 *            the value's String representation, or {@code null}
 	 * 
-	 * @return the corresponding enumeration value, or <code>null</code> if the
-	 *         value does not match any of Multiplicity's <code>String</code>
+	 * @return the corresponding enumeration value, or {@code null} if the
+	 *         value does not match any of Multiplicity's {@code String}
 	 *         representations
 	 */
 	public static Multiplicity toMultiplicity(String value) {
@@ -244,7 +244,7 @@ public class ModelHelper {
 	 * @param classDef the object class
 	 * @param featureName the feature name
 	 * 
-	 * @return <code>true</code> if the given feature is is held by its core
+	 * @return {@code true} if the given feature is is held by its core
 	 *         instance
 	 * 
 	 * @throws ServiceException

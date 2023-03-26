@@ -72,7 +72,7 @@ public class NodeImpl<
      * Tests whether name and parent are consistent:
      * <em>The root node and only the root node has an empty name</em>
      * 
-     * @return <code>true</code> if name and parent are consistent
+     * @return {@code true} if name and parent are consistent
      */
     protected boolean isConsistent(){
         S same = sameObject();
@@ -82,16 +82,16 @@ public class NodeImpl<
     }
     
     /**name
-     * Sets a new value for the attribute <code>name</code>.
+     * Sets a new value for the attribute {@code name}.
      * <p>
      * This attribute is not changeable, i.e. its value can be set as long as the object is <em>TRANSIENT</em> or <em>NEW</em>
      * <p>
      * The root node has a node name of the empty string ("").
      * Every other node has an arbitrary node name, specified at the time it is created.
      * The only restrictions on this name are that it cannot be the empty string, and it cannot contain the slash character ('/').
-     * @param name The non-null new value for attribute <code>name</code>.
+     * @param name The non-null new value for attribute {@code name}.
      * 
-     * @exception NullPointerException if name is <code>null</code>
+     * @exception NullPointerException if name is {@code null}
      * @exception IllegalArgumentException if name contains a '/' character
      * 
      */
@@ -108,12 +108,12 @@ public class NodeImpl<
     }
 
     /**
-     * Retrieves the value for the attribute <code>name</code>.
+     * Retrieves the value for the attribute {@code name}.
      * <p>
      * The root node has a node name of the empty string ("").
      * Every other node has an arbitrary node name, specified at the time it is created.
      * The only restrictions on this name are that it cannot be the empty string, and it cannot contain the slash character ('/').
-     * @return The non-null value for attribute <code>name</code>.
+     * @return The non-null value for attribute {@code name}.
      */
     public java.lang.String getName(
     ){
@@ -122,13 +122,13 @@ public class NodeImpl<
     }
     
     /**
-     * Retrieves the value for the attribute <code>absolutePath</code>.
+     * Retrieves the value for the attribute {@code absolutePath}.
      * <p>
      * The root node has an absolute path name of "/".
      * Children of the root node have absolute path names of "/" + <node name>.
      * All other nodes have absolute path names of <parent's absolute path name> + "/" + <node name>.
      * Note that all absolute path names begin with the slash character.
-     * @return The non-null value for attribute <code>absolutePath</code>.
+     * @return The non-null value for attribute {@code absolutePath}.
      */
     public java.lang.String getAbsolutePath(
     ){

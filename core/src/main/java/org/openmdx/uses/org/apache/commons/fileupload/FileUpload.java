@@ -29,7 +29,7 @@ package org.openmdx.uses.org.apache.commons.fileupload;
  * <p>High level API for processing file uploads.</p>
  *
  * <p>This class handles multiple files per single HTML widget, sent using
- * <code>multipart/mixed</code> encoding type, as specified by
+ * {@code multipart/mixed} encoding type, as specified by
  * <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>.  Use {@link
  * #parseRequest(RequestContext)} to acquire a list
  * of {@link org.openmdx.uses.org.apache.commons.fileupload.FileItem FileItems} associated
@@ -57,7 +57,7 @@ public class FileUpload
      * Constructs an uninitialised instance of this class.
      *
      * A factory must be
-     * configured, using <code>setFileItemFactory()</code>, before attempting
+     * configured, using {@code setFileItemFactory()}, before attempting
      * to parse requests.
      *
      * @see #FileUpload(FileItemFactory)
@@ -68,7 +68,7 @@ public class FileUpload
 
     /**
      * Constructs an instance of this class which uses the supplied factory to
-     * create <code>FileItem</code> instances.
+     * create {@code FileItem} instances.
      *
      * @see #FileUpload()
      * @param fileItemFactory The factory to use for creating file items.

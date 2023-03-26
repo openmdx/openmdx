@@ -75,7 +75,8 @@ public class XMIExternalizer {
 		String[] arguments	
 	){
         String openmdxjdo = null;
-        String stXMIDialect = "poseidon";
+        String stXMIDialect = "emf";
+        boolean markdown = false;
         final List<String> pathMapSymbols = new ArrayList<String>();
         final List<String> pathMapPaths = new ArrayList<String>();
         final List<String> formats = new ArrayList<String>();
@@ -84,6 +85,20 @@ public class XMIExternalizer {
         int c;
         while ((c = g.getopt()) != -1) {
             switch(c) {
+	            case 'j':
+	                openmdxjdo = g.getOptarg();
+	                break;
+                case 'm':
+                    markdown = true;
+                    break;
+                case 'o':
+                    outFileName = g.getOptarg();
+                    break;
+	            case 'p':
+	                pathMapPaths.add(
+	                    g.getOptarg()
+	                );
+	                break;
                 case 's':
                     pathMapSymbols.add(
                         g.getOptarg()
@@ -94,33 +109,31 @@ public class XMIExternalizer {
                         g.getOptarg()
                     );
                     break;
-                case 'p':
-                    pathMapPaths.add(
-                        g.getOptarg()
-                    );
-                    break;
                 case 'u':
                     url = g.getOptarg();
                     break;
-                case 'j':
-                    openmdxjdo = g.getOptarg();
-                    break;
                 case 'x':
                     stXMIDialect = g.getOptarg();
-                    break;
-                case 'o':
-                    outFileName = g.getOptarg();
                     break;
             }
         }
         
         this.modelNames = getModelNames(arguments, g);
         this.formats = formats;
-        this.modelExternalizer = new ModelExternalizer_1(openmdxjdo);
+        this.modelExternalizer = new ModelExternalizer_1(openmdxjdo, markdown);
     	this.xmiFormat = toFormat(stXMIDialect);
     	this.pathMap = toPathMap(pathMapSymbols, pathMapPaths);
 	}
 
+	private final short xmiFormat;
+    private String url = null;
+    private String outFileName = "./out.jar";
+    
+    private final List<String> modelNames;
+    private final ModelExternalizer_1_0 modelExternalizer;
+    private final List<String> formats;
+    private final Map<String, String> pathMap;
+	
 	private List<String> getModelNames(
 		String[] arguments, 
 		final Getopt g
@@ -155,15 +168,6 @@ public class XMIExternalizer {
         System.out.println("INFO:    pathMap=" + pathMap);
 		return pathMap;
 	}
-
-	private final short xmiFormat;
-    private String url = null;
-    private String outFileName = "./out.jar";
-    
-    private final List<String> modelNames;
-    private final ModelExternalizer_1_0 modelExternalizer;
-    private final List<String> formats;
-    private final Map<String, String> pathMap;
 
     /**
      * Main
@@ -241,14 +245,15 @@ public class XMIExternalizer {
 		    args,
 		    "",
 		    new LongOpt[]{
-		        new LongOpt("pathMapSymbol", LongOpt.OPTIONAL_ARGUMENT, null, 's'),
-		        new LongOpt("pathMapPath", LongOpt.OPTIONAL_ARGUMENT, null, 'p'),
+		        new LongOpt("dataproviderVersion", LongOpt.REQUIRED_ARGUMENT, null, 'd'), // ignored
+		        new LongOpt("openmdxjdo", LongOpt.REQUIRED_ARGUMENT, null, 'j'),
+		        new LongOpt("markdown-annotations", LongOpt.NO_ARGUMENT, null, 'm'),
+		        new LongOpt("out", LongOpt.REQUIRED_ARGUMENT, null, 'o'),
+		        new LongOpt("pathMapPath", LongOpt.REQUIRED_ARGUMENT, null, 'p'),
+		        new LongOpt("pathMapSymbol", LongOpt.REQUIRED_ARGUMENT, null, 's'),
+		        new LongOpt("format", LongOpt.REQUIRED_ARGUMENT, null, 't'),
 		        new LongOpt("url", LongOpt.REQUIRED_ARGUMENT, null, 'u'),
 		        new LongOpt("xmi", LongOpt.REQUIRED_ARGUMENT, null, 'x'),
-		        new LongOpt("out", LongOpt.OPTIONAL_ARGUMENT, null, 'o'),
-		        new LongOpt("format", LongOpt.OPTIONAL_ARGUMENT, null, 't'),
-		        new LongOpt("openmdxjdo", LongOpt.OPTIONAL_ARGUMENT, null, 'j'),
-		        new LongOpt("dataproviderVersion", LongOpt.REQUIRED_ARGUMENT, null, 'd') // temporary option only
 		    }
 		);
 		return options;
@@ -260,10 +265,5 @@ public class XMIExternalizer {
 	private static List<String> getParameters(Getopt g, String[] args) {
 		return Arrays.asList(args).subList(g.getOptind(), args.length);
 	}
-
-	//------------------------------------------------------------------------
-	// Class Mode
-	//------------------------------------------------------------------------
-
 
 }

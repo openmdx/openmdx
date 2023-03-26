@@ -76,7 +76,7 @@ abstract class GeneralizableElementRecord<M extends Enum<M>>
     private String visibility;
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 7868622340563182666L;
 

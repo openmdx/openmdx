@@ -65,6 +65,7 @@ public class ClassMapper
 
     /**
      * Constructor 
+     * @param markdown TODO
      */
     public ClassMapper(
         ModelElement_1_0 classDef,        
@@ -72,7 +73,8 @@ public class ClassMapper
         Model_1_0 model,
         Format format, 
         String packageSuffix,
-        MetaData_1_0 metaData
+        MetaData_1_0 metaData, 
+        boolean markdown
     ) throws ServiceException {
         super(
             classDef,
@@ -81,6 +83,7 @@ public class ClassMapper
             format, 
             packageSuffix, 
             metaData, 
+            markdown, 
             new StandardPrimitiveTypeMapper()
         );
     }
@@ -97,7 +100,7 @@ public class ClassMapper
      */
     public void mapEnd() {
 //      this.trace("Class/End");
-        this.pw.println("}");
+        printLine("}");
     }
 
     /**
@@ -107,48 +110,41 @@ public class ClassMapper
     ) {
 //      this.trace("Class/Begin");
         this.fileHeader();
-        this.pw.println("package " + this.getNamespace(MapperUtils.getNameComponents(MapperUtils.getPackageName(this.classDef.getQualifiedName()))) + ";");
-        this.pw.println();
-        this.pw.println("/**");
-        this.pw.println(
-            MapperUtils.wrapText(
-                " * ",
-                "Constants for class <code>" + this.classDef.getName() + "</code>."
-            )
+        printLine("package " + this.getNamespace(MapperUtils.getNameComponents(MapperUtils.getPackageName(this.classDef.getQualifiedName()))) + ";");
+        newLine();
+        printLine("/**");
+        MapperUtils.wrapText(
+            " * ",
+            "Constants for class {@code " + this.classDef.getName() + "}.", 
+            this::printLine
         );
-        this.pw.println(" */");
-        this.pw.println("public interface " + this.classDef.getName() + "Class {");
-        this.pw.println();
-        this.pw.println("    /**");
-        this.pw.println(
-            MapperUtils.wrapText(
-                "     * ",
-                "Name of class <code>" + this.classDef.getName() + "</code>."
-            )
+        printLine(" */");
+        printLine("public interface " + this.classDef.getName() + "Class {");
+        newLine();
+        printLine("    /**");
+        MapperUtils.wrapText(
+            "     * ",
+            "Name of class {@code " + this.classDef.getName() + "}.", this::printLine
         );
-        this.pw.println("     */");
-        this.pw.println("    java.lang.String NAME = \"" + this.classDef.getName() + "\";");
-        this.pw.println();
-        this.pw.println("    /**");
-        this.pw.println(
-            MapperUtils.wrapText(
-                "     * ",
-                "Qalified name of class <code>" + this.classDef.getName() + "</code>."
-            )
+        printLine("     */");
+        printLine("    java.lang.String NAME = \"" + this.classDef.getName() + "\";");
+        newLine();
+        printLine("    /**");
+        MapperUtils.wrapText(
+            "     * ",
+            "Qualified name of class {@code " + this.classDef.getName() + "}.", this::printLine
         );
-        this.pw.println("     */");
-        this.pw.println("    java.lang.String QUALIFIED_NAME = \"" + this.classDef.getQualifiedName() + "\";");
-        this.pw.println();
-        this.pw.println("    /**");
-        this.pw.println(
-            MapperUtils.wrapText(
-                "     * ",
-                "XRI of class <code>" + this.classDef.getName() + "</code>."
-            )
+        printLine("     */");
+        printLine("    java.lang.String QUALIFIED_NAME = \"" + this.classDef.getQualifiedName() + "\";");
+        newLine();
+        printLine("    /**");
+        MapperUtils.wrapText(
+            "     * ",
+            "XRI of class {@code " + this.classDef.getName() + "}.", this::printLine
         );
-        this.pw.println("     */");
-        this.pw.println("    java.lang.String XRI = \"xri://@openmdx*" + this.classDef.getQualifiedName().replace(':', '.') + "\";");
-        this.pw.println();
+        printLine("     */");
+        printLine("    java.lang.String XRI = \"xri://@openmdx*" + this.classDef.getQualifiedName().replace(':', '.') + "\";");
+        newLine();
     }
 
 }

@@ -45,7 +45,7 @@
 package org.openmdx.application.mof.repository.layer.application;
 
 /**
- * The <code>LayerConfigurationEntries</code> class contains
+ * The {@code LayerConfigurationEntries} class contains
  * constants identifying the dataprovider configuration entries.
  */
 public class LayerConfigurationEntries {

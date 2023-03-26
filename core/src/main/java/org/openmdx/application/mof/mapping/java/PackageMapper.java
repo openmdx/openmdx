@@ -66,16 +66,13 @@ import org.openmdx.base.mof.cci.Model_1_0;
 @SuppressWarnings({"rawtypes","unchecked"})
 public class PackageMapper extends AbstractMapper {
 
-    /**
-     * Constructor 
-     */
     public PackageMapper(
         Writer writer,
         Model_1_0 model,
         Format format, 
         String packageSuffix, 
         MetaData_1_0 metaData, 
-        PrimitiveTypeMapper primitiveTypeMapper
+        boolean markdown, PrimitiveTypeMapper primitiveTypeMapper
     ) {
         super(
             writer,
@@ -83,7 +80,7 @@ public class PackageMapper extends AbstractMapper {
             format, 
             packageSuffix,
             metaData, 
-            primitiveTypeMapper
+            markdown, primitiveTypeMapper
         );
     }
 
@@ -97,19 +94,19 @@ public class PackageMapper extends AbstractMapper {
             org.openmdx.application.mof.mapping.java.metadata.Visibility.CCI,
             false
         ); 
-        this.pw.println("  public " + candidateType + "Query " + getMethodName(
+        printLine("  public " + candidateType + "Query " + getMethodName(
             "create",
             MapperUtils.getElementName(classifierDef.getQualifiedName()),
             "Query"
         ) + "();");
-        this.pw.println();
+        newLine();
     }
     
     //-----------------------------------------------------------------------
     public void mapEnd(
     ) {
         this.trace("Package/End.vm");
-        this.pw.println("}");        
+        printLine("}");        
     }
     
     //-----------------------------------------------------------------------
@@ -117,10 +114,10 @@ public class PackageMapper extends AbstractMapper {
         ClassDef classDef
     ) throws ServiceException {
         this.trace("Package/ClassAccessor");
-        this.pw.println("  public " + this.getType(classDef.getQualifiedName(), getFormat(), false) + "Class " + getMethodName(
+        printLine("  public " + this.getType(classDef.getQualifiedName(), getFormat(), false) + "Class " + getMethodName(
             "get" + MapperUtils.getElementName(classDef.getQualifiedName()) 
         ) + "();");
-        this.pw.println();        
+        newLine();        
     }
   
     //-----------------------------------------------------------------------
@@ -141,48 +138,44 @@ public class PackageMapper extends AbstractMapper {
         String authorityField = buffer.append("Authority").toString();
         String authorityType = this.getType("org:openmdx:base:Authority", getFormat(), false);
         String xri = MapperUtils.getAuthorityId(nameComponents);
-        this.pw.println(" /**");
-        this.pw.println(
-            MapperUtils.wrapText(
-                "  * ",
-                "The <code>AUTHORITY_XRI</code> <em>\"" + xri + 
-                "\"</em> may be used to look up the Authority the package <code>" + 
-                qualifiedPackageName + "</code> belongs to:"
-            )
+        printLine(" /**");
+        MapperUtils.wrapText(
+            "  * ",
+            "The {@code AUTHORITY_XRI} <em>\"" + xri + 
+            "\"</em> may be used to look up the Authority the package {@code " + 
+            qualifiedPackageName + "} belongs to:", this::printLine
         );
-        this.pw.println("  * <p>");
-        this.pw.println("  * <pre>");
-        this.pw.println("  *   " + authorityType + ' ' + authorityField + " = (" + authorityType + ")persistenceManager.getObjectById(");
-        this.pw.println("  *     " + authorityType + ".class,");
-        this.pw.println("  *     " + packageType + ".AUTHORITY_XRI");
-        this.pw.println("  *   );");
-        this.pw.println("  *   " + packageType + " " + packageField + " = (" + packageType + ')' + authorityField + ".getPackage();");
-        this.pw.println("  * </pre>");
-        this.pw.println("  * <p>");
-        this.pw.println("  *");
-        this.pw.println("  * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Class,java.lang.Object)");
-        this.pw.println("  */");
-        this.pw.println("package " + this.getNamespace(nameComponents) + ";");
-        this.pw.println();
-        this.pw.println("public interface " + packageType + "  extends javax.jmi.reflect.RefPackage {");  
-        this.pw.println();
-        this.pw.println(" /**");
-        this.pw.println(
-            MapperUtils.wrapText(
-                "  * ",
-                "The <code>AUTHORITY_XRI</code> <em>\"" + xri + 
-                "\"</em> may be used to look up the Authority the package <code>" + 
-                qualifiedPackageName + "</code> belongs to:"
-            )
+        printLine("  * <p>");
+        printLine("  * <pre>");
+        printLine("  *   " + authorityType + ' ' + authorityField + " = (" + authorityType + ")persistenceManager.getObjectById(");
+        printLine("  *     " + authorityType + ".class,");
+        printLine("  *     " + packageType + ".AUTHORITY_XRI");
+        printLine("  *   );");
+        printLine("  *   " + packageType + " " + packageField + " = (" + packageType + ')' + authorityField + ".getPackage();");
+        printLine("  * </pre>");
+        printLine("  * <p>");
+        printLine("  *");
+        printLine("  * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Class,java.lang.Object)");
+        printLine("  */");
+        printLine("package " + this.getNamespace(nameComponents) + ";");
+        newLine();
+        printLine("public interface " + packageType + "  extends javax.jmi.reflect.RefPackage {");  
+        newLine();
+        printLine(" /**");
+        MapperUtils.wrapText(
+            "  * ",
+            "The {@code AUTHORITY_XRI} <em>\"" + xri + 
+            "\"</em> may be used to look up the Authority the package {@code " + 
+            qualifiedPackageName + "} belongs to:", this::printLine
         );
-        this.pw.println("   * <p>");
+        printLine("   * <p>");
         MapperUtils.wrapText(
             "   * ",
-            "<em>Note: This is an extension to the JMI 1 standard.</em>"
+            "<em>Note: This is an extension to the JMI 1 standard.</em>", this::printLine
         );
-        this.pw.println("  */");
-        this.pw.println("  java.lang.String AUTHORITY_XRI = \"" + xri + "\";");   
-        this.pw.println();
+        printLine("  */");
+        printLine("  java.lang.String AUTHORITY_XRI = \"" + xri + "\";");   
+        newLine();
     }
 
     //-----------------------------------------------------------------------
@@ -197,7 +190,7 @@ public class PackageMapper extends AbstractMapper {
             null, // removableSuffix
             null // appendableSuffix
         );
-        this.pw.println("  public " + this.getType(structDef.getQualifiedName(), getFormat(), false) + " " + methodName + "(");
+        printLine("  public " + this.getType(structDef.getQualifiedName(), getFormat(), false) + " " + methodName + "(");
         int ii = 0;
         for (Iterator<?> i = structDef.getFields().iterator(); i.hasNext(); ii++) {
             StructuralFeatureDef fieldDef = (StructuralFeatureDef) i.next();
@@ -209,7 +202,7 @@ public class PackageMapper extends AbstractMapper {
                 fieldDef, ""
             );
         }
-        this.pw.println("  );");        
+        printLine("  );");        
     }
         
 }

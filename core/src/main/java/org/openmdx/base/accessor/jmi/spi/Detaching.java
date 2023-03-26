@@ -59,7 +59,7 @@ public class Detaching {
 	/**
 	 * Determines whether detaching shall be enabled or not
 	 * 
-	 * @return <code>true</code> if detaching is enabled
+	 * @return {@code true} if detaching is enabled
 	 */
 	public static boolean isEnabled(){
 		if(enabled == null) {

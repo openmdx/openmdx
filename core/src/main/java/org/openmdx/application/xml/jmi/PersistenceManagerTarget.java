@@ -90,7 +90,7 @@ public class PersistenceManagerTarget implements ImportTarget {
     }
     
     /**
-     * The Plug-In's <code>PersistenceManager</code>
+     * The Plug-In's {@code PersistenceManager}
      */
     private final PersistenceManager persistenceManager;
     

@@ -118,7 +118,7 @@ class SpecificationMapping_1  {
     private final ConcurrentMap<String, Constructor<? extends RefException>> exceptionConstructors = new ConcurrentHashMap<>();
     
     /**
-     * The <code>RefException_1(ServiceException)</code> constructor
+     * The {@code RefException_1(ServiceException)} constructor
      */
     private final Constructor<? extends RefException> defaultExceptionConstructor;
     
@@ -591,7 +591,7 @@ class SpecificationMapping_1  {
 		 * 
          * @param qualifiedClassName the qualified class name
 		 * 
-		 * @return the JPA3 class or <code>null</code>
+		 * @return the JPA3 class or {@code null}
 		 */
 		private static Class<? extends AbstractObject> getDetachedClass(
 			String qualifiedClassName

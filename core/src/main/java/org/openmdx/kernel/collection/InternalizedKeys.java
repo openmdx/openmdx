@@ -96,7 +96,7 @@ public class InternalizedKeys {
      * 
      * @param key
      * 
-     * @return <code>true</code> if the given key is internalizable
+     * @return {@code true} if the given key is internalizable
      */
     public static boolean isInternalizable(
         Object key
@@ -112,8 +112,8 @@ public class InternalizedKeys {
      * Normalize the key to use an identity hash map.
      * <p>
      * This method supports
-     * <li><code>String</code>s
-     * <li><code>Integer</code>s in the range <code>-128</code> to <code>128</code>
+     * <li>{@code String}s
+     * <li>{@code Integer}s in the range {@code -128} to {@code 128}
      * </ul>
      * 
      * @param <T>
@@ -126,12 +126,12 @@ public class InternalizedKeys {
      * @exception IllegalArgumentException
      *                unless the key is one of
      *                <ul>
-     *                <li>a <code>java.lang.String</code> instance
-     *                <li>a <code>java.lang.Instance</code> instance in the range
-     *                <code>-128</code> to <code>127</code>
+     *                <li>a {@code java.lang.String} instance
+     *                <li>a {@code java.lang.Instance} instance in the range
+     *                {@code -128} to {@code 127}
      *                </ul>
      * @exception NullPointerException
-     *                if the key is <code>null</code>
+     *                if the key is {@code null}
      * @exception IllegalArgumentException
      *                if the key can't be internalized
      */

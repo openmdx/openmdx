@@ -46,7 +46,7 @@ package org.openmdx.base.mof.cci;
 
 
 /**
- * The <code>PrimitiveTypes</code> class contains the
+ * The {@code PrimitiveTypes} class contains the
  * supported primitive types.
  */
 public class PrimitiveTypes {

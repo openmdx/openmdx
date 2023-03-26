@@ -121,7 +121,7 @@ public interface RefPackage_1_0 extends RefPackage {
     * Retrieve the RefPackage's view context
     * 
     * @return the RefPackage's view context in case of a view,
-    * <code>null</code> otherwise
+    * {@code null} otherwise
     */
    InteractionSpec refInteractionSpec();
 

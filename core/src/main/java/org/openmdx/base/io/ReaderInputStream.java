@@ -22,8 +22,8 @@ import java.io.InputStream;
 import java.io.Reader;
 
 /**
- * Adapts a <code>Reader</code> as an <code>InputStream</code>.
- * Adapted from <code>StringInputStream</code>.
+ * Adapts a {@code Reader} as an {@code InputStream}.
+ * Adapted from {@code StringInputStream}.
  *
  */
 public class ReaderInputStream extends InputStream {
@@ -39,22 +39,22 @@ public class ReaderInputStream extends InputStream {
     private int begin;
 
     /**
-     * Construct a <code>ReaderInputStream</code>
-     * for the specified <code>Reader</code>.
+     * Construct a {@code ReaderInputStream}
+     * for the specified {@code Reader}.
      *
-     * @param reader   <code>Reader</code>.  Must not be <code>null</code>.
+     * @param reader   {@code Reader}.  Must not be {@code null}.
      */
     public ReaderInputStream(Reader reader) {
         in = reader;
     }
 
     /**
-     * Construct a <code>ReaderInputStream</code>
-     * for the specified <code>Reader</code>,
+     * Construct a {@code ReaderInputStream}
+     * for the specified {@code Reader},
      * with the specified encoding.
      *
-     * @param reader     non-null <code>Reader</code>.
-     * @param encoding   non-null <code>String</code> encoding.
+     * @param reader     non-null {@code Reader}.
+     * @param encoding   non-null {@code String} encoding.
      */
     public ReaderInputStream(Reader reader, String encoding) {
         this(reader);
@@ -66,11 +66,11 @@ public class ReaderInputStream extends InputStream {
     }
 
     /**
-     * Reads from the <code>Reader</code>, returning the same value.
+     * Reads from the {@code Reader}, returning the same value.
      *
-     * @return the value of the next character in the <code>Reader</code>.
+     * @return the value of the next character in the {@code Reader}.
      *
-     * @exception IOException if the original <code>Reader</code> fails to be read
+     * @exception IOException if the original {@code Reader} fails to be read
      */
     @Override
     public synchronized int read() throws IOException {
@@ -96,7 +96,7 @@ public class ReaderInputStream extends InputStream {
     }
 
     /**
-     * Reads from the <code>Reader</code> into a byte array
+     * Reads from the {@code Reader} into a byte array
      *
      * @param b  the byte array to read into
      * @param off the offset in the byte array

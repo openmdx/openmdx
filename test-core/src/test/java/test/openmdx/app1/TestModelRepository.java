@@ -71,6 +71,7 @@ import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.junit5.JDOExtension;
 import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -106,9 +107,11 @@ public class TestModelRepository {
      */
     @Test
     public void loadForeignModel() throws ServiceException, IOException{
-        Model_1_0 model1 = loadForeignModel("xri://+zip*(xri://+resource/test/opencrx/openmdxmof.wbxml.zip)/openmdxmof.wbxml");
+        Model_1_0 model1 = loadForeignModel(
+        	"xri://+zip*(" + Resources.toResourceXRI("test/opencrx/openmdxmof.wbxml.zip") + ")/openmdxmof.wbxml"
+        );
         Map<Path, ModelElement_1_0> content1 = getContent(model1);
-        Model_1_0 model2 = loadForeignModel("xri://+resource/test/opencrx/openmdxmof.wbxml");
+        Model_1_0 model2 = loadForeignModel(Resources.toResourceXRI("test/opencrx/openmdxmof.wbxml"));
         Map<Path, ModelElement_1_0> content2 = getContent(model2);
         assertRepositoryEquality(content1, content2);
     }

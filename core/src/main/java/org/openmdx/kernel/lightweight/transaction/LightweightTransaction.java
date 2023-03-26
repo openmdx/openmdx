@@ -944,9 +944,9 @@ final class LightweightTransaction implements Transaction {
     }
         
     /**
-     * Provide the <code>String</code> representation of the transaction state
+     * Provide the {@code String} representation of the transaction state
      * 
-     * @return the <code>String</code> representation of the transaction state
+     * @return the {@code String} representation of the transaction state
      */
     private String getStatusAsString(){
         return  status >= 0 && status < STATI.length ? STATI[status] : Integer.toString(status); 

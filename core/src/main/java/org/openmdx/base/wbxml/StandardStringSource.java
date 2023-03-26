@@ -114,7 +114,7 @@ public class StandardStringSource implements StringSource {
      * 
      * @param charset
      * 
-     * @return <code>true</code> if the given character set is supported 
+     * @return {@code true} if the given character set is supported 
      */
     public static boolean isSupported(
         Charset charset

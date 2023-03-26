@@ -159,10 +159,10 @@ public class AuditQueries {
     /**
      * Retrieve the units of work any of the given objects is involved in
      * 
-     * @param from earlier units of works are excluded unless <code>from</code>
-     * is <code>null</code> 
-     * @param units of works starting then or later are excluded unless <code>to</code>
-     * is <code>null</code> 
+     * @param from earlier units of works are excluded unless {@code from}
+     * is {@code null} 
+     * @param units of works starting then or later are excluded unless {@code to}
+     * is {@code null} 
      * @param modifiable the objects which are involved in these units of work
      * 
      * @return the units of work any of the given objects is involved in
@@ -233,10 +233,10 @@ public class AuditQueries {
      * Retrieve the units of work objects with a given object id pattern are 
      * involved in.
      * 
-     * @param from earlier units of works are excluded unless <code>from</code>
-     * is <code>null</code> 
-     * @param units of works starting then or later are excluded unless <code>to</code>
-     * is <code>null</code> 
+     * @param from earlier units of works are excluded unless {@code from}
+     * is {@code null} 
+     * @param units of works starting then or later are excluded unless {@code to}
+     * is {@code null} 
      * @param modifable a usually object id pattern based collection of objects involved
      * in any of the returned units of work
      * 
@@ -320,13 +320,13 @@ public class AuditQueries {
     /**
      * Retrieve the units of work a given object was touched in
      * 
-     * @param from earlier units of works are excluded unless <code>from</code>
-     * is <code>null</code> 
-     * @param units of works starting then or later are excluded unless <code>to</code>
-     * is <code>null</code> 
+     * @param from earlier units of works are excluded unless {@code from}
+     * is {@code null} 
+     * @param units of works starting then or later are excluded unless {@code to}
+     * is {@code null} 
      * @param attributes the units of work are restricted to the ones which 
-     * modified any of the given attributes unless <code>attributes</code> is 
-     * <code>null</code> 
+     * modified any of the given attributes unless {@code attributes} is 
+     * {@code null} 
      * @param modifiable the object which was touched in the returned units of work
      * 
      * @return the units of work modifiable was touched in
@@ -379,13 +379,13 @@ public class AuditQueries {
      * Retrieve the units of work objects with a given object id pattern are 
      * involved in.
      * 
-     * @param from earlier units of works are excluded unless <code>from</code>
-     * is <code>null</code> 
-     * @param units of works starting then or later are excluded unless <code>to</code>
-     * is <code>null</code> 
+     * @param from earlier units of works are excluded unless {@code from}
+     * is {@code null} 
+     * @param units of works starting then or later are excluded unless {@code to}
+     * is {@code null} 
      * @param attributes the units of work are restricted to the ones which 
-     * modified any of the given attributes unless <code>attributes</code> is 
-     * <code>null</code> 
+     * modified any of the given attributes unless {@code attributes} is 
+     * {@code null} 
      * @param modifable a usually object id pattern based collection of objects touched
      * by any of the returned units of work
      * 
@@ -450,10 +450,10 @@ public class AuditQueries {
     /**
      * Retrieve the units of work a given object was created in
      * 
-     * @param from earlier units of works are excluded unless <code>from</code>
-     * is <code>null</code> 
-     * @param units of works starting then or later are excluded unless <code>to</code>
-     * is <code>null</code> 
+     * @param from earlier units of works are excluded unless {@code from}
+     * is {@code null} 
+     * @param units of works starting then or later are excluded unless {@code to}
+     * is {@code null} 
      * @param createdObjects the object which was created in the returned units of work
      * 
      * @return the units of work modifiable was created in
@@ -494,10 +494,10 @@ public class AuditQueries {
      * Retrieve the units of work objects with a given object id pattern were 
      * created in.
      * 
-     * @param from earlier units of works are excluded unless <code>from</code>
-     * is <code>null</code> 
-     * @param units of works starting then or later are excluded unless <code>to</code>
-     * is <code>null</code> 
+     * @param from earlier units of works are excluded unless {@code from}
+     * is {@code null} 
+     * @param units of works starting then or later are excluded unless {@code to}
+     * is {@code null} 
      * @param modifable a usually object id pattern based collection of objects created
      * by any of the returned units of work
      * 
@@ -551,10 +551,10 @@ public class AuditQueries {
     /**
      * Retrieve the units of work a given object was removed in
      * 
-     * @param from earlier units of works are excluded unless <code>from</code>
-     * is <code>null</code> 
-     * @param units of works starting then or later are excluded unless <code>to</code>
-     * is <code>null</code> 
+     * @param from earlier units of works are excluded unless {@code from}
+     * is {@code null} 
+     * @param units of works starting then or later are excluded unless {@code to}
+     * is {@code null} 
      * @param removedObjects the object which was created in the returned units of work
      * 
      * @return the units of work modifiable was created in
@@ -597,10 +597,10 @@ public class AuditQueries {
      * Retrieve the units of work objects with a given object id pattern were 
      * removed in.
      * 
-     * @param from earlier units of works are excluded unless <code>from</code>
-     * is <code>null</code> 
-     * @param units of works starting then or later are excluded unless <code>to</code>
-     * is <code>null</code> 
+     * @param from earlier units of works are excluded unless {@code from}
+     * is {@code null} 
+     * @param units of works starting then or later are excluded unless {@code to}
+     * is {@code null} 
      * @param modifable a usually object id pattern based collection of objects removed
      * by any of the returned units of work
      * 
@@ -678,10 +678,10 @@ public class AuditQueries {
      * Retrieve the units of work within a given time range
      * 
      * @param persistenceManager the persistence manager to be used
-     * @param from earlier units of works are excluded unless <code>from</code>
-     * is <code>null</code> 
-     * @param to later units of works are excluded unless <code>to</code>
-     * is <code>null</code> 
+     * @param from earlier units of works are excluded unless {@code from}
+     * is {@code null} 
+     * @param to later units of works are excluded unless {@code to}
+     * is {@code null} 
      * 
      * @return the selected units of work
      */

@@ -52,7 +52,7 @@ import org.openmdx.base.query.Filter;
 import org.openmdx.state2.spi.LegacyPlugInHelper;
 
 /**
- * Legacy <code>StateCapable</code> container
+ * Legacy {@code StateCapable} container
  */
 public class LegacyStateCapableContainer_1 extends StateCapableContainer_1 {
 
@@ -74,7 +74,7 @@ public class LegacyStateCapableContainer_1 extends StateCapableContainer_1 {
 	}
 
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = 6629852248986498333L;
 

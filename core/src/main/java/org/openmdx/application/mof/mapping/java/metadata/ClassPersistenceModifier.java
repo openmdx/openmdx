@@ -77,15 +77,15 @@ public enum ClassPersistenceModifier {
     private final String xmlFormat;
 
     /**
-     * Retrieve a <code>ClassPersistenceModifier</code> from its XML representation-
+     * Retrieve a {@code ClassPersistenceModifier} from its XML representation-
      * 
      * @param xmlFormat
      * 
-     * @return the corresponding <code>ClassPersistenceModifier</code> value
+     * @return the corresponding {@code ClassPersistenceModifier} value
      * 
-     * @throws IllegalArgumentException if <code>xmlFormat</code> is
-     * neither <code>null</code> nor representing any of the 
-     * <code>ClassPersistenceModifier</code> values. 
+     * @throws IllegalArgumentException if {@code xmlFormat} is
+     * neither {@code null} nor representing any of the 
+     * {@code ClassPersistenceModifier} values. 
      */
     public static ClassPersistenceModifier fromXMLFormat(
         String xmlFormat

@@ -91,7 +91,7 @@ public abstract class AbstractRestPort implements Port<RestConnection> {
 	/**
 	 * Determines whether this port has a delegate
 	 * 
-	 * @return <code>true</code> if this port has a delegate
+	 * @return {@code true} if this port has a delegate
 	 */
 	protected boolean hasDelegate(){
 		return this.delegate != null;
@@ -101,7 +101,7 @@ public abstract class AbstractRestPort implements Port<RestConnection> {
 	 * Create a new delegate interaction if this port has a delegate
 	 * 
 	 * @param connection
-	 * @return the delegate interaction ord <code>null</code> if this port has no delegate
+	 * @return the delegate interaction ord {@code null} if this port has no delegate
 	 * @throws ResourceException
 	 */
 	protected Interaction newDelegateInteraction(

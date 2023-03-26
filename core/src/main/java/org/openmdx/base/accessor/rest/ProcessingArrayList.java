@@ -55,7 +55,7 @@ import org.openmdx.base.accessor.cci.DataObject_1_0;
 class ProcessingArrayList extends ArrayList<DataObject_1_0> implements ProcessingList {
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -9123399888875427632L;
 

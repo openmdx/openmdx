@@ -67,6 +67,7 @@ public class StructureMapper extends AbstractMapper {
     
     /**
      * Constructor 
+     * @param markdown TODO
      */
     public StructureMapper(
         ModelElement_1_0 structDef,
@@ -75,6 +76,7 @@ public class StructureMapper extends AbstractMapper {
         Format format, 
         String packageSuffix, 
         MetaData_1_0 metaData, 
+        boolean markdown, 
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
@@ -83,6 +85,7 @@ public class StructureMapper extends AbstractMapper {
             format, 
             packageSuffix,
             metaData, 
+            markdown, 
             primitiveTypeMapper
         );
         this.structDef = new StructDef(
@@ -100,21 +103,18 @@ public class StructureMapper extends AbstractMapper {
     ) throws ServiceException {
         this.trace("StructureType/FieldGetSparseArray");
         this.members.add(fieldDef.getBeanGenericName());
-        this.pw.println("  /**");
-        this.pw.println(MapperUtils.wrapText(
+        printLine("  /**");
+        MapperUtils.wrapText(
             "   * ",
-            "Retrieves a SparseArray containing all the elements for the structure field <code>" + fieldDef.getName() + "</code>."
-        ));
-        if (fieldDef.getAnnotation() != null) {
-            this.pw.println("   * <p>");
-            MapperUtils.wrapText("   * ", fieldDef.getAnnotation());
-        }
-        this.pw.println("   * @return A SparseArray containing all elements for this structure field.");
-        this.pw.println("   */");
+            "Retrieves a SparseArray containing all the elements for the structure field {@code " + fieldDef.getName() + "}.", this::printLine
+        );
+        mapAnnotation("   * ", fieldDef);
+        printLine("   * @return A SparseArray containing all elements for this structure field.");
+        printLine("   */");
         String memberType = this.getType(fieldDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER, null);
-        this.pw.println("  public " + memberType + " " + this.getMethodName(fieldDef.getBeanGetterName()) + "(");
-        this.pw.println("  );");
-        this.pw.println();
+        printLine("  public " + memberType + " " + this.getMethodName(fieldDef.getBeanGetterName()) + "(");
+        printLine("  );");
+        newLine();
     }
 
     //-----------------------------------------------------------------------
@@ -123,21 +123,18 @@ public class StructureMapper extends AbstractMapper {
     ) throws ServiceException {
         this.trace("StructureType/FieldGetSet");
         this.members.add(fieldDef.getBeanGenericName());
-        this.pw.println("  /**");
-        this.pw.println(MapperUtils
+        printLine("  /**");
+        MapperUtils
             .wrapText(
                 "   * ",
-                "Retrieves a set containing all the elements for the structure field <code>" + fieldDef.getName() + "</code>."));
-        if (fieldDef.getAnnotation() != null) {
-            this.pw.println("   * <p>");
-            this.pw.println(MapperUtils.wrapText("   * ", fieldDef.getAnnotation()));
-        }
-        this.pw.println("   * @return A set containing all elements for this structure field.");
-        this.pw.println("   */");
+                "Retrieves a set containing all the elements for the structure field {@code " + fieldDef.getName() + "}.", this::printLine);
+        mapAnnotation("   * ", fieldDef);
+        printLine("   * @return A set containing all elements for this structure field.");
+        printLine("   */");
         String memberType = this.getType(fieldDef, "java.util.Set", Boolean.TRUE, TypeMode.MEMBER, null);
-        this.pw.println("  public " + memberType + " " + this.getMethodName(fieldDef.getBeanGetterName()) + "(");
-        this.pw.println("  );");        
-        this.pw.println();
+        printLine("  public " + memberType + " " + this.getMethodName(fieldDef.getBeanGetterName()) + "(");
+        printLine("  );");        
+        newLine();
     }
 
     //-----------------------------------------------------------------------
@@ -147,21 +144,18 @@ public class StructureMapper extends AbstractMapper {
         this.trace("StructureType/FieldGetList");
         this.members.add(fieldDef.getBeanGenericName());
         if(getFormat() != Format.JMI1) {
-            this.pw.println("  /**");
-            this.pw.println(MapperUtils
+            printLine("  /**");
+            MapperUtils
                 .wrapText(
                     "   * ",
-                    "Retrieves a list containing all the elements for the structure field <code>" + fieldDef.getName() + "</code>."));
-            if (fieldDef.getAnnotation() != null) {
-                this.pw.println("   * <p>");
-                this.pw.println(MapperUtils.wrapText("   * ", fieldDef.getAnnotation()));
-            }
-            this.pw.println("   * @return A list containing all elements for this structure field.");
-            this.pw.println("   */");
+                    "Retrieves a list containing all the elements for the structure field {@code " + fieldDef.getName() + "}.", this::printLine);
+            mapAnnotation("   * ", fieldDef);
+            printLine("   * @return A list containing all elements for this structure field.");
+            printLine("   */");
             String memberType = this.getType(fieldDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER, null);
-            this.pw.println("  public " + memberType + " " + this.getMethodName(fieldDef.getBeanGetterName()) + "(");
-            this.pw.println("  );");        
-            this.pw.println();
+            printLine("  public " + memberType + " " + this.getMethodName(fieldDef.getBeanGetterName()) + "(");
+            printLine("  );");        
+            newLine();
         }
     }
 
@@ -171,18 +165,15 @@ public class StructureMapper extends AbstractMapper {
     ) throws ServiceException {
         this.trace("StructureType/FieldGet1_1");
         this.members.add(structureFieldDef.getBeanGenericName());
-        this.pw.println("  /**");
-        this.pw.println("   * Retrieves the value for the structure field <code>" + structureFieldDef.getName() + "</code>.");
-        if (structureFieldDef.getAnnotation() != null) {
-            this.pw.println("   * <p>");
-            this.pw.println(MapperUtils.wrapText("   * ", structureFieldDef.getAnnotation()));
-        }
-        this.pw.println("   * @return The non-null value for structure field <code>" + structureFieldDef.getName() + "</code>.");
-        this.pw.println("   */");
+        printLine("  /**");
+        printLine("   * Retrieves the value for the structure field {@code " + structureFieldDef.getName() + "}.");
+        mapAnnotation("   * ", structureFieldDef);
+        printLine("   * @return The non-null value for structure field {@code " + structureFieldDef.getName() + "}.");
+        printLine("   */");
         String memberType = this.getType(structureFieldDef.getQualifiedTypeName(), getFormat(), false);
-        this.pw.println("  public " + memberType + " " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
-        this.pw.println("  );");        
-        this.pw.println();
+        printLine("  public " + memberType + " " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
+        printLine("  );");        
+        newLine();
     }
 
     //-----------------------------------------------------------------------
@@ -191,19 +182,15 @@ public class StructureMapper extends AbstractMapper {
     ) throws ServiceException {
         this.trace("StructureType/FieldGet0_1");
         this.members.add(structureFieldDef.getBeanGenericName());
-        this.pw.println("  /**");
-        this.pw.println("   * Retrieves the value for the optional structure field <code>" + structureFieldDef.getName() + "</code>.");
-        if (structureFieldDef.getAnnotation() != null) {
-            this.pw.println("   * <p>");
-            this.pw.println(MapperUtils
-                .wrapText("   * ", structureFieldDef.getAnnotation()));
-        }
-        this.pw.println("   * @return The possibly null value for structure field <code>" + structureFieldDef.getName() + "</code>.");
-        this.pw.println("   */");
+        printLine("  /**");
+        printLine("   * Retrieves the value for the optional structure field {@code " + structureFieldDef.getName() + "}.");
+        mapAnnotation("   * ", structureFieldDef);
+        printLine("   * @return The possibly null value for structure field {@code " + structureFieldDef.getName() + "}.");
+        printLine("   */");
         String memberType = this.getType(structureFieldDef.getQualifiedTypeName(), getFormat(), true);
-        this.pw.println("  public " + memberType + " " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
-        this.pw.println("  );");        
-        this.pw.println();
+        printLine("  public " + memberType + " " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
+        printLine("  );");        
+        newLine();
     }
 
     //-----------------------------------------------------------------------
@@ -212,83 +199,74 @@ public class StructureMapper extends AbstractMapper {
     ) {
         this.trace("StructureType/FieldGetStream.vm");
         this.members.add(structureFieldDef.getBeanGenericName());
-        this.pw.println("");
+        printLine("");
         if (PrimitiveTypes.BINARY.equals(structureFieldDef.getQualifiedTypeName())) {
-            this.pw.println("  /**");
-            this.pw.println(MapperUtils
+            printLine("  /**");
+            MapperUtils
                 .wrapText(
                     "   * ",
-                    "Retrieves the value as java.io.InputStream for the binary structure field <code>" + structureFieldDef.getName() + "</code>."));
-            if (structureFieldDef.getAnnotation() != null) {
-                this.pw.println("   * <p>");
-                this.pw.println(MapperUtils.wrapText("   * ", structureFieldDef.getAnnotation()));
-            }
-            this.pw.println("   * @return A InputStream containing the binary value as stream for this structure field.");
-            this.pw.println("   */");
-            this.pw.println("  public java.io.InputStream " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
-            this.pw.println("  );");
-            this.pw.println("");
+                    "Retrieves the value as java.io.InputStream for the binary structure field {@code " + structureFieldDef.getName() + "}.", this::printLine);
+            mapAnnotation("   * ", structureFieldDef);
+            printLine("   * @return A InputStream containing the binary value as stream for this structure field.");
+            printLine("   */");
+            printLine("  public java.io.InputStream " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
+            printLine("  );");
+            printLine("");
         } 
         else if (PrimitiveTypes.STRING.equals(structureFieldDef.getQualifiedTypeName())) {
-            this.pw.println("  /**");
-            this.pw.println(MapperUtils
+            printLine("  /**");
+            MapperUtils
                 .wrapText(
                     "   * ",
-                    "Retrieves the value as java.io.Reader for the string structure field <code>" + structureFieldDef.getName() + "</code>."));
-            if (structureFieldDef.getAnnotation() != null) {
-                this.pw.println("   * <p>");
-                this.pw.println(MapperUtils.wrapText("   * ", structureFieldDef.getAnnotation()));
-            }
-            this.pw.println("   * @return A Reader containing the string value as stream for this structure field.");
-            this.pw.println("   */");
-            this.pw.println("  public java.io.Reader " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
-            this.pw.println("  );");
-            this.pw.println();
+                    "Retrieves the value as java.io.Reader for the string structure field {@code " + structureFieldDef.getName() + "}.", this::printLine);
+            mapAnnotation("   * ", structureFieldDef);
+            printLine("   * @return A Reader containing the string value as stream for this structure field.");
+            printLine("   */");
+            printLine("  public java.io.Reader " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
+            printLine("  );");
+            newLine();
         } 
         else {
-            this.pw.println();
-            this.pw.println("  /**");
-            this.pw.println(MapperUtils
+            newLine();
+            printLine("  /**");
+            MapperUtils
                 .wrapText(
                     "   * ",
-                    "Retrieves the value as streaming Collection for the structure field <code>" + structureFieldDef.getName() + "</code>."));
-            if (structureFieldDef.getAnnotation() != null) {
-                this.pw.println("   * <p>");
-                this.pw.println(MapperUtils.wrapText("   * ", structureFieldDef.getAnnotation()));
-            }
-            this.pw.println("   * @return A Collection containing the value as stream for this structure field.");
-            this.pw.println("   */");
-            this.pw.println("  public java.io.DataInput " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
-            this.pw.println("  );");
-            this.pw.println();
+                    "Retrieves the value as streaming Collection for the structure field {@code " + structureFieldDef.getName() + "].", this::printLine);
+            mapAnnotation("   * ", structureFieldDef);
+            printLine("   * @return A Collection containing the value as stream for this structure field.");
+            printLine("   */");
+            printLine("  public java.io.DataInput " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
+            printLine("  );");
+            newLine();
         }
     }
 
     //-----------------------------------------------------------------------
     public void mapEnd(
     ) throws ServiceException {
-        this.pw.println();
+        newLine();
         if(getFormat() == Format.CCI2) {
             this.trace("StructureType/Member");
-            this.pw.println();
-            this.pw.println("  /**");
-            this.pw.println("   * The structure's members");
-            this.pw.println("   */");
-            this.pw.println("  enum Member {");
+            newLine();
+            printLine("  /**");
+            printLine("   * The structure's members");
+            printLine("   */");
+            printLine("  enum Member {");
             String delimiter = "    ";
             if(this.members.isEmpty()) {
-                this.pw.println(delimiter + "// No members");
+                printLine(delimiter + "// No members");
             } else {
                 for(String member : this.members) {
-                    this.pw.println(delimiter + AbstractNames.uncapitalize(member));
+                    printLine(delimiter + AbstractNames.uncapitalize(member));
                     delimiter = "  , ";
                 }
             }
-            this.pw.println("  }");
-            this.pw.println();
+            printLine("  }");
+            newLine();
         }
         this.trace("StructureType/End");
-        this.pw.println("}");
+        printLine("}");
     }
 
     //-----------------------------------------------------------------------
@@ -297,20 +275,20 @@ public class StructureMapper extends AbstractMapper {
         this.trace("StructureType/Begin");
         this.fileHeader();
         List<String> nameComponents = MapperUtils.getNameComponents(MapperUtils.getPackageName(this.structDef.getQualifiedName()));
-        this.pw.println("package " + this.getNamespace(nameComponents) + ";");
-        this.pw.println();
-        this.pw.println("public interface " + this.structName);
+        printLine("package " + this.getNamespace(nameComponents) + ";");
+        newLine();
+        printLine("public interface " + this.structName);
         if(getFormat() == Format.JMI1) {            
-            this.pw.print("  extends " + REF_STRUCT_INTERFACE_NAME + ", ");
+            print("  extends " + REF_STRUCT_INTERFACE_NAME + ", ");
         }
         if(getFormat() != Format.CCI2) {
-            this.pw.println(
+            printLine(
                 getNamespace(nameComponents, Names.CCI2_PACKAGE_SUFFIX) +    
                 '.' +
                 this.structName
             );
         }
-        this.pw.println("{");
+        printLine("{");
         this.members = new ArrayList<String>();
     }
 

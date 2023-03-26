@@ -52,7 +52,7 @@ public interface StringTable {
     /**
      * Tells whether the WBXL string table shall be populated explicitely
      * 
-     * @return <code>false</code> the WBXL string table shall be populated explicitely
+     * @return {@code false} the WBXL string table shall be populated explicitely
      */
     boolean isStringTablePopulatedExplicitely();
     

@@ -138,9 +138,9 @@ public class RestSource implements Closeable {
     }
 
     /**
-     * Set up and retrieve the <code>InputSource</code>
+     * Set up and retrieve the {@code InputSource}
      * 
-     * @return the <code>InputSource</code>
+     * @return the {@code InputSource}
      */
     protected InputSource getBody(
     ){
@@ -157,7 +157,7 @@ public class RestSource implements Closeable {
     /**
      * Tells whether the source shall be exhausted
      * 
-     * @return <code>true</code> if the source shall be exhausted
+     * @return {@code true} if the source shall be exhausted
      */
     protected boolean isToBeExhausted() {
         return this.exhaust;

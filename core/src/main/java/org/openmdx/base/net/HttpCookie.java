@@ -239,7 +239,7 @@ public class HttpCookie implements Comparable<HttpCookie> {
     *
     * @param uri
     *
-    * @return <code>true</code> if the cookie should be sent to the given URI
+    * @return {@code true} if the cookie should be sent to the given URI
     */
    public boolean matches(URI uri) {
       if ((!this.secure || "https".equalsIgnoreCase(uri.getScheme())) &&
@@ -257,7 +257,7 @@ public class HttpCookie implements Comparable<HttpCookie> {
    /**
     * Tells whether the cookie has to be discarded
     *
-    * @return <code>true</code> if the cookie has to be discarded
+    * @return {@code true} if the cookie has to be discarded
     */
    public boolean isDiscard() {
       return this.discard;
@@ -266,7 +266,7 @@ public class HttpCookie implements Comparable<HttpCookie> {
    /**
     * Tells whether the cookie has expired
     *
-    * @return <code>true</code> if the cookie has expired
+    * @return {@code true} if the cookie has expired
     */
    public boolean isExpired() {
       return this.expiresAt < System.currentTimeMillis();

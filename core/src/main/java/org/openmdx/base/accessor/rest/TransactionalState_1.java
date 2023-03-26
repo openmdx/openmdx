@@ -143,7 +143,7 @@ public final class TransactionalState_1 {
     /**
      * Tells whether the data object is out of sync with its "remote" counterpart
      * 
-     * @return <code>true</code> if the data object is out of sync with its 
+     * @return {@code true} if the data object is out of sync with its 
      * "remote" counterpart
      */
     final boolean isOutOfSync(
@@ -158,7 +158,7 @@ public final class TransactionalState_1 {
     /**
      * Tells whether there is a life cycle event pending or a feature dirty
      * 
-     * @return <code>false</code> unless a life cycle event is pending 
+     * @return {@code false} unless a life cycle event is pending 
      * or a feature is dirty
      */
     final boolean isDirty(
@@ -282,7 +282,7 @@ public final class TransactionalState_1 {
     /**
      * The dirty features
      * 
-     * @param nonGrowing if <code>true</code> we may remove an element but not add a new one
+     * @param nonGrowing if {@code true} we may remove an element but not add a new one
      * 
      * @return the set of dirty features
      */
@@ -303,7 +303,7 @@ public final class TransactionalState_1 {
      * 
      * @param readOnly 
      * 
-     * @return the operation queue, never<code>null</code>
+     * @return the operation queue, never{@code null}
      */
     final Queue<Operation> operations(
         boolean readOnly
@@ -323,7 +323,7 @@ public final class TransactionalState_1 {
      * 
      * @param readOnly 
      * 
-     * @return the aspect map, never <code>null</code>
+     * @return the aspect map, never {@code null}
      */
     final Map<String,DataObject_1_0> transactionalAspects(
         boolean readOnly

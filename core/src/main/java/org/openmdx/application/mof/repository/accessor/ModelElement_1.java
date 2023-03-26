@@ -468,7 +468,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 	 */
 	@Override
 	public String getName(
-	) throws ServiceException {
+	){
 	    return this.delegate.getName();
 	}
 
@@ -571,7 +571,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 	 */
 	@Override
 	public String getQualifiedName(
-	) throws ServiceException {
+	){
 	    return this.delegate.getQualifiedName();
 	}
 
@@ -639,7 +639,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
      */
     @Override
     public String getSegmentName(
-    ) throws ServiceException {
+    ){
         return this.delegate.getObjectId().getSegment(4).toClassicRepresentation();
     }
     

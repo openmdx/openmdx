@@ -236,8 +236,8 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
     //------------------------------------------------------------------------
     
     /**
-     * A sub-class implementing <code>ClearCallback</code> should invoke 
-     * <code>super.jdoPreClear()</code>.
+     * A sub-class implementing {@code ClearCallback} should invoke 
+     * {@code super.jdoPreClear()}.
      */
     protected void jdoPreClear(
     ){
@@ -245,8 +245,8 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
     }
 
     /**
-     * A sub-class implementing <code>StoreCallback</code> should invoke 
-     * <code>super.jdoPreStore()</code>.
+     * A sub-class implementing {@code StoreCallback} should invoke 
+     * {@code super.jdoPreStore()}.
      */
     protected void jdoPreStore(
     ){
@@ -254,8 +254,8 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
     }
 
     /**
-     * A sub-class implementing <code>LoadCallback</code> should invoke 
-     * <code>super.jdoPostLoad()</code>.
+     * A sub-class implementing {@code LoadCallback} should invoke 
+     * {@code super.jdoPostLoad()}.
      */
     protected void jdoPostLoad(
     ) {
@@ -263,8 +263,8 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
     }
 
     /**
-     * A sub-class implementing <code>DeleteCallback</code> should invoke 
-     * <code>super.jdoPreDelete()</code>.
+     * A sub-class implementing {@code DeleteCallback} should invoke 
+     * {@code super.jdoPreDelete()}.
      */
     protected void jdoPreDelete(
     ) {
@@ -272,8 +272,8 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
     }
 
     /**
-     * A sub-class implementing <code>ConstructCallback</code> should invoke 
-     * <code>super.openmdxjdoPostConstruct()</code>.
+     * A sub-class implementing {@code ConstructCallback} should invoke 
+     * {@code super.openmdxjdoPostConstruct()}.
      */
     protected void openmdxjdoPostConstruct(
     ) {

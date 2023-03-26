@@ -74,11 +74,11 @@ import org.openmdx.kernel.configuration.cci.Configuration;
  * Bean Factory
  * <p>
  * The following configuration entry names are reserved<ul>
- * <li><code>class</code>, the class to be instantiated
- * <li><code>interface</code>, the class to be exposed by the factory
+ * <li>{@code class}, the class to be instantiated
+ * <li>{@code interface}, the class to be exposed by the factory
  * </ul>
  * <p>
- * If a class has a public <code>Configuration</code> constructor then 
+ * If a class has a public {@code Configuration} constructor then 
  * this constructor is used to inject the configuration, otherwise
  * the instance is treated as java bean, i.e. it is instantiated via
  * default constructor and the configuration is applied through its
@@ -124,8 +124,8 @@ public class PlugInFactory<T> extends BeanFactory<T> {
      * Create a factory for the given class.
      * <p>
      * The class names are retrieved from the following configuration keys<ul>
-     * <li><code>"class"</code> <em>(mandatory)</em>
-     * <li><code>"interface"</code> <em>(optional)</em>
+     * <li>{@code "class"} <em>(mandatory)</em>
+     * <li>{@code "interface"} <em>(optional)</em>
      * </ul>
      * 
      * @param configuration the Java Bean Factory configuration includes the class name(s)
@@ -158,7 +158,7 @@ public class PlugInFactory<T> extends BeanFactory<T> {
      * Create a factory for the given class.
      * <p>
      * The bean class name is retrieved from the following configuration key<ul>
-     * <li><code>"class"</code> <em>(mandatory)</em>
+     * <li>{@code "class"} <em>(mandatory)</em>
      * </ul>
      * 
      * @param instanceClass the instance class
@@ -271,7 +271,7 @@ public class PlugInFactory<T> extends BeanFactory<T> {
 
 	/**
 	 * Retrieve the (optional) alternative constructor using a 
-	 * <code>Configuration</code> argument
+	 * {@code Configuration} argument
 	 * 
 	 * @param beanClass the class to be inspected
 	 * 
@@ -299,7 +299,7 @@ public class PlugInFactory<T> extends BeanFactory<T> {
      * 
      * @param constructor the constructor to be tested
      * 
-     * @return <code>true</code> if he constructor is public
+     * @return {@code true} if he constructor is public
      */
     private static boolean isPublic(
     	Constructor<?> constructor

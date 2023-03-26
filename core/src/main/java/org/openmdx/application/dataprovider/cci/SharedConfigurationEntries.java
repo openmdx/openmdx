@@ -46,7 +46,7 @@ package org.openmdx.application.dataprovider.cci;
 
 
 /**
- * The <code>SharedConfigurationEntries</code> class contains
+ * The {@code SharedConfigurationEntries} class contains
  * constants identifying the dataprovider configuration entries
  * shared by all layers.
  */

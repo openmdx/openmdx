@@ -247,7 +247,7 @@ private ClassDef(
   /**
    * Find the class to be extended
    * 
-   * @param immediate skip abstract non-base super-classes if <code>false</code>.
+   * @param immediate skip abstract non-base super-classes if {@code false}.
    * 
    * @return the super-class
    */

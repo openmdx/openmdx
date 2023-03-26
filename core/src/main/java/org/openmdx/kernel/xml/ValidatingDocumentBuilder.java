@@ -160,7 +160,7 @@ public class ValidatingDocumentBuilder {
      * @param url the document's url
      *
      * @return the namespace in case of schema based documents,
-     * <code>null</code> in case of dtd based documents
+     * {@code null} in case of dtd based documents
      * 
      * @throws IOException 
      */

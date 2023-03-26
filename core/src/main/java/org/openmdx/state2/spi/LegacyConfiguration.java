@@ -59,7 +59,7 @@ public interface LegacyConfiguration {
      * 
      * @param xri
      * 
-     * @return <code>true</code> if the valid time is unique for a given XRI
+     * @return {@code true} if the valid time is unique for a given XRI
      */
     boolean isValidTimeUnique(
         Path xri
@@ -70,7 +70,7 @@ public interface LegacyConfiguration {
      * 
      * @param parentClassifierDef the parent's classifier definition
      * 
-     * @return <code>true</code> if the valid time is unique for its children
+     * @return {@code true} if the valid time is unique for its children
      * 
      * @throws ServiceException 
      */

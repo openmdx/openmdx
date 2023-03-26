@@ -53,18 +53,18 @@ import javax.jdo.PersistenceManager;
  */
 public interface JDOPersistenceManager extends PersistenceManager, AutoCloseable {
 
-    /** Close this <code>PersistenceManager</code> so that no further requests 
-     * may be made on it.  A <code>PersistenceManager</code> instance can be 
+    /** Close this {@code PersistenceManager} so that no further requests 
+     * may be made on it.  A {@code PersistenceManager} instance can be 
      * used only until it is closed.
      *
-     * <P>Closing a <code>PersistenceManager</code> might release it to the pool 
-     * of available <code>PersistenceManager</code>s, or might be garbage 
+     * <P>Closing a {@code PersistenceManager} might release it to the pool 
+     * of available {@code PersistenceManager}s, or might be garbage 
      * collected, at the option of the JDO implementation.  Before being used 
-     * again to satisfy a <code>getPersistenceManager()</code> request, the 
+     * again to satisfy a {@code getPersistenceManager()} request, the 
      * default values for options will be restored to their values as specified 
-     * in the <code>PersistenceManagerFactory</code>.
+     * in the {@code PersistenceManagerFactory}.
      *
-     * <P>This method closes the <code>PersistenceManager</code>.
+     * <P>This method closes the {@code PersistenceManager}.
      */
     void close ();
 

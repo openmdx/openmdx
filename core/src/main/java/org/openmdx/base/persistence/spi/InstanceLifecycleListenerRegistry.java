@@ -87,7 +87,7 @@ public class InstanceLifecycleListenerRegistry implements
     /**
      * Tells whether there are delegates or not
      * 
-     * @return <code>true</code> if there are no delegates
+     * @return {@code true} if there are no delegates
      */
     protected boolean isEmpty(
     ){
@@ -104,11 +104,11 @@ public class InstanceLifecycleListenerRegistry implements
     
     /**
      * Adds the listener instance to the list of lifecycle event
-     * listeners. The <code>classes</code> parameter identifies all
-     * of the classes of interest. If the <code>classes</code>
-     * parameter is specified as <code>null</code>, events for all
+     * listeners. The {@code classes} parameter identifies all
+     * of the classes of interest. If the {@code classes}
+     * parameter is specified as {@code null}, events for all
      * persistent classes and interfaces will be sent to
-     * <code>listenerInstance</code>.
+     * {@code listenerInstance}.
      * <p>The listenerInstance will be called for each event for which it
      * implements the corresponding listenerInstance interface.</p>
      * @param listener the lifecycle listener
@@ -147,7 +147,7 @@ public class InstanceLifecycleListenerRegistry implements
      * @param event
      * @param classes
      * 
-     * @return <code>true</code> if a listener is interested in a given event
+     * @return {@code true} if a listener is interested in a given event
      */
     private boolean isInterested(
         InstanceLifecycleEvent event,
@@ -411,7 +411,7 @@ public class InstanceLifecycleListenerRegistry implements
         final InstanceLifecycleListener listener;
 
         /**
-         * An empty classes array is normalized to <code>null</code>
+         * An empty classes array is normalized to {@code null}
          */
         final Class<?>[] classes;
         

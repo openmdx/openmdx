@@ -51,7 +51,7 @@ import javax.resource.cci.MappedRecord;
 import org.w3c.cci2.AnyTypePredicate;
 
 /**
- * <code>org::openmdx::kernel::QueryFilter</code>
+ * {@code org::openmdx::kernel::QueryFilter}
  */
 public interface QueryFilterRecord extends MappedRecord, AnyTypePredicate {
     

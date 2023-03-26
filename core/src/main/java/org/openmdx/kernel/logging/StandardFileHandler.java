@@ -68,8 +68,8 @@ import java.util.logging.LogRecord;
  * By default buffering is enabled in the IO libraries but each log
  * record is flushed out when it is complete. 
  * <p>
- * The <code>FallbackFileHandler</code> is able to support <code>Formattter</code>s 
- * implementing <code>FormatWithouThrown</code>.
+ * The {@code FallbackFileHandler} is able to support {@code Formattter}s 
+ * implementing {@code FormatWithouThrown}.
  * <p>
  * <b>Configuration:</b>
  * By default each <tt>FileHandler</tt> is initialized using the following

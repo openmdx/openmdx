@@ -66,7 +66,7 @@ public class PlugInContexts {
      * 
      * @param object the object
      * @param plugInClass the plug-in's class
-     * @return the requested context object, or <code>null</code> if the plugInClass is not applicable to the object
+     * @return the requested context object, or {@code null} if the plugInClass is not applicable to the object
      * @throws RuntimeServiceException  
      * 
      * @exception ServiceException
@@ -87,7 +87,7 @@ public class PlugInContexts {
      * 
      * @param object the object
      * @param plugInClass the plug-in's class
-     * @return the requested context object, or <code>null</code> if the plugInClass is not applicable to the object
+     * @return the requested context object, or {@code null} if the plugInClass is not applicable to the object
      * @throws RuntimeServiceException  
      * 
      * @exception ServiceException

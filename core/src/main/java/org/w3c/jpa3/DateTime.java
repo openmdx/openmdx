@@ -13,11 +13,11 @@ public class DateTime {
     }
 
     /**
-     * Convert a <code>java.util.Date</code> to an <code>SQL TIMESTAMP</code>
+     * Convert a {@code java.util.Date} to an {@code SQL TIMESTAMP}
      * 
-     * @param cciDateTime the <code>java.util.Date</code> to be converted
+     * @param cciDateTime the {@code java.util.Date} to be converted
      * 
-     * @return a corresponding <code>SQL TIMESTAMP</code>
+     * @return a corresponding {@code SQL TIMESTAMP}
      */
     public static final java.sql.Timestamp toJDO (
         java.util.Date cciDateTime
@@ -26,11 +26,11 @@ public class DateTime {
     }
 
     /**
-     * Convert an <code>SQL TIMESTAMP</code> to a <code>java.util.Date</code>
+     * Convert an {@code SQL TIMESTAMP} to a {@code java.util.Date}
      * 
-     * @param jdoDateTime the <code>SQL TIMESTAMP</code to be converted
+     * @param jdoDateTime the {@code SQL TIMESTAMP} to be converted
      * 
-     * @return a corresponding <code>java.util.Date</code>
+     * @return a corresponding {@code java.util.Date}
      */
     public static final java.util.Date toCCI (
         java.sql.Timestamp jdoDateTime

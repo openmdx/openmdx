@@ -54,7 +54,7 @@ import org.openmdx.base.rest.cci.ObjectRecord;
 public abstract class DelegatingConsumerRecord implements ConsumerRecord {
 
     /**
-     * Implements <code>Serializable</code> 
+     * Implements {@code Serializable} 
      */
     private static final long serialVersionUID = -5806017211362158607L;
 

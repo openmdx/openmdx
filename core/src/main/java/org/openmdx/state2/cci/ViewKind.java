@@ -52,18 +52,18 @@ public enum ViewKind {
     
     /**
      * A Time Point View is defined by an optional system-time point 
-     * (<code>validAt</code>) and a mandatory applicaton-time point 
-     * (<code>validFor</code>).
+     * ({@code validAt}) and a mandatory applicaton-time point 
+     * ({@code validFor}).
      */
     TIME_POINT_VIEW,
     
     /**
      * A Time Range View is defined by an application-time range (starting 
-     * with <code>validFrom</code> and ending with <code>validTo for 
-     * <code>DateStates</code> and <code>invalidFrom</code> for 
-     * <code>DateTimeStates</code>, respectively).
+     * with {@code validFrom} and ending with {@code validTo for 
+     * {@code DateStates} and {@code invalidFrom} for 
+     * {@code DateTimeStates}, respectively).
      * <p>
-     * Both ends may be open (<code>null<code>) in which case the state is 
+     * Both ends may be open ({@code null{@code ) in which case the state is 
      * valid <em>since ever</em> and <em>for ever</em> respectively.
      */
     TIME_RANGE_VIEW

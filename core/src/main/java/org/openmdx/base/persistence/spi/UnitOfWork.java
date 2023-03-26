@@ -50,8 +50,8 @@ import org.openmdx.base.persistence.cci.Synchronization;
 public interface UnitOfWork extends org.openmdx.base.persistence.cci.UnitOfWork, Synchronization {
     
     /**
-     * The <code>afterBegin</code> method notifies a 
-     * <code>PersistenceManger</code> instance that a new unit of work has 
+     * The {@code afterBegin} method notifies a 
+     * {@code PersistenceManger} instance that a new unit of work has 
      * started, and that the subsequent access to its managed objects
      * will be invoked in the context of this unit of work.
      */

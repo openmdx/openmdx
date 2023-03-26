@@ -9,7 +9,7 @@ public class TypeMismatchException extends JmiException {
     private final Class expectedType;
     
     /**
-     * Constructs an <code>TypeMismatchException</code> without detail message.
+     * Constructs an {@code TypeMismatchException} without detail message.
      * @param expectedType class of expected type.
      * @param objectInError value that caused this exception.
      * @param elementInError Attribute, Reference, Parameter or AssociationEnd for the value that is in error.
@@ -20,7 +20,7 @@ public class TypeMismatchException extends JmiException {
     }
 
     /**
-     * Constructs an <code>TypeMismatchException</code> with the specified detail message.
+     * Constructs an {@code TypeMismatchException} with the specified detail message.
      * @param expectedType class of expected type.
      * @param objectInError value that caused this exception.
      * @param elementInError Attribute, Reference, Parameter or AssociationEnd for the value that is in error.

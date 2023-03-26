@@ -50,9 +50,9 @@ import java.util.Collection;
  * String Type Predicate
  *
  * The like and unlike predicates are formed according to the following rulse:
- * <li>The wildcard sequence &ldquo;<code>.*</code>&rdquo; stands for any 
+ * <li>The wildcard sequence &ldquo;{@code .*}&rdquo; stands for any 
  *     number of characters
- * <li>The wildcard character &ldquo;<code>.</code>&rdquo; stands for a 
+ * <li>The wildcard character &ldquo;{@code .}&rdquo; stands for a 
  *     single character
  * </ul>
  * 
@@ -132,8 +132,8 @@ public interface StringTypePredicate
     /**
      * To define the SoundEx to be used.
      * <p>
-     * <code>"org.openmdx.query.SoundEx"</code> is used as the first argument
-     * of JDO <code>Query</code>'s <code>addExtension()</code> method, while
+     * {@code "org.openmdx.query.SoundEx"} is used as the first argument
+     * of JDO {@code Query}'s {@code addExtension()} method, while
      * the second one is the name of the SoundEx to be used.
      * 
      * @see javax.jdo.Query#addExtension(String, Object)
@@ -150,9 +150,9 @@ public interface StringTypePredicate
      * @param operand the attribute's value is compared to the operand  
      * according to the following rules, unless either the JSON_QUERY
      * or X_QUERY flag is specified:<ul>
-     * <li>The wildcard sequence &ldquo;<code>.*</code>&rdquo; stands for any 
+     * <li>The wildcard sequence &ldquo;{@code .*}&rdquo; stands for any 
      *     number of characters
-     * <li>The wildcard character &ldquo;<code>.</code>&rdquo; stands for a 
+     * <li>The wildcard character &ldquo;{@code .}&rdquo; stands for a 
      *     single character
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
@@ -176,9 +176,9 @@ public interface StringTypePredicate
      * </ul>
      * @param operand the attribute's value is compared to the operand  
      * according to the following rules:<ul>
-     * <li>The wildcard sequence &ldquo;<code>.*</code>&rdquo; stands for any 
+     * <li>The wildcard sequence &ldquo;{@code .*}&rdquo; stands for any 
      *     number of characters
-     * <li>The wildcard character &ldquo;<code>.</code>&rdquo; stands for a 
+     * <li>The wildcard character &ldquo;{@code .}&rdquo; stands for a 
      *     single character
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
@@ -199,9 +199,9 @@ public interface StringTypePredicate
      * </ul>
      * @param operand the attribute's value is compared to the operand  
      * according to the following rules:<ul>
-     * <li>The wildcard sequence &ldquo;<code>.*</code>&rdquo; stands for any 
+     * <li>The wildcard sequence &ldquo;{@code .*}&rdquo; stands for any 
      *     number of characters
-     * <li>The wildcard character &ldquo;<code>.</code>&rdquo; stands for a 
+     * <li>The wildcard character &ldquo;{@code .}&rdquo; stands for a 
      *     single character
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
@@ -223,9 +223,9 @@ public interface StringTypePredicate
      * @param operand the attribute's value is compared to the operand  
      * according to the following rules, unless either the JSON_QUERY
      * or X_QUERY flag is specified:<ul>
-     * <li>The wildcard sequence &ldquo;<code>.*</code>&rdquo; stands for any 
+     * <li>The wildcard sequence &ldquo;{@code .*}&rdquo; stands for any 
      *     number of characters
-     * <li>The wildcard character &ldquo;<code>.</code>&rdquo; stands for a 
+     * <li>The wildcard character &ldquo;{@code .}&rdquo; stands for a 
      *     single character
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
@@ -248,9 +248,9 @@ public interface StringTypePredicate
      * </ul>
      * @param operand the attribute's value is compared to the operand  
      * according to the following rules:<ul>
-     * <li>The wildcard sequence &ldquo;<code>.*</code>&rdquo; stands for any 
+     * <li>The wildcard sequence &ldquo;{@code .*}&rdquo; stands for any 
      *     number of characters
-     * <li>The wildcard character &ldquo;<code>.</code>&rdquo; stands for a 
+     * <li>The wildcard character &ldquo;{@code .}&rdquo; stands for a 
      *     single character
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
@@ -271,9 +271,9 @@ public interface StringTypePredicate
      * </ul>
      * @param operand the attribute's value is compared to the operand  
      * according to the following rules:<ul>
-     * <li>The wildcard sequence &ldquo;<code>.*</code>&rdquo; stands for any 
+     * <li>The wildcard sequence &ldquo;{@code .*}&rdquo; stands for any 
      *     number of characters
-     * <li>The wildcard character &ldquo;<code>.</code>&rdquo; stands for a 
+     * <li>The wildcard character &ldquo;{@code .}&rdquo; stands for a 
      *     single character
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE

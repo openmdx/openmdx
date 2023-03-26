@@ -54,6 +54,7 @@ import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.kernel.loading.Resources;
 
 
 public class Dataprovider_2Test {
@@ -62,7 +63,7 @@ public class Dataprovider_2Test {
 	public void whenDataproviderIsInvokedThenGreetingsAreReturned() throws ResourceException{
 		// Arrange
 		Dataprovider_2 testee = new Dataprovider_2();
-		testee.setConfiguration("xri://+resource/META-INF/helloWorld1Dataprovider.properties");
+		testee.setConfiguration(Resources.toMetaInfXRI("helloWorld1Dataprovider.properties"));
 		final MessageRecord request = Records.getRecordFactory().createMappedRecord(MessageRecord.class);
 		final RestInteractionSpec interactionSpec = InteractionSpecs.getRestInteractionSpecs(true).INVOKE;
 		// Act

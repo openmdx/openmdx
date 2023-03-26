@@ -322,7 +322,7 @@ public class ObjectAndValidStateComparator {
 	 * 
 	 * @param object
 	 * 
-	 * @return <code>true</code> if the object is modelled as stated but not used as such
+	 * @return {@code true} if the object is modelled as stated but not used as such
 	 * @throws ServiceException
 	 */
 	protected boolean isValidTimeUnique(
@@ -479,7 +479,7 @@ public class ObjectAndValidStateComparator {
 	 * State aware feature comparator determination
 	 * 
 	 * @param qualifiedName the qualified feature name
-	 * @param aspect <code>true</code> in case of aspects
+	 * @param aspect {@code true} in case of aspects
 	 * 
 	 * @return the feature comparator to be used
 	 * 

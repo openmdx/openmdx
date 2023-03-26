@@ -154,7 +154,7 @@ hould sleep before "runs" of examining
  * </ul>
  * <p>
  * GenericKeyedObjectPool is not usable without a {@link KeyedPoolableObjectFactory}.  A
- * non-<code>null</code> factory must be provided either as a constructor argument
+ * non-{@code null} factory must be provided either as a constructor argument
  * or via a call to {@link #setFactory} before the pool is used.
  * </p>
  * @see GenericObjectPool

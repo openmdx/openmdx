@@ -57,7 +57,7 @@ public interface MarshallerProvider {
      *  
      * @param type the qualified model class name with single colon separators, e.g. "org:w3c:String
      * 
-     * @return the corresponding marshaller, or <code>null</code> if this instance can't provide it
+     * @return the corresponding marshaller, or {@code null} if this instance can't provide it
      */
     Marshaller getMarshaller(
         String type

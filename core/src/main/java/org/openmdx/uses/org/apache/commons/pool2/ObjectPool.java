@@ -32,25 +32,25 @@ import java.util.NoSuchElementException;
  * <p>
  * Example of use:
  * <pre style="border:solid thin; padding: 1ex;"
- * > Object obj = <code style="color:#00C">null</code>;
+ * > Object obj = <code style="color:#00C">null};
  *
- * <code style="color:#00C">try</code> {
+ * <code style="color:#00C">try} {
  *     obj = pool.borrowObject();
- *     <code style="color:#00C">try</code> {
- *         <code style="color:#0C0">//...use the object...</code>
- *     } <code style="color:#00C">catch</code>(Exception e) {
- *         <code style="color:#0C0">// invalidate the object</code>
+ *     <code style="color:#00C">try} {
+ *         <code style="color:#0C0">//...use the object...}
+ *     } <code style="color:#00C">catch}(Exception e) {
+ *         <code style="color:#0C0">// invalidate the object}
  *         pool.invalidateObject(obj);
- *         <code style="color:#0C0">// do not return the object to the pool twice</code>
- *         obj = <code style="color:#00C">null</code>;
- *     } <code style="color:#00C">finally</code> {
- *         <code style="color:#0C0">// make sure the object is returned to the pool</code>
- *         <code style="color:#00C">if</code>(<code style="color:#00C">null</code> != obj) {
+ *         <code style="color:#0C0">// do not return the object to the pool twice}
+ *         obj = <code style="color:#00C">null};
+ *     } <code style="color:#00C">finally} {
+ *         <code style="color:#0C0">// make sure the object is returned to the pool}
+ *         <code style="color:#00C">if}(<code style="color:#00C">null} != obj) {
  *             pool.returnObject(obj);
  *        }
  *     }
- * } <code style="color:#00C">catch</code>(Exception e) {
- *       <code style="color:#0C0">// failed to borrow an object</code>
+ * } <code style="color:#00C">catch}(Exception e) {
+ *       <code style="color:#0C0">// failed to borrow an object}
  * }</pre>
  * <p>
  * See {@link BaseObjectPool} for a simple base implementation.
@@ -96,7 +96,7 @@ public interface ObjectPool<T> {
             IllegalStateException;
 
     /**
-     * Return an instance to the pool. By contract, <code>obj</code>
+     * Return an instance to the pool. By contract, {@code obj}
      * <strong>must</strong> have been obtained using {@link #borrowObject()} or
      * a related method as defined in an implementation or sub-interface.
      *
@@ -116,7 +116,7 @@ public interface ObjectPool<T> {
     /**
      * Invalidates an object from the pool.
      * <p>
-     * By contract, <code>obj</code> <strong>must</strong> have been obtained
+     * By contract, {@code obj} <strong>must</strong> have been obtained
      * using {@link #borrowObject} or a related method as defined in an
      * implementation or sub-interface.
      * <p>
@@ -132,7 +132,7 @@ public interface ObjectPool<T> {
     /**
      * Create an object using the {@link PooledObjectFactory factory} or other
      * implementation dependent mechanism, passivate it, and then place it in
-     * the idle object pool. <code>addObject</code> is useful for "pre-loading"
+     * the idle object pool. {@code addObject} is useful for "pre-loading"
      * a pool with idle objects. (Optional operation).
      *
      * @throws Exception

@@ -74,6 +74,7 @@ import org.openmdx.base.rest.spi.AbstractRestInteraction;
 import org.openmdx.base.rest.spi.AbstractRestPort;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.resource.cci.ConnectionFactory;
 import org.openmdx.resource.pki.cci.CertificateProvider;
 import org.openmdx.resource.pki.cci.CertificateValidator;
@@ -198,7 +199,7 @@ public class Preferences_2 extends AbstractRestPort {
 									signatureProvider.getClass().getSimpleName() + "/signature");
 						} else if ("validator".equals(type)) {
 							CertificateFactory factory = CertificateFactory.getInstance("X.509");
-							URL url = new URL("xri://+resource/test/openmdx/resource/pki/UserCert.pem");
+							URL url = new URL(Resources.toResourceXRI("test/openmdx/resource/pki/UserCert.pem"));
 							Certificate certificate = factory.generateCertificate(url.openStream());
 							CertPathValidatorResult result = ((CertificateValidator) connection)
 									.validate(factory.generateCertPath(Arrays.asList(certificate)));

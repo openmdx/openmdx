@@ -72,7 +72,7 @@ public class ClassRecord
     private boolean singleton;
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 7333278087117151396L;
     

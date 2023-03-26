@@ -50,12 +50,12 @@ package org.w3c.cci2;
 public interface OptionalFeaturePredicate {
 
     /**
-     * Matches if the attribute's optional value is <code>null</null>. 
+     * Matches if the attribute's optional value is {@code null</null>. 
      */
     void isNull();
 
     /**
-     * Matches if the attribute's optional value is not <code>null</null>. 
+     * Matches if the attribute's optional value is not {@code null</null>. 
      */
     void isNonNull();
     

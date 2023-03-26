@@ -1,0 +1,14 @@
+digraph "Diagram Main [Package net::rfc]" {
+
+	${ATTRIBUTE_STATEMENTS}
+
+	{
+		${LAYER[layer=0]}
+		${CLASS[name=net:rfc:MimeType]}
+	}
+	
+	${LAYERS}
+	${ASSOCIATION[name=*]}
+	${INSTANCE_OF}
+
+}

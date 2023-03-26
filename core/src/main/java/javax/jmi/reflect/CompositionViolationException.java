@@ -6,7 +6,7 @@ package javax.jmi.reflect;
 public class CompositionViolationException extends JmiException {
     
     /**
-     * Constructs a <code>CompositionViolationException</code> without detail message.
+     * Constructs a {@code CompositionViolationException} without detail message.
      * @param objectInError An instance (component) that caused the composition violation.
      * @param elementInError Attribute, Reference or Association that is being updated to violate the composition.
      */
@@ -15,7 +15,7 @@ public class CompositionViolationException extends JmiException {
     }
     
     /**
-     * Constructs a <code>CompositionViolationException</code> with the specified detail message.
+     * Constructs a {@code CompositionViolationException} with the specified detail message.
      * @param objectInError An instance (component) that caused the composition voilation.
      * @param elementInError Attribute, Reference or Association that is being updated to violate the composition.
      * @param msg the detail message.

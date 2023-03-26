@@ -71,7 +71,7 @@ public class LegacyState_2 extends State_2 {
      * Tells whether the valid time is unique for object hosted by this
      * provider.
      *
-     * @return <code>true</code> if the valid time is unique for object
+     * @return {@code true} if the valid time is unique for object
      *         hosted by this provider.
      */
     public boolean isValidTimeUnique() {
@@ -83,7 +83,7 @@ public class LegacyState_2 extends State_2 {
      * provider.
      * 
      * @param validTimeUnique
-     *            <code>true</code> if the valid time
+     *            {@code true} if the valid time
      *            shall be unique for for objects hosted by this provider
      */
     public void setValidTimeUnique(

@@ -142,7 +142,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
      * 
      * @param pattern the pattern
      * 
-     * @return <code>true</code> if exponents shall be detected and rejected
+     * @return {@code true} if exponents shall be detected and rejected
      */
     static final boolean isPatternWithoutText(
         String pattern
@@ -177,10 +177,10 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
      * Returns a DateFormat object for the  given arguments
      * 
      * @param pattern the pattern to be used
-     * @param timeZone the time zone id, or <code>null</code> for local time zone
+     * @param timeZone the time zone id, or {@code null} for local time zone
      * @param lenient tells whether parsing is lenient or strict
      * 
-     * @return the requested <code>DateTimeFormat</code>
+     * @return the requested {@code DateTimeFormat}
      */
     public static DateTimeFormat getInstance(
         String pattern,

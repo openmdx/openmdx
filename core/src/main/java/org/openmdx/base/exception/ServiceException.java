@@ -52,8 +52,8 @@ import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.exception.BasicException.Parameter;
 
 /**
- * A <code>ServiceException</code> is used where an exception chain shall be 
- * thrown as checked <code>Exception</code>
+ * A {@code ServiceException} is used where an exception chain shall be 
+ * thrown as checked {@code Exception}
  */
 public final class ServiceException
     extends Exception
@@ -74,12 +74,12 @@ public final class ServiceException
     }
     
     /**
-     * Creates a new <code>ServiceException</code>.
+     * Creates a new {@code ServiceException}.
      *
      * @param   cause
      *          The exception cause.
      * @param   exceptionDomain
-     *          The exception domain or <code>null</code> for the
+     *          The exception domain or {@code null} for the
      *          default exception domain containing negative exception codes
      *          only.
      * @param   exceptionCode
@@ -111,10 +111,10 @@ public final class ServiceException
     }
 
     /**
-     * Creates a new <code>ServiceException</code>.
+     * Creates a new {@code ServiceException}.
      *
      * @param   exceptionDomain
-     *          The exception domain or <code>null</code> for the
+     *          The exception domain or {@code null} for the
      *          default exception domain containing negative exception codes
      *          only.
      * @param   exceptionCode
@@ -142,7 +142,7 @@ public final class ServiceException
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -851622086260585234L;
     
@@ -175,7 +175,7 @@ public final class ServiceException
     }
 
     /**
-     * Retrieves the exception domain of this <code>ServiceException</code>.
+     * Retrieves the exception domain of this {@code ServiceException}.
      *
      * @return the exception domain
      */
@@ -185,7 +185,7 @@ public final class ServiceException
     }
 
     /**
-     * Retrieves the exception code of this <code>ServiceException</code>.
+     * Retrieves the exception code of this {@code ServiceException}.
      *
      * @return the exception code
      */

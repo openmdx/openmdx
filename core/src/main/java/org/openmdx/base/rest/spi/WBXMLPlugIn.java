@@ -67,7 +67,7 @@ public class WBXMLPlugIn extends DynamicPlugIn {
 	/**
 	 * Prepare page 0
 	 * 
-	 * @param lenient if <code>true</code> then collisions are logged as warnings,
+	 * @param lenient if {@code true} then collisions are logged as warnings,
 	 * otherwise they lead to exceptions.
 	 */
 	static Page preparePage0(

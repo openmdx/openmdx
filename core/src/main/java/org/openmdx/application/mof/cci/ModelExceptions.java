@@ -47,7 +47,7 @@ package org.openmdx.application.mof.cci;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
- * The <code>ModelExceptions</code> class contains exceptions codes used for
+ * The {@code ModelExceptions} class contains exceptions codes used for
  * importing or exporting MOF models.
  */
 public class ModelExceptions extends BasicException.Code {

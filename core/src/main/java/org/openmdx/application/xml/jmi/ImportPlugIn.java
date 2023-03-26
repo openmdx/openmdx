@@ -67,7 +67,7 @@ public interface ImportPlugIn {
      * @param objectHolder 
      * @param objectClass
      * 
-     * @return the requested object, never <code>null</code>
+     * @return the requested object, never {@code null}
      * 
      * @throws ServiceException if the object does not yet exist or can't be acquired
      */

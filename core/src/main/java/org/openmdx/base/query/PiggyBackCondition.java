@@ -83,7 +83,7 @@ public class PiggyBackCondition extends Condition {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -734596366612105605L;
 

@@ -171,14 +171,14 @@ public abstract class AbstractSparseArray<E> implements SparseArray<E> {
     /**
      * A list backed up by the sparse array:
      * <ul>
-     * <li>its size() is the sparse array's <code>lastKey() + 1</code>
-     * <li>the sparse array's un-populated positions are represented as <code>null</null> values
+     * <li>its size() is the sparse array's {@code lastKey() + 1}
+     * <li>the sparse array's un-populated positions are represented as {@code null</null> values
      * <li>get(int) and set(int,E) operations are allowed for any index >= 0
      * <li>clear() and add(E) are supported
      * <li>remove(int) and add(int,E) are not supported
      * </ul>
      *  
-     * &#64;return a <code>List</code> representing this <code>SparseArray</code>
+     * &#64;return a {@code List} representing this {@code SparseArray}
      */
     public List<E> asList() {
         return this.list == null ? this.list = new AsList<E>(this) : this.list;
@@ -613,8 +613,8 @@ public abstract class AbstractSparseArray<E> implements SparseArray<E> {
      * <p>
      * A list backed up by the sparse array:
      * <ul>
-     * <li>its size() is the sparse array's <code>lastKey() + 1</code>
-     * <li>the sparse array's un-populated positions are represented as <code>null</null> values
+     * <li>its size() is the sparse array's {@code lastKey() + 1}
+     * <li>the sparse array's un-populated positions are represented as {@code null</null> values
      * <li>get() and set() operations are allowed for any index >= 0
      * <li>clear() and add(E) are supported
      * <li>remove(int) and add(int,E) are not supported
@@ -635,7 +635,7 @@ public abstract class AbstractSparseArray<E> implements SparseArray<E> {
         }
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = -7591560889642014116L;
 

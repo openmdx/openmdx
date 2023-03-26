@@ -62,8 +62,8 @@ public interface FeatureComparator {
 	 * @param expected the value of the expected object's feature
 	 * @param actual the value of the actual object's feature
 	 * 
-	 * @return <code>null</code> if the values are considered to <em>match</em>,
-	 * a <code>MappedRecord</code> if the values are considered to be <em>different</em>
+	 * @return {@code null} if the values are considered to <em>match</em>,
+	 * a {@code MappedRecord} if the values are considered to be <em>different</em>
 	 */
 	MappedRecord compare(
 		Path xri,

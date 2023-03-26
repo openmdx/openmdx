@@ -152,7 +152,7 @@ public class RestServlet_2 extends HttpServlet {
     private final static String DEFAULT_CHARACTER_ENCODING = "UTF-8";
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -4403464830407956377L;
 
@@ -186,8 +186,8 @@ public class RestServlet_2 extends HttpServlet {
          * @param the
          *            application name, usually one of
          *            <ul>
-         *            <li><code>"connect"</code>
-         *            <li><code>"auto-connect"</code>
+         *            <li>{@code "connect"}
+         *            <li>{@code "auto-connect"}
          *            </ul>
          */
         @Override
@@ -232,7 +232,7 @@ public class RestServlet_2 extends HttpServlet {
      * 
      * @param request
      * 
-     * @return <code>true</code> if the session is in auto-commit mode
+     * @return {@code true} if the session is in auto-commit mode
      */
     protected boolean isAutoCommitting(
         HttpServletRequest request
@@ -247,7 +247,7 @@ public class RestServlet_2 extends HttpServlet {
      * 
      * @param request
      * 
-     * @return <code>true</code> if the values shall be retained
+     * @return {@code true} if the values shall be retained
      */
     protected boolean isRetainValues(
         HttpServletRequest request
@@ -261,7 +261,7 @@ public class RestServlet_2 extends HttpServlet {
      * 
      * @param request
      * 
-     * @return <code>true</code> if null values shall be serialized.
+     * @return {@code true} if null values shall be serialized.
      */
     protected boolean isSerializeNulls(
         HttpServletRequest request
@@ -661,7 +661,7 @@ public class RestServlet_2 extends HttpServlet {
      * 
      * @param request
      * 
-     * @return <code>true</code> if the query string shall be interpreted as REST input record
+     * @return {@code true} if the query string shall be interpreted as REST input record
      */
     private static boolean hasQuery(
         final HttpServletRequest request
@@ -1469,7 +1469,7 @@ public class RestServlet_2 extends HttpServlet {
      * 
      * @param request
      * 
-     * @return the decoded query string; or <code>null</code> if the query is either missing or empty
+     * @return the decoded query string; or {@code null} if the query is either missing or empty
      * 
      * @throws IOException
      */
@@ -1486,7 +1486,7 @@ public class RestServlet_2 extends HttpServlet {
      * 
      * @param request
      * 
-     * @return the request's query string reader which may be empty but never <code>null</code>.
+     * @return the request's query string reader which may be empty but never {@code null}.
      * 
      * @throws IOException
      */
@@ -1503,7 +1503,7 @@ public class RestServlet_2 extends HttpServlet {
      * 
      * @param request
      * 
-     * @return the request's query string input stream which may be empty but never <code>null</code>.
+     * @return the request's query string input stream which may be empty but never {@code null}.
      * 
      * @throws IOException
      */
@@ -1522,7 +1522,7 @@ public class RestServlet_2 extends HttpServlet {
      * 
      * @param request
      * 
-     * @return <code>true</code> if the HTTP request usually has no body
+     * @return {@code true} if the HTTP request usually has no body
      */
     private static boolean useQueryAsSource(
         final HttpServletRequest request
@@ -1548,14 +1548,14 @@ public class RestServlet_2 extends HttpServlet {
     }
 
     /**
-     * Provide a <code>parse()</code> source
+     * Provide a {@code parse()} source
      * 
      * @param request
      *            the HTTP request
      * @param response
      *            the HTTP response
      * 
-     * @return a <code>Source</code>
+     * @return a {@code Source}
      * 
      * @throws ServiceException
      */

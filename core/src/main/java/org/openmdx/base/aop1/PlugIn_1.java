@@ -69,7 +69,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
      * 
      * @param type
      * 
-     * @return <code>true</code> if the Removable interceptor shall be applied
+     * @return {@code true} if the Removable interceptor shall be applied
      * 
      * @throws ServiceException
      */
@@ -88,7 +88,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
      * @param next
      * @param type
      * 
-     * @return <code>true</code> if the Segment interceptor shall be applied
+     * @return {@code true} if the Segment interceptor shall be applied
      * 
      * @throws ServiceException
      */
@@ -105,7 +105,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
      * 
      * @param type
      * 
-     * @return <code>true</code> if the ExtentCapable interceptor shall be applied
+     * @return {@code true} if the ExtentCapable interceptor shall be applied
      * 
      * @throws ServiceException
      */

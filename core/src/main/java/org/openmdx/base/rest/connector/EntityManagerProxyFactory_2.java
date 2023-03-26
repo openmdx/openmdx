@@ -180,7 +180,7 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 6853221646431074355L;
 
@@ -317,7 +317,7 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
      * 
      * @param connectionFactory
      * 
-     * @return a new <code>Port</code> for the given connection factory
+     * @return a new {@code Port} for the given connection factory
      * 
      * @throws ServiceException
      */
@@ -393,12 +393,12 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
     
     /**
      * The method is used by JDOHelper to construct an instance of 
-     * <code>PersistenceManagerFactory</code> based on user-specified 
+     * {@code PersistenceManagerFactory} based on user-specified 
      * properties.
      * 
      * @param props
      * 
-     * @return a new <code>PersistenceManagerFactory</code>
+     * @return a new {@code PersistenceManagerFactory}
      */
     public static JDOPersistenceManagerFactory getPersistenceManagerFactory (
         Map<?,?> props
@@ -411,13 +411,13 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
 
     /**
      * The method is used by JDOHelper to construct an instance of 
-     * <code>PersistenceManagerFactory</code> based on user-specified 
+     * {@code PersistenceManagerFactory} based on user-specified 
      * properties.
      * 
      * @param overrides
      * @param props
      * 
-     * @return a new <code>PersistenceManagerFactory</code>
+     * @return a new {@code PersistenceManagerFactory}
      */
     public static JDOPersistenceManagerFactory getPersistenceManagerFactory (
         Map<?,?> overrides, 

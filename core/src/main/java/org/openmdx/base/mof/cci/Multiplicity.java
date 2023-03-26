@@ -128,8 +128,8 @@ public enum Multiplicity {
      * @return the corresponding enumeration value
      * 
      * @throws NullPointerException
-     *             if value is <code>null</value>
-     * @throws IllegalArgumentException if the value does not match any of Multiplicity's <code>String</code> representations
+     *             if value is {@code null</value>
+     * @throws IllegalArgumentException if the value does not match any of Multiplicity's {@code String} representations
      */
     public static Multiplicity parse(
         String multiplicity
@@ -158,7 +158,7 @@ public enum Multiplicity {
      * <li>{@link #SINGLE_VALUE}
      * </ul>
      * 
-     * @return <code>true</code> if the multiplicity is single-valued
+     * @return {@code true} if the multiplicity is single-valued
      */
     public boolean isSingleValued() {
         return SINGLE_VALUED.contains(this);
@@ -173,7 +173,7 @@ public enum Multiplicity {
      * <li>{@link #MAP}
      * </ul>
      * 
-     * @return <code>true</code> if the multiplicity is multi-valued
+     * @return {@code true} if the multiplicity is multi-valued
      */
     public boolean isMultiValued() {
         return MULTI_VALUED.contains(this);
@@ -187,7 +187,7 @@ public enum Multiplicity {
      * <li>{@link #SPARSEARRAY}
      * </ul>
      * 
-     * @return <code>true</code> if the multiplicity is multi-valued
+     * @return {@code true} if the multiplicity is multi-valued
      */
     public boolean isCollection() {
         return COLLECTIONS.contains(this);
@@ -199,7 +199,7 @@ public enum Multiplicity {
      * <li>{@link #STREAM}
      * </ul>
      * 
-     * @return <code>true</code> if the multiplicity is stream-valued
+     * @return {@code true} if the multiplicity is stream-valued
      */
     public boolean isStreamValued() {
         return this == Multiplicity.STREAM;

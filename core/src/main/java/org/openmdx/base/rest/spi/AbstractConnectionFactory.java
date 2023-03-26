@@ -56,7 +56,7 @@ public abstract class AbstractConnectionFactory implements ConnectionFactory {
 	private transient ResourceAdapterMetaData metaData;
 
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = -4948065302876535517L;
 

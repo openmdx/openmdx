@@ -7,7 +7,7 @@ package javax.jmi.reflect;
 public class ClosureViolationException extends JmiException {
     
     /**
-     * Constructs an <code>ClosureViolationException</code> without detail message.
+     * Constructs an {@code ClosureViolationException} without detail message.
      * @param objectInError An instance that violated the closure rule.
      * @param elementInError Reference, Attribute or Association for which the closure rule is violated.
      */
@@ -16,7 +16,7 @@ public class ClosureViolationException extends JmiException {
     }
 
     /**
-     * Constructs an <code>ClosureViolationException</code> with the specified detail message.
+     * Constructs an {@code ClosureViolationException} with the specified detail message.
      * @param objectInError An instance that violated the closure rule.
      * @param elementInError Reference, Attribute or Association for which the closure rule is violated.
      * @param msg the detail message.

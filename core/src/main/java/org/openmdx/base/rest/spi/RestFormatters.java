@@ -88,7 +88,7 @@ public class RestFormatters {
      * 
      * @param mimeType
      * 
-     * @return <code>true</code> if the given MIME type requires a binary stream
+     * @return {@code true} if the given MIME type requires a binary stream
      */
     public static boolean isBinary(
         String mimeType

@@ -144,7 +144,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
                 return new Extent_1(parent, container) {
 
                     /**
-                     * Implements <code>Serializable</code>
+                     * Implements {@code Serializable}
                      */
                     private static final long serialVersionUID = -6873613222542014345L;
 
@@ -165,12 +165,12 @@ public class PlugIn_1 implements PlugIn_1_0 {
     }
 
     /**
-     * Create a <code>StateCapable</code> container
+     * Create a {@code StateCapable} container
      * 
      * @param parent
      * @param container
      * @param type
-     * @return a new <code>StateCapable</code> container
+     * @return a new {@code StateCapable} container
      * 
      * @throws ServiceException
      */

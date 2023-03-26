@@ -169,7 +169,7 @@ public class SimplePort extends HttpPort {
     /**
      * Provide the cookie handler
      * 
-     * @return the appropriate cookie handler, or <code>null</code> if no cookie handling is desired
+     * @return the appropriate cookie handler, or {@code null} if no cookie handling is desired
      */
     protected CookieHandler newCookieHandler(){
         return new CookieManager();

@@ -80,15 +80,15 @@ public enum InheritanceStrategy {
     private final String xmlFormat;
     
     /**
-     * Retrieve a <code>InheritanceStrategy</code> from its XML representation-
+     * Retrieve a {@code InheritanceStrategy} from its XML representation-
      * 
      * @param xmlFormat
      * 
-     * @return the corresponding <code>InheritanceStrategy</code> value
+     * @return the corresponding {@code InheritanceStrategy} value
      * 
-     * @throws IllegalArgumentException if <code>xmlFormat</code> is
-     * neither <code>null</code> nor representing any of the 
-     * <code>InheritanceStrategy</code> values. 
+     * @throws IllegalArgumentException if {@code xmlFormat} is
+     * neither {@code null} nor representing any of the 
+     * {@code InheritanceStrategy} values. 
       */
     public static InheritanceStrategy fromXMLFormat(
         String xmlFormat

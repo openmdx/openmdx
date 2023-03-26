@@ -34,20 +34,20 @@ import java.util.NoSuchElementException;
  * <p>
  * Example of use:
  * <pre style="border:solid thin; padding: 1ex;"
- * > Object obj = <code style="color:#00C">null</code>;
- * Object key = <code style="color:#C00">"Key"</code>;
+ * > Object obj = <code style="color:#00C">null};
+ * Object key = <code style="color:#C00">"Key"};
  *
- * <code style="color:#00C">try</code> {
+ * <code style="color:#00C">try} {
  *     obj = pool.borrowObject(key);
- *     <code style="color:#0C0">//...use the object...</code>
- * } <code style="color:#00C">catch</code>(Exception e) {
- *     <code style="color:#0C0">// invalidate the object</code>
+ *     <code style="color:#0C0">//...use the object...}
+ * } <code style="color:#00C">catch}(Exception e) {
+ *     <code style="color:#0C0">// invalidate the object}
  *     pool.invalidateObject(key, obj);
- *     <code style="color:#0C0">// do not return the object to the pool twice</code>
- *     obj = <code style="color:#00C">null</code>;
- * } <code style="color:#00C">finally</code> {
- *     <code style="color:#0C0">// make sure the object is returned to the pool</code>
- *     <code style="color:#00C">if</code>(<code style="color:#00C">null</code> != obj) {
+ *     <code style="color:#0C0">// do not return the object to the pool twice}
+ *     obj = <code style="color:#00C">null};
+ * } <code style="color:#00C">finally} {
+ *     <code style="color:#0C0">// make sure the object is returned to the pool}
+ *     <code style="color:#00C">if}(<code style="color:#00C">null} != obj) {
  *         pool.returnObject(key, obj);
  *     }
  * }</pre>
@@ -71,7 +71,7 @@ import java.util.NoSuchElementException;
  */
 public interface KeyedObjectPool<K,V> {
     /**
-     * Obtains an instance from this pool for the specified <code>key</code>.
+     * Obtains an instance from this pool for the specified {@code key}.
      * <p>
      * Instances returned from this method will have been either newly created
      * with {@link KeyedPooledObjectFactory#makeObject makeObject} or will be
@@ -83,7 +83,7 @@ public interface KeyedObjectPool<K,V> {
      * By contract, clients <strong>must</strong> return the borrowed object
      * using {@link #returnObject returnObject},
      * {@link #invalidateObject invalidateObject}, or a related method as
-     * defined in an implementation or sub-interface, using a <code>key</code>
+     * defined in an implementation or sub-interface, using a {@code key}
      * that is {@link Object#equals equivalent} to the one used to borrow the
      * instance in the first place.
      * <p>
@@ -106,10 +106,10 @@ public interface KeyedObjectPool<K,V> {
     V borrowObject(K key) throws Exception, NoSuchElementException, IllegalStateException;
 
     /**
-     * Return an instance to the pool. By contract, <code>obj</code>
+     * Return an instance to the pool. By contract, {@code obj}
      * <strong>must</strong> have been obtained using
      * {@link #borrowObject borrowObject} or a related method as defined in an
-     * implementation or sub-interface using a <code>key</code> that is
+     * implementation or sub-interface using a {@code key} that is
      * equivalent to the one used to borrow the instance in the first place.
      *
      * @param key the key used to obtain the object
@@ -129,10 +129,10 @@ public interface KeyedObjectPool<K,V> {
     /**
      * Invalidates an object from the pool.
      * <p>
-     * By contract, <code>obj</code> <strong>must</strong> have been obtained
+     * By contract, {@code obj} <strong>must</strong> have been obtained
      * using {@link #borrowObject borrowObject} or a related method as defined
-     * in an implementation or sub-interface using a <code>key</code> that is
-     * equivalent to the one used to borrow the <code>Object</code> in the first
+     * in an implementation or sub-interface using a {@code key} that is
+     * equivalent to the one used to borrow the {@code Object} in the first
      * place.
      * <p>
      * This method should be used when an object that has been borrowed is
@@ -148,7 +148,7 @@ public interface KeyedObjectPool<K,V> {
     /**
      * Create an object using the {@link KeyedPooledObjectFactory factory} or
      * other implementation dependent mechanism, passivate it, and then place it
-     * in the idle object pool. <code>addObject</code> is useful for
+     * in the idle object pool. {@code addObject} is useful for
      * "pre-loading" a pool with idle objects (Optional operation).
      *
      * @param key the key a new instance should be added to
@@ -165,23 +165,23 @@ public interface KeyedObjectPool<K,V> {
 
     /**
      * Returns the number of instances corresponding to the given
-     * <code>key</code> currently idle in this pool. Returns a negative value if
+     * {@code key} currently idle in this pool. Returns a negative value if
      * this information is not available.
      *
      * @param key the key to query
      * @return the number of instances corresponding to the given
-     * <code>key</code> currently idle in this pool.
+     * {@code key} currently idle in this pool.
      */
     int getNumIdle(K key);
 
     /**
      * Returns the number of instances currently borrowed from but not yet
-     * returned to the pool corresponding to the given <code>key</code>.
+     * returned to the pool corresponding to the given {@code key}.
      * Returns a negative value if this information is not available.
      *
      * @param key the key to query
      * @return the number of instances currently borrowed from but not yet
-     * returned to the pool corresponding to the given <code>key</code>.
+     * returned to the pool corresponding to the given {@code key}.
 =     */
     int getNumActive(K key);
 
@@ -213,7 +213,7 @@ public interface KeyedObjectPool<K,V> {
 
     /**
      * Clears the specified pool, removing all pooled instances corresponding to
-     * the given <code>key</code> (optional operation).
+     * the given {@code key} (optional operation).
      *
      * @param key the key to clear
      *

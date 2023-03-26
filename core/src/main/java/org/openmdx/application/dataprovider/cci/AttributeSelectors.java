@@ -52,7 +52,7 @@ import org.openmdx.base.rest.cci.QueryRecord;
 
 
 /**
- * The <code>AttributeSelectors</code> class contains constants 
+ * The {@code AttributeSelectors} class contains constants 
  * identifying the set of attributes to be retrieved.
  */
 
@@ -157,7 +157,7 @@ public class AttributeSelectors {
    * Returns the code of the passed code's string representation.
    * The string representation is case insensitive.
    *
-   * @exception  throws an <code>IllegalArgumentException</code> 
+   * @exception  throws an {@code IllegalArgumentException} 
    *             if the stringified code cannot be resolved
    * @param code a stringified code
    * @return a code

@@ -99,6 +99,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
      * 
      * @param mappingFormat
      *            mapping format defined MapperFactory_1.
+     * @param markdown TODO
      * @param packageSuffix
      *            The suffix for the package to be generated in (without leading
      *            dot), e.g. 'cci'.
@@ -107,10 +108,11 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
      */
     public Mapper_1(
         String mappingFormat,
-        String packageSuffix,
+        boolean markdown,
+        String packageSuffix, 
         String fileExtension
     ) throws ServiceException {
-        super(packageSuffix);
+        super(markdown, packageSuffix);
         this.fileExtension = fileExtension;
         if (mappingFormat.startsWith(MappingTypes.JPA3 + ':')) {
             this.format = Format.JPA3;
@@ -124,7 +126,28 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         this.primitiveTypeMapper = newPrimitiveTypeMapper();
     }
 
-    // ---------------------------------------------------------------------------
+    /**
+     * Packages not to be processed
+     */
+    private final static Collection<String> EXCLUDED_PACKAGES = Arrays.asList(
+    	// Due to a conflict between jmi and jmi1
+		"org:omg:PrimitiveTypes:PrimitiveTypes"
+    );
+
+    private final static Collection<String> EXCLUDED_CLASSES = Arrays.asList();
+
+    private MetaData_1_0 metaData;
+
+    private final String fileExtension;
+
+    private List<ModelElement_1_0> processedAttributes = null;
+
+    private final Format format;
+
+    private final PrimitiveTypeMapper primitiveTypeMapper;
+    
+    private  boolean markdown;
+    
     /**
      * Is called for all ModelAttribute features of a class including supertypes.
      * This method must check whether modelAttribute.container = modelClass and
@@ -1167,7 +1190,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                 this.format,
                                 this.packageSuffix,
                                 this.metaData, 
-                                getPrimitiveTypeMapper());
+                                markdown, getPrimitiveTypeMapper());
                         // initialize package
                         this.mapBeginPackage(currentPackageName, packageMapper);
                     }
@@ -1225,7 +1248,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             this.format,
                                             this.packageSuffix,
                                             this.metaData, 
-                                            getPrimitiveTypeMapper()
+                                            markdown, getPrimitiveTypeMapper()
                                          ) : null;
                                         InstanceMapper instanceMapper = new InstanceMapper(
                                             element,
@@ -1235,6 +1258,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             this.format,
                                             this.packageSuffix,
                                             this.metaData, 
+                                            markdown,
                                             getPrimitiveTypeMapper()
                                         );
                                         InterfaceMapper interfaceMapper = jpa3 && instanceMapper.hasSPI() ? new InterfaceMapper(
@@ -1244,7 +1268,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             Format.SPI2,
                                             Names.SPI2_PACKAGE_SUFFIX,
                                             this.metaData, 
-                                            getPrimitiveTypeMapper()
+                                            markdown, getPrimitiveTypeMapper()
                                          ) : null;
                                         AbstractMetaDataMapper ormMetaDataMapper = jpa3 ? new StandardMetaDataMapper(
                                             element,
@@ -1254,8 +1278,8 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             this.packageSuffix,
                                             null,
                                             this.metaData,
-                                            getPrimitiveTypeMapper(), 
-                                            geObjectRepositoryMetadataPlugin()
+                                            markdown, 
+                                            getPrimitiveTypeMapper(), geObjectRepositoryMetadataPlugin()
                                          ) : cci2 ? new NativeMetaDataMapper(
                                                  element,
                                                  ormMetaDataWriter,
@@ -1264,8 +1288,8 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                                  this.packageSuffix,
                                                  null,
                                                  this.metaData,
-                                                 getPrimitiveTypeMapper(), 
-                                                 geObjectRepositoryMetadataPlugin()
+                                                 markdown, 
+                                                 getPrimitiveTypeMapper(), geObjectRepositoryMetadataPlugin()
                                           ) : null;
                                         AbstractMetaDataMapper ormSliceMetaDataMapper = jpa3 ? new StandardMetaDataMapper(
                                             element,
@@ -1275,8 +1299,8 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             this.packageSuffix,
                                             InstanceMapper.SLICE_CLASS_NAME,
                                             this.metaData,
-                                            getPrimitiveTypeMapper(), 
-                                            geObjectRepositoryMetadataPlugin()
+                                            markdown, 
+                                            getPrimitiveTypeMapper(), geObjectRepositoryMetadataPlugin()
                                          ) : null;
                                         QueryMapper queryMapper = cci2 ? new QueryMapper(
                                                 queryWriter,
@@ -1284,7 +1308,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                                 this.format,
                                                 this.packageSuffix,
                                                 this.metaData, 
-                                                getPrimitiveTypeMapper()
+                                                markdown, getPrimitiveTypeMapper()
                                         ) : null;
                                         this.mapBeginClass(
                                             element,
@@ -1418,7 +1442,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                         this.format,
                                         this.packageSuffix,
                                         this.metaData, 
-                                        getPrimitiveTypeMapper()
+                                        markdown, getPrimitiveTypeMapper()
                                 );
                                 QueryMapper queryMapper = cci2 ? new QueryMapper(
                                     queryWriter,
@@ -1426,7 +1450,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                     this.format,
                                     this.packageSuffix,
                                     this.metaData, 
-                                    getPrimitiveTypeMapper()
+                                    markdown, getPrimitiveTypeMapper()
                                 ) : null;
                                 if (structureMapper != null) {
                                     this.mapBeginStructure(
@@ -1488,7 +1512,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                         this.format,
                                         packageSuffix,
                                         this.metaData, 
-                                        getPrimitiveTypeMapper()
+                                        markdown, getPrimitiveTypeMapper()
                                     );
                                     this.mapException(element, exceptionMapper);
                                     exceptionWriter.flush();
@@ -1522,7 +1546,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                         this.format,
                                         this.packageSuffix,
                                         this.metaData, 
-                                        getPrimitiveTypeMapper()
+                                        markdown, getPrimitiveTypeMapper()
                                     );
                                     if (mapAssociation(
                                         element,
@@ -1606,7 +1630,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
      * @param packageName
      *            the qualified model package name
      * 
-     * @return <code>true</code> if model is in an archive
+     * @return {@code true} if model is in an archive
      */
     private boolean excludePackage(String packageName) {
         if (EXCLUDED_PACKAGES.contains(packageName)) {
@@ -1631,7 +1655,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
      * 
      * @param className
      * 
-     * @return <code>true</code> if model is in an archive
+     * @return {@code true} if model is in an archive
      */
     private boolean excludeClass(ClassDef classDef) {
         String className = classDef.getQualifiedName();
@@ -1674,7 +1698,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
      * 
      * @param name
      * 
-     * @return <code>true</code> if model is in an archive
+     * @return {@code true} if model is in an archive
      */
     private static boolean artifactIsInArchive(CharSequence iri) {
         String uri = iri.toString();
@@ -1683,31 +1707,5 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         return url != null && "jar".equals(url.getProtocol());
     }
 
-    // --------------------------------------------------------------------------------
-    // Members
-    // --------------------------------------------------------------------------------
-    /**
-     * Packages not to be processed
-     */
-    private final static Collection<String> EXCLUDED_PACKAGES =
-        Arrays.asList("org:omg:PrimitiveTypes:PrimitiveTypes" // due to a
-                                                              // conflict
-                                                              // between jmi and
-                                                              // jmi1
-            );
-
-    private final static Collection<String> EXCLUDED_CLASSES = Arrays.asList();
-
-    private MetaData_1_0 metaData;
-
-    private final String fileExtension;
-
-    private List<ModelElement_1_0> processedAttributes = null;
-
-    private final Format format;
-
-    private final PrimitiveTypeMapper primitiveTypeMapper;
-    
 }
 
-// --- End of File -----------------------------------------------------------

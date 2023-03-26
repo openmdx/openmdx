@@ -35,7 +35,7 @@ import org.openmdx.uses.org.apache.commons.io.IOCase;
  * Filters files based on the suffix (what the filename ends with).
  * This is used in retrieving all the files of a particular type.
  * <p>
- * For example, to retrieve and print all <code>*.java</code> files
+ * For example, to retrieve and print all {@code *.java} files
  * in the current directory:
  *
  * <pre>

@@ -63,7 +63,7 @@ public final class PathPattern extends AbstractPattern {
 	}
 	
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
     private static final long serialVersionUID = 3256441391432086579L;
     

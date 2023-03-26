@@ -54,8 +54,8 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 /**
  * Plug-In 1.0
  * <p>
- * A <code>PlugIn_1_0</code> implementation may implement any of the 
- * <code>InstanceLifecycleListener</code> interfaces in order to be
+ * A {@code PlugIn_1_0} implementation may implement any of the 
+ * {@code InstanceLifecycleListener} interfaces in order to be
  * notified about life cycle events.
  * 
  * @see javax.jdo.listener.InstanceLifecycleListener
@@ -90,8 +90,8 @@ public interface PlugIn_1_0 {
      * Called when the unit of work is about to be completed
      * 
      * @param unitOfWork the unit of work to be flushed
-     * @param beforeCompletion <code>true</code> if the flush is induced by the unit of
-     * work's before completion transition, <code>false</code> otherwise 
+     * @param beforeCompletion {@code true} if the flush is induced by the unit of
+     * work's before completion transition, {@code false} otherwise 
      */
     void flush(
         UnitOfWork_1 unitOfWork, 
@@ -103,7 +103,7 @@ public interface PlugIn_1_0 {
      * 
      * @param type 
      * 
-     * @return an object of the given type, or <code>null</code> if no 
+     * @return an object of the given type, or {@code null} if no 
      * such user object is provided by this plug-in
      */
     <T> T getPlugInObject(
@@ -116,7 +116,7 @@ public interface PlugIn_1_0 {
      *  
      * @param object the ancestor
      *  
-     * @return <code>true</code> if the data object manager has to handle
+     * @return {@code true} if the data object manager has to handle
      * cascading deletes 
      * 
      * @throws ServiceException 
@@ -133,7 +133,7 @@ public interface PlugIn_1_0 {
      * @param object the object to be validated
      * @param feature the feature's meta-data
      * 
-     * @return <code>true</code> if the plug-in exempts the feature
+     * @return {@code true} if the plug-in exempts the feature
      * from the standard validation.
      * 
      * @throws ServiceException 
@@ -148,7 +148,7 @@ public interface PlugIn_1_0 {
      * 
      * @param object
      * 
-     * @return <code>true</code> if the object is an aspect
+     * @return {@code true} if the object is an aspect
      */
     Boolean isAspect(
 		DataObject_1 object

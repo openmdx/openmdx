@@ -117,7 +117,7 @@ public class PersistenceHelper {
 
     /**
      * Determine an object's class name<ul>
-     * <li><code>null</code> in case of a <code>null</code> object reference
+     * <li>{@code null} in case of a {@code null} object reference
      * <li>the MOF class' id in case of a JDO object
      * <li>the Java class' name in case of a non-JDO object
      * </ul<
@@ -140,7 +140,7 @@ public class PersistenceHelper {
      * 
      * @param object
      * 
-     * @return a clone, or <code>null</code> if the object is <code>null</code>
+     * @return a clone, or {@code null} if the object is {@code null}
      * 
      * @exception RuntimeException if cloning fails or if the object is not cloneable 
      */
@@ -297,7 +297,7 @@ public class PersistenceHelper {
     /**
      * Retrieve the object's last XRI segment
      * 
-     * @return the last segment of the actual or future XRI; or <code>null</code> if the object is not contained yet
+     * @return the last segment of the actual or future XRI; or {@code null} if the object is not contained yet
      */
     public static String getLastXRISegment(
     	Object pc
@@ -310,8 +310,8 @@ public class PersistenceHelper {
      * 
      * @param pc
      * 
-     * @exception NullPointerException if the argument is <code>null</code>
-     * @exception IllegalArgumentException if the argument is not a <code>javax.jmi.reflect.RefObject</code> instance
+     * @exception NullPointerException if the argument is {@code null}
+     * @exception IllegalArgumentException if the argument is not a {@code javax.jmi.reflect.RefObject} instance
      */
     public static void retrieveAllDescendants(
         Object pc

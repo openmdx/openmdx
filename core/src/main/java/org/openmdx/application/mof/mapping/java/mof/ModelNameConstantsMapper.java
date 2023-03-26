@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Constants Generator
+ * Description: Model Name Constant Mapper
  * Owner:       the original authors.
  * ====================================================================
  * 
@@ -77,44 +77,29 @@ public class ModelNameConstantsMapper
 
     /**
      * Constructor 
+     * 
+     * @param markdown {@code true} if annotations use markdown
      */
     public ModelNameConstantsMapper(
+    	boolean markdown
     ){
-        this(
-            null, // mappingFormat
-            "mof1", // packageSuffix
-            "java" // fileExtension
-        );
+        super(markdown, PACKAGE_SUFFIX);    
     }
     
     /**
-     * Constructor.
-     * 
-     * @param mappingFormat mapping format defined MapperFactory_1.
-     * @param packageSuffix The suffix for the package to be generated in (without leading dot), e.g. 'cci'.
-     * @param fileExtension The file extension (without leading point), e.g. 'java'.
+     * The suffix for the package to be generated in (without leading dot), e.g. 'cci2'.
      */
-    protected ModelNameConstantsMapper(
-        Format mappingFormat,
-        String packageSuffix,
-        String fileExtension
-    ) {
-        super(
-            packageSuffix
-        );    
-        this.mappingFormat = mappingFormat;
-        this.fileExtension = fileExtension;
-    }
-
-    /**
-     * 
-     */
-    private final String fileExtension;
+    private static final String PACKAGE_SUFFIX = "mof1";
     
     /**
-     * 
+     * The file extension (without leading point), e.g. 'java'.
      */
-    private final Format mappingFormat;
+    private static final String FILE_EXTENSION = "java";
+    
+    /**
+     * Mapping format defined MapperFactory_1.
+     */
+    private static final Format MAPPING_FORMAT = null;
     
     /**
      * 
@@ -407,17 +392,17 @@ public class ModelNameConstantsMapper
                             element, 
                             classWriter, 
                             this.model, 
-                            this.mappingFormat, 
+                            MAPPING_FORMAT, 
                             this.packageSuffix,
-                            this.metaData
+                            this.metaData, markdown
                         );
                         InstanceFeaturesMapper instanceIntfMapper = new InstanceFeaturesMapper(
                             element, 
                             instanceFeaturesWriter, 
                             this.model, 
-                            this.mappingFormat, 
+                            MAPPING_FORMAT, 
                             this.packageSuffix,
-                            this.metaData
+                            this.metaData, markdown
                         );
                         this.mapBeginClass(
                             element,
@@ -457,9 +442,9 @@ public class ModelNameConstantsMapper
                             instanceIntfMapper
                         );
                         instanceFeaturesWriter.flush();
-                        this.addToZip(zip, instanceFeaturesFile, element, FeaturesMapper.FEATURES_INTERFACE_SUFFIX + '.' + this.fileExtension);
+                        this.addToZip(zip, instanceFeaturesFile, element, FeaturesMapper.FEATURES_INTERFACE_SUFFIX + '.' + FILE_EXTENSION);
                         classWriter.flush();
-                        this.addToZip(zip, classFile, element, "Class." + this.fileExtension);
+                        this.addToZip(zip, classFile, element, "Class." + FILE_EXTENSION);
                     } else if(
                         // org:omg:model1:StructureType
                         this.model.isStructureType(element) &&
@@ -474,9 +459,9 @@ public class ModelNameConstantsMapper
                                 element, 
                                 structFeaturesWriter, 
                                 this.model, 
-                                this.mappingFormat, 
+                                MAPPING_FORMAT, 
                                 this.packageSuffix,
-                                this.metaData
+                                this.metaData, markdown
                             );
                             this.mapBeginStruct(
                                 element,
@@ -503,7 +488,7 @@ public class ModelNameConstantsMapper
                             structFeaturesWriter.flush();
                             this.addToZip(
                             	zip, 
-                            	structFeaturesFile, element, FeaturesMapper.FEATURES_INTERFACE_SUFFIX + '.' + this.fileExtension);
+                            	structFeaturesFile, element, FeaturesMapper.FEATURES_INTERFACE_SUFFIX + '.' + FILE_EXTENSION);
                         }
                     } else if(element.isExceptionType() &&
                         this.model.isLocal(element, currentPackageName)

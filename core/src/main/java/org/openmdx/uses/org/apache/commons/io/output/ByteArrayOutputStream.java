@@ -36,8 +36,8 @@ import org.openmdx.uses.org.apache.commons.io.input.ClosedInputStream;
  * written into a byte array. The buffer automatically grows as data
  * is written to it.
  * <p>
- * The data can be retrieved using <code>toByteArray()</code> and
- * <code>toString()</code>.
+ * The data can be retrieved using {@code toByteArray()} and
+ * {@code toString()}.
  * <p>
  * Closing a {@code ByteArrayOutputStream} has no effect. The methods in
  * this class can be called after the stream has been closed without
@@ -267,7 +267,7 @@ public class ByteArrayOutputStream extends OutputStream {
     }
 
     /**
-     * Fetches entire contents of an <code>InputStream</code> and represent
+     * Fetches entire contents of an {@code InputStream} and represent
      * same data as result InputStream.
      * <p>
      * This method is useful where,
@@ -280,7 +280,7 @@ public class ByteArrayOutputStream extends OutputStream {
      * It can be used in favor of {@link #toByteArray()}, since it
      * avoids unnecessary allocation and copy of byte[].<br>
      * This method buffers the input internally, so there is no need to use a
-     * <code>BufferedInputStream</code>.
+     * {@code BufferedInputStream}.
      *
      * @param input Stream to be fully buffered.
      * @return A fully buffered stream.
@@ -293,7 +293,7 @@ public class ByteArrayOutputStream extends OutputStream {
     }
 
     /**
-     * Fetches entire contents of an <code>InputStream</code> and represent
+     * Fetches entire contents of an {@code InputStream} and represent
      * same data as result InputStream.
      * <p>
      * This method is useful where,
@@ -306,7 +306,7 @@ public class ByteArrayOutputStream extends OutputStream {
      * It can be used in favor of {@link #toByteArray()}, since it
      * avoids unnecessary allocation and copy of byte[].<br>
      * This method buffers the input internally, so there is no need to use a
-     * <code>BufferedInputStream</code>.
+     * {@code BufferedInputStream}.
      *
      * @param input Stream to be fully buffered.
      * @param size the initial buffer size
@@ -324,7 +324,7 @@ public class ByteArrayOutputStream extends OutputStream {
 
     /**
      * Gets the current contents of this byte stream as a Input Stream. The
-     * returned stream is backed by buffers of <code>this</code> stream,
+     * returned stream is backed by buffers of {@code this} stream,
      * avoiding memory allocation and copy, thus saving space and time.<br>
      *
      * @return the current contents of this output stream.

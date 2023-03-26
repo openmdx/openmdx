@@ -47,7 +47,7 @@ package org.openmdx.base.rest.cci;
 import javax.resource.cci.IndexedRecord;
 
 /**
- * <code>org::openmdx::kernel::ResultSet</code>
+ * {@code org::openmdx::kernel::ResultSet}
  */
 public interface ResultRecord extends IndexedRecord {
     
@@ -66,7 +66,7 @@ public interface ResultRecord extends IndexedRecord {
     /**
      * Retrieve the total
      * 
-     * @return the total, or <code>null</code> if it is not known yet
+     * @return the total, or {@code null} if it is not known yet
      */
     Long getTotal();
     
@@ -80,7 +80,7 @@ public interface ResultRecord extends IndexedRecord {
     /**
      * Tells whether there are more objects to be returned
      * 
-     * @return <code>TRUE</code> if there are more objects to be returned
+     * @return {@code TRUE} if there are more objects to be returned
      */
     Boolean getHasMore();
     

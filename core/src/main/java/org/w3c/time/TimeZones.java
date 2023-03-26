@@ -65,17 +65,17 @@ public class TimeZones {
     
     /**
      * <p>
-     * Returns a <code>java.util.TimeZone</code> for this class.
+     * Returns a {@code java.util.TimeZone} for this class.
      * </p>
      *
      * <p>
-     * If <code>zoneOffset</code> is <code>FIELD_UNDEFINED</code>, return
+     * If {@code zoneOffset} is {@code FIELD_UNDEFINED}, return
      * default time zone for this host.
-     * (Same default as <code>java.util.GregorianCalendar</code>).
+     * (Same default as {@code java.util.GregorianCalendar}).
      * </p>DatatypeConstants
      *
      * @param zoneOffset
-     *            the zone offset, or <code>DatatypeConstants.FIELD_UNDEFINED</code>
+     *            the zone offset, or {@code DatatypeConstants.FIELD_UNDEFINED}
      *            in order to retrieve the default time zone
      *
      * @return TimeZone for this zoneoffset

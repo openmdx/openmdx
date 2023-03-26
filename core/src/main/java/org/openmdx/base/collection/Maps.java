@@ -61,7 +61,7 @@ public class Maps {
     }
 
     /**
-     * A <code>NULL</code> value for maps not allowing <code>null</code> as value.
+     * A {@code NULL} value for maps not allowing {@code null} as value.
      */
     public static final Object NULL = new Object();
 

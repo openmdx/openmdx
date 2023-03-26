@@ -48,7 +48,7 @@ import java.io.Serializable;
 
 /**
  * Identity<ul>
- * <li>A <em>persistent object's</em> <code>Identity</code> has one of the following XRI 2 authority forms<ul>
+ * <li>A <em>persistent object's</em> {@code Identity} has one of the following XRI 2 authority forms<ul>
  * <li><b>@openmdx*</b><i>&lsaquo;openmdx-authority&rsaquo;</i></b>
  * <li><b>@openmdx*</b><i>&lsaquo;openmdx-authority&rsaquo;</i><b>*($t*(+class)*</b><i>&lsaquo;model-class&rsaquo;</i><b>)</b>
  * </ul>
@@ -69,7 +69,7 @@ import java.io.Serializable;
  * <li>The namespace should be omitted if it consists of exactly the same 
  * components as the the <i>openmdx-authority</i>.
  * </ul>
- * <li>A <em>transient object's</em> <code>Identity</code> has the following XRI 2 authority form<ul>
+ * <li>A <em>transient object's</em> {@code Identity} has the following XRI 2 authority form<ul>
  * <li><b>$t*uuid*</b><i>&lsaquo;uuid&rsaquo;</i>
  * </ul>
  */

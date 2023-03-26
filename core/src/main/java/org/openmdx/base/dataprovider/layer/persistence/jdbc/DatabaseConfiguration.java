@@ -233,11 +233,11 @@ public class DatabaseConfiguration {
     }
 
     /**
-     * Normalize empty <code>String</code>s to <code>null</code>
+     * Normalize empty {@code String}s to {@code null}
      * 
      * @param value the value to be normalized
 
-     * @return the value unles sthe value is empty; <code>null</code> in case of an empty value
+     * @return the value unles sthe value is empty; {@code null} in case of an empty value
      */
     private String normalize(
     	String value

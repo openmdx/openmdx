@@ -64,10 +64,10 @@ public class DateTimeStateViewContext
      * Constructor 
      * 
      * @param datatypeFactory the immutable datatype factory
-     * @param validFrom the begin of the time range, or <code>null</code> for an unconstrained lower bound
-     * @param validTo the end of the time range, or <code>null</code> for an unconstrained upper bound
-     * @param validFor the view's valid time point, or <code>null</code> for time range views
-     * @param validAt the view's transaction time point, or <code>null</code> for time range views
+     * @param validFrom the begin of the time range, or {@code null} for an unconstrained lower bound
+     * @param validTo the end of the time range, or {@code null} for an unconstrained upper bound
+     * @param validFor the view's valid time point, or {@code null} for time range views
+     * @param validAt the view's transaction time point, or {@code null} for time range views
      */
     private DateTimeStateViewContext(
         ImmutableDatatypeFactory datatypeFactory,
@@ -88,7 +88,7 @@ public class DateTimeStateViewContext
     }
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -2814664512154648676L;
 
@@ -115,8 +115,8 @@ public class DateTimeStateViewContext
     /**
      * Create a time range view context 
      *
-     * @param validFrom the begin of the time range, or <code>null</code> for an unconstrained lower bound
-     * @param validTo the end of the time range, or <code>null</code> for an unconstrained upper bound
+     * @param validFrom the begin of the time range, or {@code null} for an unconstrained lower bound
+     * @param validTo the end of the time range, or {@code null} for an unconstrained upper bound
      */
     public static DateTimeStateViewContext newTimeRangeViewContext(
         Date validFrom,

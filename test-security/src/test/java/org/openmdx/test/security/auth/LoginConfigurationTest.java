@@ -59,6 +59,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openmdx.base.text.conversion.URLReader;
 import org.openmdx.junit5.OpenmdxTestSecurityStandardExtension;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.security.auth.login.configuration.URLConfiguration;
 
 @ExtendWith(OpenmdxTestSecurityStandardExtension.class)
@@ -143,7 +144,7 @@ public class LoginConfigurationTest {
 			)
 		};
         URLConfiguration localConfiguration = new URLConfiguration(
-            new URL("xri://+resource/org/openmdx/test/security/auth/login.configuration"), 
+            new URL(Resources.toResourceXRI("xri://+resource/org/openmdx/test/security/auth/login.configuration")), 
             sharedOptions
         );
         System.out.println(localConfiguration);

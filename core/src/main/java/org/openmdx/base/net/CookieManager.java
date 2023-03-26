@@ -72,17 +72,17 @@ public class CookieManager extends CookieHandler {
 	}
 
 	/**
-	 * The <code>Cookie</code> store
+	 * The {@code Cookie} store
 	 */
 	private SortedSet<HttpCookie> cookies1 = new TreeSet<HttpCookie>();
 
     /**
-     * The <code>Cookie2</code> store
+     * The {@code Cookie2} store
      */
     private SortedSet<HttpCookie> cookies2 = new TreeSet<HttpCookie>();
 	
     /**
-     * Tells whether a <code>Cookie2: Version="1"</code> hint shall be sent to the server.
+     * Tells whether a {@code Cookie2: Version="1"} hint shall be sent to the server.
      */
     private final static boolean INCLUDE_COOKIE2_HINT = false;
     
@@ -151,7 +151,7 @@ public class CookieManager extends CookieHandler {
 	}
 
 	/**
-	 * Put <code>Cookie</code> and <code>Cookie2</code> entries into the store
+	 * Put {@code Cookie} and {@code Cookie2} entries into the store
 	 * 
 	 * @param uri
 	 * @param name

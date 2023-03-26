@@ -67,6 +67,7 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
 
 	/**
 	 * Constructor
+	 * @param markdown TODO
 	 */
 	public NativeMetaDataMapper(
         ModelElement_1_0 classDef, 
@@ -76,8 +77,8 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
         String packageSuffix,
 		String sliceClassName, 
         MetaData_1_0 metaData, 
-        PrimitiveTypeMapper primitiveTypeMapper, 
-        ObjectRepositoryMetadataPlugin plugin
+        boolean markdown, 
+        PrimitiveTypeMapper primitiveTypeMapper, ObjectRepositoryMetadataPlugin plugin
     ) throws ServiceException {
         super(
             classDef,
@@ -86,9 +87,9 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
             format, 
             packageSuffix, 
     		sliceClassName, 
+            markdown, 
             metaData, 
-            primitiveTypeMapper, 
-            plugin
+            primitiveTypeMapper, plugin
         );
 	}
 
@@ -153,9 +154,9 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
 		if(this.isDeclaringClass(attributeDef)) {
 			Boolean persistent = isPersistent(attributeDef);
 			if(persistent != null) {
-				this.pw.print(attributeDef.getQualifiedName().replaceAll(":", "\\\\:"));
-				this.pw.print(" = ");
-				this.pw.println(persistent.booleanValue() ? "PERSISTENT" : "TRANSIENT");
+				print(attributeDef.getQualifiedName().replaceAll(":", "\\\\:"));
+				print(" = ");
+				printLine(persistent.booleanValue() ? "PERSISTENT" : "TRANSIENT");
 			}
 		}
 	}

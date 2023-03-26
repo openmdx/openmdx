@@ -76,7 +76,7 @@ class DataObjectFilter extends ObjectFilter {
 	}
 
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = 7352255651343841409L;
 	

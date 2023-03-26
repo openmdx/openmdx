@@ -155,7 +155,7 @@ public final class AttributeSpecifier implements Serializable {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -2014082079642825679L;
     

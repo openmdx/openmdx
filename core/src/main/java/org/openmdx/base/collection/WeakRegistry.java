@@ -125,7 +125,7 @@ public class WeakRegistry<K,V> implements Registry<K, V> {
     /**
      * Determines whether the registry is open or closed
      * 
-     * @return <code>true</code> if the reogistry is open
+     * @return {@code true} if the reogistry is open
      */
     private boolean isOpen(){
         return this.delegate != null;

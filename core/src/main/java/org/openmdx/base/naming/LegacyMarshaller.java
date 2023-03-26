@@ -111,7 +111,7 @@ public final class LegacyMarshaller implements Marshaller {
     }
 
     /**
-     * Append a marshalled component to a <code>StringBuilder</code>.
+     * Append a marshalled component to a {@code StringBuilder}.
      * 
      * @param     buffer
      *            The StringBuffer to be modified.

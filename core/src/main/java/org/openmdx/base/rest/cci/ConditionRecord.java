@@ -50,7 +50,7 @@ import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.Quantifier;
 
 /**
- * <code>org::openmdx::kernel::Condition</code>
+ * {@code org::openmdx::kernel::Condition}
  */
 public interface ConditionRecord extends MappedRecord {
     

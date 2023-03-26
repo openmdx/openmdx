@@ -1,0 +1,34 @@
+digraph "Diagram Main [Package org::openmdx::preferences2]" {
+
+	${ATTRIBUTE_STATEMENTS}
+
+	{
+		${LAYER[layer=0]}
+		${CLASS[name=org:openmdx:preferences2:Segment]}
+	}
+	
+	{
+		${LAYER[layer=1,mindist=3]}
+		${CLASS[name=org:openmdx:preferences2:Preferences]}
+	}
+	
+	{
+		${LAYER[layer=2]}
+		${CLASS[name=org:openmdx:preferences2:Root]}
+	}
+	
+	{
+		${LAYER[layer=3,mindist=3]}
+		${CLASS[name=org:openmdx:preferences2:Node,width=8]}
+	}
+	
+	{
+		${LAYER[layer=4,mindist=3]}
+		${CLASS[name=org:openmdx:preferences2:Entry,width=8]}
+	}
+
+	${LAYERS}
+	${ASSOCIATION[name=*]}
+	${INSTANCE_OF}
+
+}

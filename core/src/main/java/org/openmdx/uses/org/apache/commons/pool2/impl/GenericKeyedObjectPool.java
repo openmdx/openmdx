@@ -50,16 +50,16 @@ import org.openmdx.uses.org.apache.commons.pool2.PooledObjectState;
 import org.openmdx.uses.org.apache.commons.pool2.SwallowedExceptionListener;
 
 /**
- * A configurable <code>KeyedObjectPool</code> implementation.
+ * A configurable {@code KeyedObjectPool} implementation.
  * <p>
  * When coupled with the appropriate {@link KeyedPooledObjectFactory},
- * <code>GenericKeyedObjectPool</code> provides robust pooling functionality for
- * keyed objects. A <code>GenericKeyedObjectPool</code> can be viewed as a map
+ * {@code GenericKeyedObjectPool} provides robust pooling functionality for
+ * keyed objects. A {@code GenericKeyedObjectPool} can be viewed as a map
  * of sub-pools, keyed on the (unique) key values provided to the
  * {@link #preparePool preparePool}, {@link #addObject addObject} or
  * {@link #borrowObject borrowObject} methods. Each time a new key value is
  * provided to one of these methods, a sub-new pool is created under the given
- * key to be managed by the containing <code>GenericKeyedObjectPool.</code>
+ * key to be managed by the containing {@code GenericKeyedObjectPool.}
  * <p>
  * Optionally, one may configure the pool to examine and possibly evict objects
  * as they sit idle in the pool and to ensure that a minimum number of idle
@@ -86,7 +86,7 @@ public class GenericKeyedObjectPool<K,T> extends BaseGenericObjectPool<T>
         implements KeyedObjectPool<K,T>, GenericKeyedObjectPoolMXBean<K> {
 
     /**
-     * Create a new <code>GenericKeyedObjectPool</code> using defaults from
+     * Create a new {@code GenericKeyedObjectPool} using defaults from
      * {@link GenericKeyedObjectPoolConfig}.
      * @param factory the factory to be used to create entries
      */
@@ -95,7 +95,7 @@ public class GenericKeyedObjectPool<K,T> extends BaseGenericObjectPool<T>
     }
 
     /**
-     * Create a new <code>GenericKeyedObjectPool</code> using a specific
+     * Create a new {@code GenericKeyedObjectPool} using a specific
      * configuration.
      *
      * @param factory the factory to be used to create entries
@@ -276,8 +276,8 @@ public class GenericKeyedObjectPool<K,T> extends BaseGenericObjectPool<T>
     }
 
     /**
-     * Equivalent to <code>{@link #borrowObject(Object, long) borrowObject}(key,
-     * {@link #getMaxWaitMillis()})</code>.
+     * Equivalent to {@code {@link #borrowObject(Object, long) borrowObject}(key,
+     * {@link #getMaxWaitMillis()})}.
      * <p>
      * {@inheritDoc}
      */
@@ -295,7 +295,7 @@ public class GenericKeyedObjectPool<K,T> extends BaseGenericObjectPool<T>
      * associated with the given key, then an idle instance will be selected
      * based on the value of {@link #getLifo()}, activated and returned.  If
      * activation fails, or {@link #getTestOnBorrow() testOnBorrow} is set to
-     * <code>true</code> and validation fails, the instance is destroyed and the
+     * {@code true} and validation fails, the instance is destroyed and the
      * next available instance is examined.  This continues until either a valid
      * instance is returned or there are no more idle instances available.
      * <p>
@@ -303,24 +303,24 @@ public class GenericKeyedObjectPool<K,T> extends BaseGenericObjectPool<T>
      * the given key, behavior depends on the {@link #getMaxTotalPerKey()
      * maxTotalPerKey}, {@link #getMaxTotal() maxTotal}, and (if applicable)
      * {@link #getBlockWhenExhausted()} and the value passed in to the
-     * <code>borrowMaxWaitMillis</code> parameter. If the number of instances checked
+     * {@code borrowMaxWaitMillis} parameter. If the number of instances checked
      * out from the sub-pool under the given key is less than
-     * <code>maxTotalPerKey</code> and the total number of instances in
-     * circulation (under all keys) is less than <code>maxTotal</code>, a new
+     * {@code maxTotalPerKey} and the total number of instances in
+     * circulation (under all keys) is less than {@code maxTotal}, a new
      * instance is created, activated and (if applicable) validated and returned
-     * to the caller. If validation fails, a <code>NoSuchElementException</code>
+     * to the caller. If validation fails, a {@code NoSuchElementException}
      * will be thrown.
      * <p>
      * If the associated sub-pool is exhausted (no available idle instances and
      * no capacity to create new ones), this method will either block
      * ({@link #getBlockWhenExhausted()} is true) or throw a
-     * <code>NoSuchElementException</code>
+     * {@code NoSuchElementException}
      * ({@link #getBlockWhenExhausted()} is false).
      * The length of time that this method will block when
      * {@link #getBlockWhenExhausted()} is true is determined by the value
-     * passed in to the <code>borrowMaxWait</code> parameter.
+     * passed in to the {@code borrowMaxWait} parameter.
      * <p>
-     * When <code>maxTotal</code> is set to a positive value and this method is
+     * When {@code maxTotal} is set to a positive value and this method is
      * invoked when at the limit with no idle instances available under the requested
      * key, an attempt is made to create room by clearing the oldest 15% of the
      * elements from the keyed sub-pools.
@@ -577,7 +577,7 @@ public class GenericKeyedObjectPool<K,T> extends BaseGenericObjectPool<T>
      * {@inheritDoc}
      * <p>
      * Activation of this method decrements the active count associated with
-     * the given keyed pool and attempts to destroy <code>obj.</code>
+     * the given keyed pool and attempts to destroy {@code obj.}
      *
      * @param key pool key
      * @param obj instance to invalidate
@@ -638,7 +638,7 @@ public class GenericKeyedObjectPool<K,T> extends BaseGenericObjectPool<T>
 
     /**
      * Clears the specified sub-pool, removing all pooled instances
-     * corresponding to the given <code>key</code>. Exceptions encountered
+     * corresponding to the given {@code key}. Exceptions encountered
      * destroying idle instances are swallowed but notified via a
      * {@link SwallowedExceptionListener}.
      *
@@ -1212,7 +1212,7 @@ public class GenericKeyedObjectPool<K,T> extends BaseGenericObjectPool<T>
     /**
      * Create an object using the {@link KeyedPooledObjectFactory#makeObject
      * factory}, passivate it, and then place it in the idle object pool.
-     * <code>addObject</code> is useful for "pre-loading" a pool with idle
+     * {@code addObject} is useful for "pre-loading" a pool with idle
      * objects.
      *
      * @param key the key a new instance should be added to

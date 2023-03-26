@@ -56,7 +56,7 @@ import org.openmdx.base.accessor.cci.DataObject_1_0;
 class DataObjectSlice extends ArrayList<DataObject_1_0> {
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 4161149028230944266L;
 

@@ -67,8 +67,8 @@ import org.w3c.cci2.SparseArray;
  * Bean Factory
  * <p>
  * The following configuration entry names are reserved<ul>
- * <li><code>class</code>, the class to be instantiated
- * <li><code>interface</code>, the class to be exposed by the factory
+ * <li>{@code class}, the class to be instantiated
+ * <li>{@code interface}, the class to be exposed by the factory
  * </ul>
  * <p>
  * The instance is treated as java bean, i.e. it is instantiated via
@@ -151,8 +151,8 @@ public class BeanFactory<T> implements Factory<T> {
      * Create a factory for the given class.
      * <p>
      * The class names are retrieved from the following configuration keys<ul>
-     * <li><code>"class"</code> <em>(mandatory)</em>
-     * <li><code>"interface"</code> <em>(optional)</em>
+     * <li>{@code "class"} <em>(mandatory)</em>
+     * <li>{@code "interface"} <em>(optional)</em>
      * </ul>
      * 
      * @param configuration the Java Bean Factory configuration includes the class name(s)
@@ -185,7 +185,7 @@ public class BeanFactory<T> implements Factory<T> {
      * Create a factory for the given class.
      * <p>
      * The bean class name is retrieved from the following configuration key<ul>
-     * <li><code>"class"</code> <em>(mandatory)</em>
+     * <li>{@code "class"} <em>(mandatory)</em>
      * </ul>
      * 
      * @param instanceClass the instance class
@@ -208,7 +208,7 @@ public class BeanFactory<T> implements Factory<T> {
      * Create a factory for the given class.
      * <p>
      * The bean class name is retrieved from the following configuration key<ul>
-     * <li><code>"class"</code> <em>(mandatory)</em>
+     * <li>{@code "class"} <em>(mandatory)</em>
      * </ul>
      * 
      * @param declaredClass the instance class

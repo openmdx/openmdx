@@ -122,7 +122,7 @@ public class LightweightInitialContextFactoryBuilder implements InitialContextFa
      * Install the {@code LightweightInitialContextFactoryBuilder} by registering it 
      * with the {@code NamingManager}
      * <p>
-     * The <code>java:comp/env</code> environment may be populated through system properties.
+     * The {@code java:comp/env} environment may be populated through system properties.
      * <p>
      * Note:<br>
      * This method is idempotent, i.e. it may be invoked repeatedly but does the registration
@@ -141,16 +141,16 @@ public class LightweightInitialContextFactoryBuilder implements InitialContextFa
     }
 
     /**
-     * Install the <code>NonManagedContextFactoryBuilder</code> singleton.
+     * Install the {@code NonManagedContextFactoryBuilder} singleton.
      * <p>
-     * The <code>java:comp/env</code> environment may be populated either through
-     * the <code>componentEnvironment</code> argument or through system properties.
+     * The {@code java:comp/env} environment may be populated either through
+     * the {@code componentEnvironment} argument or through system properties.
      * 
-     * @param componentEnvironment to initialize the <code>java:comp/env</code> 
+     * @param componentEnvironment to initialize the {@code java:comp/env} 
      * environment.<p>
-     * <code>java:comp/env/jdbc/MyDataSource</code> for example might be specified 
-     * by an entry mapping <code>org.openmdx.comp.env.jdbc.MyDataSource</code>
-     * to <code>jdbc:xa:org.postgresql.xa.PGXADataSource?user=scott&password=tiger</code> 
+     * {@code java:comp/env/jdbc/MyDataSource} for example might be specified 
+     * by an entry mapping {@code org.openmdx.comp.env.jdbc.MyDataSource}
+     * to {@code jdbc:xa:org.postgresql.xa.PGXADataSource?user=scott&password=tiger} 
      * 
      * @throws NamingException 
      */

@@ -88,7 +88,7 @@ public final class StringToken {
     /**
      * Tells whether the corresponding entry has been newly created
      * 
-     * @return <code>true</code> if token has been newly created
+     * @return {@code true} if token has been newly created
      */
     public boolean isNew(
     ){

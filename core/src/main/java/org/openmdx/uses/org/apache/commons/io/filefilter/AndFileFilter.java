@@ -53,7 +53,7 @@ public class AndFileFilter
     private final List<IOFileFilter> fileFilters;
 
     /**
-     * Constructs a new instance of <code>AndFileFilter</code>.
+     * Constructs a new instance of {@code AndFileFilter}.
      *
      * @since Commons I/O 1.1
      */
@@ -62,7 +62,7 @@ public class AndFileFilter
     }
 
     /**
-     * Constructs a new instance of <code>AndFileFilter</code>
+     * Constructs a new instance of {@code AndFileFilter}
      * with the specified list of filters.
      *
      * @param fileFilters  a List of IOFileFilter instances, copied, null ignored

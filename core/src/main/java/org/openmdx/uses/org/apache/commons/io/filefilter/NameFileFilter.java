@@ -35,7 +35,7 @@ import org.openmdx.uses.org.apache.commons.io.IOCase;
  * Filters filenames for a certain name.
  * <p>
  * For example, to print all files and directories in the
- * current directory whose name is <code>Test</code>:
+ * current directory whose name is {@code Test}:
  *
  * <pre>
  * File dir = new File(".");

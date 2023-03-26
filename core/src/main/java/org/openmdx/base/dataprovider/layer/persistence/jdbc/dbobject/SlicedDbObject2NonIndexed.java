@@ -118,7 +118,7 @@ public class SlicedDbObject2NonIndexed extends SlicedDbObject2 {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 3257849870223226167L;
 

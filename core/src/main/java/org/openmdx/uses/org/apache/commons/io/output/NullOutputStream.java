@@ -35,7 +35,7 @@ public class NullOutputStream extends OutputStream {
     public static final NullOutputStream NULL_OUTPUT_STREAM = new NullOutputStream();
 
     /**
-     * Does nothing - output to <code>/dev/null</code>.
+     * Does nothing - output to {@code /dev/null}.
      * @param b The bytes to write
      * @param off The start offset
      * @param len The number of bytes to write
@@ -46,7 +46,7 @@ public class NullOutputStream extends OutputStream {
     }
 
     /**
-     * Does nothing - output to <code>/dev/null</code>.
+     * Does nothing - output to {@code /dev/null}.
      * @param b The byte to write
      */
     @Override
@@ -55,7 +55,7 @@ public class NullOutputStream extends OutputStream {
     }
 
     /**
-     * Does nothing - output to <code>/dev/null</code>.
+     * Does nothing - output to {@code /dev/null}.
      * @param b The bytes to write
      * @throws IOException never
      */

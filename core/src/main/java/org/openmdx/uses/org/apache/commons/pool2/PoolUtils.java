@@ -102,8 +102,8 @@ public final class PoolUtils {
      * @return the {@link TimerTask} that will periodically check the pools idle
      *         object count.
      * @throws IllegalArgumentException
-     *             when <code>pool</code> is <code>null</code> or when
-     *             <code>minIdle</code> is negative or when <code>period</code>
+     *             when {@code pool} is {@code null} or when
+     *             {@code minIdle} is negative or when {@code period}
      *             isn't valid for {@link Timer#schedule(TimerTask, long, long)}
      */
     public static <T> TimerTask checkMinIdle(final ObjectPool<T> pool,
@@ -141,9 +141,9 @@ public final class PoolUtils {
      * @return the {@link TimerTask} that will periodically check the pools idle
      *         object count.
      * @throws IllegalArgumentException
-     *             when <code>keyedPool</code>, <code>key</code> is
-     *             <code>null</code> or when <code>minIdle</code> is negative or
-     *             when <code>period</code> isn't valid for
+     *             when {@code keyedPool}, {@code key} is
+     *             {@code null} or when {@code minIdle} is negative or
+     *             when {@code period} isn't valid for
      *             {@link Timer#schedule(TimerTask, long, long)}.
      */
     public static <K, V> TimerTask checkMinIdle(
@@ -167,7 +167,7 @@ public final class PoolUtils {
 
     /**
      * Periodically check the idle object count for each key in the
-     * <code>Collection</code> <code>keys</code> in the keyedPool. At most one
+     * {@code Collection} {@code keys} in the keyedPool. At most one
      * idle object will be added per period.
      *
      * @param keyedPool
@@ -185,9 +185,9 @@ public final class PoolUtils {
      * @return a {@link Map} of key and {@link TimerTask} pairs that will
      *         periodically check the pools idle object count.
      * @throws IllegalArgumentException
-     *             when <code>keyedPool</code>, <code>keys</code>, or any of the
-     *             values in the collection is <code>null</code> or when
-     *             <code>minIdle</code> is negative or when <code>period</code>
+     *             when {@code keyedPool}, {@code keys}, or any of the
+     *             values in the collection is {@code null} or when
+     *             {@code minIdle} is negative or when {@code period}
      *             isn't valid for {@link Timer#schedule(TimerTask, long, long)}
      *             .
      * @see #checkMinIdle(KeyedObjectPool, Object, int, long)
@@ -210,7 +210,7 @@ public final class PoolUtils {
     }
 
     /**
-     * Call <code>addObject()</code> on <code>pool</code> <code>count</code>
+     * Call {@code addObject()} on {@code pool} {@code count}
      * number of times.
      *
      * @param pool
@@ -221,7 +221,7 @@ public final class PoolUtils {
      * @throws Exception
      *             when {@link ObjectPool#addObject()} fails.
      * @throws IllegalArgumentException
-     *             when <code>pool</code> is <code>null</code>.
+     *             when {@code pool} is {@code null}.
      */
     public static <T> void prefill(final ObjectPool<T> pool, final int count)
             throws Exception, IllegalArgumentException {
@@ -234,22 +234,22 @@ public final class PoolUtils {
     }
 
     /**
-     * Call <code>addObject(Object)</code> on <code>keyedPool</code> with
-     * <code>key</code> <code>count</code> number of times.
+     * Call {@code addObject(Object)} on {@code keyedPool} with
+     * {@code key} {@code count} number of times.
      *
      * @param keyedPool
      *            the keyedPool to prefill.
      * @param key
      *            the key to add objects for.
      * @param count
-     *            the number of idle objects to add for <code>key</code>.
+     *            the number of idle objects to add for {@code key}.
      * @param <K> the type of the pool key
      * @param <V> the type of pool entries
      * @throws Exception
      *             when {@link KeyedObjectPool#addObject(Object)} fails.
      * @throws IllegalArgumentException
-     *             when <code>keyedPool</code> or <code>key</code> is
-     *             <code>null</code>.
+     *             when {@code keyedPool} or {@code key} is
+     *             {@code null}.
      */
     public static <K, V> void prefill(final KeyedObjectPool<K, V> keyedPool,
             final K key, final int count) throws Exception,
@@ -266,24 +266,24 @@ public final class PoolUtils {
     }
 
     /**
-     * Call <code>addObject(Object)</code> on <code>keyedPool</code> with each
-     * key in <code>keys</code> for <code>count</code> number of times. This has
+     * Call {@code addObject(Object)} on {@code keyedPool} with each
+     * key in {@code keys} for {@code count} number of times. This has
      * the same effect as calling {@link #prefill(KeyedObjectPool, Object, int)}
-     * for each key in the <code>keys</code> collection.
+     * for each key in the {@code keys} collection.
      *
      * @param keyedPool
      *            the keyedPool to prefill.
      * @param keys
      *            {@link Collection} of keys to add objects for.
      * @param count
-     *            the number of idle objects to add for each <code>key</code>.
+     *            the number of idle objects to add for each {@code key}.
      * @param <K> the type of the pool key
      * @param <V> the type of pool entries
      * @throws Exception
      *             when {@link KeyedObjectPool#addObject(Object)} fails.
      * @throws IllegalArgumentException
-     *             when <code>keyedPool</code>, <code>keys</code>, or any value
-     *             in <code>keys</code> is <code>null</code>.
+     *             when {@code keyedPool}, {@code keys}, or any value
+     *             in {@code keys} is {@code null}.
      * @see #prefill(KeyedObjectPool, Object, int)
      */
     public static <K, V> void prefill(final KeyedObjectPool<K, V> keyedPool,
@@ -559,7 +559,7 @@ public final class PoolUtils {
     }
 
     /**
-     * Get the <code>Timer</code> for checking keyedPool's idle count.
+     * Get the {@code Timer} for checking keyedPool's idle count.
      *
      * @return the {@link Timer} for checking keyedPool's idle count.
      */

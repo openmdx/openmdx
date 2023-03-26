@@ -61,7 +61,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * UUID Conversion
  * <p>
- * This class supports the following <code>UUID</code> String representations<ul>
+ * This class supports the following {@code UUID} String representations<ul>
  * <li><b>Legacy</b>, e.g. <i>XubSsL0VEdufdQFDCgEBxg</i>
  * <li><b>UID</b>, e.g. <i>982VZG5FB34RSU2J6G18F9VDG</i>
  * <li><b>UUID</b>, e.g. <i>5ee6d2b0-bd15-11db-9f75-01430a0101c6</i>
@@ -77,12 +77,12 @@ public class UUIDConversion {
 
     /**
      * Parse a string to a UUID<ul>
-     * <li><code>null</code> is returned if <code>uuid</code> is <code>null</code>
-     * <li>if the length of <code>uuid</code> is <code>22</code> it is considered to be in <b>Legacy</b> format
-     * <li>if the length of <code>uuid</code> is <code>25</code> it is considered to be in <b>UID</b> format
-     * <li>if the length of <code>uuid</code> is <code>36</code> it is considered to be in <b>UUID</b> format
-     * <li>if the length of <code>uuid</code> is <code>45</code> it is considered to be in <b>URN</b> format
-     * <li>if the length of <code>uuid</code> is <code>50</code> it is considered to be in <b>XRI</b> format
+     * <li>{@code null} is returned if {@code uuid} is {@code null}
+     * <li>if the length of {@code uuid} is {@code 22} it is considered to be in <b>Legacy</b> format
+     * <li>if the length of {@code uuid} is {@code 25} it is considered to be in <b>UID</b> format
+     * <li>if the length of {@code uuid} is {@code 36} it is considered to be in <b>UUID</b> format
+     * <li>if the length of {@code uuid} is {@code 45} it is considered to be in <b>URN</b> format
+     * <li>if the length of {@code uuid} is {@code 50} it is considered to be in <b>XRI</b> format
      * </ul>
      *
      * @param uuid the String representatation of a UUID
@@ -419,7 +419,7 @@ public class UUIDConversion {
      * 
      * @param candidate
      * 
-     * @return <code>true</code> if the candidate is can be converted to a UUID
+     * @return {@code true} if the candidate is can be converted to a UUID
      */
     public static boolean isUUID(
     	String candidate

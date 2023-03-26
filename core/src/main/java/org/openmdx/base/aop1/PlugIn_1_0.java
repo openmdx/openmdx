@@ -80,7 +80,7 @@ public interface PlugIn_1_0 {
      * @param feature
      * @param value 
      * 
-     * @return <code>true</code> if the value has been propagated eagerly
+     * @return {@code true} if the value has been propagated eagerly
      */
     boolean propagatedEagerly(
         DataObject_1 object, 

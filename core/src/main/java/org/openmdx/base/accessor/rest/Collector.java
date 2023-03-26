@@ -56,7 +56,7 @@ import org.openmdx.base.accessor.cci.DataObject_1_0;
 public class Collector extends ArrayList<DataObject_1_0> implements Consumer<DataObject_1_0> {
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -278490394867545823L;
 

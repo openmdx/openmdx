@@ -174,12 +174,12 @@ public enum ConditionType implements Code {
     }
     
     /**
-     * The <code>ConditionType</code>'s legacy code
+     * The {@code ConditionType}'s legacy code
      */
     private final short code;
     
     /**
-     * The <code>ConditionType</code>'s UNICODE symbol
+     * The {@code ConditionType}'s UNICODE symbol
      */
     private final char symbol;
     
@@ -189,18 +189,18 @@ public enum ConditionType implements Code {
     private ConditionType inverseCondition;
     
     /**
-     * Retrieve the <code>ConditionType</code>'s code
+     * Retrieve the {@code ConditionType}'s code
      * 
-     * @return the <code>ConditionType</code>'s code
+     * @return the {@code ConditionType}'s code
      */
     public short code(){
         return this.code;
     }
 
     /**
-     * Retrieve the <code>ConditionType</code>'s UNICODE symbol
+     * Retrieve the {@code ConditionType}'s UNICODE symbol
      * 
-     * @return the <code>ConditionType</code>'s UNICODE symbol
+     * @return the {@code ConditionType}'s UNICODE symbol
      */
     public char symbol() {
         return this.symbol;
@@ -226,11 +226,11 @@ public enum ConditionType implements Code {
     }
     
     /**
-     * Retrieve the <code>ConditionType</code>'s code
+     * Retrieve the {@code ConditionType}'s code
      * 
      * @param type
      * 
-     * @return the <code>ConditionType</code>'s code
+     * @return the {@code ConditionType}'s code
      */
     public static short codeOf(
         ConditionType type
@@ -239,13 +239,13 @@ public enum ConditionType implements Code {
     }
     
     /**
-     * Retrieve the <code>ConditionType</code> represented by the given code
+     * Retrieve the {@code ConditionType} represented by the given code
      * 
      * @param code
      * 
-     * @return the <code>ConditionType</code> represented by the given code
+     * @return the {@code ConditionType} represented by the given code
      * 
-     * @exception IllegalArgumentException if the code does not represent a <code>ConditionType</code>
+     * @exception IllegalArgumentException if the code does not represent a {@code ConditionType}
      */
     public static ConditionType valueOf(
         short code
@@ -271,13 +271,13 @@ public enum ConditionType implements Code {
     }
 
     /**
-     * Retrieve the <code>ConditionType</code> represented by the given symbol
+     * Retrieve the {@code ConditionType} represented by the given symbol
      * 
      * @param code
      * 
-     * @return the <code>ConditionType</code> represented by the given symbol
+     * @return the {@code ConditionType} represented by the given symbol
      * 
-     * @exception IllegalArgumentException if the symbol does not represent a <code>ConditionType</code>
+     * @exception IllegalArgumentException if the symbol does not represent a {@code ConditionType}
      */
     public static ConditionType valueOf(
         char symbol

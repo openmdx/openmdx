@@ -46,7 +46,7 @@ package org.openmdx.base.accessor.cci;
 
 
 /**
- * The <code>SystemAttributes</code> class contains the system attributes'
+ * The {@code SystemAttributes} class contains the system attributes'
  * names.
  */
 public class SystemAttributes {

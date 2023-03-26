@@ -116,7 +116,7 @@ public class MarshallingContainer_1
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 3545803160820921399L;
 

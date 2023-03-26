@@ -64,7 +64,7 @@ public abstract class XRISegment implements Comparable<XRISegment>, Serializable
     protected abstract Object discriminant();
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -5111725167053688670L;
     

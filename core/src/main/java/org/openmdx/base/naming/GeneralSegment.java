@@ -64,7 +64,7 @@ public class GeneralSegment extends XRISegment {
 	private final boolean authority;
 
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = -5611747218232362282L;
 	

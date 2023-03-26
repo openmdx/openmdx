@@ -125,7 +125,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
     /**
      * Set an attribute's value.
      * <p>
-     * This method returns a <code>BAD_PARAMETER</code> exception unless the 
+     * This method returns a {@code BAD_PARAMETER} exception unless the 
      * feature is single valued or a stream. 
      *
      * @param       feature
@@ -180,7 +180,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
     /**
      * Get a List attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -208,7 +208,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
     /**
      * Get a Set attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -236,7 +236,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
     /**
      * Get a SparseArray attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -264,7 +264,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
     /**
      * Get a Map attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -295,7 +295,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
     /**
      * Get a reference feature.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -352,7 +352,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
 	/**
      * Create an instance's clone
      * @param identity the identity of the new object if a persistent-new 
-     * instance should be returned, <code>null</code> if a transient instance 
+     * instance should be returned, {@code null} if a transient instance 
      * should be returned
      * 
      * @return a clone
@@ -384,13 +384,13 @@ public abstract class MarshallingObject_1<M extends Marshaller>
      *            the object's new container.
      * @param     criteria
      *            The criteria is used to move the object to the container or 
-     *            <code>null</null>, in which case it is up to the
+     *            {@code null</null>, in which case it is up to the
      *            implementation to define the criteria.
      *
      * @exception ServiceException  ILLEGAL_STATE
      *            if the object is persistent.
      * @exception ServiceException BAD_PARAMETER
-     *            if <code>there</code> is <code>null</code>.
+     *            if {@code there} is {@code null}.
      * @exception ServiceException  
      *            if the move operation fails.
      */
@@ -435,7 +435,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
         }
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = 3257009873437996080L;
 

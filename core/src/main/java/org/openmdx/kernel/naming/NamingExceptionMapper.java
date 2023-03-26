@@ -88,7 +88,7 @@ public class NamingExceptionMapper
     }
     
     /**
-     * Add a parameter unless its value would be <code>null</code>
+     * Add a parameter unless its value would be {@code null}
      * 
      * @param target
      * @param key

@@ -107,7 +107,7 @@ public class RidOidQueryDatabase_2 extends Database_2 {
      * 
      * @param filterPropertyDef
      * 
-     * @return <code>true</code> if RID and OID shall be used 
+     * @return {@code true} if RID and OID shall be used 
      * @throws ServiceException  
      * 
      * @throws ServiceException 

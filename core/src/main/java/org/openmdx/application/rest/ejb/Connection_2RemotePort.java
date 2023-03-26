@@ -148,7 +148,7 @@ class Connection_2RemotePort implements Port<RestConnection> {
     /**
      * Retrieve the EJB home
      * 
-     * @param retrieveFromHandle retrieve <code>EJBHome</code> from <code>HomeHandle</code>
+     * @param retrieveFromHandle retrieve {@code EJBHome} from {@code HomeHandle}
      * 
      * @return the EJB Home
      * 

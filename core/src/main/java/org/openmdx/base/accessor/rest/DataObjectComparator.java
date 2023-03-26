@@ -87,8 +87,8 @@ final class DataObjectComparator implements Comparator<DataObject_1_0> {
      * 
      * @param order
      * 
-     * @return an ObjectComparator instance; or <code>null</code> if
-     * the order is <code>null</code> or has length <code>0</code>
+     * @return an ObjectComparator instance; or {@code null} if
+     * the order is {@code null} or has length {@code 0}
      */
     static DataObjectComparator getInstance(
         FeatureOrderRecord[] order

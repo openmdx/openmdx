@@ -68,12 +68,12 @@ public class JmiServiceException extends JmiException
     private static final long serialVersionUID = 3688792466186909232L;
 
     /**
-     * Creates a new <code>ServiceException</code>.
+     * Creates a new {@code ServiceException}.
      *
      * @param   cause
      *          The exception cause.
      * @param   exceptionDomain
-     *          The exception domain or <code>null</code> for the
+     *          The exception domain or {@code null} for the
      *          default exception domain containing negative exception codes
      *          only.
      * @param   exceptionCode
@@ -105,10 +105,10 @@ public class JmiServiceException extends JmiException
     }
 
     /**
-     * Creates a new <code>ServiceException</code>.
+     * Creates a new {@code ServiceException}.
      *
      * @param   exceptionDomain
-     *          The exception domain or <code>null</code> for the
+     *          The exception domain or {@code null} for the
      *          default exception domain containing negative exception codes
      *          only.
      * @param   exceptionCode
@@ -139,11 +139,11 @@ public class JmiServiceException extends JmiException
     }
 
     /**
-     * Creates a new <code>ServiceException</code>.
+     * Creates a new {@code ServiceException}.
      *
      * @param   elementInError
      * @param   exceptionDomain
-     *          The exception domain or <code>null</code> for the
+     *          The exception domain or {@code null} for the
      *          default exception domain containing negative exception codes
      *          only.
      * @param   exceptionCode
@@ -178,7 +178,7 @@ public class JmiServiceException extends JmiException
     /**
      * Constructor
      * 
-     * @param cause a <code>BasicException</code> wrapper
+     * @param cause a {@code BasicException} wrapper
      */
     public JmiServiceException(
         Throwable cause 
@@ -191,7 +191,7 @@ public class JmiServiceException extends JmiException
     /**
      * Constructor
      * 
-     * @param cause a <code>BasicException</code> wrapper
+     * @param cause a {@code BasicException} wrapper
      * @param elementInError
      */
     public JmiServiceException(
@@ -233,7 +233,7 @@ public class JmiServiceException extends JmiException
     }
 
     /**
-     * Retrieves the exception domain of this <code>ServiceException</code>.
+     * Retrieves the exception domain of this {@code ServiceException}.
      *
      * @return the exception domain
      */
@@ -243,7 +243,7 @@ public class JmiServiceException extends JmiException
     }
 
     /**
-     * Retrieves the exception code of this <code>ServiceException</code>.
+     * Retrieves the exception code of this {@code ServiceException}.
      *
      * @return the exception code
      */

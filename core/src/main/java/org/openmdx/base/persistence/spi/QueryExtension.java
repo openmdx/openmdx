@@ -63,7 +63,7 @@ public class QueryExtension extends QueryExtensionRecord {
     }
 
     /**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = -8930494300927026792L;
     

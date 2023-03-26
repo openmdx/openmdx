@@ -1,0 +1,16 @@
+digraph "Diagram PrimitiveTypes [Package org::iso]" {
+
+	${ATTRIBUTE_STATEMENTS}
+
+	{
+		${LAYER[layer=0]}
+		${CLASS[name=org:iso:Currency]}
+		${CLASS[name=org:iso:Language]}
+		${CLASS[name=org:iso:Sex]}
+	}
+	
+	${LAYERS}
+	${ASSOCIATION[name=*]}
+	${INSTANCE_OF}
+
+}

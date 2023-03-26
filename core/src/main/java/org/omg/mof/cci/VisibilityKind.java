@@ -46,7 +46,7 @@
 package org.omg.mof.cci;
 
 /**
- * The <code>VisibilityKind</code> class contains the three possible kinds of
+ * The {@code VisibilityKind} class contains the three possible kinds of
  * visibility for a ModelElement outside of its container as defined by the 
  * OMG Meta Object Facility (MOF) Specification.
  */

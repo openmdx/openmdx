@@ -76,7 +76,7 @@ class PooledConnectionFactory implements PooledObjectFactory<ValidatablePooledCo
 	}
 
 	/**
-	 * A database url of the form <code>jdbc:subprotocol:subname</code>
+	 * A database url of the form {@code jdbc:subprotocol:subname}
 	 */
 	protected final String url;
 	

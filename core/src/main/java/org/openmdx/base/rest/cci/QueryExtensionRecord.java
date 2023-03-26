@@ -62,15 +62,15 @@ public interface QueryExtensionRecord extends MappedRecord {
     //------------------------------------------------------------------------
     
     /**
-     * Retrieves the value for the attribute <code>clause</code>.
-     * @return The non-null value for attribute <code>clause</code>.
+     * Retrieves the value for the attribute {@code clause}.
+     * @return The non-null value for attribute {@code clause}.
      */
     java.lang.String getClause(
     );
 
     /**
-     * Sets a new value for the attribute <code>clause</code>.
-     * @param clause The non-null new value for attribute <code>clause</code>.
+     * Sets a new value for the attribute {@code clause}.
+     * @param clause The non-null new value for attribute {@code clause}.
      */
     void setClause(
         java.lang.String clause
@@ -82,14 +82,14 @@ public interface QueryExtensionRecord extends MappedRecord {
     //------------------------------------------------------------------------
     
     /**
-     * Retrieves a list containing all the elements for the attribute <code>booleanParam</code>.
+     * Retrieves a list containing all the elements for the attribute {@code booleanParam}.
      * @return A list containing all elements for this attribute.
      */
     java.util.List<java.lang.Boolean> getBooleanParam(
     );
     
     /**
-     * Clears <code>booleanParam</code> and adds the given value(s).
+     * Clears {@code booleanParam} and adds the given value(s).
      * <p>
      * This method is equivalent to<pre>
      *   list.clear();
@@ -97,7 +97,7 @@ public interface QueryExtensionRecord extends MappedRecord {
      *     list.add(e);
      *   }
      * </pre>
-     * @param booleanParam value(s) to be added to <code>booleanParam</code>
+     * @param booleanParam value(s) to be added to {@code booleanParam}
      */
     void setBooleanParam(
         boolean... booleanParam
@@ -112,14 +112,14 @@ public interface QueryExtensionRecord extends MappedRecord {
     );
 
     /**
-     * Retrieves a list containing all the elements for the attribute <code>dateParam</code>.
+     * Retrieves a list containing all the elements for the attribute {@code dateParam}.
      * @return A list containing all elements for this attribute.
      */
     java.util.List<javax.xml.datatype.XMLGregorianCalendar> getDateParam(
     );
 
     /**
-     * Clears <code>dateParam</code> and adds the given value(s).
+     * Clears {@code dateParam} and adds the given value(s).
      * <p>
      * This method is equivalent to<pre>
      *   list.clear();
@@ -127,7 +127,7 @@ public interface QueryExtensionRecord extends MappedRecord {
      *     list.add(e);
      *   }
      * </pre>
-     * @param dateParam value(s) to be added to <code>dateParam</code>
+     * @param dateParam value(s) to be added to {@code dateParam}
      */
     void setDateParam(
         javax.xml.datatype.XMLGregorianCalendar... dateParam
@@ -138,14 +138,14 @@ public interface QueryExtensionRecord extends MappedRecord {
     );
 
     /**
-     * Retrieves a list containing all the elements for the attribute <code>dateTimeParam</code>.
+     * Retrieves a list containing all the elements for the attribute {@code dateTimeParam}.
      * @return A list containing all elements for this attribute.
      */
     java.util.List<java.util.Date> getDateTimeParam(
     );
 
     /**
-     * Clears <code>dateTimeParam</code> and adds the given value(s).
+     * Clears {@code dateTimeParam} and adds the given value(s).
      * <p>
      * This method is equivalent to<pre>
      *   list.clear();
@@ -153,7 +153,7 @@ public interface QueryExtensionRecord extends MappedRecord {
      *     list.add(e);
      *   }
      * </pre>
-     * @param dateTimeParam value(s) to be added to <code>dateTimeParam</code>
+     * @param dateTimeParam value(s) to be added to {@code dateTimeParam}
      */
     void setDateTimeParam(
         java.util.Date... dateTimeParam
@@ -164,14 +164,14 @@ public interface QueryExtensionRecord extends MappedRecord {
     );
 
     /**
-     * Retrieves a list containing all the elements for the attribute <code>decimalParam</code>.
+     * Retrieves a list containing all the elements for the attribute {@code decimalParam}.
      * @return A list containing all elements for this attribute.
      */
     java.util.List<java.math.BigDecimal> getDecimalParam(
     );
 
     /**
-     * Clears <code>decimalParam</code> and adds the given value(s).
+     * Clears {@code decimalParam} and adds the given value(s).
      * <p>
      * This method is equivalent to<pre>
      *   list.clear();
@@ -179,7 +179,7 @@ public interface QueryExtensionRecord extends MappedRecord {
      *     list.add(e);
      *   }
      * </pre>
-     * @param decimalParam value(s) to be added to <code>decimalParam</code>
+     * @param decimalParam value(s) to be added to {@code decimalParam}
      */
     void setDecimalParam(
         java.math.BigDecimal... decimalParam
@@ -190,14 +190,14 @@ public interface QueryExtensionRecord extends MappedRecord {
     );
     
     /**
-     * Retrieves a list containing all the elements for the attribute <code>integerParam</code>.
+     * Retrieves a list containing all the elements for the attribute {@code integerParam}.
      * @return A list containing all elements for this attribute.
      */
     java.util.List<java.lang.Integer> getIntegerParam(
     );
 
     /**
-     * Clears <code>integerParam</code> and adds the given value(s).
+     * Clears {@code integerParam} and adds the given value(s).
      * <p>
      * This method is equivalent to<pre>
      *   list.clear();
@@ -205,7 +205,7 @@ public interface QueryExtensionRecord extends MappedRecord {
      *     list.add(e);
      *   }
      * </pre>
-     * @param integerParam value(s) to be added to <code>integerParam</code>
+     * @param integerParam value(s) to be added to {@code integerParam}
      */
     void setIntegerParam(
         int... integerParam
@@ -220,14 +220,14 @@ public interface QueryExtensionRecord extends MappedRecord {
     );
     
     /**
-     * Retrieves a list containing all the elements for the attribute <code>stringParam</code>.
+     * Retrieves a list containing all the elements for the attribute {@code stringParam}.
      * @return A list containing all elements for this attribute.
      */
     java.util.List<java.lang.String> getStringParam(
     );
 
     /**
-     * Clears <code>stringParam</code> and adds the given value(s).
+     * Clears {@code stringParam} and adds the given value(s).
      * <p>
      * This method is equivalent to<pre>
      *   list.clear();
@@ -235,7 +235,7 @@ public interface QueryExtensionRecord extends MappedRecord {
      *     list.add(e);
      *   }
      * </pre>
-     * @param stringParam value(s) to be added to <code>stringParam</code>
+     * @param stringParam value(s) to be added to {@code stringParam}
      */
     void setStringParam(
         java.lang.String... stringParam

@@ -23,14 +23,14 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Decorates a <code>Map</code> to obtain <code>Set</code> behaviour.
+ * Decorates a {@code Map} to obtain {@code Set} behaviour.
  * <p>
- * This class is used to create a <code>Set</code> with the same properties as
+ * This class is used to create a {@code Set} with the same properties as
  * the key set of any map. Thus, a ReferenceSet can be created by wrapping a
- * <code>ReferenceMap</code> in an instance of this class.
+ * {@code ReferenceMap} in an instance of this class.
  * <p>
  * Most map implementation can be used to create a set by passing in dummy values.
- * Exceptions include <code>BidiMap</code> implementations, as they require unique values.
+ * Exceptions include {@code BidiMap} implementations, as they require unique values.
  *
  * @since Commons Collections 3.1
  * @version Revision: 1.3  Date: 2011/04/12 12:19:18

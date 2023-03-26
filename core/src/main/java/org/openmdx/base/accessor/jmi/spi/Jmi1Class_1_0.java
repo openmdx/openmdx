@@ -67,7 +67,7 @@ public interface Jmi1Class_1_0 extends RefClass {
      * Tells whether its RefPackage delegates to an ObjectFactory_1_0 or to
      * a PersistenceManager.
      * 
-     * @return <code>true</code> if its RefPackage delegates to an ObjectFactory_1_0
+     * @return {@code true} if its RefPackage delegates to an ObjectFactory_1_0
      */
     boolean isTerminal();
 

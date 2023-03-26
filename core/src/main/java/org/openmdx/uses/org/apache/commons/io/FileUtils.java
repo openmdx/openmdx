@@ -177,7 +177,7 @@ public class FileUtils {
     public static final BigInteger ONE_YB = ONE_KB_BI.multiply(ONE_ZB);
 
     /**
-     * An empty array of type <code>File</code>.
+     * An empty array of type {@code File}.
      */
     public static final File[] EMPTY_FILE_ARRAY = new File[0];
 
@@ -273,7 +273,7 @@ public class FileUtils {
     //-----------------------------------------------------------------------
     /**
      * Opens a {@link FileInputStream} for the specified file, providing better
-     * error messages than simply calling <code>new FileInputStream(file)</code>.
+     * error messages than simply calling {@code new FileInputStream(file)}.
      * <p>
      * At the end of the method either the stream will be successfully opened,
      * or an exception will have been thrown.
@@ -501,11 +501,11 @@ public class FileUtils {
      * that for you.
      * <p>
      * An example: If you want to search through all directories called
-     * "temp" you pass in <code>FileFilterUtils.NameFileFilter("temp")</code>
+     * "temp" you pass in {@code FileFilterUtils.NameFileFilter("temp")}
      * <p>
      * Another common usage of this method is find files in a directory
      * tree but ignoring the directories generated CVS. You can simply pass
-     * in <code>FileFilterUtils.makeCVSAware(null)</code>.
+     * in {@code FileFilterUtils.makeCVSAware(null)}.
      *
      * @param directory  the directory to search in
      * @param fileFilter filter to apply when finding files.
@@ -827,18 +827,18 @@ public class FileUtils {
 
     //-----------------------------------------------------------------------
     /**
-     * Convert from a <code>URL</code> to a <code>File</code>.
+     * Convert from a {@code URL} to a {@code File}.
      * <p>
      * From version 1.1 this method will decode the URL.
-     * Syntax such as <code>file:///my%20docs/file.txt</code> will be
-     * correctly decoded to <code>/my docs/file.txt</code>. Starting with version
+     * Syntax such as {@code file:///my%20docs/file.txt} will be
+     * correctly decoded to {@code /my docs/file.txt}. Starting with version
      * 1.5, this method uses UTF-8 to decode percent-encoded octets to characters.
      * Additionally, malformed percent-encoded octets are handled leniently by
      * passing them through literally.
      *
      * @param url the file URL to convert, {@code null} returns {@code null}
-     * @return the equivalent <code>File</code> object, or {@code null}
-     * if the URL's protocol is not <code>file</code>
+     * @return the equivalent {@code File} object, or {@code null}
+     * if the URL's protocol is not {@code file}
      */
     public static File toFile(final URL url) {
         if (url == null || !"file".equalsIgnoreCase(url.getProtocol())) {
@@ -899,7 +899,7 @@ public class FileUtils {
     }
 
     /**
-     * Converts each of an array of <code>URL</code> to a <code>File</code>.
+     * Converts each of an array of {@code URL} to a {@code File}.
      * <p>
      * Returns an array of the same size as the input.
      * If the input is {@code null}, an empty array is returned.
@@ -907,8 +907,8 @@ public class FileUtils {
      * index.
      * <p>
      * This method will decode the URL.
-     * Syntax such as <code>file:///my%20docs/file.txt</code> will be
-     * correctly decoded to <code>/my docs/file.txt</code>.
+     * Syntax such as {@code file:///my%20docs/file.txt} will be
+     * correctly decoded to {@code /my docs/file.txt}.
      *
      * @param urls the file URLs to convert, {@code null} returns empty array
      * @return a non-{@code null} array of Files matching the input, with a {@code null} item
@@ -936,7 +936,7 @@ public class FileUtils {
     }
 
     /**
-     * Converts each of an array of <code>File</code> to a <code>URL</code>.
+     * Converts each of an array of {@code File} to a {@code URL}.
      * <p>
      * Returns an array of the same size as the input.
      *
@@ -989,7 +989,7 @@ public class FileUtils {
      * The destination directory is created if it does not exist.
      * If the destination file exists, then this method will overwrite it.
      * <p>
-     * <strong>Note:</strong> Setting <code>preserveFileDate</code> to
+     * <strong>Note:</strong> Setting {@code preserveFileDate} to
      * {@code true} tries to preserve the file's last modified
      * date/times using {@link File#setLastModified(long)}, however it is
      * not guaranteed that the operation will succeed.
@@ -1056,7 +1056,7 @@ public class FileUtils {
      * The directory holding the destination file is created if it does not exist.
      * If the destination file exists, then this method will overwrite it.
      * <p>
-     * <strong>Note:</strong> Setting <code>preserveFileDate</code> to
+     * <strong>Note:</strong> Setting {@code preserveFileDate} to
      * {@code true} tries to preserve the file's last modified
      * date/times using {@link File#setLastModified(long)}, however it is
      * not guaranteed that the operation will succeed.
@@ -1097,13 +1097,13 @@ public class FileUtils {
     }
 
     /**
-     * Copy bytes from a <code>File</code> to an <code>OutputStream</code>.
+     * Copy bytes from a {@code File} to an {@code OutputStream}.
      * <p>
-     * This method buffers the input internally, so there is no need to use a <code>BufferedInputStream</code>.
+     * This method buffers the input internally, so there is no need to use a {@code BufferedInputStream}.
      * </p>
      *
-     * @param input  the <code>File</code> to read from
-     * @param output the <code>OutputStream</code> to write to
+     * @param input  the {@code File} to read from
+     * @param output the {@code OutputStream} to write to
      * @return the number of bytes copied
      * @throws NullPointerException if the input or output is null
      * @throws IOException          if an I/O error occurs
@@ -1252,7 +1252,7 @@ public class FileUtils {
      * If the destination directory did exist, then this method merges
      * the source with the destination, with the source taking precedence.
      * <p>
-     * <strong>Note:</strong> Setting <code>preserveFileDate</code> to
+     * <strong>Note:</strong> Setting {@code preserveFileDate} to
      * {@code true} tries to preserve the files' last modified
      * date/times using {@link File#setLastModified(long)}, however it is
      * not guaranteed that those operations will succeed.
@@ -1332,7 +1332,7 @@ public class FileUtils {
      * If the destination directory did exist, then this method merges
      * the source with the destination, with the source taking precedence.
      * <p>
-     * <strong>Note:</strong> Setting <code>preserveFileDate</code> to
+     * <strong>Note:</strong> Setting {@code preserveFileDate} to
      * {@code true} tries to preserve the files' last modified
      * date/times using {@link File#setLastModified(long)}, however it is
      * not guaranteed that those operations will succeed.
@@ -1461,22 +1461,22 @@ public class FileUtils {
 
     //-----------------------------------------------------------------------
     /**
-     * Copies bytes from the URL <code>source</code> to a file
-     * <code>destination</code>. The directories up to <code>destination</code>
-     * will be created if they don't already exist. <code>destination</code>
+     * Copies bytes from the URL {@code source} to a file
+     * {@code destination}. The directories up to {@code destination}
+     * will be created if they don't already exist. {@code destination}
      * will be overwritten if it already exists.
      * <p>
      * Warning: this method does not set a connection or read timeout and thus
      * might block forever. Use {@link #copyURLToFile(URL, File, int, int)}
      * with reasonable timeouts to prevent this.
      *
-     * @param source      the <code>URL</code> to copy bytes from, must not be {@code null}
-     * @param destination the non-directory <code>File</code> to write bytes to
+     * @param source      the {@code URL} to copy bytes from, must not be {@code null}
+     * @param destination the non-directory {@code File} to write bytes to
      *                    (possibly overwriting), must not be {@code null}
-     * @throws IOException if <code>source</code> URL cannot be opened
-     * @throws IOException if <code>destination</code> is a directory
-     * @throws IOException if <code>destination</code> cannot be written
-     * @throws IOException if <code>destination</code> needs creating but can't be
+     * @throws IOException if {@code source} URL cannot be opened
+     * @throws IOException if {@code destination} is a directory
+     * @throws IOException if {@code destination} cannot be written
+     * @throws IOException if {@code destination} needs creating but can't be
      * @throws IOException if an IO error occurs during copying
      */
     public static void copyURLToFile(final URL source, final File destination) throws IOException {
@@ -1484,22 +1484,22 @@ public class FileUtils {
     }
 
     /**
-     * Copies bytes from the URL <code>source</code> to a file
-     * <code>destination</code>. The directories up to <code>destination</code>
-     * will be created if they don't already exist. <code>destination</code>
+     * Copies bytes from the URL {@code source} to a file
+     * {@code destination}. The directories up to {@code destination}
+     * will be created if they don't already exist. {@code destination}
      * will be overwritten if it already exists.
      *
-     * @param source            the <code>URL</code> to copy bytes from, must not be {@code null}
-     * @param destination       the non-directory <code>File</code> to write bytes to
+     * @param source            the {@code URL} to copy bytes from, must not be {@code null}
+     * @param destination       the non-directory {@code File} to write bytes to
      *                          (possibly overwriting), must not be {@code null}
      * @param connectionTimeout the number of milliseconds until this method
-     *                          will timeout if no connection could be established to the <code>source</code>
+     *                          will timeout if no connection could be established to the {@code source}
      * @param readTimeout       the number of milliseconds until this method will
-     *                          timeout if no data could be read from the <code>source</code>
-     * @throws IOException if <code>source</code> URL cannot be opened
-     * @throws IOException if <code>destination</code> is a directory
-     * @throws IOException if <code>destination</code> cannot be written
-     * @throws IOException if <code>destination</code> needs creating but can't be
+     *                          timeout if no data could be read from the {@code source}
+     * @throws IOException if {@code source} URL cannot be opened
+     * @throws IOException if {@code destination} is a directory
+     * @throws IOException if {@code destination} cannot be written
+     * @throws IOException if {@code destination} needs creating but can't be
      * @throws IOException if an IO error occurs during copying
      * @since Commons I/O 2.0
      */
@@ -1512,19 +1512,19 @@ public class FileUtils {
     }
 
     /**
-     * Copies bytes from an {@link InputStream} <code>source</code> to a file
-     * <code>destination</code>. The directories up to <code>destination</code>
-     * will be created if they don't already exist. <code>destination</code>
+     * Copies bytes from an {@link InputStream} {@code source} to a file
+     * {@code destination}. The directories up to {@code destination}
+     * will be created if they don't already exist. {@code destination}
      * will be overwritten if it already exists.
      * The {@code source} stream is closed.
      * See {@link #copyToFile(InputStream, File)} for a method that does not close the input stream.
      *
-     * @param source      the <code>InputStream</code> to copy bytes from, must not be {@code null}, will be closed
-     * @param destination the non-directory <code>File</code> to write bytes to
+     * @param source      the {@code InputStream} to copy bytes from, must not be {@code null}, will be closed
+     * @param destination the non-directory {@code File} to write bytes to
      *                    (possibly overwriting), must not be {@code null}
-     * @throws IOException if <code>destination</code> is a directory
-     * @throws IOException if <code>destination</code> cannot be written
-     * @throws IOException if <code>destination</code> needs creating but can't be
+     * @throws IOException if {@code destination} is a directory
+     * @throws IOException if {@code destination} cannot be written
+     * @throws IOException if {@code destination} needs creating but can't be
      * @throws IOException if an IO error occurs during copying
      * @since Commons I/O 2.0
      */
@@ -1537,19 +1537,19 @@ public class FileUtils {
     }
 
     /**
-     * Copies bytes from an {@link InputStream} <code>source</code> to a file
-     * <code>destination</code>. The directories up to <code>destination</code>
-     * will be created if they don't already exist. <code>destination</code>
+     * Copies bytes from an {@link InputStream} {@code source} to a file
+     * {@code destination}. The directories up to {@code destination}
+     * will be created if they don't already exist. {@code destination}
      * will be overwritten if it already exists.
      * The {@code source} stream is left open, e.g. for use with {@link java.util.zip.ZipInputStream ZipInputStream}.
      * See {@link #copyInputStreamToFile(InputStream, File)} for a method that closes the input stream.
      *
-     * @param source      the <code>InputStream</code> to copy bytes from, must not be {@code null}
-     * @param destination the non-directory <code>File</code> to write bytes to
+     * @param source      the {@code InputStream} to copy bytes from, must not be {@code null}
+     * @param destination the non-directory {@code File} to write bytes to
      *                    (possibly overwriting), must not be {@code null}
-     * @throws IOException if <code>destination</code> is a directory
-     * @throws IOException if <code>destination</code> cannot be written
-     * @throws IOException if <code>destination</code> needs creating but can't be
+     * @throws IOException if {@code destination} is a directory
+     * @throws IOException if {@code destination} cannot be written
+     * @throws IOException if {@code destination} needs creating but can't be
      * @throws IOException if an IO error occurs during copying
      * @since Commons I/O 2.5
      */
@@ -1871,9 +1871,9 @@ public class FileUtils {
     }
 
     /**
-     * Returns an Iterator for the lines in a <code>File</code>.
+     * Returns an Iterator for the lines in a {@code File}.
      * <p>
-     * This method opens an <code>InputStream</code> for the file.
+     * This method opens an {@code InputStream} for the file.
      * When you have finished with the iterator you should close the stream
      * to free internal resources. This can be done by calling the
      * {@link LineIterator#close()} or
@@ -1916,7 +1916,7 @@ public class FileUtils {
     }
 
     /**
-     * Returns an Iterator for the lines in a <code>File</code> using the default encoding for the VM.
+     * Returns an Iterator for the lines in a {@code File} using the default encoding for the VM.
      *
      * @param file the file to open for input, must not be {@code null}
      * @return an Iterator of the lines in the file, never {@code null}
@@ -2190,8 +2190,8 @@ public class FileUtils {
     }
 
     /**
-     * Writes the <code>toString()</code> value of each item in a collection to
-     * the specified <code>File</code> line by line.
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
      * The specified character encoding and the default line ending will be used.
      * <p>
      * NOTE: As from v1.3, the parent directories of the file will be created
@@ -2210,8 +2210,8 @@ public class FileUtils {
     }
 
     /**
-     * Writes the <code>toString()</code> value of each item in a collection to
-     * the specified <code>File</code> line by line, optionally appending.
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line, optionally appending.
      * The specified character encoding and the default line ending will be used.
      *
      * @param file     the file to write to
@@ -2229,8 +2229,8 @@ public class FileUtils {
     }
 
     /**
-     * Writes the <code>toString()</code> value of each item in a collection to
-     * the specified <code>File</code> line by line.
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
      * The default VM encoding and the default line ending will be used.
      *
      * @param file  the file to write to
@@ -2243,8 +2243,8 @@ public class FileUtils {
     }
 
     /**
-     * Writes the <code>toString()</code> value of each item in a collection to
-     * the specified <code>File</code> line by line.
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
      * The default VM encoding and the default line ending will be used.
      *
      * @param file   the file to write to
@@ -2259,8 +2259,8 @@ public class FileUtils {
     }
 
     /**
-     * Writes the <code>toString()</code> value of each item in a collection to
-     * the specified <code>File</code> line by line.
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
      * The specified character encoding and the line ending will be used.
      * <p>
      * NOTE: As from v1.3, the parent directories of the file will be created
@@ -2280,8 +2280,8 @@ public class FileUtils {
     }
 
     /**
-     * Writes the <code>toString()</code> value of each item in a collection to
-     * the specified <code>File</code> line by line.
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
      * The specified character encoding and the line ending will be used.
      *
      * @param file       the file to write to
@@ -2306,8 +2306,8 @@ public class FileUtils {
     }
 
     /**
-     * Writes the <code>toString()</code> value of each item in a collection to
-     * the specified <code>File</code> line by line.
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
      * The default VM encoding and the specified line ending will be used.
      *
      * @param file       the file to write to
@@ -2322,8 +2322,8 @@ public class FileUtils {
     }
 
     /**
-     * Writes the <code>toString()</code> value of each item in a collection to
-     * the specified <code>File</code> line by line.
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
      * The default VM encoding and the specified line ending will be used.
      *
      * @param file       the file to write to
@@ -2686,15 +2686,15 @@ public class FileUtils {
 
     //-----------------------------------------------------------------------
     /**
-     * Tests if the specified <code>File</code> is newer than the reference
-     * <code>File</code>.
+     * Tests if the specified {@code File} is newer than the reference
+     * {@code File}.
      *
-     * @param file      the <code>File</code> of which the modification date must
+     * @param file      the {@code File} of which the modification date must
      *                  be compared, must not be {@code null}
-     * @param reference the <code>File</code> of which the modification date
+     * @param reference the {@code File} of which the modification date
      *                  is used, must not be {@code null}
-     * @return true if the <code>File</code> exists and has been modified more
-     * recently than the reference <code>File</code>
+     * @return true if the {@code File} exists and has been modified more
+     * recently than the reference {@code File}
      * @throws IllegalArgumentException if the file is {@code null}
      * @throws IllegalArgumentException if the reference file is {@code null} or doesn't exist
      */
@@ -2710,14 +2710,14 @@ public class FileUtils {
     }
 
     /**
-     * Tests if the specified <code>File</code> is newer than the specified
-     * <code>Date</code>.
+     * Tests if the specified {@code File} is newer than the specified
+     * {@code Date}.
      *
-     * @param file the <code>File</code> of which the modification date
+     * @param file the {@code File} of which the modification date
      *             must be compared, must not be {@code null}
      * @param date the date reference, must not be {@code null}
-     * @return true if the <code>File</code> exists and has been modified
-     * after the given <code>Date</code>.
+     * @return true if the {@code File} exists and has been modified
+     * after the given {@code Date}.
      * @throws IllegalArgumentException if the file is {@code null}
      * @throws IllegalArgumentException if the date is {@code null}
      */
@@ -2729,14 +2729,14 @@ public class FileUtils {
     }
 
     /**
-     * Tests if the specified <code>File</code> is newer than the specified
+     * Tests if the specified {@code File} is newer than the specified
      * time reference.
      *
-     * @param file       the <code>File</code> of which the modification date must
+     * @param file       the {@code File} of which the modification date must
      *                   be compared, must not be {@code null}
      * @param timeMillis the time reference measured in milliseconds since the
      *                   epoch (00:00:00 GMT, January 1, 1970)
-     * @return true if the <code>File</code> exists and has been modified after
+     * @return true if the {@code File} exists and has been modified after
      * the given time reference.
      * @throws IllegalArgumentException if the file is {@code null}
      */
@@ -2753,15 +2753,15 @@ public class FileUtils {
 
     //-----------------------------------------------------------------------
     /**
-     * Tests if the specified <code>File</code> is older than the reference
-     * <code>File</code>.
+     * Tests if the specified {@code File} is older than the reference
+     * {@code File}.
      *
-     * @param file      the <code>File</code> of which the modification date must
+     * @param file      the {@code File} of which the modification date must
      *                  be compared, must not be {@code null}
-     * @param reference the <code>File</code> of which the modification date
+     * @param reference the {@code File} of which the modification date
      *                  is used, must not be {@code null}
-     * @return true if the <code>File</code> exists and has been modified before
-     * the reference <code>File</code>
+     * @return true if the {@code File} exists and has been modified before
+     * the reference {@code File}
      * @throws IllegalArgumentException if the file is {@code null}
      * @throws IllegalArgumentException if the reference file is {@code null} or doesn't exist
      */
@@ -2777,14 +2777,14 @@ public class FileUtils {
     }
 
     /**
-     * Tests if the specified <code>File</code> is older than the specified
-     * <code>Date</code>.
+     * Tests if the specified {@code File} is older than the specified
+     * {@code Date}.
      *
-     * @param file the <code>File</code> of which the modification date
+     * @param file the {@code File} of which the modification date
      *             must be compared, must not be {@code null}
      * @param date the date reference, must not be {@code null}
-     * @return true if the <code>File</code> exists and has been modified
-     * before the given <code>Date</code>.
+     * @return true if the {@code File} exists and has been modified
+     * before the given {@code Date}.
      * @throws IllegalArgumentException if the file is {@code null}
      * @throws IllegalArgumentException if the date is {@code null}
      */
@@ -2796,14 +2796,14 @@ public class FileUtils {
     }
 
     /**
-     * Tests if the specified <code>File</code> is older than the specified
+     * Tests if the specified {@code File} is older than the specified
      * time reference.
      *
-     * @param file       the <code>File</code> of which the modification date must
+     * @param file       the {@code File} of which the modification date must
      *                   be compared, must not be {@code null}
      * @param timeMillis the time reference measured in milliseconds since the
      *                   epoch (00:00:00 GMT, January 1, 1970)
-     * @return true if the <code>File</code> exists and has been modified before
+     * @return true if the {@code File} exists and has been modified before
      * the given time reference.
      * @throws IllegalArgumentException if the file is {@code null}
      */
@@ -2837,7 +2837,7 @@ public class FileUtils {
 
     /**
      * Computes the checksum of a file using the specified checksum object.
-     * Multiple files may be checked using one <code>Checksum</code> instance
+     * Multiple files may be checked using one {@code Checksum} instance
      * if desired simply by reusing the same checksum object.
      * For example:
      * <pre>

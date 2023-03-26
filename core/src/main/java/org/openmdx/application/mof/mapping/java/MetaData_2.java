@@ -1,6 +1,6 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: Meta Data Provider
  * Owner:       the original authors.
  * ====================================================================
@@ -42,7 +42,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.application.mof.mapping.java;
 
 import java.io.File;
@@ -178,7 +177,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
      * @param tagName
      * @param expectedName
      * 
-     * @return the requested child, or <code>null</code>
+     * @return the requested child, or {@code null}
      */
     Element getChild(
         Element parent,
@@ -214,7 +213,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
      * @param element
      * @param attributeName
      * 
-     * @return the requested attribute, or <code>null</code>
+     * @return the requested attribute, or {@code null}
      */
     String getAttribute(
         Element element,

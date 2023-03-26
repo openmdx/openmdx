@@ -154,9 +154,9 @@ public class DateStateViews {
      * @param persistenceManager
      *            the JDO context
      * @param viewContext,
-     *            may be <code>null</code>
+     *            may be {@code null}
      * 
-     * @return the <code>PersistenceManager</code> for the requested state view context
+     * @return the {@code PersistenceManager} for the requested state view context
      */
     public static PersistenceManager getPersistenceManager(
         PersistenceManager persistenceManager,
@@ -172,11 +172,11 @@ public class DateStateViews {
      * @param persistenceManager
      *            the JDO context
      * @param validFrom
-     *            the begin of the time range, or <code>null</code> for an unconstrained lower bound
+     *            the begin of the time range, or {@code null} for an unconstrained lower bound
      * @param validTo
-     *            the end of the time range, or <code>null</code> for an unconstrained upper bound
+     *            the end of the time range, or {@code null} for an unconstrained upper bound
      * 
-     * @return the <code>PersistenceManager</code> for the given state view context
+     * @return the {@code PersistenceManager} for the given state view context
      * 
      * @throws IllegalArgumentException
      *             if validTo is less than validFrom
@@ -198,11 +198,11 @@ public class DateStateViews {
      * @param persistenceManager
      *            the JDO context
      * @param validFor
-     *            the view's valid time point, or <code>null</code> for today
+     *            the view's valid time point, or {@code null} for today
      * @param validAt
-     *            the view's transaction time point, or <code>null</code> for an up-to-date view
+     *            the view's transaction time point, or {@code null} for an up-to-date view
      * 
-     * @return the <code>PersistenceManager</code> for the given state view context
+     * @return the {@code PersistenceManager} for the given state view context
      */
     public static PersistenceManager getPersistenceManager(
         PersistenceManager persistenceManager,
@@ -272,9 +272,9 @@ public class DateStateViews {
      * 
      * @param refContext
      * @param viewContext,
-     *            may be <code>null</code>
+     *            may be {@code null}
      * 
-     * @return the <code>PersistenceManager</code> for the given state view context
+     * @return the {@code PersistenceManager} for the given state view context
      */
     public static PersistenceManager getPersistenceManager(
         RefBaseObject refContext,
@@ -289,11 +289,11 @@ public class DateStateViews {
      * @param refContext
      *            the JMI context
      * @param validFrom
-     *            the begin of the time range, or <code>null</code> for an unconstrained lower bound
+     *            the begin of the time range, or {@code null} for an unconstrained lower bound
      * @param validTo
-     *            the end of the time range, or <code>null</code> for an unconstrained upper bound
+     *            the end of the time range, or {@code null} for an unconstrained upper bound
      * 
-     * @return the <code>PersistenceManager</code> for the given state view context
+     * @return the {@code PersistenceManager} for the given state view context
      * 
      * @throws IllegalArgumentException
      *             if validTo is less than validFrom
@@ -315,11 +315,11 @@ public class DateStateViews {
      * @param refContext
      *            the JMI context
      * @param validFor
-     *            the view's valid time point, or <code>null</code> for today
+     *            the view's valid time point, or {@code null} for today
      * @param validAt
-     *            the view's transaction time point, or <code>null</code> for an up-to-date view
+     *            the view's transaction time point, or {@code null} for an up-to-date view
      * 
-     * @return the <code>PersistenceManager</code> for the given state view context
+     * @return the {@code PersistenceManager} for the given state view context
      */
     public static PersistenceManager getPersistenceManager(
         RefBaseObject refContext,
@@ -652,7 +652,7 @@ public class DateStateViews {
      * @return a context-free view onto the given object
      * 
      * @exception NullPointerException
-     *                if refObject is <code>null</code>
+     *                if refObject is {@code null}
      */
     @SuppressWarnings("unchecked")
     public static <C extends StateCapable, S extends C> C getViewForCore(
@@ -800,7 +800,7 @@ public class DateStateViews {
 
     /**
      * Retrieve a view for a given validity, which is propagated
-     * through navigation and applied to <code>DateState</code> instances.
+     * through navigation and applied to {@code DateState} instances.
      * <p>
      * Views to DateState instances are read-only, views to other objects
      * are readable and writable.
@@ -809,14 +809,14 @@ public class DateStateViews {
      *            a plain JMI object or a date view
      * @param validFor
      *            exclude all states not valid at the given date,
-     *            use <code>today()</code> in case of <code>null</code>
+     *            use {@code today()} in case of {@code null}
      * @param validAt
      *            exclude all states created after the given time point
      * 
      * @return a view to the given object
      * 
      * @exception IllegalArgumentException
-     *                if the <code>object</code> does not support views
+     *                if the {@code object} does not support views
      */
     @SuppressWarnings("unchecked")
     public static <T extends RefObject, V extends T> V getViewForTimePoint(
@@ -848,7 +848,7 @@ public class DateStateViews {
 
     /**
      * Retrieve a view for a given validity, which is propagated
-     * through navigation and applied to <code>DateState</code> instances.
+     * through navigation and applied to {@code DateState} instances.
      * <p>
      * Views to DateState instances are read-only, views to other objects
      * are readable and writable.
@@ -857,15 +857,15 @@ public class DateStateViews {
      *            a plain JMI container or a date view of a container
      * @param validFor
      *            exclude all states not valid at the given date,
-     *            use <code>today()</code> in case of <code>null</code>
+     *            use {@code today()} in case of {@code null}
      * @param validAt
      *            exclude all states created after the given time point
      * 
      * @return a view to the given container
      * 
      * @exception IllegalArgumentException
-     *                if the <code>container</code> is neither <code>null</code>
-     *                nor an instance of <code>RefBaseObject</code>
+     *                if the {@code container} is neither {@code null}
+     *                nor an instance of {@code RefBaseObject}
      */
     @SuppressWarnings("unchecked")
     public static <T extends Container<?>> T getViewForTimePoint(
@@ -951,15 +951,15 @@ public class DateStateViews {
      *            a plain JMI object or a date state view
      * @param validFrom
      *            exclude all states not valid at or after the given
-     *            date unless validFrom is <code>null</code>
+     *            date unless validFrom is {@code null}
      * @param validTo
      *            exclude all states not valid at or before the given
-     *            date unless validTo is <code>null</code>
+     *            date unless validTo is {@code null}
      * 
      * @return a view to the given object
      * 
      * @exception IllegalArgumentException
-     *                if the <code>object</code> does not support views
+     *                if the {@code object} does not support views
      *                or validTo is less than validFrom
      */
     @SuppressWarnings("unchecked")
@@ -1002,16 +1002,16 @@ public class DateStateViews {
      *            a plain JMI object or a date state view
      * @param validFrom
      *            exclude all states not valid at or after the given
-     *            date unless validFrom is <code>null</code>
+     *            date unless validFrom is {@code null}
      * @param validTo
      *            exclude all states not valid at or before the given
-     *            date unless validTo is <code>null</code>
+     *            date unless validTo is {@code null}
      * 
      * @return a view to the given object
      * 
      * @exception IllegalArgumentException
-     *                if the <code>container</code> is neither <code>null</code>
-     *                nor an instance of <code>RefBaseObject</code> or if validTo is less than validFrom.
+     *                if the {@code container} is neither {@code null}
+     *                nor an instance of {@code RefBaseObject} or if validTo is less than validFrom.
      */
     @SuppressWarnings("unchecked")
     public static <T extends Container<?>> T getViewForTimeRange(
@@ -1049,15 +1049,15 @@ public class DateStateViews {
      *            a plain JMI object or a date state view
      * @param validFrom
      *            exclude all states not valid at or after the given
-     *            date unless validFrom is <code>null</code>
+     *            date unless validFrom is {@code null}
      * @param validTo
      *            exclude all states not valid at or before the given
-     *            date unless validTo is <code>null</code>
+     *            date unless validTo is {@code null}
      * 
      * @return a view to the given object
      * 
      * @exception IllegalArgumentException
-     *                if the <code>object</code> does not support views
+     *                if the {@code object} does not support views
      */
     public static <T extends DateState> List<T> getCroppedStates(
         StateCapable stateCapable,
@@ -1088,7 +1088,7 @@ public class DateStateViews {
      * @return a view covering the whole period
      * 
      * @exception IllegalArgumentException
-     *                if the <code>dateState</code> does not support views
+     *                if the {@code dateState} does not support views
      */
     @SuppressWarnings("unchecked")
     public static <T extends DateState> T getViewForLifeTime(
@@ -1277,7 +1277,7 @@ public class DateStateViews {
      * @param validFrom
      * @param validTo
      * 
-     * @return <code>true</code> if the propagation is idempotent
+     * @return {@code true} if the propagation is idempotent
      */
     private static boolean isPropagationIdempotent(
         DateState source,
@@ -1418,7 +1418,7 @@ public class DateStateViews {
 
     /**
      * Retrieve a view for a given period, which is propagated
-     * through navigation and applied to <code>DateState</code> instances.
+     * through navigation and applied to {@code DateState} instances.
      * <p>
      * The attributes are readable and writable.
      * 
@@ -1554,9 +1554,9 @@ public class DateStateViews {
      * @param invalidated
      *            tells whether valid or invalid states excluded
      *            <ul>
-     *            <li><code>null</code>: Neither valid nor invalid states are excluded
-     *            <li><code>TRUE</code>: Valid states are excluded
-     *            <li><code>FALSE</code>: Invalid states are excluded
+     *            <li>{@code null}: Neither valid nor invalid states are excluded
+     *            <li>{@code TRUE}: Valid states are excluded
+     *            <li>{@code FALSE}: Invalid states are excluded
      *            </ul>
      * @param qualifiers
      *            the objects' qualifiers
@@ -1617,9 +1617,9 @@ public class DateStateViews {
      * @param invalidated
      *            tells whether valid or invalid states excluded
      *            <ul>
-     *            <li><code>null</code>: Neither valid nor invalid states are excluded
-     *            <li><code>TRUE</code>: Valid states are excluded
-     *            <li><code>FALSE</code>: Invalid states are excluded
+     *            <li>{@code null}: Neither valid nor invalid states are excluded
+     *            <li>{@code TRUE}: Valid states are excluded
+     *            <li>{@code FALSE}: Invalid states are excluded
      *            </ul>
      * @param qualifiers
      *            the objects' qualifiers
@@ -1651,9 +1651,9 @@ public class DateStateViews {
      * @param invalidated
      *            tells whether valid or invalid states excluded
      *            <ul>
-     *            <li><code>null</code>: Neither valid nor invalid states are excluded
-     *            <li><code>TRUE</code>: Valid states are excluded
-     *            <li><code>FALSE</code>: Invalid states are excluded
+     *            <li>{@code null}: Neither valid nor invalid states are excluded
+     *            <li>{@code TRUE}: Valid states are excluded
+     *            <li>{@code FALSE}: Invalid states are excluded
      *            </ul>
      * @param existsAt
      *            an (optional) time in history
@@ -1771,9 +1771,9 @@ public class DateStateViews {
      * @param invalidated
      *            tells whether valid or invalid states excluded
      *            <ul>
-     *            <li><code>null</code>: Neither valid nor invalid states are excluded
-     *            <li><code>TRUE</code>: Valid states are excluded
-     *            <li><code>FALSE</code>: Invalid states are excluded
+     *            <li>{@code null}: Neither valid nor invalid states are excluded
+     *            <li>{@code TRUE}: Valid states are excluded
+     *            <li>{@code FALSE}: Invalid states are excluded
      *            </ul>
      * @param existsAt
      *            an (optional) time in history
@@ -1818,9 +1818,9 @@ public class DateStateViews {
      * @param invalidated
      *            tells whether valid or invalid states excluded
      *            <ul>
-     *            <li><code>null</code>: Neither valid nor invalid states are excluded
-     *            <li><code>TRUE</code>: Valid states are excluded
-     *            <li><code>FALSE</code>: Invalid states are excluded
+     *            <li>{@code null}: Neither valid nor invalid states are excluded
+     *            <li>{@code TRUE}: Valid states are excluded
+     *            <li>{@code FALSE}: Invalid states are excluded
      *            </ul>
      * @return a collection of DateState instances matching the given criteria
      */
@@ -1845,10 +1845,10 @@ public class DateStateViews {
      *            a plain JMI object or a date state view
      * @param includeValidStates
      *            tells whether the invalidatedAt attribute may
-     *            be non-<code>null</code>
+     *            be non-{@code null}
      * @param includeInvalidStates
      *            tells whether the invalidatedAt attribute
-     *            may be <code>null</code>
+     *            may be {@code null}
      * 
      * @return a collection of DateState instances
      */
@@ -1953,8 +1953,8 @@ public class DateStateViews {
      * @param jmiContext
      *            a plain JMI object or a date state view
      * 
-     * @return the <code>DateStateContext</code> in case of a
-     *         Date State View, <code>null</code> otherwise.
+     * @return the {@code DateStateContext} in case of a
+     *         Date State View, {@code null} otherwise.
      */
     public static DateStateContext getContext(
         RefBaseObject jmiContext
@@ -1977,7 +1977,7 @@ public class DateStateViews {
      * @param jmiContext
      *            a JMI context
      * 
-     * @return the view kind, or <code>null</code> if the view context is <code>null</code>
+     * @return the view kind, or {@code null} if the view context is {@code null}
      */
     public static ViewKind getViewKind(
         RefBaseObject jmiContext
@@ -1992,22 +1992,22 @@ public class DateStateViews {
      * @param refObject
      *            a plain JMI object or a date state view
      * 
-     * @return <code>true</code> unless one of the following conditions is met
+     * @return {@code true} unless one of the following conditions is met
      *         <ul>
-     *         <li><code>refObject</code> is <code>null</code>
-     *         <li><code>refObject</code> is deleted
-     *         <li>all if the following conditions are <code>true</code>
+     *         <li>{@code refObject} is {@code null}
+     *         <li>{@code refObject} is deleted
+     *         <li>all if the following conditions are {@code true}
      *         <ol>
-     *         <li><code>refObject instanceof DateState</code>
-     *         <li>getViewKind(refObject) == ViewKind.TIME_RANGE_VIEW</code>
+     *         <li>{@code refObject instanceof DateState}
+     *         <li>getViewKind(refObject) == ViewKind.TIME_RANGE_VIEW}
      *         <li>the view has either been disturbed through write operations to other
      *         views or it has not been acquired through one of the following methods
      *         <ul>
-     *         <li><code>newInstance()</code> or <code>create&hellip;()</code>
-     *         <li><code>getStates()</code>
-     *         <li><code>getValidStates()</code>
-     *         <li><code>getViewForInitializedState()</code>
-     *         <li><code>getViewForPropagatedState()</code>
+     *         <li>{@code newInstance()} or {@code create&hellip;()}
+     *         <li>{@code getStates()}
+     *         <li>{@code getValidStates()}
+     *         <li>{@code getViewForInitializedState()}
+     *         <li>{@code getViewForPropagatedState()}
      *         </ul>
      *         </ol>
      *         </ul>
@@ -2026,7 +2026,7 @@ public class DateStateViews {
      * 
      * @param refObject
      * 
-     * @return <code>true</code> if the view refers to a single state
+     * @return {@code true} if the view refers to a single state
      * 
      * @throws IllegalArgumentException
      *             if there is no date-state context
@@ -2600,7 +2600,7 @@ public class DateStateViews {
         private final AccessMode mode;
 
         /**
-         * The <code>DateState</code> comparator
+         * The {@code DateState} comparator
          */
         private final static Comparator<DateState> stateComparator = new Comparator<DateState>() {
 

@@ -54,7 +54,7 @@ public interface RestConnectionMetaData extends ConnectionMetaData {
     /**
      * Tells whether we are in bulk load mode
      * 
-     * @return <code>true</code> if we are in bulk load mode, false otherwise
+     * @return {@code true} if we are in bulk load mode, false otherwise
      */
     boolean isBulkLoad();
         

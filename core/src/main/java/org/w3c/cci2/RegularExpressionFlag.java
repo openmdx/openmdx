@@ -62,7 +62,7 @@ public enum RegularExpressionFlag {
 	/**
 	 * Tells whether the flag is an SQL match parameter
 	 * 
-	 * @return <code>true</code> if the flag is an SQL match parameter
+	 * @return {@code true} if the flag is an SQL match parameter
 	 */
 	public boolean isMatchParameter(){
 		return matchParameter != NUL;

@@ -67,7 +67,7 @@ public class ReferenceRecord
 {
 
     /**
-     * Imolements <code>Serializable</code>
+     * Imolements {@code Serializable}
      */
     private static final long serialVersionUID = 1902793355832391232L;
     

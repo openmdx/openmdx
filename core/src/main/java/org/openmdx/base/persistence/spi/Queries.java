@@ -90,7 +90,7 @@ public class Queries {
      * 
      * @param target
      * 
-     * @return <code>true</code> if we are dispatching to a reference predicate
+     * @return {@code true} if we are dispatching to a reference predicate
      */
     private static boolean isReferencePredicate(
     	Object target	

@@ -63,14 +63,14 @@ public class FlushOrder implements Comparator<DataObject_1_0> {
     }
 
     /**
-     * A  a <code>FlushOrder</code> instance
+     * A  a {@code FlushOrder} instance
      */
     private static final Comparator<DataObject_1_0> instance = new FlushOrder();
     
     /**
-     * Retrieve a <code>FlushOrder</code> instance
+     * Retrieve a {@code FlushOrder} instance
      * 
-     * @return a <code>FlushOrder</code> instance
+     * @return a {@code FlushOrder} instance
      */
     public static Comparator<DataObject_1_0> getInstance(){
         return FlushOrder.instance;

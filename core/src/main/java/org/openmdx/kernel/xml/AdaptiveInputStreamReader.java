@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
 
 /**
  * The Adaptive Input Stream Reader has the following encoding priorities<ol>
- * <li>The constructor's <code>encoding</code> argument
+ * <li>The constructor's {@code encoding} argument
  * <li>A byte order mark
  * <li>An XML declaration's encoding attribute
  * <li>The platform's default encoding
@@ -67,7 +67,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	 * Constructor
 	 * 
 	 * @param in
-     * @param encoding overrides the adaptive encoding unless it is <code>null</code>
+     * @param encoding overrides the adaptive encoding unless it is {@code null}
 	 * @param byteOrderMarkAware 
 	 * @param xmlDeclarationAware 
 	 * @param propagateClose tells whether a close request is propagated to the input stream
@@ -131,7 +131,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	private final boolean propagateClose;
 
 	/**
-	 * Ensure that the <code>Reader</code> is open
+	 * Ensure that the {@code Reader} is open
 	 * 
 	 * @throws IOException 
 	 */
@@ -348,9 +348,9 @@ public class AdaptiveInputStreamReader extends Reader {
 	     * Remove the suurounding &laquo;'&raquo; respectively &laquo;"&raquo; 
 	     * characters.
 	     *  
-	     * @param quoted the embedded string; may be <code>null</code>
+	     * @param quoted the embedded string; may be {@code null}
 	     * @return the quoted string without its leading or trailing character;
-	     * or <code>null</code> if quoted was <code>null</code>. 
+	     * or {@code null} if quoted was {@code null}. 
 	     */
 	    private static final String unquote(
 	        String quoted
@@ -366,7 +366,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	     * @param in the stream
 	     * @param regexpFactory 
 	     * 
-	     * @return the XML Declaration; or <code>null</code> if none has been 
+	     * @return the XML Declaration; or {@code null} if none has been 
 	     * specified.
 	     * 
 	     * @throws IOException  
@@ -385,7 +385,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	     * @param in the stream
 	     * @param regexpFactory TODO
 	     * 
-	     * @return the XML Declaration; or <code>null</code> if none has been 
+	     * @return the XML Declaration; or {@code null} if none has been 
 	     * specified.
 	     * 
 	     * @throws IOException  
@@ -493,10 +493,10 @@ public class AdaptiveInputStreamReader extends Reader {
     /**
      * ASCII Reader
      * <p>
-     * This <code>InputStream</code> <code>Reader</code> is able to read ASCII
+     * This {@code InputStream} {@code Reader} is able to read ASCII
      * characters encoded in any of  the following formats provided the stream 
      * does not contain a byte order mark or any other non-ASCII character up
-     * the position it is read through the <code>InputStreamASCIIReader</code>.
+     * the position it is read through the {@code InputStreamASCIIReader}.
      * <ul>
      * <li>US-ASCII
      * <li>ISO-8859-1
@@ -504,7 +504,7 @@ public class AdaptiveInputStreamReader extends Reader {
      * <li>UTF-16
      * <li>UTF-32
      * </ul>
-     * The <code>InputStreamASCIIReader</code> is designed not to read ahead.
+     * The {@code InputStreamASCIIReader} is designed not to read ahead.
      */
     protected static class ASCIIReader extends Reader {
 
@@ -536,7 +536,7 @@ public class AdaptiveInputStreamReader extends Reader {
         
         /**
          * Close disconnects the reader from the underlying 
-         * <code>InputStream</code> rather than closing it.
+         * {@code InputStream} rather than closing it.
          * 
          * @exception IOException
          */
@@ -659,8 +659,8 @@ public class AdaptiveInputStreamReader extends Reader {
     //------------------------------------------------------------------------
     
     /**
-     * Canonical Encoding Names for <code>java.io</code> and 
-     * <code>java.lang</code> API. 
+     * Canonical Encoding Names for {@code java.io} and 
+     * {@code java.lang} API. 
      */
     protected static class Encodings {
 
@@ -807,8 +807,8 @@ public class AdaptiveInputStreamReader extends Reader {
         public final static char VALUE = 0xFEFF;
         
         /**
-         * Each <code>ENCODINGS</code> entry corresponds to a
-         * <code>REPRESENTATIONS</code> entry.
+         * Each {@code ENCODINGS} entry corresponds to a
+         * {@code REPRESENTATIONS} entry.
          */
         final public static String[] ENCODINGS = {
             Encodings.UTF_8, 
@@ -819,8 +819,8 @@ public class AdaptiveInputStreamReader extends Reader {
         };
 
         /**
-         * Each <code>REPRESENTATIONS</code> entry corresponds to an 
-         * <code>ENCODINGS</code> entry.
+         * Each {@code REPRESENTATIONS} entry corresponds to an 
+         * {@code ENCODINGS} entry.
          */
         final public static byte[][] REPRESENTATIONS = new byte[][]{
             new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF},
@@ -836,7 +836,7 @@ public class AdaptiveInputStreamReader extends Reader {
          * 
          * @param in the input stream
          * 
-         * @return the byte order mark's encoding; or <code>null</code> in absence
+         * @return the byte order mark's encoding; or {@code null} in absence
          * of a byte order mark.
          * 
          * @throws IOException  

@@ -96,9 +96,9 @@ public abstract class Handler_1
     /**
      * Unsupported authority exception
      * 
-     * @param url an <code>URL</code> which can't be handled by this handler
+     * @param url an {@code URL} which can't be handled by this handler
      * 
-     * @return a <code>MalformedURLException</code> for the given <code>URL</code>.
+     * @return a {@code MalformedURLException} for the given {@code URL}.
      */
     abstract protected MalformedURLException newMalformedURLException(
         URL url

@@ -64,9 +64,6 @@ public class AssociationMapper
     extends AbstractMapper
 {
 
-    /**
-     * Constructor 
-     */
     public AssociationMapper(
         ModelElement_1_0 element,
         Writer writer,
@@ -74,9 +71,10 @@ public class AssociationMapper
         Format format,
         String packageSuffix,
         MetaData_1_0 metaData, 
+        boolean markdown, 
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
-        super(writer, model, format, packageSuffix, metaData, primitiveTypeMapper);
+        super(writer, model, format, packageSuffix, metaData, markdown, primitiveTypeMapper);
         this.associationName = Identifier.CLASS_PROXY_NAME.toIdentifier(
             element.getName(),
             null, // removablePrefix
@@ -106,7 +104,7 @@ public class AssociationMapper
     ) throws ServiceException {
         this.trace("Association/Begin");
         this.fileHeader();
-        this.pw.println(
+        printLine(
             "package " + this.getNamespace(
                 MapperUtils.getNameComponents(
                     MapperUtils.getPackageName(
@@ -115,15 +113,12 @@ public class AssociationMapper
                 )
             ) + ';'
         );
-        this.pw.println();
-        this.pw.println("/**");
-        this.pw.println(" * Association Interface <code>" + this.associationDef.getName() + "</code>"); 
-        if (this.associationDef.getAnnotation() != null) {
-            this.pw.println(" *<p>");
-            this.pw.println(MapperUtils.wrapText(" * ", this.associationDef.getAnnotation()));
-        }
-        this.pw.println(" */");
-        this.pw.println("public interface " + this.associationName + " {"); 
+        newLine();
+        printLine("/**");
+        printLine(" * Association Interface {@code " + this.associationDef.getName() + "}"); 
+        mapAnnotation(" * ", this.associationDef);
+        printLine(" */");
+        printLine("public interface " + this.associationName + " {"); 
     }
 
     /**
@@ -133,7 +128,7 @@ public class AssociationMapper
      */
     protected void mapEnd(
     ) throws ServiceException {
-        this.pw.println("}"); 
+        printLine("}"); 
         this.trace("Association/End");
     }
     
@@ -154,38 +149,35 @@ public class AssociationMapper
         if(objectValueName.equals(qualifierValueName)) {
             objectValueName = '_' + objectValueName;
         }
-        this.pw.println();
-        this.pw.println("  /**");
-        this.pw.println("   * Association End Interface <code>" + associationEnd.getName() + "</code>"); 
-        if (associationEnd.getAnnotation() != null) {
-            this.pw.println(" *<p>");
-            this.pw.println(MapperUtils.wrapText(" * ", associationEnd.getAnnotation()));
-        }
-        this.pw.println("   */");
-        this.pw.println(
+        newLine();
+        printLine("  /**");
+        printLine("   * Association End Interface {@code " + associationEnd.getName() + "}"); 
+        mapAnnotation(" * ", associationEnd);
+        printLine("   */");
+        printLine(
             "  interface " + name + "<E> extends " + QUALIFIED_CONTAINER_CLASS_NAME + "<E> {"); 
-        this.pw.println();            
-        this.pw.println("     E get(");
-        this.pw.println("       " + InstanceMapper.QUALIFIER_TYPE_CLASS_NAME + " " + qualifierTypeName + ",");
-        this.pw.println("       " + qualifierValueType + " " + qualifierValueName);
-        this.pw.println("     );");
-        this.pw.println();
+        newLine();            
+        printLine("     E get(");
+        printLine("       " + InstanceMapper.QUALIFIER_TYPE_CLASS_NAME + " " + qualifierTypeName + ",");
+        printLine("       " + qualifierValueType + " " + qualifierValueName);
+        printLine("     );");
+        newLine();
         ReferenceDef referenceDef = associationEnd.getReference(); 
         if(referenceDef != null && referenceDef.isChangeable()) {
-            this.pw.println("     void add(");
-            this.pw.println("       " + InstanceMapper.QUALIFIER_TYPE_CLASS_NAME + " " + qualifierTypeName + ",");
-            this.pw.println("       " + qualifierValueType + " " + qualifierValueName + ",");
-            this.pw.println("       E " + objectValueName);
-            this.pw.println("     );");
-            this.pw.println();            
-            this.pw.println("     void remove(");
-            this.pw.println("       " + InstanceMapper.QUALIFIER_TYPE_CLASS_NAME + " " + qualifierTypeName + ",");
-            this.pw.println("       " + qualifierValueType + " " + qualifierValueName);
-            this.pw.println("     );");
-            this.pw.println();            
+            printLine("     void add(");
+            printLine("       " + InstanceMapper.QUALIFIER_TYPE_CLASS_NAME + " " + qualifierTypeName + ",");
+            printLine("       " + qualifierValueType + " " + qualifierValueName + ",");
+            printLine("       E " + objectValueName);
+            printLine("     );");
+            newLine();            
+            printLine("     void remove(");
+            printLine("       " + InstanceMapper.QUALIFIER_TYPE_CLASS_NAME + " " + qualifierTypeName + ",");
+            printLine("       " + qualifierValueType + " " + qualifierValueName);
+            printLine("     );");
+            newLine();            
         }
-        this.pw.println("  }"); 
-        this.pw.println();                        
+        printLine("  }"); 
+        newLine();                        
         this.trace("AssociationEnd/End");
     }
     

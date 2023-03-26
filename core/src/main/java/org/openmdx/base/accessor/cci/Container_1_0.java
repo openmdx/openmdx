@@ -96,7 +96,7 @@ public interface Container_1_0
      * @param fetchPlan 
      * @param       criteria
      *                The criteria to be applied to objects of this container;
-     *                or <code>null</code> for all the container's elements in
+     *                or {@code null} for all the container's elements in
      *                      their default order.
      *
      * @return    a list based on the container's elements and the given
@@ -114,7 +114,7 @@ public interface Container_1_0
     /**
      * Tells whether the collection has been loaded into the cache.
      * 
-     * @return <code>true</code> if the collection has been loaded into the cache.
+     * @return {@code true} if the collection has been loaded into the cache.
      */
     boolean isRetrieved();
     
@@ -127,7 +127,7 @@ public interface Container_1_0
      *              The fetch plan to be used to retrieve the elements
      * @param       criteria
      *              The criteria to be applied to objects of this container;
-     *              or <code>null</code> for all the container's elements in
+     *              or {@code null} for all the container's elements in
      *              their default order.
      */
     void processAll(

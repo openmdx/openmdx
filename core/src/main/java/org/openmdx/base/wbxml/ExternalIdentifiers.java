@@ -52,9 +52,9 @@ import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Public Document IDs<ul>
- * <li><code>0x00</code> to 0x7F</code>: <em>Well-Known values</em> are set as specified by the OMA MAG/MAE group processes.
- * <li><code>0x80</code> to 0x3FFF</code>: <em>Reserved values</em>, registered and managed by OMNA.
- * <li><code>0x4000</code> to <code>0x1FFFFF</code>: <em>Experimental values</em>, registered by OMNA only for advisory purposes
+ * <li>{@code 0x00} to 0x7F}: <em>Well-Known values</em> are set as specified by the OMA MAG/MAE group processes.
+ * <li>{@code 0x80} to 0x3FFF}: <em>Reserved values</em>, registered and managed by OMNA.
+ * <li>{@code 0x4000} to {@code 0x1FFFFF}: <em>Experimental values</em>, registered by OMNA only for advisory purposes
  * </ul>
  */
 public class ExternalIdentifiers {
@@ -66,12 +66,12 @@ public class ExternalIdentifiers {
     public static final int LITERAL = 0x00;
     
     /**
-     * <code>NULL</code> represents a missing or unknown public document id.
+     * {@code NULL} represents a missing or unknown public document id.
      */
     public static final int NULL = 0x01;
     
     /**
-     * The well known values are in the range code>0x00</code> to 0x7F</code>
+     * The well known values are in the range code>0x00} to 0x7F}
      */
     private static String[] WELL_KNOWN = {
         "-//WAPFORUM//DTD WML 1.0//EN", // 0x02 WML 1.0
@@ -100,12 +100,12 @@ public class ExternalIdentifiers {
     };
 
     /**
-     * The registered values are in the range <code>0x80</code> to 0x3FFF</code>
+     * The registered values are in the range {@code 0x80} to 0x3FFF}
      */
     private static final Map<Integer,String> REGISTERED = new HashMap<Integer, String>();
     
     /**
-     * The private and experimental values are in the range <code>0x4000</code> to <code>0x1FFFFF</code>
+     * The private and experimental values are in the range {@code 0x4000} to {@code 0x1FFFFF}
      */
     private static final Map<Integer,String> PRIVATE = new HashMap<Integer, String>();
     
@@ -114,7 +114,7 @@ public class ExternalIdentifiers {
      * 
      * @param xmlDocumentId
      * 
-     * @return the WBXML specific public document identifier, or <code>LITERAL</code> if it has to be transferred literally
+     * @return the WBXML specific public document identifier, or {@code LITERAL} if it has to be transferred literally
      * 
      * @throws ServiceException
      */

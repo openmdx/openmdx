@@ -47,10 +47,8 @@ package org.openmdx.kernel.configuration;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Collections;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,7 +59,7 @@ import java.util.regex.Pattern;
 import org.openmdx.kernel.collection.TreeSparseArray;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
-import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Resources;
 import org.w3c.cci2.SparseArray;
 
 /**
@@ -75,11 +73,6 @@ public class PropertiesProvider {
     private PropertiesProvider(){
     	// Avoid instantiation
     }
-
-    /**
-     * 
-     */
-    private static final String RESOURCE_XRI_PREFIX = "xri://+resource/";
 
     /**
      * 
@@ -128,24 +121,19 @@ public class PropertiesProvider {
     public static Properties getProperties(
         String uri
     ) throws IOException {
-        final List<URL> urls = uri == null || uri.length() == 0 ? Collections.<URL>emptyList(
-        ) : uri.startsWith(RESOURCE_XRI_PREFIX) ? Collections.list(
-            Classes.getResources(uri.substring(RESOURCE_XRI_PREFIX.length()))
-        ) : Collections.singletonList(
-            new URL(uri)
-        );
-        switch(urls.size()) {
-            case 0:
-                return new Properties();
-            case 1:
-                return getProperties(urls.get(0));
-            default:
-                Properties target = new Properties();
-                for(URL url : urls) {
-                    include(target, getProperties(url));
-                }
-                return target;
-        }
+        Properties target = null;
+    	for(Iterator<URL> i = Resources.findResolvedURLs(uri).iterator(); i.hasNext();) {
+    		final Properties current = getProperties(i.next());
+    		if(target == null) {
+    			if(i.hasNext()) {
+    				target = new Properties();
+    			} else {
+    				return current;
+    			}
+    		}
+            include(target, current);
+    	}
+    	return target == null ? new Properties() : target;
     }
 
     /**

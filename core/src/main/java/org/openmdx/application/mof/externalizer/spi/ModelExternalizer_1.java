@@ -52,6 +52,7 @@ import javax.resource.cci.MappedRecord;
 
 import org.openmdx.application.mof.externalizer.cci.ModelExternalizer_1_0;
 import org.openmdx.application.mof.externalizer.cci.ModelImporter_1_0;
+import org.openmdx.application.mof.mapping.cci.MappingTypes;
 import org.openmdx.application.mof.repository.accessor.ModelProvider_2;
 import org.openmdx.base.dataprovider.cci.Channel;
 import org.openmdx.base.dataprovider.cci.DataproviderRequestProcessor;
@@ -79,14 +80,18 @@ public class ModelExternalizer_1 implements ModelExternalizer_1_0 {
 	 * 
 	 * @param openmdxjdoDir
 	 *            base URL for openmdxjdo files
+	 * @param markdown 
+	 *            {@code true} if annotations use markdown
 	 */
 	public ModelExternalizer_1(
-		String openmdxjdoDir
+		String openmdxjdoDir, 
+		boolean markdown
 	){
 		try {
 			this.dataprovider = ModelProvider_2.newModelExternalizationDataprovider(
 				openmdxjdoDir
 			);
+			this.markdown = markdown;
 		} catch (RuntimeException e) {
 			throw Throwables.log(e);
 		}
@@ -95,6 +100,11 @@ public class ModelExternalizer_1 implements ModelExternalizer_1_0 {
 	protected final Port<RestConnection> dataprovider;
 
     private static final String PROVIDER_NAME = "Mof";
+    
+    /**
+     * Tells whether annotations use markdown
+     */
+    private final boolean markdown;
 
 	/*
 	 * (non-Javadoc)
@@ -140,6 +150,9 @@ public class ModelExternalizer_1 implements ModelExternalizer_1_0 {
 		request.setBody(params);
 		IndexedRecord values = Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.code());
 		params.put("format", values);
+		if(markdown) {
+			values.add(MappingTypes.MARKDOWN);
+		}
 		values.addAll(formats);
 		MessageRecord result = channnel.addOperationRequest(request);
 		return (byte[]) result.getBody().get("packageAsJar");

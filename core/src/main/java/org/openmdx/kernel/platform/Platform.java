@@ -112,8 +112,8 @@ public class Platform {
  
     /**
      * Tells whether we are in a Java- or Dalvik-VM:<ul>
-     * <li><code>Java-VM</code>
-     * <li><code>Dalvik-VM</code>
+     * <li>{@code Java-VM}
+     * <li>{@code Dalvik-VM}
      * </ul>
      *
      * @return the platform id

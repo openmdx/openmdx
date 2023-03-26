@@ -75,10 +75,10 @@ public class FileFilterUtils {
      * @param filter the filter to apply to the set of files.
      * @param files the array of files to apply the filter to.
      *
-     * @return a subset of <code>files</code> that is accepted by the
+     * @return a subset of {@code files} that is accepted by the
      *         file filter.
      * @throws IllegalArgumentException if the filter is {@code null}
-     *         or <code>files</code> contains a {@code null} value.
+     *         or {@code files} contains a {@code null} value.
      *
      * @since Commons I/O 2.0
      */
@@ -120,10 +120,10 @@ public class FileFilterUtils {
      * @param filter the filter to apply to the set of files.
      * @param files the array of files to apply the filter to.
      *
-     * @return a subset of <code>files</code> that is accepted by the
+     * @return a subset of {@code files} that is accepted by the
      *         file filter.
      * @throws IllegalArgumentException if the filter is {@code null}
-     *         or <code>files</code> contains a {@code null} value.
+     *         or {@code files} contains a {@code null} value.
      *
      * @since Commons I/O 2.0
      */
@@ -151,10 +151,10 @@ public class FileFilterUtils {
      * @param filter the filter to apply to each files in the list.
      * @param files the collection of files to apply the filter to.
      *
-     * @return a subset of <code>files</code> that is accepted by the
+     * @return a subset of {@code files} that is accepted by the
      *         file filter.
      * @throws IllegalArgumentException if the filter is {@code null}
-     *         or <code>files</code> contains a {@code null} value.
+     *         or {@code files} contains a {@code null} value.
      * @since Commons I/O 2.0
      */
     public static List<File> filterList(final IOFileFilter filter, final Iterable<File> files) {
@@ -180,10 +180,10 @@ public class FileFilterUtils {
      * @param filter the filter to apply to each files in the list.
      * @param files the collection of files to apply the filter to.
      *
-     * @return a subset of <code>files</code> that is accepted by the
+     * @return a subset of {@code files} that is accepted by the
      *         file filter.
      * @throws IllegalArgumentException if the filter is {@code null}
-     *         or <code>files</code> contains a {@code null} value.
+     *         or {@code files} contains a {@code null} value.
      * @since Commons I/O 2.0
      */
     public static List<File> filterList(final IOFileFilter filter, final File... files) {
@@ -210,10 +210,10 @@ public class FileFilterUtils {
      * @param filter the filter to apply to the set of files.
      * @param files the collection of files to apply the filter to.
      *
-     * @return a subset of <code>files</code> that is accepted by the
+     * @return a subset of {@code files} that is accepted by the
      *         file filter.
      * @throws IllegalArgumentException if the filter is {@code null}
-     *         or <code>files</code> contains a {@code null} value.
+     *         or {@code files} contains a {@code null} value.
      *
      * @since Commons I/O 2.0
      */
@@ -241,10 +241,10 @@ public class FileFilterUtils {
      * @param filter the filter to apply to the set of files.
      * @param files the collection of files to apply the filter to.
      *
-     * @return a subset of <code>files</code> that is accepted by the
+     * @return a subset of {@code files} that is accepted by the
      *         file filter.
      * @throws IllegalArgumentException if the filter is {@code null}
-     *         or <code>files</code> contains a {@code null} value.
+     *         or {@code files} contains a {@code null} value.
      *
      * @since Commons I/O 2.0
      */
@@ -269,10 +269,10 @@ public class FileFilterUtils {
      * @param acceptedFiles the list of files to add accepted files to.
      *
      * @param <T> the type of the file collection.
-     * @return a subset of <code>files</code> that is accepted by the
+     * @return a subset of {@code files} that is accepted by the
      *         file filter.
      * @throws IllegalArgumentException if the filter is {@code null}
-     *         or <code>files</code> contains a {@code null} value.
+     *         or {@code files} contains a {@code null} value.
      */
     private static <T extends Collection<File>> T filter(final IOFileFilter filter,
             final Iterable<File> files, final T acceptedFiles) {
@@ -502,8 +502,8 @@ public class FileFilterUtils {
 
     //-----------------------------------------------------------------------
     /**
-     * Returns an <code>IOFileFilter</code> that wraps the
-     * <code>FileFilter</code> instance.
+     * Returns an {@code IOFileFilter} that wraps the
+     * {@code FileFilter} instance.
      *
      * @param filter  the filter to be wrapped
      * @return a new filter that implements IOFileFilter
@@ -514,8 +514,8 @@ public class FileFilterUtils {
     }
 
     /**
-     * Returns an <code>IOFileFilter</code> that wraps the
-     * <code>FilenameFilter</code> instance.
+     * Returns an {@code IOFileFilter} that wraps the
+     * {@code FilenameFilter} instance.
      *
      * @param filter  the filter to be wrapped
      * @return a new filter that implements IOFileFilter
@@ -658,7 +658,7 @@ public class FileFilterUtils {
      * @return an IOFileFilter that accepts files beginning with the provided
      *         magic number.
      *
-     * @throws IllegalArgumentException if <code>magicNumber</code> is
+     * @throws IllegalArgumentException if {@code magicNumber} is
      *         {@code null} or the empty String.
      * @see MagicNumberFileFilter
      * @since Commons I/O 2.0
@@ -678,7 +678,7 @@ public class FileFilterUtils {
      * @return an IOFileFilter that accepts files containing the magic number
      *         at the specified offset.
      *
-     * @throws IllegalArgumentException if <code>magicNumber</code> is
+     * @throws IllegalArgumentException if {@code magicNumber} is
      *         {@code null} or the empty String, or if offset is a
      *         negative number.
      * @see MagicNumberFileFilter
@@ -698,7 +698,7 @@ public class FileFilterUtils {
      * @return an IOFileFilter that accepts files beginning with the provided
      *         magic number.
      *
-     * @throws IllegalArgumentException if <code>magicNumber</code> is
+     * @throws IllegalArgumentException if {@code magicNumber} is
      *         {@code null} or is of length zero.
      * @see MagicNumberFileFilter
      * @since Commons I/O 2.0
@@ -718,8 +718,8 @@ public class FileFilterUtils {
      * @return an IOFileFilter that accepts files containing the magic number
      *         at the specified offset.
      *
-     * @throws IllegalArgumentException if <code>magicNumber</code> is
-     *         {@code null}, or contains no bytes, or <code>offset</code>
+     * @throws IllegalArgumentException if {@code magicNumber} is
+     *         {@code null}, or contains no bytes, or {@code offset}
      *         is a negative number.
      * @see MagicNumberFileFilter
      * @since Commons I/O 2.0

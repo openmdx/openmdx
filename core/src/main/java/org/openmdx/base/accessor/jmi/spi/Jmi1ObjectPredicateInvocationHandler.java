@@ -74,7 +74,7 @@ public class Jmi1ObjectPredicateInvocationHandler extends Jmi1QueryInvocationHan
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 4054872493209535130L;
     

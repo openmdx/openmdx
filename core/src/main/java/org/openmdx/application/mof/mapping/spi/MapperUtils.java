@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.function.Consumer;
 
 import org.openmdx.kernel.xri.XRI_2Protocols;
 
@@ -136,27 +137,28 @@ public class MapperUtils {
   }
 
   //--------------------------------------------------------------------------------
-    /**
-     * Word wraps a given text and returns it as a string.
+
+   /**
+     * A (maybe multiline) input text is split into lines and 
+     * send to the sink line by line with the given indent.
+     * 
      * @param indent The indentation to be used for text output.
-     * @param inText The input text to be word wrapped.
-     * @return The word wrapped output text.
+     * @param text The input text to be word wrapped.
      */
-    public static String wrapText(
+    public static void wrapText(
         String indent,
-        String inText
+        String text, 
+        Consumer<CharSequence> sink
     ) {
-        StringBuilder text = new StringBuilder();
-        StringTokenizer tokenizer = new StringTokenizer(inText, "\n\r\f");
-        String separator = "";
+        final StringBuilder buffer = new StringBuilder();
+        final StringTokenizer tokenizer = new StringTokenizer(text, "\n\r\f");
         while (tokenizer.hasMoreTokens()) {
             String nextToken = tokenizer.nextToken();
-            text.append(separator);
-            text.append(indent);
-            text.append(nextToken);
-            separator = System.getProperty("line.separator");
+            buffer.append(indent);
+            buffer.append(nextToken);
+            sink.accept(buffer);
+            buffer.setLength(0);
         }
-        return text.toString();
     }
 
   //--------------------------------------------------------------------------------

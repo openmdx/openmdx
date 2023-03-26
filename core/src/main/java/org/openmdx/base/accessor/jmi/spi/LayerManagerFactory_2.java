@@ -96,7 +96,7 @@ class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
     }
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -3412830449142819058L;
 
@@ -137,11 +137,11 @@ class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
     }
 
     /**
-     * Create a layer specific <code>PersistenceManager</code>
+     * Create a layer specific {@code PersistenceManager}
      * 
      * @param delegate
      * 
-     * @return a layer specific <code>PersistenceManager</code>
+     * @return a layer specific {@code PersistenceManager}
      */
     protected JDOPersistenceManager newLayerManager (
         JDOPersistenceManager delegate

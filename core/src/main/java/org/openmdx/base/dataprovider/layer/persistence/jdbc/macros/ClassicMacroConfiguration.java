@@ -74,27 +74,27 @@ public class ClassicMacroConfiguration implements MacroConfiguration {
     }
 
     /**
-     * Lazy evaluation of the suppliers get() method to retrieve <ode>stringMacroColumn</code>
+     * Lazy evaluation of the suppliers get() method to retrieve <ode>stringMacroColumn}
      */
     private final Supplier<SparseArray<String>> stringMacroColumns;
 
     /**
-     * Lazy evaluation of the suppliers get() method to retrieve <ode>stringMacroName</code>
+     * Lazy evaluation of the suppliers get() method to retrieve <ode>stringMacroName}
      */
     private final Supplier<SparseArray<String>> stringMacroNames;
 
     /**
-     * Lazy evaluation of the suppliers get() method to retrieve <ode>stringMacroValue</code>
+     * Lazy evaluation of the suppliers get() method to retrieve <ode>stringMacroValue}
      */
     private final Supplier<SparseArray<String>> stringMacroValues;
 
     /**
-     * Lazy evaluation of the suppliers get() method to retrieve <ode>pathMacroName</code>
+     * Lazy evaluation of the suppliers get() method to retrieve <ode>pathMacroName}
      */
     private final Supplier<SparseArray<String>> pathMacroNames;
 
     /**
-     * Lazy evaluation of the suppliers get() method to retrieve <ode>pathMacroValue</code>
+     * Lazy evaluation of the suppliers get() method to retrieve <ode>pathMacroValue}
      */
     private final Supplier<SparseArray<String>> pathMacroValues;
 
@@ -140,11 +140,11 @@ public class ClassicMacroConfiguration implements MacroConfiguration {
      * Create a macro configuration based on the given Java Bean configuration
      * 
      * @param macroColumns
-     *            the <code>stringMacroColumn</code> configuration
+     *            the {@code stringMacroColumn} configuration
      * @param macroNames
-     *            the <code>stringMacroNames</code> configuration
+     *            the {@code stringMacroNames} configuration
      * @param macroValues
-     *            the <code>stringMacroValue</code> configuration
+     *            the {@code stringMacroValue} configuration
      * 
      * @return a new macro handler
      */
@@ -186,9 +186,9 @@ public class ClassicMacroConfiguration implements MacroConfiguration {
      * Create a macro configuration based on the given Java Bean configuration
      * 
      * @param macroNames
-     *            the <code>pathMacroNames</code> configuration
+     *            the {@code pathMacroNames} configuration
      * @param macroValues
-     *            the <code>pathMacroValue</code> configuration
+     *            the {@code pathMacroValue} configuration
      * 
      * @return a new macro handler
      */

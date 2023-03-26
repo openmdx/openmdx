@@ -125,7 +125,7 @@ public class Order {
     }
     
     /**
-     * Compare two XMLGregorianCalendar values where <code>null</code> is
+     * Compare two XMLGregorianCalendar values where {@code null} is
      * considered to be smaller than every other value.
      * 
      * @param d1 the first value
@@ -146,7 +146,7 @@ public class Order {
     }
 
     /**
-     * Compare two XMLGregorianCalendar values where <code>null</code> is
+     * Compare two XMLGregorianCalendar values where {@code null} is
      * considered to be greater than every other value.
      * 
      * @param d1
@@ -167,15 +167,15 @@ public class Order {
     }
 
     /**
-     * Compare two XMLGregorianCalendar values where <code>null</code> is
-     * considered to be lesser than every other value for <code>from</code>
-     * and greater than every other value for <code>to</code>.
+     * Compare two XMLGregorianCalendar values where {@code null} is
+     * considered to be lesser than every other value for {@code from}
+     * and greater than every other value for {@code to}.
      * 
      * @param from
      * @param to
      * 
-     * @return a negative integer, zero, or a positive integer as <code>from</code> 
-     * is less than, equal to, or greater than <code>to</code>. 
+     * @return a negative integer, zero, or a positive integer as {@code from} 
+     * is less than, equal to, or greater than {@code to}. 
      */
     public static int compareValidFromToValidTo(
         XMLGregorianCalendar from,
@@ -185,13 +185,13 @@ public class Order {
     }
 
     /**
-     * Compare two (mutable or immutable) <code>XMLGregorianCalendar</code> values
+     * Compare two (mutable or immutable) {@code XMLGregorianCalendar} values
      * 
      * @param d1
      * @param d2
      * 
-     * @return a negative integer, zero, or a positive integer as <code>from</code> 
-     * is less than, equal to, or greater than <code>to</code>. 
+     * @return a negative integer, zero, or a positive integer as {@code from} 
+     * is less than, equal to, or greater than {@code to}. 
      */
     public static int compare(
         XMLGregorianCalendar d1,
@@ -206,12 +206,12 @@ public class Order {
     }
         
     /**
-     * Compare two (mutable or immutable) <code>XMLGregorianCalendar</code> values
+     * Compare two (mutable or immutable) {@code XMLGregorianCalendar} values
      * 
      * @param d1
      * @param d2
      * 
-     * @return true if the two values are either equal or both <code>null</code>
+     * @return true if the two values are either equal or both {@code null}
      */
     public static boolean equal(
         XMLGregorianCalendar d1,
@@ -261,7 +261,7 @@ public class Order {
     }
     
     /**
-     * Compare two Date values where <code>null</code> is
+     * Compare two Date values where {@code null} is
      * considered to be smaller than every other value.
      * 
      * @param d1
@@ -282,7 +282,7 @@ public class Order {
     }
 
     /**
-     * Compare two Date values where <code>null</code> is
+     * Compare two Date values where {@code null} is
      * considered to be greater than every other value.
      * 
      * @param d1
@@ -303,15 +303,15 @@ public class Order {
     }
 
     /**
-     * Compare two Date values where <code>null</code> is
-     * considered to be lesser than every other value for <code>from</code>
-     * and greater than every other value for <code>to</code>.
+     * Compare two Date values where {@code null} is
+     * considered to be lesser than every other value for {@code from}
+     * and greater than every other value for {@code to}.
      * 
      * @param from
      * @param to
      * 
-     * @return a negative integer, zero, or a positive integer as <code>from</code> 
-     * is less than, equal to, or greater than <code>to</code>. 
+     * @return a negative integer, zero, or a positive integer as {@code from} 
+     * is less than, equal to, or greater than {@code to}. 
      */
     public static int compareValidFromToValidTo(
         Date from,
@@ -326,7 +326,7 @@ public class Order {
     //------------------------------------------------------------------------
 
     /**
-     * Compare two Date values where <code>null</code> is
+     * Compare two Date values where {@code null} is
      * considered to be greater than every other value.
      * 
      * @param d1

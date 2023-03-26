@@ -1,7 +1,7 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Description: PackageExternalizer_1
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: Abstract Mapper
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -47,7 +47,6 @@ package org.openmdx.application.mof.mapping.spi;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.zip.ZipEntry;
@@ -59,24 +58,42 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.log.SysLog;
 
-//---------------------------------------------------------------------------
-
 /**
  * This class provides utility functions useful for the implementation of
  * PackageExternalizers. This class is abstract, hence the externalize()
  * method must be implemented by a concreted subclass.
  */
-
 public abstract class AbstractMapper_1 implements Mapper_1_0 {
 
-  //---------------------------------------------------------------------------  
+  /**
+   * Constructor
+   * 
+   * @param markdown {@code true} if annotations use markdown
+   * @param packageSuffix the (optional) package suffix
+   */
   protected AbstractMapper_1(
+    boolean markdown, 
     String packageSuffix
   ) {
+    this.markdown = markdown;
     this.packageSuffix = packageSuffix;
   }
   
-  //---------------------------------------------------------------------------  
+  /**
+   * 
+   */
+  protected Model_1_0 model = null;
+  
+  /**
+   * 
+   */
+  protected final String packageSuffix;
+  
+  /**
+   * Tells whether annoations use markdown.
+   */
+  protected final boolean markdown;
+
   protected void addToZip(
     ZipOutputStream zip,
     ByteArrayOutputStream os,
@@ -88,36 +105,43 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
   ) throws ServiceException {
 
     try {
-      String zipEntryName = null;
+      final String zipEntryName;
       if(element == null) {
         zipEntryName = entryName + suffix;
-      }
-      else {
-        String packageName =
-          this.model.toJavaPackageName(
+      } else {
+        String packageName = this.model.toJavaPackageName(
             element.getQualifiedName(),
             packageSuffix,
             dereferenceType
-          ).replace('.', '/');
+        ).replace(
+        	'.', 
+        	'/'
+        );
         if(packageName.startsWith("/")) {
           packageName = packageName.substring(1);
         }
         zipEntryName = packageName + "/" + entryName + suffix;
       }
-      SysLog.trace("adding to jar. element " + zipEntryName);
+      addToZip(zip, zipEntryName, os);
+    } catch(IOException e) {
+      throw new ServiceException(e);
+    }
+  }
+
+  protected void addToZip(
+	ZipOutputStream zip, 
+	final String zipEntryName, 
+	ByteArrayOutputStream os
+  ) throws IOException {
+	  SysLog.trace("adding to jar. element " + zipEntryName);
       ZipEntry zipEntry = new JarEntry(
           zipEntryName
       );
       zipEntry.setSize(os.size());
       zip.putNextEntry(zipEntry);
       os.writeTo(zip);
-    }
-    catch(IOException e) {
-      throw new ServiceException(e);
-    }
   }
 
-  //---------------------------------------------------------------------------  
   protected void addToZip(
     ZipOutputStream zip,
     ByteArrayOutputStream os,
@@ -136,7 +160,6 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
     );
   }
   
-  //---------------------------------------------------------------------------  
   public void addToZip(
       ZipOutputStream zip,
       ByteArrayOutputStream os,
@@ -152,7 +175,7 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
       );
     }
     
-  //---------------------------------------------------------------------------  
+
   public void addToZip(
     ZipOutputStream zip,
     ByteArrayOutputStream os,
@@ -171,52 +194,22 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
     );
   }
   
-  //--------------------------------------------------------------------------------
-  String toJavaObjectType(
-    String attributeType
-  ) throws ServiceException {
-
-    if("short".equals(attributeType)) {
-      return "java.lang.Short";
-    }
-    else if("long".equals(attributeType)) {
-      return "java.lang.Long";
-    }
-    else if("int".equals(attributeType)) {
-      return "java.lang.Integer";
-    }
-    else if("boolean".equals(attributeType)) {
-      return "java.lang.Boolean";
-    }
-    else {
-      return attributeType;
-    }
-  }
-
-  //--------------------------------------------------------------------------------
   /**
    * Return model packages which match the qualified package name. 
    * qualifiedPackageName may contain % as last character serving as wildcard.
    */
   protected List<ModelElement_1_0> getMatchingPackages(
-    String qualifiedPackageName
+    final String qualifiedPackageName
   ) throws ServiceException {
-    List<ModelElement_1_0> modelPackages = new ArrayList<ModelElement_1_0>();
-    for(
-      Iterator<ModelElement_1_0> i = this.model.getContent().iterator(); 
-      i.hasNext();
-    ) {
-      ModelElement_1_0 modelElement = i.next();
+    final List<ModelElement_1_0> modelPackages = new ArrayList<>();
+    final boolean wildcard = qualifiedPackageName.indexOf("%") >= 0;
+    final String pattern = wildcard 
+      ? qualifiedPackageName.substring(0, qualifiedPackageName.indexOf("%"))
+      : qualifiedPackageName;
+    for(ModelElement_1_0 modelElement : this.model.getContent()) {
       if(this.model.isPackageType(modelElement)) {
-        boolean wildcard = qualifiedPackageName.indexOf("%") >= 0;
-        String pattern = wildcard 
-          ? qualifiedPackageName.substring(0, qualifiedPackageName.indexOf("%"))
-          : qualifiedPackageName;
         String qualifiedName = modelElement.getQualifiedName();
-        if(
-          (!wildcard && qualifiedName.equals(qualifiedPackageName)) ||
-          (wildcard && qualifiedName.startsWith(pattern))
-        ) {
+        if(wildcard ? qualifiedName.startsWith(pattern) : qualifiedName.equals(qualifiedPackageName)) {
           modelPackages.add(modelElement);
         }
       }
@@ -224,20 +217,4 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
     return modelPackages;
   }
   
-  //--------------------------------------------------------------------------------
-  // Variables
-  //--------------------------------------------------------------------------------
-  
-  /**
-   * 
-   */
-  protected Model_1_0 model = null;
-  
-  /**
-   * 
-   */
-  protected final String packageSuffix;
-
 }
-
-//--- End of File -----------------------------------------------------------

@@ -46,7 +46,7 @@ Every node in a preference tree has a node name (which is not necessarily unique
           </generalization>
           <ownedAttribute xmi:type="uml:Property" xmi:id="_4y2GYHLuEeGDZOi-upD3nQ" name="name" isReadOnly="true" aggregation="composite">
             <ownedComment xmi:type="uml:Comment" xmi:id="_cuH_MHTiEeGLucv0LfX07g">
-              <body>The root node has a node name of the empty string (&quot;&quot;).
+              <body>The root node has a node name of the empty string (`""`).
 Every other node has an arbitrary node name, specified at the time it is created.
 The only restrictions on this name are that it cannot be the empty string, and it cannot contain the slash character ('/').</body>
             </ownedComment>
@@ -54,10 +54,12 @@ The only restrictions on this name are that it cannot be the empty string, and i
           </ownedAttribute>
           <ownedAttribute xmi:type="uml:Property" xmi:id="_akg_kHM7EeG9T95WWtTPPg" name="absolutePath" isReadOnly="true" aggregation="composite" isDerived="true">
             <ownedComment xmi:type="uml:Comment" xmi:id="_2B8M0HTiEeGLucv0LfX07g">
-              <body>The root node has an absolute path name of &quot;/&quot;.
-Children of the root node have absolute path names of &quot;/&quot; + &lt;node name>.
-All other nodes have absolute path names of &lt;parent's absolute path name> + &quot;/&quot; + &lt;node name>.
-Note that all absolute path names begin with the slash character.</body>
+              <body>
+The root node has an absolute path name of `/`.
+Children of the root node have absolute path names of`/` + ‹node name›.
+All other nodes have absolute path names of ‹parent's absolute path name› + `/` + ‹node name›.
+Note that all absolute path names begin with the slash character.
+              </body>
             </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>

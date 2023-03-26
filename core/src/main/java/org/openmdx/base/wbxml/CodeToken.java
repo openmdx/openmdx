@@ -104,7 +104,7 @@ public final class CodeToken {
     /**
      * Tells whether this token belongs to the attribute code space
      * 
-     * @return <code>false</code> if it belongs to the tag code space
+     * @return {@code false} if it belongs to the tag code space
      */
     public boolean isAttributeCodeSpace(
     ){
@@ -142,7 +142,7 @@ public final class CodeToken {
     /**
      * Retrieve the length of the matching entry
      * 
-     * @return the length of the matching entry; or <code>-1</code> if it is unknown
+     * @return the length of the matching entry; or {@code -1} if it is unknown
      */
     public int length(
     ){
@@ -152,7 +152,7 @@ public final class CodeToken {
     /**
      * Tells whether the corresponding entry has been newly created
      * 
-     * @return <code>true</code> if token has been newly created
+     * @return {@code true} if token has been newly created
      */
     public boolean isNew(
     ){

@@ -816,7 +816,7 @@ public class InMemory_2 implements Port<RestConnection> {
         }
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = -3151451305490323997L;
 

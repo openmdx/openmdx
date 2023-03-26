@@ -47,7 +47,7 @@ package org.openmdx.kernel.logging;
 import java.util.logging.LogRecord;
 
 /**
- * The <code>BasicFormatter</code> excludes a log records thrown exception.
+ * The {@code BasicFormatter} excludes a log records thrown exception.
  */
 public class BasicFormatter extends AbstractFormatter {
 

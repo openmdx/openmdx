@@ -172,6 +172,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Factory;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.naming.ComponentEnvironment;
 import org.openmdx.preferences2.jmi1.Entry;
@@ -711,7 +712,7 @@ public class TestMain {
 				super.taskId = "CR20018821";
 				this.begin();
 				Importer.importObjects(Importer.asTarget(super.entityManager),
-						Importer.asSource(new URL("xri://+resource/test/openmdx/app1/data.xml")));
+						Importer.asSource(new URL(Resources.toResourceXRI("test/openmdx/app1/data.xml"))));
 				this.commit();
 			} finally {
 				super.taskId = null;
@@ -4098,7 +4099,7 @@ public class TestMain {
 					super.taskId = "CR20018821";
 					this.begin();
 					Importer.importObjects(Importer.asTarget(super.entityManager),
-							Importer.asSource(new URL("xri://+resource/test/openmdx/app1/data.xml")));
+							Importer.asSource(new URL(Resources.toResourceXRI("test/openmdx/app1/data.xml"))));
 					if (this instanceof AbstractLocalConnectionTest) {
 						//
 						// CR20019858

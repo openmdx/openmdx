@@ -79,12 +79,12 @@ public class StateComparator
     private final static Comparator<DataObject_1_0> INSTANCE = new StateComparator();
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 8801286952504763272L;
 
     /**
-     * Implements <code>Comparable</code>
+     * Implements {@code Comparable}
      */
     public int compare(DataObject_1_0 o1, DataObject_1_0 o2) {
         if(o1.jdoIsDeleted()) {

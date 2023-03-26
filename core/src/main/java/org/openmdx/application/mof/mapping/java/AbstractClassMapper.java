@@ -63,9 +63,11 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 
+/**
+ * Abstract Class Mapper
+ */
 public abstract class AbstractClassMapper extends AbstractMapper {
 
-    //-----------------------------------------------------------------------
     protected AbstractClassMapper(
         ModelElement_1_0 classDef,        
         Writer writer, 
@@ -73,7 +75,7 @@ public abstract class AbstractClassMapper extends AbstractMapper {
         Format format, 
         String packageSuffix, 
         MetaData_1_0 metaData, 
-        PrimitiveTypeMapper primitiveTypeMapper
+        boolean markdown, PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             writer, 
@@ -81,6 +83,7 @@ public abstract class AbstractClassMapper extends AbstractMapper {
             format, 
             packageSuffix,
             metaData, 
+            markdown, 
             primitiveTypeMapper
         );
         this.classDef = new ClassDef(classDef, model, metaData);
@@ -120,7 +123,7 @@ public abstract class AbstractClassMapper extends AbstractMapper {
      * 
      * @param qualifiedName a qualified class name
      * 
-     * @return <code>true</code> if this class is a sub-class of the one specified by qualifiedName
+     * @return {@code true<} if this class is a sub-class of the one specified by qualifiedName
      */
     protected final boolean isInstanceOf(
         String qualifiedName
@@ -176,7 +179,7 @@ public abstract class AbstractClassMapper extends AbstractMapper {
      * 
      * @param referenceDef
      * 
-     * @return <code>true</code> if the reference refers to a mix-in class
+     * @return {@code true} if the reference refers to a mix-in class
      * 
      * @throws ServiceException
      */
@@ -237,8 +240,8 @@ public abstract class AbstractClassMapper extends AbstractMapper {
     /**
      * Tells whether the current class a mix-in class
      * 
-     * @return <code>true</code> if the current class has the 
-     * <code>&laquo;root&raquo;</code> stereotype
+     * @return {@code true} if the current class has the 
+     * {@code &laquo;root&raquo;} stereotype
      */
     protected boolean isMixIn(){
         return this.mixIn;

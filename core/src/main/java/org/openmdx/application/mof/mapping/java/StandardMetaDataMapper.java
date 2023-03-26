@@ -80,9 +80,6 @@ import org.w3c.format.DateTimeFormat;
  */
 public class StandardMetaDataMapper extends AbstractMetaDataMapper {
 
-    /**
-     * Constructor 
-     */
     public StandardMetaDataMapper(
         ModelElement_1_0 classDef, 
         Writer writer,
@@ -91,6 +88,7 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         String packageSuffix,
 		String sliceClassName, 
         MetaData_1_0 metaData, 
+        boolean markdown, 
         PrimitiveTypeMapper primitiveTypeMapper, 
         ObjectRepositoryMetadataPlugin plugin
     ) throws ServiceException {
@@ -101,7 +99,8 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
             format, 
             packageSuffix, 
             sliceClassName,
-            metaData,
+            markdown,
+            metaData, 
             primitiveTypeMapper, 
             plugin
         );
@@ -266,13 +265,13 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         boolean isPersistent = this.isPersistent(featureDef);
         String fieldName = Identifier.ATTRIBUTE_NAME.toIdentifier(featureDef.getName());
         if(isPersistent) {
-            this.pw.print("      <basic");
+            print("      <basic");
             printAttribute(
                 this.pw,
                 "name", 
                 fieldName + InstanceMapper.SIZE_SUFFIX
             );
-            this.pw.println(">");              
+            printLine(">");              
             FieldMetaData fieldMetaData = getFieldMetaData(featureDef.getQualifiedName());
             ColumnMetaData columnMetaData = fieldMetaData == null ? null : fieldMetaData.getColumn();
             boolean specifyColumnName = 
@@ -282,7 +281,7 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
                 String columnName = columnMetaData != null && columnMetaData.getName() != null ?
                     columnMetaData.getName() :
                     toColumnName(featureDef.getName());
-                this.pw.print("        <column");
+                print("        <column");
                 printAttribute(
                     this.pw,
                     "name", 
@@ -294,8 +293,8 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
                     "INTEGER DEFAULT -1"
                 );
             }
-            this.pw.println("/>");
-            this.pw.println("      </basic>");
+            printLine("/>");
+            printLine("      </basic>");
         }
         else {
             this.pwTransientAttributes.print("      <transient");
@@ -494,14 +493,14 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
     	    this.pwOneToOneRelationships.close();
     	    this.pwVersionAttributes.close();
     	    this.pwTransientAttributes.close();
-    	    this.pw.print(this.streamBasicAttributes.toString("UTF-8"));
-            this.pw.print(this.streamVersionAttributes.toString("UTF-8"));
-            this.pw.print(this.streamManyToOneRelationships.toString("UTF-8"));
-            this.pw.print(this.streamOneToManyRelationships.toString("UTF-8"));
-            this.pw.print(this.streamOneToOneRelationships.toString("UTF-8"));
-            this.pw.print(this.streamTransientAttributes.toString("UTF-8"));
-            this.pw.println("    </attributes>");
-            this.pw.println("  </entity>");
+    	    print(this.streamBasicAttributes.toString("UTF-8"));
+            print(this.streamVersionAttributes.toString("UTF-8"));
+            print(this.streamManyToOneRelationships.toString("UTF-8"));
+            print(this.streamOneToManyRelationships.toString("UTF-8"));
+            print(this.streamOneToOneRelationships.toString("UTF-8"));
+            print(this.streamTransientAttributes.toString("UTF-8"));
+            printLine("    </attributes>");
+            printLine("  </entity>");
             this.embed((StandardMetaDataMapper) sliceClass);
         }
         catch(Exception e) {
@@ -519,14 +518,14 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
             this.pwOneToOneRelationships.close();
             this.pwVersionAttributes.close();
             this.pwTransientAttributes.close();
-            this.pw.print(this.streamBasicAttributes.toString("UTF-8"));
-            this.pw.print(this.streamVersionAttributes.toString("UTF-8"));
-            this.pw.print(this.streamManyToOneRelationships.toString("UTF-8"));
-            this.pw.print(this.streamOneToManyRelationships.toString("UTF-8"));
-            this.pw.print(this.streamOneToOneRelationships.toString("UTF-8"));
-            this.pw.print(this.streamTransientAttributes.toString("UTF-8"));
-            this.pw.println("    </attributes>");
-            this.pw.println("  </entity>");
+            print(this.streamBasicAttributes.toString("UTF-8"));
+            print(this.streamVersionAttributes.toString("UTF-8"));
+            print(this.streamManyToOneRelationships.toString("UTF-8"));
+            print(this.streamOneToManyRelationships.toString("UTF-8"));
+            print(this.streamOneToOneRelationships.toString("UTF-8"));
+            print(this.streamTransientAttributes.toString("UTF-8"));
+            printLine("    </attributes>");
+            printLine("  </entity>");
         }
         catch(Exception e) {
             throw new ServiceException(e);
@@ -541,9 +540,9 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
 		String className = this.sliceClassName == null ? 
 		    this.className : 
 		    this.className + sliceClassName;
-        this.pw.print("  <entity");
+        print("  <entity");
 		printAttribute(this.pw, "class", this.packageName + "." + className);
-        this.pw.println(">");
+        printLine(">");
         // table
         InheritanceStrategy inheritanceStrategy = this.getInheritanceStrategy();
         if (
@@ -553,9 +552,9 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
                 InheritanceStrategy.TABLE_PER_CLASS != inheritanceStrategy 
             )
         ) {
-            this.pw.print("    <table");
+            print("    <table");
             printAttribute(this.pw, "name", this.ormTableName());
-            this.pw.println("/>");
+            printLine("/>");
         }
         // id-class
         ClassDef immediateSuperClassDef = this.classDef.getSuperClassDef(true);
@@ -570,30 +569,30 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
             (this.classMetaData.getBaseClass() == null)
         ) {
             if(this.sliceClassName != null) {
-                this.pw.print("    <id-class");            
+                print("    <id-class");            
                 printAttribute(
                     this.pw,
                     "class", 
                     this.packageName + "." + className + "$" + InstanceMapper.SLICE_ID_CLASS_NAME
                 );
-                this.pw.println("/>");
+                printLine("/>");
             }
         }
         // inheritance
 		if(inheritanceStrategy != null) {
-            this.pw.print("    <inheritance");
+            print("    <inheritance");
             printAttribute(this.pw, "strategy", inheritanceStrategy.toXMLFormat());
-            this.pw.println("/>");
+            printLine("/>");
 		}
         // discriminator-value
-        this.pw.print("    <discriminator-value>");
-        this.pw.print(this.getDiscriminatorValue());
-        this.pw.println("</discriminator-value>");
+        print("    <discriminator-value>");
+        print(this.getDiscriminatorValue());
+        printLine("</discriminator-value>");
         // discriminator-column
-        this.pw.print("    <discriminator-column");
+        print("    <discriminator-column");
         printAttribute(this.pw, "name", this.plugin.getDiscriminatorColumnName(this.qualifiedClassName));
         printAttribute(this.pw, "discriminator-type", "STRING");
-        this.pw.println("/>");
+        printLine("/>");
         // attributes
         streamBasicAttributes.reset();
         this.pwBasicAttributes = new PrintWriter(this.streamBasicAttributes);
@@ -607,7 +606,7 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         this.pwOneToOneRelationships = new PrintWriter(this.streamOneToOneRelationships);
         streamVersionAttributes.reset();
         this.pwVersionAttributes = new PrintWriter(this.streamVersionAttributes);        
-        this.pw.println("    <attributes>");
+        printLine("    <attributes>");
         // version
         if(
             isBaseClass &&
@@ -632,9 +631,9 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
 		if(isBaseClass) {
             // id
             if(this.classMetaData.getBaseClass() == null) {		    
-                this.pw.print("      <id");
+                print("      <id");
                 printAttribute(this.pw, "name", InstanceMapper.JDO_IDENTITY_MEMBER);
-                this.pw.println(">");
+                printLine(">");
                 this.printColumn(
                     this.pw,
                     identityColumnMetaData, 
@@ -643,7 +642,7 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
                     null, 
                     -1
                 );
-                this.pw.println("      </id>");
+                printLine("      </id>");
             }
             // parent
             if(this.hasContainer()) {
@@ -693,9 +692,9 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
                 //  <column name="OBJECT_ID"/>
                 // </id>                
                 String tag = "id";
-                this.pw.print("      <" + tag);
+                print("      <" + tag);
                 printAttribute(this.pw, "name", InstanceMapper.JDO_IDENTITY_MEMBER);
-                this.pw.println(">");
+                printLine(">");
                 this.printColumn(
                     this.pw,
                     identityColumnMetaData, 
@@ -704,7 +703,7 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
                     null, 
                     -1
                 );
-                this.pw.println("      </" + tag + ">");
+                printLine("      </" + tag + ">");
                 // <id name="openmdxjdoIndex">
                 //  <column name="IDX"/>
                 // </id>                
@@ -714,9 +713,9 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
                 ColumnMetaData indexColumnMetaData = indexFieldMetaData == null ? 
                     null : 
                     indexFieldMetaData.getColumn();                        
-                this.pw.print("      <" + tag);
+                print("      <" + tag);
                 printAttribute(this.pw, "name", InstanceMapper.INDEX_MEMBER);
-                this.pw.println(">");
+                printLine(">");
                 this.printColumn(
                     this.pw,
                     indexColumnMetaData, 
@@ -725,7 +724,7 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
                     null, 
                     -1
                 );
-                this.pw.println("      </" + tag + ">");                
+                printLine("      </" + tag + ">");                
                 // <many-to-one name="openmdxjdoIdentity">
                 //  <join-column name="OBJECT_ID" referenced-column-name="OBJECT_ID"/>
                 // </many-to-one>

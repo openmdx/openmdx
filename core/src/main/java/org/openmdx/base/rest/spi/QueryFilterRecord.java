@@ -105,22 +105,22 @@ public class QueryFilterRecord
     private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 6030385859226659109L;
 
     /**
-     * The <code>"condition"</code> entry
+     * The {@code "condition"} entry
      */
     private IndexedRecord condition;
     
     /**
-     * The <code>"orderSpecifier"</code> entry
+     * The {@code "orderSpecifier"} entry
      */
     private IndexedRecord orderSpecifier;
 
     /**
-     * The <code>"extension"</code> entry
+     * The {@code "extension"} entry
      */
     private IndexedRecord extension;
     
@@ -138,7 +138,7 @@ public class QueryFilterRecord
 	/**
      * Tests whether a collection exists and contains at least one element
      * 
-     * @return <code>true</code> if the collection is neither <code>null</code> nore empty
+     * @return {@code true} if the collection is neither {@code null} nore empty
      */
     private static boolean has(Collection<?> collection) {
     	return collection != null && !collection.isEmpty();

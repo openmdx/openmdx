@@ -77,15 +77,15 @@ public enum ExtensionTarget {
     private final String xmlFormat;
 
     /**
-     * Retrieve a <code>ExtensionTarget</code> from its XML representation-
+     * Retrieve a {@code ExtensionTarget} from its XML representation-
      * 
      * @param xmlFormat
      * 
-     * @return the corresponding <code>ExtensionTarget</code> value
+     * @return the corresponding {@code ExtensionTarget} value
      * 
-     * @throws IllegalArgumentException if <code>xmlFormat</code> is
-     * neither <code>null</code> nor representing any of the 
-     * <code>ExtensionTarget</code> values. 
+     * @throws IllegalArgumentException if {@code xmlFormat} is
+     * neither {@code null} nor representing any of the 
+     * {@code ExtensionTarget} values. 
      */
     public static ExtensionTarget fromXMLFormat(
         String xmlFormat

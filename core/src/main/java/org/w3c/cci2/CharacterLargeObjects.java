@@ -44,6 +44,7 @@
  */
 package org.w3c.cci2;
 
+import java.io.ByteArrayOutputStream;
 import java.io.CharArrayReader;
 import java.io.CharArrayWriter;
 import java.io.EOFException;
@@ -54,12 +55,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.io.Writer;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Object Relational Mapping
@@ -79,11 +82,11 @@ public class CharacterLargeObjects {
     private final static int CAPACITY = 10000;
 
     /**
-     * Create a <code>CharacterLargeObject</code> facade for the given string
+     * Create a {@code CharacterLargeObject} facade for the given string
      * 
      * @param source
      * 
-     * @return a <code>CharacterLargeObject</code> facade for the given string
+     * @return a {@code CharacterLargeObject} facade for the given string
      */
     public static CharacterLargeObject valueOf(
         String source
@@ -92,11 +95,11 @@ public class CharacterLargeObjects {
     }
 
     /**
-     * Create a <code>CharacterLargeObject</code> facade for the given byte array
+     * Create a {@code CharacterLargeObject} facade for the given byte array
      * 
      * @param source
      * 
-     * @return a <code>CharacterLargeObject</code> facade for the given byte array
+     * @return a {@code CharacterLargeObject} facade for the given byte array
      */
     public static CharacterLargeObject valueOf(
         char[] source
@@ -105,11 +108,11 @@ public class CharacterLargeObjects {
     }
 
     /**
-     * Create a <code>CharacterLargeObject</code> facade for the given URL
+     * Create a {@code CharacterLargeObject} facade for the given URL
      * 
      * @param source
      * 
-     * @return a <code>CharacterLargeObject</code> facade for the given URL
+     * @return a {@code CharacterLargeObject} facade for the given URL
      */
     public static CharacterLargeObject valueOf(
         URL source
@@ -118,12 +121,12 @@ public class CharacterLargeObjects {
     }
     
     /**
-     * Create a <code>CharacterLargeObject</code> facade for the given file
+     * Create a {@code CharacterLargeObject} facade for the given file
      * 
      * @param source the file to be read
      * @param encoding the file's the character encoding 
      * 
-     * @return a <code>CharacterLargeObject</code> facade for the given file
+     * @return a {@code CharacterLargeObject} facade for the given file
      */
     public static CharacterLargeObject valueOf(
         File source, 
@@ -133,11 +136,11 @@ public class CharacterLargeObjects {
     }
     
     /**
-     * Create a <code>CharacterLargeObject</code> facade for the given stream
+     * Create a {@code CharacterLargeObject} facade for the given stream
      * 
      * @param source
      * 
-     * @return a <code>CharacterLargeObject</code> facade for the given stream
+     * @return a {@code CharacterLargeObject} facade for the given stream
      */
     public static CharacterLargeObject valueOf(
         Reader source
@@ -146,12 +149,12 @@ public class CharacterLargeObjects {
     }
     
     /**
-     * Create a <code>CharacterLargeObject</code> facade for the given stream
+     * Create a {@code CharacterLargeObject} facade for the given stream
      * 
      * @param source
      * @param length
      * 
-     * @return a <code>CharacterLargeObject</code> facade for the given stream
+     * @return a {@code CharacterLargeObject} facade for the given stream
      */
     public static CharacterLargeObject valueOf(
         Reader source,
@@ -161,12 +164,12 @@ public class CharacterLargeObjects {
     }
     
     /**
-     * Create a <code>CharacterLargeObject</code> copy of the given stream
+     * Create a {@code CharacterLargeObject} copy of the given stream
      * 
      * @param source
      * @param length
      * 
-     * @return a <code>CharacterLargeObject</code> copy of the given stream
+     * @return a {@code CharacterLargeObject} copy of the given stream
      * 
      * @throws IOException  
      */
@@ -183,7 +186,7 @@ public class CharacterLargeObjects {
     }
     
     /**
-     * A negative length is converted to <code>null</code>.
+     * A negative length is converted to {@code null}.
      * 
      * @param length
      * 
@@ -223,6 +226,23 @@ public class CharacterLargeObjects {
         return count;
     }
 
+    /**
+     * The given character data will be UTF-8 encoded
+     * 
+     * @param from the data to be written to the sink
+     * 
+     * @throws IOException if UTF-8 conversion fails
+     */
+    public static ByteArrayOutputStream createByteArrayOutputStream(
+    	CharSequence from
+    ) throws IOException {
+    	final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    	try(Writer writer = new OutputStreamWriter(buffer, StandardCharsets.UTF_8)){
+    		writer.append(from);
+    	}
+    	return buffer;
+    }
+        
     
     //------------------------------------------------------------------------
     // Class StringLargeObject
@@ -297,7 +317,7 @@ public class CharacterLargeObjects {
         }
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = -9096693393561649452L;
 
@@ -360,7 +380,7 @@ public class CharacterLargeObjects {
         }
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = -5837819381102619869L;
 
@@ -627,5 +647,5 @@ public class CharacterLargeObjects {
         }
 
     }
-    
- }
+
+}

@@ -59,10 +59,10 @@ public interface ExportFilter {
      *
      * @param aggregationKind the aggregation kind of the association end
      * @param qualifiedReferenceName the qualified name of the reference
-     * @param distance tells how many references with aggregation kind <code>NONE</code> have to be
+     * @param distance tells how many references with aggregation kind {@code NONE} have to be
      * traversed to reach the object from any of the initial objects
      * 
-     * @return <code>true</code> if objects reachable by the given reference shall be exported as well
+     * @return {@code true} if objects reachable by the given reference shall be exported as well
      */
     boolean include(
         AggregationKind aggregationKind, 
@@ -75,7 +75,7 @@ public interface ExportFilter {
      * 
      * @param xri
      * 
-     * @return <code>true</code> if the object or reference with the given id shall be excluded
+     * @return {@code true} if the object or reference with the given id shall be excluded
      */
     boolean exclude(
         Path xri

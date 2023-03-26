@@ -47,7 +47,7 @@ package org.openmdx.base.rest.cci;
 import java.util.Set;
 
 /**
- * <code>org::openmdx::kernel::Query</code>
+ * {@code org::openmdx::kernel::Query}
  */
 public interface QueryRecord extends RequestRecord {
     
@@ -143,7 +143,7 @@ public interface QueryRecord extends RequestRecord {
     /**
      * Tells whether the object shall be refreshed before answering the query.
      * 
-     * @param refresh <code>true</code> if the object shall be refreshed before 
+     * @param refresh {@code true} if the object shall be refreshed before 
      * answering the query
      */
     void setRefresh(
@@ -153,7 +153,7 @@ public interface QueryRecord extends RequestRecord {
     /**
      * Tells whether the object shall be refreshed before answering the query.
      * 
-     * @return <code>true</code> if the object shall be refreshed before 
+     * @return {@code true} if the object shall be refreshed before 
      * answering the query
      */
     boolean isRefresh();

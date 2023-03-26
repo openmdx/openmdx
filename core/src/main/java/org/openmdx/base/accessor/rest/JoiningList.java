@@ -58,10 +58,10 @@ import org.openmdx.base.accessor.rest.AbstractContainer_1.Included;
 /**
  * Joining  List
  * <p>
- * <em>Note the difference between a <code>JoiningList</code> and a <code>java.util.List</code>:<br>
- * A <code>ChainingList</code>'s <code>size()</code> method uses <code>Integer.MAX_VALUE</code> 
+ * <em>Note the difference between a {@code JoiningList} and a {@code java.util.List}:<br>
+ * A {@code ChainingList}'s {@code size()} method uses {@code Integer.MAX_VALUE} 
  * to tell, that its size has not yet been calculated.<br>
- * That's why such a <code>Collection</code> has to be wrapped into a <code>CountingCollection</code>
+ * That's why such a {@code Collection} has to be wrapped into a {@code CountingCollection}
  * before being returned by the API.</em>
  */
 abstract class JoiningList 

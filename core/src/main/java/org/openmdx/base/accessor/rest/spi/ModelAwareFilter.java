@@ -71,7 +71,7 @@ abstract class ModelAwareFilter
      * @param filter
      * 
      * @exception   NullPointerException
-     *              if the filter is <code>null</code>
+     *              if the filter is {@code null}
      */
     protected ModelAwareFilter(
         List<ConditionRecord> filter
@@ -82,7 +82,7 @@ abstract class ModelAwareFilter
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -3121625282542792849L;
     
@@ -207,8 +207,8 @@ abstract class ModelAwareFilter
      * 
      * @param classifier
      * 
-     * @return <code>true</code> if the class is <code>org::openmdx::base::AspectCapable</code> 
-     * but not an <code>org::openmdx:base::Aspect</code>
+     * @return {@code true} if the class is {@code org::openmdx::base::AspectCapable} 
+     * but not an {@code org::openmdx:base::Aspect}
      * 
      * @throws ServiceException 
      */
@@ -260,7 +260,7 @@ abstract class ModelAwareFilter
         private final Collection<?> superTypes;
 
         /**
-         * Initially <code>null</code> to include the object class
+         * Initially {@code null} to include the object class
          */
         private Iterator<?> superTypeIterator = null;
         

@@ -73,7 +73,7 @@ public class ForeignLogRecord
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 2754042576241756966L;
 

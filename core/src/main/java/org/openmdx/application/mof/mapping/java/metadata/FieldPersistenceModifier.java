@@ -79,15 +79,15 @@ public enum FieldPersistenceModifier {
     private final String xmlFormat;
 
     /**
-     * Retrieve a <code>FieldPersistenceModifier</code> from its XML representation-
+     * Retrieve a {@code FieldPersistenceModifier} from its XML representation-
      * 
      * @param xmlFormat
      * 
-     * @return the corresponding <code>FieldPersistenceModifier</code> value
+     * @return the corresponding {@code FieldPersistenceModifier} value
      * 
-     * @throws IllegalArgumentException if <code>xmlFormat</code> is
-     * neither <code>null</code> nor representing any of the 
-     * <code>FieldPersistenceModifier</code> values. 
+     * @throws IllegalArgumentException if {@code xmlFormat} is
+     * neither {@code null} nor representing any of the 
+     * {@code FieldPersistenceModifier} values. 
      */
     public static FieldPersistenceModifier fromXMLFormat(
         String xmlFormat

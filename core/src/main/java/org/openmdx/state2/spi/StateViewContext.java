@@ -64,7 +64,7 @@ public abstract class StateViewContext<V>
      *
      * @param viewKind
      * @param validAt 
-     * @param existsAt the transaction time point, or <code>null</code> for an up-to-date view
+     * @param existsAt the transaction time point, or {@code null} for an up-to-date view
      * @param lowerBound
      * @param upperBound
      * @param includeUpperBound
@@ -154,18 +154,18 @@ public abstract class StateViewContext<V>
     private final String id;
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 113453722360985152L;
 
     /**
      * Tests the transaction time
      * 
-     * @param existsAt <code>null</code> stands for the "head" 
+     * @param existsAt {@code null} stands for the "head" 
      * @param createdAt 
      * @param removedAt
      * 
-     * @return <code>true</code> if the entry exists at the given transaction time
+     * @return {@code true} if the entry exists at the given transaction time
      */
     public static boolean compareTransactionTime(
         Date existsAt,
@@ -200,10 +200,10 @@ public abstract class StateViewContext<V>
     }
 
     /**
-     * A time point view's <code>validAt</code>
+     * A time point view's {@code validAt}
      * 
-     * @return <code>validAt</code> in case of a <code>TIME_POINT_VIEW</code>,
-     * <code>null</code> otherwise
+     * @return {@code validAt} in case of a {@code TIME_POINT_VIEW},
+     * {@code null} otherwise
      */
     public V getValidAt(
     ){

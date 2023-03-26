@@ -88,7 +88,7 @@ public class TransactionalSegment extends XRISegment {
 	private transient String unifiedRepresentation;
 	
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = 9186604789391301906L;
 	

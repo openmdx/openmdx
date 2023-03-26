@@ -56,7 +56,7 @@ public class AccentInsensitivePattern extends RegularExpressionPattern {
 	}
 
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = -7427116394830879489L;
 	

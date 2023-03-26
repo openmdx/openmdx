@@ -87,6 +87,7 @@ import org.openmdx.base.rest.spi.RestConnectionFactory;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.transaction.TransactionAttributeType;
 import org.openmdx.kernel.exception.Throwables;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
 
@@ -414,8 +415,7 @@ public class UiLoader
     }
 
     //-------------------------------------------------------------------------
-	private static final String UI_DATAPROVIDER_CONFIGURATION_URI = 
-		"xri://+resource/org/openmdx/ui1/ui-dataprovider.properties";
+	private static final String UI_DATAPROVIDER_CONFIGURATION_URI = Resources.toResourceXRI("org/openmdx/ui1/ui-dataprovider.properties");
 	
     private final Map<String,Long> uiCRC = new HashMap<String,Long>();
     private final Port<RestConnection> uiRepository;

@@ -54,10 +54,10 @@ public class Version {
      * <p>
      * The version byte contains the major version minus one in the upper four 
      * bits and the minor version in the lower four bits:<ul>
-     * <li>the version number <code>1.3</code> for example would be encoded as 
-     *     <code>0x03</code>
-     * <li>the version number <code>2.7</code> for example would be encoded as 
-     *     <code>0x17</code>
+     * <li>the version number {@code 1.3} for example would be encoded as 
+     *     {@code 0x03}
+     * <li>the version number {@code 2.7} for example would be encoded as 
+     *     {@code 0x17}
      * </ul>
      */
     static public final byte SPECIFICATION_VERSION_ID = 0x03;

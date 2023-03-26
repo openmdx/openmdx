@@ -52,7 +52,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Encoding helper
  * <p>
- * See <code>http://www.iana.org/assignments/character-sets</code>
+ * See {@code http://www.iana.org/assignments/character-sets}
  */
 public class Charsets {
 

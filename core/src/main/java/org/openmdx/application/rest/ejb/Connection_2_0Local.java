@@ -56,9 +56,9 @@ public interface Connection_2_0Local extends EJBLocalObject {
 
     /** 
      * Allows the execution of an interaction represented by the 
-     * <code>InteractionSpec</code>.
-     * This invocation takes an input <code>Record</code> and returns an  
-     * output <code>Record</code> if the execution of the Interaction has been
+     * {@code InteractionSpec}.
+     * This invocation takes an input {@code Record} and returns an  
+     * output {@code Record} if the execution of the Interaction has been
      * successful.
      *  
      * @param   ispec   InteractionSpec representing a target EIS 

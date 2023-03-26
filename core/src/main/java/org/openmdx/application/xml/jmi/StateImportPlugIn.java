@@ -98,7 +98,7 @@ public class StateImportPlugIn implements ImportPlugIn {
     private final ImportPlugIn delegate;
     
     /**
-     * The features not to be propagated by the JMI helper for <code>StateCapable</code> instances
+     * The features not to be propagated by the JMI helper for {@code {@code StateCapable} instances
      */
     private static final Collection<String> IGNORABLE_FEATURES_FOR_STATE_CAPABLE_INSTANCES = Arrays.asList(
         SystemAttributes.CORE,
@@ -289,7 +289,7 @@ public class StateImportPlugIn implements ImportPlugIn {
      * @param target
      * @param source
      * 
-     * @return <code>true</code> in case of unique valid time
+     * @return {@code true} in case of unique valid time
      * 
      * @throws ServiceException 
      */

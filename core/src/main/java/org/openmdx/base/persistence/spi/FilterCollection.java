@@ -67,7 +67,7 @@ public final class FilterCollection<E> extends AbstractCollection<E> implements 
     }
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 3572879082975643874L;
 

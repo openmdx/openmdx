@@ -68,7 +68,7 @@ public class DateStateViewContext
      * Constructor 
      *
      * @param validFor the view's valid time point
-     * @param validAt the view's transaction time point, or <code>null</code> for an up-to-date view
+     * @param validAt the view's transaction time point, or {@code null} for an up-to-date view
      */
     private DateStateViewContext(
         XMLGregorianCalendar validFor,
@@ -87,8 +87,8 @@ public class DateStateViewContext
     /**
      * Constructor 
      *
-     * @param validFrom the begin of the time range, or <code>null</code> for an unconstrained lower bound
-     * @param validTo the end of the time range, or <code>null</code> for an unconstrained upper bound
+     * @param validFrom the begin of the time range, or {@code null} for an unconstrained lower bound
+     * @param validTo the end of the time range, or {@code null} for an unconstrained upper bound
      */
     private DateStateViewContext(
         XMLGregorianCalendar validFrom,
@@ -105,7 +105,7 @@ public class DateStateViewContext
     }
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -5803852880487324874L;
     
@@ -113,7 +113,7 @@ public class DateStateViewContext
      * Create a time point view context 
      *
      * @param validFor the view's valid time point
-     * @param validAt the view's transaction time point, or <code>null</code> for an up-to-date view
+     * @param validAt the view's transaction time point, or {@code null} for an up-to-date view
      */
     public static DateStateViewContext newTimePointViewContext(
         XMLGregorianCalendar validFor,
@@ -129,8 +129,8 @@ public class DateStateViewContext
     /**
      * Create a time range view context 
      *
-     * @param validFrom the begin of the time range, or <code>null</code> for an unconstrained lower bound
-     * @param validTo the end of the time range, or <code>null</code> for an unconstrained upper bound
+     * @param validFrom the begin of the time range, or {@code null} for an unconstrained lower bound
+     * @param validTo the end of the time range, or {@code null} for an unconstrained upper bound
      * 
      * @throws IllegalArgumentException if validTo is less than validFrom 
      */

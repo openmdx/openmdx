@@ -172,7 +172,7 @@ public class StateCapableContainer_1
     );
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 1312568818384216689L;
 
@@ -476,7 +476,7 @@ public class StateCapableContainer_1
      * 
      * @param object
      * 
-     * @return <code>true<code> if at least one state is selected
+     * @return {@code true{@code  if at least one state is selected
      */
     private boolean hasStates(
     	DataObject_1_0 value

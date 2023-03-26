@@ -72,7 +72,7 @@ public class ResultRecord
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -1447605619412752707L;
 

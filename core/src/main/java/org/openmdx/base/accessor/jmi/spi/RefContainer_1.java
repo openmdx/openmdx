@@ -111,7 +111,7 @@ public class RefContainer_1
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 1211709415207799992L;
 

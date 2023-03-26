@@ -115,7 +115,7 @@ public class DateState_1
     );
         
     /**
-     * Compare two XMLGregorianCalendar values where <code>null</code> is
+     * Compare two XMLGregorianCalendar values where {@code null} is
      * considered to be smaller than every other value.
      */
     private static final Comparator<XMLGregorianCalendar> VALID_FROM_COMPARATOR = new Comparator<XMLGregorianCalendar> () {
@@ -559,7 +559,7 @@ public class DateState_1
      * @param left
      * @param right
      * 
-     * @return <code>true</code> if the two states are dajacent
+     * @return {@code true} if the two states are dajacent
      * 
      * @throws ServiceException
      */
@@ -578,7 +578,7 @@ public class DateState_1
      * @param left
      * @param right
      * 
-     * @return <code>true</code> if all attributes apart from the ones to be ignored are equal
+     * @return {@code true} if all attributes apart from the ones to be ignored are equal
      */
     protected boolean similar(
         DataObject_1_0 left,
@@ -631,7 +631,7 @@ public class DateState_1
      * Tells whether a feature is either an attribute or a reference stored as attribute.
      * 
      * @param featureDef
-     * @return <code>true</code> if the feature is either an attribute or a reference stored as attribute
+     * @return {@code true} if the feature is either an attribute or a reference stored as attribute
      * 
      * @throws ServiceException
      */
@@ -650,7 +650,7 @@ public class DateState_1
      * @param left
      * @param right
      * 
-     * @return <code>>true<code> if the values are equal
+     * @return {@code >true{@code  if the values are equal
      * @throws ServiceException
      */
     private boolean equal(
@@ -676,12 +676,12 @@ public class DateState_1
     }
     
     /**
-     * Tests whether the two objects are either equal or both <code>null</code>
+     * Tests whether the two objects are either equal or both {@code null}
      * 
      * @param left
      * @param right
      * 
-     * @return <code>true</code> if the two objects are either equal or both <code>null</code>
+     * @return {@code true} if the two objects are either equal or both {@code null}
      */
     static protected boolean equal(
         Object left,

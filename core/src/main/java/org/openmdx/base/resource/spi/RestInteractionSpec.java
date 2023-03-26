@@ -71,7 +71,7 @@ public final class RestInteractionSpec implements InteractionSpec {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -721366034760859071L;
 

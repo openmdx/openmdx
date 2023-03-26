@@ -49,7 +49,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 /**
- * <code>SysLog</code> wraps the Log class to do application-general
+ * {@code SysLog} wraps the Log class to do application-general
  * logging. It provides a singleton accessor, along with lots of
  * handy class method {static} accessors. <p>
  */
@@ -183,9 +183,9 @@ public class SysLog {
      *         and '\n' characters are removed silently from the message.
      * @param logObj
      *         a log object providing detail information. The log object is
-     *         stringified using its <code>toString</code> method before getting
+     *         stringified using its {@code toString} method before getting
      *         logged. The log object may be a null object. If the log object
-     *         is a <code>Throwable</code> it's message and stack trace is
+     *         is a {@code Throwable} it's message and stack trace is
      *         logged.
      * @see #criticalError(String)
      * @see #criticalError(String, Object, int)
@@ -206,9 +206,9 @@ public class SysLog {
      *         and '\n' characters are removed silently from the message.
      * @param logObj
      *         a log object providing detail information. The log object is
-     *         stringified using its <code>toString</code> method before getting
+     *         stringified using its {@code toString} method before getting
      *         logged. The log object may be a null object. If the log object
-     *         is a <code>Throwable</code> it's message and stack trace is
+     *         is a {@code Throwable} it's message and stack trace is
      *         logged.
      * @see #criticalError(String)
      * @see #criticalError(String, Object, int)
@@ -243,9 +243,9 @@ public class SysLog {
      *         and '\n' characters are removed silently from the message.
      * @param logObj
      *         a log object providing detail information. The log object is
-     *         stringified using its <code>toString</code> method before getting
+     *         stringified using its {@code toString} method before getting
      *         logged. The log object may be a null object. If the log object
-     *         is a <code>Throwable</code> it's message and stack trace is
+     *         is a {@code Throwable} it's message and stack trace is
      *         logged.
      * @see #error(String)
      * @see #error(String, Object, int)
@@ -266,9 +266,9 @@ public class SysLog {
      *         and '\n' characters are removed silently from the message.
      * @param logObj
      *         a log object providing detail information. The log object is
-     *         stringified using its <code>toString</code> method before getting
+     *         stringified using its {@code toString} method before getting
      *         logged. The log object may be a null object. If the log object
-     *         is a <code>Throwable</code> it's message and stack trace is
+     *         is a {@code Throwable} it's message and stack trace is
      *         logged.
      * @see #error(String)
      * @see #error(String, Object, int)
@@ -305,9 +305,9 @@ public class SysLog {
      *         and '\n' characters are removed silently from the message.
      * @param logObj
      *         a log object providing detail information. The log object is
-     *         stringified using its <code>toString</code> method before getting
+     *         stringified using its {@code toString} method before getting
      *         logged. The log object may be a null object. If the log object
-     *         is a <code>Throwable</code> it's message and stack trace is
+     *         is a {@code Throwable} it's message and stack trace is
      *         logged.
      * @see #warning(String)
      * @see #warning(String, Object, int)
@@ -328,9 +328,9 @@ public class SysLog {
      *         and '\n' characters are removed silently from the message.
      * @param logObj
      *         a log object providing detail information. The log object is
-     *         stringified using its <code>toString</code> method before getting
+     *         stringified using its {@code toString} method before getting
      *         logged. The log object may be a null object. If the log object
-     *         is a <code>Throwable</code> it's message and stack trace is
+     *         is a {@code Throwable} it's message and stack trace is
      *         logged.
      * @see #warning(String)
      * @see #warning(String, Object, int)
@@ -367,9 +367,9 @@ public class SysLog {
      *         and '\n' characters are removed silently from the message.
      * @param logObj
      *         a log object providing detail information. The log object is
-     *         stringified using its <code>toString</code> method before getting
+     *         stringified using its {@code toString} method before getting
      *         logged. The log object may be a null object. If the log object
-     *         is a <code>Throwable</code> it's message and stack trace is
+     *         is a {@code Throwable} it's message and stack trace is
      *         logged.
      * @see #info(String)
      * @see #info(String, Object, int)
@@ -390,9 +390,9 @@ public class SysLog {
      *         and '\n' characters are removed silently from the message.
      * @param logObj
      *         a log object providing detail information. The log object is
-     *         stringified using its <code>toString</code> method before getting
+     *         stringified using its {@code toString} method before getting
      *         logged. The log object may be a null object. If the log object
-     *         is a <code>Throwable</code> it's message and stack trace is
+     *         is a {@code Throwable} it's message and stack trace is
      *         logged.
      * @see #info(String)
      * @see #info(String, Object, int)
@@ -429,9 +429,9 @@ public class SysLog {
      *         and '\n' characters are removed silently from the message.
      * @param logObj
      *         a log object providing detail information. The log object is
-     *         stringified using its <code>toString</code> method before getting
+     *         stringified using its {@code toString} method before getting
      *         logged. The log object may be a null object. If the log object
-     *         is a <code>Throwable</code> it's message and stack trace is
+     *         is a {@code Throwable} it's message and stack trace is
      *         logged.
      * @see #detail(String)
      * @see #detail(String, Object, int)
@@ -452,9 +452,9 @@ public class SysLog {
      *         and '\n' characters are removed silently from the message.
      * @param logObj
      *         a log object providing detail information. The log object is
-     *         stringified using its <code>toString</code> method before getting
+     *         stringified using its {@code toString} method before getting
      *         logged. The log object may be a null object. If the log object
-     *         is a <code>Throwable</code> it's message and stack trace is
+     *         is a {@code Throwable} it's message and stack trace is
      *         logged.
      * @see #detail(String)
      * @see #detail(String, Object, int)
@@ -491,9 +491,9 @@ public class SysLog {
      *         and '\n' characters are removed silently from the message.
      * @param logObj
      *         a log object providing detail information. The log object is
-     *         stringified using its <code>toString</code> method before getting
+     *         stringified using its {@code toString} method before getting
      *         logged. The log object may be a null object. If the log object
-     *         is a <code>Throwable</code> it's message and stack trace is
+     *         is a {@code Throwable} it's message and stack trace is
      *         logged.
      * @see #trace(String)
      * @see #trace(String, Object, int)
@@ -514,9 +514,9 @@ public class SysLog {
      *         and '\n' characters are removed silently from the message.
      * @param logObj
      *         a log object providing detail information. The log object is
-     *         stringified using its <code>toString</code> method before getting
+     *         stringified using its {@code toString} method before getting
      *         logged. The log object may be a null object. If the log object
-     *         is a <code>Throwable</code> it's message and stack trace is
+     *         is a {@code Throwable} it's message and stack trace is
      *         logged.
      * @see #trace(String)
      * @see #trace(String, Object, int)

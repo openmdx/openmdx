@@ -91,12 +91,12 @@ class NonRepairingNamespaceContext implements NamespaceContext {
     private final Map<String,String> mapping = new HashMap<String,String>();
     
     /**
-     * The element's namespace URI, may be <code>""</code>
+     * The element's namespace URI, may be {@code ""}
      */
     private final String namespaceURI;
     
     /**
-     * The element's prefix, may be <code>""</code>
+     * The element's prefix, may be {@code ""}
      */
     private final String prefix;
 
@@ -108,7 +108,7 @@ class NonRepairingNamespaceContext implements NamespaceContext {
     /**
      * Set a namespace prefix
      * 
-     * @param prefix the namespace prefix, may be <code>XMLConstants.DEFAULT_NS_PREFIX</code>
+     * @param prefix the namespace prefix, may be {@code XMLConstants.DEFAULT_NS_PREFIX}
      * @param uri
      */
     void put(

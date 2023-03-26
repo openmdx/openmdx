@@ -93,8 +93,8 @@ public abstract class BaseObjectPool<T> implements ObjectPool<T> {
     /**
      * {@inheritDoc}
      * <p>
-     * This affects the behavior of <code>isClosed</code> and
-     * <code>assertOpen</code>.
+     * This affects the behavior of {@code isClosed} and
+     * {@code assertOpen}.
      */
     @Override
     public void close() {
@@ -104,14 +104,14 @@ public abstract class BaseObjectPool<T> implements ObjectPool<T> {
     /**
      * Has this pool instance been closed.
      *
-     * @return <code>true</code> when this pool has been closed.
+     * @return {@code true} when this pool has been closed.
      */
     public final boolean isClosed() {
         return closed;
     }
 
     /**
-     * Throws an <code>IllegalStateException</code> when this pool has been
+     * Throws an {@code IllegalStateException} when this pool has been
      * closed.
      *
      * @throws IllegalStateException when this pool has been closed.

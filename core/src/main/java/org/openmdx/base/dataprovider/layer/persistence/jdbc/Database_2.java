@@ -137,7 +137,6 @@ import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.FastResultSet;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.LikeFlavour;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Target;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -2019,10 +2018,10 @@ public class Database_2
      * Retrieve the catalog id
      * 
      * @param the
-     *            actual catalog, or <code>null</code> if none is defined
+     *            actual catalog, or {@code null} if none is defined
      * 
      * @return the catalog id, i.e. either the catalog itself or "" if the
-     *         catalog is <code>null</code>
+     *         catalog is {@code null}
      */
     private static String toCatalogId(String catalog) {
         return catalog == null ? "" : catalog;
@@ -2382,7 +2381,7 @@ public class Database_2
      * 
      * @param qualifiedClassName
      * 
-     * @return <code>true</code> if the class shall be checked indirectly only
+     * @return {@code true} if the class shall be checked indirectly only
      */
     protected boolean isAspectBaseClass(String qualifiedClassName) {
         return Aspects.isAspectBaseClass(qualifiedClassName);
@@ -2467,7 +2466,7 @@ public class Database_2
      * 
      * @param connection
      * 
-     * @return <code>true</code> if the given connection supports scroll
+     * @return {@code true} if the given connection supports scroll
      *         sensitive result sets
      */
     protected boolean allowScrollSensitiveResultSet(Connection connection) {
@@ -2489,7 +2488,7 @@ public class Database_2
      * 
      * @param connection
      * 
-     * @return <code>true</code> if the given connection supports scroll
+     * @return {@code true} if the given connection supports scroll
      *         insensitive result sets
      */
     protected boolean allowScrollInsensitiveResultSet(Connection connection) {
@@ -2655,7 +2654,7 @@ public class Database_2
      * @param ps
      * @param value
      * 
-     * @return <code>true</code> if we have to bring a large string into oracle
+     * @return {@code true} if we have to bring a large string into oracle
      * @throws SQLException
      */
     private boolean requiresStreaming(
@@ -3481,7 +3480,7 @@ public class Database_2
      * Determines whether the given Model class is configuratively excluded from
      * persistency or not
      * 
-     * @return <code>true</code> if the given Model class is not configuratively
+     * @return {@code true} if the given Model class is not configuratively
      *         excluded from persistency
      */
     protected boolean isNotExcludedFromPersistency(String modelClass) {
@@ -3494,7 +3493,7 @@ public class Database_2
      * @param featureDef
      *            the features meta-data
      * 
-     * @return <code>true</code> if the given feature is persistent
+     * @return {@code true} if the given feature is persistent
      */
     public boolean isPersistent(ModelElement_1_0 featureDef)
         throws ServiceException {
@@ -6196,46 +6195,39 @@ public class Database_2
             // ignore
         }
         loopFilterProperties: for (FilterProperty p : filterProperties) {
-            try {
-                if (referencedTypes != null) {
-                    // get filter property name and eliminate prefixes such as
-                    // role_id, etc.
-                    String filterPropertyName = p.name();
+            if (referencedTypes != null) {
+                // get filter property name and eliminate prefixes such as
+                // role_id, etc.
+                String filterPropertyName = p.name();
+                filterPropertyName = filterPropertyName
+                    .substring(filterPropertyName.lastIndexOf('$') + 1);
+                // Qualified filter property name
+                if (filterPropertyName.indexOf(":") > 0) {
+                    ModelElement_1_0 featureDef = getModel().findElement(filterPropertyName);
+                    if (featureDef != null) {
+                        filterPropertyDefs.add(featureDef);
+                        continue loopFilterProperties;
+                    }
+                }
+                // Non-qualified filter property name. Must look up.
+                else {
                     filterPropertyName = filterPropertyName
-                        .substring(filterPropertyName.lastIndexOf('$') + 1);
-                    // Qualified filter property name
-                    if (filterPropertyName.indexOf(":") > 0) {
-                        ModelElement_1_0 featureDef = getModel().findElement(filterPropertyName);
+                        .substring(filterPropertyName.lastIndexOf(':') + 1);
+                    // try to find filter property in any of the subtypes of
+                    // referencedType
+                    for (ModelElement_1_0 subtype : referencedTypes) {
+                        String qualifiedFilterPropertyName = subtype.getQualifiedName() + ":"
+                            + filterPropertyName;
+                        ModelElement_1_0 featureDef = getModel()
+                            .findElement(qualifiedFilterPropertyName);
                         if (featureDef != null) {
                             filterPropertyDefs.add(featureDef);
                             continue loopFilterProperties;
                         }
                     }
-                    // Non-qualified filter property name. Must look up.
-                    else {
-                        filterPropertyName = filterPropertyName
-                            .substring(filterPropertyName.lastIndexOf(':') + 1);
-                        // try to find filter property in any of the subtypes of
-                        // referencedType
-                        for (ModelElement_1_0 subtype : referencedTypes) {
-                            String qualifiedFilterPropertyName = subtype.getQualifiedName() + ":"
-                                + filterPropertyName;
-                            ModelElement_1_0 featureDef = getModel()
-                                .findElement(qualifiedFilterPropertyName);
-                            if (featureDef != null) {
-                                filterPropertyDefs.add(featureDef);
-                                continue loopFilterProperties;
-                            }
-                        }
-                    }
-                    // No feature definition found for filter property
-                    filterPropertyDefs.add(null);
                 }
-            } catch (ServiceException exception) {
-                SysLog.warning(
-                    "The following error occured when trying to determine multiplicity of filter property",
-                    exception
-                );
+                // No feature definition found for filter property
+                filterPropertyDefs.add(null);
             }
         }
         return filterPropertyDefs;
@@ -6952,7 +6944,7 @@ public class Database_2
      * @param exception
      * @param partitionedObjects
      * 
-     * @return <code>true</code> if the exception is recoverable
+     * @return {@code true} if the exception is recoverable
      */
     private boolean isRecoverable(
         ServiceException exception,
@@ -7420,7 +7412,7 @@ public class Database_2
      * 
      * @param qualifiedClassName
      * 
-     * @return <code>true</code> if the class shall not be checked
+     * @return {@code true} if the class shall not be checked
      */
     protected boolean isBaseClass(String qualifiedClassName) {
         return BASE_CLASSES.contains(qualifiedClassName);

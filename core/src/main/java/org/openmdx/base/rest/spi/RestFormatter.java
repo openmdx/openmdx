@@ -62,11 +62,11 @@ import org.openmdx.kernel.exception.BasicException;
 public interface RestFormatter {
 
     /**
-     * Provide a <code>format()</code> target
+     * Provide a {@code format()} target
      * 
-     * @param source the <code>ObjectOutput</code>
+     * @param source the {@code ObjectOutput}
      * 
-     * @return a <code>Target</code>
+     * @return a {@code Target}
      */
     Target asTarget(
         final ObjectOutput output

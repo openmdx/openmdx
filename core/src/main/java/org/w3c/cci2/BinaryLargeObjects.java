@@ -76,11 +76,11 @@ public class BinaryLargeObjects {
     private final static int CAPACITY = 10000;
 
     /**
-     * Create a <code>BinaryLargeObject</code> facade for the given byte array
+     * Create a {@code BinaryLargeObject} facade for the given byte array
      * 
      * @param source
      * 
-     * @return a <code>BinaryLargeObject</code> facade for the given byte array
+     * @return a {@code BinaryLargeObject} facade for the given byte array
      */
     public static BinaryLargeObject valueOf(
         byte[] source
@@ -93,13 +93,13 @@ public class BinaryLargeObjects {
     }
 
     /**
-     * Create a <code>BinaryLargeObject</code> facade for the given byte array
+     * Create a {@code BinaryLargeObject} facade for the given byte array
      * 
      * @param source
      * @param offset
      * @param length
      * 
-     * @return a <code>BinaryLargeObject</code> facade for the given byte array
+     * @return a {@code BinaryLargeObject} facade for the given byte array
      */
     public static BinaryLargeObject valueOf(
         byte[] source,
@@ -114,11 +114,11 @@ public class BinaryLargeObjects {
     }
 
     /**
-     * Create a <code>BinaryLargeObject</code> facade for the given URL
+     * Create a {@code BinaryLargeObject} facade for the given URL
      * 
      * @param source
      * 
-     * @return a <code>BinaryLargeObject</code> facade for the given URL
+     * @return a {@code BinaryLargeObject} facade for the given URL
      */
     public static BinaryLargeObject valueOf(
         URL source
@@ -127,11 +127,11 @@ public class BinaryLargeObjects {
     }
     
     /**
-     * Create a <code>BinaryLargeObject</code> facade for the given file
+     * Create a {@code BinaryLargeObject} facade for the given file
      * 
      * @param source
      * 
-     * @return a <code>BinaryLargeObject</code> facade for the given file
+     * @return a {@code BinaryLargeObject} facade for the given file
      */
     public static BinaryLargeObject valueOf(
         File source
@@ -140,11 +140,11 @@ public class BinaryLargeObjects {
     }
 
     /**
-     * Create a <code>BinaryLargeObject</code> facade for the given stream
+     * Create a {@code BinaryLargeObject} facade for the given stream
      * 
      * @param source
      * 
-     * @return a <code>BinaryLargeObject</code> facade for the given stream
+     * @return a {@code BinaryLargeObject} facade for the given stream
      */
     public static BinaryLargeObject valueOf(
         InputStream source
@@ -153,12 +153,12 @@ public class BinaryLargeObjects {
     }
 
     /**
-     * Create a <code>BinaryLargeObject</code> facade for the given stream
+     * Create a {@code BinaryLargeObject} facade for the given stream
      * 
      * @param source
      * @param length
      * 
-     * @return a <code>BinaryLargeObject</code> facade for the given stream
+     * @return a {@code BinaryLargeObject} facade for the given stream
      */
     public static BinaryLargeObject valueOf(
         InputStream source,
@@ -168,12 +168,12 @@ public class BinaryLargeObjects {
     }
 
     /**
-     * Create a <code>BinaryLargeObject</code> copy of the given stream
+     * Create a {@code BinaryLargeObject} copy of the given stream
      * 
      * @param source
      * @param length
      * 
-     * @return a <code>BinaryLargeObject</code> copy of the given stream
+     * @return a {@code BinaryLargeObject} copy of the given stream
      * 
      * @throws IOException  
      */
@@ -190,7 +190,7 @@ public class BinaryLargeObjects {
     }
     
     /**
-     * A negative length is converted to <code>null</code>.
+     * A negative length is converted to {@code null}.
      * 
      * @param length
      * 
@@ -228,6 +228,23 @@ public class BinaryLargeObjects {
         return count;
     }
 
+	/**
+	 * Create a pre-filled binary sinkable from a given resource
+	 * 
+	 * @param from resource location to retrieve the content
+	 * 
+	 * @return a pre-filled binary ssink
+	 * 
+	 * @throws IOException
+	 */
+	public static ByteArrayOutputStream createByteArrayOutputStream(URL from) throws IOException {
+		final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		try(InputStream s = from.openStream()){
+			streamCopy(s, 0, buffer);
+		}
+		return buffer;
+	}
+       
     
     //------------------------------------------------------------------------
     // Class ArrayLargeObject
@@ -256,7 +273,7 @@ public class BinaryLargeObjects {
         }
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = 3886030128086687249L;
 
@@ -334,7 +351,7 @@ public class BinaryLargeObjects {
         }
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = -5837819381102619869L;
 
@@ -424,7 +441,7 @@ public class BinaryLargeObjects {
         }
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = 3916312441998769493L;
 
@@ -502,7 +519,7 @@ public class BinaryLargeObjects {
         private transient File file;
 
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = -1566865189136279414L;
 
@@ -553,7 +570,7 @@ public class BinaryLargeObjects {
         }
         
         /**
-         * Implements <code>Serializable</code>
+         * Implements {@code Serializable}
          */
         private static final long serialVersionUID = -6473575658856881436L;
 
@@ -600,5 +617,5 @@ public class BinaryLargeObjects {
         }
 
     }
-       
+
 }

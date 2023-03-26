@@ -46,15 +46,14 @@
 package org.omg.mof.cci;
 
 /**
- * The <code>DirectionKind</code> class defines the possible directions of 
+ * The {@code DirectionKind} class defines the possible directions of 
  * information transfer for Operation and Exception Parameters as defined by
  * the OMG Meta Object Facility (MOF) Specification.
  */
 public class DirectionKind {
 
-  // Avoid instantiation
-  protected DirectionKind() {
-      super();
+  private DirectionKind() {
+	  // Avoid instantiation
   }
 
 

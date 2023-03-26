@@ -154,7 +154,7 @@ public class DataManagerFactory_1
     };
 
     /**
-     * Implements <code>Serializabel</code>
+     * Implements {@code Serializabel}
      */
     private static final long serialVersionUID = -8694584589690397280L;
 
@@ -374,12 +374,12 @@ public class DataManagerFactory_1
 
     /**
      * The method is used by JDOHelper to construct an instance of
-     * <code>PersistenceManagerFactory</code> based on user-specified
+     * {@code PersistenceManagerFactory} based on user-specified
      * properties.
      * 
      * @param props
      * 
-     * @return a new <code>PersistenceManagerFactory</code>
+     * @return a new {@code PersistenceManagerFactory}
      */
     @SuppressWarnings("rawtypes")
     public static JDOPersistenceManagerFactory getPersistenceManagerFactory(
@@ -393,13 +393,13 @@ public class DataManagerFactory_1
 
     /**
      * The method is used by JDOHelper to construct an instance of
-     * <code>PersistenceManagerFactory</code> based on user-specified
+     * {@code PersistenceManagerFactory} based on user-specified
      * properties.
      * 
      * @param overrides
      * @param props
      * 
-     * @return a new <code>PersistenceManagerFactory</code>
+     * @return a new {@code PersistenceManagerFactory}
      */
     @SuppressWarnings({ "rawtypes" })
     public static JDOPersistenceManagerFactory getPersistenceManagerFactory(

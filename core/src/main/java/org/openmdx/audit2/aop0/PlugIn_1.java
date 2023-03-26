@@ -198,8 +198,8 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
 	 * Internalize a pattern resource identifier
 	 * 
 	 * @param value
-	 *            an XRI's <code>String</code> representation
-	 * @return an XRI's <code>Path</code> representation
+	 *            an XRI's {@code String} representation
+	 * @return an XRI's {@code Path} representation
 	 */
 	protected Path toPattern(String value) {
 	    if (value != null) {
@@ -224,8 +224,8 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      * Internalize a prefix resource identifier
      * 
      * @param value
-     *            an XRI's <code>String</code> representation
-     * @return an XRI's <code>Path</code> representation
+     *            an XRI's {@code String} representation
+     * @return an XRI's {@code Path} representation
      */
     protected Path toPrefix(String value) {
         if (value != null) {
@@ -253,9 +253,9 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      * Validate a segment identifier
      * 
      * @param value
-     *            an XRI's <code>String</code> representation
+     *            an XRI's {@code String} representation
      * 
-     * @return an XRI's <code>Path</code> representation
+     * @return an XRI's {@code Path} representation
      */
     protected Path toSegmentIdentifier(String value) {
         if (value != null) {
@@ -276,10 +276,10 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      * Externalize a resource identifier
      * 
      * @param value
-     *            an XRI's <code>Path</code> representation
+     *            an XRI's {@code Path} representation
      * @param prefix
      * 
-     * @return an XRI's <code>String</code> representation
+     * @return an XRI's {@code String} representation
      */
     protected String toXRI(Path value, boolean prefix) {
         return 
@@ -572,7 +572,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      * @param candidate
      *            the object to be tested
      * 
-     * @return <code>true/code> if the candidate shall be audited
+     * @return {@code true/code> if the candidate shall be audited
      * @throws ServiceException
      */
     protected boolean isInvolved(

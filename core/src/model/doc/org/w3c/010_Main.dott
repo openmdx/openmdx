@@ -1,0 +1,36 @@
+digraph "Diagram PrimitiveTypes [Package org::w3c]" {
+
+	${ATTRIBUTE_STATEMENTS}
+
+	{
+		${LAYER[layer=0]}
+		${CLASS[name=org:w3c:binary]}
+		${CLASS[name=org:w3c:boolean]}
+	}
+	
+	{
+		${LAYER[layer=1]}
+		${CLASS[name=org:w3c:string]}
+		${CLASS[name=org:w3c:anyURI]}
+	}
+	
+	{
+		${LAYER[layer=2]}
+		${CLASS[name=org:w3c:short]};
+		${CLASS[name=org:w3c:integer]}
+		${CLASS[name=org:w3c:long]}
+		${CLASS[name=org:w3c:decimal]}
+	}
+	
+	{
+		${LAYER[layer=3]}
+		${CLASS[name=org:w3c:date]}
+		${CLASS[name=org:w3c:dateTime]}
+		${CLASS[name=org:w3c:duration]}
+	}
+
+	${LAYERS}
+	${ASSOCIATION[name=*]}
+	${INSTANCE_OF}
+
+}

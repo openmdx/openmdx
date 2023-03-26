@@ -67,7 +67,7 @@ public class StandardXMLOutputFactory extends AbstractXMLOutputFactory {
     /**
      * Tells whether white space characters shall be included or not
      * 
-     * @return <code>true</code> if white space characters shall be included
+     * @return {@code true} if white space characters shall be included
      */
     protected boolean isPretty(
     ){

@@ -137,7 +137,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     }
     
     /**
-     * Creates a <code>Path</code> object.
+     * Creates a {@code Path} object.
      *
      * @param  path  The non-null string to parse.
      * 
@@ -158,7 +158,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     }
 
     /**
-     * Creates a <code>Path</code> object.
+     * Creates a {@code Path} object.
      *
      * @param  iri  The non-null IRI.
      * 
@@ -186,7 +186,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     }
 
     /**
-     * Creates a <code>Path</code> object.
+     * Creates a {@code Path} object.
      *
      * @param   charSequence
      *          The non-null string to parse.
@@ -207,11 +207,11 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     }
 
     /**
-     * Clones the given <code>Path</code>
+     * Clones the given {@code Path}
      *
      * @param  that     The new path will consist of this name's components
      * 
-     * @deprecated usually there is no need to clone a <code>Path</code>
+     * @deprecated usually there is no need to clone a {@code Path}
      */ 
     @Deprecated
     public Path (
@@ -266,7 +266,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     private static final Path ROOT = new Path(new String[0]); // not a singleton in the current implementation!
 
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = -6970183208008259633L;
 
@@ -383,7 +383,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
      *
      * @return      a new path with a size greater by one  
      *
-     * @exception   NuillPointerException if the xriSegment is <code>null</code>
+     * @exception   NuillPointerException if the xriSegment is {@code null}
      */
     public Path getChild(
     	XRISegment xriSegment
@@ -443,7 +443,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     /**
      * Tests, whether the path contains a wildcard
      * 
-     * @return <code>true</code> if the path in XRI format contains any of the following XRI cross references<ul>
+     * @return {@code true} if the path in XRI format contains any of the following XRI cross references<ul>
      * <li>($.)
      * <li>($..)
      * <li>($...)
@@ -503,7 +503,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
 
     /**
      * Generates a relative URI representation of this path which may safely be appended to another hierarchical URI.
-     * An empty path is represented by <code>"@openmdx"</code>. 
+     * An empty path is represented by {@code "@openmdx"}. 
      * <p> 
      * The string representation thus generated can be passed to the 
      * Path constructor to create a new equivalent path.
@@ -632,9 +632,9 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     }
     
     /**
-     * Transient object id pattern (<code>xri://@openmdx!($t*uuid*&lt;uuid&gt;)</code>).
+     * Transient object id pattern ({@code xri://@openmdx!($t*uuid*&lt;uuid&gt;)}).
      * 
-     * @return <code>true</code> if this path represents a transient object id
+     * @return {@code true} if this path represents a transient object id
      */
     public boolean isTransactionalObjectId(){
         return this.size == 1 && this.getLastSegment() instanceof TransactionalSegment;
@@ -909,7 +909,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     /**
      * Test whether it is a cross reference or a path component pattern
      * 
-     * @return <code>true</code> if it is a cross reference pattern
+     * @return {@code true} if it is a cross reference pattern
      */
     private boolean isCrossReferencePattern(
     ) {
@@ -986,7 +986,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     /**
      * Tests whether the path refers to an object
      *
-     * @return <code>true</code> if the path refers to an object
+     * @return {@code true} if the path refers to an object
      */
     public boolean isObjectPath(){
         return (this.size & 1) == 1;
@@ -995,7 +995,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     /**
      * Tests whether the path refers to a container
      *
-     * @return <code>true</code> if the path refers to a container
+     * @return {@code true} if the path refers to a container
      */
     public boolean isContainerPath(){
         return this.size % 2 == 0;

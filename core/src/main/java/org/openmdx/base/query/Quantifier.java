@@ -81,12 +81,12 @@ public enum Quantifier implements Code {
     }
     
     /**
-     * The <code>Quantifier</code>'s legacy code
+     * The {@code Quantifier}'s legacy code
      */
     private final short code;
     
     /**
-     * The <code>Quantifier</code>'s UNICODE symbol
+     * The {@code Quantifier}'s UNICODE symbol
      */
     private final char symbol;
 
@@ -105,29 +105,29 @@ public enum Quantifier implements Code {
     }
     
     /**
-     * Retrieve the <code>Quantifier</code>'s code
+     * Retrieve the {@code Quantifier}'s code
      * 
-     * @return the <code>Quantifier</code>'s code
+     * @return the {@code Quantifier}'s code
      */
     public short code(){
         return this.code;
     }
 
     /**
-     * Retrieve the <code>Quantifier</code>'s UNICODE symbol
+     * Retrieve the {@code Quantifier}'s UNICODE symbol
      * 
-     * @return the <code>Quantifier</code>'s UNICODE symbol
+     * @return the {@code Quantifier}'s UNICODE symbol
      */
     public char symbol() {
         return this.symbol;
     }
 
     /**
-     * Retrieve the <code>Quantifier</code>'s code
+     * Retrieve the {@code Quantifier}'s code
      * 
      * @param quantifier
      * 
-     * @return the <code>Quantifier</code>'s code
+     * @return the {@code Quantifier}'s code
      */
     public static short codeOf(
         Quantifier quantifier
@@ -136,13 +136,13 @@ public enum Quantifier implements Code {
     }
     
     /**
-     * Retrieve the <code>Quantifier</code> represented by the given code
+     * Retrieve the {@code Quantifier} represented by the given code
      * 
      * @param code
      * 
-     * @return the <code>Quantifier</code> represented by the given code
+     * @return the {@code Quantifier} represented by the given code
      * 
-     * @exception IllegalArgumentException if the code does not represent a <code>Quantifier</code>
+     * @exception IllegalArgumentException if the code does not represent a {@code Quantifier}
      */
     public static Quantifier valueOf(
         short code
@@ -158,13 +158,13 @@ public enum Quantifier implements Code {
     }
 
     /**
-     * Retrieve the <code>Quantifier</code> represented by the given symbol
+     * Retrieve the {@code Quantifier} represented by the given symbol
      * 
      * @param code
      * 
-     * @return the <code>Quantifier</code> represented by the given symbol
+     * @return the {@code Quantifier} represented by the given symbol
      * 
-     * @exception IllegalArgumentException if the symbol does not represent a <code>Quantifier</code>
+     * @exception IllegalArgumentException if the symbol does not represent a {@code Quantifier}
      */
     public static Quantifier valueOf(
         char symbol

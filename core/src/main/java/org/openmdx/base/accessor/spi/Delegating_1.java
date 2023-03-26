@@ -61,10 +61,10 @@ public class Delegating_1 {
     /**
      * Compare two delegating objects
      * 
-     * @return <code>true</code> if both have the same class and
+     * @return {@code true} if both have the same class and
      * their delegates are equal.
      * 
-     * @throws NullPointerException if <code>left</code> is <code>null</code>.
+     * @throws NullPointerException if {@code left} is {@code null}.
      */
     public static boolean equal(
         Delegating_1_0<?> left,
@@ -84,8 +84,8 @@ public class Delegating_1 {
     /**
      * Compare the delegates
      * 
-     * @return <code>true</code> of the delegates are either both
-     * <code>null</code> or equal.
+     * @return {@code true} of the delegates are either both
+     * {@code null} or equal.
      */
     private static boolean equal(
         Object left,

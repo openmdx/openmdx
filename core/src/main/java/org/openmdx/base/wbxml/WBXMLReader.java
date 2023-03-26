@@ -144,12 +144,12 @@ public class WBXMLReader implements XMLReader, FeatureSupport {
     private Locator locator;
 
     /**
-     * The curren attribute page, initially <code>0</code>
+     * The curren attribute page, initially {@code 0}
      */
     private int attributePage;
 
     /**
-     * The current tag page, initially <code>0</code>
+     * The current tag page, initially {@code 0}
      */
     private int tagPage;
 
@@ -164,7 +164,7 @@ public class WBXMLReader implements XMLReader, FeatureSupport {
     private char[] characters = new char[256];
 
     /**
-     * Read to the end of the input file if <code>true</code>
+     * Read to the end of the input file if {@code true}
      */
     private boolean exhaust = true;
 
@@ -596,7 +596,7 @@ public class WBXMLReader implements XMLReader, FeatureSupport {
     /**
      * Read a multi-byte integer value
      * 
-     * @return the <code>Integer</code> value
+     * @return the {@code Integer} value
      * 
      * @throws SAXException
      * @throws IOException
@@ -616,7 +616,7 @@ public class WBXMLReader implements XMLReader, FeatureSupport {
     /**
      * Read inline string
      * 
-     * @return the <code>String</code> value
+     * @return the {@code String} value
      * 
      * @throws IOException
      * @throws SAXException
@@ -637,7 +637,7 @@ public class WBXMLReader implements XMLReader, FeatureSupport {
     /**
      * Read string from table
      * 
-     * @return the <code>String</code> value
+     * @return the {@code String} value
      * 
      * @throws IOException
      * @throws SAXException

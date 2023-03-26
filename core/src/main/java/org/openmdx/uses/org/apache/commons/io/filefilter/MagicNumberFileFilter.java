@@ -37,7 +37,7 @@ import java.util.Arrays;
  * File filter for matching files containing a "magic number". A magic number
  * is a unique series of bytes common to all files of a specific file format.
  * For instance, all Java class files begin with the bytes
- * <code>0xCAFEBABE</code>.
+ * {@code 0xCAFEBABE}.
  * </p>
  *
  * <pre>
@@ -97,7 +97,7 @@ public class MagicNumberFileFilter extends AbstractFileFilter implements
      * <p>
      * Constructs a new MagicNumberFileFilter and associates it with the magic
      * number to test for in files. This constructor assumes a starting offset
-     * of <code>0</code>.
+     * of {@code 0}.
      * </p>
      *
      * <p>
@@ -114,7 +114,7 @@ public class MagicNumberFileFilter extends AbstractFileFilter implements
      *
      * @param magicNumber the magic number to look for in the file.
      *
-     * @throws IllegalArgumentException if <code>magicNumber</code> is
+     * @throws IllegalArgumentException if {@code magicNumber} is
      *         {@code null}, or contains no bytes.
      */
     public MagicNumberFileFilter(final byte[] magicNumber) {
@@ -125,7 +125,7 @@ public class MagicNumberFileFilter extends AbstractFileFilter implements
      * <p>
      * Constructs a new MagicNumberFileFilter and associates it with the magic
      * number to test for in files. This constructor assumes a starting offset
-     * of <code>0</code>.
+     * of {@code 0}.
      * </p>
      *
      * Example usage:
@@ -139,7 +139,7 @@ public class MagicNumberFileFilter extends AbstractFileFilter implements
      * @param magicNumber the magic number to look for in the file.
      *        The string is converted to bytes using the platform default charset.
      *
-     * @throws IllegalArgumentException if <code>magicNumber</code> is
+     * @throws IllegalArgumentException if {@code magicNumber} is
      *         {@code null} or the empty String.
      */
     public MagicNumberFileFilter(final String magicNumber) {
@@ -162,8 +162,8 @@ public class MagicNumberFileFilter extends AbstractFileFilter implements
      *        The string is converted to bytes using the platform default charset.
      * @param offset the byte offset in the file to start comparing bytes.
      *
-     * @throws IllegalArgumentException if <code>magicNumber</code> is
-     *         {@code null} or the empty String, or <code>offset</code> is
+     * @throws IllegalArgumentException if {@code magicNumber} is
+     *         {@code null} or the empty String, or {@code offset} is
      *         a negative number.
      */
     public MagicNumberFileFilter(final String magicNumber, final long offset) {
@@ -202,8 +202,8 @@ public class MagicNumberFileFilter extends AbstractFileFilter implements
      * @param magicNumber the magic number to look for in the file.
      * @param offset the byte offset in the file to start comparing bytes.
      *
-     * @throws IllegalArgumentException if <code>magicNumber</code> is
-     *         {@code null}, or contains no bytes, or <code>offset</code>
+     * @throws IllegalArgumentException if {@code magicNumber} is
+     *         {@code null}, or contains no bytes, or {@code offset}
      *         is a negative number.
      */
     public MagicNumberFileFilter(final byte[] magicNumber, final long offset) {

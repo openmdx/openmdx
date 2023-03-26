@@ -139,8 +139,8 @@ public class PrimitiveTypeParsers {
     /**
      * This method amends the given parsers with the configured ones
      * and logs configuration exceptions silently. Problems caused by
-     * missing <code>Parser</code>s on the other hand are signaled by 
-     * <code>IllegalArgumentException</code>s at run-time.
+     * missing {@code Parser}s on the other hand are signaled by 
+     * {@code IllegalArgumentException}s at run-time.
      */
 	private static void addConfiguredParsers(final List<Parser> parsers) {
 		try {

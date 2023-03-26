@@ -171,7 +171,7 @@ public class ModelBuilder_1 implements ModelBuilder_1_0 {
     }
 
     /**
-     * The model information source in case of <code>DUMP</code> 
+     * The model information source in case of {@code DUMP} 
      */
     private final ModelLoader modelLoader;
     

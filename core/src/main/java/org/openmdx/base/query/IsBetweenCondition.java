@@ -93,7 +93,7 @@ public class IsBetweenCondition extends Condition {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 4050479036709154872L;
 
@@ -115,9 +115,9 @@ public class IsBetweenCondition extends Condition {
     }
 
     /**
-     * Defines whether the condition shall be <code>true</code> or <code>false</code>
+     * Defines whether the condition shall be {@code true} or {@code false}
      * 
-     * @param fulful <code>true</code> if the condition shall be fulfilled
+     * @param fulful {@code true} if the condition shall be fulfilled
      */
     public void setFulfil(
 		boolean fulfil
@@ -126,9 +126,9 @@ public class IsBetweenCondition extends Condition {
     }
     
     /**
-     * Tells whether the condition shall be <code>true</code> or <code>false</code>
+     * Tells whether the condition shall be {@code true} or {@code false}
      * 
-     * @return <code>true</code> if the condition shall be fulfilled
+     * @return {@code true} if the condition shall be fulfilled
      */
     public boolean isFulfil() {
     	final ConditionType type = getType();

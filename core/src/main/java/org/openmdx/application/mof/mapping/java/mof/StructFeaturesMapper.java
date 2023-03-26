@@ -62,24 +62,14 @@ import org.openmdx.base.mof.cci.Model_1_0;
  */
 public class StructFeaturesMapper extends FeaturesMapper {
 
-    /**
-     * Constructor 
-     *
-     * @param structDef
-     * @param writer
-     * @param model
-     * @param format
-     * @param packageSuffix
-     * 
-     * @throws ServiceException
-     */
     public StructFeaturesMapper(
         ModelElement_1_0 structDef,
         Writer writer,
         Model_1_0 model,
         Format format, 
         String packageSuffix,
-        MetaData_1_0 metaData
+        MetaData_1_0 metaData, 
+        boolean markdown
     ) throws ServiceException {
         super(
     		structDef,
@@ -88,6 +78,7 @@ public class StructFeaturesMapper extends FeaturesMapper {
             format, 
             packageSuffix,
             metaData, 
+            markdown, 
             new StandardPrimitiveTypeMapper()
         );
         this.structDef = new StructDef(
@@ -113,30 +104,32 @@ public class StructFeaturesMapper extends FeaturesMapper {
     public void mapField(
         StructuralFeatureDef structureFieldDef
     ) throws ServiceException {
-        this.pw.println("  /**");
-        this.pw.println(MapperUtils.wrapText(
+        printLine("  /**");
+        MapperUtils.wrapText(
             "   * ",
-            "Struct field <code>" + structureFieldDef.getName() + "</code>."));
-        this.pw.println("   */");
-        this.pw.print("    java.lang.String ");
-        this.pw.print(getConstantName(structureFieldDef.getName()));
-        this.pw.print(" = \"");
-        this.pw.print(structureFieldDef.getName());
-        this.pw.println("\";");
-        this.pw.println();
+            "Struct field {@code " + structureFieldDef.getName() + "}.", 
+            this::printLine
+        );
+        printLine("   */");
+        print("    java.lang.String ");
+        print(getConstantName(structureFieldDef.getName()));
+        print(" = \"");
+        print(structureFieldDef.getName());
+        printLine("\";");
+        newLine();
     }
 
     public void mapEnd() {
-        this.pw.println("}");
+        printLine("}");
     }
 
     public void mapBegin() {
         this.fileHeader();
-        this.pw.println("package " + this.getNamespace(MapperUtils.getNameComponents(MapperUtils.getPackageName(this.structDef.getQualifiedName()))) + ";");
-        this.pw.println();
-        this.pw.println("public interface " + this.structDef.getName() + FEATURES_INTERFACE_SUFFIX);
-        this.pw.println("  extends org.openmdx.base.accessor.jmi.cci.RefStruct_1_0 {");
-        this.pw.println();
+        printLine("package " + this.getNamespace(MapperUtils.getNameComponents(MapperUtils.getPackageName(this.structDef.getQualifiedName()))) + ";");
+        newLine();
+        printLine("public interface " + this.structDef.getName() + FEATURES_INTERFACE_SUFFIX);
+        printLine("  extends org.openmdx.base.accessor.jmi.cci.RefStruct_1_0 {");
+        newLine();
     }
 
     /**

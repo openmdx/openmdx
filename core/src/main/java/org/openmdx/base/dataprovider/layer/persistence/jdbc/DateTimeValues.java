@@ -63,10 +63,10 @@ import org.w3c.time.TimeZones;
 class DateTimeValues {
 
     /**
-     * Replace XMLGregorianCalendar values of type <code>DATETIME</code>
-     * by <code>Date</code> values.
+     * Replace XMLGregorianCalendar values of type {@code DATETIME}
+     * by {@code Date} values.
      * 
-     * @param object the <code>ObjectRecord</code>
+     * @param object the {@code ObjectRecord}
      */
     @SuppressWarnings("unchecked")
     protected static final void normalizeDateTimeValues(
@@ -100,12 +100,12 @@ class DateTimeValues {
     }
 
     /**
-     * Replace XMLGregorianCalendar values of type <code>DATETIME</code>
-     * by their corresponding <code>Date</code> values.
+     * Replace XMLGregorianCalendar values of type {@code DATETIME}
+     * by their corresponding {@code Date} values.
      * 
      * @param value
-     * @return the corresponding <code>Date</code> value in case of an
-     * XMLGregorianCalendar value of type <code>DATETIME</code>, the 
+     * @return the corresponding {@code Date} value in case of an
+     * XMLGregorianCalendar value of type {@code DATETIME}, the 
      * original value otherwise
      */
     private static final Object normalizeDateTimeValue(Object value) {

@@ -64,7 +64,7 @@ public interface ObjectRepositoryMetadataPlugin {
      * Retrieve the table name for a given class
      * 
      * @param packageDigest the package prefix specified in the the openmdxjdo file; 
-     * or <code>null</code>
+     * or {@code null}
      * @param qualifiedClassName the components of the fully qualified class name
      * 
      * the components of the fully qualified class name
@@ -93,7 +93,7 @@ public interface ObjectRepositoryMetadataPlugin {
      * Retrieve the slice table name for a table name
      * 
      * @param packageDigest the package prefix specified in the the openmdxjdo file; 
-     * or <code>null</code>
+     * or {@code null}
      * @param qualifiedClassName the components of the fully qualified class name
      * 
      * the components of the fully qualified class name
@@ -115,7 +115,7 @@ public interface ObjectRepositoryMetadataPlugin {
      * Retrieve the discriminator value for a given class
      * 
      * @param packageDigest the package prefix specified in the the openmdxjdo file; 
-     * or <code>null</code>
+     * or {@code null}
      * @param qualifiedClassName the components of the fully qualified class name
      * 
      * @return the discriminator value for a given class

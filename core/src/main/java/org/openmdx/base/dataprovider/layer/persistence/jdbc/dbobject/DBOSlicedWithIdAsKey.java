@@ -184,7 +184,7 @@ extends SlicedDbObject
      * 
      * @param connection the database connection
      * 
-     * @return the database product name, or <code>N/A</code> in case of exception
+     * @return the database product name, or {@code N/A} in case of exception
      */
     private String getDatabaseProductName(Connection connection) {
         try {

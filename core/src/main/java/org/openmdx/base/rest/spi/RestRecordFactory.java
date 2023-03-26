@@ -92,7 +92,7 @@ public class RestRecordFactory {
     }
 
     /** 
-     * Creates an <code>MappedRecord</code> of the given type.
+     * Creates an {@code MappedRecord} of the given type.
      *  
      *  @param typedInterface the interface the record shall implement, where one of
      *  the following values will lead to an {@code Optional.isPresent()} result:<ul>
@@ -146,7 +146,7 @@ public class RestRecordFactory {
     }
     
     /** 
-     * Creates an <code>IndexdRecord</code> of the given type.
+     * Creates an {@code IndexdRecord} of the given type.
      *  
      *  @param typedInterface the interface the record shall implement, one of<ul>
      *  <li>{@link org.openmdx.base.rest.cci.ResultRecord}

@@ -80,7 +80,7 @@ public class HttpClient {
     }
 
     /**
-     * The cookie handler, which may be <code>null</code>
+     * The cookie handler, which may be {@code null}
      */
     private final CookieHandler cookieHandler;
 	
@@ -88,9 +88,9 @@ public class HttpClient {
      * Create a HTTP URL connection
      * 
      * @param url
-     * @param secure <code>true</code> if a https connection is required
+     * @param secure {@code true} if a https connection is required
      * @param method
-     * @param contentType the contentType, implying <code>doOutput(contentType!=null)</code>
+     * @param contentType the contentType, implying {@code doOutput(contentType!=null)}
      * 
      * @return the initialized connection
      * 

@@ -85,27 +85,27 @@ public class ObjectRecord
     private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 1436275899255948883L;
 
     /**
-     * The <code>"resourceIdentifier"</code> entry
+     * The {@code "resourceIdentifier"} entry
      */
     private Path resourceIdentifier;
     
     /**
-     * The <code>"value"</code> entry
+     * The {@code "value"} entry
      */
     private MappedRecord value;
 
     /**
-     * The <code>"version"</code> entry
+     * The {@code "version"} entry
      */
     private byte[] version;
 
     /**
-     * The <code>"lock"</code> entry
+     * The {@code "lock"} entry
      */
     private Object lock;
     
@@ -282,7 +282,7 @@ public class ObjectRecord
      * @param thisValue
      * @param thatValue
      * 
-     * @return <code>true</code> of both values are either equal or <code>null</code>
+     * @return {@code true} of both values are either equal or {@code null}
      */
     private static boolean areMatching(Object thisValue, Object thatValue) {
     	if(thisValue == null) {
@@ -320,7 +320,7 @@ public class ObjectRecord
 	 * 
 	 * @param record the record to be inspected
 	 * 
-	 * @return <code>true</code> if the record's name equals to <code>org:openmdx:kernel:Object</code>.
+	 * @return {@code true} if the record's name equals to {@code org:openmdx:kernel:Object}.
 	 */
 	public static boolean isCompatible(Record record) {
 	    return NAME.equals(record.getRecordName());

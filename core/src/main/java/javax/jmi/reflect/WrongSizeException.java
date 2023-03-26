@@ -2,7 +2,7 @@ package javax.jmi.reflect;
 
 /** Exception which arises when a collection contains
  * fewer or more values than is required by the corresponding
- * <CODE>Multiplicity.lower</CODE> and <code>Multiplicity.upper</code>.
+ * <CODE>Multiplicity.lower</CODE> and {@code Multiplicity.upper}.
  */
 @SuppressWarnings("serial")
 public class WrongSizeException extends JmiException {

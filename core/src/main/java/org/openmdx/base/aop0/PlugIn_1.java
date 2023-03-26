@@ -93,7 +93,7 @@ public class PlugIn_1
 {
 
     /**
-     * <code>UUID</code> is the default qualifier type.
+     * {@code UUID} is the default qualifier type.
      */
     private QualifierType defaultQualifierType = QualifierType.UID;
     

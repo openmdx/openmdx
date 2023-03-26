@@ -65,9 +65,9 @@ public class Isolation {
 
 	/**
 	 * Make the object immutable or create a immutable copy for supported values<ul>
-	 * <li><code>java.util.Date</code>
-	 * <li><code>javax.xml.datatype.XMLGregorianCalendar</code>
-	 * <li><code>org.openmdx.base.resource.cci.Freezable</code>
+	 * <li>{@code java.util.Date}
+	 * <li>{@code javax.xml.datatype.XMLGregorianCalendar}
+	 * <li>{@code org.openmdx.base.resource.cci.Freezable}
 	 * </ul>
 	 * <p>
 	 * Note:<br>
@@ -92,8 +92,8 @@ public class Isolation {
 
 	/**
 	 * Make the object immutable or create a immutable copy for supported values<ul>
-	 * <li><code>org.openmdx.base.resource.cci.Freezable</code> &amp;
-	 * <code>javax.resource.cci.Record</code>
+	 * <li>{@code org.openmdx.base.resource.cci.Freezable} &amp;
+	 * {@code javax.resource.cci.Record}
 	 * </ul>
 	 * 
 	 * @param value the value to be transformed

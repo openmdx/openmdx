@@ -54,6 +54,7 @@ import org.openmdx.base.dataprovider.kernel.Dataprovider_2;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.spi.AbstractRestPort;
+import org.openmdx.kernel.loading.Resources;
 
 public class ModelProvider_2 extends AbstractRestPort {
 
@@ -66,10 +67,12 @@ public class ModelProvider_2 extends AbstractRestPort {
 		setDelegate(delegate);
 	}
 
-	private static final String MODEL_DATAPROVIDER_CONFIGURATION_URI = 
-			"xri://+resource/org/openmdx/application/mof/repository/accessor/model-dataprovider.properties";
-	private static final String META_MODEL_DATAPROVIDER_CONFIGURATION_URI = 
-			"xri://+resource/org/openmdx/application/mof/repository/accessor/meta-model-dataprovider.properties";
+	private static final String MODEL_DATAPROVIDER_CONFIGURATION_URI = Resources.toResourceXRI(
+		"org/openmdx/application/mof/repository/accessor/model-dataprovider.properties"
+	);
+	private static final String META_MODEL_DATAPROVIDER_CONFIGURATION_URI = Resources.toResourceXRI(
+		"org/openmdx/application/mof/repository/accessor/meta-model-dataprovider.properties"
+	);
 	
 	private static Port<RestConnection> newDelegate(
 		boolean metaModel

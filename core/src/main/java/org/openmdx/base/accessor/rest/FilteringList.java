@@ -118,7 +118,7 @@ abstract class FilteringList extends AbstractSequentialList<DataObject_1_0> {
      * 
      * @param candidate the candidate to be tested
      * 
-     * @return <code>true</code> if the object is acceptable as a member of the collection
+     * @return {@code true} if the object is acceptable as a member of the collection
      */
     protected boolean accept(
         Object candidate
@@ -135,7 +135,7 @@ abstract class FilteringList extends AbstractSequentialList<DataObject_1_0> {
     /**
      * Tells whether a filter should be applied to the candidates or not
      * 
-     * @return <code>true</code> if no filter should be applied to the candidates 
+     * @return {@code true} if no filter should be applied to the candidates 
      */
     protected boolean acceptAll (
     ){

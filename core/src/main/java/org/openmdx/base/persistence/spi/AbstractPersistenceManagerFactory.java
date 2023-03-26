@@ -149,13 +149,13 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
     private final Configuration configuration;
 
     /**
-     * A <code>PersistenceManagerFactory</code>'s configuration is its
-     * <code>PersistenceManager</code>s' default configuration.
+     * A {@code PersistenceManagerFactory}'s configuration is its
+     * {@code PersistenceManager}s' default configuration.
      */
     private Map<ConfigurableProperty, Object> configurableProperties = new HashMap<ConfigurableProperty, Object>();
 
     /**
-     * <code>PersistentManager</code> book keeping.
+     * {@code PersistentManager} book keeping.
      */
     private Set<PersistenceManager> persistenceManagers = MapBackedSet.decorate(
         new WeakHashMap<PersistenceManager, Object>()
@@ -182,25 +182,25 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
     private static final Map<String, Object> DEFAULT_CONFIGURATION = new HashMap<String, Object>();
 
     /**
-     * The <code>PersistenceManagerFactory</code>'s properties.
+     * The {@code PersistenceManagerFactory}'s properties.
      */
     private final static Properties NON_CONFIGURABLE_PROPERTIES = new Properties();
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 4344984435301460319L;
 
     /**
-     * Return <code>true</code> if the property's value is
-     * <code>"true"</code> ignoring case.
+     * Return {@code true} if the property's value is
+     * {@code "true"} ignoring case.
      * 
      * @param option
      *            the option
      * @param defaulValue
      *            tells whether the flag is by default on or off
      * 
-     * @return <code>true</code> if the flag is on (explicitly or by default)
+     * @return {@code true} if the flag is on (explicitly or by default)
      */
     private boolean getFlag(
         ConfigurableProperty option,
@@ -215,13 +215,13 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
     }
 
     /**
-     * Return <code>true</code> if the property's value is
-     * <code>"true"</code> ignoring case.
+     * Return {@code true} if the property's value is
+     * {@code "true"} ignoring case.
      * 
      * @param option
      *            the option
      * 
-     * @return <code>true</code> if the flag is on
+     * @return {@code true} if the flag is on
      */
     private boolean getFlag(
         ConfigurableProperty option
@@ -242,10 +242,10 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
     }
 
     /**
-     * Freeze the <code>PersistenceManagerFactory</code>'s configurable properties.
+     * Freeze the {@code PersistenceManagerFactory}'s configurable properties.
      * 
      * @exception JDOFatalUserException
-     *                if the <code>PersistenceManagerFactory</code>
+     *                if the {@code PersistenceManagerFactory}
      *                is closed
      */
     protected void freeze() {
@@ -374,7 +374,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
     /**
      * Test whether the configurable properties are frozen or not
      * 
-     * @return <code>true</code> if the configurable properties are frozen
+     * @return {@code true} if the configurable properties are frozen
      */
     protected boolean isFrozen() {
         return this.configurableProperties.getClass() != HashMap.class;
@@ -386,7 +386,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
      * @param userid
      * @param password
      * 
-     * @return a new <code>PersistenceManager</code>
+     * @return a new {@code PersistenceManager}
      */
     protected abstract P newPersistenceManager(
         String userid,
@@ -396,7 +396,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
     /**
      * The sub-class specific factory method
      * 
-     * @return a new <code>PersistenceManager</code>
+     * @return a new {@code PersistenceManager}
      */
     protected abstract P newPersistenceManager();
 
@@ -916,7 +916,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
     /**
      * Tell whether the transaction is container managed
      * 
-     * @return <code>true</code> if the transaction is container managed
+     * @return {@code true} if the transaction is container managed
      */
     public boolean getContainerManaged() {
         return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.ContainerManaged));

@@ -1,0 +1,15 @@
+digraph "Diagram PrimitiveTypes [Package org::ietf]" {
+
+	${ATTRIBUTE_STATEMENTS}
+
+	{
+		${LAYER[layer=0]}
+		${CLASS[name=org:ietf:OID]}
+		${CLASS[name=org:ietf:UUID]}
+	}
+	
+	${LAYERS}
+	${ASSOCIATION[name=*]}
+	${INSTANCE_OF}
+
+}

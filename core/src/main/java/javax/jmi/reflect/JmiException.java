@@ -10,14 +10,14 @@ public abstract class JmiException extends RuntimeException {
     private final Object objectInError;
     
     /**
-     * Constructs new <code>JmiException</code> without detail message.
+     * Constructs new {@code JmiException} without detail message.
      */
     public JmiException() {
         this(null, (RefObject) null);
     }
     
     /**
-     * Constructs an <code>JmiException</code> with the specified detail message.
+     * Constructs an {@code JmiException} with the specified detail message.
      * @param msg the detail message.
      */
     public JmiException(String msg) {
@@ -25,7 +25,7 @@ public abstract class JmiException extends RuntimeException {
     }
     
     /**
-     * Constructs new <code>JmiException</code> without detail message.
+     * Constructs new {@code JmiException} without detail message.
      * @param elementInError JMI object in error.
      */    
     public JmiException(RefObject elementInError) {
@@ -33,7 +33,7 @@ public abstract class JmiException extends RuntimeException {
     }
 
     /**
-     * Constructs an <code>JmiException</code> with the specified detail message.
+     * Constructs an {@code JmiException} with the specified detail message.
      * @param elementInError JMI object in error.
      * @param msg the detail message.
      */
@@ -42,7 +42,7 @@ public abstract class JmiException extends RuntimeException {
     }
     
     /**
-     * Constructs new <code>JmiException</code> without detail message.
+     * Constructs new {@code JmiException} without detail message.
      * @param objectInError Value that caused the error.
      * @param elementInError JMI object in error.
      */    
@@ -53,7 +53,7 @@ public abstract class JmiException extends RuntimeException {
     }
     
     /**
-     * Constructs an <code>JmiException</code> with the specified detail message.
+     * Constructs an {@code JmiException} with the specified detail message.
      * @param objectInError Value that caused the error.
      * @param elementInError JMI object in error.
      * @param msg the detail message.

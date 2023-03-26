@@ -61,7 +61,7 @@ public class AttributeRecord
     private int maxLength;
         
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 4110656575531913526L;
 

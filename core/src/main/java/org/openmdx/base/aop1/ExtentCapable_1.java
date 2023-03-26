@@ -77,7 +77,7 @@ public class ExtentCapable_1 extends Interceptor_1 {
     }
     
     /**
-     * <code>true</code> in case of an <code>org::openmdx::base::Aspect</code> instance
+     * {@code true} in case of an {@code org::openmdx::base::Aspect} instance
      */
     private boolean aspect;
     

@@ -59,9 +59,6 @@ import org.openmdx.base.mof.cci.Model_1_0;
  */
 public abstract class FeaturesMapper extends AbstractMapper {
 
-    /**
-     * Constructor 
-     */
     public FeaturesMapper(
         ModelElement_1_0 featuredDef,        
         Writer writer, 
@@ -69,6 +66,7 @@ public abstract class FeaturesMapper extends AbstractMapper {
         Format format, 
         String packageSuffix,
         MetaData_1_0 metaData, 
+        boolean markdown, 
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
@@ -77,6 +75,7 @@ public abstract class FeaturesMapper extends AbstractMapper {
             format, 
             packageSuffix,
             metaData, 
+            markdown, 
             primitiveTypeMapper
         );
     }

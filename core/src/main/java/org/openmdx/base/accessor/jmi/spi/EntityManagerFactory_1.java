@@ -77,20 +77,20 @@ import org.w3c.cci2.SparseArray;
 /**
  * Entity Manager Factory
  * <p>
- * The <code>PersistenceManagerFactory</code> it delegates to can be specified
+ * The {@code PersistenceManagerFactory} it delegates to can be specified
  * in the following ways:
  * <ol>
- * <li>as <code>org.openmdx.jdo.PersistenceManagerFactory</code> property if
+ * <li>as {@code org.openmdx.jdo.PersistenceManagerFactory} property if
  * the client has set up the persistence manager factory on its own
- * <li>as <code>org.openmdx.jdo.PersistenceManagerFactoryName</code> property for
+ * <li>as {@code org.openmdx.jdo.PersistenceManagerFactoryName} property for
  * an embedded persistence manager
- * <li>as <code>connection-url</code> attribute for an extra-VM connection
- * <li>as <code>connection-factory-name</code> and
- * <code>connection-factory2-name</code> attributes for JNDI registered
+ * <li>as {@code connection-url} attribute for an extra-VM connection
+ * <li>as {@code connection-factory-name} and
+ * {@code connection-factory2-name} attributes for JNDI registered
  * objects, such as
  * <ul>
- * <li>JCA <code>ConnectionFactory</code> for a RESTful extra-VM connection
- * <li><code>EJBHome</code> or <code>EJBLocalHome</code> for RESTful
+ * <li>JCA {@code ConnectionFactory} for a RESTful extra-VM connection
+ * <li>{@code EJBHome} or {@code EJBLocalHome} for RESTful
  * intra-VM connections
  * </ul>
  * </ol>
@@ -283,7 +283,7 @@ public class EntityManagerFactory_1
     private JDODataStoreCache dataStoreCache;
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -3043695082264242663L;
 
@@ -302,12 +302,12 @@ public class EntityManagerFactory_1
 
     /**
      * The method is used by JDOHelper to construct an instance of
-     * <code>PersistenceManagerFactory</code> based on user-specified
+     * {@code PersistenceManagerFactory} based on user-specified
      * properties.
      * 
      * @param props
      * 
-     * @return a new <code>PersistenceManagerFactory</code>
+     * @return a new {@code PersistenceManagerFactory}
      */
     public static JDOPersistenceManagerFactory getPersistenceManagerFactory(
         Map props

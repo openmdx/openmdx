@@ -309,7 +309,7 @@ public class RestParser {
      * @param source
      *            the source providing the exception stack
      * 
-     * @return a <code>BasicException</code>
+     * @return a {@code BasicException}
      * 
      * @throws SAXException in case of failure
      */
@@ -335,7 +335,7 @@ public class RestParser {
      * 
      * @param mimeType
      * 
-     * @return <code>true</code> if the given MIME type requires a binary stream
+     * @return {@code true} if the given MIME type requires a binary stream
      */
     public static boolean isBinary(
         String mimeType
@@ -344,11 +344,11 @@ public class RestParser {
     }
     
     /**
-     * Provide a <code>parse()</code> source
+     * Provide a {@code parse()} source
      * 
-     * @param input the <code>ObjectInput</code>
+     * @param input the {@code ObjectInput}
      * 
-     * @return a <code>Source</code>
+     * @return a {@code Source}
      */
 //  @SuppressWarnings("resource")
     public static RestSource asSource(
@@ -583,7 +583,7 @@ public class RestParser {
         /**
          * Tells whether struct has been added by startElement()
          * 
-         * @return <code>true</code> if struct has been added by startElement()
+         * @return {@code true} if struct has been added by startElement()
          * @throws SAXException
          */
         private boolean isStructEnding(
@@ -946,7 +946,7 @@ public class RestParser {
          * 
          * @param typeName
          * 
-         * @return <code>true</code> in case of structure, <code>false</code> in
+         * @return {@code true} in case of structure, {@code false} in
          *         case of object
          *         
          * @throws SAXException
@@ -968,7 +968,7 @@ public class RestParser {
          * 
          * @param typeName
          * 
-         * @return <code>true</code> in case of query, <code>false</code>
+         * @return {@code true} in case of query, {@code false}
          *         otherwise
          * 
          * @throws ServiceException
@@ -1178,7 +1178,7 @@ public class RestParser {
         /**
          * Tells whether there is either character or binary content available
          * 
-         * @return <code>true</code> if some content is available
+         * @return {@code true} if some content is available
          */
         protected boolean hasData(
         ){

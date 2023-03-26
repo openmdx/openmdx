@@ -54,7 +54,7 @@ import org.openmdx.kernel.exception.BasicException;
 class MarshallingConsumer implements ConsumerRecord {
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -7320802040758252486L;
     

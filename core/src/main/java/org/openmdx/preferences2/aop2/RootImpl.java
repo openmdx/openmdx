@@ -73,10 +73,10 @@ public class RootImpl<
     );
     
     /**
-     * Sets a new value for the attribute <code>type</code>.
+     * Sets a new value for the attribute {@code type}.
      * <p>
      * This attribute is not changeable, i.e. its value can be set as long as the object is <em>TRANSIENT</em> or <em>NEW</em>
-     * @param type The non-null new value for attribute <code>type</code>.
+     * @param type The non-null new value for attribute {@code type}.
      * 
      * @exception IllegalArgumentException if type is neither 'system' nor 'user'
      */

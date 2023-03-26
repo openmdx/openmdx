@@ -112,7 +112,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /**
      * Checks whether the persistence manager is already closed
      * 
-     * @return <code>true</code> if the persistence manager is already closed
+     * @return {@code true} if the persistence manager is already closed
      */
     protected boolean isClosed(){
     	return this.outermostPackage.refPersistenceManager().isClosed();

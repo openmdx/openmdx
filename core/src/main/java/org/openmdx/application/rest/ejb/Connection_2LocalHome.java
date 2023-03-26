@@ -56,10 +56,10 @@ public interface Connection_2LocalHome extends EJBLocalHome {
   /**
    * This method corresponds to the ejbCreate method in the bean.
    * The parameter sets of the two methods are identical. When the client
-   * calls <code>Connection_2LocalHome.create()</code>, the container
-   * allocates an instance of the EJBean and calls <code>ejbCreate()</code>.
+   * calls {@code Connection_2LocalHome.create()}, the container
+   * allocates an instance of the EJBean and calls {@code ejbCreate()}.
    *
-   * @param         connectionSpec the REST <code>ConnectionSpec</code> 
+   * @param         connectionSpec the REST {@code ConnectionSpec} 
    * 
    * @return        a Connection_2_0Local object
    *

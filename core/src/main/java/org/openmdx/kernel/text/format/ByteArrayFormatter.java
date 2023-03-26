@@ -53,7 +53,7 @@ public class ByteArrayFormatter
 
     /**
      * Creates a new formatter for a byte buffer. The byte buffer will be 
-     * formatted on demand when calling its <code>toString</code> method.
+     * formatted on demand when calling its {@code toString} method.
      * 
      * @param buf the input buffer.
      * @param offset the offset in the buffer of the first byte to format.
@@ -88,7 +88,7 @@ public class ByteArrayFormatter
 
     /**
      * Creates a new formatter for a byte buffer. The byte buffer will be 
-     * formatted on demand when calling its <code>toString</code> method.
+     * formatted on demand when calling its {@code toString} method.
      * 
      * @param buf the input buffer.
      * @param offset the offset in the buffer of the first byte to format.
@@ -102,7 +102,7 @@ public class ByteArrayFormatter
 
     /**
      * Creates a new formatter for a byte buffer. The byte buffer will be 
-     * formatted on demand when calling its <code>toString</code> method.
+     * formatted on demand when calling its {@code toString} method.
      * 
      * @param buf the input buffer.
      */

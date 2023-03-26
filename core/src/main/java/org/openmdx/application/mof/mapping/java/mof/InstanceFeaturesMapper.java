@@ -65,23 +65,13 @@ import org.openmdx.base.mof.cci.Model_1_0;
  */
 public class InstanceFeaturesMapper extends FeaturesMapper {
 
-    /**
-     * Constructor 
-     *
-     * @param classDef
-     * @param writer
-     * @param model
-     * @param format
-     * @param packageSuffix
-     * @throws ServiceException
-     */
     public InstanceFeaturesMapper(
         ModelElement_1_0 classDef,        
         Writer writer, 
         Model_1_0 model,
         Format format, 
         String packageSuffix,
-        MetaData_1_0 metaData
+        MetaData_1_0 metaData, boolean markdown
     ) throws ServiceException {
         super(
         	classDef,
@@ -90,7 +80,7 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
             format, 
             packageSuffix,
             metaData, 
-            new StandardPrimitiveTypeMapper()
+            markdown, new StandardPrimitiveTypeMapper()
         );
         this.classDef = new ClassDef(classDef, model);
     }
@@ -112,17 +102,19 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
     public void mapReference(
         ReferenceDef referenceDef
     ) throws ServiceException {
-        this.pw.println("   /**");
-        this.pw.println(MapperUtils.wrapText(
+        printLine("   /**");
+        MapperUtils.wrapText(
             "    * ",
-            "Reference feature <code>" + referenceDef.getName() + "</code>."));
-        this.pw.println("    */");
-        this.pw.print("    java.lang.String ");
-        this.pw.print(getConstantName(referenceDef.getName()));
-        this.pw.print(" = \"");
-        this.pw.print(referenceDef.getName());
-        this.pw.println("\";");
-        this.pw.println();
+            "Reference feature {@code " + referenceDef.getName() + "}.",
+            this::printLine
+        );
+        printLine("    */");
+        print("    java.lang.String ");
+        print(getConstantName(referenceDef.getName()));
+        print(" = \"");
+        print(referenceDef.getName());
+        printLine("\";");
+        newLine();
     }
 
     /**
@@ -135,17 +127,19 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
     public void mapOperation(
         OperationDef operationDef
     ) throws ServiceException {
-        this.pw.println("   /**");
-        this.pw.println(MapperUtils.wrapText(
+        printLine("   /**");
+        MapperUtils.wrapText(
             "    * ",
-            "Behavioural feature <code>" + operationDef.getName() + "</code>."));
-        this.pw.println("    */");
-        this.pw.print("    java.lang.String ");
-        this.pw.print(getConstantName(operationDef.getName()));
-        this.pw.print(" = \"");
-        this.pw.print(operationDef.getName());
-        this.pw.println("\";");
-        this.pw.println();
+            "Behavioural feature {@code " + operationDef.getName() + "}.",
+            this::printLine
+        );
+        printLine("    */");
+        print("    java.lang.String ");
+        print(getConstantName(operationDef.getName()));
+        print(" = \"");
+        print(operationDef.getName());
+        printLine("\";");
+        newLine();
     }
 
     /**
@@ -154,7 +148,7 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
      */
     public void mapEnd() {
 //      this.trace("ClassFeatures/End");
-        this.pw.println("}");
+        printLine("}");
     }
 
     /**
@@ -164,14 +158,14 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
     public void mapBegin()
         throws ServiceException {
         this.fileHeader();
-        this.pw.println("package "
+        printLine("package "
             + this.getNamespace(MapperUtils.getNameComponents(MapperUtils
                 .getPackageName(this.classDef.getQualifiedName()))) + ";");
-        this.pw.println();
-        this.pw.println("/**");
-        this.pw.println(MapperUtils.wrapText(" * ", "Features of class " + this.classDef.getName()));
-        this.pw.println(" */");
-        this.pw.print("public interface " + this.classDef.getName() + FEATURES_INTERFACE_SUFFIX);
+        newLine();
+        printLine("/**");
+        MapperUtils.wrapText(" * ", "Features of class " + this.classDef.getName(), this::printLine);
+        printLine(" */");
+        print("public interface " + this.classDef.getName() + FEATURES_INTERFACE_SUFFIX);
         if (!this.classDef.getSupertypes().isEmpty()) {
             String separator = " extends "; 
             for (
@@ -180,12 +174,12 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
                 separator = ", "
             ) {
                 ClassDef supertype = (ClassDef) i.next();
-                this.pw.print(separator);
-                this.pw.print(this.getModelType(supertype.getQualifiedName()) + FEATURES_INTERFACE_SUFFIX);
+                print(separator);
+                print(this.getModelType(supertype.getQualifiedName()) + FEATURES_INTERFACE_SUFFIX);
             }
         }
-        this.pw.println(" {");
-        this.pw.println();
+        printLine(" {");
+        newLine();
     }
 
     /**
@@ -193,22 +187,23 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
      * 
      * @param attributeDef
      * @throws ServiceException
-     */
-    
+     */    
     public void mapAttribute(
         AttributeDef attributeDef
     ) throws ServiceException {
-        this.pw.println("   /**");
-        this.pw.println(MapperUtils.wrapText(
+        printLine("   /**");
+        MapperUtils.wrapText(
             "    * ",
-            "Structural feature <code>" + attributeDef.getName() + "</code>."));
-        this.pw.println("    */");
-        this.pw.print("    java.lang.String ");
-        this.pw.print(getConstantName(attributeDef.getName()));
-        this.pw.print(" = \"");
-        this.pw.print(attributeDef.getName());
-        this.pw.println("\";");
-        this.pw.println();
+            "Structural feature {@code " + attributeDef.getName() + "}.",
+            this::printLine
+        );
+        printLine("    */");
+        print("    java.lang.String ");
+        print(getConstantName(attributeDef.getName()));
+        print(" = \"");
+        print(attributeDef.getName());
+        printLine("\";");
+        newLine();
     }
 
     /**

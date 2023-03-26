@@ -63,7 +63,7 @@ public class DateMarshaller {
     }
 
     /**
-     * <code>Datatype</code> Instance <-> ISO 8601 Basic <code>String</code>
+     * {@code Datatype} Instance <-> ISO 8601 Basic {@code String}
      */
     public static final Marshaller BASIC_FORMAT_TO_DATATYPE = new DatatypeMarshaller(
         XMLGregorianCalendar.class

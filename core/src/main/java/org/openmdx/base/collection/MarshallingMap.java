@@ -121,7 +121,7 @@ public class MarshallingMap<K,V>
     
         
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 3834309540194956341L;
 

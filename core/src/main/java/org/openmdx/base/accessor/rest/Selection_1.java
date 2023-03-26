@@ -246,7 +246,7 @@ final class Selection_1 extends AbstractContainer_1 {
      * 
      * @param candidate
      * 
-     * @return <code>true</code> if the object belongs to the container or extent
+     * @return {@code true} if the object belongs to the container or extent
      */
     @Override
     protected boolean isInContainerOrExtent(

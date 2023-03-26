@@ -277,13 +277,13 @@ public abstract class DelegatingObject_1
      *            the object's new container.
      * @param     criteria
      *            The criteria is used to move the object to the container or 
-     *            <code>null</null>, in which case it is up to the
+     *            {@code null</null>, in which case it is up to the
      *            implementation to define the criteria.
      *
      * @exception ServiceException  ILLEGAL_STATE
      *            if the object is persistent.
      * @exception ServiceException BAD_PARAMETER
-     *            if <code>there</code> is <code>null</code>.
+     *            if {@code there} is {@code null}.
      * @exception ServiceException  
      *            if the move operation fails.
      */
@@ -605,7 +605,7 @@ public abstract class DelegatingObject_1
     /**
      * Set an attribute's value.
      * <p>
-     * This method returns a <code>BAD_PARAMETER</code> exception unless the 
+     * This method returns a {@code BAD_PARAMETER} exception unless the 
      * feature is single valued or a stream. 
      *
      * @param       feature
@@ -655,7 +655,7 @@ public abstract class DelegatingObject_1
     /**
      * Get a List attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -680,7 +680,7 @@ public abstract class DelegatingObject_1
     /**
      * Get a Set attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -716,7 +716,7 @@ public abstract class DelegatingObject_1
     /**
      * Get a SparseArray attribute.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature
@@ -741,7 +741,7 @@ public abstract class DelegatingObject_1
     /**
      * Get a reference feature.
      * <p> 
-     * This method never returns <code>null</code> as an instance of the
+     * This method never returns {@code null} as an instance of the
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param       feature

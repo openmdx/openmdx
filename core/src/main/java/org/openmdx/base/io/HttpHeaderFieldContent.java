@@ -132,11 +132,11 @@ public final class HttpHeaderFieldContent implements Comparable<HttpHeaderFieldC
     }
     
     /**
-     * Parse the <code>q</code> amendment
+     * Parse the {@code q} amendment
      * 
      * @param major
      * 
-     * @return the <code>q</code> amendment's value
+     * @return the {@code q} amendment's value
      */
     private static float toQuality(
         String major

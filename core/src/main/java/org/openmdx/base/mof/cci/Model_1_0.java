@@ -110,7 +110,7 @@ public interface Model_1_0 {
      * 
      * @param xri the XRI to be analyzed
      * 
-     * @return <code>true</code> if the given XRI contains a shared association 
+     * @return {@code true} if the given XRI contains a shared association 
      */
     boolean containsSharedAssociation(
         Path xri
@@ -393,14 +393,14 @@ public interface Model_1_0 {
      * Verifies an object
      * 
      * @param object to be verified
-     * @param deepVerify When <code>deepVerify</code> is <code>true</code>, 
+     * @param deepVerify When {@code deepVerify} is {@code true}, 
      * the refVerifyConstraints method carries out a shallowVerify on that
      * object and a deep verify through its containment hierarchy.
      * @param verifyDerived
      * tells whether derived features should be verified as well
      * 
      * @return the null value if no constraint is violated; 
-     * otherwise, a list of <code>ServiceException</code> objects 
+     * otherwise, a list of {@code ServiceException} objects 
      * (each representing a constraint violation) is returned.
      */
     Collection<ServiceException> verifyObject(
@@ -487,8 +487,8 @@ public interface Model_1_0 {
      * Return identity pattern for class element
      * 
      * @param classDef the class, for which the identity pattern shall be determined
-     * @param takeSubclassesIntoConsideration if <code>false</code> then <code>null</code>
-     * is returned in case of a <code>root</code> class, otherwise the subclasses' pattern
+     * @param takeSubclassesIntoConsideration if {@code false} then {@code null}
+     * is returned in case of a {@code root} class, otherwise the subclasses' pattern
      * is used provided it is unique
      * @return identity pattern for specified class, null if classDef is not of type class.
      * @deprecated Will be replaced by a more general solution, soon

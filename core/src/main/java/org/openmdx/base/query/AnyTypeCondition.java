@@ -81,7 +81,7 @@ public class AnyTypeCondition extends Condition {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
 	private static final long serialVersionUID = -1593541490032431549L;
 

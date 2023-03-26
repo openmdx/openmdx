@@ -47,7 +47,7 @@ package org.openmdx.application.mof.cci;
 
 
 /**
- * The <code>ModelConstraints</code> class contains the model constraints that are used by the class
+ * The {@code ModelConstraints} class contains the model constraints that are used by the class
  * ModelConstraintsChecker_1
  */
 
@@ -184,7 +184,7 @@ public class ModelConstraints {
    * Returns the code of the passed code's string representation.
    * The string representation is case insensitive.
    *
-   * @exception  throws an <code>IllegalArgumentException</code> 
+   * @exception  throws an {@code IllegalArgumentException} 
    *             if the stringified code cannot be resolved
    * @param code a stringified code
    * @return a code
