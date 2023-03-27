@@ -47,6 +47,9 @@ buildscript {
     repositories {
         mavenCentral()
         maven {
+            url = uri("https://datura.econoffice.ch/maven2")
+        }
+        maven {
             url = uri("https://www.openmdx.org/repos/releases")
         }
     }

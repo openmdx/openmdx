@@ -59,6 +59,9 @@ repositories {
 	maven {
         url = uri("https://jcenter.bintray.com/")
     }
+    maven {
+        url = uri("https://datura.econoffice.ch/maven2")
+    }
 }
 
 var env = Properties()

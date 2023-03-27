@@ -49,4 +49,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://datura.econoffice.ch/maven2")
+    }
 }
