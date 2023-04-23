@@ -146,9 +146,7 @@ public abstract class AbstractInitialContextFactory implements InitialContextFac
      */
     protected abstract AbstractDataSourceContext createDataSourceContext();
     
-    /* (non-Javadoc)
-     * @see javax.naming.spi.InitialContextFactory#getInitialContext(java.util.Hashtable)
-     */
+    @Override
     public Context getInitialContext(
         Hashtable<?, ?> environment
     ) throws NamingException {

@@ -219,13 +219,13 @@ public class ModelPackageLoader_2 implements ModelLoader {
     /**
      * Retrieve the model URI<ol>
      * <li>try to locate the WBXML resource URL
-     * <li>fall back to the XML resource XRI
+     * <li>fall back to the XML resource URL
      * </ol>
      * 
      * @param qualifiedPackageName
      * @param modelName
      * 
-     * @return the model resource URI 
+     * @return the model resource URI, or {@code null} if the resource is lacking
      *   
      * @throws ServiceException
      */
@@ -233,11 +233,12 @@ public class ModelPackageLoader_2 implements ModelLoader {
         String qualifiedPackageName, 
         String modelName
     ){
-        String resourcePath = ModelHelper_1.toJavaPackageName(qualifiedPackageName, Names.XMI_PACKAGE_SUFFIX).replace('.', '/') + '/' + modelName;
+        final String resourcePath = ModelHelper_1.toJavaPackageName(qualifiedPackageName, Names.XMI_PACKAGE_SUFFIX).replace('.', '/') + '/' + modelName;
         URL resourceURL = Resources.getResource(resourcePath + ".wbxml");
-        return resourceURL == null ? (
-            XRI_2Protocols.RESOURCE_PREFIX + resourcePath + ".xml" 
-        ) : resourceURL.toExternalForm();  
+        if(resourceURL == null) {
+            resourceURL = Resources.getResource(resourcePath + ".xml");
+        }
+        return resourceURL == null ? null : resourceURL.toExternalForm();  
     }
 
     /**
@@ -253,14 +254,18 @@ public class ModelPackageLoader_2 implements ModelLoader {
         final String modelName = qualifiedPackageName.substring(
             qualifiedPackageName.lastIndexOf(':') + 1
         );
-        String xmlResource = getResourceURI(qualifiedPackageName, modelName);
-        SysLog.detail("loading model " + modelName + " from " + xmlResource);
-        importHelper.importObjects(
-            new Dataprovider_2Target(this.channel),
-            ImportHelper.asSource(new InputSource(xmlResource)), 
-            null, // errorHandler
-            ImportMode.CREATE
-        );
+        final String xmlResource = getResourceURI(qualifiedPackageName, modelName);
+        if(xmlResource == null) {
+	        SysLog.warning("Resource for model " + modelName + " missing!");
+        } else {
+	        SysLog.detail("Loading model " + modelName + " from " + xmlResource);
+	        importHelper.importObjects(
+	            new Dataprovider_2Target(this.channel),
+	            ImportHelper.asSource(new InputSource(xmlResource)), 
+	            null, // errorHandler
+	            ImportMode.CREATE
+	        );
+        }
     }
     
     /**

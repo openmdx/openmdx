@@ -7,7 +7,7 @@
 1. Create the file build.properties in your home directory with the 
    following content:
    
-   openmdx-test.core.datasource=jdbc:postgresql:\\/\\/localhost\\/openmdx-test?user=postgres&password=manager99&driver=org.postgresql.Driver
+   openmdx-test.core.datasource=jdbc:xa:org.postgresql.xa.PGXADataSource?user=openmdx-test&password=secret&databaseName=openmdx-test
    openmdx-test.core.timezone=Europe/Zurich
 
 2. With pgAdmin 4 create the database openmdx-test and run the

@@ -71,13 +71,13 @@ public final class AtomikosTransactionSynchronizationRegistry
 {
 
     public AtomikosTransactionSynchronizationRegistry(TransactionManager transactionManger) {
-		this.transactionManger = transactionManger;
+		this.transactionManager = transactionManger;
 	}
 
 	/**
      * The Atomikos Transaction Manager
      */
-    private final TransactionManager transactionManger;
+    private final TransactionManager transactionManager;
     
     /**
      * The resource registry
@@ -96,7 +96,7 @@ public final class AtomikosTransactionSynchronizationRegistry
     		throw new IllegalStateException("No active transaction");
     	}
 		try {
-			return this.transactionManger.getTransaction();
+			return this.transactionManager.getTransaction();
 		} catch (SystemException e) {
 			throw new RuntimeException(e);
 		}
@@ -121,7 +121,7 @@ public final class AtomikosTransactionSynchronizationRegistry
      */
     public int getTransactionStatus() {
     	try {
-			return transactionManger.getStatus();
+			return transactionManager.getStatus();
 		} catch (SystemException e) {
 			throw new RuntimeServiceException(e);
 		}
@@ -154,7 +154,7 @@ public final class AtomikosTransactionSynchronizationRegistry
      */
     public void registerInterposedSynchronization(Synchronization sync) {
     	AtomikosSynchronization atomikosSynchronization = (AtomikosSynchronization) getResources().get(AtomikosSynchronization.class);
-    	atomikosSynchronization.setInterposedSynchroniztaion(sync);
+    	atomikosSynchronization.setInterposedSynchronizatio(sync);
     }
 
     /* (non-Javadoc)
@@ -163,7 +163,7 @@ public final class AtomikosTransactionSynchronizationRegistry
     public void setRollbackOnly(
     ) {
     	try {
-			this.transactionManger.setRollbackOnly();
+			this.transactionManager.setRollbackOnly();
 		} catch (IllegalStateException | SystemException e) {
 			throw new RuntimeException();
 		}
@@ -198,7 +198,7 @@ public final class AtomikosTransactionSynchronizationRegistry
     	 */
     	private Synchronization interposedSynchronization;
 		
-    	void setInterposedSynchroniztaion(Synchronization synchronization) {
+    	void setInterposedSynchronizatio(Synchronization synchronization) {
     		this.interposedSynchronization = synchronization;
     	}
     	
