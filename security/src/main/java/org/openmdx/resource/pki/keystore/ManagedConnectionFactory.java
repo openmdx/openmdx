@@ -72,7 +72,7 @@ import org.openmdx.resource.spi.AbstractManagedConnectionFactory;
 public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 
 	/**
-     * Implements <code>java.io.Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 8198549417001170970L;
 

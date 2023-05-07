@@ -152,7 +152,7 @@ public class SwingCallbackHandler
 	}
 
 	/**
-	 * Signals that the callback handler's <code>handle()</code> method should return
+	 * Signals that the callback handler's {@code handle()} method should return
 	 */
 	public void signalReturn(
 	){
@@ -160,7 +160,7 @@ public class SwingCallbackHandler
 	}
 
 	/**
-	 * Signals that callback handler's <code>handle()</code> method should fail
+	 * Signals that callback handler's {@code handle()} method should fail
 	 *
 	 * @param exception the exception 
 	 */
@@ -171,7 +171,7 @@ public class SwingCallbackHandler
 	}
 	
 	/**
-	 * Signals that callback handler's <code>handle()</code> method should fail
+	 * Signals that callback handler's {@code handle()} method should fail
 	 *
 	 * @param exception the exception 
 	 */

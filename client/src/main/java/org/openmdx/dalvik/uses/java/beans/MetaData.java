@@ -53,7 +53,7 @@ import java.util.Vector;
 import java.util.WeakHashMap;
 
 /*
- * Like the <code>Intropector</code>, the <code>MetaData</code> class
+ * Like the {@code Intropector}, the {@code MetaData} class
  * contains <em>meta</em> objects that describe the way
  * classes should express their state in terms of their
  * own public APIs.
@@ -66,7 +66,8 @@ import java.util.WeakHashMap;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -84,7 +85,7 @@ class NullPersistenceDelegate extends PersistenceDelegate {
 }
 
 /**
- * The persistence delegate for <CODE>enum</CODE> classes.
+ * The persistence delegate for {@code enum} classes.
  *
  * @author Sergey A. Malenkov
  */
@@ -263,10 +264,10 @@ class java_lang_reflect_Method_PersistenceDelegate extends PersistenceDelegate {
 // Dates
 
 /**
- * The persistence delegate for <CODE>java.util.Date</CODE> classes.
+ * The persistence delegate for {@code java.util.Date} classes.
  * Do not extend DefaultPersistenceDelegate to improve performance and
- * to avoid problems with <CODE>java.sql.Date</CODE>,
- * <CODE>java.sql.Time</CODE> and <CODE>java.sql.Timestamp</CODE>.
+ * to avoid problems with {@code java.sql.Date},
+ * {@code java.sql.Time} and {@code java.sql.Timestamp}.
  *
  * @author Sergey A. Malenkov
  */
@@ -288,7 +289,7 @@ class java_util_Date_PersistenceDelegate extends PersistenceDelegate {
 }
 
 /**
- * The persistence delegate for <CODE>java.sql.Timestamp</CODE> classes.
+ * The persistence delegate for {@code java.sql.Timestamp} classes.
  * It supports nanoseconds.
  *
  * @author Sergey A. Malenkov
@@ -538,7 +539,7 @@ abstract class java_util_Collections extends PersistenceDelegate {
 }
 
 /**
- * The persistence delegate for <CODE>java.util.EnumMap</CODE> classes.
+ * The persistence delegate for {@code java.util.EnumMap} classes.
  *
  * @author Sergey A. Malenkov
  */
@@ -557,7 +558,7 @@ class java_util_EnumMap_PersistenceDelegate extends PersistenceDelegate {
 }
 
 /**
- * The persistence delegate for <CODE>java.util.EnumSet</CODE> classes.
+ * The persistence delegate for {@code java.util.EnumSet} classes.
  *
  * @author Sergey A. Malenkov
  */

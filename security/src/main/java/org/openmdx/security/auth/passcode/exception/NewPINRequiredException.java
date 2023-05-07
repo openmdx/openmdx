@@ -52,12 +52,12 @@ public class NewPINRequiredException
 	extends PasscodeExpiredException {
 
     /**
-     * <code>serialVersionUID</code> for <code>Serialization</code>
+     * {@code serialVersionUID} for {@code Serialization}
      */
     private static final long serialVersionUID = 3257007657150591792L;
 
     /**
-     * Constructor for <code>Serialization</code>
+     * Constructor for {@code Serialization}
      */
     protected NewPINRequiredException(
     ) {

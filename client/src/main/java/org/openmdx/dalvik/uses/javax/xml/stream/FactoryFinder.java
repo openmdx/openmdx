@@ -42,7 +42,8 @@ import java.util.Properties;
  * 
  * openMDX/Dalvik Notice (February 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  *
  * @since openMDX 2.12
  * @author openMDX Team
@@ -97,7 +98,7 @@ class FactoryFinder {
      * and fall back is enabled, the current (i.e. bootstrap) class loader is
      * tried.
      *
-     * If the class loader supplied is <code>null</code>, first try using the
+     * If the class loader supplied is {@code null}, first try using the
      * context class loader followed by the current (i.e. bootstrap) class
      * loader.
      */
@@ -131,7 +132,7 @@ class FactoryFinder {
 
     /**
      * Create an instance of a class. Delegates to method
-     * <code>getProviderClass()</code> in order to load the class.
+     * {@code getProviderClass()} in order to load the class.
      *
      * @param className Name of the concrete class corresponding to the
      * service provider

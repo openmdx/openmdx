@@ -58,7 +58,7 @@ public final class GenericPrincipal
 	implements Externalizable, Principal {
 
 	/**
-     * Implements <code>Externalizable</code>
+     * Implements {@code Externalizable}
 	 */
     public GenericPrincipal() {
 		super();
@@ -74,7 +74,7 @@ public final class GenericPrincipal
      * @param name
      *        the principal's name
      *        
-     * @param NullPointerException if any of the arguments is <code>null</code>       
+     * @param NullPointerException if any of the arguments is {@code null}       
      */
     public GenericPrincipal(
         String type,
@@ -87,7 +87,7 @@ public final class GenericPrincipal
     }
     
     /**
-     * <code>serialVersionUID</code> to implement <code>Serializable</code>.
+     * {@code serialVersionUID} to implement {@code Serializable}.
      */
 	private static final long serialVersionUID = 3256728368329602610L;
 
@@ -119,7 +119,7 @@ public final class GenericPrincipal
     /**
      * Retrieve the identity.
      * 
-     * @return the <code>identity</code>'s value
+     * @return the {@code identity}'s value
      */
     public String getIdentity() {
         return this.identity;

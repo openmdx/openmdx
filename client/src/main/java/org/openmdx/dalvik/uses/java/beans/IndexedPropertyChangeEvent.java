@@ -27,7 +27,7 @@ package org.openmdx.dalvik.uses.java.beans;
 /**
  * An "IndexedPropertyChange" event gets delivered whenever a component that
  * conforms to the JavaBeans<TM> specification (a "bean") changes a bound
- * indexed property. This class is an extension of <code>PropertyChangeEvent</code>
+ * indexed property. This class is an extension of {@code PropertyChangeEvent}
  * but contains the index of the property that has changed.
  * <P>
  * Null values may be provided for the old and the new values if their
@@ -40,7 +40,8 @@ package org.openmdx.dalvik.uses.java.beans;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -53,7 +54,7 @@ public class IndexedPropertyChangeEvent extends PropertyChangeEvent {
     private int index;
 
     /**
-     * Constructs a new <code>IndexedPropertyChangeEvent</code> object.
+     * Constructs a new {@code IndexedPropertyChangeEvent} object.
      *
      * @param source  The bean that fired the event.
      * @param propertyName  The programmatic name of the property that

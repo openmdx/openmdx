@@ -65,12 +65,12 @@ class SystemProperties {
     private static final String PATTERN = "\\$\\{([^}]+)\\}";
 
     /**
-     * The property expansion <code>Pattern</code>. 
+     * The property expansion {@code Pattern}. 
      */
     private static final Pattern pattern = Pattern.compile(PATTERN);
 
     /**
-     * Expand system properties of the form <code>${system.property}</code>.
+     * Expand system properties of the form {@code ${system.property}}.
      * 
      * @param source the source
      * 
@@ -84,7 +84,7 @@ class SystemProperties {
     }
 
     /**
-     * Expand system properties of the form <code>${system.property}</code>.
+     * Expand system properties of the form {@code ${system.property}}.
      * 
      * @param source the source
      * 

@@ -39,7 +39,8 @@ import java.util.ArrayList;
  * <p>
  * openMDX/Dalvik Notice (November 2022):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.18
  * @author openMDX Team
@@ -95,7 +96,7 @@ class DerIndefLenConverter {
 
     /**
      * Parse the tag and if it is an end-of-contents tag then
-     * add the current position to the <code>eocList</code> vector.
+     * add the current position to the {@code eocList} vector.
      */
     private void parseTag() throws IOException {
         if (dataPos == dataSize)
@@ -154,7 +155,7 @@ class DerIndefLenConverter {
 
     /**
      * Parse the length and if it is an indefinite length then add
-     * the current position to the <code>ndefsList</code> vector.
+     * the current position to the {@code ndefsList} vector.
      */
     private int parseLength() throws IOException {
         int curLen = 0;

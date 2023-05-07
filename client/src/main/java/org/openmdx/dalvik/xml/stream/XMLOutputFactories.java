@@ -88,7 +88,7 @@ public class XMLOutputFactories {
     /**
      * Tells whether the given content type is supported
      * 
-     * @return <code>true</code> if given content type is supported
+     * @return {@code true} if given content type is supported
      */
     public static boolean isSupported(
         String mimeType

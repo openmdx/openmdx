@@ -48,7 +48,8 @@ import org.openmdx.dalvik.uses.javax.xml.stream.events.XMLEvent;
  * 
  * openMDX/Dalvik Notice (February 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  *
  * @since openMDX 2.12
  * @author openMDX Team

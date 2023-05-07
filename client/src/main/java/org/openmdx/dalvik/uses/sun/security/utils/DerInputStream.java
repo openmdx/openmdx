@@ -54,7 +54,8 @@ import java.io.DataInputStream;
  * <p>
  * openMDX/Dalvik Notice (November 2022):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.18
  * @author openMDX Team
@@ -652,13 +653,13 @@ public class DerInputStream {
 
     /**
      * Mark the current position in the buffer, so that
-     * a later call to <code>reset</code> will return here.
+     * a later call to {@code reset} will return here.
      */
     public void mark(int value) { buffer.mark(value); }
 
 
     /**
-     * Return to the position of the last <code>mark</code>
+     * Return to the position of the last {@code mark}
      * call.  A mark is implicitly set at the beginning of
      * the stream when it is created.
      */

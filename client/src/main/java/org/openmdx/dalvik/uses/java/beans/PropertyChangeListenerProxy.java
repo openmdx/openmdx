@@ -27,22 +27,23 @@ package org.openmdx.dalvik.uses.java.beans;
 
 
 /**
- * A class which extends the <code>EventListenerProxy</code> specifically
- * for adding a named <code>PropertyChangeListener</code>. Instances of
- * this class can be added as <code>PropertyChangeListener</code> to
+ * A class which extends the {@code EventListenerProxy} specifically
+ * for adding a named {@code PropertyChangeListener}. Instances of
+ * this class can be added as {@code PropertyChangeListener} to
  * an object.
  * <p>
- * If the object has a <code>getPropertyChangeListeners()</code>
+ * If the object has a {@code getPropertyChangeListeners()}
  * method then the array returned could be a mixture of
- * <code>PropertyChangeListener</code> and
- * <code>PropertyChangeListenerProxy</code> objects.
+ * {@code PropertyChangeListener} and
+ * {@code PropertyChangeListenerProxy} objects.
  *
  * @see java.util.EventListenerProxy
  * 
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team

@@ -59,12 +59,12 @@ import org.openmdx.base.text.Case;
  * Identifier naming is an important issue for automatically generated Java interfaces, especially
  * when the interfaces are intended to be used by applications written by human programmers. The
  * mapping has to reach a balance between conflicting requirements:<ul>
- * <li>Syntactic correctness &mdash; all identifiers in the mapped Java must conform to the Java syntax.
- * <li>User friendliness &mdash; identifiers should convey as much information as possible without being
+ * <li>Syntactic correctness&mdash;all identifiers in the mapped Java must conform to the Java syntax.
+ * <li>User friendliness&mdash;identifiers should convey as much information as possible without being
  *     overly long.
  * <li>Conformance to existing conventions &mdash; identifiers should conform to existing stylistic
  *     conventions.
- * <li>Conflict avoidance &mdash; identifiers must not conflict with keywords, literals and
+ * <li>Conflict avoidance&mdash;identifiers must not conflict with keywords, literals and
  *     {@code java.lang.Object}'s methods.
  * </ul>
  */

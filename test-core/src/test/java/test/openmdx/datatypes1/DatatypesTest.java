@@ -537,7 +537,7 @@ public class DatatypesTest  {
      * @param dateLowerBound the lower bound of the date selection
      * @param dateUpperBound the upper bound of the date selection
      * @param expectedCount the expected number of entries in the selection
-     * @param fetchSize the fetch size to be used, full segment scan if <code>null</code>
+     * @param fetchSize the fetch size to be used, full segment scan if {@code null}
      * 
      * @throws Exception
      */

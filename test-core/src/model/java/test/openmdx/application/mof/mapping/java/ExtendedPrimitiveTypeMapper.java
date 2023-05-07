@@ -60,7 +60,7 @@ public class ExtendedPrimitiveTypeMapper extends StandardPrimitiveTypeMapper {
     /**
      * Constructor 
      * <p>
-     * Fallback requireed for example for <code>est:openmdx:app1:AddressFormatType</code>
+     * Fallback requireed for example for {@code est:openmdx:app1:AddressFormatType}
      */
     public ExtendedPrimitiveTypeMapper() {
         super(true);

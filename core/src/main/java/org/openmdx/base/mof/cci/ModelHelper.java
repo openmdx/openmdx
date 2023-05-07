@@ -82,8 +82,12 @@ public class ModelHelper {
 				return Multiplicity.SET;
 			}
 		} else if (Multiplicity.UNBOUNDED.equals(multiplicity)) {
-			// map 0..n for primitive types to <<list>> (deprecated)
-			return Multiplicity.LIST;
+			if(featureDef.isAssociationEndType()) {
+				return Multiplicity.SET;
+			} else {
+				// map 0..n for primitive types to <<list>> (deprecated)
+				return Multiplicity.LIST;
+			}
 		}
 		try {
 			return Multiplicity.parse(multiplicity);

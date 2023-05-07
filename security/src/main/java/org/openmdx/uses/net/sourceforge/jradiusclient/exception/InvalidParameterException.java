@@ -66,7 +66,7 @@ public class InvalidParameterException extends Exception{
     }
 
 	/**
-	 * Implements <code>Serializable</code>.
+     * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = 4121981355749355572L;
 

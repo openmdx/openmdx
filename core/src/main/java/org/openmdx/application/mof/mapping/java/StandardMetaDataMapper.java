@@ -703,7 +703,7 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
                     null, 
                     -1
                 );
-                printLine("      </" + tag + ">");
+                printLine("      </", tag, ">");
                 // <id name="openmdxjdoIndex">
                 //  <column name="IDX"/>
                 // </id>                
@@ -724,7 +724,7 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
                     null, 
                     -1
                 );
-                printLine("      </" + tag + ">");                
+                printLine("      </", tag, ">");                
                 // <many-to-one name="openmdxjdoIdentity">
                 //  <join-column name="OBJECT_ID" referenced-column-name="OBJECT_ID"/>
                 // </many-to-one>

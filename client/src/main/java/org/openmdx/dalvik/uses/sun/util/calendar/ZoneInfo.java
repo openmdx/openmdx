@@ -40,7 +40,7 @@ import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
 /**
- * <code>ZoneInfo</code> is an implementation subclass of {@link
+ * {@code ZoneInfo} is an implementation subclass of {@link
  * java.util.TimeZone TimeZone} that represents GMT offsets and
  * daylight saving time transitions of a time zone.
  * <p>
@@ -48,13 +48,13 @@ import java.util.TimeZone;
  * #transitions transitions} table consisting of a chronological
  * sequence of transitions of GMT offset and/or daylight saving time
  * changes. Since all transitions are represented in UTC, in theory,
- * <code>ZoneInfo</code> can be used with any calendar systems except
+ * {@code ZoneInfo} can be used with any calendar systems except
  * for the {@link #getOffset(int,int,int,int,int,int) getOffset}
  * method that takes Gregorian calendar date fields.
  * <p>
  * This table covers transitions from 1900 until 2037 (as of version
  * 1.4), Before 1900, it assumes that there was no daylight saving
- * time and the <code>getOffset</code> methods always return the
+ * time and the {@code getOffset} methods always return the
  * {@link #getRawOffset} value. No Local Mean Time is supported. If a
  * specified date is beyond the transition table and this time zone is
  * supposed to observe daylight saving time in 2037, it delegates
@@ -68,7 +68,8 @@ import java.util.TimeZone;
  * <p>
  * openMDX/Dalvik Notice (November 2022):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.18
  * @author openMDX Team
@@ -109,9 +110,9 @@ public class ZoneInfo extends TimeZone {
 
     /**
      * A CRC32 value of all pairs of transition time (in milliseconds
-     * in <code>long</code>) in local time and its GMT offset (in
-     * seconds in <code>int</code>) in the chronological order. Byte
-     * values of each <code>long</code> and <code>int</code> are taken
+     * in {@code long}) in local time and its GMT offset (in
+     * seconds in {@code int}) in the chronological order. Byte
+     * values of each {@code long} and {@code int} are taken
      * in the big endian order (i.e., MSB to LSB).
      * @serial
      */
@@ -119,7 +120,7 @@ public class ZoneInfo extends TimeZone {
 
     /**
      * The amount of time in milliseconds saved during daylight saving
-     * time. If <code>useDaylight</code> is false, this value is 0.
+     * time. If {@code useDaylight} is false, this value is 0.
      * @serial
      */
     private int dstSavings;
@@ -650,7 +651,7 @@ public class ZoneInfo extends TimeZone {
     }
 
     /**
-     * Returns a copy of this <code>ZoneInfo</code>.
+     * Returns a copy of this {@code ZoneInfo}.
      */
     public Object clone() {
         ZoneInfo zi = (ZoneInfo) super.clone();
@@ -695,7 +696,7 @@ public class ZoneInfo extends TimeZone {
      * offset value with no daylight saving time.
      *
      * @param other the ZoneInfo object to be compared with
-     * @return true if the given <code>TimeZone</code> has the same
+     * @return true if the given {@code TimeZone} has the same
      * GMT offset and transition information; false, otherwise.
      */
     public boolean hasSameRules(TimeZone other) {
@@ -730,7 +731,7 @@ public class ZoneInfo extends TimeZone {
      *
      * @return the Map that holds the mappings from alias time zone IDs
      *    to their standard time zone IDs, or null if
-     *    <code>ZoneInfoMappings</code> file is not available.
+     *    {@code ZoneInfoMappings} file is not available.
      */
     public static Map<String, String> getAliasTable() {
          return ZoneInfoFile.getAliasMap();

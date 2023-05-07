@@ -112,7 +112,7 @@ public class StructureMapper extends AbstractMapper {
         printLine("   * @return A SparseArray containing all elements for this structure field.");
         printLine("   */");
         String memberType = this.getType(fieldDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER, null);
-        printLine("  public " + memberType + " " + this.getMethodName(fieldDef.getBeanGetterName()) + "(");
+        printLine("  public ", memberType, " ", this.getMethodName(fieldDef.getBeanGetterName()), "(");
         printLine("  );");
         newLine();
     }
@@ -132,7 +132,7 @@ public class StructureMapper extends AbstractMapper {
         printLine("   * @return A set containing all elements for this structure field.");
         printLine("   */");
         String memberType = this.getType(fieldDef, "java.util.Set", Boolean.TRUE, TypeMode.MEMBER, null);
-        printLine("  public " + memberType + " " + this.getMethodName(fieldDef.getBeanGetterName()) + "(");
+        printLine("  public ", memberType, " ", this.getMethodName(fieldDef.getBeanGetterName()), "(");
         printLine("  );");        
         newLine();
     }
@@ -153,7 +153,7 @@ public class StructureMapper extends AbstractMapper {
             printLine("   * @return A list containing all elements for this structure field.");
             printLine("   */");
             String memberType = this.getType(fieldDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER, null);
-            printLine("  public " + memberType + " " + this.getMethodName(fieldDef.getBeanGetterName()) + "(");
+            printLine("  public ", memberType, " ", this.getMethodName(fieldDef.getBeanGetterName()), "(");
             printLine("  );");        
             newLine();
         }
@@ -166,12 +166,12 @@ public class StructureMapper extends AbstractMapper {
         this.trace("StructureType/FieldGet1_1");
         this.members.add(structureFieldDef.getBeanGenericName());
         printLine("  /**");
-        printLine("   * Retrieves the value for the structure field {@code " + structureFieldDef.getName() + "}.");
+        printLine("   * Retrieves the value for the structure field {@code ", structureFieldDef.getName(), "}.");
         mapAnnotation("   * ", structureFieldDef);
-        printLine("   * @return The non-null value for structure field {@code " + structureFieldDef.getName() + "}.");
+        printLine("   * @return The non-null value for structure field {@code ", structureFieldDef.getName(), "}.");
         printLine("   */");
         String memberType = this.getType(structureFieldDef.getQualifiedTypeName(), getFormat(), false);
-        printLine("  public " + memberType + " " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
+        printLine("  public ", memberType, " ", this.getMethodName(structureFieldDef.getBeanGetterName()), "(");
         printLine("  );");        
         newLine();
     }
@@ -183,12 +183,12 @@ public class StructureMapper extends AbstractMapper {
         this.trace("StructureType/FieldGet0_1");
         this.members.add(structureFieldDef.getBeanGenericName());
         printLine("  /**");
-        printLine("   * Retrieves the value for the optional structure field {@code " + structureFieldDef.getName() + "}.");
+        printLine("   * Retrieves the value for the optional structure field {@code ", structureFieldDef.getName(), "}.");
         mapAnnotation("   * ", structureFieldDef);
-        printLine("   * @return The possibly null value for structure field {@code " + structureFieldDef.getName() + "}.");
+        printLine("   * @return The possibly null value for structure field {@code ", structureFieldDef.getName(), "}.");
         printLine("   */");
         String memberType = this.getType(structureFieldDef.getQualifiedTypeName(), getFormat(), true);
-        printLine("  public " + memberType + " " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
+        printLine("  public ", memberType, " ", this.getMethodName(structureFieldDef.getBeanGetterName()), "(");
         printLine("  );");        
         newLine();
     }
@@ -199,7 +199,7 @@ public class StructureMapper extends AbstractMapper {
     ) {
         this.trace("StructureType/FieldGetStream.vm");
         this.members.add(structureFieldDef.getBeanGenericName());
-        printLine("");
+        newLine();
         if (PrimitiveTypes.BINARY.equals(structureFieldDef.getQualifiedTypeName())) {
             printLine("  /**");
             MapperUtils
@@ -209,9 +209,9 @@ public class StructureMapper extends AbstractMapper {
             mapAnnotation("   * ", structureFieldDef);
             printLine("   * @return A InputStream containing the binary value as stream for this structure field.");
             printLine("   */");
-            printLine("  public java.io.InputStream " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
+            printLine("  public java.io.InputStream ", this.getMethodName(structureFieldDef.getBeanGetterName()), "(");
             printLine("  );");
-            printLine("");
+            newLine();
         } 
         else if (PrimitiveTypes.STRING.equals(structureFieldDef.getQualifiedTypeName())) {
             printLine("  /**");
@@ -222,7 +222,7 @@ public class StructureMapper extends AbstractMapper {
             mapAnnotation("   * ", structureFieldDef);
             printLine("   * @return A Reader containing the string value as stream for this structure field.");
             printLine("   */");
-            printLine("  public java.io.Reader " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
+            printLine("  public java.io.Reader ", this.getMethodName(structureFieldDef.getBeanGetterName()), "(");
             printLine("  );");
             newLine();
         } 
@@ -236,7 +236,7 @@ public class StructureMapper extends AbstractMapper {
             mapAnnotation("   * ", structureFieldDef);
             printLine("   * @return A Collection containing the value as stream for this structure field.");
             printLine("   */");
-            printLine("  public java.io.DataInput " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
+            printLine("  public java.io.DataInput ", this.getMethodName(structureFieldDef.getBeanGetterName()), "(");
             printLine("  );");
             newLine();
         }
@@ -255,10 +255,10 @@ public class StructureMapper extends AbstractMapper {
             printLine("  enum Member {");
             String delimiter = "    ";
             if(this.members.isEmpty()) {
-                printLine(delimiter + "// No members");
+                printLine(delimiter, "// No members");
             } else {
                 for(String member : this.members) {
-                    printLine(delimiter + AbstractNames.uncapitalize(member));
+                    printLine(delimiter, AbstractNames.uncapitalize(member));
                     delimiter = "  , ";
                 }
             }
@@ -273,18 +273,18 @@ public class StructureMapper extends AbstractMapper {
     public void mapBegin(
     ) throws ServiceException {
         this.trace("StructureType/Begin");
-        this.fileHeader();
         List<String> nameComponents = MapperUtils.getNameComponents(MapperUtils.getPackageName(this.structDef.getQualifiedName()));
-        printLine("package " + this.getNamespace(nameComponents) + ";");
+        printLine("package ", this.getNamespace(nameComponents), ";");
         newLine();
-        printLine("public interface " + this.structName);
+        this.mapGeneratedAnnotation();
+        printLine("public interface ", this.structName);
         if(getFormat() == Format.JMI1) {            
             print("  extends " + REF_STRUCT_INTERFACE_NAME + ", ");
         }
         if(getFormat() != Format.CCI2) {
             printLine(
-                getNamespace(nameComponents, Names.CCI2_PACKAGE_SUFFIX) +    
-                '.' +
+                getNamespace(nameComponents, Names.CCI2_PACKAGE_SUFFIX),    
+                ".",
                 this.structName
             );
         }

@@ -21,14 +21,15 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 /** 
- * <p>Serialized form of <code>javax.xml.datatype.XMLGregorianCalendar</code>.</p>
+ * <p>Serialized form of {@code javax.xml.datatype.XMLGregorianCalendar}.</p>
  * 
  * @author Michael Glavassevich, IBM
  * @version $Id: SerializedXMLGregorianCalendar.java 756261 2009-03-19 23:35:50Z mrglavas $
  * <p>
  * openMDX/Dalvik Notice (April 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team

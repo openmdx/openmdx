@@ -432,7 +432,7 @@ public class TestMain {
 		/**
 		 * TODO
 		 * 
-		 * @return <code>true</code> if remote exception are mapped to GENERIC
+		 * @return {@code true} if remote exception are mapped to GENERIC
 		 */
 		protected boolean causeIsGeneric() {
 			return REMOTE_EXCEPTIONS_ARE_GENERIC && this instanceof RemoteConnectionTest;
@@ -445,7 +445,7 @@ public class TestMain {
 		/**
 		 * Switch back and forth to test both variants
 		 * 
-		 * @return <code>true</code> if the package should be used to acquire
+		 * @return {@code true} if the package should be used to acquire
 		 *         structures.
 		 */
 		protected StructureCreation nextStructureCreation() {
@@ -4368,7 +4368,7 @@ public class TestMain {
 
 		/**
 		 * @param i the argument to be tested
-		 * @return <code>true</code> if the argument is odd
+		 * @return {@code true} if the argument is odd
 		 */
 		private boolean isOdd(int i) {
 			return !isEven(i);
@@ -4376,7 +4376,7 @@ public class TestMain {
 
 		/**
 		 * @param i the argument to be tested
-		 * @return <code>true</code> if the argument ie even
+		 * @return {@code true} if the argument ie even
 		 */
 		private boolean isEven(int i) {
 			return i % 2 == 0;
@@ -4926,7 +4926,7 @@ public class TestMain {
 		/**
 		 * Defines whether the unit of work is optimistic or pessimistic
 		 * 
-		 * @return <code>true</code> if the unit of work is optimistic
+		 * @return {@code true} if the unit of work is optimistic
 		 */
 		protected abstract Boolean isOptimistic();
 

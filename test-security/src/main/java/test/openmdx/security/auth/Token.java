@@ -77,7 +77,7 @@ final class Token
 	}
 	
 	/**
-	 * <code>serialVersionUID</code> to implement <code>Serializable</code>.
+	 * {@code serialVersionUID} to implement {@code Serializable}.
 	 */
 	private static final long serialVersionUID = 3256726173651515703L;
 
@@ -102,7 +102,7 @@ final class Token
 	//------------------------------------------------------------------------
 	
 	/**
-	 * Constructor to implement <code>Externalizable</code>
+	 * Constructor to implement {@code Externalizable}
 	 */
 	public Token() {
 	    super();

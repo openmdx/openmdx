@@ -55,7 +55,8 @@ package org.openmdx.dalvik.uses.java.beans;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -116,7 +117,7 @@ public interface PropertyEditor {
      *
      * @return a fragment of Java code representing an initializer for the
      *         current value. It should not contain a semi-colon
-     *         ('<code>;</code>') to end the expression.
+     *         ('{@code ;}') to end the expression.
      */
     String getJavaInitializationString();
 

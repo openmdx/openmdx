@@ -128,22 +128,22 @@ class ManagedKeyStoreConnection extends AbstractManagedConnection<ManagedConnect
     private final ConnectionType connectionType;
     
     /**
-     * <code>null</code> unless connectionType is CERTIFICATE or PRIVATE_KEY
+     * {@code null} unless connectionType is CERTIFICATE or PRIVATE_KEY
      */
     private Certificate certificate;
 
     /**
-     * <code>null</code> unless connectionType is PRIVATE_KEY
+     * {@code null} unless connectionType is PRIVATE_KEY
      */
     private Key key;
     
     /**
-     * <code>null</code> unless connectionType is VALIDATOR
+     * {@code null} unless connectionType is VALIDATOR
      */
     private PKIXParameters parameters;
     
     /**
-     * <code>null</code> unless connectionType is VALIDATOR
+     * {@code null} unless connectionType is VALIDATOR
      */
     private CertPathValidator validator;
     

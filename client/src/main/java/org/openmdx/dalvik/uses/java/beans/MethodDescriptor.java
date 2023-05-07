@@ -40,7 +40,8 @@ import java.util.ArrayList;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -57,8 +58,8 @@ public class MethodDescriptor extends FeatureDescriptor {
     private ParameterDescriptor parameterDescriptors[];
 
     /**
-     * Constructs a <code>MethodDescriptor</code> from a
-     * <code>Method</code>.
+     * Constructs a {@code MethodDescriptor} from a
+     * {@code Method}.
      *
      * @param method    The low-level method information.
      */
@@ -68,8 +69,8 @@ public class MethodDescriptor extends FeatureDescriptor {
 
 
     /**
-     * Constructs a <code>MethodDescriptor</code> from a
-     * <code>Method</code> providing descriptive information for each
+     * Constructs a {@code MethodDescriptor} from a
+     * {@code Method} providing descriptive information for each
      * of the method's parameters.
      *
      * @param method    The low-level method information.

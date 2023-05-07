@@ -94,11 +94,13 @@ public class PackageMapper extends AbstractMapper {
             org.openmdx.application.mof.mapping.java.metadata.Visibility.CCI,
             false
         ); 
-        printLine("  public " + candidateType + "Query " + getMethodName(
-            "create",
-            MapperUtils.getElementName(classifierDef.getQualifiedName()),
-            "Query"
-        ) + "();");
+        printLine(
+        	"  public ", 
+        	candidateType,
+        	"Query ",
+        	getMethodName("create", MapperUtils.getElementName(classifierDef.getQualifiedName()), "Query"),
+        	"();"
+        );
         newLine();
     }
     
@@ -114,9 +116,13 @@ public class PackageMapper extends AbstractMapper {
         ClassDef classDef
     ) throws ServiceException {
         this.trace("Package/ClassAccessor");
-        printLine("  public " + this.getType(classDef.getQualifiedName(), getFormat(), false) + "Class " + getMethodName(
-            "get" + MapperUtils.getElementName(classDef.getQualifiedName()) 
-        ) + "();");
+        printLine(
+        	"  public ",
+        	this.getType(classDef.getQualifiedName(), getFormat(), false),
+        	"Class ",
+        	getMethodName("get" + MapperUtils.getElementName(classDef.getQualifiedName())),
+        	"();"
+        );
         newLine();        
     }
   
@@ -125,7 +131,6 @@ public class PackageMapper extends AbstractMapper {
         String qualifiedPackageName
     ) throws ServiceException {
         this.trace("Package/Begin");
-        this.fileHeader();
         List nameComponents = MapperUtils.getNameComponents(MapperUtils.getPackageName(qualifiedPackageName));
         StringBuffer buffer = AbstractNames.openmdx2PackageName(
             new StringBuffer(),
@@ -147,19 +152,20 @@ public class PackageMapper extends AbstractMapper {
         );
         printLine("  * <p>");
         printLine("  * <pre>");
-        printLine("  *   " + authorityType + ' ' + authorityField + " = (" + authorityType + ")persistenceManager.getObjectById(");
-        printLine("  *     " + authorityType + ".class,");
-        printLine("  *     " + packageType + ".AUTHORITY_XRI");
+        printLine("  *   ", authorityType, " ", authorityField, " = (", authorityType, ")persistenceManager.getObjectById(");
+        printLine("  *     ", authorityType, ".class,");
+        printLine("  *     ", packageType, ".AUTHORITY_XRI");
         printLine("  *   );");
-        printLine("  *   " + packageType + " " + packageField + " = (" + packageType + ')' + authorityField + ".getPackage();");
+        printLine("  *   ", packageType, " ", packageField, " = (", packageType, ")", authorityField, ".getPackage();");
         printLine("  * </pre>");
         printLine("  * <p>");
         printLine("  *");
         printLine("  * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Class,java.lang.Object)");
         printLine("  */");
-        printLine("package " + this.getNamespace(nameComponents) + ";");
+        printLine("package ", this.getNamespace(nameComponents), ";");
         newLine();
-        printLine("public interface " + packageType + "  extends javax.jmi.reflect.RefPackage {");  
+        this.mapGeneratedAnnotation();
+        printLine("public interface ", packageType, "  extends javax.jmi.reflect.RefPackage {");  
         newLine();
         printLine(" /**");
         MapperUtils.wrapText(
@@ -174,7 +180,7 @@ public class PackageMapper extends AbstractMapper {
             "<em>Note: This is an extension to the JMI 1 standard.</em>", this::printLine
         );
         printLine("  */");
-        printLine("  java.lang.String AUTHORITY_XRI = \"" + xri + "\";");   
+        printLine("  java.lang.String AUTHORITY_XRI = \"", xri, "\";");   
         newLine();
     }
 
@@ -190,7 +196,7 @@ public class PackageMapper extends AbstractMapper {
             null, // removableSuffix
             null // appendableSuffix
         );
-        printLine("  public " + this.getType(structDef.getQualifiedName(), getFormat(), false) + " " + methodName + "(");
+        printLine("  public ", this.getType(structDef.getQualifiedName(), getFormat(), false), " ", methodName, "(");
         int ii = 0;
         for (Iterator<?> i = structDef.getFields().iterator(); i.hasNext(); ii++) {
             StructuralFeatureDef fieldDef = (StructuralFeatureDef) i.next();

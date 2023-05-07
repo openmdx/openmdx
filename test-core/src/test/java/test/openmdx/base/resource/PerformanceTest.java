@@ -554,8 +554,8 @@ public class PerformanceTest {
         }
 
         /**
-         * Writes <code>len</code> bytes from the specified byte array 
-         * starting at offset <code>off</code> to this byte array output stream.
+         * Writes {@code len} bytes from the specified byte array 
+         * starting at offset {@code off} to this byte array output stream.
          *
          * @param   b     the data.
          * @param   off   the start offset in the data.

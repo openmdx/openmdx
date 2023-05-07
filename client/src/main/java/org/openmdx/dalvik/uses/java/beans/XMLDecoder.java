@@ -43,11 +43,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 
 /**
- * The <code>XMLDecoder</code> class is used to read XML documents
- * created using the <code>XMLEncoder</code> and is used just like
- * the <code>ObjectInputStream</code>. For example, one can use
+ * The {@code XMLDecoder} class is used to read XML documents
+ * created using the {@code XMLEncoder} and is used just like
+ * the {@code ObjectInputStream}. For example, one can use
  * the following fragment to read the first object defined
- * in an XML document written by the <code>XMLEncoder</code>
+ * in an XML document written by the {@code XMLEncoder}
  * class:
  * <pre>
  *       XMLDecoder d = new XMLDecoder(
@@ -60,7 +60,8 @@ import javax.xml.parsers.SAXParser;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -78,7 +79,7 @@ public class XMLDecoder {
 
     /**
      * Creates a new input stream for reading archives
-     * created by the <code>XMLEncoder</code> class.
+     * created by the {@code XMLEncoder} class.
      *
      * @param in The underlying stream.
      *
@@ -90,7 +91,7 @@ public class XMLDecoder {
 
     /**
      * Creates a new input stream for reading archives
-     * created by the <code>XMLEncoder</code> class.
+     * created by the {@code XMLEncoder} class.
      *
      * @param in The underlying stream.
      * @param owner The owner of this stream.
@@ -102,12 +103,12 @@ public class XMLDecoder {
 
     /**
      * Creates a new input stream for reading archives
-     * created by the <code>XMLEncoder</code> class.
+     * created by the {@code XMLEncoder} class.
      *
      * @param in the underlying stream.
      * @param owner the owner of this stream.
      * @param exceptionListener the exception handler for the stream;
-     *        if <code>null</code> the default exception listener will be used.
+     *        if {@code null} the default exception listener will be used.
      */
     public XMLDecoder(InputStream in, Object owner, ExceptionListener exceptionListener) {
         this(in, owner, exceptionListener, null);
@@ -115,16 +116,16 @@ public class XMLDecoder {
 
     /**
      * Creates a new input stream for reading archives
-     * created by the <code>XMLEncoder</code> class.
+     * created by the {@code XMLEncoder} class.
      *
-     * @param in the underlying stream.  <code>null</code> may be passed without
+     * @param in the underlying stream.  {@code null} may be passed without
      *        error, though the resulting XMLDecoder will be useless
-     * @param owner the owner of this stream.  <code>null</code> is a legal
+     * @param owner the owner of this stream.  {@code null} is a legal
      *        value
      * @param exceptionListener the exception handler for the stream, or
-     *        <code>null</code> to use the default
+     *        {@code null} to use the default
      * @param cl the class loader used for instantiating objects.
-     *        <code>null</code> indicates that the default class loader should
+     *        {@code null} indicates that the default class loader should
      *        be used
      */
     public XMLDecoder(InputStream in, Object owner,
@@ -178,12 +179,12 @@ public class XMLDecoder {
     }
 
     /**
-     * Sets the exception handler for this stream to <code>exceptionListener</code>.
+     * Sets the exception handler for this stream to {@code exceptionListener}.
      * The exception handler is notified when this stream catches recoverable
      * exceptions.
      *
      * @param exceptionListener The exception handler for this stream;
-     * if <code>null</code> the default exception listener will be used.
+     * if {@code null} the default exception listener will be used.
      *
      * @see #getExceptionListener
      */
@@ -222,7 +223,7 @@ public class XMLDecoder {
     }
 
     /**
-     * Sets the owner of this decoder to <code>owner</code>.
+     * Sets the owner of this decoder to {@code owner}.
      *
      * @param owner The owner of this decoder.
      *

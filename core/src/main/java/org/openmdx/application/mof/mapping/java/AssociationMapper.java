@@ -103,22 +103,24 @@ public class AssociationMapper
     protected void mapBegin(
     ) throws ServiceException {
         this.trace("Association/Begin");
-        this.fileHeader();
         printLine(
-            "package " + this.getNamespace(
+            "package ",
+            this.getNamespace(
                 MapperUtils.getNameComponents(
                     MapperUtils.getPackageName(
                         this.associationDef.getQualifiedName()
                     )
                 )
-            ) + ';'
+            ),
+            ";"
         );
         newLine();
         printLine("/**");
-        printLine(" * Association Interface {@code " + this.associationDef.getName() + "}"); 
+        printLine(" * Association Interface {@code ", this.associationDef.getName(), "}"); 
         mapAnnotation(" * ", this.associationDef);
         printLine(" */");
-        printLine("public interface " + this.associationName + " {"); 
+        this.mapGeneratedAnnotation();
+        printLine("public interface ", this.associationName, " {"); 
     }
 
     /**
@@ -151,28 +153,27 @@ public class AssociationMapper
         }
         newLine();
         printLine("  /**");
-        printLine("   * Association End Interface {@code " + associationEnd.getName() + "}"); 
+        printLine("   * Association End Interface {@code ", associationEnd.getName(), "}"); 
         mapAnnotation(" * ", associationEnd);
         printLine("   */");
-        printLine(
-            "  interface " + name + "<E> extends " + QUALIFIED_CONTAINER_CLASS_NAME + "<E> {"); 
+        printLine("  interface ", name, "<E> extends ", QUALIFIED_CONTAINER_CLASS_NAME, "<E> {"); 
         newLine();            
         printLine("     E get(");
-        printLine("       " + InstanceMapper.QUALIFIER_TYPE_CLASS_NAME + " " + qualifierTypeName + ",");
-        printLine("       " + qualifierValueType + " " + qualifierValueName);
+        printLine("       ", InstanceMapper.QUALIFIER_TYPE_CLASS_NAME, " ", qualifierTypeName, ",");
+        printLine("       ", qualifierValueType, " ", qualifierValueName);
         printLine("     );");
         newLine();
         ReferenceDef referenceDef = associationEnd.getReference(); 
         if(referenceDef != null && referenceDef.isChangeable()) {
             printLine("     void add(");
-            printLine("       " + InstanceMapper.QUALIFIER_TYPE_CLASS_NAME + " " + qualifierTypeName + ",");
-            printLine("       " + qualifierValueType + " " + qualifierValueName + ",");
-            printLine("       E " + objectValueName);
+            printLine("       ", InstanceMapper.QUALIFIER_TYPE_CLASS_NAME, " ", qualifierTypeName, ",");
+            printLine("       ", qualifierValueType, " ", qualifierValueName, ",");
+            printLine("       E ", objectValueName);
             printLine("     );");
             newLine();            
             printLine("     void remove(");
-            printLine("       " + InstanceMapper.QUALIFIER_TYPE_CLASS_NAME + " " + qualifierTypeName + ",");
-            printLine("       " + qualifierValueType + " " + qualifierValueName);
+            printLine("       ", InstanceMapper.QUALIFIER_TYPE_CLASS_NAME, " ", qualifierTypeName, ",");
+            printLine("       ", qualifierValueType, " ", qualifierValueName);
             printLine("     );");
             newLine();            
         }

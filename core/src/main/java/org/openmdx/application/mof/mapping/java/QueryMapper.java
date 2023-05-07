@@ -125,7 +125,7 @@ public class QueryMapper
                 "} satisfies the selected condition.", this::printLine
             );
             printLine("   */");
-            printLine("  public " + queryType + ' ' + getPredicateName(null, featureDef) + '(');
+            printLine("  public ", queryType, " ", getPredicateName(null, featureDef), "(");
             printLine("  );");
             newLine();
         } else {
@@ -147,7 +147,7 @@ public class QueryMapper
                     "} is {@code null} or not.", this::printLine
                 );
                 printLine("   */");
-                printLine("  public org.w3c.cci2.OptionalFeaturePredicate " + getPredicateName(null, featureDef) + '(');
+                printLine("  public org.w3c.cci2.OptionalFeaturePredicate ", getPredicateName(null, featureDef), "(");
                 printLine("  );");
                 newLine();
             } else {
@@ -162,7 +162,7 @@ public class QueryMapper
                     "} has values or not.", this::printLine
                 );
                 printLine("   */");
-                printLine("  public org.w3c.cci2.MultivaluedFeaturePredicate " + getPredicateName(null, featureDef) + '(');
+                printLine("  public org.w3c.cci2.MultivaluedFeaturePredicate ", getPredicateName(null, featureDef), "(");
                 printLine("  );");
                 newLine();
             }
@@ -198,7 +198,7 @@ public class QueryMapper
                 );
             }
             printLine("   */");
-            printLine("  public " + queryType + ' ' + getPredicateName("thereExists", featureDef) + '(');
+            printLine("  public ", queryType, " ", getPredicateName("thereExists", featureDef), "(");
             printLine("  );");
             newLine();
             //
@@ -233,7 +233,7 @@ public class QueryMapper
                 );
             }
             printLine("   */");
-            printLine("  public " + queryType + ' ' + getPredicateName("forAll", featureDef) + '(');
+            printLine("  public ", queryType, " ", getPredicateName("forAll", featureDef),"(");
             printLine("  );");
             newLine();
         }
@@ -254,7 +254,7 @@ public class QueryMapper
                     "Note: <em>The order in which </em>{@code orderBy&hellip;}<em> instructions are given is relevant!</em>", this::printLine
                 );
                 printLine("   */");
-                printLine("    public " + orderType + ' ' + getPredicateName("orderBy", featureDef) + '(');
+                printLine("    public ", orderType, " ", getPredicateName("orderBy", featureDef), "(");
                 printLine("  );");
                 newLine();
             }
@@ -279,14 +279,15 @@ public class QueryMapper
         ClassifierDef classifierDef
     ) throws ServiceException {
         this.trace("Query/Begin");
-        this.fileHeader();
         String qualifiedName = classifierDef.getQualifiedName();
         printLine(
-            "package " + this.getNamespace(
+            "package ",
+            this.getNamespace(
                 MapperUtils.getNameComponents(
                     MapperUtils.getPackageName(qualifiedName)
                 )
-            ) + ';'
+            ),
+            ";"
         );
         newLine();
         printLine("/**");
@@ -296,7 +297,11 @@ public class QueryMapper
               "} based on conditions to be met by their attributes. ", this::printLine
         );
         printLine(" */");
-        printLine("public interface " + Identifier.CLASS_PROXY_NAME.toIdentifier(MapperUtils.getElementName(qualifiedName), null, null,null, "Query"));
+        this.mapGeneratedAnnotation();
+        printLine(
+        	"public interface ", 
+        	Identifier.CLASS_PROXY_NAME.toIdentifier(MapperUtils.getElementName(qualifiedName), null, null,null, "Query")
+        );
         print("  extends ");
         if(classifierDef.getSupertypes().isEmpty()) {
             printLine("org.w3c.cci2.AnyTypePredicate");

@@ -91,13 +91,13 @@ public class ExceptionMapper extends AbstractMapper {
         // Prolog
         //
         this.trace("Exception/Exception");
-        this.fileHeader();
         List<String> namespacePrefix = MapperUtils.getNameComponents(MapperUtils.getPackageName(this.exceptionDef.getQualifiedName(), 2));
         List<AttributeDef> attributes = this.exceptionDef.getParameters();
-        printLine("package " + this.getNamespace(namespacePrefix) + ";");
+        printLine("package ", this.getNamespace(namespacePrefix), ";");
         newLine();
+        this.mapGeneratedAnnotation();
         printLine("@SuppressWarnings(\"serial\")");
-        printLine("public class " + this.exceptionDef.getName() );
+        printLine("public class ", this.exceptionDef.getName() );
         print("  extends ");
         if(this.getFormat() == Format.JMI1) {
             print(AbstractMapper.getNamespace(namespacePrefix,Names.CCI2_PACKAGE_SUFFIX) + '.' + this.exceptionDef.getName());
@@ -110,7 +110,7 @@ public class ExceptionMapper extends AbstractMapper {
         //
         boolean hasMessage = false;
         newLine();
-        printLine("  public " + this.exceptionDef.getName() + "(");
+        printLine("  public ", this.exceptionDef.getName(), "(");
         String separator = "      "; 
         for (AttributeDef attributeDef : attributes){
             this.mapParameter(
@@ -166,12 +166,12 @@ public class ExceptionMapper extends AbstractMapper {
                 printLine("    , org.openmdx.kernel.exception.BasicException.Code.PROCESSING_FAILURE");
                 printLine("    , null");
                 for (AttributeDef attributeDef : attributes){
-                    printLine("    , " + this.getFeatureName(attributeDef));    
+                    printLine("    , ", this.getFeatureName(attributeDef));    
                 }
                 printLine("    );");
                 printLine("  }");
                 newLine();
-                printLine("  public " + this.exceptionDef.getName() + "(");
+                printLine("  public ", this.exceptionDef.getName(), "(");
                 printLine("    java.lang.String domain");
                 printLine("  , int errorCode");
                 printLine("  , java.lang.String description");
@@ -189,12 +189,12 @@ public class ExceptionMapper extends AbstractMapper {
                 printLine("    , errorCode");
                 printLine("    , description");
                 for (AttributeDef attributeDef : attributes) {
-                    printLine("    , " + this.getFeatureName(attributeDef));    
+                    printLine("    , ", this.getFeatureName(attributeDef));    
                 }
                 printLine("    );");
                 printLine("  }");
                 newLine();
-                printLine("  public " + this.exceptionDef.getName() + "(");
+                printLine("  public ", this.exceptionDef.getName(), "(");
                 printLine("    java.lang.Exception e");
                 printLine("  , java.lang.String domain");
                 printLine("  , int errorCode");
@@ -210,7 +210,7 @@ public class ExceptionMapper extends AbstractMapper {
                 printLine("    super(");
                 separator = "      ";
                 for (AttributeDef attributeDef : attributes) {
-                    printLine(separator + this.getFeatureName(attributeDef));    
+                    printLine(separator, this.getFeatureName(attributeDef));    
                     separator = "    , ";
                 }
                 printLine("    );");
@@ -220,12 +220,18 @@ public class ExceptionMapper extends AbstractMapper {
                 printLine("      , domain");
                 printLine("      , errorCode");
                 printLine("      , new org.openmdx.kernel.exception.BasicException.Parameter[]{");
-                printLine("          new org.openmdx.kernel.exception.BasicException.Parameter(\"class\",\"" + exceptionDef.getQualifiedName() + "\")");
+                printLine("          new org.openmdx.kernel.exception.BasicException.Parameter(\"class\",\"", exceptionDef.getQualifiedName(), "\")");
                 for (AttributeDef attributeDef : attributes) {
-                    printLine("        , new org.openmdx.kernel.exception.BasicException.Parameter(\"" + attributeDef.getName() + "\"," + getFeatureName(attributeDef) + ")");
+                    printLine(
+                    	"        , new org.openmdx.kernel.exception.BasicException.Parameter(\"",
+                    	attributeDef.getName(),
+                    	"\",",
+                    	getFeatureName(attributeDef),
+                    	")"
+                    );
                 }
                 printLine("        }");
-                printLine("      , description == null ? \"" +  exceptionDef.getQualifiedName() + "\" : description");
+                printLine("      , description == null ? \"",  exceptionDef.getQualifiedName(), "\" : description");
                 printLine("      , this");
                 printLine("      )");
                 printLine("    );");
@@ -241,7 +247,7 @@ public class ExceptionMapper extends AbstractMapper {
                 printLine("   *   <li>one parameter for each modelled exception feature");
                 printLine("   * </ul>");
                 printLine("   */");
-                printLine("  public " + this.exceptionDef.getName() + "(");
+                printLine("  public ", this.exceptionDef.getName(), "(");
                 printLine("    org.openmdx.base.exception.ServiceException contractCompliantServiceException");
                 printLine("  ) {");
                 printLine("    this(");
@@ -249,7 +255,7 @@ public class ExceptionMapper extends AbstractMapper {
                 printLine("    );");
                 printLine("  }");
                 newLine();
-                printLine("  private " + this.exceptionDef.getName() + "(");
+                printLine("  private ", this.exceptionDef.getName(), "(");
                 printLine("    org.openmdx.kernel.exception.BasicException e");
                 printLine("  ) {");
                 printLine("    this(");
@@ -258,13 +264,13 @@ public class ExceptionMapper extends AbstractMapper {
                     printLine("    , (java.lang.String[])null");    
                 } else {
                     for (AttributeDef attributeDef : attributes) {
-                        printLine("    , e.getParameter(\"" + attributeDef.getName() + "\")");    
+                        printLine("    , e.getParameter(\"", attributeDef.getName(), "\")");    
                     }
                 }
                 printLine("    );");
                 printLine("  }");
                 newLine();
-                printLine("  private " + this.exceptionDef.getName() + "(");
+                printLine("  private ", this.exceptionDef.getName(), "(");
                 printLine("      org.openmdx.kernel.exception.BasicException e");
                 printLine("    , java.lang.String... arguments");
                 printLine("  ) {");
@@ -273,7 +279,8 @@ public class ExceptionMapper extends AbstractMapper {
                 int i = 0;
                 for (AttributeDef attributeDef : attributes) {
                     printLine(
-                        separator + this.getParseExpression(
+                        separator,
+                        this.getParseExpression(
                             attributeDef.getQualifiedTypeName(),
                             ModelHelper.toMultiplicity(attributeDef.getMultiplicity()),
                             "arguments[" + i++ + "]"

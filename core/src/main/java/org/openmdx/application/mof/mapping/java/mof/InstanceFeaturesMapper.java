@@ -157,14 +157,16 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
      */
     public void mapBegin()
         throws ServiceException {
-        this.fileHeader();
-        printLine("package "
-            + this.getNamespace(MapperUtils.getNameComponents(MapperUtils
-                .getPackageName(this.classDef.getQualifiedName()))) + ";");
+        printLine(
+        	"package ",
+            this.getNamespace(MapperUtils.getNameComponents(MapperUtils.getPackageName(this.classDef.getQualifiedName()))),
+            ";"
+        );
         newLine();
         printLine("/**");
         MapperUtils.wrapText(" * ", "Features of class " + this.classDef.getName(), this::printLine);
         printLine(" */");
+        this.mapGeneratedAnnotation();
         print("public interface " + this.classDef.getName() + FEATURES_INTERFACE_SUFFIX);
         if (!this.classDef.getSupertypes().isEmpty()) {
             String separator = " extends "; 

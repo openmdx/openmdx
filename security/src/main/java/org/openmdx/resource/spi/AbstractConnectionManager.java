@@ -77,7 +77,7 @@ public abstract class AbstractConnectionManager
     }
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = -6580404870568064926L;
 

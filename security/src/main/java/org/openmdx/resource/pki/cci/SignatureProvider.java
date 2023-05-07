@@ -49,7 +49,7 @@ import java.security.GeneralSecurityException;
 import java.security.SignatureException;
 
 /**
- * <code>Signature</code> Provider
+ * {@code Signature} Provider
  */
 public interface SignatureProvider extends Closeable {
 
@@ -131,7 +131,7 @@ public interface SignatureProvider extends Closeable {
     	 * 
     	 * @param signature
     	 * 
-    	 * @return <code>true</code> if the signature is valid
+    	 * @return {@code true} if the signature is valid
     	 * 
     	 * @throws SignatureException
     	 */
@@ -146,7 +146,7 @@ public interface SignatureProvider extends Closeable {
          * @param offset
          * @param length
          * 
-    	 * @return <code>true</code> if the signature is valid
+    	 * @return {@code true} if the signature is valid
     	 * 
          * @throws SignatureException
          */

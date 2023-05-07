@@ -98,7 +98,7 @@ public class BasicHostnameVerifier implements HostnameVerifier {
 	 * @param hostName
 	 * @param distinguishedName
 	 * 
-	 * @return <code>true</code> in case of success
+	 * @return {@code true} in case of success
 	 */
 	protected boolean verify(
 		String hostName,
@@ -150,7 +150,7 @@ public class BasicHostnameVerifier implements HostnameVerifier {
 	 * @param hostName
 	 * @param commonName
 	 * 
-	 * @return <code>true</code> in case of success
+	 * @return {@code true} in case of success
 	 */
 	protected boolean matches(
         String hostName,

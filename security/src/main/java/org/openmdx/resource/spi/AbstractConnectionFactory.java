@@ -81,7 +81,7 @@ public abstract class AbstractConnectionFactory <C extends AutoCloseable, E exte
     private Reference reference;
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 717396893019818237L;
     

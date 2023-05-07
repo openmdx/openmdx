@@ -32,7 +32,8 @@ import java.util.Map;
  * <p>
  * openMDX/Dalvik Notice (November 2022):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.18
  * @author openMDX Team
@@ -69,7 +70,7 @@ public class CalendarUtils {
 
     /**
      * Divides two integers and returns the floor of the quotient.
-     * For example, <code>floorDivide(-1, 4)</code> returns -1 while
+     * For example, {@code floorDivide(-1, 4)} returns -1 while
      * -1/4 is 0.
      *
      * @param n the numerator
@@ -83,7 +84,7 @@ public class CalendarUtils {
 
     /**
      * Divides two integers and returns the floor of the quotient.
-     * For example, <code>floorDivide(-1, 4)</code> returns -1 while
+     * For example, {@code floorDivide(-1, 4)} returns -1 while
      * -1/4 is 0.
      *
      * @param n the numerator
@@ -98,14 +99,14 @@ public class CalendarUtils {
     /**
      * Divides two integers and returns the floor of the quotient and
      * the modulus remainder.  For example,
-     * <code>floorDivide(-1,4)</code> returns <code>-1</code> with
-     * <code>3</code> as its remainder, while <code>-1/4</code> is
-     * <code>0</code> and <code>-1%4</code> is <code>-1</code>.
+     * {@code floorDivide(-1,4)} returns {@code -1} with
+     * {@code 3} as its remainder, while {@code -1/4} is
+     * {@code 0} and {@code -1%4} is {@code -1}.
      *
      * @param n the numerator
      * @param d a divisor which must be > 0
      * @param r an array of at least one element in which the value
-     * <code>mod(n, d)</code> is returned.
+     * {@code mod(n, d)} is returned.
      * @return the floor of the quotient.
      */
     public static final int floorDivide(int n, int d, int[] r) {
@@ -121,14 +122,14 @@ public class CalendarUtils {
     /**
      * Divides two integers and returns the floor of the quotient and
      * the modulus remainder.  For example,
-     * <code>floorDivide(-1,4)</code> returns <code>-1</code> with
-     * <code>3</code> as its remainder, while <code>-1/4</code> is
-     * <code>0</code> and <code>-1%4</code> is <code>-1</code>.
+     * {@code floorDivide(-1,4)} returns {@code -1} with
+     * {@code 3} as its remainder, while {@code -1/4} is
+     * {@code 0} and {@code -1%4} is {@code -1}.
      *
      * @param n the numerator
      * @param d a divisor which must be > 0
      * @param r an array of at least one element in which the value
-     * <code>mod(n, d)</code> is returned.
+     * {@code mod(n, d)} is returned.
      * @return the floor of the quotient.
      */
     public static final int floorDivide(long n, int d, int[] r) {

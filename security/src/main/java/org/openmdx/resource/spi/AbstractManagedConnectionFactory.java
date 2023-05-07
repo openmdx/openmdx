@@ -69,7 +69,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 	}
 
 	/**
-	 * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = 8606343080939877576L;
 

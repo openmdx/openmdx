@@ -106,8 +106,8 @@ public class SegmentImpl extends AbstractObject<test.openmdx.clock1.jmi1.Segment
     }
     
     /**
-     * Sets a new value for the attribute <code>description</code>.
-     * @param description The possibly null new value for attribute <code>description</code>.
+     * Sets a new value for the attribute {@code description}.
+     * @param description The possibly null new value for attribute {@code description}.
      */
     public void setDescription(
       java.lang.String description

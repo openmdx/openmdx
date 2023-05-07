@@ -107,25 +107,24 @@ extends AbstractClassMapper {
     public void mapBegin(
     ) throws ServiceException {
         this.trace("Interface/Begin");
-        this.fileHeader();
         printLine(
-            "package " + this.getNamespace(
+            "package ",
+            this.getNamespace(
                 MapperUtils.getNameComponents(
                     MapperUtils.getPackageName(
                         this.classDef.getQualifiedName()
                     )
                 )
-            ) + ';'
+            ),
+            ";"
         );
         newLine();
         printLine("/**");
         print(" * Service Provider Interface {@code " + this.classDef.getName() + "}"); 
         mapAnnotation(" * ", this.classDef);
         printLine(" */");
-        printLine(
-            "public interface " + this.className + " extends " +
-            this.interfaceType(this.classDef, Visibility.CCI, false) + " {"
-        ); 
+        this.mapGeneratedAnnotation();
+        printLine("public interface ", this.className, " extends ", this.interfaceType(this.classDef, Visibility.CCI, false), " {"); 
     }
 
     /**

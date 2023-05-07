@@ -94,7 +94,7 @@ public abstract class AddressCallbackHandler
     /**
      * Tells whether callbacks should be handled or delegated
      * 
-     * @return return <code>true</code> if callbacks should be handled
+     * @return return {@code true} if callbacks should be handled
      */
     protected abstract boolean accept(
     );
@@ -104,7 +104,7 @@ public abstract class AddressCallbackHandler
      * 
      * @param callback
      * 
-     * @return return <code>true</code> if t he callback should be handled
+     * @return return {@code true} if t he callback should be handled
      */
     protected abstract boolean accept(
     	AddressCallback callback
@@ -115,7 +115,7 @@ public abstract class AddressCallbackHandler
      * 
      * @param callback
      * 
-     * @return return <code>true</code> if t he callback should be handled
+     * @return return {@code true} if t he callback should be handled
      */
     private boolean accept(
     	Callback callback

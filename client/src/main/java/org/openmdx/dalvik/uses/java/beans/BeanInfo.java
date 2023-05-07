@@ -51,7 +51,8 @@ package org.openmdx.dalvik.uses.java.beans;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -59,7 +60,7 @@ package org.openmdx.dalvik.uses.java.beans;
 public interface BeanInfo {
 
     /**
-     * Gets the beans <code>BeanDescriptor</code>.
+     * Gets the beans {@code BeanDescriptor}.
      *
      * @return  A BeanDescriptor providing overall information about
      * the bean, such as its displayName, its customizer, etc.  May
@@ -69,7 +70,7 @@ public interface BeanInfo {
     BeanDescriptor getBeanDescriptor();
 
     /**
-     * Gets the beans <code>EventSetDescriptor</code>s.
+     * Gets the beans {@code EventSetDescriptor}s.
      *
      * @return  An array of EventSetDescriptors describing the kinds of
      * events fired by this bean.  May return null if the information
@@ -87,7 +88,7 @@ public interface BeanInfo {
     int getDefaultEventIndex();
 
     /**
-     * Gets the beans <code>PropertyDescriptor</code>s.
+     * Gets the beans {@code PropertyDescriptor}s.
      *
      * @return An array of PropertyDescriptors describing the editable
      * properties supported by this bean.  May return null if the
@@ -111,7 +112,7 @@ public interface BeanInfo {
     int getDefaultPropertyIndex();
 
     /**
-     * Gets the beans <code>MethodDescriptor</code>s.
+     * Gets the beans {@code MethodDescriptor}s.
      *
      * @return An array of MethodDescriptors describing the externally
      * visible methods supported by this bean.  May return null if

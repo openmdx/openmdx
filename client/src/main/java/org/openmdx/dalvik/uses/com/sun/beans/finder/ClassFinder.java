@@ -27,13 +27,13 @@ package org.openmdx.dalvik.uses.com.sun.beans.finder;
 // import static sun.reflect.misc.ReflectUtil.checkPackageAccess;
 
 /**
- * This is utility class that provides <code>static</code> methods
+ * This is utility class that provides {@code static} methods
  * to find a class with the specified name using the specified class loader.
  * 
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -42,11 +42,11 @@ package org.openmdx.dalvik.uses.com.sun.beans.finder;
  */
 public final class ClassFinder {
     /**
-     * Returns the <code>Class</code> object associated
+     * Returns the {@code Class} object associated
      * with the class or interface with the given string name,
      * using the default class loader.
      * <p>
-     * The <code>name</code> can denote an array class
+     * The {@code name} can denote an array class
      * (see {@link Class#getName} for details).
      *
      * @param name  fully qualified name of the desired class
@@ -82,14 +82,14 @@ public final class ClassFinder {
     }
 
     /**
-     * Returns the <code>Class</code> object associated with
+     * Returns the {@code Class} object associated with
      * the class or interface with the given string name,
      * using the given class loader.
      * <p>
-     * The <code>name</code> can denote an array class
+     * The {@code name} can denote an array class
      * (see {@link Class#getName} for details).
      * <p>
-     * If the parameter <code>loader</code> is null,
+     * If the parameter {@code loader} is null,
      * the class is loaded through the default class loader.
      *
      * @param name    fully qualified name of the desired class
@@ -118,19 +118,19 @@ public final class ClassFinder {
     }
 
     /**
-     * Returns the <code>Class</code> object associated
+     * Returns the {@code Class} object associated
      * with the class or interface with the given string name,
      * using the default class loader.
      * <p>
-     * The <code>name</code> can denote an array class
+     * The {@code name} can denote an array class
      * (see {@link Class#getName} for details).
      * <p>
      * This method can be used to obtain
-     * any of the <code>Class</code> objects
-     * representing <code>void</code> or primitive Java types:
-     * <code>char</code>, <code>byte</code>, <code>short</code>,
-     * <code>int</code>, <code>long</code>, <code>float</code>,
-     * <code>double</code> and <code>boolean</code>.
+     * any of the {@code Class} objects
+     * representing {@code void} or primitive Java types:
+     * {@code char}, {@code byte}, {@code short},
+     * {@code int}, {@code long}, {@code float},
+     * {@code double} and {@code boolean}.
      *
      * @param name  fully qualified name of the desired class
      * @return class object representing the desired class
@@ -146,22 +146,22 @@ public final class ClassFinder {
     }
 
     /**
-     * Returns the <code>Class</code> object associated with
+     * Returns the {@code Class} object associated with
      * the class or interface with the given string name,
      * using the given class loader.
      * <p>
-     * The <code>name</code> can denote an array class
+     * The {@code name} can denote an array class
      * (see {@link Class#getName} for details).
      * <p>
-     * If the parameter <code>loader</code> is null,
+     * If the parameter {@code loader} is null,
      * the class is loaded through the default class loader.
      * <p>
      * This method can be used to obtain
-     * any of the <code>Class</code> objects
-     * representing <code>void</code> or primitive Java types:
-     * <code>char</code>, <code>byte</code>, <code>short</code>,
-     * <code>int</code>, <code>long</code>, <code>float</code>,
-     * <code>double</code> and <code>boolean</code>.
+     * any of the {@code Class} objects
+     * representing {@code void} or primitive Java types:
+     * {@code char}, {@code byte}, {@code short},
+     * {@code int}, {@code long}, {@code float},
+     * {@code double} and {@code boolean}.
      *
      * @param name    fully qualified name of the desired class
      * @param loader  class loader from which the class must be loaded

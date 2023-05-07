@@ -70,32 +70,32 @@ public class RadiusPrincipal implements Principal{
         this.principalName = name;
     }
     /**
-     * Gets the name of this <code>RadiusPrincipal</code>
-     * @return java.lang.String The name of this <code>RadiusPrincipal</code>
+     * Gets the name of this {@code RadiusPrincipal}
+     * @return java.lang.String The name of this {@code RadiusPrincipal}
      */
     public String getName(){
         return this.principalName;
     }
     /**
      * This method returns a string representation of this
-     * <code>RadiusPrincipal</code>.
+     * {@code RadiusPrincipal}.
      *
-     * @return a string representation of this <code>RadiusPrincipal</code>.
+     * @return a string representation of this {@code RadiusPrincipal}.
      */
     @Override
     public String toString(){
         return this.getName();
     }
     /**
-     * Compares the specified Object with this <code>RadiusPrincipal</code>
+     * Compares the specified Object with this {@code RadiusPrincipal}
      * for equality.  Returns true if the given object is also a
-     * <code>RadiusPrincipal</code> and the two RadiusPrincipal
+     * {@code RadiusPrincipal} and the two RadiusPrincipal
      * have the same username.
      * @param object Object to be compared for equality with this
-     *		<code>RadiusPrincipal</code>.
+     *		{@code RadiusPrincipal}.
      *
      * @return true if the specified Object is equal to this
-     *		<code>RadiusPrincipal</code>.
+     *		{@code RadiusPrincipal}.
      */
     @Override
     public boolean equals(Object object){
@@ -115,7 +115,7 @@ public class RadiusPrincipal implements Principal{
         return true;
     }
     /**
-     * @return int the hashCode for this <code>RadiusPrincipal</code>
+     * @return int the hashCode for this {@code RadiusPrincipal}
      */
     @Override
     public int hashCode(){

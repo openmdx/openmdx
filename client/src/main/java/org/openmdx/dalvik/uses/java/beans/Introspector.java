@@ -84,12 +84,12 @@ import org.openmdx.dalvik.uses.sun.reflect.misc.ReflectUtil;
  * Because the Introspector caches BeanInfo classes for better performance,
  * take care if you use it in an application that uses
  * multiple class loaders.
- * In general, when you destroy a <code>ClassLoader</code>
+ * In general, when you destroy a {@code ClassLoader}
  * that has been used to introspect classes,
  * you should use the
- * {@link #flushCaches <code>Introspector.flushCaches</code>}
+ * {@link #flushCaches {@code Introspector.flushCaches}}
  * or
- * {@link #flushFromCaches <code>Introspector.flushFromCaches</code>} method
+ * {@link #flushFromCaches {@code Introspector.flushFromCaches}} method
  * to flush all of the introspected classes out of the cache.
  *
  * <P>
@@ -100,7 +100,8 @@ import org.openmdx.dalvik.uses.sun.reflect.misc.ReflectUtil;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -304,12 +305,12 @@ public class Introspector {
      *          this method is undefined if parameter path
      *          is null.
      *
-     * <p>First, if there is a security manager, its <code>checkPropertiesAccess</code>
+     * <p>First, if there is a security manager, its {@code checkPropertiesAccess}
      * method is called. This could result in a SecurityException.
      *
      * @param path  Array of package names.
      * @exception  SecurityException  if a security manager exists and its
-     *             <code>checkPropertiesAccess</code> method doesn't allow setting
+     *             {@code checkPropertiesAccess} method doesn't allow setting
      *              of system properties.
      * @see SecurityManager#checkPropertiesAccess
      */

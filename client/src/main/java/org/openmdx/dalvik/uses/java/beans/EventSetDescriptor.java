@@ -40,7 +40,8 @@ import java.lang.reflect.Method;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -348,9 +349,9 @@ public class EventSetDescriptor extends FeatureDescriptor {
     }
 
     /**
-     * Gets the <code>MethodDescriptor</code>s of the target listener interface.
+     * Gets the {@code MethodDescriptor}s of the target listener interface.
      *
-     * @return An array of <code>MethodDescriptor</code> objects for the target methods
+     * @return An array of {@code MethodDescriptor} objects for the target methods
      * within the target listener interface that will get called when
      * events are fired.
      */
@@ -443,9 +444,9 @@ public class EventSetDescriptor extends FeatureDescriptor {
      * Marks an event set as being in the &quot;default&quot; set (or not).
      * By default this is <TT>true</TT>.
      *
-     * @param inDefaultEventSet <code>true</code> if the event set is in
+     * @param inDefaultEventSet {@code true} if the event set is in
      *                          the &quot;default&quot; set,
-     *                          <code>false</code> if not
+     *                          {@code false} if not
      */
     public void setInDefaultEventSet(boolean inDefaultEventSet) {
         this.inDefaultEventSet = inDefaultEventSet;

@@ -33,7 +33,8 @@ package org.openmdx.dalvik.uses.java.beans;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -44,7 +45,7 @@ class PropertyVetoException extends Exception {
 
 
     /**
-     * Constructs a <code>PropertyVetoException</code> with a
+     * Constructs a {@code PropertyVetoException} with a
      * detailed message.
      *
      * @param mess Descriptive message
@@ -56,7 +57,7 @@ class PropertyVetoException extends Exception {
     }
 
      /**
-     * Gets the vetoed <code>PropertyChangeEvent</code>.
+     * Gets the vetoed {@code PropertyChangeEvent}.
      *
      * @return A PropertyChangeEvent describing the vetoed change.
      */

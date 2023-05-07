@@ -63,7 +63,7 @@ import test.openmdx.app1.jmi1.Segment;
 	import java.util.function.Consumer; 
 
 /**
- * Association Implementation <code>SegmentReferencesForgeignPerson</code> 
+ * Association Implementation {@code SegmentReferencesForgeignPerson} 
  */
 public class SegmentReferencesForeignPersonImpl
     extends AbstractCollection<Person>

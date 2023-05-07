@@ -62,7 +62,7 @@ public abstract class AbstractConnection implements AutoCloseable {
     private AbstractManagedConnection<?> managedConnection;
 
     /**
-     * Used by <code>AbstractManagedConnection</code>
+     * Used by {@code AbstractManagedConnection}
      */
     void associateManagedConnection(
     	AbstractManagedConnection<?> managedConnection

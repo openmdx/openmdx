@@ -31,7 +31,8 @@
  * <p>
  * openMDX/Dalvik Notice (November 2022):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.18
  * @author openMDX Team
@@ -55,7 +56,7 @@ public class ByteArrayTagOrder implements Comparator<byte[]> {
      * @return negative number if bytes1 < bytes2, 0 if bytes1 == bytes2,
      * positive number if bytes1 > bytes2.
      *
-     * @exception <code>ClassCastException</code>
+     * @exception {@code ClassCastException}
      * if either argument is not a byte array.
      */
 
