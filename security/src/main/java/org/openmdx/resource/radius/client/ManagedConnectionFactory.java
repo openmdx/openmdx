@@ -105,12 +105,12 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
     }
 
 	/**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 6915930278489524854L;
 
     /**
-     * <code>true</code> if the managed connection factory is created without logger
+     * {@code true} if the managed connection factory is created without logger
      */
     private final boolean logToAdapter;
     

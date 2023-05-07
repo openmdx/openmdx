@@ -259,11 +259,11 @@ public class RadiusClient
     }
     
     /**
-     * This method performs the job of authenticating the given <code>RadiusPacket</code> against
+     * This method performs the job of authenticating the given {@code RadiusPacket} against
      * the radius server.
      *
-     * @param RadiusPacket containing all of the <code>RadiusAttributes</code> for this request. This
-     * <code>RadiusPacket</code> must include the USER_NAME attribute and be of type ACCEES_REQUEST.
+     * @param RadiusPacket containing all of the {@code RadiusAttributes} for this request. This
+     * {@code RadiusPacket} must include the USER_NAME attribute and be of type ACCEES_REQUEST.
      * If the USER_PASSWORD attribute is set it must contain the plaintext bytes, we will encode the
      * plaintext to send to the server with a REVERSIBLE algorithm. We will set the NAS_IDENTIFIER
      * Attribute, so even if it is set in the RadiusPacket we will overwrite it
@@ -277,11 +277,11 @@ public class RadiusClient
         return this.authenticate(accessRequest, this.authenticationRetries);
     }
     /**
-     * This method performs the job of authenticating the given <code>RadiusPacket</code> against
+     * This method performs the job of authenticating the given {@code RadiusPacket} against
      * the radius server.
      *
-     * @param RadiusPacket containing all of the <code>RadiusAttributes</code> for this request. This
-     * <code>RadiusPacket</code> must include the USER_NAME attribute and be of type ACCEES_REQUEST.
+     * @param RadiusPacket containing all of the {@code RadiusAttributes} for this request. This
+     * {@code RadiusPacket} must include the USER_NAME attribute and be of type ACCEES_REQUEST.
      * If the USER_PASSWORD attribute is set it must contain the plaintext bytes, we will encode the
      * plaintext to send to the server with a REVERSIBLE algorithm. We will set the NAS_IDENTIFIER
      * Attribute, so even if it is set in the RadiusPacket we will overwrite it
@@ -928,7 +928,7 @@ public class RadiusClient
     
     /**
      * This method returns a string representation of this
-     * <code>RadiusClient</code>.
+     * {@code RadiusClient}.
      *
      * @return a string representation of this object.
      */
@@ -951,15 +951,15 @@ public class RadiusClient
     }
 
     /**
-     * Compares the specified Object with this <code>RadiusClient</code>
+     * Compares the specified Object with this {@code RadiusClient}
      * for equality.  Returns true if the given object is also a
-     * <code>RadiusClient</code> and the two RadiusClient
+     * {@code RadiusClient} and the two RadiusClient
      * have the same host, port, sharedSecret & username.
      * @param object Object to be compared for equality with this
-     *      <code>RadiusClient</code>.
+     *      {@code RadiusClient}.
      *
      * @return true if the specified Object is equal to this
-     *      <code>RadiusClient</code>.
+     *      {@code RadiusClient}.
      */
     @Override
     public boolean equals(Object object){
@@ -980,7 +980,7 @@ public class RadiusClient
             Arrays.equals(this.getSharedSecret(), that.getSharedSecret());
     }
     /**
-     * @return int the hashCode for this <code>RadiusClient</code>
+     * @return int the hashCode for this {@code RadiusClient}
      */
     @Override
     public int hashCode(){
@@ -1021,7 +1021,7 @@ public class RadiusClient
     /**
      * We should not reuse radius clients with send/receive failures
      * 
-     * @return <code>true</code> unless there was a send/receive failure
+     * @return {@code true} unless there was a send/receive failure
      */
     public boolean isValid(){
         if(!this.valid){

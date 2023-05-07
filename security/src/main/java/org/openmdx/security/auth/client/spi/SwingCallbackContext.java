@@ -56,13 +56,13 @@ import javax.swing.JFrame;
 public interface SwingCallbackContext {
 
 	/**
-	 * Signals that the callback handler's <code>handle()</code> method should return
+	 * Signals that the callback handler's {@code handle()} method should return
 	 */
 	void signalReturn(
 	);
 
 	/**
-	 * Signals that callback handler's <code>handle()</code> method should fail
+	 * Signals that callback handler's {@code handle()} method should fail
 	 *
 	 * @param exception the exception 
 	 */
@@ -71,7 +71,7 @@ public interface SwingCallbackContext {
 	);
 	
 	/**
-	 * Signals that callback handler's <code>handle()</code> method should fail
+	 * Signals that callback handler's {@code handle()} method should fail
 	 *
 	 * @param exception the exception 
 	 */

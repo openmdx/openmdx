@@ -112,7 +112,7 @@ public class TokenException
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 4361051563608646179L;
 
@@ -135,7 +135,7 @@ public class TokenException
     }
 
     /**
-     * Retrieves the exception domain of this <code>ServiceException</code>.
+     * Retrieves the exception domain of this {@code ServiceException}.
      *
      * @return the exception domain
      */
@@ -145,7 +145,7 @@ public class TokenException
     }
 
     /**
-     * Retrieves the exception code of this <code>ServiceException</code>.
+     * Retrieves the exception code of this {@code ServiceException}.
      *
      * @return the exception code
      */

@@ -29,7 +29,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
- * The <code>AbstractCalendar</code> class provides a framework for
+ * The {@code AbstractCalendar} class provides a framework for
  * implementing a concrete calendar system.
  *
  * <p><a name="fixed_date"></a><B>Fixed Date</B><br>
@@ -44,7 +44,8 @@ import java.util.TimeZone;
  * <p>
  * openMDX/Dalvik Notice (November 2022):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.18
  * @author openMDX Team
@@ -337,7 +338,7 @@ public abstract class AbstractCalendar extends CalendarSystem {
      * date. If the specified date is not normalized, its date fields
      * are normalized.
      *
-     * @param date a <code>CalendarDate</code> with which the fixed
+     * @param date a {@code CalendarDate} with which the fixed
      * date is calculated
      * @return the calculated fixed date
      * @see AbstractCalendar.html#fixed_date
@@ -347,9 +348,9 @@ public abstract class AbstractCalendar extends CalendarSystem {
     /**
      * Calculates calendar fields from the specified fixed date. This
      * method stores the calculated calendar field values in the specified
-     * <code>CalendarDate</code>.
+     * {@code CalendarDate}.
      *
-     * @param date a <code>CalendarDate</code> to stored the
+     * @param date a {@code CalendarDate} to stored the
      * calculated calendar fields.
      * @param fixedDate a fixed date to calculate calendar fields
      * @see AbstractCalendar.html#fixed_date

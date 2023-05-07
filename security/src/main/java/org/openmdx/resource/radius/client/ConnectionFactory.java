@@ -75,7 +75,7 @@ public class ConnectionFactory
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 6296420695651960582L;
 

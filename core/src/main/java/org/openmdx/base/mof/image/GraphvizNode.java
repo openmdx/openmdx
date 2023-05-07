@@ -57,7 +57,6 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
-import org.openmdx.base.mof.spi.PIMDocFileType;
 import org.openmdx.kernel.exception.BasicException;
 
 /**

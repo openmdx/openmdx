@@ -45,7 +45,8 @@ import org.openmdx.dalvik.uses.com.sun.beans.TypeResolver;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -56,7 +57,7 @@ public class FeatureDescriptor {
 	private Reference<Class> classRef;
 
     /**
-     * Constructs a <code>FeatureDescriptor</code>.
+     * Constructs a {@code FeatureDescriptor}.
      */
     public FeatureDescriptor() {
     }
@@ -334,7 +335,7 @@ public class FeatureDescriptor {
     /**
      * Creates a new soft reference that refers to the given object.
      *
-     * @return a new soft reference or <code>null</code> if object is <code>null</code>
+     * @return a new soft reference or {@code null} if object is {@code null}
      *
      * @see SoftReference
      */
@@ -347,7 +348,7 @@ public class FeatureDescriptor {
     /**
      * Creates a new weak reference that refers to the given object.
      *
-     * @return a new weak reference or <code>null</code> if object is <code>null</code>
+     * @return a new weak reference or {@code null} if object is {@code null}
      *
      * @see WeakReference
      */

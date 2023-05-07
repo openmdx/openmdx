@@ -126,8 +126,8 @@ public class Oid {
      * Tests if two Oid objects represent the same Object identifier
      * value.
      *
-     * @return <code>true</code> if the two Oid objects represent the same
-     * value, <code>false</code> otherwise.
+     * @return {@code true} if the two Oid objects represent the same
+     * value, {@code false} otherwise.
      * @param other the Oid object that has to be compared to this one
      */
     @SuppressWarnings("deprecation")

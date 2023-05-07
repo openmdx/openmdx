@@ -98,7 +98,8 @@ import org.openmdx.dalvik.uses.org.apache.xerces.util.DatatypeMessageFormatter;
  * <p>
  * openMDX/Dalvik Notice (April 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -136,32 +137,32 @@ class DurationImpl
     private final int signum;
 
     /**
-     * <p>Years of this <code>Duration</code>.</p>
+     * <p>Years of this {@code Duration}.</p>
      */
     private final BigInteger years;
 
     /**
-     * <p>Months of this <code>Duration</code>.</p>
+     * <p>Months of this {@code Duration}.</p>
      */
     private final BigInteger months;
 
     /**
-     * <p>Days of this <code>Duration</code>.</p>
+     * <p>Days of this {@code Duration}.</p>
      */
     private final BigInteger days;
 
     /**
-     * <p>Hours of this <code>Duration</code>.</p>
+     * <p>Hours of this {@code Duration}.</p>
      */
     private final BigInteger hours;
 
     /**
-     * <p>Minutes of this <code>Duration</code>.</p>
+     * <p>Minutes of this {@code Duration}.</p>
      */
     private final BigInteger minutes;
 
     /**
-     * <p>Seconds of this <code>Duration</code>.</p>
+     * <p>Seconds of this {@code Duration}.</p>
      */
     private final BigDecimal seconds;
 
@@ -207,18 +208,18 @@ class DurationImpl
      * <p>All the parameters are optional as long as at least one field is present.
      * If specified, parameters have to be zero or positive.</p>
      * 
-     * @param isPositive Set to <code>false</code> to create a negative duration. When the length
+     * @param isPositive Set to {@code false} to create a negative duration. When the length
      *   of the duration is zero, this parameter will be ignored.
-     * @param years of this <code>Duration</code>
-     * @param months of this <code>Duration</code>
-     * @param days of this <code>Duration</code>
-     * @param hours of this <code>Duration</code>
-     * @param minutes of this <code>Duration</code>
-     * @param seconds of this <code>Duration</code>
+     * @param years of this {@code Duration}
+     * @param months of this {@code Duration}
+     * @param days of this {@code Duration}
+     * @param hours of this {@code Duration}
+     * @param minutes of this {@code Duration}
+     * @param seconds of this {@code Duration}
      * 
      * @throws IllegalArgumentException
      *    If years, months, days, hours, minutes and
-     *    seconds parameters are all <code>null</code>. Or if any
+     *    seconds parameters are all {@code null}. Or if any
      *    of those parameters are negative.
      */
     protected DurationImpl(
@@ -344,7 +345,7 @@ class DurationImpl
      * 
      * <p>The DAYS, HOURS, MINUTES and SECONDS fields are used to
      * represent the specifed duration in a reasonable way.
-     * That is, the constructed object <code>x</code> satisfies
+     * That is, the constructed object {@code x} satisfies
      * the following conditions:</p>
      * <ul>
      *  <li>x.getHours()&lt;24
@@ -670,7 +671,7 @@ class DurationImpl
     };
     
 	/**
-	 * <p>Partial order relation comparison with this <code>Duration</code> instance.</p>
+	 * <p>Partial order relation comparison with this {@code Duration} instance.</p>
 	 * 
 	 * <p>Comparison result must be in accordance with
 	 * <a href="http://www.w3.org/TR/xmlschema-2/#duration-order">W3C XML Schema 1.0 Part 2, Section 3.2.7.6.2,
@@ -678,15 +679,15 @@ class DurationImpl
 	 * 
 	 * <p>Return:</p>
 	 * <ul>
-	 *   <li>{@link DatatypeConstants#LESSER} if this <code>Duration</code> is shorter than <code>duration</code> parameter</li>
-	 *   <li>{@link DatatypeConstants#EQUAL} if this <code>Duration</code> is equal to <code>duration</code> parameter</li>
-	 *   <li>{@link DatatypeConstants#GREATER} if this <code>Duration</code> is longer than <code>duration</code> parameter</li>
+	 *   <li>{@link DatatypeConstants#LESSER} if this {@code Duration} is shorter than {@code duration} parameter</li>
+	 *   <li>{@link DatatypeConstants#EQUAL} if this {@code Duration} is equal to {@code duration} parameter</li>
+	 *   <li>{@link DatatypeConstants#GREATER} if this {@code Duration} is longer than {@code duration} parameter</li>
 	 *   <li>{@link DatatypeConstants#INDETERMINATE} if a conclusive partial order relation cannot be determined</li>
 	 * </ul>
 	 *
 	 * @param duration to compare
 	 * 
-	 * @return the relationship between <code>this</code> <code>Duration</code>and <code>duration</code> parameter as
+	 * @return the relationship between {@code this} {@code Duration}and {@code duration} parameter as
 	 *   {@link DatatypeConstants#LESSER}, {@link DatatypeConstants#EQUAL}, {@link DatatypeConstants#GREATER}
 	 *   or {@link DatatypeConstants#INDETERMINATE}.
 	 * 
@@ -694,7 +695,7 @@ class DurationImpl
 	 *   cannot reasonably process the request, e.g. W3C XML Schema allows for
 	 *   arbitrarily large/small/precise values, the request may be beyond the
 	 *   implementations capability.
-	 * @throws NullPointerException if <code>duration</code> is <code>null</code>. 
+	 * @throws NullPointerException if {@code duration} is {@code null}. 
 	 *
 	 * @see #isShorterThan(Duration)
 	 * @see #isLongerThan(Duration)
@@ -1016,9 +1017,9 @@ class DurationImpl
      * <p>Due to a behavior change in the {@link BigDecimal#toString()}
      * method in JDK1.5, this had to be implemented here.</p>
      * 
-     * @param bd <code>BigDecimal</code> to format as a <code>String</code>
+     * @param bd {@code BigDecimal} to format as a {@code String}
      * 
-     * @return  <code>String</code> representation of <code>BigDecimal</code> 
+     * @return  {@code String} representation of {@code BigDecimal} 
      */
     private String toString(BigDecimal bd) {
         String intString = bd.unscaledValue().toString();
@@ -1189,7 +1190,7 @@ class DurationImpl
      * Note that since this method returns <tt>int</tt>, this
      * method will return an incorrect value for {@link Duration}s
      * with the year field that goes beyond the range of <tt>int</tt>.
-     * Use <code>getField(YEARS)</code> to avoid possible loss of precision.</p>
+     * Use {@code getField(YEARS)} to avoid possible loss of precision.</p>
      * 
      * @return
      *      If the YEARS field is present, return
@@ -1207,7 +1208,7 @@ class DurationImpl
      * This method works just like {@link #getYears()} except
      * that this method works on the MONTHS field.
      * 
-     * @return Months of this <code>Duration</code>.
+     * @return Months of this {@code Duration}.
      */
     public int getMonths() {
         return getInt(DatatypeConstants.MONTHS);
@@ -1220,7 +1221,7 @@ class DurationImpl
      * This method works just like {@link #getYears()} except
      * that this method works on the DAYS field.
      * 
-     * @return Days of this <code>Duration</code>.
+     * @return Days of this {@code Duration}.
      */
     public int getDays() {
         return getInt(DatatypeConstants.DAYS);
@@ -1233,7 +1234,7 @@ class DurationImpl
      * This method works just like {@link #getYears()} except
      * that this method works on the HOURS field.
      * 
-     * @return Hours of this <code>Duration</code>.
+     * @return Hours of this {@code Duration}.
      * 
      */
     public int getHours() {
@@ -1247,7 +1248,7 @@ class DurationImpl
      * This method works just like {@link #getYears()} except
      * that this method works on the MINUTES field.
      * 
-     * @return Minutes of this <code>Duration</code>.
+     * @return Minutes of this {@code Duration}.
      * 
      */
     public int getMinutes() {
@@ -1293,10 +1294,10 @@ class DurationImpl
      * 
      * <p>If the seconds field carries more digits than milli-second order,
      * those will be simply discarded (or in other words, rounded to zero.)  
-     * For example, for any Calendar value <code>x<code>,</p>
+     * For example, for any Calendar value {@code x{@code ,</p>
      * <pre>
-     * <code>new Duration("PT10.00099S").getTimeInMills(x) == 10000</code>.
-     * <code>new Duration("-PT10.00099S").getTimeInMills(x) == -10000</code>.
+     * {@code new Duration("PT10.00099S").getTimeInMills(x) == 10000}.
+     * {@code new Duration("-PT10.00099S").getTimeInMills(x) == -10000}.
      * </pre>
      * 
      * <p>
@@ -1306,15 +1307,15 @@ class DurationImpl
      * method for details.
      * 
      * @param startInstant
-     *      The length of a month/year varies. The <code>startInstant</code> is
+     *      The length of a month/year varies. The {@code startInstant} is
      *      used to disambiguate this variance. Specifically, this method
-     *      returns the difference between <code>startInstant</code> and
-     *      <code>startInstant+duration</code>
+     *      returns the difference between {@code startInstant} and
+     *      {@code startInstant+duration}
      * 
-     * @return milliseconds between <code>startInstant</code> and
-     *   <code>startInstant</code> plus this <code>Duration</code>
+     * @return milliseconds between {@code startInstant} and
+     *   {@code startInstant} plus this {@code Duration}
      *
-     * @throws NullPointerException if <code>startInstant</code> parameter 
+     * @throws NullPointerException if {@code startInstant} parameter 
      * is null.
      * 
      */
@@ -1329,10 +1330,10 @@ class DurationImpl
      * 
      * <p>If the seconds field carries more digits than milli-second order,
      * those will be simply discarded (or in other words, rounded to zero.)
-     * For example, for any <code>Date</code> value <code>x<code>,</p>   
+     * For example, for any {@code Date} value {@code x{@code ,</p>   
      * <pre>
-     * <code>new Duration("PT10.00099S").getTimeInMills(x) == 10000</code>.
-     * <code>new Duration("-PT10.00099S").getTimeInMills(x) == -10000</code>.
+     * {@code new Duration("PT10.00099S").getTimeInMills(x) == 10000}.
+     * {@code new Duration("-PT10.00099S").getTimeInMills(x) == -10000}.
      * </pre>
      * 
      * <p>
@@ -1342,16 +1343,16 @@ class DurationImpl
      * method for details.
      * 
      * @param startInstant
-     *      The length of a month/year varies. The <code>startInstant</code> is
+     *      The length of a month/year varies. The {@code startInstant} is
      *      used to disambiguate this variance. Specifically, this method
-     *      returns the difference between <code>startInstant</code> and
-     *      <code>startInstant+duration</code>.
+     *      returns the difference between {@code startInstant} and
+     *      {@code startInstant+duration}.
      * 
      * @throws NullPointerException
      *      If the startInstant parameter is null.
      * 
-     * @return milliseconds between <code>startInstant</code> and
-     *   <code>startInstant</code> plus this <code>Duration</code>
+     * @return milliseconds between {@code startInstant} and
+     *   {@code startInstant} plus this {@code Duration}
      *
      * @see #getTimeInMillis(Calendar)
      */
@@ -1405,14 +1406,14 @@ class DurationImpl
      *      Duration object.
      * </ol>
      * 
-     * <p>Note that since the Calendar class uses <code>int</code> to
+     * <p>Note that since the Calendar class uses {@code int} to
      * hold the value of year and month, this method may produce
      * an unexpected result if this duration object holds
      * a very large value in the years or months fields.</p>
      *
-     * @param startTimeInstant <code>Calendar</code> reference point.
+     * @param startTimeInstant {@code Calendar} reference point.
      *  
-     * @return <code>Duration</code> of years and months of this <code>Duration</code> as days.
+     * @return {@code Duration} of years and months of this {@code Duration} as days.
      * 
      * @throws NullPointerException If the startTimeInstant parameter is null.
      */
@@ -1441,7 +1442,7 @@ class DurationImpl
     }
     
     /**
-     * <p>Computes a new duration whose value is <code>factor</code> times
+     * <p>Computes a new duration whose value is {@code factor} times
      * longer than the value of this duration.</p>
      * 
      * <p>This method is provided for the convenience.
@@ -1450,9 +1451,9 @@ class DurationImpl
      * multiply(new BigDecimal(String.valueOf(factor)))
      * </pre>
      * 
-     * @param factor Factor times longer of new <code>Duration</code> to create.
+     * @param factor Factor times longer of new {@code Duration} to create.
      * 
-     * @return New <code>Duration</code> that is <code>factor</code>times longer than this <code>Duration</code>.
+     * @return New {@code Duration} that is {@code factor}times longer than this {@code Duration}.
      * 
      * @see #multiply(BigDecimal)
      */
@@ -1461,7 +1462,7 @@ class DurationImpl
     }
     
     /**
-     * Computes a new duration whose value is <code>factor</code> times
+     * Computes a new duration whose value is {@code factor} times
      * longer than the value of this duration.
      * 
      * <p>
@@ -1503,8 +1504,8 @@ class DurationImpl
      * @throws IllegalStateException if operation produces fraction in 
      * the months field.
      *
-     * @throws NullPointerException if the <code>factor</code> parameter is 
-     * <code>null</code>.
+     * @throws NullPointerException if the {@code factor} parameter is 
+     * {@code null}.
      *
      */
     public Duration multiply(BigDecimal factor) {
@@ -1599,7 +1600,7 @@ class DurationImpl
     }
     
     /**
-     * 1 unit of FIELDS[i] is equivalent to <code>FACTORS[i]</code> unit of
+     * 1 unit of FIELDS[i] is equivalent to {@code FACTORS[i]} unit of
      * FIELDS[i+1].
      */
     private static final BigDecimal[] FACTORS = new BigDecimal[] {
@@ -1611,7 +1612,7 @@ class DurationImpl
     };    
     
     /**
-     * <p>Computes a new duration whose value is <code>this+rhs</code>.</p>
+     * <p>Computes a new duration whose value is {@code this+rhs}.</p>
      * 
      * <p>For example,</p>
      * <pre>
@@ -1631,8 +1632,8 @@ class DurationImpl
      * <p>
      * Firstly, we can assume that two {@link Duration}s to be added
      * are both positive without losing generality (i.e.,
-     * <code>(-X)+Y=Y-X</code>, <code>X+(-Y)=X-Y</code>,
-     * <code>(-X)+(-Y)=-(X+Y)</code>)
+     * {@code (-X)+Y=Y-X}, {@code X+(-Y)=X-Y},
+     * {@code (-X)+(-Y)=-(X+Y)})
      * 
      * <p>
      * Addition of two positive {@link Duration}s are simply defined as  
@@ -1641,11 +1642,11 @@ class DurationImpl
      * A field of the resulting {@link Duration} will be unset if and
      * only if respective fields of two input {@link Duration}s are unset. 
      * <p>
-     * Note that <code>lhs.add(rhs)</code> will be always successful if
-     * <code>lhs.signum()*rhs.signum()!=-1</code> or both of them are
+     * Note that {@code lhs.add(rhs)} will be always successful if
+     * {@code lhs.signum()*rhs.signum()!=-1} or both of them are
      * normalized.</p>
      * 
-     * @param rhs <code>Duration</code> to add to this <code>Duration</code>
+     * @param rhs {@code Duration} to add to this {@code Duration}
      * 
      * @return
      *      non-null valid Duration object.
@@ -1743,10 +1744,10 @@ class DurationImpl
     }
     
     /**
-     * Compute <code>value*signum</code> where value==null is treated as
+     * Compute {@code value*signum} where value==null is treated as
      * value==0.
      * @param value Value to sanitize.
-     * @param signum 0 to sanitize to 0, > 0 to sanitize to <code>value</code>, < 0 to sanitize to negative <code>value</code>.
+     * @param signum 0 to sanitize to 0, > 0 to sanitize to {@code value}, < 0 to sanitize to negative {@code value}.
      *
      * @return non-null {@link BigDecimal}.
      */
@@ -1761,10 +1762,10 @@ class DurationImpl
     }
         
     /**
-     * <p>Compute <code>value*signum</code> where <code>value==null</code> is treated as <code>value==0</code></p>.
+     * <p>Compute {@code value*signum} where {@code value==null} is treated as {@code value==0}</p>.
      * 
      * @param value Value to sanitize.
-     * @param signum 0 to sanitize to 0, > 0 to sanitize to <code>value</code>, < 0 to sanitize to negative <code>value</code>.
+     * @param signum 0 to sanitize to 0, > 0 to sanitize to {@code value}, < 0 to sanitize to negative {@code value}.
      * 
      * @return non-null {@link BigDecimal}.
      */
@@ -1779,7 +1780,7 @@ class DurationImpl
     }
     
     /**
-     * <p>Computes a new duration whose value is <code>this-rhs</code>.</p>
+     * <p>Computes a new duration whose value is {@code this-rhs}.</p>
      * 
      * <p>For example:</p>
      * <pre>
@@ -1796,8 +1797,8 @@ class DurationImpl
      * <p>Formally the computation is defined as follows.
      * First, we can assume that two {@link Duration}s are both positive
      * without losing generality.  (i.e.,
-     * <code>(-X)-Y=-(X+Y)</code>, <code>X-(-Y)=X+Y</code>,
-     * <code>(-X)-(-Y)=-(X-Y)</code>)</p>
+     * {@code (-X)-Y=-(X+Y)}, {@code X-(-Y)=X+Y},
+     * {@code (-X)-(-Y)=-(X-Y)})</p>
      *  
      * <p>Then two durations are subtracted field by field.
      * If the sign of any non-zero field <tt>F</tt> is different from
@@ -1813,9 +1814,9 @@ class DurationImpl
      * days), then the computation fails by throwing an
      * {@link IllegalStateException}.</p>
      * 
-     * @param rhs <code>Duration</code> to substract from this <code>Duration</code>.
+     * @param rhs {@code Duration} to substract from this {@code Duration}.
      *  
-     * @return New <code>Duration</code> created from subtracting <code>rhs</code> from this <code>Duration</code>.
+     * @return New {@code Duration} created from subtracting {@code rhs} from this {@code Duration}.
      * 
      * @throws IllegalStateException
      *      If two durations cannot be meaningfully subtracted. For
@@ -1833,7 +1834,7 @@ class DurationImpl
     
     /**
      * Returns a new {@link Duration} object whose
-     * value is <code>-this</code>.
+     * value is {@code -this}.
      * 
      * <p>
      * Since the {@link Duration} class is immutable, this method
@@ -1955,7 +1956,7 @@ class DurationImpl
      * cannot be invoked directly.
      * 
      * In future, this should be replaced by
-     * <code>cal.getTimeInMillis()</code>
+     * {@code cal.getTimeInMillis()}
      */
     private static long getCalendarTimeInMillis(Calendar cal) {
         return cal.getTime().getTime();
@@ -1967,7 +1968,7 @@ class DurationImpl
      * 
      * @return
      *      An object that encapsulates the string
-     *      returned by <code>this.toString()</code>.
+     *      returned by {@code this.toString()}.
      */
     private Object writeReplace() throws IOException {
         return new SerializedDuration(toString());

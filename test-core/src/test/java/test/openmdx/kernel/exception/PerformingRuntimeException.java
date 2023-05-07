@@ -89,7 +89,7 @@ public class PerformingRuntimeException
     }
 
 	/**
-	 * Implements <code>Serializable</code>
+	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = 1471749267410236566L;
 

@@ -58,9 +58,9 @@ import javax.xml.namespace.QName;
  * javax.xml.stream.notations and javax.xml.stream.entities.
  * When the current event is a DTD the following call will return a
  * list of Notations
- *  <code>List l = (List) getProperty("javax.xml.stream.notations");</code>
+ *  {@code List l = (List) getProperty("javax.xml.stream.notations");}
  * The following call will return a list of entity declarations:
- * <code>List l = (List) getProperty("javax.xml.stream.entities");</code>
+ * {@code List l = (List) getProperty("javax.xml.stream.entities");}
  * These properties can only be accessed during a DTD event and
  * are defined to return null if the information is not available.
  *
@@ -163,7 +163,8 @@ import javax.xml.namespace.QName;
  * 
  * openMDX/Dalvik Notice (February 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  *
  * @since openMDX 2.12
  * @author openMDX Team
@@ -549,7 +550,7 @@ public interface XMLStreamReader extends XMLStreamConstants {
    * If the number of characters actually copied is less than the "length", then there is no more text.
    * Otherwise, subsequent calls need to be made until all text has been retrieved. For example:
    *
-   *<code>
+   *{@code 
    * int length = 1024;
    * char[] myBuffer = new char[ length ];
    *
@@ -560,7 +561,7 @@ public interface XMLStreamReader extends XMLStreamConstants {
    *   if (nCopied < length)
    *       break;
    * }
-   * </code>
+   * }
    * XMLStreamException may be thrown if there are any XML errors in the underlying source.
    * The "targetStart" argument must be greater than or equal to 0 and less than the length of "target",
    * Length must be greater than 0 and "targetStart + length" must be less than or equal to length of "target".

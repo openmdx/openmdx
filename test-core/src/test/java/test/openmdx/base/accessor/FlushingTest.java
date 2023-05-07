@@ -136,7 +136,7 @@ public class FlushingTest {
      * Tells whether adjacent members are ordered
      * @param comparator TODO
      * 
-     * @return <code>true</code> if adjacent members are ordered
+     * @return {@code true} if adjacent members are ordered
      */
     private boolean isPartiallyOrdered(Comparator<DataObject_1_0> comparator){
         for(int i = 0, iLimit = this.members.size() - 1; i < iLimit; i++) {
@@ -151,7 +151,7 @@ public class FlushingTest {
      * Tells whether the members are ordered
      * @param comparator TODO
      * 
-     * @return <code>true</code> if the members are ordered
+     * @return {@code true} if the members are ordered
      */
     private boolean isCompletelyOrdered(Comparator<DataObject_1_0> comparator){
         for(int i = 0, iLimit = this.members.size() - 1; i < iLimit; i++) {

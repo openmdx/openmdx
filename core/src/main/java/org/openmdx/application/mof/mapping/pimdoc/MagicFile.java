@@ -71,7 +71,7 @@ public enum MagicFile {
 	TABLE_OF_CONTENT("index", "html", null, null),
 	
 	/**
-	 * The table of content
+	 * The UML symbol is used for the diagram link in the table of content
 	 */	
 	UML_SYMBOL("uml-symbol", null, "svg", null);
 		

@@ -38,19 +38,19 @@ import java.util.concurrent.ConcurrentMap;
 import org.openmdx.dalvik.uses.sun.security.action.GetPropertyAction;
 
 /**
- * <code>CalendarSystem</code> is an abstract class that defines the
+ * {@code CalendarSystem} is an abstract class that defines the
  * programming interface to deal with calendar date and time.
  *
- * <p><code>CalendarSystem</code> instances are singletons. For
+ * <p>{@code CalendarSystem} instances are singletons. For
  * example, there exists only one Gregorian calendar instance in the
  * Java runtime environment. A singleton instance can be obtained
  * calling one of the static factory methods.
  *
  * <h4>CalendarDate</h4>
  *
- * <p>For the methods in a <code>CalendarSystem</code> that manipulate
- * a <code>CalendarDate</code>, <code>CalendarDate</code>s that have
- * been created by the <code>CalendarSystem</code> must be
+ * <p>For the methods in a {@code CalendarSystem} that manipulate
+ * a {@code CalendarDate}, {@code CalendarDate}s that have
+ * been created by the {@code CalendarSystem} must be
  * specified. Otherwise, the methods throw an exception. This is
  * because, for example, a Chinese calendar date can't be understood
  * by the Hebrew calendar system.
@@ -73,7 +73,8 @@ import org.openmdx.dalvik.uses.sun.security.action.GetPropertyAction;
  * <p>
  * openMDX/Dalvik Notice (November 2022):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.18
  * @author openMDX Team
@@ -131,24 +132,24 @@ public abstract class CalendarSystem {
     private final static Gregorian GREGORIAN_INSTANCE = new Gregorian();
 
     /**
-     * Returns the singleton instance of the <code>Gregorian</code>
+     * Returns the singleton instance of the {@code Gregorian}
      * calendar system.
      *
-     * @return the <code>Gregorian</code> instance
+     * @return the {@code Gregorian} instance
      */
     public static Gregorian getGregorianCalendar() {
         return GREGORIAN_INSTANCE;
     }
 
     /**
-     * Returns a <code>CalendarSystem</code> specified by the calendar
+     * Returns a {@code CalendarSystem} specified by the calendar
      * name. The calendar name has to be one of the supported calendar
      * names.
      *
      * @param calendarName the calendar name
-     * @return the <code>CalendarSystem</code> specified by
-     * <code>calendarName</code>, or null if there is no
-     * <code>CalendarSystem</code> associated with the given calendar name.
+     * @return the {@code CalendarSystem} specified by
+     * {@code calendarName}, or null if there is no
+     * {@code CalendarSystem} associated with the given calendar name.
      */
     public static CalendarSystem forName(String calendarName) {
         if ("gregorian".equals(calendarName)) {
@@ -244,7 +245,7 @@ public abstract class CalendarSystem {
      *
      * @param millis the offset value in milliseconds from January 1,
      * 1970 00:00:00 UTC (Gregorian).
-     * @return a <code>CalendarDate</code> instance that contains the
+     * @return a {@code CalendarDate} instance that contains the
      * calculated calendar field values.
      */
     public abstract CalendarDate getCalendarDate(long millis);
@@ -254,12 +255,12 @@ public abstract class CalendarSystem {
     public abstract CalendarDate getCalendarDate(long millis, TimeZone zone);
 
     /**
-     * Constructs a <code>CalendarDate</code> that is specific to this
+     * Constructs a {@code CalendarDate} that is specific to this
      * calendar system. All calendar fields have their initial
      * values. The {@link TimeZone#getDefault() default time zone} is
      * set to the instance.
      *
-     * @return a <code>CalendarDate</code> instance that contains the initial
+     * @return a {@code CalendarDate} instance that contains the initial
      * calendar field values.
      */
     public abstract CalendarDate newCalendarDate();
@@ -269,9 +270,9 @@ public abstract class CalendarSystem {
     /**
      * Returns the number of milliseconds since the Epoch, January 1,
      * 1970 00:00:00 UTC (Gregorian), represented by the specified
-     * <code>CalendarDate</code>.
+     * {@code CalendarDate}.
      *
-     * @param date the <code>CalendarDate</code> from which the time
+     * @param date the {@code CalendarDate} from which the time
      * value is calculated
      * @return the number of milliseconds since the Epoch.
      */
@@ -279,9 +280,9 @@ public abstract class CalendarSystem {
 
     /**
      * Returns the length in days of the specified year by
-     * <code>date</code>. This method does not perform the
-     * normalization with the specified <code>CalendarDate</code>. The
-     * <code>CalendarDate</code> must be normalized to get a correct
+     * {@code date}. This method does not perform the
+     * normalization with the specified {@code CalendarDate}. The
+     * {@code CalendarDate} must be normalized to get a correct
      * value.
      */
     public abstract int getYearLength(CalendarDate date);
@@ -289,7 +290,7 @@ public abstract class CalendarSystem {
     /**
      * Returns the number of months of the specified year. This method
      * does not perform the normalization with the specified
-     * <code>CalendarDate</code>. The <code>CalendarDate</code> must
+     * {@code CalendarDate}. The {@code CalendarDate} must
      * be normalized to get a correct value.
      */
     public abstract int getYearLengthInMonths(CalendarDate date);
@@ -297,7 +298,7 @@ public abstract class CalendarSystem {
     /**
      * Returns the length in days of the month specified by the calendar
      * date. This method does not perform the normalization with the
-     * specified calendar date. The <code>CalendarDate</code> must
+     * specified calendar date. The {@code CalendarDate} must
      * be normalized to get a correct value.
      *
      * @param date the date from which the month value is obtained
@@ -315,26 +316,26 @@ public abstract class CalendarSystem {
     public abstract int getWeekLength();
 
     /**
-     * Returns the <code>Era</code> designated by the era name that
+     * Returns the {@code Era} designated by the era name that
      * has to be known to this calendar system. If no Era is
      * applicable to this calendar system, null is returned.
      *
      * @param eraName the name of the era
-     * @return the <code>Era</code> designated by
-     * <code>eraName</code>, or <code>null</code> if no Era is
+     * @return the {@code Era} designated by
+     * {@code eraName}, or {@code null} if no Era is
      * applicable to this calendar system or the specified era name is
      * not known to this calendar system.
      */
     public abstract Era getEra(String eraName);
 
     /**
-     * Returns valid <code>Era</code>s of this calendar system. The
+     * Returns valid {@code Era}s of this calendar system. The
      * return value is sorted in the descendant order. (i.e., the first
      * element of the returned array is the oldest era.) If no era is
-     * applicable to this calendar system, <code>null</code> is returned.
+     * applicable to this calendar system, {@code null} is returned.
      *
-     * @return an array of valid <code>Era</code>s, or
-     * <code>null</code> if no era is applicable to this calendar
+     * @return an array of valid {@code Era}s, or
+     * {@code null} if no era is applicable to this calendar
      * system.
      */
     public abstract Era[] getEras();
@@ -347,29 +348,29 @@ public abstract class CalendarSystem {
     public abstract void setEra(CalendarDate date, String eraName);
 
     /**
-     * Returns a <code>CalendarDate</code> of the n-th day of week
+     * Returns a {@code CalendarDate} of the n-th day of week
      * which is on, after or before the specified date. For example, the
      * first Sunday in April 2002 (Gregorian) can be obtained as
      * below:
      *
-     * <pre><code>
+     * <pre>{@code 
      * Gregorian cal = CalendarSystem.getGregorianCalendar();
      * CalendarDate date = cal.newCalendarDate();
      * date.setDate(2004, cal.APRIL, 1);
      * CalendarDate firstSun = cal.getNthDayOfWeek(1, cal.SUNDAY, date);
      * // firstSun represents April 4, 2004.
-     * </code></pre>
+     * }</pre>
      *
-     * This method returns a new <code>CalendarDate</code> instance
+     * This method returns a new {@code CalendarDate} instance
      * and doesn't modify the original date.
      *
      * @param nth specifies the n-th one. A positive number specifies
-     * <em>on or after</em> the <code>date</code>. A non-positive number
-     * specifies <em>on or before</em> the <code>date</code>.
+     * <em>on or after</em> the {@code date}. A non-positive number
+     * specifies <em>on or before</em> the {@code date}.
      * @param dayOfWeek the day of week
      * @param date the date
-     * @return the date of the nth <code>dayOfWeek</code> after
-     * or before the specified <code>CalendarDate</code>
+     * @return the date of the nth {@code dayOfWeek} after
+     * or before the specified {@code CalendarDate}
      */
     public abstract CalendarDate getNthDayOfWeek(int nth, int dayOfWeek,
                                                  CalendarDate date);
@@ -377,29 +378,29 @@ public abstract class CalendarSystem {
     public abstract CalendarDate setTimeOfDay(CalendarDate date, int timeOfDay);
 
     /**
-     * Checks whether the calendar fields specified by <code>date</code>
+     * Checks whether the calendar fields specified by {@code date}
      * represents a valid date and time in this calendar system. If the
-     * given date is valid, <code>date</code> is marked as <em>normalized</em>.
+     * given date is valid, {@code date} is marked as <em>normalized</em>.
      *
-     * @param date the <code>CalendarDate</code> to be validated
-     * @return <code>true</code> if all the calendar fields are consistent,
-     * otherwise, <code>false</code> is returned.
+     * @param date the {@code CalendarDate} to be validated
+     * @return {@code true} if all the calendar fields are consistent,
+     * otherwise, {@code false} is returned.
      * @exception NullPointerException if the specified
-     * <code>date</code> is <code>null</code>
+     * {@code date} is {@code null}
      */
     public abstract boolean validate(CalendarDate date);
 
     /**
      * Normalizes calendar fields in the specified
-     * <code>date</code>. Also all {@link CalendarDate#FIELD_UNDEFINED
+     * {@code date}. Also all {@link CalendarDate#FIELD_UNDEFINED
      * undefined} fields are set to correct values. The actual
      * normalization process is calendar system dependent.
      *
      * @param date the calendar date to be validated
-     * @return <code>true</code> if all fields have been normalized;
-     * <code>false</code> otherwise.
+     * @return {@code true} if all fields have been normalized;
+     * {@code false} otherwise.
      * @exception NullPointerException if the specified
-     * <code>date</code> is <code>null</code>
+     * {@code date} is {@code null}
      */
     public abstract boolean normalize(CalendarDate date);
 }

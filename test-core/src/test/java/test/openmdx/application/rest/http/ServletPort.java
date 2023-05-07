@@ -1162,7 +1162,7 @@ public class ServletPort
         /**
          * Retrieve the content
          * 
-         * @return the content as <code>ServletInputStream</code>
+         * @return the content as {@code ServletInputStream}
          */
         ServletInputStream getBinarySource(
         ){
@@ -1338,7 +1338,7 @@ public class ServletPort
         /**
          * Retrieve the content
          * 
-         * @return the content as <code>InputSource</code>
+         * @return the content as {@code InputSource}
          */
         InputSource getInputSource(
         ){

@@ -48,7 +48,8 @@ import org.openmdx.kernel.log.SysLog;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -240,7 +241,8 @@ public final class MethodUtil extends SecureClassLoader {
      * <p>
 	 * openMDX/Dalvik Notice (January 2013):<br>
 	 * THIS CODE HAS BEEN MODIFIED: bounce might be null now
-	 * <code>org.openmdx.dalvik.uses.</code>
+	 * {@code org.openmdx.dalvik.uses.}
+
 	 * </p>
      */
     public static Object invoke(

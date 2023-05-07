@@ -122,13 +122,17 @@ public class ClassMapper extends AbstractClassMapper {
     public void mapBegin(
     ) {
         this.trace("ClassProxy/Begin");
-        this.fileHeader();
-        printLine("package " + this.getNamespace(MapperUtils.getNameComponents(MapperUtils.getPackageName(this.classDef.getQualifiedName()))) + ";");
-        printLine("");
-        printLine("public interface " + this.className + "Class ");
+        printLine(
+        	"package ",
+        	this.getNamespace(MapperUtils.getNameComponents(MapperUtils.getPackageName(this.classDef.getQualifiedName()))),
+        	";"
+        );
+        newLine();
+        this.mapGeneratedAnnotation();
+        printLine("public interface ", this.className, "Class ");
         if(getFormat() == Format.JMI1) printLine("  extends javax.jmi.reflect.RefClass");
         printLine("{");
-        printLine("");
+        newLine();
         printLine("  /**");
         MapperUtils.wrapText("   * ", "Creates an instance of class {@code " + this.className + "}.", this::printLine);
         MapperUtils.wrapText(
@@ -137,9 +141,9 @@ public class ClassMapper extends AbstractClassMapper {
             this::printLine
         );
         printLine("   */");
-        printLine("  public " + this.className + " create" + this.className + "(");
+        printLine("  public ", this.className, " create", this.className, "(");
         printLine("  );");
-        printLine("");
+        newLine();
         printLine("  /**");
         MapperUtils.wrapText(
             "   * ",
@@ -157,7 +161,7 @@ public class ClassMapper extends AbstractClassMapper {
             this::printLine
         );
         printLine("   */");
-        printLine("  public " + this.className + " get" + this.className + "(");
+        printLine("  public ", this.className, " get", this.className, "(");
         printLine("    Object object");
         printLine("  );");
     }

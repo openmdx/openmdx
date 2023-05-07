@@ -51,12 +51,12 @@ public class WaitForNextTokenException
 	extends PasscodeExpiredException {
 
     /**
-     * <code>serialVersionUID</code> to implement <code>Serializable</code>.
+     * {@code serialVersionUID} to implement {@code Serializable}.
      */
     private static final long serialVersionUID = 3762533395313538104L;
 
     /**
-     * Constructor to implement <code>Serializable</code>.
+     * Constructor to implement {@code Serializable}.
      */
     protected WaitForNextTokenException(
     ){

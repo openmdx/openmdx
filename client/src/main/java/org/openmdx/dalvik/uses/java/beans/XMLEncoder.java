@@ -36,11 +36,11 @@ import java.util.Map;
 import java.util.Vector;
 
 /**
- * The <code>XMLEncoder</code> class is a complementary alternative to
- * the <code>ObjectOutputStream</code> and can used to generate
+ * The {@code XMLEncoder} class is a complementary alternative to
+ * the {@code ObjectOutputStream} and can used to generate
  * a textual representation of a <em>JavaBean</em> in the same
- * way that the <code>ObjectOutputStream</code> can
- * be used to create binary representation of <code>Serializable</code>
+ * way that the {@code ObjectOutputStream} can
+ * be used to create binary representation of {@code Serializable}
  * objects. For example, the following fragment can be used to create
  * a textual representation the supplied <em>JavaBean</em>
  * and all its properties:
@@ -51,19 +51,19 @@ import java.util.Vector;
  *       e.writeObject(new JButton("Hello, world"));
  *       e.close();
  * </pre>
- * Despite the similarity of their APIs, the <code>XMLEncoder</code>
+ * Despite the similarity of their APIs, the {@code XMLEncoder}
  * class is exclusively designed for the purpose of archiving graphs
  * of <em>JavaBean</em>s as textual representations of their public
  * properties. Like Java source files, documents written this way
  * have a natural immunity to changes in the implementations of the classes
- * involved. The <code>ObjectOutputStream</code> continues to be recommended
+ * involved. The {@code ObjectOutputStream} continues to be recommended
  * for interprocess communication and general purpose serialization.
  * <p>
- * The <code>XMLEncoder</code> class provides a default denotation for
+ * The {@code XMLEncoder} class provides a default denotation for
  * <em>JavaBean</em>s in which they are represented as XML documents
  * complying with version 1.0 of the XML specification and the
  * UTF-8 character encoding of the Unicode/ISO 10646 character set.
- * The XML documents produced by the <code>XMLEncoder</code> class are:
+ * The XML documents produced by the {@code XMLEncoder} class are:
  * <ul>
  * <li>
  * <em>Portable and version resilient</em>: they have no dependencies
@@ -72,7 +72,7 @@ import java.util.Vector;
  * different versions of some of the classes and between VMs from
  * different vendors.
  * <li>
- * <em>Structurally compact</em>: The <code>XMLEncoder</code> class
+ * <em>Structurally compact</em>: The {@code XMLEncoder} class
  * uses a <em>redundancy elimination</em> algorithm internally so that the
  * default values of a Bean's properties are not written to the stream.
  * <li>
@@ -131,12 +131,12 @@ import java.util.Vector;
  * <li>
  * Instances of the wrapper classes for Java's primitive types are written
  * using the name of the primitive type as the tag. For example, an
- * instance of the <code>Integer</code> class could be written:
- * &lt;int&gt;123&lt;/int&gt;. Note that the <code>XMLEncoder</code> class
+ * instance of the {@code Integer} class could be written:
+ * &lt;int&gt;123&lt;/int&gt;. Note that the {@code XMLEncoder} class
  * uses Java's reflection package in which the conversion between
  * Java's primitive types and their associated "wrapper classes"
- * is handled internally. The API for the <code>XMLEncoder</code> class
- * itself deals only with <code>Object</code>s.
+ * is handled internally. The API for the {@code XMLEncoder} class
+ * itself deals only with {@code Object}s.
  * <li>
  * In an element representing a nullary method whose name
  * starts with "get", the "method" attribute is replaced
@@ -174,7 +174,8 @@ import java.util.Vector;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -204,7 +205,7 @@ public class XMLEncoder extends Encoder implements AutoCloseable {
 
     /**
      * Creates a new output stream for sending <em>JavaBeans</em>
-     * to the stream <code>out</code> using an XML encoding.
+     * to the stream {@code out} using an XML encoding.
      *
      * @param out The stream to which the XML representation of
      * the objects will be sent.
@@ -219,7 +220,7 @@ public class XMLEncoder extends Encoder implements AutoCloseable {
     }
 
     /**
-     * Sets the owner of this encoder to <code>owner</code>.
+     * Sets the owner of this encoder to {@code owner}.
      *
      * @param owner The owner of this encoder.
      *
@@ -374,7 +375,7 @@ public class XMLEncoder extends Encoder implements AutoCloseable {
      * This method writes out the preamble associated with the
      * XML encoding if it has not been written already and
      * then writes out all of the values that been
-     * written to the stream since the last time <code>flush</code>
+     * written to the stream since the last time {@code flush}
      * was called. After flushing, all internal references to the
      * values that were written to this stream are cleared.
      */
@@ -417,7 +418,7 @@ public class XMLEncoder extends Encoder implements AutoCloseable {
 
 
     /**
-     * This method calls <code>flush</code>, writes the closing
+     * This method calls {@code flush}, writes the closing
      * postamble and then closes the output stream associated
      * with this stream.
      */
@@ -447,12 +448,12 @@ public class XMLEncoder extends Encoder implements AutoCloseable {
     }
 
     /**
-     * Returns <code>true</code> if the argument,
+     * Returns {@code true} if the argument,
      * a Unicode code point, is valid in XML documents.
      * Unicode characters fit into the low sixteen bits of a Unicode code point,
      * and pairs of Unicode <em>surrogate characters</em> can be combined
      * to encode Unicode code point in documents containing only Unicode.
-     * (The <code>char</code> datatype in the Java Programming Language
+     * (The {@code char} datatype in the Java Programming Language
      * represents Unicode characters, including unpaired surrogates.)
      * <par>
      * [2] Char ::= #x0009 | #x000A | #x000D
@@ -462,8 +463,8 @@ public class XMLEncoder extends Encoder implements AutoCloseable {
      * </par>
      *
      * @param code  the 32-bit Unicode code point being tested
-     * @return  <code>true</code> if the Unicode code point is valid,
-     *          <code>false</code> otherwise
+     * @return  {@code true} if the Unicode code point is valid,
+     *          {@code false} otherwise
      */
     private static boolean isValidCharCode(int code) {
         return (0x0020 <= code && code <= 0xD7FF)

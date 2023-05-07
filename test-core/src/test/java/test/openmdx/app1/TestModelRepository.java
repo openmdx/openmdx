@@ -207,7 +207,7 @@ public class TestModelRepository {
                 writer.println();
                 writer.println();
                 writer.println("    /**");
-                writer.println("     * Implements <code>Serializable</code>");
+                writer.println("     * Implements {@code Serializable}");
                 writer.println("     */");
                 writer.println();
                 writer.println("    @Override");

@@ -29,16 +29,16 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
- * The class <code>Era</code> represents a calendar era that defines a
+ * The class {@code Era} represents a calendar era that defines a
  * period of time in which the same year numbering is used. For
  * example, Gregorian year 2004 is <I>Heisei</I> 16 in the Japanese
  * calendar system. An era starts at any point of time (Gregorian) that is
- * represented by <code>CalendarDate</code>.
+ * represented by {@code CalendarDate}.
  *
- * <p><code>Era</code>s that are applicable to a particular calendar
+ * <p>{@code Era}s that are applicable to a particular calendar
  * system can be obtained by calling {@link CalendarSystem#getEras}
  * one of which can be used to specify a date in
- * <code>CalendarDate</code>.
+ * {@code CalendarDate}.
  *
  * <p>The following era names are defined in this release.
  * <pre>{@code
@@ -55,7 +55,8 @@ import java.util.TimeZone;
  * <p>
  * openMDX/Dalvik Notice (November 2022):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.18
  * @author openMDX Team
@@ -72,15 +73,15 @@ public final class Era {
     private final boolean localTime;
 
     /**
-     * Constructs an <code>Era</code> instance.
+     * Constructs an {@code Era} instance.
      *
      * @param name the era name (e.g., "BeforeCommonEra" for the Julian calendar system)
      * @param abbr the abbreviation of the era name (e.g., "B.C.E." for "BeforeCommonEra")
      * @param since the time (millisecond offset from January 1, 1970
      * (Gregorian) UTC or local time) when the era starts, inclusive.
-     * @param localTime <code>true</code> if <code>since</code>
-     * specifies a local time; <code>false</code> if
-     * <code>since</code> specifies UTC
+     * @param localTime {@code true} if {@code since}
+     * specifies a local time; {@code false} if
+     * {@code since} specifies UTC
      */
     public Era(String name, String abbr, long since, boolean localTime) {
         this.name = name;

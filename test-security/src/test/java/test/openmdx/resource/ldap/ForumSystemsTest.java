@@ -69,35 +69,35 @@ import org.openmdx.resource.spi.DefaultConnectionManager;
  * Use Forum System's public
  * <a href="https://www.forumsys.com/tutorials/integration-how-to/ldap/online-ldap-test-server/">Online LDAP Test Server</a>
  */
-public class ForumSystemsTest {
+class ForumSystemsTest {
 
 	private static ConnectionManager connectionManager;
 	
 	@BeforeAll
-	public static void setUp() {
+	static void setUp() {
 		connectionManager = new DefaultConnectionManager();
 	}
 
 	@AfterAll
-	public static void tearDown() {
+	static void tearDown() {
 		connectionManager = null;
 	}
 	
     @Test
-    public void withClassicAuthenticationLookupSucceeds() throws LdapException, ResourceException, IOException {
+    void withClassicAuthenticationLookupForExistingUserSucceeds() throws LdapException, ResourceException, IOException {
         // Arrange
         final ManagedConnectionFactory testee = createTestee();
         testee.setUserName("cn=read-only-admin,dc=example,dc=com");
         testee.setPassword("password");
         final ConnectionFactory<LdapConnection, LdapException> connectionFactory = testee.createConnectionFactory(connectionManager);
         // Act
-        final String commonName = readWithContainerAuthentication(connectionFactory);
+        final String commonName = readCommonNameOfGaussWithContainerAuthentication(connectionFactory);
         // Assert
         Assertions.assertEquals("Carl Friedrich Gauss", commonName);
     }
 
     @Test
-    public void withClassicAuthenticationDistinguishedNameMustBeValid() throws ResourceException, LdapException {
+    void withClassicAuthenticationDistinguishedNameMustBeValid() throws ResourceException, LdapException {
     	// Arrange
         final ManagedConnectionFactory testee = createTestee();
         testee.setUserName("cn=doe,dc=example,dc=com");
@@ -107,7 +107,8 @@ public class ForumSystemsTest {
         Assertions.assertThrowsExactly(LdapAuthenticationException.class,()-> connectionFactory.getConnection());
     }
 
-    public void withClassicAuthenticationPasswordMustBeValid() throws ResourceException, LdapException {
+    @Test
+    void withClassicAuthenticationPasswordMustBeValid() throws ResourceException, LdapException {
     	// Arrange
         final ManagedConnectionFactory testee = createTestee();
         testee.setUserName("cn=read-only-admin,dc=example,dc=com");
@@ -118,18 +119,18 @@ public class ForumSystemsTest {
     }
     
     @Test
-    public void withoutAuthenticationLookupSucceeds() throws ResourceException, LdapException, IOException {
+    void withoutAuthenticationLookupForExistingUserSucceeds() throws ResourceException, LdapException, IOException {
     	// Arrange
         final ManagedConnectionFactory testee = createTestee();
         final ConnectionFactory<LdapConnection, LdapException> connectionFactory = testee.createConnectionFactory(connectionManager);
         // Act
-        final String commonName = readWithContainerAuthentication(connectionFactory);
+        final String commonName = readCommonNameOfGaussWithContainerAuthentication(connectionFactory);
         // Assert
         Assertions.assertEquals("Carl Friedrich Gauss", commonName);
     }
 
     @Test
-    public void withApplicationAuthenticationLookupSucceeds() throws ResourceException, LdapException, IOException {
+    void withApplicationAuthenticationLookupForExistingUserSucceeds() throws ResourceException, LdapException, IOException {
     	// Arrange
         final ManagedConnectionFactory testee = createTestee();
         final AuthenticationInfo authenticationInfo = new AuthenticationInfo(
@@ -138,13 +139,13 @@ public class ForumSystemsTest {
         );
         final ConnectionFactory<LdapConnection, LdapException> connectionFactory = testee.createConnectionFactory(connectionManager);
         // Act
-        final String commonName = readWithApplicationAuthentication(connectionFactory, authenticationInfo);
+        final String commonName = readCommonNameOfGaussWithApplicationAuthentication(connectionFactory, authenticationInfo);
         // Assert
         Assertions.assertEquals("Carl Friedrich Gauss", commonName);
     }
 
     @Test
-    public void withApplicationAuthenticaationClassicCredentialsAreIgnored() throws ResourceException, LdapException, IOException {
+    void withApplicationAuthenticationClassicCredentialsAreIgnored() throws ResourceException, LdapException, IOException {
     	// Arrange
         final ManagedConnectionFactory testee = createTestee();
         testee.setUserName("cn=ignored,dc=example,dc=com");
@@ -155,12 +156,13 @@ public class ForumSystemsTest {
         );
         final ConnectionFactory<LdapConnection, LdapException> connectionFactory = testee.createConnectionFactory(connectionManager);
         // Act
-        final String commonName = readWithApplicationAuthentication(connectionFactory, authenticationInfo);
+        final String commonName = readCommonNameOfGaussWithApplicationAuthentication(connectionFactory, authenticationInfo);
         // Assert
         Assertions.assertEquals("Carl Friedrich Gauss", commonName);
     }
     
-    public void withApplicationAuthenticationPasswordMustBeValid() throws ResourceException, LdapException {
+    @Test
+    void withApplicationAuthenticationPasswordMustBeValid() throws ResourceException, LdapException {
     	// Arrange
         final ManagedConnectionFactory testee = createTestee();
         final AuthenticationInfo authenticationInfo = new AuthenticationInfo(
@@ -172,7 +174,8 @@ public class ForumSystemsTest {
         Assertions.assertThrowsExactly(LdapAuthenticationException.class,()-> connectionFactory.getConnection(authenticationInfo));
     }
 
-    public void withApplicationAuthenticationDistunguishedNameMustBeValid() throws ResourceException, LdapException {
+    @Test
+    void withApplicationAuthenticationDistunguishedNameMustBeValid() throws ResourceException, LdapException {
     	// Arrange
         final ManagedConnectionFactory testee = createTestee();
         final AuthenticationInfo authenticationInfo = new AuthenticationInfo(
@@ -183,7 +186,31 @@ public class ForumSystemsTest {
         // Act & Assert
         Assertions.assertThrowsExactly(LdapAuthenticationException.class,()-> connectionFactory.getConnection(authenticationInfo));
     }
+    
+    @Test
+    void withoutAuthenticationLookupForExistingGroupSucceeds() throws ResourceException, LdapException, IOException {
+    	// Arrange
+        final ManagedConnectionFactory testee = createTestee();
+        final ConnectionFactory<LdapConnection, LdapException> connectionFactory = testee.createConnectionFactory(connectionManager);
+        // Act
+        final String commonName = readCommonNameOfChemistsWithContainerAuthentication(connectionFactory);
+        final String objectClass = readObjectClassOfChemistsWithContainerAuthentication(connectionFactory);
+        // Assert
+        Assertions.assertEquals("Chemists", commonName);
+        Assertions.assertEquals("groupOfUniqueNames", objectClass);
+    }
 
+    @Test
+    void  withoutAuthenticationLookupForNonExistingGroupReturnsNull() throws ResourceException, LdapException, IOException {
+    	// Arrange
+        final ManagedConnectionFactory testee = createTestee();
+        final ConnectionFactory<LdapConnection, LdapException> connectionFactory = testee.createConnectionFactory(connectionManager);
+        // Act
+        final Entry entry = readObjectClassOfAlchemistsWithContainerAuthentication(connectionFactory);
+        // Assert
+        Assertions.assertNull(entry);
+    }
+    
     public static void main(String[] arguments) throws IOException {
         final ManagedConnectionFactory testee = createTestee();
         final AuthenticationInfo authenticationInfo = new AuthenticationInfo(
@@ -199,7 +226,7 @@ public class ForumSystemsTest {
         }
         // Act
         try {
-            final String commonName = readWithApplicationAuthentication(connectionFactory, authenticationInfo);
+            final String commonName = readCommonNameOfGaussWithApplicationAuthentication(connectionFactory, authenticationInfo);
             Assertions.assertEquals("Carl Friedrich Gauss", commonName);
         } catch (LdapException exception) {
             exception.printStackTrace();
@@ -207,13 +234,13 @@ public class ForumSystemsTest {
         }
         waitForOperator("Disconnect from Internet, please");
         try {
-            readWithApplicationAuthentication(connectionFactory, authenticationInfo);
+            readCommonNameOfGaussWithApplicationAuthentication(connectionFactory, authenticationInfo);
             Assertions.fail("You forgot to disconnect!");
         } catch (LdapException expected) {
             waitForOperator("Reconnect to the Internet, please");
         }
         try {
-            final String commonName = readWithApplicationAuthentication(connectionFactory, authenticationInfo);
+            final String commonName = readCommonNameOfGaussWithApplicationAuthentication(connectionFactory, authenticationInfo);
             Assertions.assertEquals("Carl Friedrich Gauss", commonName);
         } catch (LdapException exception) {
             exception.printStackTrace();
@@ -234,26 +261,66 @@ public class ForumSystemsTest {
         }
     }
 
-    private static String readWithContainerAuthentication(final ConnectionFactory<LdapConnection, LdapException> connectionFactory)
-        throws LdapException, IOException {
+    private static String readCommonNameOfGaussWithContainerAuthentication(
+    	final ConnectionFactory<LdapConnection, LdapException> connectionFactory
+    ) throws LdapException, IOException {
         try (LdapConnection ldap = connectionFactory.getConnection()) {
             return getCommonNameOfGauss(ldap);
         }
     }
 
-    private static String readWithApplicationAuthentication(
+    private static String readCommonNameOfChemistsWithContainerAuthentication(
+    	final ConnectionFactory<LdapConnection, LdapException> connectionFactory
+    ) throws LdapException, IOException {
+        try (LdapConnection ldap = connectionFactory.getConnection()) {
+            return getCommonNameOfChemists(ldap);
+        }
+    }
+
+    private static String readObjectClassOfChemistsWithContainerAuthentication(
+    	final ConnectionFactory<LdapConnection, LdapException> connectionFactory
+    ) throws LdapException, IOException {
+        try (LdapConnection ldap = connectionFactory.getConnection()) {
+            return getObjectClassOfChemists(ldap);
+        }
+    }
+
+    private static Entry readObjectClassOfAlchemistsWithContainerAuthentication(
+    	final ConnectionFactory<LdapConnection, LdapException> connectionFactory
+    ) throws LdapException, IOException {
+        try (LdapConnection ldap = connectionFactory.getConnection()) {
+            return getObjectClassOfAlchemists(ldap);
+        }
+    }
+    
+    private static String readCommonNameOfGaussWithApplicationAuthentication(
         final ConnectionFactory<LdapConnection, LdapException> connectionFactory,
         final AuthenticationInfo authenticationInfo
-    )
-        throws LdapException, IOException {
+    ) throws LdapException, IOException {
         try (LdapConnection ldap = connectionFactory.getConnection(authenticationInfo)){
             return getCommonNameOfGauss(ldap);
         }
     }
 
-    private static String getCommonNameOfGauss(
-        LdapConnection ldap
-    ) throws LdapException {
+    private static String getCommonNameOfChemists(LdapConnection ldap) throws LdapException {
+        final Entry entry = ldap.lookup("ou=chemists,dc=example,dc=com","cn");
+        final Attribute cn = entry.get("cn");
+        final Value value = cn.get(); // the first value
+        return value.getString();
+    }
+
+    private static String getObjectClassOfChemists(LdapConnection ldap) throws LdapException {
+        final Entry entry = ldap.lookup("ou=chemists,dc=example,dc=com","objectClass");
+        final Attribute objectClass = entry.get("objectClass");
+        final Value value = objectClass.get(); // the first value
+        return value.getString();
+    }
+
+    private static Entry getObjectClassOfAlchemists(LdapConnection ldap) throws LdapException {
+        return ldap.lookup("ou=alchemists,dc=example,dc=com","objectClass");
+    }
+    
+    private static String getCommonNameOfGauss(LdapConnection ldap) throws LdapException {
         final Entry entry = ldap.lookup("uid=gauss,dc=example,dc=com");
         final Attribute cn = entry.get("cn");
         final Value value = cn.get(); // the first value
@@ -266,5 +333,5 @@ public class ForumSystemsTest {
 		testee.setPortNumber(389);
 		return testee;
 	}
-
+	
 }

@@ -41,7 +41,8 @@ import java.lang.reflect.Method;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -151,7 +152,7 @@ perty.
     }
 
     /**
-     * Creates <code>PropertyDescriptor</code> for the specified bean
+     * Creates {@code PropertyDescriptor} for the specified bean
      * with the specified name and methods to read/write the property value.
      *
      * @param bean          the type of the target bean
@@ -312,10 +313,10 @@ perty.
     }
 
     /**
-     * Gets the <code>Class</code> object of the indexed properties' type.
-     * The returned <code>Class</code> may describe a primitive type such as <code>int</code>.
+     * Gets the {@code Class} object of the indexed properties' type.
+     * The returned {@code Class} may describe a primitive type such as {@code int}.
      *
-     * @return The <code>Class</code> for the indexed properties' type; may return <code>null</code>
+     * @return The {@code Class} for the indexed properties' type; may return {@code null}
      *         if the type cannot be determined.
      */
     public synchronized Class<?> getIndexedPropertyType() {
@@ -399,8 +400,8 @@ perty.
     }
 
     /**
-     * Compares this <code>PropertyDescriptor</code> against the specified object.
-     * Returns true if the objects are the same. Two <code>PropertyDescriptor</code>s
+     * Compares this {@code PropertyDescriptor} against the specified object.
+     * Returns true if the objects are the same. Two {@code PropertyDescriptor}s
      * are the same if the read, write, property types, property editor and
      * flags  are equivalent.
      */

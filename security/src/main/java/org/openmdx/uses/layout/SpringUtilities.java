@@ -35,8 +35,8 @@ public class SpringUtilities {
     }
 
     /**
-     * Aligns the first <code>rows</code> * <code>cols</code>
-     * components of <code>parent</code> in
+     * Aligns the first {@code rows} * {@code cols}
+     * components of {@code parent} in
      * a grid. Each component is as big as the maximum
      * preferred width and height of the components.
      * The parent is made just big enough to fit them all.
@@ -137,8 +137,8 @@ public class SpringUtilities {
     }
 
     /**
-     * Aligns the first <code>rows</code> * <code>cols</code>
-     * components of <code>parent</code> in
+     * Aligns the first {@code rows} * {@code cols}
+     * components of {@code parent} in
      * a grid. Each component in a column is as wide as the maximum
      * preferred width of the components in that column;
      * height is similarly determined for each row.

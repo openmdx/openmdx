@@ -48,7 +48,8 @@ import java.util.Arrays;
  * <p>
  * openMDX/Dalvik Notice (November 2022):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.18
  * @author openMDX Team
@@ -539,7 +540,7 @@ class ObjectIdentifier implements Serializable
      * the input, the left 4 zeroes are padded to fill the 6 bits space.
      *
      * @param in        the input byte array
-     * @param ioffset   start point inside <code>in</code>
+     * @param ioffset   start point inside {@code in}
      * @param ilength   number of bytes to repack
      * @param iw        NUB for input
      * @param ow        NUB for output

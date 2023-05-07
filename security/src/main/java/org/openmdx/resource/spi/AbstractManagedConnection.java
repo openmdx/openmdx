@@ -358,7 +358,7 @@ public abstract class AbstractManagedConnection<F extends ManagedConnectionFacto
     /**
      * Tells whether the managed connection is idle
      * 
-     * @return <code>true</code> if the managed connection is idle
+     * @return {@code true} if the managed connection is idle
      */
     boolean isIdle(){
     	return this.connections.isEmpty();

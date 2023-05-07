@@ -54,7 +54,7 @@ public class CancelledCallbackException
 	extends LoginException {
 
 	/**
-	 * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = -5369640854069798363L;
 

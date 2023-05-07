@@ -51,14 +51,14 @@ import java.security.cert.Certificate;
 
 
 /**
- * <code>Certificate</code> Provider
+ * {@code Certificate} Provider
  */
 public interface CertificateProvider extends Closeable {
     
     /**
-     * Retrieve the <code>Certificate</code>'s alias
+     * Retrieve the {@code Certificate}'s alias
      * 
-     * @return the <code>Certificate</code>'s alias. 
+     * @return the {@code Certificate}'s alias. 
      * 
      * @throws GeneralSecurityException
      */
@@ -66,9 +66,9 @@ public interface CertificateProvider extends Closeable {
     ) throws GeneralSecurityException; 
 
     /**
-     * Retrieve this provider's <code>Certificate</code>
+     * Retrieve this provider's {@code Certificate}
      * 
-     * @return this provider's <code>Certificate</code>
+     * @return this provider's {@code Certificate}
      * 
      * @throws GeneralSecurityException
      */

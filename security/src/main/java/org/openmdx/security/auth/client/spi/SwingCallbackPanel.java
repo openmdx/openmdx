@@ -79,7 +79,7 @@ public class SwingCallbackPanel extends JPanel
 	implements ActionListener {
 	
     /**
-	 * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = 7459090346508569170L;
 

@@ -66,7 +66,7 @@ public class RadiusClientFactory implements PoolableObjectFactory {
      * @param accountingPorts The Radius Server's Accounting Port
      * @param sharedSecret The Radius Protocol's Shared Secret 
      * @param socketTimeout The Radius Client's Socket Timeout
-     * @param logger the logger must not be <code>null</code>
+     * @param logger the logger must not be {@code null}
      * @param trace tells whether the radius requests are traced
      * @param nasAddress the NAS IP Address; the NAS Identifier is used in case of null
      */

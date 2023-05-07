@@ -30,29 +30,29 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
- * The <code>CalendarDate</code> class represents a specific instant
+ * The {@code CalendarDate} class represents a specific instant
  * in time by calendar date and time fields that are multiple cycles
  * in different time unites. The semantics of each calendar field is
  * given by a concrete calendar system rather than this
- * <code>CalendarDate</code> class that holds calendar field values
+ * {@code CalendarDate} class that holds calendar field values
  * without interpreting them. Therefore, this class can be used to
  * represent an amount of time, such as 2 years and 3 months.
  *
- * <p>A <code>CalendarDate</code> instance can be created by calling
- * the <code>newCalendarDate</code> or <code>getCalendarDate</code>
- * methods in <code>CalendarSystem</code>. A
- * <code>CalendarSystem</code> instance is obtained by calling one of
- * the factory methods in <code>CalendarSystem</code>. Manipulations
+ * <p>A {@code CalendarDate} instance can be created by calling
+ * the {@code newCalendarDate} or {@code getCalendarDate}
+ * methods in {@code CalendarSystem}. A
+ * {@code CalendarSystem} instance is obtained by calling one of
+ * the factory methods in {@code CalendarSystem}. Manipulations
  * of calendar dates must be handled by the calendar system by which
- * <code>CalendarDate</code> instances have been created.
+ * {@code CalendarDate} instances have been created.
  *
  * <p>Some calendar fields can be modified through method calls. Any
  * modification of a calendar field brings the state of a
- * <code>CalendarDate</code> to <I>not normalized</I>. The
+ * {@code CalendarDate} to <I>not normalized</I>. The
  * normalization must be performed to make all the calendar fields
  * consistent with a calendar system.
  *
- * <p>The <code>protected</code> methods are intended to be used for
+ * <p>The {@code protected} methods are intended to be used for
  * implementing a concrete calendar system, not for general use as an
  * API.
  *
@@ -61,7 +61,8 @@ import java.util.TimeZone;
  * <p>
  * openMDX/Dalvik Notice (November 2022):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.18
  * @author openMDX Team
@@ -110,14 +111,14 @@ public abstract class CalendarDate implements Cloneable {
     /**
      * Sets the era of the date to the specified era. The default
      * implementation of this method accepts any Era value, including
-     * <code>null</code>.
+     * {@code null}.
      *
      * @exception NullPointerException if the calendar system for this
-     * <code>CalendarDate</code> requires eras and the specified era
+     * {@code CalendarDate} requires eras and the specified era
      * is null.
      * @exception IllegalArgumentException if the specified
-     * <code>era</code> is unknown to the calendar
-     * system for this <code>CalendarDate</code>.
+     * {@code era} is unknown to the calendar
+     * system for this {@code CalendarDate}.
      */
     public CalendarDate setEra(Era era) {
         if (this.era == era) {
@@ -150,17 +151,17 @@ public abstract class CalendarDate implements Cloneable {
 
     /**
      * Returns whether the year represented by this
-     * <code>CalendarDate</code> is a leap year. If leap years are
+     * {@code CalendarDate} is a leap year. If leap years are
      * not applicable to the calendar system, this method always
-     * returns <code>false</code>.
+     * returns {@code false}.
      *
-     * <p>If this <code>CalendarDate</code> hasn't been normalized,
-     * <code>false</code> is returned. The normalization must be
+     * <p>If this {@code CalendarDate} hasn't been normalized,
+     * {@code false} is returned. The normalization must be
      * performed to retrieve the correct leap year information.
      *
-     * @return <code>true</code> if this <code>CalendarDate</code> is
-     * normalized and the year of this <code>CalendarDate</code> is a
-     * leap year, or <code>false</code> otherwise.
+     * @return {@code true} if this {@code CalendarDate} is
+     * normalized and the year of this {@code CalendarDate} is a
+     * leap year, or {@code false} otherwise.
      * @see BaseCalendar#isGregorianLeapYear
      */
     public boolean isLeapYear() {
@@ -380,7 +381,7 @@ public abstract class CalendarDate implements Cloneable {
 
     /**
      * Returns whether the specified date is the same date of this
-     * <code>CalendarDate</code>. The time of the day fields are
+     * {@code CalendarDate}. The time of the day fields are
      * ignored for the comparison.
      */
     public boolean isSameDate(CalendarDate date) {
@@ -434,10 +435,10 @@ public abstract class CalendarDate implements Cloneable {
     }
 
     /**
-     * Returns a copy of this <code>CalendarDate</code>. The
-     * <code>TimeZone</code> object, if any, is not cloned.
+     * Returns a copy of this {@code CalendarDate}. The
+     * {@code TimeZone} object, if any, is not cloned.
      *
-     * @return a copy of this <code>CalendarDate</code>
+     * @return a copy of this {@code CalendarDate}
      */
     public Object clone() {
         try {
@@ -449,7 +450,7 @@ public abstract class CalendarDate implements Cloneable {
     }
 
     /**
-     * Converts calendar date values to a <code>String</code> in the
+     * Converts calendar date values to a {@code String} in the
      * following format.
      * <pre>
      *     yyyy-MM-dd'T'HH:mm:ss.SSSz

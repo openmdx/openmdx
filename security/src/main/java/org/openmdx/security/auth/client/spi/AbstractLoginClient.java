@@ -72,7 +72,7 @@ public abstract class AbstractLoginClient
 	 * @param phase the phase during which the error occurred
 	 * @param cause the reason for the abort
 	 * 
-	 * @return <code>null</code>
+	 * @return {@code null}
 	 */
 	protected <T> T abort(
 		String phase,
@@ -163,8 +163,8 @@ public abstract class AbstractLoginClient
 	 * 
 	 * @param loginContext the context to be used to log-in
 	 * 
-	 * @return <code>true</code> if log-in succeeded,
-	 * <code>false</code> if log-in has been canceled.
+	 * @return {@code true} if log-in succeeded,
+	 * {@code false} if log-in has been canceled.
 	 */
 	protected boolean login(
 		LoginContext loginContext
@@ -209,7 +209,7 @@ public abstract class AbstractLoginClient
 	);
 
 	/**
-	 * Implements <code>Runnable</code>
+	 * Implements {@code Runnable}
 	 */
 	public void run(
 	) {

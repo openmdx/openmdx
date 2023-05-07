@@ -124,10 +124,14 @@ public class StructFeaturesMapper extends FeaturesMapper {
     }
 
     public void mapBegin() {
-        this.fileHeader();
-        printLine("package " + this.getNamespace(MapperUtils.getNameComponents(MapperUtils.getPackageName(this.structDef.getQualifiedName()))) + ";");
+        printLine(
+        	"package ",
+        	this.getNamespace(MapperUtils.getNameComponents(MapperUtils.getPackageName(this.structDef.getQualifiedName()))),
+        	";"
+        );
         newLine();
-        printLine("public interface " + this.structDef.getName() + FEATURES_INTERFACE_SUFFIX);
+        this.mapGeneratedAnnotation();
+        printLine("public interface ", this.structDef.getName(), FEATURES_INTERFACE_SUFFIX);
         printLine("  extends org.openmdx.base.accessor.jmi.cci.RefStruct_1_0 {");
         newLine();
     }

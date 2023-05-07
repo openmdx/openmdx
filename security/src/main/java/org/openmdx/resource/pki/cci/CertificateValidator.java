@@ -52,7 +52,7 @@ import java.security.cert.CertPathValidatorResult;
 
 
 /**
- * <code>CertPath</code> Validation
+ * {@code CertPath} Validation
  */
 public interface CertificateValidator extends Closeable {
     

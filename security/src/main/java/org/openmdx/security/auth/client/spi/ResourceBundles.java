@@ -64,7 +64,7 @@ public class ResourceBundles {
 	 * 
 	 * @param baseName
 	 * 
-	 * @return the corresponding ResourceBundle; or <code>null</code>
+	 * @return the corresponding ResourceBundle; or {@code null}
 	 * if it is missing
 	 */
 	public static ResourceBundle getResourceBundle(
@@ -84,7 +84,7 @@ public class ResourceBundles {
 	 * 
 	 * @param baseName
 	 * 
-	 * @return the corresponding ResourceBundle; or <code>null</code>
+	 * @return the corresponding ResourceBundle; or {@code null}
 	 * if it is missing
 	 */
 	public static <T> ResourceBundle getResourceBundle(

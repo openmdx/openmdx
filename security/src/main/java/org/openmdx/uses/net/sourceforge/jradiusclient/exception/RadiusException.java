@@ -84,7 +84,7 @@ public class RadiusException extends Exception {
 
 
     /**
-	 * Implements <code>Serializable</code>.
+     * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = 3256718472724755511L;
 	

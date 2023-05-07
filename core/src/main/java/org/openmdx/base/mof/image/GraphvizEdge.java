@@ -46,9 +46,7 @@ package org.openmdx.base.mof.image;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -69,7 +67,6 @@ public class GraphvizEdge {
 		this.parameters = new GraphvizAttributes(styleSheet, "_class", "name");
         this.parameters.setDefaultValue("style", "");
         this.sink = sink;
-        this.strangeSpline = STRANGE_SPLINES.contains(styleSheet.getSplines());
 	}
 	
     private String id;
@@ -77,10 +74,7 @@ public class GraphvizEdge {
     private ModelElement_1_0 fieldDef;
     private final GraphvizAttributes parameters;
     private final Sink sink;
-    private final boolean strangeSpline;
     
-    private static final Set<Splines> STRANGE_SPLINES = EnumSet.of(Splines.CURVED, Splines.ORTHO);
-	
     public GraphvizAttributes getParameters() {
         return this.parameters;
     }
@@ -168,7 +162,7 @@ public class GraphvizEdge {
 				.append("\n\t<tr>\n\t\t<td border=\"1\">")
 				.append(qualifierNames.get(i))
 				.append(" : ")
-				.append(GraphvizAttributes.getDisplayName(model.getElement(qualifierTypes.get(0))))
+				.append(GraphvizAttributes.getDisplayName(model.getElement(qualifierTypes.get(i))))
 				.append("</td>\n\t</tr>");
 		}
 		label
@@ -220,24 +214,24 @@ public class GraphvizEdge {
         final ModelElement_1_0 end0 = model.getElement(content.get(0));
 		final ModelElement_1_0 end1 = model.getElement(content.get(1));
 		if(isAggregation(end1)) {
-			return new Ends(end0, end1, isDirectionToBeInverted(end0, end1));
+			return new Ends(end0, end1);
 		}
 		if(isAggregation(end0)) {
-			return new Ends(end1, end0, isDirectionToBeInverted(end1, end0));
+			return new Ends(end1, end0);
 		}
 		if(hasPrimitiveQualifier(end1)) {
-			return new Ends(end0, end1, false);
+			return new Ends(end0, end1);
 		}
 		if(hasPrimitiveQualifier(end0)) {
-			return new Ends(end1, end0, false);
+			return new Ends(end1, end0);
 		}
 		if(!isNavigable(end0) && isNavigable(end1)) {
-			return new Ends(end0, end1, isDirectionToBeInverted(end0, end1));
+			return new Ends(end0, end1);
 		}
 		if(isNavigable(end0) && !isNavigable(end1)) {
-			return new Ends(end1, end0, isDirectionToBeInverted(end1, end0));
+			return new Ends(end1, end0);
 		}
-		return new Ends(end0, end1, false);
+		return new Ends(end0, end1);
 	}
 	
     /*
@@ -267,7 +261,7 @@ public class GraphvizEdge {
                 this.parameters.setStrictValue("headtooltip", GraphvizAttributes.getDisplayName(this.fieldDef));
                 this.parameters.setStrictValue("arrowhead", "vee");
                 this.parameters.setStrictValue("arrowtail", "dot");
-                return strangeSpline ? createEdge(referencedEndType, exposedEndType) : createEdge(exposedEndType, referencedEndType);
+                return createEdge(exposedEndType, referencedEndType);
             } else if (this.associationDef != null) {
             	final Ends ends = getEnds();
             	final Model_1_0 model = this.associationDef.getModel();
@@ -290,7 +284,7 @@ public class GraphvizEdge {
                 this.parameters.setStrictValue("taillabel",getEndLabel(ends.referencedEnd, ends.exposedEnd));
                 this.parameters.setStrictValue("arrowhead",getArrow(ends.exposedEnd, ends.referencedEnd));
                 this.parameters.setStrictValue("arrowtail",getArrow(ends.referencedEnd, ends.exposedEnd));
-                return ends.invertDirection ? createEdge(referencedEndType, exposedEndType) : createEdge(exposedEndType, referencedEndType);
+                return createEdge(exposedEndType, referencedEndType);
             } else {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
@@ -336,19 +330,14 @@ public class GraphvizEdge {
 
 	private static class Ends {
 		
-		Ends(ModelElement_1_0 exposedEnd, ModelElement_1_0 referencedEnd, boolean invertDirection) {
+		Ends(ModelElement_1_0 exposedEnd, ModelElement_1_0 referencedEnd) {
 			this.exposedEnd = exposedEnd;
 			this.referencedEnd = referencedEnd;
-			this.invertDirection = invertDirection;
 		}
 		
 		final ModelElement_1_0 exposedEnd;
 		final ModelElement_1_0 referencedEnd;
-		final boolean invertDirection;
-	}
-	
-	private boolean isDirectionToBeInverted(ModelElement_1_0 end0, ModelElement_1_0 end1) {
-		return strangeSpline && (isNavigable(end0) != isNavigable(end1));
+
 	}
 	
 	/**

@@ -69,7 +69,7 @@ public class AddressCallback
     }
 
     /**
-     * <code>serialVersionUID</code> to implement <code>Serializable</code>
+     * {@code serialVersionUID} to implement {@code Serializable}
      */
 	private static final long serialVersionUID = 3257569486201894963L;
 

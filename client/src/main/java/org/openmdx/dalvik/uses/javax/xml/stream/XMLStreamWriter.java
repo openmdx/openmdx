@@ -44,12 +44,12 @@ import javax.xml.namespace.NamespaceContext;
  * <table border="1" cellpadding="2" cellspacing="0">
  *     <thead>
  *         <tr>
- *             <th colspan="5">XML Namespaces, <code>javax.xml.stream.isRepairingNamespaces</code> and write method behaviour</th>
+ *             <th colspan="5">XML Namespaces, {@code javax.xml.stream.isRepairingNamespaces} and write method behaviour</th>
  *         </tr>
  *         <tr>
  *             <th>Method</th> <!-- method -->
- *             <th colspan="2"><code>isRepairingNamespaces</code> == true</th>
- *             <th colspan="2"><code>isRepairingNamespaces</code> == false</th>
+ *             <th colspan="2">{@code isRepairingNamespaces} == true</th>
+ *             <th colspan="2">{@code isRepairingNamespaces} == false</th>
  *         </tr>
  *         <tr>
  *             <th></th> <!-- method -->
@@ -62,7 +62,7 @@ import javax.xml.namespace.NamespaceContext;
  *
  *     <tbody>
  *         <tr>
- *             <th><code>writeAttribute(namespaceURI, localName, value)</code></th>
+ *             <th>{@code writeAttribute(namespaceURI, localName, value)}</th>
  *             <!-- isRepairingNamespaces == true -->
  *             <td>
  *                 <!-- namespaceURI bound -->
@@ -79,12 +79,12 @@ import javax.xml.namespace.NamespaceContext;
  *             </td>
  *             <td>
  *                 <!-- namespaceURI unbound -->
- *                 <code>XMLStreamException</code>
+ *                 {@code XMLStreamException}
  *             </td>
  *         </tr>
  *
  *         <tr>
- *             <th><code>writeAttribute(prefix, namespaceURI, localName, value)</code></th>
+ *             <th>{@code writeAttribute(prefix, namespaceURI, localName, value)}</th>
  *             <!-- isRepairingNamespaces == true -->
  *             <td>
  *                 <!-- namespaceURI bound -->
@@ -105,7 +105,7 @@ import javax.xml.namespace.NamespaceContext;
  *                 prefix:localName="value"&nbsp;<sup>[1][2]</sup><br />
  *                 <br />
  *                 bound to different prefix:<br />
- *                 <code>XMLStreamException</code><sup>[2]</sup>
+ *                 {@code XMLStreamException}<sup>[2]</sup>
  *             </td>
  *             <td>
  *                 <!-- namespaceURI unbound -->
@@ -114,9 +114,9 @@ import javax.xml.namespace.NamespaceContext;
  *         </tr>
  *
  *         <tr>
- *             <th><code>writeStartElement(namespaceURI, localName)</code><br />
+ *             <th>{@code writeStartElement(namespaceURI, localName)}<br />
  *                 <br />
- *                 <code>writeEmptyElement(namespaceURI, localName)</code></th>
+ *                 {@code writeEmptyElement(namespaceURI, localName)}</th>
  *             <!-- isRepairingNamespaces == true -->
  *             <td >
  *                 <!-- namespaceURI bound -->
@@ -133,14 +133,14 @@ import javax.xml.namespace.NamespaceContext;
  *             </td>
  *             <td>
  *                 <!-- namespaceURI unbound -->
- *                 <code>XMLStreamException</code>
+ *                 {@code XMLStreamException}
  *             </td>
  *         </tr>
  *
  *         <tr>
- *             <th><code>writeStartElement(prefix, localName, namespaceURI)</code><br />
+ *             <th>{@code writeStartElement(prefix, localName, namespaceURI)}<br />
  *                 <br />
- *                 <code>writeEmptyElement(prefix, localName, namespaceURI)</code></th>
+ *                 {@code writeEmptyElement(prefix, localName, namespaceURI)}</th>
  *             <!-- isRepairingNamespaces == true -->
  *             <td>
  *                 <!-- namespaceURI bound -->
@@ -161,7 +161,7 @@ import javax.xml.namespace.NamespaceContext;
  *                 &lt;prefix:localName&gt;&nbsp;<sup>[1]</sup><br />
  *                 <br />
  *                 bound to different prefix:<br />
- *                 <code>XMLStreamException</code>
+ *                 {@code XMLStreamException}
  *             </td>
  *             <td>
  *                 <!-- namespaceURI unbound -->
@@ -192,7 +192,8 @@ import javax.xml.namespace.NamespaceContext;
  * 
  * openMDX/Dalvik Notice (February 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  *
  * @since openMDX 2.12
  * @author openMDX Team

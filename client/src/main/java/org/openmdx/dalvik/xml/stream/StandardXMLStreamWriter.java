@@ -74,7 +74,7 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
     /**
      * Constructor 
      * 
-     * @param whitespace include tab and newline characters if <code>true</code>
+     * @param whitespace include tab and newline characters if {@code true}
      * @param writer the target stream
      * @param encoding the factory defined encoding
      * 
@@ -93,7 +93,7 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
     /**
      * Constructor 
      * 
-     * @param whitespace include tab and newline characters if <code>true</code>
+     * @param whitespace include tab and newline characters if {@code true}
      * @param writer the target stream
      * @param encoding the factory defined encoding
      */

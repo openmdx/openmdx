@@ -68,14 +68,14 @@ import org.openmdx.kernel.exception.Throwables;
 
 /**
  * This class represents an implementation for
- * <code>javax.security.auth.login.Configuration</code>.
+ * {@code javax.security.auth.login.Configuration}.
  *
  * <p>This object provides the runtime login configuration acquired
- * from a single <code>java.net.URL</code>.
+ * from a single {@code java.net.URL}.
  * 
  * <p>The configuration syntax supported by this implementation
  * is exactly that syntax specified in the
- * <code>javax.security.auth.login.Configuration</code> class.
+ * {@code javax.security.auth.login.Configuration} class.
  * 
  * @see javax.security.auth.login.LoginContext
  */
@@ -84,8 +84,8 @@ public class URLConfiguration extends Configuration {
 	/**
 	 * Constructor
      * 
-     * @param source the <code>Confuguration</code>'s source
-	 * @param options the options shared by all <code>LoginModule</code>s
+     * @param source the {@code Confuguration}'s source
+	 * @param options the options shared by all {@code LoginModule}s
 	 * 
 	 * @throws IOException 
 	 */
@@ -104,7 +104,7 @@ public class URLConfiguration extends Configuration {
 	private final URL url;
 	
     /**
-     * The options shared by all <code>LoginModule</code>s
+     * The options shared by all {@code LoginModule}s
      */
     private final Map<String,?> options;
 
@@ -290,9 +290,9 @@ public class URLConfiguration extends Configuration {
     }	
 		
 	/**
-	 * Create a new <code>StreamTokenizer</code>
+	 * Create a new {@code StreamTokenizer}
 	 * 
-	 * @return an initialized <code>StreamTokenizer</code>
+	 * @return an initialized {@code StreamTokenizer}
 	 * 
 	 * @throws IOException
 	 */

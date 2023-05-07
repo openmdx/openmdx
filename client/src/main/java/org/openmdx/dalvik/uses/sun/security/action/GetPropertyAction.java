@@ -33,10 +33,10 @@ import java.security.PrivilegedAction;
  * property as a privileged action.
  *
  * <p>An instance of this class can be used as the argument of
- * <code>AccessController.doPrivileged</code>.
+ * {@code AccessController.doPrivileged}.
  *
  * <p>The following code retrieves the value of the system
- * property named <code>"prop"</code> as a privileged action: <p>
+ * property named {@code "prop"} as a privileged action: <p>
  *
  * <pre>
  * String s = java.security.AccessController.doPrivileged
@@ -46,7 +46,8 @@ import java.security.PrivilegedAction;
  * <p>
  * openMDX/Dalvik Notice (November 2022):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.18
  * @author openMDX Team

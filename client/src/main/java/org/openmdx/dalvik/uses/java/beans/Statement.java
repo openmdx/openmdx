@@ -40,9 +40,9 @@ import org.openmdx.dalvik.uses.sun.reflect.misc.MethodUtil;
 
 
 /**
- * A <code>Statement</code> object represents a primitive statement
+ * A {@code Statement} object represents a primitive statement
  * in which a single method is applied to a target and
- * a set of arguments - as in <code>"a.setFoo(b)"</code>.
+ * a set of arguments - as in {@code "a.setFoo(b)"}.
  * Note that where this example uses names
  * to denote the target and its argument, a statement
  * object does not require a name space and is constructed with
@@ -54,7 +54,8 @@ import org.openmdx.dalvik.uses.sun.reflect.misc.MethodUtil;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -80,12 +81,12 @@ public class Statement {
     private final Object[] arguments;
 
     /**
-     * Creates a new <code>Statement</code> object with a <code>target</code>,
-     * <code>methodName</code> and <code>arguments</code> as per the parameters.
+     * Creates a new {@code Statement} object with a {@code target},
+     * {@code methodName} and {@code arguments} as per the parameters.
      *
      * @param target The target of this statement.
      * @param methodName The methodName of this statement.
-     * @param arguments The arguments of this statement. If <code>null</code> then an empty array will be used.
+     * @param arguments The arguments of this statement. If {@code null} then an empty array will be used.
      *
      */
     public Statement(Object target, String methodName, Object[] arguments) {
@@ -131,7 +132,7 @@ public class Statement {
      * the algorithm specified in the Java Language Specification
      * (15.11). The dynamic class of the target and arguments are used
      * in place of the compile-time type information and, like the
-     * <code>java.lang.reflect.Method</code> class itself, conversion between
+     * {@code java.lang.reflect.Method} class itself, conversion between
      * primitive values and their associated wrapper classes is handled
      * internally.
      * <p>
@@ -142,12 +143,12 @@ public class Statement {
      * <li>
      * The reserved method name "new" may be used to call a class's constructor
      * as if all classes defined static "new" methods. Constructor invocations
-     * are typically considered <code>Expression</code>s rather than <code>Statement</code>s
+     * are typically considered {@code Expression}s rather than {@code Statement}s
      * as they return a value.
      * <li>
-     * The method names "get" and "set" defined in the <code>java.util.List</code>
+     * The method names "get" and "set" defined in the {@code java.util.List}
      * interface may also be applied to array instances, mapping to
-     * the static methods of the same name in the <code>Array</code> class.
+     * the static methods of the same name in the {@code Array} class.
      * </ul>
      */
     public void execute() throws Exception {

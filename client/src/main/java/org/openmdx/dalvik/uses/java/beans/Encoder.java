@@ -32,19 +32,20 @@ import java.util.Map;
 import org.openmdx.base.exception.ExceptionListener;
 
 /**
- * An <code>Encoder</code> is a class which can be used to create
+ * An {@code Encoder} is a class which can be used to create
  * files or streams that encode the state of a collection of
- * JavaBeans in terms of their public APIs. The <code>Encoder</code>,
+ * JavaBeans in terms of their public APIs. The {@code Encoder},
  * in conjunction with its persistence delegates, is responsible for
- * breaking the object graph down into a series of <code>Statements</code>s
- * and <code>Expression</code>s which can be used to create it.
+ * breaking the object graph down into a series of {@code Statements}s
+ * and {@code Expression}s which can be used to create it.
  * A subclass typically provides a syntax for these expressions
  * using some human readable form - like Java source code or XML.
  * 
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -83,12 +84,12 @@ public class Encoder {
     }
 
     /**
-     * Sets the exception handler for this stream to <code>exceptionListener</code>.
+     * Sets the exception handler for this stream to {@code exceptionListener}.
      * The exception handler is notified when this stream catches recoverable
      * exceptions.
      *
      * @param exceptionListener The exception handler for this stream;
-     *       if <code>null</code> the default exception listener will be used.
+     *       if {@code null} the default exception listener will be used.
      *
      * @see #getExceptionListener
      */
@@ -135,7 +136,7 @@ public class Encoder {
      * "newProxyInstance" method defined in the
      * Proxy class.
      * <li>
-     * If the BeanInfo for this type has a <code>BeanDescriptor</code>
+     * If the BeanInfo for this type has a {@code BeanDescriptor}
      * which defined a "persistenceDelegate" property, this
      * value is returned.
      * <li>
@@ -161,11 +162,11 @@ public class Encoder {
     }
 
     /**
-     * Sets the persistence delegate associated with this <code>type</code> to
-     * <code>persistenceDelegate</code>.
+     * Sets the persistence delegate associated with this {@code type} to
+     * {@code persistenceDelegate}.
      *
-     * @param  type The class of objects that <code>persistenceDelegate</code> applies to.
-     * @param  persistenceDelegate The persistence delegate for instances of <code>type</code>.
+     * @param  type The class of objects that {@code persistenceDelegate} applies to.
+     * @param  persistenceDelegate The persistence delegate for instances of {@code type}.
      *
      * @see #getPersistenceDelegate
      * @see org.openmdx.dalvik.uses.java.beans.Introspector#getBeanInfo
@@ -195,9 +196,9 @@ public class Encoder {
     }
 
     /**
-     * Returns a tentative value for <code>oldInstance</code> in
+     * Returns a tentative value for {@code oldInstance} in
      * the environment created by this stream. A persistence
-     * delegate can use its <code>mutatesTo</code> method to
+     * delegate can use its {@code mutatesTo} method to
      * determine whether this value may be initialized to
      * form the equivalent object at the output or whether
      * a new object must be instantiated afresh. If the
@@ -242,8 +243,8 @@ public class Encoder {
     }
 
     /**
-     * Writes statement <code>oldStm</code> to the stream.
-     * The <code>oldStm</code> should be written entirely
+     * Writes statement {@code oldStm} to the stream.
+     * The {@code oldStm} should be written entirely
      * in terms of the callers environment, i.e. the
      * target and all arguments should be part of the
      * object graph being written. These expressions
@@ -254,7 +255,7 @@ public class Encoder {
      * The implementation of this method will produce
      * a second expression to represent the same expression in
      * an environment that will exist when the stream is read.
-     * This is achieved simply by calling <code>writeObject</code>
+     * This is achieved simply by calling {@code writeObject}
      * on the target and all the arguments and building a new
      * expression with the results.
      *
@@ -277,10 +278,10 @@ public class Encoder {
      * The implementation first checks to see if an
      * expression with this value has already been written.
      * If not, the expression is cloned, using
-     * the same procedure as <code>writeStatement</code>,
+     * the same procedure as {@code writeStatement},
      * and the value of this expression is reconciled
      * with the value of the cloned expression
-     * by calling <code>writeObject</code>.
+     * by calling {@code writeObject}.
      *
      * @param oldExp The expression to be written to the stream.
      */

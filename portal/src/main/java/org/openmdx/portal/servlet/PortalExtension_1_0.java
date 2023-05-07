@@ -231,7 +231,7 @@ public interface PortalExtension_1_0 {
     ) throws ServiceException;
     
     /**
-     * Returns a list of <code>FilterProperty</code>s which are added to the query
+     * Returns a list of {@code FilterProperty}s which are added to the query
      * when processing a FIND_OBJECTS action. E.g. non-active objects should not
      * be returned by the find objects reply a filter of the form active=true can
      * be returned.

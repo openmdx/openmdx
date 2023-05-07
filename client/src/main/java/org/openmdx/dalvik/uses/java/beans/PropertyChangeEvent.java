@@ -45,7 +45,8 @@ package org.openmdx.dalvik.uses.java.beans;
  * <p>
  * openMDX/Dalvik Notice (January 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.12
  * @author openMDX Team
@@ -54,7 +55,7 @@ package org.openmdx.dalvik.uses.java.beans;
 public class PropertyChangeEvent extends java.util.EventObject {
 
     /**
-     * Constructs a new <code>PropertyChangeEvent</code>.
+     * Constructs a new {@<code PropertyChangeEvent}.
      *
      * @param source  The bean that fired the event.
      * @param propertyName  The programmatic name of the property

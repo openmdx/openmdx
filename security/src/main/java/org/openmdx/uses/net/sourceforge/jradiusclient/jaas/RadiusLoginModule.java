@@ -98,10 +98,10 @@ public class RadiusLoginModule implements LoginModule {
      * Method to abort the authentication process (phase 2). This method gets
      * called if the LoginContext's overall authentication process failed
      * (i.e. one of the relevant REQUIRED, REQUISITE, SUFFICIENT and OPTIONAL
-     * <code>LoginModules</code> did not succeed). It also cleans up any
+     * {@code LoginModules} did not succeed). It also cleans up any
      * internal state saved by the login method.
      * @return boolean true if this method succeeds false if this
-     *                      <code>LoginModule</code> should be ignored
+     *                      {@code LoginModule} should be ignored
      * @exception LoginException If the abort fails
      */
     public boolean abort() throws LoginException{
@@ -125,7 +125,7 @@ public class RadiusLoginModule implements LoginModule {
      * Method to commit the authentication process (phase 2). This method gets
      * called if the LoginContext's overall authentication process succeeded
      * (i.e. all of the relevant REQUIRED, REQUISITE, SUFFICIENT and OPTIONAL
-     * <code>LoginModules</code> succeeded).
+     * {@code LoginModules} succeeded).
      * If this LoginModule's own authentication attempt succeeded (checked by
      * retrieving the private state saved by the login method), then this
      * method associates relevant Principals and Credentials with the Subject
@@ -134,7 +134,7 @@ public class RadiusLoginModule implements LoginModule {
      * the login method. ( poss. improvement: perform
      * a RADIUS accounting request to notify RADIUS server of login time.)
      * @return boolean true if this method succeeds false if this
-     *                      <code>LoginModule</code> should be ignored
+     *                      {@code LoginModule} should be ignored
      * @exception LoginException If the commit action fails
      */
     public boolean commit() throws LoginException{
@@ -155,7 +155,7 @@ public class RadiusLoginModule implements LoginModule {
         return true;
     }
     /**
-     * Initialize this <code>LoginModule</code>.
+     * Initialize this {@code LoginModule}.
      * This method is called by the LoginContext after this LoginModule has
      * been instantiated. The purpose of this method is to initialize this
      * LoginModule with the relevant information. If this LoginModule does not
@@ -189,10 +189,10 @@ public class RadiusLoginModule implements LoginModule {
      * Authenticates this Subject against a RADIUS Server (phase 1). It uses
      * the callbacks to request a UserName and a Password, and possibly requests
      * a response to a challenge recieved from the RADIUS server.
-     * @return boolean True if this <code>LoginModule</code> succeeds, False if
-     *                      this <code>LoginModule</code> should be ignored
+     * @return boolean True if this {@code LoginModule} succeeds, False if
+     *                      this {@code LoginModule} should be ignored
      * @exception FailedLoginException if the login fails
-     * @exception LoginException If this <code>LoginModule</code> can't perform
+     * @exception LoginException If this {@code LoginModule} can't perform
      *                           the requested authentication
      */
     public boolean login() throws LoginException{
@@ -263,7 +263,7 @@ public class RadiusLoginModule implements LoginModule {
      * a response to a challenge recieved from the RADIUS server. It will do this
      * using a single PasswordCallback with the Challenge message as the prompt.
      * @exception FailedLoginException if the login fails
-     * @exception LoginException If this <code>LoginModule</code> can't perform
+     * @exception LoginException If this {@code LoginModule} can't perform
      *                           the requested authentication
      */
     private void authenticate( final RadiusPacket accessRequest, final int numRetries) throws LoginException {
@@ -321,7 +321,7 @@ public class RadiusLoginModule implements LoginModule {
      * This method logs out a Subject (Poss. Improvement: perform
      * a RADIUS accounting request to notify RADIUS server of logout time.)
      * @return boolean return true if the logout was successful, False if
-     *                      this <code>LoginModule</code> should be ignored
+     *                      this {@code LoginModule} should be ignored
      * @exception LoginException if the logout fails.
      */
     public boolean logout() throws LoginException {

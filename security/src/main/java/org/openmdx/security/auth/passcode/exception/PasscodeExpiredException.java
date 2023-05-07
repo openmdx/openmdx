@@ -54,7 +54,7 @@ public abstract class PasscodeExpiredException
 	extends CredentialExpiredException {
 
 	/**
-     * Constructor for <code>Serialization</code>
+     * Constructor for {@code Serialization}
      */
     protected PasscodeExpiredException(
     ){
@@ -76,7 +76,7 @@ public abstract class PasscodeExpiredException
     }
     
     /**
-     * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
      */
     private static final long serialVersionUID = 2663140444834626577L;
 

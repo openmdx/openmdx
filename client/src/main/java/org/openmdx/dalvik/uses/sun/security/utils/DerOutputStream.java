@@ -50,7 +50,8 @@ import java.util.Locale;
  * <p>
  * openMDX/Dalvik Notice (November 2022):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  * </p>
  * @since openMDX 2.18
  * @author openMDX Team
@@ -573,8 +574,8 @@ extends ByteArrayOutputStream implements DerEncoder {
     }
 
     /**
-     *  Write the current contents of this <code>DerOutputStream</code>
-     *  to an <code>OutputStream</code>.
+     *  Write the current contents of this {@code DerOutputStream}
+     *  to an {@code OutputStream}.
      *
      *  @exception IOException on output error.
      */

@@ -55,7 +55,7 @@ public class YException
 {
 
 	/**
-	 * Implements <code>Serializable</code>
+     * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = -4466102763715366035L;
 

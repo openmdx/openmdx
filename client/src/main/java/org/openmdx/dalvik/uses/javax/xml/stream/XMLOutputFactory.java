@@ -61,7 +61,7 @@ import javax.xml.transform.Result;
  * <p>The following paragraphs describe the namespace and prefix repair algorithm:</p>
  *
  * <p>The property can be set with the following code line:
- * <code>setProperty("javax.xml.stream.isRepairingNamespaces",new Boolean(true|false));</code></p>
+ * {@code setProperty("javax.xml.stream.isRepairingNamespaces",new Boolean(true|false));}</p>
  * 
  * <p>This property specifies that the writer default namespace prefix declarations. 
  * The default value is false. </p>
@@ -109,7 +109,8 @@ import javax.xml.transform.Result;
  * 
  * openMDX/Dalvik Notice (February 2013):<br>
  * THIS CODE HAS BEEN MODIFIED AND ITS NAMESPACE HAS BEEN PREFIXED WITH
- * <code>org.openmdx.dalvik.uses.</code>
+ * {@code org.openmdx.dalvik.uses.}
+
  *
  * @since openMDX 2.12
  * @author openMDX Team

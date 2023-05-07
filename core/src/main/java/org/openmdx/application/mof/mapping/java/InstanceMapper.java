@@ -130,16 +130,16 @@ extends AbstractClassMapper {
         MapperUtils
             .wrapText(
                 "   * ",
-                "Appends the specified element to the list of all the values for the reference <code>" + referenceDef.getName() + "</code>.", this::printLine);
+                "Appends the specified element to the list of all the values for the reference {@code " + referenceDef.getName() + "}.", this::printLine);
         printLine("   * <p>");
         MapperUtils.wrapText(
             "   * ",
             "<em>Note: This is an extension to the JMI 1 standard.<br>" +
-            "In order to remain standard compliant you should substitute this method with <code>get" + 
+            "In order to remain standard compliant you should substitute this method with {@code get" + 
             referenceDef.getBeanGenericName() + 
             "().add(" + 
             referenceType + 
-            ")</code></em>.", this::printLine
+            ")}</em>.", this::printLine
         );
         if (referenceDef.getAnnotation() != null) {
             printLine("   * <p>");
@@ -147,8 +147,8 @@ extends AbstractClassMapper {
         }
         printLine("   * @param newValue The element to be appended.");
         printLine("   */");
-        printLine("  public void " + this.getMethodName("add" + referenceDef.getBeanGenericName()) + " (");
-        printLine("    " + referenceType + " newValue");
+        printLine("  public void ", this.getMethodName("add" + referenceDef.getBeanGenericName()), " (");
+        printLine("    ", referenceType, " newValue");
         printLine("  );");
         newLine();
     }
@@ -174,7 +174,7 @@ extends AbstractClassMapper {
                 MapperUtils.wrapText(
                     "   * ",
                     "Adds the specified element to the set of the values for the reference " +
-                    "<code>" + referenceDef.getName() + "</code>.", this::printLine
+                    "{@code " + referenceDef.getName() + "}.", this::printLine
                 );
                 printLine("   * <p>");
                 MapperUtils.wrapText(
@@ -185,21 +185,21 @@ extends AbstractClassMapper {
                     printLine("   * <p>");
                     MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
                 }
-                printLine("   * @param " + qualifierName + PERSISTENCY_SUFFIX + " <code>true</code> if <code>" + qualifierName + "</code> is persistent");
-                printLine("   * @param " + qualifierName + " The qualifier attribute value that qualifies the reference to get the element to be appended.");
-                printLine("   * @param " + valueHolder + " The element to be appended.");
+                printLine("   * @param ", qualifierName, PERSISTENCY_SUFFIX, " {@code true} if {@code ", qualifierName, "} is persistent");
+                printLine("   * @param ", qualifierName, " The qualifier attribute value that qualifies the reference to get the element to be appended.");
+                printLine("   * @param ", valueHolder, " The element to be appended.");
                 printLine("   */");
-                printLine("  public void " + this.getMethodName("add" + referenceDef.getBeanGenericName()) + " (");
-                printLine("    boolean " + qualifierName + PERSISTENCY_SUFFIX + ",");            
-                printLine("    " + this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false) + " " + qualifierName + ",");
-                printLine("    " + referenceType + " " + valueHolder);        
+                printLine("  public void ", this.getMethodName("add" + referenceDef.getBeanGenericName()), " (");
+                printLine("    boolean ", qualifierName, PERSISTENCY_SUFFIX, ",");            
+                printLine("    ", this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false), " ", qualifierName, ",");
+                printLine("    ", referenceType, " ", valueHolder);        
                 printLine("  );");
                 newLine();
                 printLine("  /**");
                 MapperUtils.wrapText(
                     "   * ",
                     "Adds the specified element to the set of the values for the reference " +
-                    "<code>" + referenceDef.getName() + "</code> using a reassignable qualifier.", this::printLine
+                    "{@code " + referenceDef.getName() + "} using a reassignable qualifier.", this::printLine
                 );
                 printLine("   * <p>");
                 MapperUtils.wrapText(
@@ -210,19 +210,19 @@ extends AbstractClassMapper {
                     printLine("   * <p>");
                     MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
                 }
-                printLine("   * @param " + qualifierName + " The qualifier attribute value that qualifies the reference to get the element to be appended.");
-                printLine("   * @param " + valueHolder + " The element to be appended.");
+                printLine("   * @param ", qualifierName, " The qualifier attribute value that qualifies the reference to get the element to be appended.");
+                printLine("   * @param ", valueHolder, " The element to be appended.");
                 printLine("   */");
-                printLine("  public void " + this.getMethodName("add" + referenceDef.getBeanGenericName()) + " (");
-                printLine("    " + this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false) + " " + qualifierName + ",");
-                printLine("    " + referenceType + " " + valueHolder);        
+                printLine("  public void ", this.getMethodName("add" + referenceDef.getBeanGenericName()), " (");
+                printLine("    ", this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false), " ", qualifierName, ",");
+                printLine("    ", referenceType, " ", valueHolder);        
                 printLine("  );");
                 newLine();
                 printLine("  /**");
                 MapperUtils.wrapText(
                     "   * ",
                     "Adds the specified element to the set of the values for the reference " +
-                    "<code>" + referenceDef.getName() + "</code> using an implementation-specific, reassignable qualifier.", this::printLine
+                    "{@code " + referenceDef.getName() + "} using an implementation-specific, reassignable qualifier.", this::printLine
                 );
                 printLine("   * <p>");
                 MapperUtils.wrapText(
@@ -233,10 +233,10 @@ extends AbstractClassMapper {
                     printLine("   * <p>");
                     MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
                 }
-                printLine("   * @param " + valueHolder + " The element to be appended.");
+                printLine("   * @param ", valueHolder, " The element to be appended.");
                 printLine("   */");
-                printLine("  public void " + this.getMethodName("add" + referenceDef.getBeanGenericName()) + " (");
-                printLine("    " + referenceType + " " + valueHolder);        
+                printLine("  public void ", this.getMethodName("add" + referenceDef.getBeanGenericName()), " (");
+                printLine("    ", referenceType, " ", valueHolder);        
                 printLine("  );");
                 newLine();
             }
@@ -291,34 +291,36 @@ extends AbstractClassMapper {
         }
         this.trace("Instance/ReferenceSetNoQualifier");
         printLine("  /**");
-        printLine("   * Sets a new value for the reference <code>" + referenceName + "</code>.");
+        printLine("   * Sets a new value for the reference {@code ", referenceName, "}.");
         if (referenceDef.getAnnotation() != null) {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
         }
         String methodName = this.getMethodName(beanSetterName);
         printLine(
-            "   * @param " + referenceName + " The new " + (
-                optional ? "&ndash; possibly <code>null</code> &ndash;" : "non-<code>null</code>"
-            ) + " value for this reference."
+            "   * @param ",
+            referenceName,
+            " The new",
+            optional ? "&mdash;possibly {@code null}&mdash;" : " non-{@code null} ",
+            "value for this reference."
         );
         printLine("   */");
-        printLine("  public void " + methodName + "(");
-        printLine("    " + argumentType + ' ' + referenceName);
+        printLine("  public void ", methodName, "(");
+        printLine("    ", argumentType, " ", referenceName);
         if(getFormat() == Format.JPA3) {
             printLine("  ){");                
             printLine("    throw new javax.jdo.JDOFatalUserException(");
             printLine("      \"Typed set not handled by data object\",");
-            printLine("      new UnsupportedOperationException(\"Use " + methodName + InstanceMapper.ID_SUFFIX + "() instead.\"),");
+            printLine("      new UnsupportedOperationException(\"Use ", methodName, InstanceMapper.ID_SUFFIX, "() instead.\"),");
             printLine("      this");
             printLine("    );");            
             printLine("  }");
             newLine();
-            printLine("  public void " + methodName + InstanceMapper.ID_SUFFIX + '(');
-            printLine("    java.lang.String " + referenceName);            
+            printLine("  public void ", methodName, InstanceMapper.ID_SUFFIX, "(");
+            printLine("    java.lang.String ", referenceName);            
             printLine("  ) {");
             printLine("    super.openmdxjdoMakeDirty();");            
-            printLine("    this." + referenceName + " = " + referenceName + ";");                            
+            printLine("    this.", referenceName, " = ", referenceName, ";");                            
             printLine("  }");            
         } 
         else {
@@ -347,30 +349,30 @@ extends AbstractClassMapper {
         if(referencedEnd) {
             this.trace("Instance/ReferenceGetx_1NoQualifier");
             printLine("  /**");
-            printLine("   * Retrieves the value for the reference <code>" + referenceName + "</code>.");
+            printLine("   * Retrieves the value for the reference {@code ", referenceName, "}.");
             if (referenceDef.getAnnotation() != null) {
                 printLine("   * <p>");
                 MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
             }
             print("   * @return The ");
-            print(optional ? "&ndash; possibly <code>null</code> &ndash;" : "non-<code>null</code>");
+            print(optional ? "&mdash;possibly {@code null}&mdash;" : " non-{@code null} ");
             printLine(" value for this reference.");
             printLine("   */");
             String accessorType = classType.getType(classDef, this.getFormat(), TypeMode.RESULT); 
             String methodName = this.getMethodName(referenceDef.getBeanGetterName());
-            printLine("  public " + accessorType + ' ' + methodName + '(');
+            printLine("  public ", accessorType, " ", methodName, "(");
             if(getFormat() == Format.JPA3) {
                 printLine("  ) {");
                 printLine("    throw new javax.jdo.JDOFatalUserException(");
                 printLine("      \"This signature is not handled by data object\",");
-                printLine("      new UnsupportedOperationException(\"This signature is not handled by data object. Use " + methodName + InstanceMapper.ID_SUFFIX + "().\"),");
+                printLine("      new UnsupportedOperationException(\"This signature is not handled by data object. Use ", methodName, InstanceMapper.ID_SUFFIX, "().\"),");
                 printLine("      this");
                 printLine("    );");                                    
                 printLine("  }");
                 newLine();
-                printLine("  public java.lang.String " + methodName + InstanceMapper.ID_SUFFIX + '(');
+                printLine("  public java.lang.String ", methodName, InstanceMapper.ID_SUFFIX, "(");
                 printLine("  ) {");
-                printLine("    return this." + referenceName + ";");                            
+                printLine("    return this.", referenceName, ";");                            
                 printLine("  }");
             } 
             else {
@@ -390,22 +392,28 @@ extends AbstractClassMapper {
         printLine("  /**");
         MapperUtils.wrapText(
             "   * ",
-            "Retrieves the members of the given container referencing this object via <code>" + referenceDef.getName() + "</code>.", this::printLine);
+            "Retrieves the members of the given container referencing this object via {@code " + referenceDef.getName() + "}.", this::printLine);
         printLine("   * <p>");
         MapperUtils.wrapText(
             "   * ",
             "<em>Note: This is an extension to the JMI 1 standard.<br>" +
-            "In order to remain standard compliant you should substitute this method with <code>javax.jdo.Query</code></em>", this::printLine
+            "In order to remain standard compliant you should substitute this method with {@code javax.jdo.Query}</em>", this::printLine
         );
         if (referenceDef.getAnnotation() != null) {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
         }
-        printLine("   * @param " + referenceDef.getQualifierName() + " The container of the objects to be retrieved.");
-        printLine("   * @return The members referencing ths object via <code>" + referenceDef.getName() + "</code>.");
+        printLine("   * @param ", referenceDef.getQualifierName(), " The container of the objects to be retrieved.");
+        printLine("   * @return The members referencing ths object via {@code ", referenceDef.getName(), "}.");
         printLine("   */");
-        printLine("  public " + this.getType(referenceDef, "java.util.Collection", Boolean.TRUE, TypeMode.MEMBER, null) + " " + this.getMethodName(referenceDef.getBeanGetterName()) + "(");
-        printLine("    " + getInterfaceType(referenceDef.getQualifiedQualifierTypeName()) + " " + referenceDef.getQualifierName());
+        printLine(
+        	"  public ", 
+        	this.getType(referenceDef, "java.util.Collection", Boolean.TRUE, TypeMode.MEMBER, null), 
+        	" ", 
+        	this.getMethodName(referenceDef.getBeanGetterName()),
+        	"("
+        );
+        printLine("    ", getInterfaceType(referenceDef.getQualifiedQualifierTypeName()), " ", referenceDef.getQualifierName());
         if(getFormat() == Format.JPA3) {
             printLine("  ){");
             printLine("    throw new java.lang.UnsupportedOperationException(\"Not yet implemented\");"); // TODO
@@ -439,11 +447,16 @@ extends AbstractClassMapper {
                     this.trace("Instance/ReferenceDeclaration");
                     newLine();
                     printLine("  /**");
-                    printLine("   * Reference <code>" + referenceName + "</code>.");
+                    printLine("   * Reference {@code ", referenceName, "}.");
                     printLine("   */");
                     printLine("  @SuppressWarnings(\"unused\")");                    
-                    print("  private transient ");
-                    printLine(getType(referenceDef, "java.util.Set", null, TypeMode.MEMBER, null) + ' ' + referenceName + ';');
+                    printLine(
+                    	"  private transient ",
+                    	getType(referenceDef, "java.util.Set", null, TypeMode.MEMBER, null),
+                    	" ",
+                    	referenceName,
+                    	";"
+                    );
                     newLine();
                 }
             }
@@ -466,21 +479,27 @@ extends AbstractClassMapper {
             printLine("  /**");
             MapperUtils.wrapText(
                 "   * ",
-                "Retrieves the value for the reference <code>" + referenceDef.getName() + "</code> for the specified query.", this::printLine);
+                "Retrieves the value for the reference {@code " + referenceDef.getName() + "} for the specified query.", this::printLine);
             MapperUtils.wrapText(
                 "   * ",
                 "<em>Note: This is an extension to the JMI 1 standard.<br>" +
-                "In order to remain standard compliant you should substitute this method with <code>javax.jdo.Query</code></em>", this::printLine
+                "In order to remain standard compliant you should substitute this method with {@code javax.jdo.Query}</em>", this::printLine
             );
             if (referenceDef.getAnnotation() != null) {
                 printLine("   * <p>");
                 MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
             }
             printLine("   * @param query predicate which is applied to the set of referenced objects.");
-            printLine("   * @return The objects for which the predicate evaluates to <code>true</code>.");
+            printLine("   * @return The objects for which the predicate evaluates to {@code true}.");
             printLine("   */");
-            printLine("  public <T extends " + this.getType(referenceDef.getQualifiedTypeName(), getFormat(), false) + "> java.util.List<T> " + this.getMethodName(referenceDef.getBeanGetterName()) + "(");
-            printLine("    " + qualifiedQueryName + " query");
+            printLine(
+            	"  public <T extends ",
+            	this.getType(referenceDef.getQualifiedTypeName(), getFormat(), false),
+            	"> java.util.List<T> ",
+            	this.getMethodName(referenceDef.getBeanGetterName()),
+            	"("
+            );
+            printLine("    ", qualifiedQueryName, " query");
             printLine("  );");
             newLine();
         } 
@@ -488,7 +507,7 @@ extends AbstractClassMapper {
             printLine("  /**");
             MapperUtils.wrapText(
                 "   * ",
-                "Retrieves a set containing all the elements for the reference <code>" + referenceDef.getName() + "</code>.", this::printLine);
+                "Retrieves a set containing all the elements for the reference {@code " + referenceDef.getName() + "}.", this::printLine);
             if (referenceDef.getAnnotation() != null) {
                 printLine("   * <p>");
                 MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
@@ -497,7 +516,7 @@ extends AbstractClassMapper {
             printLine("   */");
             String cast = this.printAnnotationAndReturnCast(referenceDef, collectionType);
             String methodName = this.getMethodName(referenceDef.getBeanGetterName());
-            printLine("  public " + getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER, null) + ' ' + methodName + "(");
+            printLine("  public ", getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER, null), " ", methodName, "(");
             if(getFormat() == Format.JPA3) {
                 printLine("  ){");
                 if(referenceDef.isComposition()) {
@@ -516,9 +535,15 @@ extends AbstractClassMapper {
                 } 
                 else {
                     printLine(
-                        "    " + collectionType + "<?> " + referenceName + " = this." + referenceName + ';'
+                        "    ",
+                        collectionType,
+                        "<?> ",
+                        referenceName,
+                        " = this.",
+                        referenceName,
+                        ";"
                     );
-                    printLine("    return " + cast + referenceName + ';');
+                    printLine("    return ", cast, referenceName, ";");
                 }                
                 printLine("  }");
             } 
@@ -550,29 +575,29 @@ extends AbstractClassMapper {
             printLine("  /**");
             MapperUtils.wrapText(
                 "   * ",
-                "Retrieves the <code>Collection</code> of objects referenced by <code>" + referenceDef.getName() + "</code>.", this::printLine);
+                "Retrieves the {@code Collection} of objects referenced by {@code " + referenceDef.getName() + "}.", this::printLine);
             if (referenceDef.getAnnotation() != null) {
                 printLine("   * <p>");
                 MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
             }
-            printLine("   * @return The <code>Collection</code> of referenced objects.");
+            printLine("   * @return The {@code Collection} of referenced objects.");
             printLine("   */");
-            printLine("  public " + this.getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER, null) + " " + methodName + "(");
+            printLine("  public ", this.getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER, null), " ", methodName, "(");
             if(getFormat() == Format.JPA3) {
                 printLine("  ){");
                 printLine("    throw new javax.jdo.JDOFatalUserException(");
                 printLine("      \"This signature is not handled by data object\",");
-                printLine("      new UnsupportedOperationException(\"This signature is not handled by data object. Use " + methodName + InstanceMapper.ID_SUFFIX + "().\"),");
+                printLine("      new UnsupportedOperationException(\"This signature is not handled by data object. Use ", methodName, InstanceMapper.ID_SUFFIX, "().\"),");
                 printLine("      this");
                 printLine("    );");                                                                                            
                 printLine("  }");
                 newLine();
-                printLine("  public " + collectionType + "<java.lang.String> " + methodName + InstanceMapper.ID_SUFFIX + "(");
+                printLine("  public ", collectionType, "<java.lang.String> ", methodName, InstanceMapper.ID_SUFFIX, "(");
                 printLine("  ){");
                 if(delegate) {
-                    printLine("    return super." + methodName + InstanceMapper.ID_SUFFIX + "();");
+                    printLine("    return super.", methodName, InstanceMapper.ID_SUFFIX, "();");
                 } else {
-                    printLine("    java.util.SortedMap<java.lang.Integer," + this.className + SLICE_CLASS_NAME + "> slices = openmdxjdoGetSlices();");
+                    printLine("    java.util.SortedMap<java.lang.Integer,", this.className, SLICE_CLASS_NAME, "> slices = openmdxjdoGetSlices();");
                     print("    return ");
                     mapSlicedClass("      ", referenceDef, QUALIFIED_ABSTRACT_OBJECT_CLASS_NAME + ".Sliced" + (qualifierType == null ? "Set" : "List"));
                     printLine("    };");
@@ -593,10 +618,10 @@ extends AbstractClassMapper {
                 this.trace("Instance/ReferenceDeclarationMap");
                 newLine();
                 printLine("  /**");
-                printLine("   * Reference <code>" + referenceName + "</code> as <code>java.util.Map</code>");
+                printLine("   * Reference {@code ", referenceName, "} as {@code java.util.Map}");
                 printLine("   */");
                 printLine("  @SuppressWarnings(\"unused\")");                    
-                printLine("  private transient java.util.Map<java.lang.String," + referenceType + "> " + referenceName + ';');
+                printLine("  private transient java.util.Map<java.lang.String,", referenceType, "> ", referenceName, ";");
                 newLine();
                 this.sliced.put(referenceName, referenceDef.getQualifiedTypeName());                
             }
@@ -604,19 +629,19 @@ extends AbstractClassMapper {
             printLine("  /**");
             MapperUtils.wrapText(
                 "   * ",
-                "Retrieves the <code>Map</code> of objects referenced by <code>" + referenceDef.getName() + "</code>.", this::printLine);
+                "Retrieves the {@code Map} of objects referenced by {@code " + referenceDef.getName() + "}.", this::printLine);
             if (referenceDef.getAnnotation() != null) {
                 printLine("   * <p>");
                 MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
             }
-            printLine("   * @return The <code>Map</code> of referenced objects.");
+            printLine("   * @return The {@code Map} of referenced objects.");
             printLine("   */");
-            printLine("  public " + this.getMapType(referenceDef, java.lang.String.class, Boolean.TRUE) + " " + methodName + "(");
+            printLine("  public ", this.getMapType(referenceDef, java.lang.String.class, Boolean.TRUE), " ", methodName, "(");
             if(getFormat() == Format.JPA3) {
                 printLine("  ){");
                 printLine("    throw new javax.jdo.JDOFatalUserException(");
                 printLine("      \"References of type map not handled by data object\",");
-                printLine("      new UnsupportedOperationException(\"References of type map not handled by data object. Use " + methodName + InstanceMapper.ID_SUFFIX + "().\"),");
+                printLine("      new UnsupportedOperationException(\"References of type map not handled by data object. Use ", methodName, InstanceMapper.ID_SUFFIX, "().\"),");
                 printLine("      this");
                 printLine("    );");                                                                                                            
                 printLine("  }");
@@ -647,13 +672,13 @@ extends AbstractClassMapper {
                 printLine("  /**");
                 MapperUtils.wrapText(
                     "   * ",
-                    "Retrieves the value for the reference <code>" + referenceDef.getName() + "</code> for the specified qualifier attribute value.", this::printLine);
+                    "Retrieves the value for the reference {@code " + referenceDef.getName() + "} for the specified qualifier attribute value.", this::printLine);
                 if(i == 1) {
                     printLine("   * <p>");
                     MapperUtils.wrapText(
                         "   * ",
-                        "This method is equivalent to the preferred invocation <code>" + 
-                        methodName + "(false," + referenceDef.getQualifierName() + ")</code>.", this::printLine
+                        "This method is equivalent to the preferred invocation {@code " + 
+                        methodName + "(false," + referenceDef.getQualifierName() + ")}.", this::printLine
                     );
             }
                 printLine("   * <p>");
@@ -662,16 +687,16 @@ extends AbstractClassMapper {
                     MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
                 }
                 if(i == 0) {
-                    printLine("   * @param " + qualifierPersistencyArgumentName + " Defines whether value for the qualifier is persistent or not");
+                    printLine("   * @param ", qualifierPersistencyArgumentName, " Defines whether value for the qualifier is persistent or not");
                 }
-                printLine("   * @param " + referenceDef.getQualifierName() + " The value for the qualifier attribute that qualifies this reference.");
+                printLine("   * @param ", referenceDef.getQualifierName(), " The value for the qualifier attribute that qualifies this reference.");
                 printLine("   * @return The possibly null value for this qualifier");
                 printLine("   */");
-                printLine("  public " + accessorType + ' ' + methodName + '(');
+                printLine("  public ", accessorType, " ", methodName, "(");
                 if(i == 0) {
-                    printLine("    boolean " + qualifierPersistencyArgumentName + ",");
+                    printLine("    boolean ", qualifierPersistencyArgumentName, ",");
                 }
-                printLine("    " + this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false) + " " + referenceDef.getQualifierName());
+                printLine("    ", this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false), " ", referenceDef.getQualifierName());
                 if(format == Format.JPA3) {
                     printLine("  ){");                    
                     printLine("    throw new java.lang.UnsupportedOperationException(\"Not yet implemented\");"); // TODO
@@ -693,22 +718,33 @@ extends AbstractClassMapper {
             printLine("  /**");
             MapperUtils.wrapText(
                 "   * ",
-                "Retrieves the value for the optional reference <code>" + referenceDef.getName() + "</code> for the specified qualifier attribute value.", this::printLine);
+                "Retrieves the value for the optional reference {@code " + referenceDef.getName() + "} for the specified qualifier attribute value.", this::printLine);
             printLine("   * <p>");
             MapperUtils.wrapText(
                 "   * ",
                 "<em>Note: This is an extension to the JMI 1 standard.<br>" +
-                "In order to remain standard compliant you should substitute this method with <code>java.jdo.Query</code></em>", this::printLine
+                "In order to remain standard compliant you should substitute this method with {@code java.jdo.Query}</em>", this::printLine
             );
             if (referenceDef.getAnnotation() != null) {
                 printLine("   * <p>");
                 MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
             }
-            printLine("   * @param " + referenceDef.getQualifierName() + " The value for the qualifier attribute that qualifies this reference.");
+            printLine("   * @param ", referenceDef.getQualifierName(), " The value for the qualifier attribute that qualifies this reference.");
             printLine("   * @return The non-null value for this reference.");
             printLine("   */");
-            printLine("  public " + this.getType(referenceDef, null, Boolean.TRUE, TypeMode.MEMBER, null) + " " + this.getMethodName(referenceDef.getBeanGetterName()) + "(");
-            printLine("    " + this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false) + " " + referenceDef.getQualifierName());
+            printLine(
+            	"  public ",
+            	this.getType(referenceDef, null, Boolean.TRUE, TypeMode.MEMBER, null),
+            	" ",
+            	this.getMethodName(referenceDef.getBeanGetterName()),
+            	"("
+            );
+            printLine(
+            	"    ",
+            	this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false),
+            	" ",
+            	referenceDef.getQualifierName()
+            );
             if(getFormat() == Format.JPA3) {
                 printLine("  ){");
                 printLine("    throw new java.lang.UnsupportedOperationException(\"Qualified object retrieval not yet supported by persistence layer\");");
@@ -733,12 +769,12 @@ extends AbstractClassMapper {
         for(StructuralFeatureDef param: operationDef.getParameters()) {
             if(!VoidRecord.NAME.equals(param.getQualifiedTypeName())) {
                 if (param.getAnnotation() != null) {
-                    printLine("   * @param " + param.getName() + " " + param.getAnnotation() + "");
+                    printLine("   * @param ", param.getName(), " ", param.getAnnotation(), "");
                 }
             }
         }
         printLine("   */");
-        printLine("  public " + this.getReturnType(operationDef) + " " + this.getMethodName(operationDef.getName()) + "(");
+        printLine("  public ", this.getReturnType(operationDef), " ", this.getMethodName(operationDef.getName()), "(");
         int ii = 0;
         for(StructuralFeatureDef param: operationDef.getParameters()) {
             if(!VoidRecord.NAME.equals(param.getQualifiedTypeName())) {
@@ -833,11 +869,11 @@ extends AbstractClassMapper {
                 printLine("  /**");
                 printLine("   * Object Identity");
                 printLine("   */");
-                printLine("  public interface " + InstanceMapper.OBJECT_IDENTITY_CLASS_NAME + " extends " + QUALIFIED_IDENTITY_CLASS_NAME + " {");
+                printLine("  public interface ", InstanceMapper.OBJECT_IDENTITY_CLASS_NAME, " extends ", QUALIFIED_IDENTITY_CLASS_NAME, " {");
                 newLine();
                 printLine("    /**");
-                printLine("     * Retrieve the whole <code>authority</code>.");
-                printLine("     * @return the whole <code>authority</code> value");
+                printLine("     * Retrieve the whole {@code authority}.");
+                printLine("     * @return the whole {@code authority} value");
                 printLine("     */");
                 printLine("    public java.lang.String getAuthority();");
                 newLine();            
@@ -910,25 +946,25 @@ extends AbstractClassMapper {
                 printLine("  /**");
                 printLine("   * Object Identity");
                 printLine("   */");
-                printLine("  public interface " + InstanceMapper.OBJECT_IDENTITY_CLASS_NAME + " extends " + QUALIFIED_IDENTITY_CLASS_NAME + " {");
+                printLine("  public interface ", InstanceMapper.OBJECT_IDENTITY_CLASS_NAME, " extends ", QUALIFIED_IDENTITY_CLASS_NAME, " {");
                 newLine();
                 printLine("    /**");
-                printLine("     * Retrieve the <code>" + classDef.getName() + "</code>'s identity");
+                printLine("     * Retrieve the {@code ", classDef.getName(), "}'s identity");
                 printLine("     * @return the parent object's identity");
                 printLine("     */");
-                printLine("    public " + parentIdentityType + " " + referenceAccessorName + "();");
+                printLine("    public ", parentIdentityType, " ", referenceAccessorName, "();");
                 newLine();
                 printLine("    /**");
-                printLine("     * Tells whether the <code>" + qualifierValueName + "</code> value is persistent or reassignable.");
-                printLine("     * @return <code>PERSISTENT</code> or <code>REASSIGNABLE</code>");
+                printLine("     * Tells whether the {@code ", qualifierValueName, "} value is persistent or reassignable.");
+                printLine("     * @return {@code PERSISTENT} or {@code REASSIGNABLE}");
                 printLine("     */");
-                printLine("    public " + QUALIFIER_TYPE_CLASS_NAME + " " + qualifierTypeAccessorName + "();");
+                printLine("    public ", QUALIFIER_TYPE_CLASS_NAME, " ", qualifierTypeAccessorName, "();");
                 newLine();
                 printLine("    /**");
-                printLine("     * The <code>" + qualifierValueName + "</code> value");
-                printLine("     * @return the <code>" + qualifierValueName + "</code> value");
+                printLine("     * The {@code ", qualifierValueName, "} value");
+                printLine("     * @return the {@code ", qualifierValueName, "} value");
                 printLine("     */");
-                printLine("    public " + qualifierArgumentType + " " + qualifierAccessorName + "();");
+                printLine("    public ", qualifierArgumentType, " ", qualifierAccessorName, "();");
                 newLine();            
                 printLine("  }");
                 break;
@@ -1025,8 +1061,7 @@ extends AbstractClassMapper {
     public void mapMultivaluedFields(
     ) throws ServiceException{
         if(this.isSliceHolder() || this.hasSlices()) {
-            this.trace("Instance/Begin");
-            this.fileHeader();
+            this.trace(pwSlice, "Instance/Begin");
             this.pwSlice.println(
                 "package " + this.getNamespace(
                     MapperUtils.getNameComponents(
@@ -1040,13 +1075,14 @@ extends AbstractClassMapper {
             this.pwSlice.println("/**");
             MapperUtils.wrapText(
                 " * ",
-                "<code>" + this.className + SLICE_CLASS_NAME + "</code> object hold the <code>" + 
-                classDef.getName() + "</code>'s multivalued attributes", this.pwSlice::println
+                "{@code " + this.className + SLICE_CLASS_NAME + "} object hold the {@code " + 
+                classDef.getName() + "}'s multivalued attributes", this.pwSlice::println
             );
             this.pwSlice.println(" */");
             String superClassName = this.isSliceHolder() || this.extendsClassDef == null ? (
                 this.classMetaData != null && this.classMetaData.getBaseClass() != null ? this.classMetaData.getBaseClass() + SLICE_CLASS_NAME : null 
             ) : this.getType(this.extendsClassDef.getQualifiedName(), getFormat(), false) + SLICE_CLASS_NAME;
+            mapGeneratedAnnotation(pwSlice::println);
             this.pwSlice.println("@SuppressWarnings(\"serial\")");            
             this.pwSlice.print("public class " + this.className + SLICE_CLASS_NAME + " ");
             this.pwSlice.println(superClassName == null ? "implements java.io.Serializable {" : "extends " + superClassName + " {");
@@ -1135,7 +1171,7 @@ extends AbstractClassMapper {
                 this.pwSlice.println("     * <p>");
                 this.pwSlice.println("     * This method is required by JPA.");
                 this.pwSlice.println("     * @param that the object to be compared");
-                this.pwSlice.println("     * @return <code>true</code> if the two ids refer to the same slice object");
+                this.pwSlice.println("     * @return {@code true} if the two ids refer to the same slice object");
                 this.pwSlice.println("     */");
                 this.pwSlice.println("    @Override");
                 this.pwSlice.println("    public boolean equals(java.lang.Object that) {");
@@ -1192,26 +1228,28 @@ extends AbstractClassMapper {
     public void mapBegin(
     ) throws ServiceException {
         this.trace("Instance/Begin");
-        this.fileHeader();
         printLine(
-            "package " + this.getNamespace(
+            "package ",
+            this.getNamespace(
                 MapperUtils.getNameComponents(
                     MapperUtils.getPackageName(
                         this.classDef.getQualifiedName()
                     )
                 )
-            ) + ';'
+            ),
+            ";"
         );
         newLine();
         printLine("/**");
         print(" * ");
         print(this.classDef.isAbstract() ? "Abstract class" : "Class");
-        printLine(" <code>" + this.classDef.getName() + "</code>"); 
+        printLine(" {@code ", this.classDef.getName(), "}"); 
         if (this.classDef.getAnnotation() != null) {
             printLine(" *<p>");
             MapperUtils.wrapText(" * ", this.classDef.getAnnotation(), this::printLine);
         }
         printLine(" */");
+        this.mapGeneratedAnnotation();
         if(getFormat() == Format.JPA3) {
             String superClassName = this.isBaseClass() ? 
                 this.classMetaData.getBaseClass() != null ?
@@ -1220,7 +1258,7 @@ extends AbstractClassMapper {
                 this.getType(this.extendsClassDef.getQualifiedName(), getFormat(), false);
             printLine("@SuppressWarnings(\"serial\")");
             print("public class " + this.className); 
-            printLine("  extends " + superClassName);
+            printLine("  extends ", superClassName);
             print(" implements ");
             print(
                 interfaceType(
@@ -1230,9 +1268,8 @@ extends AbstractClassMapper {
                 )
             );
             newLine();
-        } 
-        else {
-            printLine("public interface " + this.className);
+        } else {
+            printLine("public interface ", this.className);
             String separator = "  extends ";
             if(getFormat() == Format.JMI1) {
                 print(
@@ -1265,7 +1302,7 @@ extends AbstractClassMapper {
             printLine("  /**");
             printLine("   * Constructor");
             printLine("   */");
-            printLine("  public " + this.className + '('); 
+            printLine("  public ", this.className, "("); 
             printLine("  ){");
             printLine("    // Implements Serializable");
             printLine("  }");
@@ -1275,7 +1312,7 @@ extends AbstractClassMapper {
                 printLine("   * The the object's JDO identity key");
                 printLine("   */");
                 print(hasContainer() ? "   private" : "   public");
-                printLine("  java.lang.String " + JDO_IDENTITY_MEMBER + ';');
+                printLine("  java.lang.String ", JDO_IDENTITY_MEMBER, ";");
                 newLine();
                 printLine("  /**");
                 printLine("   * Retrieve the object's JDO identity key");
@@ -1284,7 +1321,7 @@ extends AbstractClassMapper {
                 printLine("  @Override");
                 printLine("  protected java.lang.String getOpenmdxjdoIdentity(");
                 printLine("  ){");
-                printLine("     return this." + JDO_IDENTITY_MEMBER + ';');
+                printLine("     return this.", JDO_IDENTITY_MEMBER, ";");
                 printLine("  }");
                 newLine();
                 printLine("  /**");
@@ -1294,7 +1331,7 @@ extends AbstractClassMapper {
                 printLine("  protected void setOpenmdxjdoIdentity(");
                 printLine("    String value");
                 printLine("  ){");
-                printLine("     this." + JDO_IDENTITY_MEMBER + " = value;");
+                printLine("     this.", JDO_IDENTITY_MEMBER, " = value;");
                 printLine("  }");
                 newLine();
             }
@@ -1303,12 +1340,24 @@ extends AbstractClassMapper {
                 printLine("   * Slice holder");
                 printLine("   */");
                 printLine(
-                    "   private java.util.TreeMap<java.lang.Integer, " + this.className + SLICE_CLASS_NAME + "> " + 
-                    SLICES_MEMBER + " = new java.util.TreeMap<java.lang.Integer, "+ this.className + SLICE_CLASS_NAME +">();"
+                    "   private java.util.TreeMap<java.lang.Integer, ", 
+                    this.className, 
+                    SLICE_CLASS_NAME,
+                    "> ", 
+                    SLICES_MEMBER,
+                    " = new java.util.TreeMap<java.lang.Integer, ",
+                    this.className,
+                    SLICE_CLASS_NAME,
+                    ">();"
                 );
                 newLine();
                 printLine("   @SuppressWarnings(\"unchecked\")");
-                printLine("   protected final  <E extends " + this.className + SLICE_CLASS_NAME + "> java.util.SortedMap<java.lang.Integer,E> openmdxjdoGetSlices(");
+                printLine(
+                	"   protected final  <E extends ",
+                	this.className,
+                	SLICE_CLASS_NAME,
+                	"> java.util.SortedMap<java.lang.Integer,E> openmdxjdoGetSlices("
+                );
                 printLine("   ){");
                 printLine("      return (java.util.SortedMap<java.lang.Integer,E>)this.openmdxjdoSlices;");
                 printLine("   }");
@@ -1329,31 +1378,31 @@ extends AbstractClassMapper {
                 MapperUtils
                     .wrapText(
                         "   * ",
-                        "Sets a new binary value for the attribute <code>" + attributeDef.getName() + "</code>.", this::printLine);
+                        "Sets a new binary value for the attribute {@code " + attributeDef.getName() + "}.", this::printLine);
                 if (attributeDef.getAnnotation() != null) {
                     printLine("   * <p>");
                     MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
                 }
-                printLine("   * @param " + newValue + " A <code>BinaryLargeObject</code> containing the binary value for this attribute.");
+                printLine("   * @param ", newValue, " A {@code BinaryLargeObject} containing the binary value for this attribute.");
                 printLine("   */");
-                printLine("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
-                printLine("    org.w3c.cci2.BinaryLargeObject " + newValue);
+                printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
+                printLine("    org.w3c.cci2.BinaryLargeObject ", newValue);
                 printLine("  );");
                 newLine();
             } else {
                 printLine("  /**");
-                printLine("   * Sets a new  binary value for the attribute <code>" + attributeDef.getName() + "</code>");
+                printLine("   * Sets a new  binary value for the attribute {@code ", attributeDef.getName(), "}");
                 if (attributeDef.getAnnotation() != null) {
                     printLine("   * <p>");
                     MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
                 }
-                printLine("   * @param " + newValue + " A <code>BinaryLargeObject</code> containing the value for this attribute.");
+                printLine("   * @param ", newValue, " A {@code BinaryLargeObject} containing the value for this attribute.");
                 printLine("   */");
-                printLine("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
-                printLine("    org.w3c.cci2.BinaryLargeObject " + newValue);
+                printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
+                printLine("    org.w3c.cci2.BinaryLargeObject ", newValue);
                 if(getFormat() == Format.JPA3) {
                     printLine("  ){");
-                    printLine("    this." + newValue + " = openmdxjdoToArray(" + newValue + ");");
+                    printLine("    this.", newValue, " = openmdxjdoToArray(", newValue, ");");
                     printLine("  }");
                 } else {
                     printLine("  );");
@@ -1363,31 +1412,31 @@ extends AbstractClassMapper {
         } else if (PrimitiveTypes.STRING.equals(modelType)) {
             if(getFormat() == Format.JMI1) {
                 printLine("  /**");
-                printLine("   * Sets a new character large object value for the attribute <code>" + attributeDef.getName() + "</code>.");
+                printLine("   * Sets a new character large object value for the attribute {@code ", attributeDef.getName(), "}.");
                 if (attributeDef.getAnnotation() != null) {
                     printLine("   * <p>");
                     MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
                 }
-                printLine("   * @param " + newValue + " A <code>CharacterLargeObject</code> containing the value for this attribute.");
+                printLine("   * @param ", newValue, " A {@code CharacterLargeObject} containing the value for this attribute.");
                 printLine("   */");
-                printLine("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
-                printLine("     org.w3c.cci2.CharacterLargeObject " + newValue);
+                printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
+                printLine("     org.w3c.cci2.CharacterLargeObject ", newValue);
                 printLine("  );");
                 newLine();
             } else {
                 printLine("  /**");
-                printLine("   * Sets a new character large object value for the attribute <code>" + attributeDef.getName() + "</code>");
+                printLine("   * Sets a new character large object value for the attribute {@code ", attributeDef.getName(), "}");
                 if (attributeDef.getAnnotation() != null) {
                     printLine("   * <p>");
                     MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
                 }
-                printLine("   * @param " + newValue + " A <code>CharacterLargeObject</code> containing the value for this attribute.");
+                printLine("   * @param ", newValue, " A {@code CharacterLargeObject} containing the value for this attribute.");
                 printLine("   */");
-                printLine("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
-                printLine("    org.w3c.cci2.CharacterLargeObject " + newValue);
+                printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
+                printLine("    org.w3c.cci2.CharacterLargeObject ", newValue);
                 if(getFormat() == Format.JPA3) {
                     printLine("  ){");
-                    printLine("    this." + newValue + " = openmdxjdoToArray(" + newValue + ");");
+                    printLine("    this.", newValue, " = openmdxjdoToArray(", newValue, ");");
                     printLine("  }");
                 } else {
                     printLine("  );");
@@ -1409,7 +1458,7 @@ extends AbstractClassMapper {
         boolean primitiveType = this.model.isPrimitiveType(modelType);
         String attributeType = this.getType(modelType, format == Format.JPA3 && primitiveType ? Format.CCI2 : format, false);
         printLine("  /**");
-        printLine("   * Sets a new value for the attribute <code>" + attributeDef.getName() + "</code>.");
+        printLine("   * Sets a new value for the attribute {@code ", attributeDef.getName(), "}.");
         if (!attributeDef.isChangeable()) {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", "This attribute is not changeable, i.e. its value can be set as long as the object is <em>TRANSIENT</em> or <em>NEW</em>", this::printLine);
@@ -1418,9 +1467,9 @@ extends AbstractClassMapper {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
         }
-        printLine("   * @param " + attributeName + " The non-null new value for attribute <code>" + attributeDef.getName() + "</code>.");
+        printLine("   * @param ", attributeName, " The non-{@code null} new value for attribute {@code ", attributeDef.getName(), "}.");
         printLine("   */");
-        printLine("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
+        printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
         printLine("    " + attributeType + ' ' + attributeName);
         if(format == Format.JPA3) {
             printLine("  ){");
@@ -1456,19 +1505,19 @@ extends AbstractClassMapper {
         String attributeType = this.getType(modelType, format == Format.JPA3 && primitiveType ? Format.CCI2 : format, true);
         newLine();
         printLine("  /**");
-        printLine("   * Sets a new value for the attribute <code>" + attributeDef.getName() + "</code>.");
+        printLine("   * Sets a new value for the attribute {@code ", attributeDef.getName(), "}.");
         if (attributeDef.getAnnotation() != null) {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
         }
-        printLine("   * @param " + attributeName + " The possibly null new value for attribute <code>" + attributeDef.getName() + "</code>.");
+        printLine("   * @param ", attributeName, " The possibly null new value for attribute {@code ", attributeDef.getName(), "}.");
         printLine("   */");
-        printLine("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
-        printLine("    " + attributeType + ' ' + attributeName);
+        printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
+        printLine("    ", attributeType, " ", attributeName);
         if(format == Format.JPA3) {
             printLine("  ){");           
             printLine("    super.openmdxjdoMakeDirty();");                        
-            printLine("    this." + attributeName + " = ");
+            printLine("    this.", attributeName, " = ");
             if(this.mapValueType(modelType)) {
                 String source = primitiveType ? attributeName : '(' + getType(modelType, format, true) + ')' + attributeName;
                 print(getMappingExpression(modelType, Format.CCI2, Format.JPA3, source));
@@ -1497,16 +1546,16 @@ extends AbstractClassMapper {
         if (PrimitiveTypes.BINARY.equals(attributeDef.getQualifiedTypeName())) {
             if(getFormat() != Format.JMI1) {
                 printLine("  /**");
-                printLine("   * Retrieves a binary large object value for the attribute <code>" + attributeDef.getName() + "</code>.");
+                printLine("   * Retrieves a binary large object value for the attribute {@code ", attributeDef.getName(), "}.");
                 if (attributeDef.getAnnotation() != null) {
                     printLine("   * <p>");
                     MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
                 }
                 printLine("   */");
-                printLine("  public org.w3c.cci2.BinaryLargeObject " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
+                printLine("  public org.w3c.cci2.BinaryLargeObject ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
                 if(getFormat() == Format.JPA3) {
                     printLine("  ){");
-                    printLine("    return org.w3c.cci2.BinaryLargeObjects.valueOf(this." + newValue + ");");
+                    printLine("    return org.w3c.cci2.BinaryLargeObjects.valueOf(this.", newValue, ");");
                     printLine("  }");
                     mapDeclareValue("  ", "byte[]", newValue, attributeDef.isDerived() ? "public" : null);
                 } else {
@@ -1517,16 +1566,16 @@ extends AbstractClassMapper {
         } else if (PrimitiveTypes.STRING.equals(attributeDef.getQualifiedTypeName())) {
             if(getFormat() != Format.JMI1) {
                 printLine("  /**");
-                printLine("   * Retrieves a character large object value for the attribute <code>" + attributeDef.getName() + "</code>.");
+                printLine("   * Retrieves a character large object value for the attribute {@code ", attributeDef.getName(), "}.");
                 if (attributeDef.getAnnotation() != null) {
                     printLine("   * <p>");
                     MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
                 }
                 printLine("   */");
-                printLine("  public org.w3c.cci2.CharacterLargeObject " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
+                printLine("  public org.w3c.cci2.CharacterLargeObject ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
                 if(getFormat() == Format.JPA3) {
                     printLine("  ){");
-                    printLine("    return org.w3c.cci2.CharacterLargeObjects.valueOf(this." + newValue + ");");
+                    printLine("    return org.w3c.cci2.CharacterLargeObjects.valueOf(this.", newValue, ");");
                     printLine("  }");
                     mapDeclareValue("  ", "char[]", newValue, attributeDef.isDerived() ? "public" : null);
                 } else {
@@ -1550,7 +1599,7 @@ extends AbstractClassMapper {
         MapperUtils
             .wrapText(
                 "   * ",
-                "Retrieves a SparseArray containing all the elements for the attribute <code>" + attributeDef.getName() + "</code>.", this::printLine);
+                "Retrieves a SparseArray containing all the elements for the attribute {@code " + attributeDef.getName() + "}.", this::printLine);
         if (attributeDef.getAnnotation() != null) {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
@@ -1558,9 +1607,15 @@ extends AbstractClassMapper {
         printLine("   * @return A SparseArray containing all elements for this attribute.");
         printLine("   */");
         if(getFormat() == Format.JPA3) {
-            printLine("  public " + getType(attributeDef, "org.w3c.cci2.SparseArray", null, TypeMode.MEMBER, null) + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
+            printLine(
+            	"  public ",
+            	getType(attributeDef, "org.w3c.cci2.SparseArray", null, TypeMode.MEMBER, null),
+            	" ",
+            	this.getMethodName(attributeDef.getBeanGetterName()),
+            	"("
+            );
             printLine("  ){");
-            printLine("    java.util.SortedMap<java.lang.Integer," + this.className + SLICE_CLASS_NAME + "> slices = openmdxjdoGetSlices();");
+            printLine("    java.util.SortedMap<java.lang.Integer,", this.className, SLICE_CLASS_NAME, "> slices = openmdxjdoGetSlices();");
             printLine("    return org.w3c.cci2.SortedMaps.asSparseArray(");
             print("      ");
             mapSlicedClass("        ", attributeDef, QUALIFIED_ABSTRACT_OBJECT_CLASS_NAME + ".SlicedMap");
@@ -1569,7 +1624,13 @@ extends AbstractClassMapper {
             printLine("  }");
         } 
         else {
-            printLine("  public " + getType(attributeDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER, null) + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
+            printLine(
+            	"  public ",
+            	getType(attributeDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER, null),
+            	" ",
+            	this.getMethodName(attributeDef.getBeanGetterName()),
+            	"("
+            );
             printLine("  );");
         }
         newLine();
@@ -1597,7 +1658,7 @@ extends AbstractClassMapper {
                     i < embedded.intValue();
                     i++
                 ){
-                    printLine("  private " + fieldType + " " + attributeName + SUFFIX_SEPARATOR + i + ";");
+                    printLine("  private ", fieldType, " ", attributeName, SUFFIX_SEPARATOR, Integer.toString(i), ";");
                 }
             }
         } 
@@ -1606,7 +1667,7 @@ extends AbstractClassMapper {
         MapperUtils
             .wrapText(
                 "   * ",
-                "Retrieves a set containing all the elements for the attribute <code>" + attributeDef.getName() + "</code>.", this::printLine);
+                "Retrieves a set containing all the elements for the attribute {@code " + attributeDef.getName() + "}.", this::printLine);
         if (attributeDef.getAnnotation() != null) {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
@@ -1614,10 +1675,20 @@ extends AbstractClassMapper {
         printLine("   * @return A set containing all elements for this attribute.");
         printLine("   */");
         if(getFormat() == Format.JPA3) {
-            printLine("  public " + getType(attributeDef, "java.util.Set", null, TypeMode.MEMBER, null) + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
+            printLine(
+            	"  public ",
+            	getType(attributeDef, "java.util.Set", null, TypeMode.MEMBER, null),
+            	" ",
+            	this.getMethodName(attributeDef.getBeanGetterName()),
+            	"("
+            );
             printLine("  ){");
             if(embedded == null) {
-                printLine("    java.util.SortedMap<java.lang.Integer," + this.className + SLICE_CLASS_NAME + "> slices = openmdxjdoGetSlices();");
+                printLine(
+                	"    java.util.SortedMap<java.lang.Integer,",
+                	this.className + SLICE_CLASS_NAME,
+                	"> slices = openmdxjdoGetSlices();"
+                );
                 print("    return ");
                 mapSlicedClass("      ", attributeDef, QUALIFIED_ABSTRACT_OBJECT_CLASS_NAME + ".SlicedSet");
                 printLine("    };");
@@ -1625,41 +1696,57 @@ extends AbstractClassMapper {
             else {
                 printLine("    return");
                 embeddedSet = Identifier.CLASS_PROXY_NAME.toIdentifier(attributeDef.getName());
-                printLine("new " + embeddedSet + "(" + embedded + ");");
+                printLine("new ", embeddedSet, "(", Integer.toString(embedded), ");");
             }                
             printLine("  }");
             if(embedded != null) {
                 String elementType = getObjectType(attributeDef);
                 newLine();
-                printLine("  private class " + embeddedSet + " extends EmbeddedSet<" + elementType + ">{");
+                printLine("  private class ", embeddedSet, " extends EmbeddedSet<", elementType, ">{");
                 newLine();
-                printLine("    " + embeddedSet + "(int capacity){");
+                printLine("    ", embeddedSet, "(int capacity){");
                 printLine("      super(capacity);");
                 printLine("    }");
                 newLine();
-                printLine("    protected final " + elementType + " openmdxjdoGet(int index){");
+                printLine("    protected final ", elementType, " openmdxjdoGet(int index){");
                 printLine("      switch(index){");
                 for(
                     int i = 0;
                     i < embedded.intValue();
                     i++
                 ){
-                    printLine("         case " + i + ": return " + attributeName + SUFFIX_SEPARATOR + i + ";");
+                    printLine("         case ", Integer.toString(i), ": return ", attributeName, SUFFIX_SEPARATOR,Integer.toString(i), ";");
                 }
-                printLine("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0.." + (embedded.intValue() - 1) + "]\");");
+                printLine(
+                	"         default: throw new IndexOutOfBoundsException(\"Index \", + index + \" is not in [0..",
+                	Integer.toString(embedded.intValue() - 1),
+                	"]\");"
+                );
                 printLine("      }");
                 printLine("    }");
                 newLine();
-                printLine("    protected final void openmdxjdoSet(int index, " + elementType + " element){");
+                printLine("    protected final void openmdxjdoSet(int index, ", elementType, " element){");
                 printLine("      switch(index){");
                 for(
                     int i = 0;
                     i < embedded.intValue();
                     i++
                 ){
-                    printLine("         case " + i + ": " + attributeName + SUFFIX_SEPARATOR + i + " = element;");
+                    printLine(
+                    	"         case ", 
+                    	Integer.toString(i), 
+                    	": ", 
+                    	attributeName, 
+                    	SUFFIX_SEPARATOR, 
+                    	Integer.toString(i), 
+                    	" = element;"
+                    );
                 }
-                printLine("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0.." + (embedded.intValue() - 1) + "]\");");
+                printLine(
+                	"         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0..", 
+                	Integer.toString(embedded.intValue() - 1),
+                	"]\");"
+                );
                 printLine("      }");
                 printLine("    }");
                 newLine();
@@ -1667,7 +1754,13 @@ extends AbstractClassMapper {
                 newLine();
             }
         } else {
-            printLine("  public " + getType(attributeDef, "java.util.Set", Boolean.TRUE, TypeMode.MEMBER, null) + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
+            printLine(
+            	"  public ",
+            	getType(attributeDef, "java.util.Set", Boolean.TRUE, TypeMode.MEMBER, null),
+            	" ",
+            	this.getMethodName(attributeDef.getBeanGetterName()),
+            	"("
+            );
             printLine("  );");
         }
         newLine();
@@ -1683,9 +1776,9 @@ extends AbstractClassMapper {
             this.trace("Instance/AttributeDeclarationMap");
             newLine();
             printLine("  /**");
-            printLine("   * Attribute <code>" + attributeName + "</code>.");
+            printLine("   * Attribute {@code " + attributeName + "}.");
             printLine("   */");
-            printLine("  private transient " + this.getMapType(attributeDef, java.lang.String.class, null) + ' ' + attributeName + ';');
+            printLine("  private transient ", this.getMapType(attributeDef, java.lang.String.class, null), " ", attributeName, ";");
             newLine();
         }        
         this.trace("Instance/AttributeGetMap");
@@ -1693,7 +1786,7 @@ extends AbstractClassMapper {
         MapperUtils
             .wrapText(
                 "   * ",
-                "Retrieves a map containing all the elements for the attribute <code>" + attributeDef.getName() + "</code>.", this::printLine);
+                "Retrieves a map containing all the elements for the attribute {@code " + attributeDef.getName() + "}.", this::printLine);
         if (attributeDef.getAnnotation() != null) {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
@@ -1701,10 +1794,16 @@ extends AbstractClassMapper {
         printLine("   * @return A map containing all elements for this attribute.");
         printLine("   */");
         String cast = printAnnotationAndReturnMapCast(attributeDef, java.lang.String.class);
-        printLine("  public " + this.getMapType(attributeDef, java.lang.String.class, Boolean.TRUE) + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
+        printLine(
+        	"  public ",
+        	this.getMapType(attributeDef, java.lang.String.class, Boolean.TRUE),
+        	" ",
+        	this.getMethodName(attributeDef.getBeanGetterName()),
+        	"("
+        );
         if(getFormat() == Format.JPA3) {
             printLine("  ){");
-            printLine("    return " + cast + "this." + attributeName + ';');
+            printLine("    return ", cast, "this.", attributeName, ";");
             printLine("  }");
         } else {
             printLine("  );");
@@ -1724,11 +1823,11 @@ extends AbstractClassMapper {
             MapperUtils
                 .wrapText(
                     "   * ",
-                    "Clears <code>" + attributeDef.getName() + "</code> and adds the members of the given List.", this::printLine);
+                    "Clears {@code " + attributeDef.getName() + "} and adds the members of the given List.", this::printLine);
             printLine("   * <p>");
             printLine("   * This method is equivalent to<pre>");
             printLine("   *   list.clear();");
-            printLine("   *   list.addAll(" + attributeName + ");");
+            printLine("   *   list.addAll(", attributeName, ");");
             printLine("   * </pre>");
             MapperUtils.wrapText(
                 "   * ",
@@ -1739,10 +1838,15 @@ extends AbstractClassMapper {
                 printLine("   * <p>");
                 MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
             }
-            printLine("   * @param " + attributeName + " collection to be copied.");
+            printLine("   * @param ", attributeName, " collection to be copied.");
             printLine("   */");
-            printLine("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
-            printLine("    " + this.getType(attributeDef, "java.util.List", Boolean.FALSE, TypeMode.MEMBER, null) + ' ' + attributeName);
+            printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
+            printLine(
+            	"    ", 
+            	this.getType(attributeDef, "java.util.List", Boolean.FALSE, TypeMode.MEMBER, null),
+            	" ",
+            	attributeName
+            );
             printLine("  );");
             newLine();            
         } else {
@@ -1752,11 +1856,11 @@ extends AbstractClassMapper {
             MapperUtils
                 .wrapText(
                     "   * ",
-                    "Clears <code>" + attributeDef.getName() + "</code> and adds the given value(s).", this::printLine);
+                    "Clears {@code " + attributeDef.getName() + "} and adds the given value(s).", this::printLine);
             printLine("   * <p>");
             printLine("   * This method is equivalent to<pre>");
             printLine("   *   list.clear();");
-            printLine("   *   for(" + elementType + " e : " + attributeName + "){");
+            printLine("   *   for(", elementType, " e : ", attributeName, "){");
             printLine("   *     list.add(e);");
             printLine("   *   }");
             printLine("   * </pre>");
@@ -1764,15 +1868,15 @@ extends AbstractClassMapper {
                 printLine("   * <p>");
                 MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
             }
-            printLine("   * @param " + attributeName + " value(s) to be added to <code>" + attributeDef.getName() + "</code>");
+            printLine("   * @param ", attributeName, " value(s) to be added to {@code ", attributeDef.getName(), "}");
             printLine("   */");
-            printLine("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
-            printLine("    " + elementType + "... " + attributeName);
+            printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
+            printLine("    ", elementType, "... ", attributeName);
             if(format == Format.JPA3) {
                 printLine("  ){");
                 printLine("    openmdxjdoSetCollection(");
-                printLine("      " + this.getMethodName(attributeDef.getBeanGetterName()) + "(),");
-                printLine("      " + attributeName);
+                printLine("      ", this.getMethodName(attributeDef.getBeanGetterName()), "(),");
+                printLine("      ", attributeName);
                 printLine("    );");
                 printLine("  }");
             } else {
@@ -1794,11 +1898,11 @@ extends AbstractClassMapper {
             MapperUtils
                 .wrapText(
                     "   * ",
-                    "Clears <code>" + attributeDef.getName() + "</code> and adds the members of the given Set.", this::printLine);
+                    "Clears {@code " + attributeDef.getName() + "} and adds the members of the given Set.", this::printLine);
             printLine("   * <p>");
             printLine("   * This method is equivalent to<pre>");
             printLine("   *   set.clear();");
-            printLine("   *   set.addAll(" + attributeName + ");");
+            printLine("   *   set.addAll(", attributeName, ");");
             printLine("   * </pre>");
             MapperUtils.wrapText(
                 "   * ",
@@ -1809,10 +1913,10 @@ extends AbstractClassMapper {
                 printLine("   * <p>");
                 MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
             }
-            printLine("   * @param " + attributeName + " collection to be copied.");
+            printLine("   * @param ", attributeName, " collection to be copied.");
             printLine("   */");
-            printLine("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
-            printLine("    " + this.getType(attributeDef, "java.util.Set", Boolean.FALSE, TypeMode.MEMBER, null) + ' ' + attributeName);
+            printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
+            printLine("    ", this.getType(attributeDef, "java.util.Set", Boolean.FALSE, TypeMode.MEMBER, null), " ", attributeName);
             printLine("  );");
             newLine();
         } else {
@@ -1822,11 +1926,11 @@ extends AbstractClassMapper {
             MapperUtils
                 .wrapText(
                     "   * ",
-                    "Clears <code>" + attributeDef.getName() + "</code> and adds the given value(s).", this::printLine);
+                    "Clears {@code " + attributeDef.getName() + "} and adds the given value(s).", this::printLine);
             printLine("   * <p>");
             printLine("   * This method is equivalent to<pre>");
             printLine("   *   set.clear();");
-            printLine("   *   for(" + elementType + " e : " + attributeName + "){");
+            printLine("   *   for(", elementType, " e : ", attributeName, "){");
             printLine("   *     set.add(e);");
             printLine("   *   }");
             printLine("   * </pre>");
@@ -1834,15 +1938,15 @@ extends AbstractClassMapper {
                 printLine("   * <p>");
                 MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
             }
-            printLine("   * @param " + attributeName + " value(s) to be added to <code>" + attributeDef.getName() + "</code>");
+            printLine("   * @param ", attributeName, " value(s) to be added to {@code ", attributeDef.getName(), "}");
             printLine("   */");
-            printLine("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
-            printLine("    " + elementType + "... " + attributeName);
+            printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
+            printLine("    ", elementType, "... ", attributeName);
             if(format == Format.JPA3) {
                 printLine("  ){");
                 printLine("    openmdxjdoSetCollection(");
-                printLine("      " + this.getMethodName(attributeDef.getBeanGetterName()) + "(),");
-                printLine("      " + attributeName);
+                printLine("      ", this.getMethodName(attributeDef.getBeanGetterName()), "(),");
+                printLine("      ", attributeName);
                 printLine("    );");
                 printLine("  }");
             } else {
@@ -1864,25 +1968,25 @@ extends AbstractClassMapper {
             MapperUtils
                 .wrapText(
                     "   * ",
-                    "Clears <code>" + attributeDef.getName() + "</code> and adds the given value(s).", this::printLine);
+                    "Clears {@code " + attributeDef.getName() + "} and adds the given value(s).", this::printLine);
             printLine("   * <p>");
             printLine("   * This method is equivalent to<pre>");
             printLine("   *   array.clear();");
-            printLine("   *   array.putAll(" + attributeName + ");");
+            printLine("   *   array.putAll(", attributeName, ");");
             printLine("   * </pre>");
             if (attributeDef.getAnnotation() != null) {
                 printLine("   * <p>");
                 MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
             }
-            printLine("   * @param " + attributeName + " value(s) to be added to <code>" + attributeDef.getName() + "</code>");
+            printLine("   * @param ", attributeName, " value(s) to be added to {@code ", attributeDef.getName(), "}");
             printLine("   */");
-            printLine("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
-            printLine("    " + this.getMapType(attributeDef, Integer.class, Boolean.FALSE) + ' ' + attributeName);
+            printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
+            printLine("    ", this.getMapType(attributeDef, Integer.class, Boolean.FALSE), " ", attributeName);
             if(getFormat() == Format.JPA3) {
                 printLine("  ){");
                 printLine("    openmdxjdoSetArray(");
-                printLine("      " + this.getMethodName(attributeDef.getBeanGetterName()) + "(),");
-                printLine("      " + attributeName);
+                printLine("      ", this.getMethodName(attributeDef.getBeanGetterName()), "(),");
+                printLine("      ", attributeName);
                 printLine("    );");
                 printLine("  }");
             } else {
@@ -1901,29 +2005,29 @@ extends AbstractClassMapper {
         printLine("  /**");
         MapperUtils.wrapText(
             "   * ",
-            "Sets a list containing all the new elements for the reference <code>" + referenceDef.getName() + "</code>.", this::printLine);
+            "Sets a list containing all the new elements for the reference {@code " + referenceDef.getName() + "}.", this::printLine);
         if (referenceDef.getAnnotation() != null) {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
         }
         printLine("   * @param newValue A list containing all the new elements for this reference.");
         printLine("   */");
-        printLine("  public void " + this.getMethodName(referenceDef.getBeanSetterName()) + "(");
-        printLine("    " + this.getType(referenceDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER, null) + " newValue");
+        printLine("  public void ", this.getMethodName(referenceDef.getBeanSetterName()), "(");
+        printLine("    ", this.getType(referenceDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER, null), " newValue");
         printLine("  );");
         newLine();
         printLine("  /**");
         MapperUtils.wrapText(
             "   * ",
-            "Sets an array containing all the new elements for the reference <code>" + referenceDef.getName() + "</code>.", this::printLine);
+            "Sets an array containing all the new elements for the reference {@code " + referenceDef.getName() + "}.", this::printLine);
         if (referenceDef.getAnnotation() != null) {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", referenceDef.getAnnotation(), this::printLine);
         }
         printLine("   * @param newValue An array containing all the new elements for this reference.");
         printLine("   */");
-        printLine("  public void " + this.getMethodName(referenceDef.getBeanSetterName()) + "(");
-        printLine("    " + this.getType(referenceDef.getQualifiedTypeName(), getFormat(), false) + "[] newValue");
+        printLine("  public void ", this.getMethodName(referenceDef.getBeanSetterName()), "(");
+        printLine("    ", this.getType(referenceDef.getQualifiedTypeName(), getFormat(), false), "[] newValue");
         printLine("  );");
         newLine();
     }
@@ -1950,10 +2054,15 @@ extends AbstractClassMapper {
                 throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.ASSERTION_FAILURE, "?");
             }            
         }
-        printLine("new " + mapType + "(slices) {");
-        printLine(prefix + "@Override");
-        printLine(prefix + "protected " + valueClass + " getValue(" + this.className + SLICE_CLASS_NAME + " slice) {");
-        printLine(prefix + " return " + (mapValueType ? getMappingExpression(modelClass, Format.JPA3, Format.CCI2, "slice." + featureDef.getBeanGetterName() + "()") : "slice." + featureDef.getBeanGetterName() + "()") + ";");
+        printLine("new ", mapType, "(slices) {");
+        printLine(prefix, "@Override");
+        printLine(prefix, "protected ", valueClass, " getValue(", this.className, SLICE_CLASS_NAME, " slice) {");
+        printLine(
+        	prefix, 
+        	" return ", 
+        	mapValueType ? getMappingExpression(modelClass, Format.JPA3, Format.CCI2, "slice." + featureDef.getBeanGetterName() + "()") : "slice." + featureDef.getBeanGetterName() + "()",
+        	";"
+        );
         printLine(prefix + "}");
         printLine(prefix + "@Override");
         printLine(prefix + "protected void setValue(" + this.className + SLICE_CLASS_NAME + " slice, " + valueClass + " value) {");
@@ -1996,7 +2105,7 @@ extends AbstractClassMapper {
                     i < embedded.intValue();
                     i++
                 ){
-                    printLine("  private " + fieldType + " " + attributeName + SUFFIX_SEPARATOR + i + ";");
+                    printLine("  private ", fieldType, " ", attributeName, SUFFIX_SEPARATOR, Integer.toString(i), ";");
                 }
             }
             newLine();
@@ -2006,7 +2115,7 @@ extends AbstractClassMapper {
         MapperUtils
             .wrapText(
                 "   * ",
-                "Retrieves a list containing all the elements for the attribute <code>" + attributeDef.getName() + "</code>.", this::printLine);
+                "Retrieves a list containing all the elements for the attribute {@code " + attributeDef.getName() + "}.", this::printLine);
         if (attributeDef.getAnnotation() != null) {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
@@ -2014,10 +2123,16 @@ extends AbstractClassMapper {
         printLine("   * @return A list containing all elements for this attribute.");
         printLine("   */");
         if(getFormat() == Format.JPA3) {
-            printLine("  public " + this.getType(attributeDef, "java.util.List", null, TypeMode.MEMBER, null) + ' ' + this.getMethodName(attributeDef.getBeanGetterName()) + '(');
+            printLine(
+            	"  public ", 
+            	this.getType(attributeDef, "java.util.List", null, TypeMode.MEMBER, null),
+            	" ",
+            	this.getMethodName(attributeDef.getBeanGetterName()),
+            	"("
+            );
             printLine("  ){");
             if(embedded == null) {
-                printLine("    java.util.SortedMap<java.lang.Integer," + this.className + SLICE_CLASS_NAME + "> slices = openmdxjdoGetSlices();");
+                printLine("    java.util.SortedMap<java.lang.Integer,", this.className, SLICE_CLASS_NAME, "> slices = openmdxjdoGetSlices();");
                 print("    return ");
                 mapSlicedClass("      ", attributeDef, QUALIFIED_ABSTRACT_OBJECT_CLASS_NAME + ".SlicedList");
                 printLine("    };");
@@ -2025,41 +2140,45 @@ extends AbstractClassMapper {
             else {
                 print("    return ");
                 embeddedList = Identifier.CLASS_PROXY_NAME.toIdentifier(attributeDef.getName());
-                printLine("new " + embeddedList + "(" + embedded + ");");
+                printLine("new ", embeddedList, "(", embedded.toString(), ");");
             }                
             printLine("  }");
             if(embedded != null) {
                 String elementType = getObjectType(attributeDef);
                 newLine();
-                printLine("  private class " + embeddedList + " extends EmbeddedList<" + elementType + ">{");
+                printLine("  private class ", embeddedList, " extends EmbeddedList<", elementType, ">{");
                 newLine();
-                printLine("    " + embeddedList + "(int capacity){");
+                printLine("    ", embeddedList, "(int capacity){");
                 printLine("      super(capacity);");
                 printLine("    }");
                 newLine();
-                printLine("    protected final " + elementType + " openmdxjdoGet(int index){");
+                printLine("    protected final ", elementType, " openmdxjdoGet(int index){");
                 printLine("      switch(index){");
                 for(
                     int i = 0;
                     i < embedded.intValue();
                     i++
                 ){
-                    printLine("         case " + i + ": return " + attributeName + SUFFIX_SEPARATOR + i + ";");
+                    printLine("         case ", Integer.toString(i), ": return ", attributeName, SUFFIX_SEPARATOR, Integer.toString(i), ";");
                 }
-                printLine("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0.." +  (embedded.intValue() - 1)  + "]\");");
+                printLine("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0..", Integer.toString(embedded.intValue() - 1), "]\");");
                 printLine("      }");
                 printLine("    }");
                 newLine();
-                printLine("    protected final void openmdxjdoSet(int index, " + elementType + " element){");
+                printLine("    protected final void openmdxjdoSet(int index, ", elementType, " element){");
                 printLine("      switch(index){");
                 for(
                     int i = 0;
                     i < embedded.intValue();
                     i++
                 ){
-                    printLine("         case " + i + ": " + attributeName + SUFFIX_SEPARATOR + i + " = element;");
+                    printLine("         case ", Integer.toString(i), ": ", attributeName + SUFFIX_SEPARATOR, Integer.toString(i), " = element;");
                 }
-                printLine("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0.." +  (embedded.intValue() - 1)  + "]\");");
+                printLine(
+                	"         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0..", 
+                	Integer.toString(embedded.intValue() - 1), 
+                	"]\");"
+                );
                 printLine("      }");
                 printLine("    }");
                 newLine();
@@ -2068,7 +2187,12 @@ extends AbstractClassMapper {
             }
         } 
         else {
-            printLine("  public " + this.getType(attributeDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER, null) + ' ' + this.getMethodName(attributeDef.getBeanGetterName()) + '(');
+            printLine(
+            	"  public ", this.getType(attributeDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER, null),
+            	" ",
+            	this.getMethodName(attributeDef.getBeanGetterName()),
+            	"("
+            );
             printLine("  );");
         }
         newLine();
@@ -2093,18 +2217,18 @@ extends AbstractClassMapper {
         }
         this.trace("Instance/AttributeGet1_1");
         printLine("  /**");
-        printLine("   * Retrieves the value for the attribute <code>" + attributeDef.getName() + "</code>.");
+        printLine("   * Retrieves the value for the attribute {@code ", attributeDef.getName(), "}.");
         if (attributeDef.getAnnotation() != null) {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
         }
-        printLine("   * @return The non-null value for attribute <code>" + attributeDef.getName() + "</code>.");
+        printLine("   * @return The non-null value for attribute {@code ", attributeDef.getName(), "}.");
         printLine("   */");
         String cast =  printAnnotationAndReturnCast(attributeDef, null);
         String featureType = objectIdentity ?
             QUALIFIED_IDENTITY_FEATURE_CLASS_NAME :
             this.getType(attributeDef, null, Boolean.TRUE, TypeMode.MEMBER, Boolean.FALSE);        
-        printLine("  public " + featureType + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
+        printLine("  public ", featureType, " ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
         if(format == Format.JPA3) {
             printLine("  ){");
             print("    return ");
@@ -2141,16 +2265,16 @@ extends AbstractClassMapper {
         MapperUtils
             .wrapText(
                 "   * ",
-                "Retrieves the possibly null value for the optional attribute <code>" + attributeDef.getName() + "</code>.", this::printLine);
+                "Retrieves the possibly null value for the optional attribute {@code " + attributeDef.getName() + "}.", this::printLine);
         if (attributeDef.getAnnotation() != null) {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
         }
-        printLine("   * @return The possibly null value for attribute <code>" + attributeDef.getName() + "</code>.");
+        printLine("   * @return The possibly null value for attribute {@code ", attributeDef.getName(), "}.");
         printLine("   */");
         String cast =  printAnnotationAndReturnCast(attributeDef, null);
         String featureType = this.getType(attributeDef, null, Boolean.TRUE, TypeMode.MEMBER, Boolean.TRUE);        
-        printLine("  public " + featureType + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
+        printLine("  public ", featureType, " ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
         if(getFormat() == Format.JPA3) {
             printLine("  ){");
             print("    return ");
@@ -2188,7 +2312,7 @@ extends AbstractClassMapper {
         this.trace(pw, "Instance/DeclareValue");
         pw.println();
         pw.println(indentation + "/**");
-        pw.println(indentation + " * Attribute <code>" + attributeName + "</code>.");
+        pw.println(indentation + " * Attribute {@code " + attributeName + "}.");
         pw.println(indentation + " */");
         pw.println(indentation + (visibility == null ? "" : visibility + " ") + attributeType + ' ' + attributeName + ';');
         pw.println();
@@ -2250,7 +2374,7 @@ extends AbstractClassMapper {
             printLine("  @SuppressWarnings(\"unused\")");
         }
         pw.println("  /**");
-        pw.println("   * Instance referenced by <code>" + referenceName + "</code>.");
+        pw.println("   * Instance referenced by {@code " + referenceName + "}.");
         pw.println("   */");
         pw.println("  java.lang.String " + referenceName + ';');
         pw.println();
@@ -2306,9 +2430,9 @@ extends AbstractClassMapper {
         this.trace("Instance/DeclareSize");
         newLine();
         printLine(indentation + "/**");
-        printLine(indentation + " * Number of elements of attribute <code>" + attributeName + "</code>");
+        printLine(indentation + " * Number of elements of attribute {@code ", attributeName, "}");
         printLine(indentation + " */");
-        printLine(indentation + "int " + attributeName + SIZE_SUFFIX + ';');
+        printLine(indentation + "int ", attributeName, SIZE_SUFFIX, ";");
         newLine();
     }
 

@@ -224,7 +224,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /**
      * Determines whether we are using a dynamic plug-in
      * 
-     * @return <code>true</code> if we are using a dynamic plug-in
+     * @return {@code true} if we are using a dynamic plug-in
      */
     protected boolean isDynamic() {
         return this.plugIn instanceof DynamicPlugIn;
@@ -754,7 +754,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
      * 
      * @param hasContent
      * 
-     * @return <code>true</code> if there was a pending tag to be flushed
+     * @return {@code true} if there was a pending tag to be flushed
      * 
      * @throws XMLStreamException
      */
