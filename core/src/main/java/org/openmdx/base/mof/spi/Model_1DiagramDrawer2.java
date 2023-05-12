@@ -73,12 +73,14 @@ public class Model_1DiagramDrawer2 {
                 final File sourceDir = new File(arguments[0]);
                 final File destDir = new File(arguments[1]);
                 final File styleFile = arguments.length == 3 ? new File(arguments[2]) : null;
+                final boolean graphvizHasIssue144 = false; // might be passed as argument
                 System.out.println("INFO: Mapping model diagram templates from " + sourceDir + " to " + destDir);
                 System.out.flush();
                 final GraphvizTemplates drawer = new GraphvizTemplates(
                 	Model_1Factory.getModel(), 
                 	getStyleSheet(styleFile), 
-                	new FileSink(destDir)
+                	new FileSink(destDir), 
+                	graphvizHasIssue144
                 );
                 drawer.drawDiagrams(sourceDir);
             } catch (Exception exception) {

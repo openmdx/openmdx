@@ -127,6 +127,11 @@ public class PIMDocConfiguration {
 	private static final String DEFAULT_TITLE = "openMDX PIM Documentation";
 
 	/**
+	 * Graphviz versions < 8.0.2 have issue 144
+	 */
+	private static final String GRAPHVIZ_ISSUE_144 = "graphviz-issue-144";
+	
+	/**
 	 * The logo defaults to openMDX logo
 	 */
 	private final static String LOGO = "logo";
@@ -163,6 +168,10 @@ public class PIMDocConfiguration {
 	
 	public String getTitle(){
 		return getProperty(TITLE).orElse(DEFAULT_TITLE);
+	}
+	
+	public boolean graphvizHasIssue144() {
+		return Boolean.parseBoolean(getProperty(GRAPHVIZ_ISSUE_144).orElse(Boolean.FALSE.toString()));
 	}
 
 	public GraphvizStyle getGraphvizStyleSheet() {

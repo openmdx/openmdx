@@ -46,14 +46,11 @@ package org.openmdx.kernel.lightweight.naming;
 
 import javax.naming.NamingException;
 import javax.naming.NoInitialContextException;
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
-
+import javax.transaction.TransactionSynchronizationRegistry;
 import org.openmdx.kernel.lightweight.naming.jdbc.AbstractDataSourceContext;
 import org.openmdx.kernel.lightweight.naming.jdbc.AtomikosDataSourceContext;
-import org.openmdx.kernel.lightweight.transaction.AtomikosTransactionSynchronizationRegistry;
-import org.openmdx.kernel.lightweight.transaction.AtomikosUserTransaction;
-import org.openmdx.kernel.loading.Classes;
+import com.atomikos.icatch.jta.TransactionSynchronizationRegistryImp;
+import com.atomikos.icatch.jta.UserTransactionManager;
 
 /**
  * Atomikos Initial Context Factory
@@ -67,20 +64,15 @@ public class AtomikosInitialContextFactory extends AbstractInitialContextFactory
             //
             // Atomikos transaction manager set-up
             //
-            final Class<TransactionManager> transactionManagerClass = Classes.getApplicationClass("com.atomikos.icatch.jta.UserTransactionManager");
-            final TransactionManager transactionManager = transactionManagerClass.newInstance();
-            final AtomikosTransactionSynchronizationRegistry transactionSynchronizationRegistry = new AtomikosTransactionSynchronizationRegistry(transactionManager);
-            final UserTransaction userTransaction = new AtomikosUserTransaction(
-            	(UserTransaction) transactionManager,
-            	transactionSynchronizationRegistry
-            );
+        	final UserTransactionManager userTransactionManager = new UserTransactionManager();
+            final TransactionSynchronizationRegistry transactionSynchronizationRegistry = new TransactionSynchronizationRegistryImp();
             //
             // Initial context setup
             //
             return createInitialContext(
-                transactionManager,
+            	userTransactionManager,
                 transactionSynchronizationRegistry,
-                userTransaction
+                userTransactionManager
             );
         } catch (NoInitialContextException exception) {
             throw exception;

@@ -106,8 +106,8 @@ dependencies {
     testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
  	testRuntimeOnly("org.postgresql:postgresql:42.5.1")
 	testRuntimeOnly("javax.servlet:javax.servlet-api:3.1.0")
-	testRuntimeOnly("com.atomikos:transactions-jta:5.0.9")
-	testRuntimeOnly("com.atomikos:transactions-jdbc:5.0.9")
+	testRuntimeOnly("com.atomikos:transactions-jta:6.0.0")
+	testRuntimeOnly("com.atomikos:transactions-jdbc:6.0.0")
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 }

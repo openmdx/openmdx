@@ -126,7 +126,11 @@ class PIMDocExternalizer {
 	
 	private void drawDiagrams(File sourceDir) {
 		try {
-			final GraphvizTemplates graphvizDiagrams = new GraphvizTemplates(model, configuration.getGraphvizStyleSheet(), sink);
+			final GraphvizTemplates graphvizDiagrams = new GraphvizTemplates(
+				model, configuration.getGraphvizStyleSheet(), 
+				sink, 
+				configuration.graphvizHasIssue144()
+			);
 			graphvizDiagrams.drawDiagrams(sourceDir);
 		} catch (ServiceException e) {
 			throw new RuntimeServiceException(e);

@@ -56,10 +56,12 @@ plugins {
 
 repositories {
 	mavenCentral()
-	mavenLocal() 
     maven {
         url = uri("https://datura.econoffice.ch/maven2")
     }
+    flatDir {
+        dirs("~/Repository/flat")
+    }    
 }
 
 var env = Properties()
@@ -170,12 +172,12 @@ dependencies {
     implementation("javax.jdo:jdo-api:3.1")
     implementation("javax.cache:cache-api:1.1.+")
 	implementation("com.vladsch.flexmark:flexmark:0.62.2")
+	implementation("com.atomikos:transactions-jta:6.0.0")
+	implementation("com.atomikos:transactions-jdbc:6.0.0")
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
     testImplementation("org.mockito:mockito-core:4.2.0")    
     testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
-	testRuntimeOnly("com.atomikos:transactions-jta:5.0.9")
-	testRuntimeOnly("com.atomikos:transactions-jdbc:5.0.9")
     // openmdxBase
     openmdxBase("org.openmdx:openmdx-base:2.18.2") 
     // openmdxBootstrap

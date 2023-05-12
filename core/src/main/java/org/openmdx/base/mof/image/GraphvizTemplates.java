@@ -76,27 +76,30 @@ import org.w3c.cci2.CharacterLargeObjects;
  */
 public class GraphvizTemplates {
 
-	public GraphvizTemplates(final Model_1_0 model, final GraphvizStyle styleSheet, final Sink sink) {
+	public GraphvizTemplates(final Model_1_0 model, final GraphvizStyle styleSheet, final Sink sink, final boolean graphvizHasIssue144) {
 		this.model = model;
 		this.styleSheet = styleSheet;
 		this.sink = sink;
+		this.graphvizHasIssue144 = graphvizHasIssue144;
 	}
 	
-	private GraphvizTemplates(GraphvizTemplates that, String name) {
+	private GraphvizTemplates(GraphvizTemplates that, String name, boolean graphvizHasIssue144) {
 		this.model = that.model;
 		this.styleSheet = that.styleSheet;
 		this.sink = that.sink.nested(name);
+		this.graphvizHasIssue144 = graphvizHasIssue144;
 	}
 	
 	private final Model_1_0 model;
 	private final GraphvizStyle styleSheet;
 	private final Sink sink;
+	private final boolean graphvizHasIssue144;
 	
 	private static final Pattern HTML_TITLE = Pattern.compile("\\s*(?:di)?graph\\s*(<.*)", Pattern.DOTALL);
 	private static final Pattern TITLE = Pattern.compile("\\s*(?:di)?graph\\s*(\"(?:[^\"]|\\\\\")+\"|[A-Za-z0-9_.-]+)\\s*\\{.*", Pattern.DOTALL);
 
 	public GraphvizTemplates nested(String name) {
-		return new GraphvizTemplates(this, name);
+		return new GraphvizTemplates(this, name, graphvizHasIssue144);
 	}
 	
 	/**
@@ -267,7 +270,7 @@ public class GraphvizTemplates {
 					if (classNodes.containsKey(end1Type.getQualifiedName())
 							&& classNodes.containsKey(end2Type.getQualifiedName())
 							&& !associationNodes.containsKey(elementDef.getQualifiedName())) {
-						GraphvizEdge associationNode = new GraphvizEdge(styleSheet, sink);
+						GraphvizEdge associationNode = new GraphvizEdge(styleSheet, sink, graphvizHasIssue144);
 						associationNode.setId(elementDef.getQualifiedName());
 						associationNode.setAssociationDef(elementDef);
 						associationEdges.append("\n\t").append(associationNode);
@@ -285,7 +288,7 @@ public class GraphvizTemplates {
 							ModelElement_1_0 fieldDefType = fieldDef.getDereferencedType();
 							if (fieldDefType.isStructureType()
 									&& classNodes.containsKey(fieldDefType.getQualifiedName())) {
-								GraphvizEdge fieldNode = new GraphvizEdge(styleSheet, sink);
+								GraphvizEdge fieldNode = new GraphvizEdge(styleSheet, sink, graphvizHasIssue144);
 								fieldNode.setId(fieldDef.getQualifiedName());
 								fieldNode.setFieldDef(fieldDef);
 								fieldNode.getParameters().setStrictValue("minlen", "3");
@@ -307,7 +310,7 @@ public class GraphvizTemplates {
 		for (int startPos = dot.indexOf("${ASSOCIATION["); startPos >= 0; ) {
 			final int endPos = dot.indexOf("]}", startPos);
 			if (endPos > startPos) {
-				final GraphvizEdge associationNode = new GraphvizEdge(styleSheet, sink);
+				final GraphvizEdge associationNode = new GraphvizEdge(styleSheet, sink, graphvizHasIssue144);
 				final GraphvizAttributes parameters = associationNode.getParameters();
 				parameters.parseParameters(dot.subSequence(startPos + "${ASSOCIATION[".length(), endPos));
 				final String qualifiedName = parameters.getValue("name");

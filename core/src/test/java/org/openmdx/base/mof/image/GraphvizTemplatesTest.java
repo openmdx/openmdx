@@ -58,7 +58,7 @@ class GraphvizTemplatesTest {
 	void when_escaped_then_title(){
 		// Arrange
 		final String dot = "digraph \"Hello \\\"World\\\"\" {\n…";
-		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null);
+		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null, false);
 		// Act
 		final Optional<String> title = testee.getTitle(dot);
 		// Assert
@@ -70,7 +70,7 @@ class GraphvizTemplatesTest {
 	void when_quoted_then_title(){
 		// Arrange
 		final String dot = "digraph \"Hello World\" {\n…";
-		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null);
+		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null, false);
 		// Act
 		final Optional<String> title = testee.getTitle(dot);
 		// Assert
@@ -82,7 +82,7 @@ class GraphvizTemplatesTest {
 	void when_missing_then_noTitle(){
 		// Arrange
 		final String dot = "digraph {\n…";
-		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null);
+		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null, false);
 		// Act
 		final Optional<String> title = testee.getTitle(dot);
 		// Assert
@@ -93,7 +93,7 @@ class GraphvizTemplatesTest {
 	void when_name_then_title(){
 		// Arrange
 		final String dot = "digraph Hello_World_0 {\n…";
-		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null);
+		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null, false);
 		// Act
 		final Optional<String> title = testee.getTitle(dot);
 		// Assert
@@ -105,7 +105,7 @@ class GraphvizTemplatesTest {
 	void when_html_then_title(){
 		// Arrange
 		final String dot = "digraph <Hello\n<b>World</b>> {\n…";
-		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null);
+		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null, false);
 		// Act
 		final Optional<String> title = testee.getTitle(dot);
 		// Assert
@@ -117,7 +117,7 @@ class GraphvizTemplatesTest {
 	void when_numeral_then_title(){
 		// Arrange
 		final String dot = "digraph -.9 {\n…";
-		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null);
+		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null, false);
 		// Act
 		final Optional<String> title = testee.getTitle(dot);
 		// Assert
@@ -129,7 +129,7 @@ class GraphvizTemplatesTest {
 	void when_graphComment_the_ignored() {
 		// Arrange
 		final String dot = "/* digraph \"Hello Moon\" {\n} */\n// digraph HelloSunshine {}\ngraph \"Hello World\" {\n…";
-		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null);
+		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null, false);
 		// Act
 		final Optional<String> title = testee.getTitle(dot);
 		// Assert
@@ -141,7 +141,7 @@ class GraphvizTemplatesTest {
 	void when_digraphComment_the_ignored() {
 		// Arrange
 		final String dot = "/* digraph \"Hello Moon\" {\n} */\n// digraph HelloSunshine {}\ndigraph \"Hello World\"{\n…";
-		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null);
+		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null, false);
 		// Act
 		final Optional<String> title = testee.getTitle(dot);
 		// Assert
@@ -153,7 +153,7 @@ class GraphvizTemplatesTest {
 	void whenExample_then_title() {
 		// Arrange
 		final String dot = "digraph \"Diagram Main [Package org::openmdx::base]\" {\n…";
-		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null);
+		final GraphvizTemplates testee = new GraphvizTemplates(null, null, null, false);
 		// Act
 		final Optional<String> title = testee.getTitle(dot);
 		// Assert
