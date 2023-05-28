@@ -947,9 +947,7 @@ public class InboundConnection_2 extends AbstractConnection {
             throws ResourceException {
             try {
                 return super.execute(ispec, input, output);
-            } catch (JDOException exception) {
-                throw ResourceExceptions.toResourceException(exception);
-            } catch (JmiException exception) {
+            } catch (JDOException|JmiException exception) {
                 throw ResourceExceptions.toResourceException(exception);
             }
         }

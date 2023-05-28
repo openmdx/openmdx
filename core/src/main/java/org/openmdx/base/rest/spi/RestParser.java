@@ -271,7 +271,6 @@ public class RestParser {
      * 
      * @throws ServiceException
      */
-    @SuppressWarnings("unused")
     public static void parseResponse(
         Record target, 
         RestSource source
@@ -280,25 +279,9 @@ public class RestParser {
             StandardHandler handler = new StandardHandler(target, source);
             XMLReader reader = RestParser.getReader(source);
             reader.setContentHandler(handler);
-            if(false) {
-                InputStream is = source.getBody().getByteStream();
-                if(is != null) {
-                    int c;
-                    StringBuilder s = new StringBuilder();
-                    while((c = is.read()) != -1) {
-                        s.append((char)c);
-                    }
-                    System.out.println(s);
-                    source.getBody().setCharacterStream(new StringReader(s.toString()));
-                }
-            }
             reader.parse(source.getBody());
             source.close();
-        } catch (IOException exception) {
-            throw new SAXException(exception);
-        } catch (SAXException exception) {
-            throw new SAXException(exception);
-        } catch (RuntimeServiceException exception) {
+        } catch (IOException|SAXException|RuntimeServiceException exception) {
             throw new SAXException(exception);
         }
     }
@@ -323,9 +306,7 @@ public class RestParser {
             reader.parse(source.getBody());
             source.close();
             return handler.getValue();
-        } catch (IOException exception) {
-            throw new SAXException(exception);
-        } catch (RuntimeException exception) {
+        } catch (IOException|RuntimeException exception) {
             throw new SAXException(exception);
         }
     }
@@ -687,10 +668,11 @@ public class RestParser {
             super.startElement(uri, localName, qName, attributes);
             boolean nestedStructFieldStart = false;
             try {
-                String typeName = null;
-                ModelElement_1_0 featureDef = null;
+                final String typeName ;
+                final ModelElement_1_0 featureDef;
                 if(qName.indexOf('.') > 0) {
                     typeName = qName.replace('.', ':');
+                    featureDef = null;
                 } else if(!ITEM_TAG.equals(qName) && qName.indexOf('.') < 0 && !this.values.isEmpty()) {
                     final String recordName = this.values.peek().getRecordName();
                     featureDef = getFeatureDef(
@@ -698,6 +680,9 @@ public class RestParser {
                         localName
                     );
                     typeName = getFeatureType(featureDef);
+                } else {
+                	featureDef = null;
+                	typeName = null;
                 }
                 if ("org.openmdx.kernel.ResultSet".equals(qName)) {
                     if (this.target instanceof ResultRecord) {
@@ -711,6 +696,8 @@ public class RestParser {
                             target.setTotal(Long.parseLong(total));
                         }
                     }
+                } else if("org:openmdx:kernel:Query".equals(typeName) && this.target instanceof QueryRecord) {
+                    this.values.push(this.target);
                 } else if(qName.indexOf('.') > 0) {
                     // Begin object or struct
                     MappedRecord mappedRecord = this.newMappedRecord(typeName);

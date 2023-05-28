@@ -45,10 +45,20 @@
 
 package org.openmdx.base.rest.spi;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.NotSerializableException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
 import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
+import org.xml.sax.SAXException;
 
 
 /**
@@ -56,7 +66,7 @@ import org.openmdx.base.naming.Path;
  */
 public class MessageRecord 
     extends AbstractMappedRecord<org.openmdx.base.rest.cci.MessageRecord.Member>
-    implements org.openmdx.base.rest.cci.MessageRecord 
+    implements org.openmdx.base.rest.cci.MessageRecord, Externalizable 
 {
     
     /**
@@ -82,6 +92,11 @@ public class MessageRecord
      */
     private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
 
+    /**
+     * The eagerly acquired REST formatter instance
+     */
+    protected static final RestFormatter REST_FORMATTER = RestFormatters.getFormatter();
+    
     /**
      * Implements {@code Serializable}
      */
@@ -260,5 +275,52 @@ public class MessageRecord
 	protected Members<Member> members() {
 		return MEMBERS;
 	}
+
+    //--------------------------------------------------------------------------
+    // Implements Externalizable
+    //--------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
+     */
+    @Override
+    public void readExternal(
+        ObjectInput in
+    ) throws IOException, ClassNotFoundException {
+        try {
+            RestParser.parseResponse(
+                this, 
+                RestParser.asSource(in)
+            );
+        } catch (SAXException exception) {
+        	throw Throwables.initCause(
+        		new InvalidObjectException(exception.getMessage()),
+        		exception,
+        		BasicException.Code.DEFAULT_DOMAIN,
+        		BasicException.Code.TRANSFORMATION_FAILURE,
+        		"Unable to read externalized ResultRecord"
+            );
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
+     */
+    @Override
+    public void writeExternal(
+        ObjectOutput out
+    ) throws IOException {
+        try (Target target = REST_FORMATTER.asTarget(out)){
+        	REST_FORMATTER.format(target, null, this);
+        } catch (Exception exception) {
+			throw Throwables.initCause(
+        		new NotSerializableException(exception.getMessage()),
+        		exception,
+        		BasicException.Code.DEFAULT_DOMAIN,
+        		BasicException.Code.TRANSFORMATION_FAILURE,
+        		"Unable to externalize ResultRecord"
+            );
+        }
+    }
 
 }
