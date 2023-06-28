@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Properties Factory
+ * Description: Properties Provider
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -50,8 +50,6 @@ import java.net.URL;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Iterator;
 import java.util.ListIterator;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,49 +63,31 @@ import org.w3c.cci2.SparseArray;
 /**
  * The properties provider loads and merges properties
  */
-public class PropertiesProvider {
+public class PropertiesProvider extends Properties {
     
-    /**
-     * Constructor 
-     */
-    private PropertiesProvider(){
-    	// Avoid instantiation
+	/**
+	 * Constructor
+	 */
+    private PropertiesProvider(
+    ){
+    	super();
     }
 
     /**
-     * 
+     * Includes are applied in the given order
      */
     private static final Pattern INCLUDES = Pattern.compile("^include\\[([0-9]+)\\]?$");
 
     /**
-     * 
+     * The name of the URI property used to retrieve the default properties
      */
     private static final String DEFAULTS = "defaults";
-
-    /**
-     * Select the &lt;String,String&gt; entries
-     * 
-     * @param source a Map
-     * 
-     * @return corresponding properties
-     * 
-     * @deprecated without replacement
-     */
-    @Deprecated
-    public static Properties toProperties(
-        Map<?,?> source
-    ){
-        Properties target = new Properties();
-        for(Map.Entry<?,?> entry : source.entrySet()) {
-            Object key = entry.getKey();
-            Object value = entry.getValue();
-            if(key instanceof String && value instanceof String) {
-                target.setProperty((String)key, (String)value);
-            }
-        }
-        return target;
-    }
-    
+	
+	/**
+	 * Implements {@code Serializable}
+	 */
+	private static final long serialVersionUID = 8070630882717670165L;
+	
     /**
      * Retrieve the properties by resolving the URI. All matching resources
      * are taken into account in case of a resource XRI. 
@@ -121,104 +101,131 @@ public class PropertiesProvider {
     public static Properties getProperties(
         String uri
     ) throws IOException {
-        Properties target = null;
-    	for(Iterator<URL> i = Resources.findResolvedURLs(uri).iterator(); i.hasNext();) {
-    		final Properties current = getProperties(i.next());
-    		if(target == null) {
-    			if(i.hasNext()) {
-    				target = new Properties();
-    			} else {
-    				return current;
-    			}
-    		}
-            include(target, current);
-    	}
-    	return target == null ? new Properties() : target;
-    }
-
-    /**
-     * Include the source into the target
-     * 
-     * @param target
-     * @param source
-     * 
-     * @throws IOException in case of conflicting values
-     */
-    private static void include(
-        Properties target,
-        Properties source
-    ) throws IOException{
-        for(Map.Entry<?, ?> e : source.entrySet()) {
-            Object name = e.getKey();
-            if(target.containsKey(name)) {
-                Object oldValue = target.get(name);
-                Object newValue = e.getValue();
-                if(oldValue == null ? newValue != null : !oldValue.equals(newValue)) {
-                    throw Throwables.initCause(
-                    	new InvalidPropertiesFormatException("Conflicting property settings"), 
-                    	null, 
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.INVALID_CONFIGURATION,
-                        "Conflicting property settings",
-                        new BasicException.Parameter("name", name),
-                        new BasicException.Parameter("oldValue", oldValue),
-                        new BasicException.Parameter("newValue", newValue)
-                    );
-                }
-            } else {
-                target.put(e.getKey(), e.getValue());
-            }
-        }
+    	return mergeFromURI(uri);
     }
     
     /**
-     * Retrieve the properties by resolving defaults and include entries. 
+     * Creates an instance by resolving defaults and including entries. 
      * 
-     * @param url
+     * @param url the URL of the properties file
      * 
      * @return the properties retrieved for the given URL
      * 
      * @throws IOException in case of access failure or a configuration conflict
      */
-    private static Properties getProperties(
-        URL url
-    ) throws IOException {
-        Properties properties = new Properties();
+	private static PropertiesProvider loadFromURL(URL url) throws IOException {
+		final PropertiesProvider instance = new PropertiesProvider();
         try (InputStream source = url.openStream()){
-            properties.load(source);
+        	instance.load(source);
+        	instance.applyDefaults();
+        	instance.applyIncludes();
         }
-        String defaultsURI = (String) properties.remove(DEFAULTS);
-        if(defaultsURI != null) {
-            Properties combined = new Properties(getProperties(defaultsURI));
-            combined.putAll(properties);
-            properties = combined;
-        }
-        SparseArray<String> includes = new TreeSparseArray<String>();
-        for(
-            Iterator<Entry<Object, Object>> i  = properties.entrySet().iterator();
-            i.hasNext();
-        ) {
-            Map.Entry<?, ?> e = i.next();
-            Object key = e.getKey();
-            Object value = e.getValue();
-            if(e.getKey() instanceof String && value instanceof String){
-                Matcher matcher = INCLUDES.matcher((String)key); 
-                if(matcher.matches()) {
-                    includes.put(
-                        Integer.valueOf(matcher.group(1)), 
-                        ((String)value).trim()
-                    );
-                    i.remove();
-                }
-            }
-        }
-        for(
-            ListIterator<String> i = includes.populationIterator();
-            i.hasNext();
-        ){
-            include(properties, getProperties(i.next()));
-        }
-        return properties;
-    }
+		return instance;
+	}
 
+    /**
+     * Creates an instance by resolving all URLs for the given URI 
+     * 
+     * @param uri the URI of the properties files
+     * 
+     * @return the properties retrieved for the given URI
+     * 
+     * @throws IOException in case of access failure or a configuration conflict
+     */
+	private static PropertiesProvider mergeFromURI(String uri) throws IOException {
+		final Iterator<URL> i = Resources.findResolvedURLs(uri).iterator();
+		if(i.hasNext()) {
+			final PropertiesProvider result = PropertiesProvider.loadFromURL(i.next());
+			while(i.hasNext()) {
+				result.merge(PropertiesProvider.loadFromURL(i.next()));
+			}
+	    	return result;
+		} else {
+			return new PropertiesProvider();
+		}
+	}
+	
+	private PropertiesProvider getDefaults() {
+		return (PropertiesProvider) this.defaults;
+	}
+	
+	private void setDefaults(PropertiesProvider defaults) {
+		this.defaults = defaults;
+	}
+	
+	private boolean hasDefaults() {
+		return this.defaults != null;
+	}
+	
+	private PropertiesProvider removeDefaults() {
+		PropertiesProvider defaults = getDefaults();
+		this.defaults = null;
+		return defaults;
+	}
+	
+	private void applyDefaults() throws IOException {
+		final String defaultsURI = (String) remove(DEFAULTS);
+        if(defaultsURI != null) {
+        	setDefaults(mergeFromURI(defaultsURI));
+        }
+	}
+	
+	private void applyIncludes() throws IOException{
+        final SparseArray<String> includes = new TreeSparseArray<String>();
+    	for(String name : stringPropertyNames()) {
+            final Matcher matcher = INCLUDES.matcher(name); 
+            if(matcher.matches()) {
+            	String uri = (String) remove(name);
+                includes.put(
+                    Integer.valueOf(matcher.group(1)), 
+                    uri.trim()
+                );
+    		}
+        }
+    	for(ListIterator<String> i = includes.populationIterator(); i.hasNext();) {
+    		merge(mergeFromURI(i.next()));
+    	}
+	}
+	
+	private void merge(PropertiesProvider that) throws IOException {
+		final PropertiesProvider defaults = chainDefaults(this.removeDefaults(), that.removeDefaults());
+    	propagateValues(that);
+    	setDefaults(defaults);
+	}
+
+	private void propagateValues(PropertiesProvider that) throws InvalidPropertiesFormatException {
+		for(String name : that.stringPropertyNames()) {
+    		final String newValue = that.getProperty(name);
+    		final Object oldValue = this.setProperty(name, newValue);
+    		if(oldValue != null && !oldValue.equals(newValue)) {
+                throw Throwables.initCause(
+                	new InvalidPropertiesFormatException("Conflicting property settings"), 
+                	null, 
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION,
+                    "Conflicting property settings",
+                    new BasicException.Parameter("name", name),
+                    new BasicException.Parameter("oldValue", oldValue),
+                    new BasicException.Parameter("newValue", newValue)
+                );
+            }
+    	}
+	}
+	
+	private static PropertiesProvider chainDefaults(PropertiesProvider primary, PropertiesProvider secondary) {
+		final PropertiesProvider chain;
+		if(primary == null) {
+			chain = secondary;
+		} else if (secondary == null){
+			chain = primary;
+		} else {
+			PropertiesProvider current = chain = primary;;
+			while(current.hasDefaults()) {
+				current = current.getDefaults();
+			}
+			current.setDefaults(secondary);
+		}
+        return chain;
+	}
+		
 }
