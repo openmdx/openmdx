@@ -60,8 +60,8 @@ repositories {
         url = uri("https://datura.econoffice.ch/maven2")
     }
     flatDir {
-        dirs("~/Repository/flat")
-    }    
+		dirs(System.getProperty("user.home") + "/Repository/flat")
+	}
 }
 
 var env = Properties()
@@ -179,7 +179,8 @@ dependencies {
     testImplementation("org.mockito:mockito-core:4.2.0")    
     testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
     // openmdxBase
-    openmdxBase("org.openmdx:openmdx-base:2.18.3") 
+//    openmdxBase("org.openmdx:openmdx-base:2.18.3")
+    openmdxBase("org.openmdx:openmdx-base:2.18.5-dev")
     // openmdxBootstrap
     openmdxBootstrap(files(File(project.getBuildDir(), "generated/classes/openmdxBootstrap")))
     openmdxBootstrap("javax:javaee-api:8.0.+")

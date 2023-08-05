@@ -44,9 +44,14 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc.text;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
@@ -58,13 +63,16 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.spi.PIMDocFileType;
 
 /**
  * index.html Mapper 
  */
 public class IndexMapper extends HTMLMapper {
 
-    /**
+	private final SortedMap<String, Map<String, String>> diagramIndexData = new TreeMap<>();
+
+	/**
      * Constructor 
      */
     public IndexMapper(
@@ -74,8 +82,15 @@ public class IndexMapper extends HTMLMapper {
         PIMDocConfiguration configuration
     ){
 		super(sink, model, MagicFile.TABLE_OF_CONTENT, markdown, configuration);
-    }    
-    
+		loadDiagramIndexData();
+    }
+
+	private void loadDiagramIndexData() {
+		this.streamElements()
+				.filter(ModelElement_1_0::isPackageType)
+				.forEach(this::putIntoMapSingleDiagramData);
+	}
+
 	@Override
 	protected void htmlBody() {
 		printLine("<body class=\"page\">");
@@ -120,20 +135,87 @@ public class IndexMapper extends HTMLMapper {
 		getPackageGroups().entrySet().forEach(this::packageCluster);
 	}
 
+	private void putIntoMapSingleDiagramData(ModelElement_1_0 element) {
+		final URI directory;
+		try {
+			directory = new URI("/" + element.getModel().toJavaPackageName(element, null).replace('.', '/') + '/');
+			for (final Map.Entry<URI, String> e : sink.getTableOfContent().entrySet()) {
+				if (e.getKey().getPath().contains(directory.getPath())) {
+					final String p = e.getKey().getPath().substring(1);
+					if (PIMDocFileType.GRAPHVIZ_SOURCE.test(p) && p.indexOf('/') > -1) {
+						final String qualifiedName = element.getQualifiedName();
+						Map<String, String> diagramDataMap = diagramIndexData.get(qualifiedName);
+						if (diagramDataMap != null && !diagramDataMap.isEmpty()) {
+							diagramDataMap.put(p, e.getValue());
+						} else {
+							diagramDataMap = new HashMap<>();
+							diagramDataMap.put(p, e.getValue());
+							diagramIndexData.put(qualifiedName, diagramDataMap);
+						}
+					}
+				}
+			}
+		} catch (URISyntaxException | ServiceException exception) {
+			throw new RuntimeServiceException(exception);
+		}
+	}
+
 	private void packageCluster(Map.Entry<String,SortedSet<String>> entry) {
+
 		printLine("\t\t\t\t\t<details class=\"uml-package-cluster\">");
 		packageGroupSummary(entry.getKey());
-		packageGroupDetails(entry.getValue());
+
+		// classes
+		printLine("\t\t\t\t\t\t<details class=\"uml-package-cluster class-section\">");
+		printLine("\t\t\t\t\t\t\t<summary>Classes</summary>");
+		printLine("\t\t\t\t\t\t\t<div>");
+		packageGroupClassDetails(entry.getValue());
+		printLine("\t\t\t\t\t\t\t</div>");
+		printLine("\t\t\t\t\t\t</details>");
+
+		// diagrams
+		printLine("\t\t\t\t\t\t<details class=\"uml-package-cluster diagram-section\">");
+		printLine("\t\t\t\t\t\t\t<summary>Diagrams</summary>");
+		printLine("\t\t\t\t\t\t\t<div>");
+		packageGroupDiagramDetails(entry.getKey());
+		printLine("\t\t\t\t\t\t\t</div>");
+		printLine("\t\t\t\t\t\t</details>");
+
 		printLine("\t\t\t\t\t</details>");
 	}
 
-	private void packageGroupDetails(final SortedSet<String> classes) {
+	private void packageGroupDiagramDetails(final String packageClusterKey) {
+		this.diagramIndexData.entrySet()
+				.stream()
+				.filter(e -> e.getKey().equals(packageClusterKey))
+				.forEach(this::mapPackageDiagrams);
+	}
+
+	private void mapPackageDiagrams(Map.Entry<String, Map<String, String>> diagramsIndexDataMap) {
+		diagramsIndexDataMap.getValue().forEach(this::outputSingleDiagramHtml);
+	}
+
+	private void outputSingleDiagramHtml(String sourcePath, String diagramData) {
+		final String textName = PIMDocFileType.TEXT.from(sourcePath, PIMDocFileType.GRAPHVIZ_SOURCE);
+		printLine("\t\t\t\t\t\t\t\t<div>");
+		printLine("\t\t\t\t\t\t\t\t\t<a href=\"",
+				textName,
+				"\" target=\"",
+				HTMLMapper.FRAME_NAME,
+				"\">"
+		);
+		printLine(diagramData);
+		printLine("\t\t\t\t\t\t\t\t\t</a>");
+		printLine("\t\t\t\t\t\t\t\t</div>");
+	}
+
+	private void packageGroupClassDetails(final SortedSet<String> classes) {
 		classes.forEach(this::mapPackageMemberName);
 	}
 	
 	private void mapPackageMemberName(String qualifiedName) {
 		try {
-			printLine("\t\t\t\t\t\t<p>");
+			printLine("\t\t\t\t\t\t\t\t<div>");
 			final ModelElement_1_0 contained = this.model.getElement(qualifiedName);
 			printLine(
 				"\t\t\t\t\t\t\t<a href=\"",
@@ -146,7 +228,7 @@ public class IndexMapper extends HTMLMapper {
 				contained.getName(),
 				"</a>"
 			);
-			printLine("\t\t\t\t\t\t</p>");
+			printLine("\t\t\t\t\t\t\t\t</div>");
 		} catch (ServiceException e) {
 			throw new RuntimeServiceException(e);
 		}
@@ -250,7 +332,7 @@ public class IndexMapper extends HTMLMapper {
 		);
 		printLine("\t\t</div>");
 	}
-    
+
     private PackageGroupBuilder getPackageGroups(
     ){
     	final PackageGroupBuilder navigationCompartment = new PackageGroupBuilder();

@@ -71,6 +71,14 @@
 .navigation-column {
 	width: 25%;
 }
+
+.class-section, .diagram-section {
+	margin-left: 1em;
+}
+.class-section > div, .diagram-section > div {
+	margin-left: 1em;
+}
+
 .frame-column {
 	width: 75%;
     position: relative;
