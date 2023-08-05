@@ -79,7 +79,7 @@ public enum PIMDocFileType implements Predicate<String> {
 	}
 
 	/**
-	 * The extension (indluding the leading dot).
+	 * The extension (including the leading dot).
 	 */
 	private final String extension;
 	

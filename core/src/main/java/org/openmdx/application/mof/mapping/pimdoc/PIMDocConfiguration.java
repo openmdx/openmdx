@@ -74,7 +74,7 @@ public class PIMDocConfiguration {
 	/**
 	 * Constructor
 	 * 
-	 * @param configurationDir the (maybe {@code null}) PIMDoc configuration base directory
+	 * @param baseDir the (maybe {@code null}) PIMDoc configuration base directory
 	 * 
 	 * @throws ServiceException if the configuration can't be loaded from the specified property file
 	 */

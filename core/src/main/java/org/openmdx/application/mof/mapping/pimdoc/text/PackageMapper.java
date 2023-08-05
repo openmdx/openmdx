@@ -82,7 +82,7 @@ public class PackageMapper extends ElementMapper {
 	private final CompartmentMapper albumMapper;
     
 	@Override
-	protected  void columnBody() {
+	protected void columnBody() {
 		printLine("\t<div class=\"column-body\">");
 		mapAnnotation("\t\t", element);
 		classesMapper.compartment(true);
@@ -102,7 +102,7 @@ public class PackageMapper extends ElementMapper {
 		}
 		return album;
 	}
-	
+
 	private URI getPackage() {
 		try {
 			return new URI('/' + element.getModel().toJavaPackageName(element, null).replace('.', '/') + '/');
