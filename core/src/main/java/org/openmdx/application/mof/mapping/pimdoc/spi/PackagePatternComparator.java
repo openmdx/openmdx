@@ -52,7 +52,7 @@ import java.util.Comparator;
 public class PackagePatternComparator implements Comparator<String> {
 
 	/**
-	 * The wildard (asterisks) is allowed as last segment of the package name only!
+	 * The wildcard (asterisks) is allowed as last segment of the package name only!
 	 */
 	private static final String WILDCARD = "**";
 	private static final String A_LATE_ASCII_CHARACTER = "~";

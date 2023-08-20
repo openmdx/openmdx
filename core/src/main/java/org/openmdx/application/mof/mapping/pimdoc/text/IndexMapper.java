@@ -47,11 +47,11 @@ package org.openmdx.application.mof.mapping.pimdoc.text;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
@@ -66,302 +66,279 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.PIMDocFileType;
 
 /**
- * index.html Mapper 
+ * index.html Mapper
  */
 public class IndexMapper extends HTMLMapper {
 
-	private final SortedMap<String, Map<String, String>> diagramIndexData = new TreeMap<>();
+    private final SortedMap<String, String> catchAllPkgDiagramIndexData = new TreeMap<>();
+    private final SortedMap<String, SortedMap<String, String>> wildcardPkgDiagramIndexData = new TreeMap<>();
+    private final SortedMap<String, SortedMap<String, String>> standardPkgDiagramIndexData = new TreeMap<>();
 
-	/**
-     * Constructor 
+    /**
+     * Constructor
      */
-    public IndexMapper(
-    	Sink sink, 
-        Model_1_0 model,
-        boolean markdown, 
-        PIMDocConfiguration configuration
-    ){
-		super(sink, model, MagicFile.TABLE_OF_CONTENT, markdown, configuration);
-		loadDiagramIndexData();
+    public IndexMapper(Sink sink, Model_1_0 model, boolean markdown, PIMDocConfiguration configuration) {
+        super(sink, model, MagicFile.TABLE_OF_CONTENT, markdown, configuration);
+        loadDiagramIndexData();
     }
 
-	private void loadDiagramIndexData() {
-		this.streamElements()
-				.filter(ModelElement_1_0::isPackageType)
-				.forEach(this::putIntoMapSingleDiagramData);
-	}
-
-	@Override
-	protected void htmlBody() {
-		printLine("<body class=\"page\">");
-		pageHead(getTitle());
-		pageBody();
-		printLine("</body>");
-   }
-
-	private void pageBody() {
-		printLine("\t<div class=\"page-section page-body\">");
-		navigationColumn();
-		frameColumn();
-		printLine("\t</div>");
-	}
-
-	private void navigationColumn() {
-		printLine("\t\t<div class=\"page-column navigation-column\">");
-		columnHead();
-		columnBody();
-		printLine("\t\t</div>");
-	}
-
-
-	private void columnBody() {
-		printLine("\t\t\t<div class=\"column-body\">");
-		navigationCompartment();
-		printLine("\t\t\t</div>");
-	}
-	
-	private void navigationCompartment() {
-		printLine("\t\t\t\t<details open>");
-		navigationSummary();
-		navigationDetails();
-		printLine("\t\t\t\t</details>");
-	}
-
-	private void navigationSummary() {
-		printLine("\t\t\t\t\t<summary class=\"navigation-summary\">Package Groups</summary>");
-	}
-
-	private void navigationDetails() {
-		getPackageGroups().entrySet().forEach(this::packageCluster);
-	}
-
-	private void putIntoMapSingleDiagramData(ModelElement_1_0 element) {
-		final URI directory;
-		try {
-			directory = new URI("/" + element.getModel().toJavaPackageName(element, null).replace('.', '/') + '/');
-			for (final Map.Entry<URI, String> e : sink.getTableOfContent().entrySet()) {
-				if (e.getKey().getPath().contains(directory.getPath())) {
-					final String p = e.getKey().getPath().substring(1);
-					if (PIMDocFileType.GRAPHVIZ_SOURCE.test(p) && p.indexOf('/') > -1) {
-						final String qualifiedName = element.getQualifiedName();
-						Map<String, String> diagramDataMap = diagramIndexData.get(qualifiedName);
-						if (diagramDataMap != null && !diagramDataMap.isEmpty()) {
-							diagramDataMap.put(p, e.getValue());
-						} else {
-							diagramDataMap = new HashMap<>();
-							diagramDataMap.put(p, e.getValue());
-							diagramIndexData.put(qualifiedName, diagramDataMap);
-						}
-					}
-				}
-			}
-		} catch (URISyntaxException | ServiceException exception) {
-			throw new RuntimeServiceException(exception);
-		}
-	}
-
-	private void packageCluster(Map.Entry<String,SortedSet<String>> entry) {
-
-		printLine("\t\t\t\t\t<details class=\"uml-package-cluster\">");
-		packageGroupSummary(entry.getKey());
-
-		// classes
-		printLine("\t\t\t\t\t\t<details class=\"uml-package-cluster class-section\">");
-		printLine("\t\t\t\t\t\t\t<summary>Classes</summary>");
-		printLine("\t\t\t\t\t\t\t<div>");
-		packageGroupClassDetails(entry.getValue());
-		printLine("\t\t\t\t\t\t\t</div>");
-		printLine("\t\t\t\t\t\t</details>");
-
-		// diagrams
-		printLine("\t\t\t\t\t\t<details class=\"uml-package-cluster diagram-section\">");
-		printLine("\t\t\t\t\t\t\t<summary>Diagrams</summary>");
-		printLine("\t\t\t\t\t\t\t<div>");
-		packageGroupDiagramDetails(entry.getKey());
-		printLine("\t\t\t\t\t\t\t</div>");
-		printLine("\t\t\t\t\t\t</details>");
-
-		printLine("\t\t\t\t\t</details>");
-	}
-
-	private void packageGroupDiagramDetails(final String packageClusterKey) {
-		this.diagramIndexData.entrySet()
-				.stream()
-				.filter(e -> e.getKey().equals(packageClusterKey))
-				.forEach(this::mapPackageDiagrams);
-	}
-
-	private void mapPackageDiagrams(Map.Entry<String, Map<String, String>> diagramsIndexDataMap) {
-		diagramsIndexDataMap.getValue().forEach(this::outputSingleDiagramHtml);
-	}
-
-	private void outputSingleDiagramHtml(String sourcePath, String diagramData) {
-		final String textName = PIMDocFileType.TEXT.from(sourcePath, PIMDocFileType.GRAPHVIZ_SOURCE);
-		printLine("\t\t\t\t\t\t\t\t<div>");
-		printLine("\t\t\t\t\t\t\t\t\t<a href=\"",
-				textName,
-				"\" target=\"",
-				HTMLMapper.FRAME_NAME,
-				"\">"
-		);
-		printLine(diagramData);
-		printLine("\t\t\t\t\t\t\t\t\t</a>");
-		printLine("\t\t\t\t\t\t\t\t</div>");
-	}
-
-	private void packageGroupClassDetails(final SortedSet<String> classes) {
-		classes.forEach(this::mapPackageMemberName);
-	}
-	
-	private void mapPackageMemberName(String qualifiedName) {
-		try {
-			printLine("\t\t\t\t\t\t\t\t<div>");
-			final ModelElement_1_0 contained = this.model.getElement(qualifiedName);
-			printLine(
-				"\t\t\t\t\t\t\t<a href=\"",
-				getHref(contained),
-				"\" title=\"",
-				getDisplayName(contained),
-				"\" target=\"",
-				HTMLMapper.FRAME_NAME,
-				"\">",
-				contained.getName(),
-				"</a>"
-			);
-			printLine("\t\t\t\t\t\t\t\t</div>");
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
-	}
-	
-	private void packageGroupSummary(String packagePattern) {
-		printLine("\t\t\t\t\t\t<summary>");
-		if(PackagePatternComparator.isWildcardPattern(packagePattern)) {
-			mapPackageGroupLink(packagePattern);
-		} else {
-			mapPackageLink(packagePattern);
-		}
-		printLine("\t\t\t\t\t\t</summary>");
-	}
-
-	private void mapPackageGroupLink(String packagePattern) {
-    	final String namespace = PackagePatternComparator.removeWildcard(packagePattern);
-		printLine(
-			"\t\t\t\t\t\t\t<a href=\"",
-			getBaseURL(),
-			NamespaceLocation.getLocation(namespace), 
-			MagicFile.PACKAGE_CLUSTER.getFileName(MagicFile.Type.TEXT),
-			"\" target=\"",
-			HTMLMapper.FRAME_NAME,
-			"\">",
-			packagePattern.replace(":", "::"),
-			"</a>"
-		);
-	}
-
-	private void mapPackageLink(String qualifiedName) {
-		try {
-			final ModelElement_1_0 packageElement = this.model.getElement(qualifiedName);
-			printLine(
-				"\t\t\t\t\t\t\t<a href=\"",
-				getHref(packageElement),
-				"\" target=\"",
-				HTMLMapper.FRAME_NAME,
-				"\">",
-				getDisplayName(packageElement),
-				"</a>"
-			);
-			printLine(
-				"\t\t\t\t\t\t\t<a href=\"",
-				getHref(packageElement),
-				"#",
-				AlbumMapper.COMPARTMENT_ID,
-				"\" target=\"",
-				HTMLMapper.FRAME_NAME,
-				"\">"
-			);
-			printLine(
-				"\t\t\t\t\t\t\t\t<img alt=\"UML\" class=\"uml-symbol\" src=\"",
-				MagicFile.UML_SYMBOL.getFileName(MagicFile.Type.IMAGE),
-				"\"/>"
-			);
-			printLine(
-				"\t\t\t\t\t\t\t</a>"
-			);
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
-	}
-
-	private void columnHead() {
-		printLine("\t\t\t<div class=\"column-head\">");
-		printLine("\t\t\t\t<h2>Index</h2>");
-		printLine("\t\t\t</div>");
-	}
-
-	private void pageHead(final String title) {
-		printLine("\t<div class=\"page-section page-head\">");
-		printLine("\t\t<div class=\"page-column\">");
-		printLine(
-			"\t\t\t<a href=\"", 
-			configuration.getTargetName(MagicFile.WELCOME_PAGE, MagicFile.Type.TEXT), 
-			"\" target=\"",
-			HTMLMapper.FRAME_NAME,
-			"\">"
-		);
-		printLine("\t\t\t\t<img src=\"", configuration.getTargetName(MagicFile.WELCOME_PAGE, MagicFile.Type.IMAGE), "\"/>");
-		printLine("\t\t\t</a>");
-		printLine("\t\t</div>");
-		printLine("\t\t<div class=\"page-column\">");
-		printLine("\t\t\t<h1>", title, "</h1>");
-		printLine("\t\t</div>");
-		printLine("\t</div>");
-	}
-
-   /**
-    * Produces the detail column frame
-    */
-	private void frameColumn() {
-		printLine("\t\t<div class=\"page-column frame-column\">");
-		printLine(
-			"\t\t\t<iframe name=\"", 
-			HTMLMapper.FRAME_NAME, 
-			"\" src=\"", 
-			configuration.getTargetName(MagicFile.WELCOME_PAGE, MagicFile.Type.TEXT), 
-			"\"/>"
-		);
-		printLine("\t\t</div>");
-	}
-
-    private PackageGroupBuilder getPackageGroups(
-    ){
-    	final PackageGroupBuilder navigationCompartment = new PackageGroupBuilder();
-    	final Collection<String> tableOfContentEntries = configuration.getTableOfContentEntries();
-    	if(tableOfContentEntries.isEmpty()) {
-    		streamElements()
-    			.filter(ModelElement_1_0::isPackageType)
-    			.map(ModelElement_1_0::getQualifiedName)
-    			.forEach(navigationCompartment::addKey);
-    		navigationCompartment.addKey(PackagePatternComparator.getCatchAllPattern());
-    	} else {
-    		tableOfContentEntries.forEach(navigationCompartment::addKey);
-    	}
-		streamElements()
-    		.filter(element -> element.isClassType() || element.isDataType())
-    		.map(ModelElement_1_0::getQualifiedName)
-    		.forEach(navigationCompartment::addElement);
-    	navigationCompartment.normalize();
-    	return navigationCompartment;
+    private void loadDiagramIndexData() {
+        this.streamElements().filter(ModelElement_1_0::isPackageType).forEach(this::putIntoMapSingleDiagramData);
     }
-    
+
     @Override
-	protected String getTitle() {
-		return this.configuration.getTitle();
-	}
+    protected void htmlBody() {
+        printLine("<body class=\"page\">");
+        pageHead(getTitle());
+        pageBody();
+        printLine("</body>");
+    }
 
-	@Override
-	protected String getBaseURL() {
-		return "";
-	}
-    
+    private void pageBody() {
+        printLine("\t<div class=\"page-section page-body\">");
+        navigationColumn();
+        frameColumn();
+        printLine("\t</div>");
+    }
+
+    private void navigationColumn() {
+        printLine("\t\t<div class=\"page-column navigation-column\">");
+        columnHead();
+        columnBody();
+        printLine("\t\t</div>");
+    }
+
+    private void columnBody() {
+        printLine("\t\t\t<div class=\"column-body\">");
+        navigationCompartment();
+        printLine("\t\t\t</div>");
+    }
+
+    private void navigationCompartment() {
+        printLine("\t\t\t\t<details open>");
+        navigationSummary();
+        navigationDetails();
+        printLine("\t\t\t\t</details>");
+    }
+
+    private void navigationSummary() {
+        printLine("\t\t\t\t\t<summary class=\"navigation-summary\">Package Groups</summary>");
+    }
+
+    private void navigationDetails() {
+        getPackageGroups().entrySet().forEach(this::packageCluster);
+    }
+
+    private void putIntoMapSingleDiagramData(ModelElement_1_0 element) {
+        final URI directory;
+        try {
+            directory = new URI("/" + element.getModel().toJavaPackageName(element, null).replace('.', '/') + '/');
+            for (final Map.Entry<URI, String> e : sink.getTableOfContent().entrySet()) {
+                if (e.getKey().getPath().contains(directory.getPath())) {
+                    final String p = e.getKey().getPath().substring(1);
+                    if (PIMDocFileType.GRAPHVIZ_SOURCE.test(p) && p.indexOf('/') > -1) {
+                        final String qualifiedName = element.getQualifiedName();
+                        SortedMap<String, String> diagramDataMap = standardPkgDiagramIndexData.get(qualifiedName);
+                        if (diagramDataMap == null) {
+                            diagramDataMap = new TreeMap<>();
+                        }
+                        diagramDataMap.put(p, e.getValue());
+                        standardPkgDiagramIndexData.put(qualifiedName, diagramDataMap);
+                        // all diagrams to be listed under the catch-all ("**") package group
+                        catchAllPkgDiagramIndexData.putAll(diagramDataMap);
+                    }
+                }
+            }
+            standardPkgDiagramIndexData.remove("org:omg:model1:model1");
+
+        } catch (URISyntaxException | ServiceException exception) {
+            throw new RuntimeServiceException(exception);
+        }
+    }
+
+    private void packageCluster(Map.Entry<String, SortedSet<String>> entry) {
+        printLine("\t\t\t\t\t<details class=\"uml-package-cluster\">");
+        packageGroupSummary(entry.getKey());
+        outputClasses(entry.getValue());
+        outputDiagrams(entry.getKey());
+        printLine("\t\t\t\t\t</details>");
+    }
+
+    private void outputClasses(final SortedSet<String> classes) {
+        printLine("\t\t\t\t\t\t<details class=\"uml-package-cluster class-section\">");
+        printLine("\t\t\t\t\t\t\t<summary>Classes</summary>");
+        printLine("\t\t\t\t\t\t\t<div>");
+        packageGroupClassDetails(classes);
+        printLine("\t\t\t\t\t\t\t</div>");
+        printLine("\t\t\t\t\t\t</details>");
+    }
+
+    private void outputDiagrams(final String packageClusterKey) {
+        printLine("\t\t\t\t\t\t<details class=\"uml-package-cluster diagram-section\">");
+        printLine("\t\t\t\t\t\t\t<summary>Diagrams</summary>");
+        printLine("\t\t\t\t\t\t\t<div>");
+        packageGroupDiagramDetails(packageClusterKey);
+        printLine("\t\t\t\t\t\t\t</div>");
+        printLine("\t\t\t\t\t\t</details>");
+    }
+
+    private void packageGroupDiagramDetails(final String packageClusterKey) {
+        if (packageClusterKey.equals("**")) {
+            mapPackageDiagrams(catchAllPkgDiagramIndexData);
+            return;
+        }
+        SortedMap<String, String> wildcardDiagramMap = null;
+        for (Map.Entry<String, SortedMap<String, String>> e : this.standardPkgDiagramIndexData.entrySet()) {
+            if (packageClusterKey.equals(e.getKey())) {
+                mapPackageDiagrams(e.getValue());
+            } else if (packageClusterKey.endsWith("**") && belongsToWildcardPackage(e.getKey(), packageClusterKey)) {
+                wildcardDiagramMap = wildcardPkgDiagramIndexData.get(packageClusterKey);
+                if (wildcardDiagramMap == null) {
+                    wildcardDiagramMap = new TreeMap<>(e.getValue());
+                } else {
+                    wildcardDiagramMap.putAll(e.getValue());
+                }
+                wildcardPkgDiagramIndexData.put(packageClusterKey, wildcardDiagramMap);
+            }
+        }
+
+        if (!wildcardPkgDiagramIndexData.isEmpty() && wildcardDiagramMap != null && !wildcardDiagramMap.isEmpty()) {
+            mapPackageDiagrams(wildcardPkgDiagramIndexData.get(packageClusterKey));
+        }
+    }
+
+    private boolean belongsToWildcardPackage(final String mapKey, final String packageClusterKey) {
+        // we're making an exception here, this is the only source of diagrams for org:omg:**
+        if (mapKey.contains("org:omg:") && packageClusterKey.equals("org:omg:**")) {
+            return true;
+        }
+
+        // if top level package, skip to avoid duplication
+        final String[] segments = mapKey.split(":");
+        if (segments.length == 3 && (segments[1].equals(segments[2]))) {
+            return false;
+        }
+        return mapKey.contains(packageClusterKey.substring(0, packageClusterKey.length() - 3));
+    }
+
+    private void mapPackageDiagrams(SortedMap<String, String> diagramsIndexDataMap) {
+        final Stream<Map.Entry<String, String>> sorted =
+                diagramsIndexDataMap.entrySet().stream().sorted(Map.Entry.comparingByValue());
+        sorted.forEach(e -> this.outputSingleDiagramHtml(e.getKey(), e.getValue()));
+    }
+
+    private void outputSingleDiagramHtml(String sourcePath, String diagramData) {
+        final String textName = PIMDocFileType.TEXT.from(sourcePath, PIMDocFileType.GRAPHVIZ_SOURCE);
+        printLine("\t\t\t\t\t\t\t\t<div>");
+        printLine("\t\t\t\t\t\t\t\t\t<a href=\"", textName, "\" target=\"", HTMLMapper.FRAME_NAME, "\">");
+        printLine(diagramData);
+        printLine("\t\t\t\t\t\t\t\t\t</a>");
+        printLine("\t\t\t\t\t\t\t\t</div>");
+    }
+
+    private void packageGroupClassDetails(final SortedSet<String> classes) {
+        classes.forEach(this::mapPackageMemberName);
+    }
+
+    private void mapPackageMemberName(String qualifiedName) {
+        try {
+            printLine("\t\t\t\t\t\t\t\t<div>");
+            final ModelElement_1_0 contained = this.model.getElement(qualifiedName);
+            printLine("\t\t\t\t\t\t\t<a href=\"", getHref(contained), "\" title=\"", getDisplayName(contained),
+                    "\" target=\"", HTMLMapper.FRAME_NAME, "\">", contained.getName(), "</a>");
+            printLine("\t\t\t\t\t\t\t\t</div>");
+        } catch (ServiceException e) {
+            throw new RuntimeServiceException(e);
+        }
+    }
+
+    private void packageGroupSummary(String packagePattern) {
+        printLine("\t\t\t\t\t\t<summary>");
+        if (PackagePatternComparator.isWildcardPattern(packagePattern)) {
+            mapPackageGroupLink(packagePattern);
+        } else {
+            mapPackageLink(packagePattern);
+        }
+        printLine("\t\t\t\t\t\t</summary>");
+    }
+
+    private void mapPackageGroupLink(String packagePattern) {
+        final String namespace = PackagePatternComparator.removeWildcard(packagePattern);
+        printLine("\t\t\t\t\t\t\t<a href=\"", getBaseURL(), NamespaceLocation.getLocation(namespace),
+                MagicFile.PACKAGE_CLUSTER.getFileName(MagicFile.Type.TEXT), "\" target=\"", HTMLMapper.FRAME_NAME,
+                "\">", packagePattern.replace(":", "::"), "</a>");
+    }
+
+    private void mapPackageLink(String qualifiedName) {
+        try {
+            final ModelElement_1_0 packageElement = this.model.getElement(qualifiedName);
+            printLine("\t\t\t\t\t\t\t<a href=\"", getHref(packageElement), "\" target=\"", HTMLMapper.FRAME_NAME, "\">",
+                    getDisplayName(packageElement), "</a>");
+            printLine("\t\t\t\t\t\t\t<a href=\"", getHref(packageElement), "#", AlbumMapper.COMPARTMENT_ID,
+                    "\" target=\"", HTMLMapper.FRAME_NAME, "\">");
+            printLine("\t\t\t\t\t\t\t\t<img alt=\"UML\" class=\"uml-symbol\" src=\"",
+                    MagicFile.UML_SYMBOL.getFileName(MagicFile.Type.IMAGE), "\"/>");
+            printLine("\t\t\t\t\t\t\t</a>");
+        } catch (ServiceException e) {
+            throw new RuntimeServiceException(e);
+        }
+    }
+
+    private void columnHead() {
+        printLine("\t\t\t<div class=\"column-head\">");
+        printLine("\t\t\t\t<h2>Index</h2>");
+        printLine("\t\t\t</div>");
+    }
+
+    private void pageHead(final String title) {
+        printLine("\t<div class=\"page-section page-head\">");
+        printLine("\t\t<div class=\"page-column\">");
+        printLine("\t\t\t<a href=\"", configuration.getTargetName(MagicFile.WELCOME_PAGE, MagicFile.Type.TEXT),
+                "\" target=\"", HTMLMapper.FRAME_NAME, "\">");
+        printLine("\t\t\t\t<img src=\"", configuration.getTargetName(MagicFile.WELCOME_PAGE, MagicFile.Type.IMAGE),
+                "\"/>");
+        printLine("\t\t\t</a>");
+        printLine("\t\t</div>");
+        printLine("\t\t<div class=\"page-column\">");
+        printLine("\t\t\t<h1>", title, "</h1>");
+        printLine("\t\t</div>");
+        printLine("\t</div>");
+    }
+
+    /**
+     * Produces the detail column frame
+     */
+    private void frameColumn() {
+        printLine("\t\t<div class=\"page-column frame-column\">");
+        printLine("\t\t\t<iframe name=\"", HTMLMapper.FRAME_NAME, "\" src=\"",
+                configuration.getTargetName(MagicFile.WELCOME_PAGE, MagicFile.Type.TEXT), "\"/>");
+        printLine("\t\t</div>");
+    }
+
+    private PackageGroupBuilder getPackageGroups() {
+        final PackageGroupBuilder navigationCompartment = new PackageGroupBuilder();
+        final Collection<String> tableOfContentEntries = configuration.getTableOfContentEntries();
+        if (tableOfContentEntries.isEmpty()) {
+            streamElements().filter(ModelElement_1_0::isPackageType).map(ModelElement_1_0::getQualifiedName)
+                    .forEach(navigationCompartment::addKey);
+            navigationCompartment.addKey(PackagePatternComparator.getCatchAllPattern());
+        } else {
+            tableOfContentEntries.forEach(navigationCompartment::addKey);
+        }
+        streamElements().filter(element -> element.isClassType() || element.isDataType())
+                .map(ModelElement_1_0::getQualifiedName).forEach(navigationCompartment::addElement);
+        navigationCompartment.normalize();
+        return navigationCompartment;
+    }
+
+    @Override
+    protected String getTitle() {
+        return this.configuration.getTitle();
+    }
+
+    @Override
+    protected String getBaseURL() {
+        return "";
+    }
+
 }
