@@ -149,7 +149,6 @@ public class IndexMapper extends HTMLMapper {
                     }
                 }
             }
-            standardPkgDiagramIndexData.remove("org:omg:model1:model1");
 
         } catch (URISyntaxException | ServiceException exception) {
             throw new RuntimeServiceException(exception);
@@ -191,7 +190,7 @@ public class IndexMapper extends HTMLMapper {
         for (Map.Entry<String, SortedMap<String, String>> e : this.standardPkgDiagramIndexData.entrySet()) {
             if (packageClusterKey.equals(e.getKey())) {
                 mapPackageDiagrams(e.getValue());
-            } else if (packageClusterKey.endsWith("**") && belongsToWildcardPackage(e.getKey(), packageClusterKey)) {
+            } else if (packageClusterKey.endsWith("**") && e.getKey().contains(packageClusterKey.substring(0, packageClusterKey.length() - 3))) {
                 wildcardDiagramMap = wildcardPkgDiagramIndexData.get(packageClusterKey);
                 if (wildcardDiagramMap == null) {
                     wildcardDiagramMap = new TreeMap<>(e.getValue());
@@ -205,20 +204,6 @@ public class IndexMapper extends HTMLMapper {
         if (!wildcardPkgDiagramIndexData.isEmpty() && wildcardDiagramMap != null && !wildcardDiagramMap.isEmpty()) {
             mapPackageDiagrams(wildcardPkgDiagramIndexData.get(packageClusterKey));
         }
-    }
-
-    private boolean belongsToWildcardPackage(final String mapKey, final String packageClusterKey) {
-        // we're making an exception here, this is the only source of diagrams for org:omg:**
-        if (mapKey.contains("org:omg:") && packageClusterKey.equals("org:omg:**")) {
-            return true;
-        }
-
-        // if top level package, skip to avoid duplication
-        final String[] segments = mapKey.split(":");
-        if (segments.length == 3 && (segments[1].equals(segments[2]))) {
-            return false;
-        }
-        return mapKey.contains(packageClusterKey.substring(0, packageClusterKey.length() - 3));
     }
 
     private void mapPackageDiagrams(SortedMap<String, String> diagramsIndexDataMap) {
