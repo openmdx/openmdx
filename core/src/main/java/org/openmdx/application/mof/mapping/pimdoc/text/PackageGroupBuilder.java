@@ -42,19 +42,24 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc.spi;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.openmdx.application.mof.mapping.pimdoc.spi.PackagePatternComparator;
+import org.openmdx.application.mof.mapping.pimdoc.spi.SimpleNameComparator;
+
 /**
  * Package Group Builder
  */
-public class PackageGroupBuilder extends TreeMap<String,SortedSet<String>> {
+class PackageGroupBuilder extends TreeMap<String,SortedSet<String>> {
 
 	public PackageGroupBuilder() {
 		super(COMPARATOR);
@@ -64,6 +69,10 @@ public class PackageGroupBuilder extends TreeMap<String,SortedSet<String>> {
 	
 	private static final long serialVersionUID = -4489160358886710466L;
 	private final Comparator<String> simpleNameComparator = new SimpleNameComparator();
+    final SortedMap<String, String> catchAllPkgDiagramIndexData = new TreeMap<>();
+    final SortedMap<String, SortedMap<String, String>> wildcardPkgDiagramIndexData = new TreeMap<>();
+    final SortedMap<String, SortedMap<String, String>> standardPkgDiagramIndexData = new TreeMap<>();
+
 	
 	public void addKey(String qualifiedName) {
 		this.computeIfAbsent(qualifiedName, key -> new TreeSet<String>(simpleNameComparator));
@@ -92,7 +101,19 @@ public class PackageGroupBuilder extends TreeMap<String,SortedSet<String>> {
 	}
 	
 	public void normalize() {
-		values().removeIf(Collection::isEmpty);
+		for(Iterator<Map.Entry<String,SortedSet<String>>> i = entrySet().iterator(); i.hasNext(); ) {
+			final Map.Entry<String, SortedSet<String>> e = i.next();
+			if(e.getValue().isEmpty()) {
+				final String packagePattern = e.getKey();
+				if(PackagePatternComparator.isCatchAllPattern(packagePattern)) {
+					if(catchAllPkgDiagramIndexData.isEmpty()) i.remove();
+				} else if (PackagePatternComparator.isWildcardPattern(packagePattern)) {
+					if(wildcardPkgDiagramIndexData.getOrDefault(packagePattern, Collections.emptySortedMap()).isEmpty()) i.remove();
+				} else {
+					if(standardPkgDiagramIndexData.getOrDefault(packagePattern, Collections.emptySortedMap()).isEmpty()) i.remove();
+				}
+			}
+		}
 	}
 	
 }

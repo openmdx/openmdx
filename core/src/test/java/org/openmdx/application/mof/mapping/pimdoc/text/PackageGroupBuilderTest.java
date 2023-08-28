@@ -42,12 +42,13 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc.spi;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import java.util.Collections;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.openmdx.application.mof.mapping.pimdoc.spi.PackagePatternComparator;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 

@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <uml:Model xmi:version="20110701" xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_l_0U4Eb9Ed-o1OTPw_6HJg" name="model">
+  <eAnnotations xmi:id="_KELFMEcEEd-o1OTPw_6HJg" source="net.rfc">
+    <references xmi:type="uml:Package" href="net.rfc.uml#_3C7B8A60016D3C8B8343014DP"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_4711A" source="org.example">
+    <references xmi:type="uml:Package" href="org.example.uml#_4711"/>
+  </eAnnotations>
   <eAnnotations xmi:id="_9dbckEcCEd-o1OTPw_6HJg" source="org.ietf">
     <references xmi:type="uml:Package" href="org.ietf.uml#_Szs1cLeAEdueCKP_VeXehw"/>
   </eAnnotations>
@@ -11,9 +17,6 @@
   </eAnnotations>
   <eAnnotations xmi:id="_6r56sEcDEd-o1OTPw_6HJg" source="org.un">
     <references xmi:type="uml:Package" href="org.un.uml#_3C7B8A60016D3C8B7F380249"/>
-  </eAnnotations>
-  <eAnnotations xmi:id="_KELFMEcEEd-o1OTPw_6HJg" source="net.rfc">
-    <references xmi:type="uml:Package" href="net.rfc.uml#_3C7B8A60016D3C8B8343014DP"/>
   </eAnnotations>
   <eAnnotations xmi:id="_yxKcQEcEEd-o1OTPw_6HJg" source="org.w3c">
     <references xmi:type="uml:Package" href="org.w3c.uml#_3C7B8A60016D3C8B62D700DA"/>

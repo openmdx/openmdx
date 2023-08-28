@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_6UQFIN67EdmkJO73lqONhA" name="un">
+  <packagedElement xmi:type="uml:Package" xmi:id="_4711P" name="org">
+    <packagedElement xmi:type="uml:Package" xmi:id="_4711" name="example">
+    </packagedElement>
+  </packagedElement>
+</uml:Model>

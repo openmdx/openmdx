@@ -55,7 +55,6 @@ import java.util.stream.Stream;
 
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
-import org.openmdx.application.mof.mapping.pimdoc.spi.PackageGroupBuilder;
 import org.openmdx.application.mof.mapping.pimdoc.spi.PackagePatternComparator;
 import org.openmdx.application.mof.repository.accessor.NamespaceLocation;
 import org.openmdx.base.exception.RuntimeServiceException;
@@ -70,16 +69,15 @@ import org.openmdx.base.mof.spi.PIMDocFileType;
  */
 public class IndexMapper extends HTMLMapper {
 
-    private final SortedMap<String, String> catchAllPkgDiagramIndexData = new TreeMap<>();
-    private final SortedMap<String, SortedMap<String, String>> wildcardPkgDiagramIndexData = new TreeMap<>();
-    private final SortedMap<String, SortedMap<String, String>> standardPkgDiagramIndexData = new TreeMap<>();
-
+    private final PackageGroupBuilder navigationCompartment = new PackageGroupBuilder();
+	
     /**
      * Constructor
      */
     public IndexMapper(Sink sink, Model_1_0 model, boolean markdown, PIMDocConfiguration configuration) {
         super(sink, model, MagicFile.TABLE_OF_CONTENT, markdown, configuration);
         loadDiagramIndexData();
+        loadPackageGroups();
     }
 
     private void loadDiagramIndexData() {
@@ -126,30 +124,28 @@ public class IndexMapper extends HTMLMapper {
     }
 
     private void navigationDetails() {
-        getPackageGroups().entrySet().forEach(this::packageCluster);
+    	navigationCompartment.entrySet().forEach(this::packageCluster);
     }
 
     private void putIntoMapSingleDiagramData(ModelElement_1_0 element) {
-        final URI directory;
         try {
-            directory = new URI("/" + element.getModel().toJavaPackageName(element, null).replace('.', '/') + '/');
+            final URI directory = new URI("/" + element.getModel().toJavaPackageName(element, null).replace('.', '/') + '/');
             for (final Map.Entry<URI, String> e : sink.getTableOfContent().entrySet()) {
                 if (e.getKey().getPath().contains(directory.getPath())) {
                     final String p = e.getKey().getPath().substring(1);
                     if (PIMDocFileType.GRAPHVIZ_SOURCE.test(p) && p.indexOf('/') > -1) {
                         final String qualifiedName = element.getQualifiedName();
-                        SortedMap<String, String> diagramDataMap = standardPkgDiagramIndexData.get(qualifiedName);
+                        SortedMap<String, String> diagramDataMap = navigationCompartment.standardPkgDiagramIndexData.get(qualifiedName);
                         if (diagramDataMap == null) {
                             diagramDataMap = new TreeMap<>();
                         }
                         diagramDataMap.put(p, e.getValue());
-                        standardPkgDiagramIndexData.put(qualifiedName, diagramDataMap);
+                        navigationCompartment.standardPkgDiagramIndexData.put(qualifiedName, diagramDataMap);
                         // all diagrams to be listed under the catch-all ("**") package group
-                        catchAllPkgDiagramIndexData.putAll(diagramDataMap);
+                        navigationCompartment.catchAllPkgDiagramIndexData.putAll(diagramDataMap);
                     }
                 }
             }
-
         } catch (URISyntaxException | ServiceException exception) {
             throw new RuntimeServiceException(exception);
         }
@@ -164,7 +160,7 @@ public class IndexMapper extends HTMLMapper {
     }
 
     private void outputClasses(final SortedSet<String> classes) {
-        printLine("\t\t\t\t\t\t<details class=\"uml-package-cluster class-section\">");
+        printLine("\t\t\t\t\t\t<details class=\"uml-package-cluster class-section\" open>");
         printLine("\t\t\t\t\t\t\t<summary>Classes</summary>");
         printLine("\t\t\t\t\t\t\t<div>");
         packageGroupClassDetails(classes);
@@ -173,7 +169,7 @@ public class IndexMapper extends HTMLMapper {
     }
 
     private void outputDiagrams(final String packageClusterKey) {
-        printLine("\t\t\t\t\t\t<details class=\"uml-package-cluster diagram-section\">");
+        printLine("\t\t\t\t\t\t<details class=\"uml-package-cluster diagram-section\" open>");
         printLine("\t\t\t\t\t\t\t<summary>Diagrams</summary>");
         printLine("\t\t\t\t\t\t\t<div>");
         packageGroupDiagramDetails(packageClusterKey);
@@ -182,27 +178,25 @@ public class IndexMapper extends HTMLMapper {
     }
 
     private void packageGroupDiagramDetails(final String packageClusterKey) {
-        if (packageClusterKey.equals("**")) {
-            mapPackageDiagrams(catchAllPkgDiagramIndexData);
-            return;
-        }
-        SortedMap<String, String> wildcardDiagramMap = null;
-        for (Map.Entry<String, SortedMap<String, String>> e : this.standardPkgDiagramIndexData.entrySet()) {
-            if (packageClusterKey.equals(e.getKey())) {
-                mapPackageDiagrams(e.getValue());
-            } else if (packageClusterKey.endsWith("**") && e.getKey().contains(packageClusterKey.substring(0, packageClusterKey.length() - 3))) {
-                wildcardDiagramMap = wildcardPkgDiagramIndexData.get(packageClusterKey);
-                if (wildcardDiagramMap == null) {
-                    wildcardDiagramMap = new TreeMap<>(e.getValue());
-                } else {
-                    wildcardDiagramMap.putAll(e.getValue());
-                }
-                wildcardPkgDiagramIndexData.put(packageClusterKey, wildcardDiagramMap);
-            }
-        }
-
-        if (!wildcardPkgDiagramIndexData.isEmpty() && wildcardDiagramMap != null && !wildcardDiagramMap.isEmpty()) {
-            mapPackageDiagrams(wildcardPkgDiagramIndexData.get(packageClusterKey));
+        if (PackagePatternComparator.isCatchAllPattern(packageClusterKey)) {
+            mapPackageDiagrams(navigationCompartment.catchAllPkgDiagramIndexData);
+        } else if (PackagePatternComparator.isWildcardPattern(packageClusterKey)){
+        	final String prefix = PackagePatternComparator.removeWildcard(packageClusterKey) + ':';
+            final SortedMap<String, String> wildcardDiagramMap = navigationCompartment.wildcardPkgDiagramIndexData.computeIfAbsent(packageClusterKey, pkc -> new TreeMap<>());
+	        for (Map.Entry<String, SortedMap<String, String>> e : navigationCompartment.standardPkgDiagramIndexData.entrySet()) {
+	        	if (e.getKey().startsWith(prefix)) {
+	                wildcardDiagramMap.putAll(e.getValue());
+	        	}
+	        }
+	        if(!wildcardDiagramMap.isEmpty()) {
+	            mapPackageDiagrams(navigationCompartment.wildcardPkgDiagramIndexData.get(packageClusterKey));
+	        }
+        } else {
+	        for (Map.Entry<String, SortedMap<String, String>> e : navigationCompartment.standardPkgDiagramIndexData.entrySet()) {
+	            if (packageClusterKey.equals(e.getKey())) {
+	                mapPackageDiagrams(e.getValue());
+	            }
+	        }
         }
     }
 
@@ -300,8 +294,7 @@ public class IndexMapper extends HTMLMapper {
         printLine("\t\t</div>");
     }
 
-    private PackageGroupBuilder getPackageGroups() {
-        final PackageGroupBuilder navigationCompartment = new PackageGroupBuilder();
+    private void loadPackageGroups() {
         final Collection<String> tableOfContentEntries = configuration.getTableOfContentEntries();
         if (tableOfContentEntries.isEmpty()) {
             streamElements().filter(ModelElement_1_0::isPackageType).map(ModelElement_1_0::getQualifiedName)
@@ -313,7 +306,6 @@ public class IndexMapper extends HTMLMapper {
         streamElements().filter(element -> element.isClassType() || element.isDataType())
                 .map(ModelElement_1_0::getQualifiedName).forEach(navigationCompartment::addElement);
         navigationCompartment.normalize();
-        return navigationCompartment;
     }
 
     @Override
