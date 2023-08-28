@@ -1,5 +1,0 @@
-digraph "A diagram package without classes [Package org::example]" {
-
-	${ATTRIBUTE_STATEMENTS}
-
-}

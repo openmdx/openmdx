@@ -130,37 +130,16 @@ class PackageGroupBuilderTest {
 	}
 	
 	@Test
-	void when_normalized_then_noEmptyValues() {
-		//
-		// Arrange
-		//
-		final PackageGroupBuilder testee = new PackageGroupBuilder();
-		testee.addKey("X");
-		testee.addKey("Y");
-		testee.addKey("Z");
-		testee.get("Y").add("y");
-		// 
-		// Act		
-		//
-		testee.normalize();
-		//
-		// Assert
-		//
-		Assertions.assertEquals(Collections.singleton("Y"), testee.keySet());
-	}
-
-	@Test
 	void when_catchAll_then_anyMatch() {
 		//
 		// Arrange
 		//
 		final PackageGroupBuilder testee = new PackageGroupBuilder();
-		testee.addKey(PackagePatternComparator.getCatchAllPattern());
-		testee.addElement("com:example:AnyClass");
 		// 
 		// Act		
 		//
-		testee.normalize();
+		testee.addKey(PackagePatternComparator.getCatchAllPattern());
+		testee.addElement("com:example:AnyClass");
 		//
 		// Assert
 		//

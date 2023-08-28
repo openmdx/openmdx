@@ -134,13 +134,8 @@ public class IndexMapper extends HTMLMapper {
                 if (e.getKey().getPath().contains(directory.getPath())) {
                     final String p = e.getKey().getPath().substring(1);
                     if (PIMDocFileType.GRAPHVIZ_SOURCE.test(p) && p.indexOf('/') > -1) {
-                        final String qualifiedName = element.getQualifiedName();
-                        SortedMap<String, String> diagramDataMap = navigationCompartment.standardPkgDiagramIndexData.get(qualifiedName);
-                        if (diagramDataMap == null) {
-                            diagramDataMap = new TreeMap<>();
-                        }
+                        final SortedMap<String, String> diagramDataMap = navigationCompartment.standardPkgDiagramIndexData.computeIfAbsent(element.getQualifiedName(), qualifiedName -> new TreeMap<>());
                         diagramDataMap.put(p, e.getValue());
-                        navigationCompartment.standardPkgDiagramIndexData.put(qualifiedName, diagramDataMap);
                         // all diagrams to be listed under the catch-all ("**") package group
                         navigationCompartment.catchAllPkgDiagramIndexData.putAll(diagramDataMap);
                     }
@@ -305,7 +300,6 @@ public class IndexMapper extends HTMLMapper {
         }
         streamElements().filter(element -> element.isClassType() || element.isDataType())
                 .map(ModelElement_1_0::getQualifiedName).forEach(navigationCompartment::addElement);
-        navigationCompartment.normalize();
     }
 
     @Override
