@@ -300,6 +300,7 @@ public class IndexMapper extends HTMLMapper {
         }
         streamElements().filter(element -> element.isClassType() || element.isDataType())
                 .map(ModelElement_1_0::getQualifiedName).forEach(navigationCompartment::addElement);
+        navigationCompartment.normalize();
     }
 
     @Override

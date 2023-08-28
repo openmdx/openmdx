@@ -44,7 +44,9 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc.text;
 
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -96,6 +98,22 @@ class PackageGroupBuilder extends TreeMap<String,SortedSet<String>> {
 	private String getPackageId(String qualifiedName) {
 		final int end = qualifiedName.lastIndexOf(':');
 		return qualifiedName.substring(0, end);
+	}
+	
+	public void normalize() {
+		for(Iterator<Map.Entry<String,SortedSet<String>>> i = entrySet().iterator(); i.hasNext(); ) {
+			final Map.Entry<String, SortedSet<String>> e = i.next();
+			if(e.getValue().isEmpty()) {
+				final String packagePattern = e.getKey();
+				if(PackagePatternComparator.isCatchAllPattern(packagePattern)) {
+					if(catchAllPkgDiagramIndexData.isEmpty()) i.remove();
+				} else if (PackagePatternComparator.isWildcardPattern(packagePattern)) {
+					if(wildcardPkgDiagramIndexData.getOrDefault(packagePattern, Collections.emptySortedMap()).isEmpty()) i.remove();
+				} else {
+					if(standardPkgDiagramIndexData.getOrDefault(packagePattern, Collections.emptySortedMap()).isEmpty()) i.remove();
+				}
+			}
+		}
 	}
 	
 }
