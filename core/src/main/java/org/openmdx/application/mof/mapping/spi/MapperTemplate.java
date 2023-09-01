@@ -107,9 +107,9 @@ public abstract class MapperTemplate {
 		this.pw.flush();
 	}
 
-	protected ModelElement_1_0 getElement(String qualifiedName) {
+	protected ModelElement_1_0 getElement(Object elementId) {
 		try {
-			return this.model.getElement(qualifiedName);
+			return this.model.getElement(elementId);
 		} catch (ServiceException e) {
 			throw new RuntimeServiceException(e);
 		}

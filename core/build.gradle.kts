@@ -62,9 +62,6 @@ repositories {
     maven {
        url = uri("file:" + File(project.getRootDir(), "publish/build/repos/releases"))
     }
-	flatDir {
-		dirs(System.getProperty("user.home") + "/Repository/flat")
-	}
 }
 
 var env = Properties()
