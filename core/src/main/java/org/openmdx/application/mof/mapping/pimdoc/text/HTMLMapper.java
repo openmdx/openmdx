@@ -175,12 +175,10 @@ abstract class HTMLMapper extends AbstractMapper {
     ){
     	if(element.isPackageType() || element.isClassType() || element.isStructureType()){
         	return getBaseURL() + getEntryName(element);
-    	} else try {
-    		final ModelElement_1_0 container = this.model.getElement(element.getContainer());
+    	} else {
+			final ModelElement_1_0 container = getContainer(element);
         	return getBaseURL() + getEntryName(container) + "#" + element.getName();
-    	} catch (ServiceException e) {
-    		throw new RuntimeServiceException(e);
-    	}
+		}
     }
 
     protected static String getDisplayName(

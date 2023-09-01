@@ -49,7 +49,11 @@ import java.util.Comparator;
 /**
  * This comparator shall ensure that wildcard entries follow the corresponding entries without wildcard.
  */
-public class PackagePatternComparator implements Comparator<String> {
+public class PackageGroupComparator implements Comparator<String> {
+
+	public PackageGroupComparator() {
+		super();
+	}
 
 	/**
 	 * The wildcard (asterisks) is allowed as last segment of the package name only!
@@ -74,10 +78,34 @@ public class PackagePatternComparator implements Comparator<String> {
 	}
 	
 	/**
+	 * Tells whether the qualified name matches the package cluster key
+	 * 
+	 * @param qualifiedName the qualified model name to be tested
+	 * @param packageClusterKey the package cluster key, either a package name or a wildcard pattern
+	 * 
+	 * @return {@code true} if the qualified model name matchess the package cluster key
+	 */
+	public static boolean matches(String qualifiedName, String packageClusterKey) {
+		return isCatchAllPattern(packageClusterKey) || (
+			isWildcardPattern(packageClusterKey) ? 
+				qualifiedName.startsWith(removeWildcard(packageClusterKey) + ':') :
+				getPackageId(qualifiedName).equals(packageClusterKey)
+	    );	
+	}
+
+	private static String getPackageId(String qualifiedName) {
+		final int end = qualifiedName.lastIndexOf(':');
+		return qualifiedName.substring(0, end);
+	}
+	
+	
+	/**
 	 * Default visibility for testing
 	 */
 	static String orderWildcardLast(String packagePattern) {
-		return  packagePattern.replace(WILDCARD, A_LATE_ASCII_CHARACTER);
+		return isWildcardPattern(packagePattern) ? 
+			packagePattern.replace(WILDCARD, A_LATE_ASCII_CHARACTER) :
+			getPackageId(packagePattern);
 	}
 	
 	/**

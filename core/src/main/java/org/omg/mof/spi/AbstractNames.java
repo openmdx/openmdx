@@ -108,8 +108,8 @@ public abstract class AbstractNames {
      * @param target
      * @param source
      */
-    public static StringBuffer openmdx2NamespaceElement(
-        StringBuffer target,
+    public static StringBuilder openmdx2NamespaceElement(
+    	StringBuilder target,
         String source
     ){
 

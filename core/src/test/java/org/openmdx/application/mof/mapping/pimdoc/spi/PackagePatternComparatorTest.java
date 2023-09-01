@@ -59,7 +59,7 @@ class PackagePatternComparatorTest {
 		//
 		// Arrange
 		//
-		final Comparator<String> testee = new PackagePatternComparator();
+		final Comparator<String> testee = new PackageGroupComparator();
 		final String left = "org:openmdx:state2:state2";
 		final String right = "org:openmdx:state2:state2";
 		// 
@@ -77,7 +77,7 @@ class PackagePatternComparatorTest {
 		//
 		// Arrange
 		//
-		final Comparator<String> testee = new PackagePatternComparator();
+		final Comparator<String> testee = new PackageGroupComparator();
 		final String left = "org:openmdx:state2:**";
 		final String right = "org:openmdx:state2:**";
 		// 
@@ -95,7 +95,7 @@ class PackagePatternComparatorTest {
 		//
 		// Arrange
 		//
-		final Comparator<String> testee = new PackagePatternComparator();
+		final Comparator<String> testee = new PackageGroupComparator();
 		final String left = "org:openmdx:state2:**";
 		final String right = "org:openmdx:state2:state2";
 		// 
@@ -113,7 +113,7 @@ class PackagePatternComparatorTest {
 		//
 		// Arrange
 		//
-		final Comparator<String> testee = new PackagePatternComparator();
+		final Comparator<String> testee = new PackageGroupComparator();
 		final String left = "org:openmdx:state2";
 		final String right = "org:openmdx:state2:**";
 		// 
@@ -131,7 +131,7 @@ class PackagePatternComparatorTest {
 		//
 		// Arrange
 		//
-		final Comparator<String> testee = new PackagePatternComparator();
+		final Comparator<String> testee = new PackageGroupComparator();
 		final String left = "org:openmdx:state1:state1";
 		final String right = "org:openmdx:state2:state2";
 		// 
@@ -145,11 +145,47 @@ class PackagePatternComparatorTest {
 	}
 
 	@Test
+	void when_superPackageBefore_then_lessThanZero() {
+		//
+		// Arrange
+		//
+		final Comparator<String> testee = new PackageGroupComparator();
+		final String left = "org:openmdx:openmdx";
+		final String right = "org:openmdx:base:base";
+		// 
+		// Act		
+		//
+		final int result = testee.compare(left, right);
+		//
+		// Assert
+		//
+		Assertions.assertTrue(result < 0);
+	}
+
+	@Test
+	void when_superPackageAfter_then_greaterThanZero() {
+		//
+		// Arrange
+		//
+		final Comparator<String> testee = new PackageGroupComparator();
+		final String left = "org:openmdx:base:base";
+		final String right = "org:openmdx:openmdx";
+		// 
+		// Act		
+		//
+		final int result = testee.compare(left, right);
+		//
+		// Assert
+		//
+		Assertions.assertTrue(result > 0);
+	}
+	
+	@Test
 	void when_alphabeticallyAfter_then_graterThanZero() {
 		//
 		// Arrange
 		//
-		final Comparator<String> testee = new PackagePatternComparator();
+		final Comparator<String> testee = new PackageGroupComparator();
 		final String left = "org:openmdx:state2:state2";
 		final String right = "org:openmdx:state1:state1";
 		// 
@@ -171,7 +207,7 @@ class PackagePatternComparatorTest {
 		// 
 		// Act		
 		//
-		final String transformed = PackagePatternComparator.orderWildcardLast(packagePattern);
+		final String transformed = PackageGroupComparator.orderWildcardLast(packagePattern);
 		//
 		// Assert
 		//
@@ -187,7 +223,7 @@ class PackagePatternComparatorTest {
 		// 
 		// Act		
 		//
-		final String transformed = PackagePatternComparator.orderWildcardLast(packagePattern);
+		final String transformed = PackageGroupComparator.orderWildcardLast(packagePattern);
 		//
 		// Assert
 		//
@@ -203,7 +239,7 @@ class PackagePatternComparatorTest {
 		// 
 		// Act		
 		//
-		final String transformed = PackagePatternComparator.getDescendants(wildcardPattern);
+		final String transformed = PackageGroupComparator.getDescendants(wildcardPattern);
 		//
 		// Assert
 		//

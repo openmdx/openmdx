@@ -169,11 +169,9 @@ abstract class GraphvizMapper extends AbstractMapper {
         	return getBaseURL() + GraphvizMapper.getElementPath(element) + '#' + AlbumMapper.COMPARTMENT_ID;
     	} else if(element.isClassType() || element.isStructureType()){
         	return getBaseURL() + GraphvizMapper.getElementPath(element);
-    	} else try {
-    		final ModelElement_1_0 container = this.model.getElement(element.getContainer());
+    	} else {
+    		final ModelElement_1_0 container = getContainer(element);
         	return getBaseURL() + GraphvizMapper.getElementPath(container) + "#" + element.getName();
-    	} catch (ServiceException e) {
-    		throw new RuntimeServiceException(e);
     	}
     }
 

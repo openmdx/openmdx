@@ -42,9 +42,10 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc.spi;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import java.util.Comparator;
+import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -52,42 +53,78 @@ import org.junit.jupiter.api.Test;
 /**
  * Simple Name Comparator Test
  */
-class SimpleNameComparatorTest {
+class FirstValueThenKeyComparatorTest {
 
 	@Test
 	void when_simpleNameIsSmaller_then_lessThanZero() {
 		//
 		// Arrange
 		//
-		final Comparator<String> testee = new SimpleNameComparator();
+		final Comparator<Map.Entry<String, String>> testee = new FirstByValueThenByKeyComparator();
 		final String left = "org:openmdx:state1:DateState";
 		final String right = "org:openmdx:base:Segment";
 		// 
 		// Act		
 		//
-		final int result = testee.compare(left, right);
+		final int result = testee.compare(toEntry(left), toEntry(right));
 		//
 		// Assert
 		//
 		Assertions.assertTrue(result < 0);
 	}
-	
+
 	@Test
-	void when_simpleNameIsSame_then_zero() {
+	void when_qualifiedNameIsSame_then_zero() {
 		//
 		// Arrange
 		//
-		final Comparator<String> testee = new SimpleNameComparator();
+		final Comparator<Map.Entry<String, String>> testee = new FirstByValueThenByKeyComparator();
+		final String left = "org:openmdx:model1:Segment";
+		final String right = "org:openmdx:model1:Segment";
+		// 
+		// Act		
+		//
+		final int result = testee.compare(toEntry(left), toEntry(right));
+		//
+		// Assert
+		//
+		Assertions.assertEquals(0, result);
+	}
+	
+	@Test
+	void when_simpleNameIsSameAndPackageIsGreater_then_greaterThan0() {
+		//
+		// Arrange
+		//
+		final Comparator<Map.Entry<String, String>> testee = new FirstByValueThenByKeyComparator();
 		final String left = "org:openmdx:model1:Segment";
 		final String right = "org:openmdx:audit1:Segment";
 		// 
 		// Act		
 		//
-		final int result = testee.compare(left, right);
+		final int result = testee.compare(toEntry(left), toEntry(right));
 		//
 		// Assert
 		//
-		Assertions.assertEquals(0, result);
+		Assertions.assertTrue(result > 0);
+	}
+
+	@Test
+	void when_simpleNameIsSameAndPackageIsGreater_then_lessThan0() {
+		//
+		// Arrange
+		//
+		final Comparator<Map.Entry<String, String>> testee = new FirstByValueThenByKeyComparator();
+		final String left = "org:openmdx:audit1:Segment";
+		final String right = "org:openmdx:model1:Segment";
+		// 
+		// Act		
+		//
+		final int result = testee.compare(toEntry(left), toEntry(right));
+		//
+		// Assert
+		//
+		Assertions.assertTrue(result < 0);
 	}
 
 	@Test
@@ -95,17 +132,39 @@ class SimpleNameComparatorTest {
 		//
 		// Arrange
 		//
-		final Comparator<String> testee = new SimpleNameComparator();
+		final Comparator<Map.Entry<String, String>> testee = new FirstByValueThenByKeyComparator();
 		final String left = "org:openmdx:base:Segment";
 		final String right = "org:openmdx:state2:DateState";
 		// 
 		// Act		
 		//
-		final int result = testee.compare(left, right);
+		final int result = testee.compare(toEntry(left), toEntry(right));
 		//
 		// Assert
 		//
 		Assertions.assertTrue(result > 0);
 	}
 
+	private static Map.Entry<String, String> toEntry(String qualifiedName) {
+		final String simpleName = qualifiedName.substring(qualifiedName.lastIndexOf(':')+1);
+		return new Map.Entry<String, String>() {
+
+			@Override
+			public String getKey() {
+				return qualifiedName;
+			}
+
+			@Override
+			public String getValue() {
+				return simpleName;
+			}
+
+			@Override
+			public String setValue(String value) {
+				throw new UnsupportedOperationException();
+			}
+			
+		};
+	}
+	
 }
