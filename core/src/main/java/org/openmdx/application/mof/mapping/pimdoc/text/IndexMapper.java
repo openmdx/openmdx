@@ -155,7 +155,7 @@ public class IndexMapper extends HTMLMapper {
     }
 
     private void packageGroup(final PackageGroup packageGroup) {
-        printLine("\t\t\t\t\t<details class=\"uml-package-cluster\">");
+        printLine("\t\t\t\t\t<details class=\"uml-package-group\">");
         packageGroupSummary(packageGroup.getPackageClusterKey());
     	packageGroupDetails(packageGroup);
         printLine("\t\t\t\t\t</details>");
@@ -171,38 +171,32 @@ public class IndexMapper extends HTMLMapper {
 	}
 
     private void packageGroupClassesAndDataTypes(PackageGroup packageGroup) {
-        printLine("\t\t\t\t\t\t<details class=\"uml-package-cluster class-section\" open>");
+        printLine("\t\t\t\t\t\t<details class=\"uml-class-group\" open>");
         printLine("\t\t\t\t\t\t\t<summary>Classes &amp; Data Types</summary>");
-        printLine("\t\t\t\t\t\t\t<div>");
         packageGroup.forEachClassOrDataType(this::mapClassOrDataTypeLink);
-        printLine("\t\t\t\t\t\t\t</div>");
         printLine("\t\t\t\t\t\t</details>");
     }
 
     private void packageGroupDiagrams(PackageGroup packageGroup) {
-        printLine("\t\t\t\t\t\t<details class=\"uml-package-cluster diagram-section\" open>");
+        printLine("\t\t\t\t\t\t<details class=\"uml-diagram-group\" open>");
         printLine("\t\t\t\t\t\t\t<summary>Diagrams</summary>");
-        printLine("\t\t\t\t\t\t\t<div>");
         packageGroup.forEachDiagram(this::mapDiagramLink);
-        printLine("\t\t\t\t\t\t\t</div>");
         printLine("\t\t\t\t\t\t</details>");
     }
 
     private void mapDiagramLink(String sourcePath, String diagramData) {
         final String textName = PIMDocFileType.TEXT.from(sourcePath, PIMDocFileType.GRAPHVIZ_SOURCE);
-        printLine("\t\t\t\t\t\t\t\t<div>");
-        printLine("\t\t\t\t\t\t\t\t\t<a href=\"", textName, "\" target=\"", HTMLMapper.FRAME_NAME, "\">");
-        printLine(diagramData);
-        printLine("\t\t\t\t\t\t\t\t\t</a>");
-        printLine("\t\t\t\t\t\t\t\t</div>");
+        printLine("\t\t\t\t\t\t\t<div>");
+        printLine("\t\t\t\t\t\t\t\t<a href=\"", textName, "\" target=\"", HTMLMapper.FRAME_NAME, "\">", diagramData, "</a>");
+        printLine("\t\t\t\t\t\t\t</div>");
     }
 
     private void mapClassOrDataTypeLink(String qualifiedName, String simpleName) {
-        printLine("\t\t\t\t\t\t\t\t<div>");
+        printLine("\t\t\t\t\t\t\t<div>");
 		final ModelElement_1_0 contained = getElement(qualifiedName);
-		printLine("\t\t\t\t\t\t\t<a href=\"", getHref(contained), "\" title=\"", getDisplayName(contained),
+		printLine("\t\t\t\t\t\t\t\t<a href=\"", getHref(contained), "\" title=\"", getDisplayName(contained),
 		        "\" target=\"", HTMLMapper.FRAME_NAME, "\">", contained.getName(), "</a>");
-		printLine("\t\t\t\t\t\t\t\t</div>");
+		printLine("\t\t\t\t\t\t\t</div>");
     }
 
     private void packageGroupSummary(String packagePattern) {
