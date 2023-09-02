@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Description: Package Group Builder 
+ * Description: Package Group Stream Builder
  * Owner: the original authors. 
  * ====================================================================
  * 
@@ -42,57 +42,53 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc.spi;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
-import java.util.Collection;
+import java.net.URI;
 import java.util.Comparator;
 import java.util.Map;
-import java.util.SortedSet;
+import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.stream.Stream;
+
+import org.openmdx.application.mof.mapping.pimdoc.spi.PackageGroupComparator;
 
 /**
- * Package Group Builder
+ * Package Group Stream Builder
  */
-public class PackageGroupBuilder extends TreeMap<String,SortedSet<String>> {
+class PackageGroupStreamBuilder {
 
-	public PackageGroupBuilder() {
-		super(COMPARATOR);
-	}
-
-	private static final Comparator<String> COMPARATOR = new PackagePatternComparator();
-	
-	private static final long serialVersionUID = -4489160358886710466L;
-	private final Comparator<String> simpleNameComparator = new SimpleNameComparator();
-	
-	public void addKey(String qualifiedName) {
-		this.computeIfAbsent(qualifiedName, key -> new TreeSet<String>(simpleNameComparator));
+	PackageGroupStreamBuilder(Stream<String> packageGroups) {
+		packageGroups.forEach(this::addTableOfContentEntry);
 	}
 
-	public void addElement(String qualifiedName) {
-		for(Map.Entry<String,SortedSet<String>> e : entrySet()) {
-			if(isPartOfPackageGroup(e.getKey(), qualifiedName)) {
-				e.getValue().add(qualifiedName);
-			}
-		}
-	}
+	private static final Comparator<String> COMPARATOR = new PackageGroupComparator();
+	final SortedMap<String,PackageGroup> packageClusters = new TreeMap<String,PackageGroup>(COMPARATOR);
 	
-	boolean isPartOfPackageGroup(String packagePattern, String qualifiedName) {
-		if(PackagePatternComparator.isWildcardPattern(packagePattern)) {
-			return PackagePatternComparator.isCatchAllPattern(packagePattern) ||
-				qualifiedName.startsWith(PackagePatternComparator.removeWildcard(packagePattern) + ':');
-		} else {
-			return getPackageId(packagePattern).equals(getPackageId(qualifiedName));
-		}
+	private void addTableOfContentEntry(String qualifiedName) {
+		packageClusters.computeIfAbsent(qualifiedName, PackageGroup::new);
 	}
 
-	private String getPackageId(String qualifiedName) {
-		final int end = qualifiedName.lastIndexOf(':');
-		return qualifiedName.substring(0, end);
+	PackageGroupStreamBuilder withClassesAndDataTypes(Stream<String> qualifiedNames) {
+		qualifiedNames.forEach(this::withClassOrDataType);
+		return this;
+	}
+
+	private void withClassOrDataType(String qualifiedName) {
+		packageClusters.values().forEach(i -> i.offerClassOrDataType(qualifiedName));
+	}
+
+	PackageGroupStreamBuilder withDiagrams(Stream<Map.Entry<URI, String>> diagramEntries) {
+		diagramEntries.forEach(this::withDiagram);
+		return this;
 	}
 	
-	public void normalize() {
-		values().removeIf(Collection::isEmpty);
+	private void withDiagram(Map.Entry<URI, String> diagramEntry) {
+		packageClusters.values().forEach(i -> i.offerDiagram(diagramEntry));
+	}
+	
+	Stream<PackageGroup> build() {
+		return packageClusters.values().stream().filter(PackageGroup::hasContent);
 	}
 	
 }

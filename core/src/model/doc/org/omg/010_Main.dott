@@ -1,0 +1,11 @@
+digraph "MOF Diagrams [Package org::omg]" {
+
+	${ATTRIBUTE_STATEMENTS}
+
+    note_mof [
+    	shape="note"
+    	label="The org::omg::** models are used to represent OMG's Meta Object Facility" 
+    	URL="https://www.omg.org/spec/MOF/2.5.1"
+    ] 	
+
+}

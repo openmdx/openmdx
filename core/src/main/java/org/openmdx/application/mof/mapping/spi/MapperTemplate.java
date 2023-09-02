@@ -49,6 +49,9 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.function.Function;
 
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 
 /**
@@ -104,4 +107,20 @@ public abstract class MapperTemplate {
 		this.pw.flush();
 	}
 
+	protected ModelElement_1_0 getElement(Object elementId) {
+		try {
+			return this.model.getElement(elementId);
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
+	}
+
+	protected ModelElement_1_0 getContainer(ModelElement_1_0 element) {
+		try {
+			return this.model.getElement(element.getContainer());
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
+	}
+	
 }

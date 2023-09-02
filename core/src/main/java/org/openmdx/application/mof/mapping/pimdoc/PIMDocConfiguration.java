@@ -57,7 +57,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 
-import org.openmdx.application.mof.mapping.pimdoc.spi.PackagePatternComparator;
+import org.openmdx.application.mof.mapping.pimdoc.spi.PackageGroupComparator;
 import org.openmdx.application.mof.mapping.spi.MarkdownRendererFactory;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -74,7 +74,7 @@ public class PIMDocConfiguration {
 	/**
 	 * Constructor
 	 * 
-	 * @param configurationDir the (maybe {@code null}) PIMDoc configuration base directory
+	 * @param baseDir the (maybe {@code null}) PIMDoc configuration base directory
 	 * 
 	 * @throws ServiceException if the configuration can't be loaded from the specified property file
 	 */
@@ -225,7 +225,7 @@ public class PIMDocConfiguration {
 	private static Collection<String> toTableOfContents(String entries){
 		final Set<String> tableOfContentEntries = new HashSet<>();
 		for(String entry : entries.split(",")) {
-			if(!PackagePatternComparator.isWildcardPattern(entry)) {
+			if(!PackageGroupComparator.isWildcardPattern(entry)) {
 				entry = entry + "::" + entry.substring(entry.lastIndexOf(':') + 1);
 			}
 			tableOfContentEntries.add(entry.replaceAll("::", ":"));

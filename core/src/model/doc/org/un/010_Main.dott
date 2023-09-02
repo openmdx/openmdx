@@ -1,4 +1,4 @@
-digraph "Diagram PrimitiveTypes [Package org::und]" {
+digraph "Diagram PrimitiveTypes [Package org::un]" {
 
 	${ATTRIBUTE_STATEMENTS}
 

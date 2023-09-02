@@ -789,7 +789,7 @@ public abstract class AbstractMapper extends MapperTemplate {
         List<String> namespaceNameComponents,
         String packageSuffix
     ) {
-        StringBuffer namespace = new StringBuffer();
+    	StringBuilder namespace = new StringBuilder();
         for(
             int i = 0, iLimit = namespaceNameComponents.size(); 
             i < iLimit; 

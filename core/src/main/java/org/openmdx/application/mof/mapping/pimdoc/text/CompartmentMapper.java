@@ -205,22 +205,12 @@ abstract class CompartmentMapper extends MapperTemplate {
 		);
 	}
 	
-	protected ModelElement_1_0 getContainer(ModelElement_1_0 current){
-		try {
-			return getElement(current.getContainer());
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
-	}
-	
 	protected String getHref(ModelElement_1_0 current) {
     	if(current.isPackageType() || current.isClassType() || current.isStructureType()){
         	return getBaseURL() + HTMLMapper.getEntryName(current);
-    	} else try {
-    		final ModelElement_1_0 container = this.model.getElement(current.getContainer());
+    	} else {
+    		final ModelElement_1_0 container = getContainer(current);
         	return getBaseURL() + HTMLMapper.getEntryName(container) + "#" + current.getName();
-    	} catch (ServiceException e) {
-    		throw new RuntimeServiceException(e);
     	}
 	}
 	
@@ -232,14 +222,6 @@ abstract class CompartmentMapper extends MapperTemplate {
 		return HTMLMapper.getDisplayName(elcurrentement);
 	}
 	
-	protected ModelElement_1_0 getElement(Object objectId) {
-		try {
-			return super.model.getElement(objectId);
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
-	}
-
 	private Predicate<ModelElement_1_0> getSupertypeFilter() {
 		final Set<?> supertypes = element.objGetSet("allSupertype");
 		return new Predicate<ModelElement_1_0>() {

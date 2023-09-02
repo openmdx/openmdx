@@ -216,13 +216,13 @@ class ModelHelper_1 {
         while(tokenizer.hasMoreTokens()) {
             packageNameComponents.add(tokenizer.nextToken());
         }
-        StringBuffer javaPackageName = new StringBuffer();
+        StringBuilder javaPackageName = new StringBuilder();
         for(
             int i = 0, iLimit = packageNameComponents.size(); 
             i < iLimit; 
             i++
         )  {
-            StringBuffer target = i == 0 ? javaPackageName : javaPackageName.append('.');
+        	StringBuilder target = i == 0 ? javaPackageName : javaPackageName.append('.');
             String source = packageNameComponents.get(i);
             AbstractNames.openmdx2NamespaceElement(target, source);
         }

@@ -144,7 +144,7 @@ public class LoginConfigurationTest {
 			)
 		};
         URLConfiguration localConfiguration = new URLConfiguration(
-            new URL(Resources.toResourceXRI("xri://+resource/org/openmdx/test/security/auth/login.configuration")), 
+            new URL(Resources.toResourceXRI("org/openmdx/test/security/auth/login.configuration")), 
             sharedOptions
         );
         System.out.println(localConfiguration);

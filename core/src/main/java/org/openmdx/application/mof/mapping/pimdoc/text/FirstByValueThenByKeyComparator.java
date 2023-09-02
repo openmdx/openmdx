@@ -42,24 +42,21 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.pimdoc.spi;
+package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import java.util.Comparator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Simple Names Comparator
  */
-public class SimpleNameComparator implements Comparator<String> {
+public class FirstByValueThenByKeyComparator implements Comparator<Map.Entry<String, String>> {
 
 	@Override
-	public int compare(final String qualifiedName1, final String qualifiedName2) {
-		final String simpleName1 = getSimpleName(qualifiedName1);
-		final String simpleName2 = getSimpleName(qualifiedName2);
-		return simpleName1.compareTo(simpleName2);
-	}
-	
-	private String getSimpleName(String qualifiedName) {
-		return qualifiedName.substring(qualifiedName.lastIndexOf(':')+1);
+	public int compare(Entry<String, String> o1, Entry<String, String> o2) {
+		int compareValue = o1.getValue().compareTo(o2.getValue());
+		return compareValue == 0 ? o1.getKey().compareTo(o2.getKey()) : compareValue;
 	}
 
 }

@@ -105,9 +105,7 @@ public class GraphvizTemplates {
 	/**
 	 * Draw given diagrams and send them to the sink
 	 * 
-	 * @param styleSheet    the Graphviz style sheet
-	 * @param fileExtension the file extension, either "dot" or "gv"
-	 * 
+	 * @param sourceDir    the Graphviz source directory
 	 * @throws ServiceException in case of failure
 	 */
 	public void drawDiagrams(final File sourceDir) throws ServiceException {

@@ -121,18 +121,28 @@ body {
 	padding: 0.25em;
 	color: white;
 }
-.uml-cluster p {
+.uml-package-group p {
 	margin-top: 0.1em;
 	margin-bottom: 0.1em;
 	margin-left: 2em;
 }
-.uml-cluster summary {
+.uml-package-group summary {
+	padding: 0.25em;
 	margin-top: 0.1em;
 	margin-bottom: 0.1em;
 }
 .uml-symbol {
 	height: 1em
 } 
+.uml-class-group, .uml-diagram-group {
+	background-color: rgb(158,192,224);
+	color: white;
+	margin-left: 1em;
+}
+.uml-class-group > div, .uml-diagram-group > div {
+	margin-left: 1em;
+}
+
 
 /** 
  * Detail Style
