@@ -89,7 +89,7 @@ public class PackageGroupComparator implements Comparator<String> {
 		return isCatchAllPattern(packageClusterKey) || (
 			isWildcardPattern(packageClusterKey) ? 
 				qualifiedName.startsWith(removeWildcard(packageClusterKey) + ':') :
-				getPackageId(qualifiedName).equals(packageClusterKey)
+				getPackageId(qualifiedName).equals(getPackageId(packageClusterKey))
 	    );	
 	}
 
