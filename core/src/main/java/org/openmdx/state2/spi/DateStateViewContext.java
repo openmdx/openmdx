@@ -110,10 +110,25 @@ public class DateStateViewContext
     private static final long serialVersionUID = -5803852880487324874L;
     
     /**
-     * Create a time point view context 
+     * Create a time point view context for an up-to-date view
      *
      * @param validFor the view's valid time point
-     * @param validAt the view's transaction time point, or {@code null} for an up-to-date view
+     */
+    public static DateStateViewContext newTimePointViewContext(
+        XMLGregorianCalendar validFor
+    ){
+        ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
+        return new DateStateViewContext(
+            datatypeFactory.toDate(validFor),
+            (Date)null
+        );
+    }
+
+    /**
+     * Create a time point view context for historical time pint
+     *
+     * @param validFor the view's valid time point
+     * @param validAt the view's transaction time point
      */
     public static DateStateViewContext newTimePointViewContext(
         XMLGregorianCalendar validFor,
@@ -125,7 +140,7 @@ public class DateStateViewContext
             datatypeFactory.toDateTime(validAt)
         );
     }
-
+    
     /**
      * Create a time range view context 
      *

@@ -292,7 +292,7 @@ public class ObjectView_1Test {
         );
         Mockito.when(marshaller.getPlugIn()).thenReturn(plugIns);
         Mockito.when(dataObject.objGetClass()).thenReturn("org:openmdx:state2:StateCapable"); // For JUnit test only - it's abstract!
-        Mockito.when(marshaller.getInteractionSpec()).thenReturn(DateStateViewContext.newTimePointViewContext(DateStateViews.today(), null));
+        Mockito.when(marshaller.getInteractionSpec()).thenReturn(DateStateViewContext.newTimePointViewContext(DateStateViews.today()));
         ObjectView_1 testee = newTestee();
         //
         // Act
