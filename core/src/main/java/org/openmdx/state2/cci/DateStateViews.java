@@ -188,7 +188,7 @@ public class DateStateViews {
     ) {
         return DateStateViews.getPersistenceManager(
             persistenceManager,
-            DateStateViewContext.newTimeRangeViewContext(validFrom, validTo)
+            createTimeRangeContext(validFrom, validTo)
         );
     }
 
@@ -205,19 +205,36 @@ public class DateStateViews {
      * @return the {@code PersistenceManager} for the given state view context
      */
     public static PersistenceManager getPersistenceManager(
-        PersistenceManager persistenceManager,
-        XMLGregorianCalendar validFor,
-        Date validAt
+        final PersistenceManager persistenceManager,
+        final XMLGregorianCalendar validFor,
+        final Date validAt
     ) {
         return DateStateViews.getPersistenceManager(
             persistenceManager,
-            DateStateViewContext.newTimePointViewContext(
-                validFor == null ? DateStateViews.today() : validFor,
-                validAt
-            )
+            createTimePointContext(validFor, validAt)
         );
     }
 
+    /**
+     * Retrieve the PersistenceManager for an up-to-date view of a given time point view
+     * 
+     * @param persistenceManager
+     *            the JDO context
+     * @param validFor
+     *            the view's valid time point, or {@code null} for today
+     * 
+     * @return the {@code PersistenceManager} for the given state view context
+     */
+    public static PersistenceManager getPersistenceManager(
+        final PersistenceManager persistenceManager,
+        final XMLGregorianCalendar validFor
+    ) {
+        return DateStateViews.getPersistenceManager(
+            persistenceManager,
+            createTimePointContext(validFor, null)
+        );
+    }
+    
     /**
      * Validates a container
      * 
@@ -305,7 +322,7 @@ public class DateStateViews {
     ) {
         return DateStateViews.getPersistenceManager(
             refContext,
-            DateStateViewContext.newTimeRangeViewContext(validFrom, validTo)
+            createTimeRangeContext(validFrom, validTo)
         );
     }
 
@@ -322,19 +339,58 @@ public class DateStateViews {
      * @return the {@code PersistenceManager} for the given state view context
      */
     public static PersistenceManager getPersistenceManager(
-        RefBaseObject refContext,
-        XMLGregorianCalendar validFor,
-        Date validAt
+        final RefBaseObject refContext,
+        final XMLGregorianCalendar validFor,
+        final Date validAt
     ) {
         return DateStateViews.getPersistenceManager(
             refContext,
-            DateStateViewContext.newTimePointViewContext(
-                validFor == null ? DateStateViews.today() : validFor,
-                validAt
-            )
+            createTimePointContext(validFor, validAt)
         );
     }
 
+    /**
+     * Create a time point context
+     * 
+     * @param validFor
+     *            the view's valid time point, or {@code null} for today
+     * @param validAt
+     *            the view's transaction time point, or {@code null} for an up-to-date view
+     *            
+     * @return the corresponding date state view context
+     */
+    private static DateStateViewContext createTimePointContext(
+        XMLGregorianCalendar validFor,
+        final Date validAt
+    ) {
+    	if(validFor == null) {
+    		validFor = DateStateViews.today();
+    	}
+    	return validAt == null ? DateStateViewContext.newTimePointViewContext(
+            validFor
+        ) : DateStateViewContext.newTimePointViewContext(
+            validFor,
+            validAt
+        );
+    }
+    
+    /**
+     * Create a time range context
+     * 
+     * @param validFrom
+     *            the begin of the time range, or {@code null} for an unconstrained lower bound
+     * @param validTo
+     *            the end of the time range, or {@code null} for an unconstrained upper bound
+     *
+     * @return
+     */
+	private static DateStateViewContext createTimeRangeContext(
+		XMLGregorianCalendar validFrom,
+		XMLGregorianCalendar validTo
+	) {
+		return DateStateViewContext.newTimeRangeViewContext(validFrom, validTo);
+	}
+    
     /**
      * Create a core object in the given context
      * 
@@ -912,7 +968,7 @@ public class DateStateViews {
     ) {
         return refContext == null ? null : (T) DateStateViews.getPackageForContext(
             refContext,
-            DateStateViewContext.newTimeRangeViewContext(validFrom, validTo)
+            createTimeRangeContext(validFrom, validTo)
         ).refPackage(
             refPackageClass.getName()
         );
