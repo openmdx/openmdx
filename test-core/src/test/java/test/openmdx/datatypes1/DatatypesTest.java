@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import javax.jdo.FetchGroup;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
@@ -759,11 +760,14 @@ public class DatatypesTest  {
             i < this.values.length;
             i++
         ){
-            NonStated nonStated = segment.getNonStated(String.valueOf(i));
+        	NonStated nonStated = segment.getNonStated(String.valueOf(i));
             validateData(nonStated, this.values[i]);
-            NonStatedQuery query = datatypes1Package.createNonStatedQuery();
+            final NonStatedQuery query = datatypes1Package.createNonStatedQuery();
             query.value6().like((String)this.values[i][VALUE6]);
-            List<NonStated> list = segment.getNonStated(query);
+            final FetchPlan fetchPlan = ((Query)query).getFetchPlan();
+			fetchPlan.setFetchSize(1);
+//			fetchPlan.setGroup(FetchGroup.BASIC);
+			final List<NonStated> list = segment.getNonStated(query);
             Assertions.assertEquals(1,  list.size(), "Query result size");
             nonStated = (NonStated) list.get(0);
             validateData(nonStated, this.values[i]);

@@ -44,6 +44,8 @@
  */
 package org.openmdx.base.naming;
 
+import java.util.Optional;
+
 /**
  * Classic Cross Reference Segment
  */
@@ -115,6 +117,28 @@ public class ClassicCrossReferenceSegment extends XRISegment {
 		return 
 			candidate instanceof ClassicCrossReferenceSegment &&
 			((ClassicCrossReferenceSegment)candidate).discriminant().isLike(discriminant());
+	}
+
+	/**
+	 * Retrieve the cross reference {@code Path} in case of a {@code ClassicCrossReferenceSegment}
+	 * 
+	 * @param xriSegment the native representation candidate XRI segment
+	 * 
+	 * @return the cross reference {@code Path} in case of a {@code ClassicCrossReferenceSegment}, {@code empty()} otherwise
+	 */
+	public static Optional<Path> getClassicCrossReference(XRISegment xriSegment) {
+		return xriSegment instanceof ClassicCrossReferenceSegment ? Optional.of((Path) xriSegment.discriminant()) : Optional.empty();
+	}
+
+	/**
+	 * Build the cross reference {@code Path} in case of a classic cross reference segment
+	 * 
+	 * @param classicRepresentation the classic representation of the candidate XRI segment
+	 * 
+	 * @return the cross reference {@code Path} in case of a classic cross reference segment, {@code empty()} otherwise
+	 */
+	public static Optional<Path> toClassicCrossReference(String classicRepresentation) {
+		return classicRepresentation != null && XRISegment.parseAsClassicCrossReference(classicRepresentation) ? Optional.of(new Path(classicRepresentation)) : Optional.empty();
 	}
 
 }

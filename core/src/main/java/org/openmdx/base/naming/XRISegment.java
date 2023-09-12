@@ -149,7 +149,7 @@ public abstract class XRISegment implements Comparable<XRISegment>, Serializable
 		);
 	}
 	
-	private static boolean parseAsClassicCrossReference(String classicRepresentation) {
+	protected static boolean parseAsClassicCrossReference(String classicRepresentation) {
 		return classicRepresentation.indexOf('/') > 0 && classicRepresentation.indexOf('(') < 0;
 	}
 

@@ -55,8 +55,11 @@ import java.util.Map;
 
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.dbobject.DbObjectConfiguration;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.ClassicCrossReferenceSegment;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.naming.XRISegment;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.kernel.exception.BasicException;
@@ -375,65 +378,84 @@ public class DatabaseConfiguration {
     public String buildObjectId(
         String component
     ) throws ServiceException{
-        return isConvertible(component) ? buildObjectId(new Path(component)) : component;
+    	try {
+	    	return ClassicCrossReferenceSegment.toClassicCrossReference(component).map(this::buildObjectIdStreamable).orElse(component);
+    	} catch (RuntimeServiceException exception) {
+    		throw new ServiceException(exception);
+    	}
+    }
+
+    private String buildObjectIdStreamable(Path resourceIdentifier) {
+    	try {
+			return buildObjectId(resourceIdentifier);
+		} catch (ServiceException exception) {
+			throw new RuntimeServiceException(exception);
+		}
     }
     
     public Path buildResourceIdentifier(
         String id, 
         boolean reference
     ) throws ServiceException {
-        Path source = new Path(id);
-        List<String> target = new ArrayList<String>();
-        if(source.isEmpty()) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE, 
-                "No components found for reference id",
-                new BasicException.Parameter("objectId",id)
-            );          
-        }
-        DbObjectConfiguration dbObjectConfiguration = getDbObjectConfiguration(
-            source.getSegment(0).toClassicRepresentation()
-        );
-        Path type = dbObjectConfiguration.getType();
-        for(
-            int i = 0, pos = 1, iLimit = type.size() - (reference ? 1 : 0); 
-            i < iLimit; 
-            i++
-        ) {
-            if(":*".equals(type.getSegment(i).toClassicRepresentation())) {
-                if(pos >= source.size()) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ASSERTION_FAILURE, 
-                        "Reference not valid for type",
-                        new BasicException.Parameter("objectId",id),
-                        new BasicException.Parameter("type", type)
-                    );                            
-                }
-                String component = source.getSegment(pos++).toClassicRepresentation();
-                target.add(
-                    isConvertible(component) ? buildResourceIdentifier(component, reference).toString() : component
-                );
-            } else {
-                target.add(type.getSegment(i).toClassicRepresentation());
-            }
-        }
-        return new Path(target.toArray(new String[target.size()]));
+    	try {
+	        return buildResourceIdentifierStreamable(new Path(id), reference);
+    	} catch (RuntimeServiceException exception) {
+    		throw new ServiceException(exception);
+    	}
     }
+
+	private Path buildResourceIdentifierStreamable(
+		Path crossReference, 
+		boolean reference
+	){
+		try {
+			List<String> target = new ArrayList<String>();
+	        if(crossReference.isEmpty()) {
+	            throw new ServiceException(
+	                BasicException.Code.DEFAULT_DOMAIN,
+	                BasicException.Code.ASSERTION_FAILURE, 
+	                "No components found for reference id",
+	                new BasicException.Parameter("xri", crossReference.toXRI())
+	            );          
+	        }
+	        DbObjectConfiguration dbObjectConfiguration = getDbObjectConfiguration(
+	            crossReference.getSegment(0).toClassicRepresentation()
+	        );
+	        Path type = dbObjectConfiguration.getType();
+	        for(
+	            int i = 0, pos = 1, iLimit = type.size() - (reference ? 1 : 0); 
+	            i < iLimit; 
+	            i++
+	        ) {
+	            if(":*".equals(type.getSegment(i).toClassicRepresentation())) {
+	                if(pos >= crossReference.size()) {
+	                    throw new ServiceException(
+	                        BasicException.Code.DEFAULT_DOMAIN,
+	                        BasicException.Code.ASSERTION_FAILURE, 
+	                        "Reference not valid for type",
+	                        new BasicException.Parameter("xri",crossReference.toXRI()),
+	                        new BasicException.Parameter("type", type)
+	                    );                            
+	                }
+	                final XRISegment component = crossReference.getSegment(pos++);
+	                target.add(
+	                	ClassicCrossReferenceSegment.getClassicCrossReference(component)
+	                		.map(nested -> buildResourceIdentifierStreamable(nested, reference).toString())
+	                		.orElseGet(component::toClassicRepresentation)
+	                );
+	            } else {
+	                target.add(type.getSegment(i).toClassicRepresentation());
+	            }
+	        }
+	        return new Path(target.toArray(new String[target.size()]));
+		} catch (ServiceException exception) {
+			throw new RuntimeServiceException(exception);
+		}
+	}
     
     public boolean normalizeObjectIds(
     ) {
         return this.database.isNormalizeObjectIds();
-    }
-
-    private boolean isConvertible(
-        String segment
-    ){
-        return 
-            segment != null &&
-            segment.indexOf('/') > 0 &&
-            !segment.startsWith("("); 
     }
 
     public List<DbObjectConfiguration> getDbObjectConfigurations(
