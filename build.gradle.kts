@@ -42,6 +42,9 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
+import org.gradle.kotlin.dsl.*
+import java.util.*
+import java.io.*
 
 plugins {
 	java
@@ -49,5 +52,19 @@ plugins {
 
 allprojects {
     group = "org.openmdx"
-    version = "2.18.6"
+    version = "2.18.7"
+}
+
+tasks.clean {
+    doLast {
+        getPlatformDir().deleteRecursively();
+    }
+}
+
+var env = Properties()
+env.load(FileInputStream(File(project.getRootDir(), "build.properties")))
+val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
+
+fun getPlatformDir(): File {
+	return File(project.getRootDir(), "jre-" + targetPlatform);
 }
