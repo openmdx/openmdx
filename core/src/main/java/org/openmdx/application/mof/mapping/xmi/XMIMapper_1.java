@@ -211,7 +211,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
             outputStream,
             this.model
         );
-        XMISchemaWriter.writeSchemaHeader(true);
+        XMISchemaWriter.writeSchemaHeader();
 
         // all model elements
         for(
