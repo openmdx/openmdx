@@ -179,7 +179,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:4.2.0")    
     testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
     // openmdxBase
-    openmdxBase("org.openmdx:openmdx-base:2.18.6")
+    openmdxBase("org.openmdx:openmdx-base:2.18.8")
     // openmdxBootstrap
     openmdxBootstrap(files(File(project.getBuildDir(), "generated/classes/openmdxBootstrap")))
     openmdxBootstrap("javax:javaee-api:8.0.+")
