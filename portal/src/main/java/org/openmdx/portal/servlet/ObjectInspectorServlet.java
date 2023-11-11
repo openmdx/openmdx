@@ -1255,7 +1255,7 @@ public class ObjectInspectorServlet extends HttpServlet {
                             nextView
                         );
                     }            
-                    String autostartUrl = app.getPortalExtension().getAutostartUrl(app);
+                    String autostartUrl = app.getPortalExtension().getAutostartUrl(session, app);
                     // Redirect to autostart URL
                     if(autostartUrl != null) {
                     	URL url = new URL("http://localhost/" + request.getContextPath() + autostartUrl);

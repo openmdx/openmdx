@@ -55,6 +55,7 @@ import java.util.TimeZone;
 
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefStruct;
+import javax.servlet.http.HttpSession;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -610,9 +611,12 @@ public interface PortalExtension_1_0 {
      * and the application context. If not null, the user is forwarded to 
      * the specified URL.
      * 
-     * @return autostart URL or null
+     * @param session
+     * @param app
+     * @return
      */
     String getAutostartUrl(
+    	HttpSession session,
     	ApplicationContext app
     );
 

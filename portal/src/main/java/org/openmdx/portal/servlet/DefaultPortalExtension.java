@@ -93,6 +93,7 @@ import javax.jdo.Transaction;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefStruct;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -3041,6 +3042,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
      */
     @Override
     public String getAutostartUrl(
+    	HttpSession session,
     	ApplicationContext app
     ) {
         return app.getSettings().getProperty(UserSettings.AUTOSTART_URL.getName());
