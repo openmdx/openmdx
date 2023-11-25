@@ -113,18 +113,12 @@ public class XMISchemaMapper {
 
   //---------------------------------------------------------------------------
 
-  /**
-   *
-   * @param primitiveTypeDef
-   * @param objectIdDefinitionRequired If true, indicates that the ObjectId simple type has been written after the schema header
-   * @throws ServiceException
-   */
   public void writePrimitiveType(
-    ModelElement_1_0 primitiveTypeDef,
-    boolean objectIdDefinitionRequired
+    ModelElement_1_0 primitiveTypeDef
   ) throws ServiceException {
     String qualifiedName = primitiveTypeDef.getQualifiedName();
-    if (!objectIdDefinitionRequired || !toXsdName(qualifiedName).equals("org.openmdx.base.ObjectId")) {
+    // since ObjectId simple type has already been written in the schema header, we need to skip it here
+    if (!toXsdName(qualifiedName).equals("org.openmdx.base.ObjectId")) {
       this.pw.println(spaces(4) + "<xsd:simpleType name=\"" + toXsdName(qualifiedName) + "\">");
       this.pw.println(spaces(4) + "  <xsd:annotation>");
       this.pw.println(spaces(4) + "    <xsd:documentation>this is a " + qualifiedName + "</xsd:documentation>");
@@ -436,14 +430,13 @@ public class XMISchemaMapper {
     this.pw.println(spaces(4) + "    <xsd:documentation>Root element</xsd:documentation>");
     this.pw.println(spaces(4) + "  </xsd:annotation>");
     this.pw.println(spaces(4) + "</xsd:element>");
-    if(objectIdDefinitionRequired) {
-      this.pw.println(spaces(4) + "<xsd:simpleType name=\"org.openmdx.base.ObjectId\">");                
-      this.pw.println(spaces(4) + "  <xsd:annotation>");                                                        
-      this.pw.println(spaces(4) + "    <xsd:documentation>this is a org:openmdx:base:ObjectId</xsd:documentation>");
-      this.pw.println(spaces(4) + "  </xsd:annotation>");
-      this.pw.println(spaces(4) + "  <xsd:restriction base=\"xsd:string\"/>");
-      this.pw.println(spaces(4) + "</xsd:simpleType>");
-    }
+    // write ObjectId simple type
+    this.pw.println(spaces(4) + "<xsd:simpleType name=\"org.openmdx.base.ObjectId\">");
+    this.pw.println(spaces(4) + "  <xsd:annotation>");
+    this.pw.println(spaces(4) + "    <xsd:documentation>this is a org:openmdx:base:ObjectId</xsd:documentation>");
+    this.pw.println(spaces(4) + "  </xsd:annotation>");
+    this.pw.println(spaces(4) + "  <xsd:restriction base=\"xsd:string\"/>");
+    this.pw.println(spaces(4) + "</xsd:simpleType>");
     this.pw.flush();
   }
   
