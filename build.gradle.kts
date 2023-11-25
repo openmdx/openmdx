@@ -52,7 +52,7 @@ plugins {
 
 allprojects {
     group = "org.openmdx"
-    version = "2.18.8"
+    version = "2.18.9"
 }
 
 tasks.clean {
