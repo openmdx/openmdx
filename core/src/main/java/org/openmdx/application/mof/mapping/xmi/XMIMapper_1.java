@@ -189,6 +189,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
     ) throws ServiceException {
 
         Map allCompositeAssociationEnds = new HashMap();
+        boolean objectIdDefinitionRequired = true;
 
         for(
             Iterator<ModelElement_1_0> i = this.model.getContent().iterator();
@@ -211,7 +212,8 @@ public class XMIMapper_1 extends AbstractMapper_1 {
             outputStream,
             this.model
         );
-        XMISchemaWriter.writeSchemaHeader(true);
+
+        XMISchemaWriter.writeSchemaHeader(objectIdDefinitionRequired);
 
         // all model elements
         for(
@@ -223,7 +225,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
 
             // PrimitiveType
             if(elementDef.isPrimitiveType()) {
-                XMISchemaWriter.writePrimitiveType(elementDef);
+                XMISchemaWriter.writePrimitiveType(elementDef, objectIdDefinitionRequired);
             }
             // Class
             else if(
