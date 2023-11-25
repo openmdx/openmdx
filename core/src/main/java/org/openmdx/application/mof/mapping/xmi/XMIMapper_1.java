@@ -213,7 +213,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
             this.model
         );
 
-        XMISchemaWriter.writeSchemaHeader(objectIdDefinitionRequired);
+      XMISchemaWriter.writeSchemaHeader(objectIdDefinitionRequired);
 
         // all model elements
         for(
@@ -406,7 +406,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
             XMIModelWriter.writePrimitiveType(elementDef);
         } else if(elementDef.isStructureType()) {
             XMIModelWriter.writeStructureType(elementDef);
-        } else if(elementDef.isStructureFieldType()                                                                               ) {
+        } else if(elementDef.isStructureFieldType()) {
             XMIModelWriter.writeStructureField(elementDef);
         } else if(elementDef.isAliasType()) {
             XMIModelWriter.writeAliasType(elementDef);
