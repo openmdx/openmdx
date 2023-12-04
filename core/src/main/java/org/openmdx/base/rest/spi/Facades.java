@@ -188,7 +188,7 @@ public class Facades {
     /**
      * Create a query facade for the given object id
      * 
-     * @param ojectId a data object's id
+     * @param objectId a data object's id
      * @param preferringNotFoundException Tells whether a NOT_FOUND exception 
      * shall be thrown rather than returning an empty result set in case a 
      * requested object does not exist.
@@ -198,11 +198,11 @@ public class Facades {
      * @throws ResourceException
      */
     public static Query_2Facade newQuery(
-        Path ojectId,
+        Path objectId,
         boolean preferringNotFoundException
     ) throws ServiceException {
         try {
-            return Query_2Facade.newInstance(ojectId, preferringNotFoundException);
+            return Query_2Facade.newInstance(objectId, preferringNotFoundException);
         } catch (ResourceException exception) {
             throw new ServiceException(exception);
         }
@@ -211,16 +211,16 @@ public class Facades {
     /**
      * Create a query facade for the given object id
      * 
-     * @param ojectId a data object's id
+     * @param objectId a data object's id
      * 
      * @return a query facade for the given object id
      * 
      * @throws ResourceException
      */
     public static Query_2Facade newQuery(
-        Path ojectId
+        Path objectId
     ) throws ServiceException {
-        return newQuery(ojectId, false);
+        return newQuery(objectId, false);
     }
 
 }
