@@ -61,7 +61,7 @@ repositories {
 }
 
 var env = Properties()
-env.load(FileInputStream(File(project.getRootDir(), "build.properties")))
+env.load(FileInputStream(File(project.rootDir, "build.properties")))
 val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
 
 eclipse {
@@ -71,23 +71,23 @@ eclipse {
     jdt {
 		sourceCompatibility = targetPlatform
     	targetCompatibility = targetPlatform
-    	javaRuntimeName = "JavaSE-" + targetPlatform    	
+    	javaRuntimeName = "JavaSE-$targetPlatform"
     }
 }
 
 fun getProjectImplementationVersion(): String {
-	return project.getVersion().toString();
+	return project.version.toString();
 }
 
 fun getDeliverDir(): File {
-	return File(project.getRootDir(), "jre-" + targetPlatform + "/" + project.name);
+	return File(project.rootDir, "jre-" + targetPlatform + "/" + project.name);
 }
 
 fun touch(file: File) {
 	ant.withGroovyBuilder { "touch"("file" to file, "mkdirs" to true) }
 }
 
-project.getConfigurations().maybeCreate("openmdxBootstrap")
+project.configurations.maybeCreate("openmdxBootstrap")
 val openmdxBootstrap by configurations
 
 dependencies {
@@ -106,7 +106,7 @@ sourceSets {
         }
         resources {
         	srcDir("src/main/resources")
-        }        
+        }
     }
     test {
         java {
@@ -116,7 +116,7 @@ sourceSets {
         resources {
         	srcDir("src/test/resources")
         }
-    }    
+    }
 }
 
 val openmdxCatalinaIncludes = listOf(
@@ -131,7 +131,7 @@ tasks {
 	    maxHeapSize = "4G"
 	}
 	compileJava {
- 	   options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
+ 	   options.release.set(Integer.valueOf(targetPlatform.majorVersion))
 	}
 	assemble {
 		dependsOn(
@@ -198,7 +198,7 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-" + project.name + "-jre-" + targetPlatform)
+    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-${project.name}-jre-" + targetPlatform)
         contents {
         	// test-core
         	from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
@@ -208,8 +208,10 @@ distributions {
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-            from("../jre-" + targetPlatform + "/" + project.name + "/lib") { into("jre-" + targetPlatform + "/" + project.name + "/lib") }
-            from("../jre-" + targetPlatform + "/gradle/repo") { into("jre-" + targetPlatform + "/gradle/repo") }
+			var path = "jre-$targetPlatform/${project.name}/lib"
+			from("../$path") { into(path) }
+			path = "jre-$targetPlatform/gradle/repo"
+			from("../$path") { into(path) }
         }
     }
 }

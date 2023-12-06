@@ -61,7 +61,7 @@ repositories {
 }
 
 var env = Properties()
-env.load(FileInputStream(File(project.getRootDir(), "build.properties")))
+env.load(FileInputStream(File(project.rootDir, "build.properties")))
 val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
 
 eclipse {
@@ -71,23 +71,23 @@ eclipse {
     jdt {
 		sourceCompatibility = targetPlatform
     	targetCompatibility = targetPlatform
-    	javaRuntimeName = "JavaSE-" + targetPlatform    	
+    	javaRuntimeName = "JavaSE-$targetPlatform"
     }
 }
 
 fun getProjectImplementationVersion(): String {
-	return project.getVersion().toString();
+	return project.version.toString();
 }
 
 fun getDeliverDir(): File {
-	return File(project.getRootDir(), "jre-" + targetPlatform + "/" + project.name);
+	return File(project.rootDir, "jre-" + targetPlatform + "/" + project.name);
 }
 
 fun touch(file: File) {
 	ant.withGroovyBuilder { "touch"("file" to file, "mkdirs" to true) }
 }
 
-project.getConfigurations().maybeCreate("openmdxBootstrap")
+project.configurations.maybeCreate("openmdxBootstrap")
 val openmdxBootstrap by configurations
 
 dependencies {
@@ -96,7 +96,7 @@ dependencies {
     implementation("javax:javaee-api:8.0.+")
     implementation("javax.jdo:jdo-api:3.1")    
     implementation("org.apache.directory.api:apache-ldap-api:2.0.+")    
-    // Test
+    // Test
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
     testImplementation("org.mockito:mockito-core:4.2.0")    
     testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
@@ -112,7 +112,7 @@ sourceSets {
         }
         resources {
         	srcDir("src/main/resources")
-        }        
+        }
     }
     test {
         java {
@@ -120,7 +120,7 @@ sourceSets {
         }
         resources {
         	srcDir("src/test/resources")
-        }        
+        }
     }
 }
 
@@ -164,15 +164,15 @@ tasks {
 	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 	    inputs.dir("${projectDir}/src/model/emf")
 	    inputs.dir("${projectDir}/src/main/resources")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.name + "-models.zip")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.name + ".openmdx-xmi.zip")
+	    outputs.file("${buildDir}/generated/sources/model/openmdx-${project.name}-models.zip")
+	    outputs.file("${buildDir}/generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip")
 	    classpath = configurations["openmdxBootstrap"]
 	    doFirst {
 	    }
 	    doLast {
 	        copy {
 	            from(
-	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.name + "-models.zip")
+	                zipTree("${buildDir}/generated/sources/model/openmdx-${project.name}-models.zip")
 	            )
 	            into("$buildDir/generated/sources/java/main")
 	            include(
@@ -183,7 +183,7 @@ tasks {
 	}
 	compileJava {
 	    dependsOn("generate-model")
-	    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
+	    options.release.set(Integer.valueOf(targetPlatform.majorVersion))
 	}
 	assemble {
 		dependsOn(
@@ -543,8 +543,10 @@ distributions {
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-            from("../jre-" + targetPlatform + "/" + project.name + "/lib") { into("jre-" + targetPlatform + "/" + project.name + "/lib") }
-            from("../jre-" + targetPlatform + "/gradle/repo") { into("jre-" + targetPlatform + "/gradle/repo") }
+			var path = "jre-$targetPlatform/${project.name}/lib"
+			from("../$path") { into(path) }
+			path = "jre-$targetPlatform/gradle/repo"
+			from("../$path") { into(path) }
         }
     }
 }

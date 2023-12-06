@@ -61,7 +61,7 @@ repositories {
 }
 
 var env = Properties()
-env.load(FileInputStream(File(project.getRootDir(), "build.properties")))
+env.load(FileInputStream(File(project.rootDir, "build.properties")))
 val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
 
 eclipse {
@@ -71,23 +71,23 @@ eclipse {
     jdt {
 		sourceCompatibility = targetPlatform
     	targetCompatibility = targetPlatform
-    	javaRuntimeName = "JavaSE-" + targetPlatform    	
+    	javaRuntimeName = "JavaSE-$targetPlatform"
     }
 }
 
 fun getProjectImplementationVersion(): String {
-	return project.getVersion().toString();
+	return project.version.toString();
 }
 
 fun getDeliverDir(): File {
-	return File(project.getRootDir(), "jre-" + targetPlatform + "/" + project.name);
+	return File(project.rootDir, "jre-" + targetPlatform + "/" + project.name);
 }
 
 fun touch(file: File) {
 	ant.withGroovyBuilder { "touch"("file" to file, "mkdirs" to true) }
 }
 
-project.getConfigurations().maybeCreate("openmdxBootstrap")
+project.configurations.maybeCreate("openmdxBootstrap")
 val openmdxBootstrap by configurations
 
 dependencies {
@@ -119,7 +119,7 @@ sourceSets {
         resources {
         	srcDir("src/main/resources")
             srcDir("$buildDir/generated/resources/main")
-        }        
+        }
     }
     test {
         java {
@@ -129,7 +129,7 @@ sourceSets {
         resources {
         	srcDir("src/test/resources")
         }
-    }    
+    }
     create("openmdxDatatype") {
     	java {
         	srcDir("src/model/java")
@@ -160,21 +160,21 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 	dependsOn("openmdxDatatypeClasses")
     inputs.dir("${projectDir}/src/model/emf")
     inputs.dir("${projectDir}/src/main/resources")
-    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.name + "-models.zip")
-    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.name + ".openmdx-xmi.zip")
+    outputs.file("${buildDir}/generated/sources/model/openmdx-${project.name}-models.zip")
+    outputs.file("${buildDir}/generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip")
     classpath(configurations["openmdxBootstrap"])
     classpath(sourceSets["openmdxDatatype"].runtimeClasspath)
 	args = listOf(
 		"--pathMapSymbol=openMDX 2 ~ Core (EMF)",
-		"--pathMapPath=file:" + File(project.getRootDir(), "core/src/model/emf") + "/",
+		"--pathMapPath=file:" + File(project.rootDir, "core/src/model/emf") + "/",
 		"--pathMapSymbol=openMDX 2 ~ Security (EMF)",
-		"--pathMapPath=file:" + File(project.getRootDir(), "security/src/model/emf") + "/",
+		"--pathMapPath=file:" + File(project.rootDir, "security/src/model/emf") + "/",
 		"--pathMapSymbol=openMDX 2 ~ Portal (EMF)",
-		"--pathMapPath=file:" + File(project.getRootDir(), "portal/src/model/emf") + "/",
+		"--pathMapPath=file:" + File(project.rootDir, "portal/src/model/emf") + "/",
 		"--url=file:src/model/emf/models.uml",
 		"--xmi=emf",
-		"--out=" + File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.name + "-models.zip"),
-		"--openmdxjdo=" + File(project.getProjectDir(), "src/main/resources"),
+		"--out=" + File(project.getBuildDir(), "generated/sources/model/openmdx-${project.name}-models.zip"),
+		"--openmdxjdo=" + File(project.projectDir, "src/main/resources"),
 		"--dataproviderVersion=2",
 		"--format=xmi1",
 	    "--format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(cci2)",
@@ -188,7 +188,7 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
     doLast {
         copy {
             from(
-                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.name + "-models.zip")
+                zipTree("${buildDir}/generated/sources/model/openmdx-${project.name}-models.zip")
             )
             into("${buildDir}/generated/sources/java/main")
             include(
@@ -197,7 +197,7 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
         }
         copy {
             from(
-                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.name + ".openmdx-xmi.zip")
+                zipTree("${buildDir}/generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip")
             )
             into("${buildDir}/generated/resources/main")
         }
@@ -206,7 +206,7 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 
 tasks.compileJava {
     dependsOn("generate-model")
-    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
+    options.release.set(Integer.valueOf(targetPlatform.majorVersion))
 }
 
 
@@ -219,7 +219,7 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-" + project.name + "-jre-" + targetPlatform)
+    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-${project.name}-jre-" + targetPlatform)
         contents {
         	// test-core
         	from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
@@ -229,8 +229,10 @@ distributions {
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-            from("../jre-" + targetPlatform + "/" + project.name + "/lib") { into("jre-" + targetPlatform + "/" + project.name + "/lib") }
-            from("../jre-" + targetPlatform + "/gradle/repo") { into("jre-" + targetPlatform + "/gradle/repo") }
+            var path = "jre-$targetPlatform/${project.name}/lib"
+            from("../$path") { into(path) }
+            path = "jre-$targetPlatform/gradle/repo"
+            from("../$path") { into(path) }
         }
     }
 }

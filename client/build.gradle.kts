@@ -61,7 +61,7 @@ repositories {
 }
 
 var env = Properties()
-env.load(FileInputStream(File(project.getRootDir(), "build.properties")))
+env.load(FileInputStream(File(project.rootDir, "build.properties")))
 val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
 
 if(System.getenv("JRE_18") == null) {
@@ -75,25 +75,25 @@ eclipse {
     jdt {
 		sourceCompatibility = targetPlatform
     	targetCompatibility = targetPlatform
-    	javaRuntimeName = "JavaSE-" + targetPlatform    	
+    	javaRuntimeName = "JavaSE-$targetPlatform"
     }
 }
 
 fun getProjectImplementationVersion(): String {
-	return project.getVersion().toString();
+	return project.version.toString();
 }
 
 fun getDeliverDir(): File {
-	return File(project.getRootDir(), "jre-" + targetPlatform + "/" + project.name);
+	return File(project.rootDir, "jre-" + targetPlatform + "/" + project.name);
 }
 
 fun touch(file: File) {
 	ant.withGroovyBuilder { "touch"("file" to file, "mkdirs" to true) }
 }
 
-project.getConfigurations().maybeCreate("openmdxBootstrap")
+project.configurations.maybeCreate("openmdxBootstrap")
 val openmdxBootstrap by configurations
-project.getConfigurations().maybeCreate("javaeeApi")
+project.configurations.maybeCreate("javaeeApi")
 val javaeeApi by configurations
 
 dependencies {
@@ -112,11 +112,11 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir("${layout.buildDirectory}/generated/sources/java/main")
+			srcDir("${buildDir}/generated/sources/java/main")
         }
         resources {
         	srcDir("src/main/resources")
-        }        
+        }
     }
 }
 
@@ -187,12 +187,12 @@ tasks {
 			":security:openmdx-security.jar"
 		)
 		doFirst {
-			val f = File("${layout.buildDirectory}/resources/main/META-INF/openmdxmof.properties")
+			var f = File("$buildDir/resources/main/META-INF/openmdxmof.properties")
 			touch(f)
 			f.writeText(zipTree(File(getDeliverDir(), "../core/lib/openmdx-base.jar")).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText() )
 			f.appendText(zipTree(File(getDeliverDir(), "../security/lib/openmdx-security.jar")).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText() )
 		}
-	    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
+	    options.release.set(Integer.valueOf(targetPlatform.majorVersion))
 	}
 	distTar {
 		dependsOn(
@@ -263,7 +263,7 @@ tasks {
 			},
 			copySpec {
 				from(
-					configurations["javaeeApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) }	
+					configurations["javaeeApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) }
 				).include(
 					"javax/transaction/Synchronization.*"
 				)
@@ -339,7 +339,7 @@ tasks {
 				).exclude(
 					"META-INF/openmdx-xml-outputfactory.properties"
 				).eachFile {
-					path = "org/openmdx/dalvik/metainf/" + name
+					path = "org/openmdx/dalvik/metainf/$name"
 				}
 	    	},
 	    	copySpec {
@@ -362,7 +362,7 @@ tasks {
 			}
 		)
 	}
-	
+
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-dalvik-sources.jar") {
 	    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		dependsOn(":client:openmdx-client-sources.jar")
@@ -395,19 +395,21 @@ tasks {
 }
 
 distributions {
-    main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-" + project.name + "-jre-" + targetPlatform)
-        contents {
-        	// client
-        	from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
-            from("src") { into(project.name + "/src") }
-            // etc
-            from("etc") { into(project.name + "/etc") }
-            // rootDir
-            from("..") { include("*.properties", "*.kts" ) }
-            // jre-...
-            from("../jre-" + targetPlatform + "/" + project.name + "/lib") { into("jre-" + targetPlatform + "/" + project.name + "/lib") }
-            from("../jre-" + targetPlatform + "/gradle/repo") { into("jre-" + targetPlatform + "/gradle/repo") }
-        }
-    }
+	main {
+		distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-${project.name}-jre-" + targetPlatform)
+		contents {
+			// client
+			from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
+			from("src") { into(project.name + "/src") }
+			// etc
+			from("etc") { into(project.name + "/etc") }
+			// rootDir
+			from("..") { include("*.properties", "*.kts" ) }
+			// jre-...
+			var path = "jre-$targetPlatform/${project.name}/lib"
+			from("../$path") { into(path) }
+			path = "jre-$targetPlatform/gradle/repo"
+			from("../$path") { into(path) }
+		}
+	}
 }
