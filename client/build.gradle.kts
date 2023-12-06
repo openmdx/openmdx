@@ -43,10 +43,8 @@
  * listed in the NOTICE file.
  */
 
-import org.gradle.kotlin.dsl.*
-import org.w3c.dom.Element
+import java.io.FileInputStream
 import java.util.*
-import java.io.*
 
 plugins {
 	java
@@ -86,7 +84,7 @@ fun getProjectImplementationVersion(): String {
 }
 
 fun getDeliverDir(): File {
-	return File(project.getRootDir(), "jre-" + targetPlatform + "/" + project.getName());
+	return File(project.getRootDir(), "jre-" + targetPlatform + "/" + project.name);
 }
 
 fun touch(file: File) {
@@ -114,7 +112,7 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir("$buildDir/generated/sources/java/main")
+            srcDir("${layout.buildDirectory}/generated/sources/java/main")
         }
         resources {
         	srcDir("src/main/resources")
@@ -189,7 +187,7 @@ tasks {
 			":security:openmdx-security.jar"
 		)
 		doFirst {
-			var f = File("$buildDir/resources/main/META-INF/openmdxmof.properties")
+			val f = File("${layout.buildDirectory}/resources/main/META-INF/openmdxmof.properties")
 			touch(f)
 			f.writeText(zipTree(File(getDeliverDir(), "../core/lib/openmdx-base.jar")).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText() )
 			f.appendText(zipTree(File(getDeliverDir(), "../security/lib/openmdx-security.jar")).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText() )
@@ -398,17 +396,17 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-" + project.getName() + "-jre-" + targetPlatform)
+    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-" + project.name + "-jre-" + targetPlatform)
         contents {
         	// client
-        	from(".") { into(project.getName()); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
-            from("src") { into(project.getName() + "/src") }
+        	from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
+            from("src") { into(project.name + "/src") }
             // etc
-            from("etc") { into(project.getName() + "/etc") }
+            from("etc") { into(project.name + "/etc") }
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-            from("../jre-" + targetPlatform + "/" + project.getName() + "/lib") { into("jre-" + targetPlatform + "/" + project.getName() + "/lib") }
+            from("../jre-" + targetPlatform + "/" + project.name + "/lib") { into("jre-" + targetPlatform + "/" + project.name + "/lib") }
             from("../jre-" + targetPlatform + "/gradle/repo") { into("jre-" + targetPlatform + "/gradle/repo") }
         }
     }

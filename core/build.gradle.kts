@@ -42,10 +42,8 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-import org.gradle.kotlin.dsl.*
-import org.w3c.dom.Element
+import java.io.FileInputStream
 import java.util.*
-import java.io.*
 
 plugins {
 	java
@@ -84,7 +82,7 @@ fun getProjectImplementationVersion(): String {
 }
 
 fun getDeliverDir(): File {
-	return File(project.getRootDir(), "jre-" + targetPlatform + "/" + project.getName());
+	return File(project.getRootDir(), "jre-" + targetPlatform + "/" + project.name);
 }
 
 fun touch(file: File) {
@@ -264,8 +262,8 @@ tasks {
 	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 	    inputs.dir("${projectDir}/src/model/emf")
 	    inputs.dir("${projectDir}/src/main/resources")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.name + "-models.zip")
+	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.name + ".openmdx-xmi.zip")
 	    classpath = configurations["openmdxBootstrap"]
 	    doFirst {
 	        project.copy {
@@ -276,7 +274,7 @@ tasks {
 	    doLast {
 	        copy {
 	            from(
-	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.name + "-models.zip")
 	            )
 	            into("$buildDir/generated/sources/java/main")
 	            include(
@@ -285,7 +283,7 @@ tasks {
 	        }
 	        copy {
 	            from(
-	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.name + ".openmdx-xmi.zip")
 	            )
 	            into("$buildDir/generated/resources/main")
 	            exclude(
@@ -294,7 +292,7 @@ tasks {
 	        }
 	        copy {
 	            from(
-	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.name + "-models.zip")
 	            )
 	            into("$buildDir/generated/resources/main")
 	            include(

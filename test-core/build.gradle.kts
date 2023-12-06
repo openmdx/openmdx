@@ -43,10 +43,8 @@
  * listed in the NOTICE file.
  */
 
-import org.gradle.kotlin.dsl.*
-import org.w3c.dom.Element
+import java.io.FileInputStream
 import java.util.*
-import java.io.*
 
 plugins {
 	java
@@ -82,7 +80,7 @@ fun getProjectImplementationVersion(): String {
 }
 
 fun getDeliverDir(): File {
-	return File(project.getRootDir(), "jre-" + targetPlatform + "/" + project.getName());
+	return File(project.getRootDir(), "jre-" + targetPlatform + "/" + project.name);
 }
 
 fun touch(file: File) {
@@ -162,8 +160,8 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 	dependsOn("openmdxDatatypeClasses")
     inputs.dir("${projectDir}/src/model/emf")
     inputs.dir("${projectDir}/src/main/resources")
-    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
-    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.name + "-models.zip")
+    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.name + ".openmdx-xmi.zip")
     classpath(configurations["openmdxBootstrap"])
     classpath(sourceSets["openmdxDatatype"].runtimeClasspath)
 	args = listOf(
@@ -175,7 +173,7 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 		"--pathMapPath=file:" + File(project.getRootDir(), "portal/src/model/emf") + "/",
 		"--url=file:src/model/emf/models.uml",
 		"--xmi=emf",
-		"--out=" + File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + "-models.zip"),
+		"--out=" + File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.name + "-models.zip"),
 		"--openmdxjdo=" + File(project.getProjectDir(), "src/main/resources"),
 		"--dataproviderVersion=2",
 		"--format=xmi1",
@@ -190,7 +188,7 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
     doLast {
         copy {
             from(
-                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.name + "-models.zip")
             )
             into("${buildDir}/generated/sources/java/main")
             include(
@@ -199,7 +197,7 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
         }
         copy {
             from(
-                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.name + ".openmdx-xmi.zip")
             )
             into("${buildDir}/generated/resources/main")
         }
@@ -221,17 +219,17 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-" + project.getName() + "-jre-" + targetPlatform)
+    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-" + project.name + "-jre-" + targetPlatform)
         contents {
         	// test-core
-        	from(".") { into(project.getName()); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
-            from("src") { into(project.getName() + "/src") }
+        	from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
+            from("src") { into(project.name + "/src") }
             // etc
-            from("etc") { into(project.getName() + "/etc") }
+            from("etc") { into(project.name + "/etc") }
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-            from("../jre-" + targetPlatform + "/" + project.getName() + "/lib") { into("jre-" + targetPlatform + "/" + project.getName() + "/lib") }
+            from("../jre-" + targetPlatform + "/" + project.name + "/lib") { into("jre-" + targetPlatform + "/" + project.name + "/lib") }
             from("../jre-" + targetPlatform + "/gradle/repo") { into("jre-" + targetPlatform + "/gradle/repo") }
         }
     }
