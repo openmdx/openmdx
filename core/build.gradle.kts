@@ -259,8 +259,8 @@ tasks {
 	)
 	val openmdxSystemExcludes = listOf<String>( )
 
-	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
-	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 	    inputs.dir("${projectDir}/src/model/emf")
 	    inputs.dir("${projectDir}/src/main/resources")
@@ -351,7 +351,7 @@ tasks {
         )
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-base.jar") {
-	    duplicatesStrategy = DuplicatesStrategy.WARN
+	    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	    dependsOn(
 	        ":core:compileJava",
 	        ":core:processResources"

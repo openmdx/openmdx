@@ -202,8 +202,8 @@ tasks {
         )
 	}
 
-	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
-	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 
 	val openmdxSecurityIncludes = listOf(
 		"org/openmdx/security/*/**",
@@ -219,7 +219,7 @@ tasks {
 	)
 
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-security.jar") {
-		duplicatesStrategy = DuplicatesStrategy.WARN
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		dependsOn(
 			":security:compileJava",
 			":security:generate-model",
@@ -247,7 +247,7 @@ tasks {
 	}
 
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-security-sources.jar") {
-		duplicatesStrategy = DuplicatesStrategy.WARN
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		destinationDirectory.set(File(getDeliverDir(), "lib"))
 		archiveFileName.set("openmdx-security-sources.jar")
 		includeEmptyDirs = false
@@ -275,7 +275,7 @@ tasks {
 	val openmdxAuthenticationExcludes = listOf<String>( )
 
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-authentication.jar") {
-		duplicatesStrategy = DuplicatesStrategy.WARN
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		dependsOn(
 			":security:compileJava",
 			":security:processResources"

@@ -302,10 +302,10 @@ tasks {
 
 	val openmdxPortalExcludes = listOf<String>( )
 
-	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
-	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-portal.jar") {
-		duplicatesStrategy = DuplicatesStrategy.WARN
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		dependsOn(
 			":portal:compileJava",
 			":portal:generate-model",
@@ -332,7 +332,7 @@ tasks {
 		exclude(openmdxPortalExcludes)
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-portal-sources.jar") {
-		duplicatesStrategy = DuplicatesStrategy.WARN
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		destinationDirectory.set(File(getDeliverDir(), "lib"))
 		archiveFileName.set("openmdx-portal-sources.jar")
 		includeEmptyDirs = false

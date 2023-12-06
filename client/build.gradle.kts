@@ -176,8 +176,8 @@ tasks {
 		"org/omg/primitivetypes/**"
 	)
 
-	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
-	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 
 	test {
 		useJUnitPlatform()
@@ -221,7 +221,7 @@ tasks {
         )
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-client.jar") {
-	    duplicatesStrategy = DuplicatesStrategy.WARN
+	    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		dependsOn(
 			":core:openmdx-base.jar",
 			":core:openmdx-system.jar",
@@ -273,7 +273,7 @@ tasks {
 		)
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-client-sources.jar") {
-	    duplicatesStrategy = DuplicatesStrategy.WARN
+	    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		dependsOn(
 			":core:openmdx-base-sources.jar",
 			":core:openmdx-system-sources.jar",
@@ -315,7 +315,7 @@ tasks {
 		)
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-dalvik.jar") {
-	    duplicatesStrategy = DuplicatesStrategy.WARN
+	    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		dependsOn(
 			"openmdx-client.jar",
 			":client:compileJava",
@@ -366,7 +366,7 @@ tasks {
 	}
 	
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-dalvik-sources.jar") {
-	    duplicatesStrategy = DuplicatesStrategy.WARN
+	    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		dependsOn(":client:openmdx-client-sources.jar")
 		destinationDirectory.set(File(getDeliverDir(), "lib"))
 		archiveFileName.set("openmdx-dalvik-sources.jar")

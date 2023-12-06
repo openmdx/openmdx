@@ -152,10 +152,10 @@ tasks.test {
 }
 
 project.tasks.named("processResources", Copy::class.java) {
-    duplicatesStrategy = DuplicatesStrategy.WARN
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 project.tasks.named("processTestResources", Copy::class.java) {
-    duplicatesStrategy = DuplicatesStrategy.WARN
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {

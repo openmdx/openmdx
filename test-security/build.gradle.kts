@@ -145,8 +145,8 @@ tasks {
 	assemble {
 		dependsOn()
 	}
-    named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
-    named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+    named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+    named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 }
 
 distributions {
