@@ -60,6 +60,9 @@ repositories {
     maven {
        url = uri("file:" + File(project.rootDir, "publish/build/repos/releases"))
     }
+	flatDir {
+		dirs(System.getProperty("user.home") + "/Repository/flat")
+	}
 }
 
 var env = Properties()
@@ -177,7 +180,7 @@ dependencies {
     // openmdxBase
     openmdxBase("org.openmdx:openmdx-base:2.18.9")
     // openmdxBootstrap
-    openmdxBootstrap(files(File(project.getBuildDir(), "generated/classes/openmdxBootstrap")))
+    openmdxBootstrap(files(file(layout.buildDirectory.dir("generated/classes/openmdxBootstrap"))))
     openmdxBootstrap("javax:javaee-api:8.0.+")
 	openmdxBootstrap("com.vladsch.flexmark:flexmark:0.62.2")
     // jdo-api
@@ -190,11 +193,11 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir("${buildDir}/generated/sources/java/main")
+            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
         }
         resources {
         	srcDir("src/main/resources")
-            srcDir("${buildDir}/generated/resources/main")
+            srcDir(layout.buildDirectory.dir("generated/resources/main"))
         }
     }
     test {
@@ -259,41 +262,38 @@ tasks {
 	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 
 	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
-	    inputs.dir("${projectDir}/src/model/emf")
-	    inputs.dir("${projectDir}/src/main/resources")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-${project.name}-models.zip")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip")
+	    inputs.dir("$projectDir/src/model/emf")
+	    inputs.dir("$projectDir/src/main/resources")
+	    outputs.file(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
+	    outputs.file(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip"))
 	    classpath = configurations["openmdxBootstrap"]
 	    doFirst {
 	        project.copy {
 	            from(project.zipTree(project.configurations.getByName("openmdxBase").singleFile))
-	            into(File(project.getBuildDir(), "generated/classes/openmdxBootstrap"))
+	            into(layout.buildDirectory.dir("generated/classes/openmdxBootstrap"))
 	        }
 	    }
 	    doLast {
 	        copy {
 	            from(
-	                zipTree("${buildDir}/generated/sources/model/openmdx-${project.name}-models.zip")
+	                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
 	            )
-	            into("$buildDir/generated/sources/java/main")
+	            into(layout.buildDirectory.dir("generated/sources/java/main"))
 	            include(
 	                "**/*.java"
 	            )
 	        }
 	        copy {
 	            from(
-	                zipTree("${buildDir}/generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip")
+	                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip"))
 	            )
-	            into("$buildDir/generated/resources/main")
-	            exclude(
-	                "**/orm.xml"
-	            )
+	            into(layout.buildDirectory.dir("generated/resources/main"))
 	        }
 	        copy {
 	            from(
-	                zipTree("${buildDir}/generated/sources/model/openmdx-${project.name}-models.zip")
+	                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
 	            )
-	            into("$buildDir/generated/resources/main")
+	            into(layout.buildDirectory.dir("generated/resources/main"))
 	            include(
 	                "**/openmdxorm.properties"
 	            )
@@ -323,17 +323,15 @@ tasks {
 	compileJava {
 	    dependsOn("generate-model")
 	    doFirst {
-	    	var f: File
 	    	// base/Version
-	    	f = File("${buildDir}/generated/sources/java/main/org/openmdx/base/Version.java")
-	    	touch(f)
-	    	f.writeText(getVersionClass("org.openmdx.base"))
+			var f: File = file(layout.buildDirectory.dir("generated/sources/java/main/org/openmdx/base/Version.java"))
+			f.writeText(getVersionClass("org.openmdx.base"))
 	    	// application/Version
-	        f = File("${buildDir}/generated/sources/java/main/org/openmdx/application/Version.java")
+	        f = file(layout.buildDirectory.dir("generated/sources/java/main/org/openmdx/application/Version.java"))
 	        touch(f)
 	        f.writeText(getVersionClass("org.openmdx.application"))
 	        // system/Version
-	        f = File("${buildDir}/generated/sources/java/main/org/openmdx/system/Version.java")
+	        f = file(layout.buildDirectory.dir("generated/sources/java/main/org/openmdx/system/Version.java"))
 	        touch(f)
 	        f.writeText(getVersionClass("org.openmdx.system"))
 	    }
@@ -365,9 +363,9 @@ tasks {
 	        )
 	    }
 		from(
-			File(buildDir, "classes/java/main"),
-			File(buildDir, "resources/main"),
-			File(buildDir, "generated/resources/main"),
+			File(buildDirAsFile, "classes/java/main"),
+			File(buildDirAsFile, "resources/main"),
+			File(buildDirAsFile, "generated/resources/main"),
 			"src/main/resources",
 	        configurations["cacheApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) },
 	        configurations["jdoApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) }
@@ -389,7 +387,7 @@ tasks {
 	    }
 		from(
 			"src/main/java",
-			File(buildDir, "generated/sources/java/main")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxBaseIncludes)
 		exclude(openmdxBaseExcludes)
@@ -408,7 +406,7 @@ tasks {
 	        )
 	    }
 	    from(
-	  		File(buildDir, "classes/java/main")
+	  		File(buildDirAsFile, "classes/java/main")
 	  	)
 	  	include(openmdxSystemIncludes)
 	  	exclude(openmdxSystemExcludes)
@@ -427,7 +425,7 @@ tasks {
 	    }
 		from(
 			"src/main/java",
-			File(buildDir, "generated/sources/java/main")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxSystemIncludes)
 		exclude(openmdxSystemExcludes)

@@ -114,17 +114,17 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir("${buildDir}/generated/sources/java/main")
+            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
         }
         resources {
         	srcDir("src/main/resources")
-            srcDir("$buildDir/generated/resources/main")
+            srcDir(layout.buildDirectory.dir("generated/resources/main"))
         }
     }
     test {
         java {
             srcDir("src/test/java")
-            srcDir("${buildDir}/generated/sources/java/test")
+            srcDir(layout.buildDirectory.dir("generated/sources/java/test"))
         }
         resources {
         	srcDir("src/test/resources")
@@ -158,10 +158,10 @@ project.tasks.named("processTestResources", Copy::class.java) {
 
 tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 	dependsOn("openmdxDatatypeClasses")
-    inputs.dir("${projectDir}/src/model/emf")
-    inputs.dir("${projectDir}/src/main/resources")
-    outputs.file("${buildDir}/generated/sources/model/openmdx-${project.name}-models.zip")
-    outputs.file("${buildDir}/generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip")
+    inputs.dir("$projectDir/src/model/emf")
+    inputs.dir("$projectDir/src/main/resources")
+    outputs.file(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
+    outputs.file(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip"))
     classpath(configurations["openmdxBootstrap"])
     classpath(sourceSets["openmdxDatatype"].runtimeClasspath)
 	args = listOf(
@@ -188,18 +188,18 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
     doLast {
         copy {
             from(
-                zipTree("${buildDir}/generated/sources/model/openmdx-${project.name}-models.zip")
+                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
             )
-            into("${buildDir}/generated/sources/java/main")
+            into(layout.buildDirectory.dir("generated/sources/java/main"))
             include(
                 "**/*.java"
             )
         }
         copy {
             from(
-                zipTree("${buildDir}/generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip")
+                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip"))
             )
-            into("${buildDir}/generated/resources/main")
+            into(layout.buildDirectory.dir("generated/resources/main"))
         }
     }
 }

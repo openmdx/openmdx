@@ -115,7 +115,7 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir("$buildDir/generated/sources/java/main")
+            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
         }
         resources {
         	srcDir("src/main/resources")
@@ -124,7 +124,7 @@ sourceSets {
     test {
         java {
             srcDir("src/test/java")
-            srcDir("$buildDir/generated/sources/java/test")
+            srcDir(layout.buildDirectory.dir("generated/sources/java/test"))
         }
         resources {
         	srcDir("src/test/resources")

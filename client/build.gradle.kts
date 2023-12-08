@@ -112,7 +112,7 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-			srcDir("${buildDir}/generated/sources/java/main")
+			srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
         }
         resources {
         	srcDir("src/main/resources")
@@ -187,7 +187,7 @@ tasks {
 			":security:openmdx-security.jar"
 		)
 		doFirst {
-			var f = File("$buildDir/resources/main/META-INF/openmdxmof.properties")
+			var f = file(layout.buildDirectory.dir("resources/main/META-INF/openmdxmof.properties"))
 			touch(f)
 			f.writeText(zipTree(File(getDeliverDir(), "../core/lib/openmdx-base.jar")).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText() )
 			f.appendText(zipTree(File(getDeliverDir(), "../security/lib/openmdx-security.jar")).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText() )
@@ -241,8 +241,8 @@ tasks {
 	    with(
 	    	copySpec {
 				from(
-					File(buildDir, "classes/java/main"),
-					File(buildDir, "resources/main"),
+					File(buildDirAsFile, "classes/java/main"),
+					File(buildDirAsFile, "resources/main"),
 					"src/main/resources"
 				).include(
 					openmdxClientIncludes
@@ -292,7 +292,7 @@ tasks {
 	    	copySpec {
 				from(
 					"src/main/java",
-					File(buildDir, "generated/sources/java/main")
+					File(buildDirAsFile, "generated/sources/java/main")
 				).include(
 					openmdxClientIncludes
 				).exclude(
@@ -353,8 +353,8 @@ tasks {
 			},
 	    	copySpec {
 				from(
-					File(buildDir, "classes/java/main"),
-					File(buildDir, "resources/main"),
+					File(buildDirAsFile, "classes/java/main"),
+					File(buildDirAsFile, "resources/main"),
 					"src/main/dalvik"
 				).exclude(
 					"META-INF/*/**"
@@ -381,7 +381,7 @@ tasks {
 	    	copySpec {
 				from(
 					"src/main/java",
-					File(buildDir, "generated/sources/java/main"),
+					File(buildDirAsFile, "generated/sources/java/main"),
 					zipTree(File(getDeliverDir(), "../client/lib/openmdx-client-sources.jar"))
 				).include(
 					openmdxDalvikIncludes

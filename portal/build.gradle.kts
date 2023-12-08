@@ -106,7 +106,7 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir("$buildDir/generated/sources/java/main")
+            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
         }
         resources {
         	srcDir("src/main/resources")
@@ -115,7 +115,7 @@ sourceSets {
     test {
         java {
             srcDir("src/test/java")
-            srcDir("$buildDir/generated/sources/java/test")
+            srcDir(layout.buildDirectory.dir("generated/sources/java/test"))
         }
         resources {
         	srcDir("src/test/resources")
@@ -123,7 +123,7 @@ sourceSets {
     }
 }
 
-touch(File(buildDir, "generated/sources/js/portal-all.js"))
+touch(file(layout.buildDirectory.dir("generated/sources/js/portal-all.js")))
 
 tasks {
 	test {
@@ -143,119 +143,122 @@ tasks {
 		)
 	}
 	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
-	    inputs.dir("${projectDir}/src/model/emf")
-	    inputs.dir("${projectDir}/src/main/resources")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-${project.name}-models.zip")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip")
+	    inputs.dir("$projectDir/src/model/emf")
+	    inputs.dir("$projectDir/src/main/resources")
+	    outputs.file(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
+	    outputs.file(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip"))
 	    classpath = configurations["openmdxBootstrap"]
 	    doFirst {
 	    }
 	    doLast {
 	        copy {
 	            from(
-	                zipTree("${buildDir}/generated/sources/model/openmdx-${project.name}-models.zip")
+	                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
 	            )
-	            into("$buildDir/generated/sources/java/main")
+	            into(layout.buildDirectory.dir("generated/sources/java/main"))
 	            include(
 	                "**/*.java"
 	            )
 	        }
 	    }
 	}
+
+	val buildDirAsFile = layout.buildDirectory.asFile.get()
+
 	register<JavaExec>("compress-and-append-prototype") {
 		val fileName = "prototype.js"
-		val dirName = "${projectDir}/src/js/org/prototypejs"
+		val dirName = "$projectDir/src/js/org/prototypejs"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-ssf") {
 		val fileName = "ssf.js"
-		val dirName = "${projectDir}/src/js/org/openmdx/portal"
+		val dirName = "$projectDir/src/js/org/openmdx/portal"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-calendar") {
 		val fileName = "calendar.js"
-		val dirName = "${projectDir}/src/js/com/dynarch/calendar"
+		val dirName = "$projectDir/src/js/com/dynarch/calendar"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-calendar-setup") {
 		val fileName = "calendar-setup.js"
-		val dirName = "${projectDir}/src/js/com/dynarch/calendar"
+		val dirName = "$projectDir/src/js/com/dynarch/calendar"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-guicontrol") {
 		val fileName = "guicontrol.js"
-		val dirName = "${projectDir}/src/js/org/openmdx/portal"
+		val dirName = "$projectDir/src/js/org/openmdx/portal"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-wiky") {
 		val fileName = "wiky.js"
-		val dirName = "${projectDir}/src/js/net/wiky"
+		val dirName = "$projectDir/src/js/net/wiky"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-wiky-lang") {
 		val fileName = "wiky.lang.js"
-		val dirName = "${projectDir}/src/js/net/wiky"
+		val dirName = "$projectDir/src/js/net/wiky"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-wiky-math") {
 		val fileName = "wiky.math.js"
-		val dirName = "${projectDir}/src/js/net/wiky"
+		val dirName = "$projectDir/src/js/net/wiky"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register("compress-and-append-js") {
@@ -269,14 +272,14 @@ tasks {
 		dependsOn("compress-and-append-wiky-math")
 	    doLast {
 	    	val f = File(projectDir, "src/war/openmdx-inspector.war/js/portal-all.js")
-	        f.writeText(File("$buildDir/generated/sources/js/prototype.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/ssf.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/calendar.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/calendar-setup.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/guicontrol.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/wiky.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/wiky.lang.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/wiky.math.js").readText())
+	        f.writeText(file(layout.buildDirectory.dir("generated/sources/js/prototype.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/ssf.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/calendar.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/calendar-setup.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/guicontrol.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/wiky.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/wiky.lang.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/wiky.math.js")).readText())
 	    }
 	}
 	compileJava {
@@ -321,10 +324,10 @@ tasks {
 			)
 		}
 		from(
-			File(buildDir, "classes/java/main"),
-			File(buildDir, "resources/main"),
+			File(this.buildDirAsFile, "classes/java/main"),
+			File(this.buildDirAsFile, "resources/main"),
 			"src/main/resources",
-			zipTree(File(buildDir, "generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip"))
+			zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip"))
 		)
 		include(openmdxPortalIncludes)
 		exclude(openmdxPortalExcludes)
@@ -344,7 +347,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDir, "generated/sources/java/main")
+			File(this.buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxPortalIncludes)
 		exclude(openmdxPortalExcludes)

@@ -44,19 +44,12 @@
  */
 package org.openmdx.gradle
 
-import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.JavaVersion
+import org.gradle.api.tasks.bundling.Jar
 import java.io.File
 import java.io.FileInputStream
-import java.util.Properties
-import java.text.SimpleDateFormat
-import java.util.TimeZone
-import java.util.Date
+import java.util.*
 
 open class ArchiveTask() : Jar() {
 
@@ -67,11 +60,11 @@ open class ArchiveTask() : Jar() {
 		env.load(FileInputStream(File(getProject().getRootDir(), "build.properties")))
 	}
 
-	@Internal var buildDir = getProject().getBuildDir()
-	@Internal var projectDir = getProject().getProjectDir()
-	
+	@Internal var projectDir = project.projectDir
+	@Internal var buildDirAsFile = project.layout.buildDirectory.asFile.get()
+
 	@Input var projectImplementationVersion: String
-	init {		
+	init {
 		projectImplementationVersion = project.getVersion().toString();
 	}
 

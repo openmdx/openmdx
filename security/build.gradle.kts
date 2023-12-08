@@ -108,7 +108,7 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir("$buildDir/generated/sources/java/main")
+            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
         }
         resources {
         	srcDir("src/main/resources")
@@ -162,19 +162,19 @@ tasks {
 		)
 	}
 	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
-	    inputs.dir("${projectDir}/src/model/emf")
-	    inputs.dir("${projectDir}/src/main/resources")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-${project.name}-models.zip")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip")
+	    inputs.dir("$projectDir/src/model/emf")
+	    inputs.dir("$projectDir/src/main/resources")
+	    outputs.file(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
+	    outputs.file(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip"))
 	    classpath = configurations["openmdxBootstrap"]
 	    doFirst {
 	    }
 	    doLast {
 	        copy {
 	            from(
-	                zipTree("${buildDir}/generated/sources/model/openmdx-${project.name}-models.zip")
+	                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
 	            )
-	            into("$buildDir/generated/sources/java/main")
+	            into(layout.buildDirectory.dir("generated/sources/java/main"))
 	            include(
 	                "**/*.java"
 	            )
@@ -237,10 +237,10 @@ tasks {
 			)
 		}
 		from(
-			File(buildDir, "classes/java/main"),
-			File(buildDir, "resources/main"),
+			File(buildDirAsFile, "classes/java/main"),
+			File(buildDirAsFile, "resources/main"),
 			"src/main/resources",
-			zipTree(File(buildDir, "generated/sources/model/openmdx-" + project.name + ".openmdx-xmi.zip"))
+			zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-" + project.name + ".openmdx-xmi.zip"))
 		)
 		include(openmdxSecurityIncludes)
 		exclude(openmdxSecurityExcludes)
@@ -261,7 +261,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDir, "generated/sources/java/main")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxSecurityIncludes)
 		exclude(openmdxSecurityExcludes)
@@ -292,8 +292,8 @@ tasks {
 			)
 		}
 		from(
-			File(buildDir, "classes/java/main"),
-			File(buildDir, "resources/main"),
+			File(buildDirAsFile, "classes/java/main"),
+			File(buildDirAsFile, "resources/main"),
 			"src/main/resources"
 		)
 		include(openmdxAuthenticationIncludes)
@@ -314,7 +314,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDir, "generated/sources/java/main")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxAuthenticationIncludes)
 		exclude(openmdxAuthenticationExcludes)
@@ -350,8 +350,8 @@ tasks {
 			)
 		}
 		from(
-			File(buildDir, "classes/java/main"),
-			File(buildDir, "resources/main"),
+			File(buildDirAsFile, "classes/java/main"),
+			File(buildDirAsFile, "resources/main"),
 			"src/main/resources",
 			zipTree(File(getDeliverDir(), "../core/lib/openmdx-base.jar"))
 		)
@@ -373,7 +373,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDir, "generated/sources/java/main")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxRadiusIncludes)
 		exclude(openmdxRadiusExcludes)
@@ -401,8 +401,8 @@ tasks {
 			)
 		}
 		from(
-			File(buildDir, "classes/java/main"),
-			File(buildDir, "resources/main"),
+			File(buildDirAsFile, "classes/java/main"),
+			File(buildDirAsFile, "resources/main"),
 			"src/main/resources"
 		)
 		include(openmdxLdapIncludes)
@@ -423,7 +423,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDir, "generated/sources/java/main")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxLdapIncludes)
 		exclude(openmdxLdapExcludes)
@@ -452,8 +452,8 @@ tasks {
 			)
 		}
 		from(
-			File(buildDir, "classes/java/main"),
-			File(buildDir, "resources/main"),
+			File(buildDirAsFile, "classes/java/main"),
+			File(buildDirAsFile, "resources/main"),
 			"src/main/resources"
 		)
 		include(openmdxPkiIncludes)
@@ -474,7 +474,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDir, "generated/sources/java/main")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxPkiIncludes)
 		exclude(openmdxPkiExcludes)
@@ -503,8 +503,8 @@ tasks {
 			)
 		}
 		from(
-			File(buildDir, "classes/java/main"),
-			File(buildDir, "resources/main"),
+			File(buildDirAsFile, "classes/java/main"),
+			File(buildDirAsFile, "resources/main"),
 			"src/main/resources"
 		)
 		include(openmdxResourceIncludes)
@@ -524,7 +524,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDir, "generated/sources/java/main")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxResourceIncludes)
 		exclude(openmdxResourceExcludes)
