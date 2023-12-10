@@ -42,9 +42,8 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-import org.gradle.kotlin.dsl.*
+import java.io.FileInputStream
 import java.util.*
-import java.io.*
 
 plugins {
 	java
@@ -62,9 +61,9 @@ tasks.clean {
 }
 
 var env = Properties()
-env.load(FileInputStream(File(project.getRootDir(), "build.properties")))
+env.load(FileInputStream(File(project.rootDir, "build.properties")))
 val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
 
 fun getPlatformDir(): File {
-	return File(project.getRootDir(), "jre-" + targetPlatform);
+	return File(project.rootDir, "jre-$targetPlatform");
 }

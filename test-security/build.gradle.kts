@@ -42,10 +42,8 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-import org.gradle.kotlin.dsl.*
-import org.w3c.dom.Element
+import java.io.FileInputStream
 import java.util.*
-import java.io.*
 
 plugins {
 	java
@@ -65,7 +63,7 @@ repositories {
 }
 
 var env = Properties()
-env.load(FileInputStream(File(project.getRootDir(), "build.properties")))
+env.load(FileInputStream(File(project.rootDir, "build.properties")))
 val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
 
 eclipse {
@@ -75,23 +73,23 @@ eclipse {
     jdt {
 		sourceCompatibility = targetPlatform
     	targetCompatibility = targetPlatform
-    	javaRuntimeName = "JavaSE-" + targetPlatform    	
+    	javaRuntimeName = "JavaSE-$targetPlatform"
     }
 }
 
 fun getProjectImplementationVersion(): String {
-	return project.getVersion().toString();
+	return project.version.toString();
 }
 
 fun getDeliverDir(): File {
-	return File(project.getRootDir(), "jre-" + targetPlatform + "/" + project.getName());
+	return File(project.rootDir, "jre-" + targetPlatform + "/" + project.name);
 }
 
 fun touch(file: File) {
 	ant.withGroovyBuilder { "touch"("file" to file, "mkdirs" to true) }
 }
 
-project.getConfigurations().maybeCreate("openmdxBootstrap")
+project.configurations.maybeCreate("openmdxBootstrap")
 val openmdxBootstrap by configurations
 
 dependencies {
@@ -117,21 +115,21 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir("$buildDir/generated/sources/java/main")
+            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
         }
         resources {
         	srcDir("src/main/resources")
-        }        
+        }
     }
     test {
         java {
             srcDir("src/test/java")
-            srcDir("$buildDir/generated/sources/java/test")
+            srcDir(layout.buildDirectory.dir("generated/sources/java/test"))
         }
         resources {
         	srcDir("src/test/resources")
         }
-    }    
+    }
 }
 
 tasks {
@@ -140,29 +138,31 @@ tasks {
 	    maxHeapSize = "4G"
 	}
 	compileJava {
-	    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
+	    options.release.set(Integer.valueOf(targetPlatform.majorVersion))
 	}
 	assemble {
 		dependsOn()
 	}
-    named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
-    named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+    named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+    named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 }
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-" + project.getName() + "-jre-" + targetPlatform)
+    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-${project.name}-jre-" + targetPlatform)
         contents {
         	// test-core
-        	from(".") { into(project.getName()); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
-            from("src") { into(project.getName() + "/src") }
+        	from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
+            from("src") { into(project.name + "/src") }
             // etc
-            from("etc") { into(project.getName() + "/etc") }
+            from("etc") { into(project.name + "/etc") }
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-            from("../jre-" + targetPlatform + "/" + project.getName() + "/lib") { into("jre-" + targetPlatform + "/" + project.getName() + "/lib") }
-            from("../jre-" + targetPlatform + "/gradle/repo") { into("jre-" + targetPlatform + "/gradle/repo") }
+            var path = "jre-$targetPlatform/${project.name}/lib"
+            from("../$path") { into(path) }
+            path = "jre-$targetPlatform/gradle/repo"
+            from("../$path") { into(path) }
         }
     }
 }

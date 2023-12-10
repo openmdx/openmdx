@@ -43,10 +43,8 @@
  * listed in the NOTICE file.
  */
 
-import org.gradle.kotlin.dsl.*
-import org.w3c.dom.Element
+import java.io.FileInputStream
 import java.util.*
-import java.io.*
 
 plugins {
 	java
@@ -63,7 +61,7 @@ repositories {
 }
 
 var env = Properties()
-env.load(FileInputStream(File(project.getRootDir(), "build.properties")))
+env.load(FileInputStream(File(project.rootDir, "build.properties")))
 val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
 
 eclipse {
@@ -73,23 +71,23 @@ eclipse {
     jdt {
 		sourceCompatibility = targetPlatform
     	targetCompatibility = targetPlatform
-    	javaRuntimeName = "JavaSE-" + targetPlatform    	
+    	javaRuntimeName = "JavaSE-$targetPlatform"
     }
 }
 
 fun getProjectImplementationVersion(): String {
-	return project.getVersion().toString();
+	return project.version.toString();
 }
 
 fun getDeliverDir(): File {
-	return File(project.getRootDir(), "jre-" + targetPlatform + "/" + project.getName());
+	return File(project.rootDir, "jre-" + targetPlatform + "/" + project.name);
 }
 
 fun touch(file: File) {
 	ant.withGroovyBuilder { "touch"("file" to file, "mkdirs" to true) }
 }
 
-project.getConfigurations().maybeCreate("openmdxBootstrap")
+project.configurations.maybeCreate("openmdxBootstrap")
 val openmdxBootstrap by configurations
 
 dependencies {
@@ -108,24 +106,24 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir("$buildDir/generated/sources/java/main")
+            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
         }
         resources {
         	srcDir("src/main/resources")
-        }        
+        }
     }
     test {
         java {
             srcDir("src/test/java")
-            srcDir("$buildDir/generated/sources/java/test")
+            srcDir(layout.buildDirectory.dir("generated/sources/java/test"))
         }
         resources {
         	srcDir("src/test/resources")
         }
-    }    
+    }
 }
 
-touch(File(buildDir, "generated/sources/js/portal-all.js"))
+touch(file(layout.buildDirectory.dir("generated/sources/js/portal-all.js")))
 
 tasks {
 	test {
@@ -145,119 +143,122 @@ tasks {
 		)
 	}
 	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
-	    inputs.dir("${projectDir}/src/model/emf")
-	    inputs.dir("${projectDir}/src/main/resources")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+	    inputs.dir("$projectDir/src/model/emf")
+	    inputs.dir("$projectDir/src/main/resources")
+	    outputs.file(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
+	    outputs.file(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip"))
 	    classpath = configurations["openmdxBootstrap"]
 	    doFirst {
 	    }
 	    doLast {
 	        copy {
 	            from(
-	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+	                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
 	            )
-	            into("$buildDir/generated/sources/java/main")
+	            into(layout.buildDirectory.dir("generated/sources/java/main"))
 	            include(
 	                "**/*.java"
 	            )
 	        }
 	    }
 	}
+
+	val buildDirAsFile = layout.buildDirectory.asFile.get()
+
 	register<JavaExec>("compress-and-append-prototype") {
 		val fileName = "prototype.js"
-		val dirName = "${projectDir}/src/js/org/prototypejs"
+		val dirName = "$projectDir/src/js/org/prototypejs"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-ssf") {
 		val fileName = "ssf.js"
-		val dirName = "${projectDir}/src/js/org/openmdx/portal"
+		val dirName = "$projectDir/src/js/org/openmdx/portal"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-calendar") {
 		val fileName = "calendar.js"
-		val dirName = "${projectDir}/src/js/com/dynarch/calendar"
+		val dirName = "$projectDir/src/js/com/dynarch/calendar"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-calendar-setup") {
 		val fileName = "calendar-setup.js"
-		val dirName = "${projectDir}/src/js/com/dynarch/calendar"
+		val dirName = "$projectDir/src/js/com/dynarch/calendar"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-guicontrol") {
 		val fileName = "guicontrol.js"
-		val dirName = "${projectDir}/src/js/org/openmdx/portal"
+		val dirName = "$projectDir/src/js/org/openmdx/portal"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-wiky") {
 		val fileName = "wiky.js"
-		val dirName = "${projectDir}/src/js/net/wiky"
+		val dirName = "$projectDir/src/js/net/wiky"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-wiky-lang") {
 		val fileName = "wiky.lang.js"
-		val dirName = "${projectDir}/src/js/net/wiky"
+		val dirName = "$projectDir/src/js/net/wiky"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register<JavaExec>("compress-and-append-wiky-math") {
 		val fileName = "wiky.math.js"
-		val dirName = "${projectDir}/src/js/net/wiky"
+		val dirName = "$projectDir/src/js/net/wiky"
 		classpath = fileTree(
-			File("${projectDir}/etc/yuicompressor", "yuicompressor.jar")
+			File("$projectDir/etc/yuicompressor", "yuicompressor.jar")
 		)
 	    args = listOf(
 	        "--line-break", "1000",
-	        "-o", "$buildDir/generated/sources/js/${fileName}",
-	        "${dirName}/${fileName}"
+	        "-o", "$buildDirAsFile/generated/sources/js/$fileName",
+	        "$dirName/$fileName"
 	    )
 	}
 	register("compress-and-append-js") {
@@ -271,19 +272,19 @@ tasks {
 		dependsOn("compress-and-append-wiky-math")
 	    doLast {
 	    	val f = File(projectDir, "src/war/openmdx-inspector.war/js/portal-all.js")
-	        f.writeText(File("$buildDir/generated/sources/js/prototype.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/ssf.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/calendar.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/calendar-setup.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/guicontrol.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/wiky.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/wiky.lang.js").readText())
-	        f.appendText(File("$buildDir/generated/sources/js/wiky.math.js").readText())
+	        f.writeText(file(layout.buildDirectory.dir("generated/sources/js/prototype.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/ssf.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/calendar.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/calendar-setup.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/guicontrol.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/wiky.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/wiky.lang.js")).readText())
+	        f.appendText(file(layout.buildDirectory.dir("generated/sources/js/wiky.math.js")).readText())
 	    }
 	}
 	compileJava {
 	    dependsOn("generate-model")
-	    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
+	    options.release.set(Integer.valueOf(targetPlatform.majorVersion))
 	}
 	assemble {
 		dependsOn(
@@ -302,10 +303,10 @@ tasks {
 
 	val openmdxPortalExcludes = listOf<String>( )
 
-	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
-	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-portal.jar") {
-		duplicatesStrategy = DuplicatesStrategy.WARN
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		dependsOn(
 			":portal:compileJava",
 			":portal:generate-model",
@@ -323,16 +324,16 @@ tasks {
 			)
 		}
 		from(
-			File(buildDir, "classes/java/main"),
-			File(buildDir, "resources/main"),
+			File(this.buildDirAsFile, "classes/java/main"),
+			File(this.buildDirAsFile, "resources/main"),
 			"src/main/resources",
-			zipTree(File(buildDir, "generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip"))
+			zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip"))
 		)
 		include(openmdxPortalIncludes)
 		exclude(openmdxPortalExcludes)
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-portal-sources.jar") {
-		duplicatesStrategy = DuplicatesStrategy.WARN
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		destinationDirectory.set(File(getDeliverDir(), "lib"))
 		archiveFileName.set("openmdx-portal-sources.jar")
 		includeEmptyDirs = false
@@ -346,7 +347,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDir, "generated/sources/java/main")
+			File(this.buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxPortalIncludes)
 		exclude(openmdxPortalExcludes)
@@ -422,18 +423,20 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-" + project.getName() + "-jre-" + targetPlatform)
+    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-${project.name}-jre-" + targetPlatform)
         contents {
         	// portal
-        	from(".") { into(project.getName()); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
-            from("src") { into(project.getName() + "/src") }
+        	from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
+            from("src") { into(project.name + "/src") }
             // etc
-            from("etc") { into(project.getName() + "/etc") }
+            from("etc") { into(project.name + "/etc") }
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-            from("../jre-" + targetPlatform + "/" + project.getName() + "/lib") { into("jre-" + targetPlatform + "/" + project.getName() + "/lib") }
-            from("../jre-" + targetPlatform + "/gradle/repo") { into("jre-" + targetPlatform + "/gradle/repo") }
+			var path = "jre-$targetPlatform/${project.name}/lib"
+			from("../$path") { into(path) }
+			path = "jre-$targetPlatform/gradle/repo"
+			from("../$path") { into(path) }
         }
     }
 }

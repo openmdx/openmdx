@@ -42,10 +42,8 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-import org.gradle.kotlin.dsl.*
-import org.w3c.dom.Element
+import java.io.FileInputStream
 import java.util.*
-import java.io.*
 
 plugins {
 	java
@@ -60,12 +58,15 @@ repositories {
         url = uri("https://datura.econoffice.ch/maven2")
     }
     maven {
-       url = uri("file:" + File(project.getRootDir(), "publish/build/repos/releases"))
+       url = uri("file:" + File(project.rootDir, "publish/build/repos/releases"))
     }
+	flatDir {
+		dirs(System.getProperty("user.home") + "/Repository/flat")
+	}
 }
 
 var env = Properties()
-env.load(FileInputStream(File(project.getRootDir(), "build.properties")))
+env.load(FileInputStream(File(project.rootDir, "build.properties")))
 val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
 
 eclipse {
@@ -75,16 +76,16 @@ eclipse {
     jdt {
 		sourceCompatibility = targetPlatform
     	targetCompatibility = targetPlatform
-    	javaRuntimeName = "JavaSE-" + targetPlatform    	
+    	javaRuntimeName = "JavaSE-$targetPlatform"
     }
 }
 
 fun getProjectImplementationVersion(): String {
-	return project.getVersion().toString();
+	return project.version.toString();
 }
 
 fun getDeliverDir(): File {
-	return File(project.getRootDir(), "jre-" + targetPlatform + "/" + project.getName());
+	return File(project.rootDir, "jre-" + targetPlatform + "/" + project.name);
 }
 
 fun touch(file: File) {
@@ -92,9 +93,9 @@ fun touch(file: File) {
 }
 
 fun getVersionClass(packageName: String): String {
-	
+
 	return """
-	
+
         package ${packageName};
 
         public class Version {
@@ -151,16 +152,14 @@ fun getVersionClass(packageName: String): String {
                     )
                 );
             }
-            
         }
         """.trimIndent()
-
 }
 
-project.getConfigurations().maybeCreate("openmdxBase")
-project.getConfigurations().maybeCreate("openmdxBootstrap")
-project.getConfigurations().maybeCreate("jdoApi")
-project.getConfigurations().maybeCreate("cacheApi")
+project.configurations.maybeCreate("openmdxBase")
+project.configurations.maybeCreate("openmdxBootstrap")
+project.configurations.maybeCreate("jdoApi")
+project.configurations.maybeCreate("cacheApi")
 val openmdxBase by configurations
 val openmdxBootstrap by configurations
 val jdoApi by configurations
@@ -174,14 +173,14 @@ dependencies {
 	implementation("com.vladsch.flexmark:flexmark:0.62.2")
 	implementation("com.atomikos:transactions-jta:6.0.0")
 	implementation("com.atomikos:transactions-jdbc:6.0.0")
-    // Test
+    // Test
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
     testImplementation("org.mockito:mockito-core:4.2.0")    
     testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
     // openmdxBase
     openmdxBase("org.openmdx:openmdx-base:2.18.9")
     // openmdxBootstrap
-    openmdxBootstrap(files(File(project.getBuildDir(), "generated/classes/openmdxBootstrap")))
+    openmdxBootstrap(files(file(layout.buildDirectory.dir("generated/classes/openmdxBootstrap"))))
     openmdxBootstrap("javax:javaee-api:8.0.+")
 	openmdxBootstrap("com.vladsch.flexmark:flexmark:0.62.2")
     // jdo-api
@@ -194,12 +193,12 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir("${buildDir}/generated/sources/java/main")
+            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
         }
         resources {
         	srcDir("src/main/resources")
-            srcDir("${buildDir}/generated/resources/main")
-        }        
+            srcDir(layout.buildDirectory.dir("generated/resources/main"))
+        }
     }
     test {
         java {
@@ -207,7 +206,7 @@ sourceSets {
         }
         resources {
         	srcDir("src/test/resources")
-        }        
+        }
     }
 }
 
@@ -259,44 +258,42 @@ tasks {
 	)
 	val openmdxSystemExcludes = listOf<String>( )
 
-	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
-	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.WARN }
+	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+
 	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
-	    inputs.dir("${projectDir}/src/model/emf")
-	    inputs.dir("${projectDir}/src/main/resources")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
-	    outputs.file("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+	    inputs.dir("$projectDir/src/model/emf")
+	    inputs.dir("$projectDir/src/main/resources")
+	    outputs.file(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
+	    outputs.file(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip"))
 	    classpath = configurations["openmdxBootstrap"]
 	    doFirst {
 	        project.copy {
-	            from(project.zipTree(project.getConfigurations().getByName("openmdxBase").singleFile))
-	            into(File(project.getBuildDir(), "generated/classes/openmdxBootstrap"))
+	            from(project.zipTree(project.configurations.getByName("openmdxBase").singleFile))
+	            into(layout.buildDirectory.dir("generated/classes/openmdxBootstrap"))
 	        }
 	    }
 	    doLast {
 	        copy {
 	            from(
-	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+	                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
 	            )
-	            into("$buildDir/generated/sources/java/main")
+	            into(layout.buildDirectory.dir("generated/sources/java/main"))
 	            include(
 	                "**/*.java"
 	            )
 	        }
 	        copy {
 	            from(
-	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+	                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip"))
 	            )
-	            into("$buildDir/generated/resources/main")
-	            exclude(
-	                "**/orm.xml"
-	            )
+	            into(layout.buildDirectory.dir("generated/resources/main"))
 	        }
 	        copy {
 	            from(
-	                zipTree("${buildDir}/generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+	                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
 	            )
-	            into("$buildDir/generated/resources/main")
+	            into(layout.buildDirectory.dir("generated/resources/main"))
 	            include(
 	                "**/openmdxorm.properties"
 	            )
@@ -326,21 +323,19 @@ tasks {
 	compileJava {
 	    dependsOn("generate-model")
 	    doFirst {
-	    	var f: File
 	    	// base/Version
-	    	f = File("${buildDir}/generated/sources/java/main/org/openmdx/base/Version.java")
-	    	touch(f)
-	    	f.writeText(getVersionClass("org.openmdx.base"))
+			var f: File = file(layout.buildDirectory.dir("generated/sources/java/main/org/openmdx/base/Version.java"))
+			f.writeText(getVersionClass("org.openmdx.base"))
 	    	// application/Version
-	        f = File("${buildDir}/generated/sources/java/main/org/openmdx/application/Version.java")
+	        f = file(layout.buildDirectory.dir("generated/sources/java/main/org/openmdx/application/Version.java"))
 	        touch(f)
 	        f.writeText(getVersionClass("org.openmdx.application"))
 	        // system/Version
-	        f = File("${buildDir}/generated/sources/java/main/org/openmdx/system/Version.java")
+	        f = file(layout.buildDirectory.dir("generated/sources/java/main/org/openmdx/system/Version.java"))
 	        touch(f)
 	        f.writeText(getVersionClass("org.openmdx.system"))
 	    }
-	    options.release.set(Integer.valueOf(targetPlatform.getMajorVersion()))
+	    options.release.set(Integer.valueOf(targetPlatform.majorVersion))
 	}
 	assemble {
 		dependsOn(
@@ -351,7 +346,7 @@ tasks {
         )
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-base.jar") {
-	    duplicatesStrategy = DuplicatesStrategy.WARN
+	    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	    dependsOn(
 	        ":core:compileJava",
 	        ":core:processResources"
@@ -368,9 +363,9 @@ tasks {
 	        )
 	    }
 		from(
-			File(buildDir, "classes/java/main"),
-			File(buildDir, "resources/main"),
-			File(buildDir, "generated/resources/main"),
+			File(buildDirAsFile, "classes/java/main"),
+			File(buildDirAsFile, "resources/main"),
+			File(buildDirAsFile, "generated/resources/main"),
 			"src/main/resources",
 	        configurations["cacheApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) },
 	        configurations["jdoApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) }
@@ -392,7 +387,7 @@ tasks {
 	    }
 		from(
 			"src/main/java",
-			File(buildDir, "generated/sources/java/main")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxBaseIncludes)
 		exclude(openmdxBaseExcludes)
@@ -411,7 +406,7 @@ tasks {
 	        )
 	    }
 	    from(
-	  		File(buildDir, "classes/java/main")
+	  		File(buildDirAsFile, "classes/java/main")
 	  	)
 	  	include(openmdxSystemIncludes)
 	  	exclude(openmdxSystemExcludes)
@@ -430,7 +425,7 @@ tasks {
 	    }
 		from(
 			"src/main/java",
-			File(buildDir, "generated/sources/java/main")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxSystemIncludes)
 		exclude(openmdxSystemExcludes)
@@ -449,8 +444,10 @@ distributions {
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-            from("../jre-" + targetPlatform + "/core/lib") { into("jre-" + targetPlatform + "/core/lib") }
-            from("../jre-" + targetPlatform + "/gradle/repo") { into("jre-" + targetPlatform + "/gradle/repo") }
+			var path = "jre-$targetPlatform/${project.name}/lib"
+			from("../$path") { into(path) }
+			path = "jre-$targetPlatform/gradle/repo"
+			from("../$path") { into(path) }
         }
     }
 }

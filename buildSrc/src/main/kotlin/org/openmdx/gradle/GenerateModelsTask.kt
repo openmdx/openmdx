@@ -44,45 +44,41 @@
  */
 package org.openmdx.gradle
 
-import org.gradle.api.Project
-import org.gradle.api.Plugin
-import org.gradle.kotlin.dsl.*
-import org.gradle.api.tasks.bundling.Zip
-import org.gradle.api.tasks.Input
-import java.io.File
 import org.gradle.api.tasks.JavaExec
+import org.gradle.kotlin.dsl.withGroovyBuilder
+import java.io.File
 
 open class GenerateModelsTask : JavaExec() {
 
 	init {
-		mainClass.set("org.openmdx.application.mof.externalizer.xmi.XMIExternalizer")	
+		mainClass.set("org.openmdx.application.mof.externalizer.xmi.XMIExternalizer")
 		args = listOf(
 			"--pathMapSymbol=openMDX 2 ~ Core (EMF)",
-			"--pathMapPath=file:" + File(project.getRootDir(), "core/src/model/emf") + "/",
+			"--pathMapPath=file:" + File("${project.rootDir}/core/src/model/emf") + "/",
 			"--pathMapSymbol=openMDX 2 ~ Security (EMF)",
-			"--pathMapPath=file:" + File(project.getRootDir(), "security/src/model/emf") + "/",
+			"--pathMapPath=file:" + File("${project.rootDir}/security/src/model/emf") + "/",
 			"--pathMapSymbol=openMDX 2 ~ Portal (EMF)",
-			"--pathMapPath=file:" + File(project.getRootDir(), "portal/src/model/emf") + "/",
+			"--pathMapPath=file:" + File("${project.rootDir}/portal/src/model/emf") + "/",
 			"--url=file:src/model/emf/models.uml",
 			"--xmi=emf",
-			"--out=" + File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + "-models.zip"),
-			"--openmdxjdo=" + File(project.getProjectDir(), "src/main/resources"),
+			"--out=" + project.layout.buildDirectory.file("generated/sources/model/openmdx-${project.getName()}-models.zip").get().asFile,
+			"--openmdxjdo=" + File("${project.projectDir}/src/main/resources"),
 			"--markdown-annotations", 
 			"--format=xmi1",
 			"--format=cci2",
 			"--format=jmi1",
 			"--format=jpa3",
 			"--format=mof1",
-			"--format=pimdoc:" + File(project.getProjectDir(), "src/model/doc"),
+			"--format=pimdoc:" + File("${project.projectDir}/src/model/doc"),
 			"%"
 		)
 		doLast {
 			ant.withGroovyBuilder {
 				"zip"(
-					"destfile" to File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + ".openmdx-xmi.zip")
+					"destfile" to project.layout.buildDirectory.file("generated/sources/model/openmdx-${project.getName()}.openmdx-xmi.zip").get().asFile
 				) {
 					"zipfileset"(
-						"src" to File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + "-models.zip")
+						"src" to project.layout.buildDirectory.file("generated/sources/model/openmdx-${project.getName()}-models.zip").get().asFile,
 					) {
 						"include"("name" to "**/*.xsd")
 						"include"("name" to "**/*.xml")
@@ -92,33 +88,32 @@ open class GenerateModelsTask : JavaExec() {
 			}
 			ant.withGroovyBuilder {
 				"zip"(
-					"destfile" to File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + ".openmdx-emf.zip"),
+					"destfile" to project.layout.buildDirectory.file("generated/sources/model/openmdx-${project.getName()}.openmdx-emf.zip").get().asFile,
 					"basedir" to File(project.getProjectDir(), "src/model/emf")
 				)
 			}
 			project.copy {
-				from(project.zipTree(File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + "-models.zip"))) { 
+				from(project.zipTree(project.layout.buildDirectory.dir("generated/sources/model/openmdx-${project.getName()}-models.zip"))) {
 					include("META-INF/") 
 				}
-				into(File(project.getBuildDir(), "resources/main"))
+				into(project.layout.buildDirectory.dir("resources/main"))
 			}
 			project.copy {
-				from(project.zipTree(File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + "-models.zip"))) { 
+				from(project.zipTree(project.layout.buildDirectory.dir("generated/sources/model/openmdx-${project.getName()}-models.zip"))) {
 					include("**/*.html") 
 					include("style-sheet.css") 
 					include("*.png") 
 					include("*.svg") 
 				}
-				into(File(project.getBuildDir(), "pimdoc"))
+				into(project.layout.buildDirectory.dir("pimdoc"))
 			}
 			project.copy {
-				from(project.zipTree(File(project.getBuildDir(), "generated/sources/model/openmdx-" + project.getName() + "-models.zip"))) { 
+				from(project.zipTree(project.layout.buildDirectory.dir("generated/sources/model/openmdx-${project.getName()}-models.zip"))) {
 					include("**/*.dot")
 				}
-				into(File(project.getBuildDir(), "generated/sources/dot"))
+				into(project.layout.buildDirectory.dir("generated/sources/dot"))
 			}
 		}
-		
 	}
-	
+
 }

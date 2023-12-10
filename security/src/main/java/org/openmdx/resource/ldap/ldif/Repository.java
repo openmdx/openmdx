@@ -92,7 +92,7 @@ import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.directory.ldap.client.api.SaslRequest;
 
 /**
- * LDAP repository
+ * LDAP repository
  */
 class Repository implements LdapConnection {
 
@@ -111,7 +111,7 @@ class Repository implements LdapConnection {
 	            entries.add(entry);
 	        }
         } catch (LdapException | IOException e) {
-            throw new CommException("Unable to populate the LDAP repository from " + source, e);
+            throw new CommException("Unable to populate the LDAP repository from " + source, e);
         }
 	}
 
