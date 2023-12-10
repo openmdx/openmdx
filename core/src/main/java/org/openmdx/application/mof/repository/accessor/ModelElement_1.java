@@ -367,8 +367,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 
     //-------------------------------------------------------------------------
     @Override
-    public boolean isReferenceStoredAsAttribute(
-    ) throws ServiceException {
+    public boolean isReferenceStoredAsAttribute() {
         return
             isReference() &&
             ((ReferenceRecord)this.delegate).asAttribute(getModel().getRecordMarshaller()) != null;
@@ -473,8 +472,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 	}
 
 	@Override
-	public String getAggregation(
-	) throws ServiceException {
+	public String getAggregation() {
 	    return isAssociationEndType() ? ((AssociationEndRecord)this.delegate).getAggregation() : null;
 	}
 
@@ -482,8 +480,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getReferencedEnd()
 	 */
 	@Override
-	public Path getReferencedEnd(
-	) throws ServiceException {
+	public Path getReferencedEnd() {
 	    return this.isReferenceType() ? ((ReferenceRecord)this.delegate).getReferencedEnd() : null;
 	}
 
@@ -491,8 +488,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getExposedEnd()
 	 */
 	@Override
-	public Path getExposedEnd(
-	) throws ServiceException {
+	public Path getExposedEnd() {
 	    return this.isReferenceType() ? ((ReferenceRecord)this.delegate).getExposedEnd() : null;
 	}
 
@@ -500,8 +496,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getContainer()
 	 */
 	@Override
-	public Path getContainer(
-	) throws ServiceException {
+	public Path getContainer() {
 	    return this.delegate.getContainer();
 	}
 	
@@ -509,8 +504,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#isDerived()
 	 */
 	@Override
-	public Boolean isDerived(
-	) throws ServiceException {
+	public Boolean isDerived() {
 	    return 
 	        isAssociationType() ? Boolean.valueOf(((AssociationRecord)this.delegate).isDerived()) :
 	        isAttributeType() ? Boolean.valueOf(((AttributeRecord)this.delegate).isDerived()) :
@@ -521,8 +515,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#isChangeable()
 	 */
 	@Override
-	public Boolean isChangeable(
-	) throws ServiceException {
+	public Boolean isChangeable() {
 	    return
 	        isStructuralFeatureType() ? Boolean.valueOf(((StructuralFeatureRecord)this.delegate).isChangeable()) : 
 	        isAssociationEndType() ? Boolean.valueOf(((AssociationEndRecord)this.delegate).isChangeable()) :
@@ -533,8 +526,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#isAbstract()
 	 */
 	@Override
-	public Boolean isAbstract(
-	) throws ServiceException {
+	public Boolean isAbstract() {
 	    return
 	        isGeneralizableElementType() ? Boolean.valueOf(((GeneralizableElementRecord)this.delegate).isAbstract()) :
 	        null;
@@ -544,8 +536,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getType()
 	 */
 	@Override
-	public Path getType(
-	) throws ServiceException {	
+	public Path getType() {
 	    return 
 	        isClassifierType() ? ((ClassifierRecord)this.delegate).getType() :
 	        isTypedElementType() ? ((TypedElementRecord)this.delegate).getType() :
@@ -556,8 +547,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getQualifierType()
 	 */
 	@Override
-	public Path getQualifierType(
-	) throws ServiceException {	
+	public Path getQualifierType() {
 	    if(isAssociationEndType()) {
 	        List<Path> qualifierTypes = ((AssociationEndRecord)this.delegate).getQualifierType();
 	        return qualifierTypes.isEmpty() ? null : qualifierTypes.get(0);
@@ -579,8 +569,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getMultiplicity()
 	 */
 	@Override
-	public String getMultiplicity(
-	) throws ServiceException {
+	public String getMultiplicity() {
 	    return
 	        isStructuralFeatureType() ? ((StructuralFeatureRecord)this.delegate).getMultiplicity() :
 	        isStructureFieldType() ? ((StructureFieldRecord)this.delegate).getMultiplicity() :
@@ -593,8 +582,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
 	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#isReference()
 	 */
 	@Override
-	public boolean isReference(
-	) throws ServiceException {
+	public boolean isReference() {
 	    return isReferenceType(); // Matches for ReferenceStoredAsAttribute, too
 	}
 

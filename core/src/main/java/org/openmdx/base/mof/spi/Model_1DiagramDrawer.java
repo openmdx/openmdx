@@ -349,17 +349,17 @@ public class Model_1DiagramDrawer {
                     s += ",arrowhead=tee";
                     s += ",arrowtail=vee";
                     s += ",color=\"#0000FF\"";
-                    boolean hasContraint = false;
+                    boolean hasConstraint = false;
                     boolean hasLabelDistance = false;
                     boolean hasStyleInvis = false;
                     for (Map.Entry<String, String> parameter : this.parameters.entrySet()) {
                         s += "," + parameter.getKey() + "=" + parameter.getValue();
-                        hasContraint = "constraint".equals(parameter.getKey());
+                        hasConstraint = "constraint".equals(parameter.getKey());
                         hasLabelDistance = "labeldistance".equals(parameter.getKey());
                         hasStyleInvis = "style".equals(parameter.getKey()) && "invis".equals(parameter.getValue());
                     }
-                    if (!hasContraint) {
-                        s += ",contraint=false";
+                    if (!hasConstraint) {
+                        s += ",constraint=false";
                     }
                     if (!hasLabelDistance) {
                         s += ",labeldistance=3";
@@ -397,17 +397,17 @@ public class Model_1DiagramDrawer {
                     s += ",arrowhead=" + this.getArrowhead(referencedEnd, exposedEnd);
                     s += ",arrowtail=" + this.getArrowhead(exposedEnd, referencedEnd);
                     s += ",color=\"#0000FF\"";
-                    boolean hasContraint = false;
+                    boolean hasConstraint = false;
                     boolean hasLabelDistance = false;
                     boolean hasStyleInvis = false;
                     for (Map.Entry<String, String> parameter : this.parameters.entrySet()) {
                         s += "," + parameter.getKey() + "=" + parameter.getValue();
-                        hasContraint = "constraint".equals(parameter.getKey());
+                        hasConstraint = "constraint".equals(parameter.getKey());
                         hasLabelDistance = "labeldistance".equals(parameter.getKey());
                         hasStyleInvis = "style".equals(parameter.getKey()) && "invis".equals(parameter.getValue());
                     }
-                    if (!hasContraint) {
-                        s += ",contraint=false";
+                    if (!hasConstraint) {
+                        s += ",constraint=false";
                     }
                     if (!hasLabelDistance) {
                         s += ",labeldistance=3";

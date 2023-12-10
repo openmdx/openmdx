@@ -46,6 +46,7 @@ package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import java.net.URI;
 
+import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
 import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -88,8 +89,26 @@ public class ImageFrameMapper extends HTMLMapper {
 
 	protected void columnHead() {
 		printLine("\t<div class=\"column-head image-head\">");
-		printLine("\t\t<h2>", getTitle(), "</h2>");
+		printLine("\t\t<h2>");
+		printLine("\t\t\t", getTitle());
+		diagramInNewTab();
+		printLine("\t\t</h2>");
 		printLine("\t</div>");
+	}
+
+	private void diagramInNewTab() {
+		printLine(
+			"\t\t\t<a href=\"", 
+			getImageURI(), 
+			"\" target=\"_blank\">"
+		);
+		printLine(
+			"\t\t\t\t<img alt=\"UML\" class=\"uml-symbol\" src=\"",
+			getBaseURL(),
+			MagicFile.UML_SYMBOL.getFileName(MagicFile.Type.IMAGE),
+			"\"/>"
+		);
+		printLine("\t\t\t</a>");
 	}
 
 	private void columnBody() {
@@ -102,6 +121,11 @@ public class ImageFrameMapper extends HTMLMapper {
 		return URI.create(
 			PIMDocFileType.TEXT.from(graphvizSourceURI.getPath(), PIMDocFileType.GRAPHVIZ_SOURCE)
 		);
+	}
+	
+	private String getImageURI() {
+		final String entryName = getEntryName();
+		return PIMDocFileType.IMAGE.from(entryName.substring(entryName.lastIndexOf('/') + 1), PIMDocFileType.TEXT);
 	}
 
 	@Override

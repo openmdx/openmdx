@@ -49,8 +49,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
@@ -150,11 +148,7 @@ class DeclaredOperationsMapper extends CompartmentMapper {
 	}
 	
 	private boolean isDerived(ModelElement_1_0 current){
-		try {
-			return Boolean.TRUE.equals(current.isDerived());
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
+		return Boolean.TRUE.equals(current.isDerived());
 	}
 
 	private boolean isQuery(ModelElement_1_0 current){
@@ -162,11 +156,7 @@ class DeclaredOperationsMapper extends CompartmentMapper {
 	}
 
 	private boolean isAbstract(ModelElement_1_0 current) {
-		try {
-			return Boolean.TRUE.equals(current.isAbstract());
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
+		return Boolean.TRUE.equals(current.isAbstract());
 	}
 
 	private Stream<ModelElement_1_0> streamReferences(ModelElement_1_0 current, String kind){

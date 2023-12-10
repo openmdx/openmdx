@@ -51,7 +51,7 @@ plugins {
 
 allprojects {
     group = "org.openmdx"
-    version = "2.18.9"
+    version = "2.18.10"
 }
 
 tasks.clean {

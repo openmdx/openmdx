@@ -74,6 +74,7 @@ edge[
 .uml_alias[
 ]
 .uml_association[
+	constraint="true"
 ]
 .uml_cluster[
 	fillcolor="lightcyan"
@@ -150,3 +151,8 @@ edge[
 // ------------------
 // Custom Classes
 // ------------------
+.detailed_class[
+ 	compartments="true" 
+	fillcolor="lightsalmon"
+ 	width="3"
+]

@@ -46,8 +46,6 @@ package org.openmdx.application.mof.mapping.pimdoc.spi;
 
 import java.util.function.Predicate;
 
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 
@@ -64,11 +62,7 @@ public class NamespaceFilter implements Predicate<ModelElement_1_0> {
 
 	@Override
 	public boolean test(ModelElement_1_0 t) {
-		try {
-			return namespaceId.equals(t.getContainer());
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
+		return namespaceId.equals(t.getContainer());
 	}
 	
 }

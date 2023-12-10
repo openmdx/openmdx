@@ -47,8 +47,6 @@ package org.openmdx.application.mof.mapping.pimdoc.text;
 import java.io.PrintWriter;
 import java.util.function.Function;
 
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Stereotypes;
 
@@ -77,17 +75,13 @@ class ClassesMapper extends CompartmentMapper {
 	}
 
 	private void mapTableRow(ModelElement_1_0 current) {
-		try {
-			printLine("\t\t\t\t\t<tr>");
-			printLine("\t\t\t\t\t\t<td>");
-			mapLink("\t\t\t\t\t\t\t", current);
-			printLine("\t\t\t\t\t\t</td>");
-			mapBallotBox("\t\t\t\t\t\t", current.isAbstract(), null);
-			mapBallotBox("\t\t\t\t\t\t", isMixInClass(current), null);
-			printLine("\t\t\t\t\t</tr>");
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
+		printLine("\t\t\t\t\t<tr>");
+		printLine("\t\t\t\t\t\t<td>");
+		mapLink("\t\t\t\t\t\t\t", current);
+		printLine("\t\t\t\t\t\t</td>");
+		mapBallotBox("\t\t\t\t\t\t", current.isAbstract(), null);
+		mapBallotBox("\t\t\t\t\t\t", isMixInClass(current), null);
+		printLine("\t\t\t\t\t</tr>");
 	}
 
 	private boolean isMixInClass(ModelElement_1_0 element) {

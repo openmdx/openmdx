@@ -185,33 +185,32 @@ public class GraphvizTemplates {
 	private SortedMap<Integer, GraphvizLayer> processLayer(StringBuilder dot) throws ServiceException {
 		final SortedMap<Integer, GraphvizLayer> layerNodes = new TreeMap<>();
 		for (int startPos = dot.indexOf("${LAYER["); startPos >= 0; ) {
-			final int endPos = dot.indexOf("]}", startPos);
-			if (endPos > startPos) {
-				final GraphvizLayer layerNode = new GraphvizLayer(styleSheet);
-				layerNode.getParameters().parseParameters(dot.subSequence(startPos + "${LAYER[".length(), endPos));
-				dot.replace(startPos, endPos + 2, layerNode.toString());
-				final GraphvizLayer conflict = layerNodes.put(layerNode.getLayer(), layerNode);
-				if(conflict != null) {
-					throw new ServiceException(
-						BasicException.Code.DEFAULT_DOMAIN, 
-						BasicException.Code.ASSERTION_FAILURE,
-						"${LAYER[layer=…]}: The 'layer' value is not unique within this digraph",
-						new BasicException.Parameter("layer", conflict.getLayer())
-					);
-				}
-			} else {
-				throw new ServiceException(
-					BasicException.Code.DEFAULT_DOMAIN, 
-					BasicException.Code.PARSE_FAILURE,
-					"${ASSOCIATION[…]} place holder is not properly closed",
-					new BasicException.Parameter("dot", dot.substring(startPos))
-				);
-			}
-			startPos = dot.indexOf("${LAYER[", endPos);
+			final int endPos = getEndPosition("${LAYER[…]}", dot, startPos);
+			final GraphvizLayer layerNode = new GraphvizLayer(styleSheet);
+			layerNode.getParameters().parseParameters(dot.subSequence(startPos + "${LAYER[".length(), endPos));
+			registerLayer(layerNodes, layerNode);
+			final String replacement = layerNode.toString();
+			dot.replace(startPos, endPos + 2, replacement);
+			startPos = dot.indexOf("${LAYER[", startPos + replacement.length());
 		}
 		return layerNodes;
 	}
-	
+
+	private void registerLayer(
+		final SortedMap<Integer, GraphvizLayer> layerNodes, 
+		final GraphvizLayer layerNode
+	) throws ServiceException {
+		final GraphvizLayer conflict = layerNodes.put(layerNode.getLayer(), layerNode);
+		if(conflict != null) {
+			throw new ServiceException(
+				BasicException.Code.DEFAULT_DOMAIN, 
+				BasicException.Code.ASSERTION_FAILURE,
+				"${LAYER[layer=…]}: The 'layer' value is not unique within this digraph",
+				new BasicException.Parameter("layer", conflict.getLayer())
+			);
+		}
+	}
+
 	/**
 	 * ${LAYERS}
 	 */
@@ -220,43 +219,38 @@ public class GraphvizTemplates {
 			final int startPos = dot.indexOf("${LAYERS}");
 			if (startPos >= 0) {
 				final int endPos = startPos + "${LAYERS}".length();
-				if(endPos > startPos) {
-					final GraphvizAttributes parameters = new GraphvizAttributes(styleSheet, "_class");
-		            parameters.setStrictValue("style", "invis");
-					StringBuilder layerEdges = new StringBuilder();
-					final Iterator<GraphvizLayer> nodes = layerNodes.values().iterator();
-					GraphvizLayer predecessor = nodes.next();
-					while(nodes.hasNext()) {
-						GraphvizLayer successor = nodes.next();
-						parameters.setStrictValue("minlen", successor.getMinDist());
-						layerEdges.append("\n\t");
-						GraphvizAttributes.appendQuoted(layerEdges, predecessor.getId());
-						layerEdges.append(" -> ");
-						GraphvizAttributes.appendQuoted(layerEdges, successor.getId());
-						parameters.appendTo(layerEdges, "\t");
-						predecessor = successor;
-					}
-					dot.replace(startPos, endPos + 2, layerEdges.toString());
-				} else {
-					throw new ServiceException(
-						BasicException.Code.DEFAULT_DOMAIN, 
-						BasicException.Code.PARSE_FAILURE,
-						"${LAYERS[…]} place holder is not properly closed",
-						new BasicException.Parameter("dot", dot.substring(startPos))
-					);
+				final GraphvizAttributes parameters = new GraphvizAttributes(styleSheet, "_class");
+	            parameters.setStrictValue("style", "invis");
+				StringBuilder layerEdges = new StringBuilder();
+				final Iterator<GraphvizLayer> nodes = layerNodes.values().iterator();
+				GraphvizLayer predecessor = nodes.next();
+				while(nodes.hasNext()) {
+					GraphvizLayer successor = nodes.next();
+					parameters.setStrictValue("minlen", successor.getMinDist());
+					layerEdges.append("\n\t");
+					GraphvizAttributes.appendQuoted(layerEdges, predecessor.getId());
+					layerEdges.append(" -> ");
+					GraphvizAttributes.appendQuoted(layerEdges, successor.getId());
+					parameters.appendTo(layerEdges, "\t");
+					predecessor = successor;
 				}
+				dot.replace(startPos, endPos + 2, layerEdges.toString());
 			}
 		}
 	}
 	
 	/**
-	 * ${ASSOCIATION[name=*]}
+	 * ${ASSOCIATION[name=*…]}
 	 */
-	private void processWildcardAssoications(final StringBuilder dot, final Map<String, GraphvizNode> classNodes,
-			final Map<String, GraphvizEdge> associationNodes) throws ServiceException {
-		final int startPos = dot.indexOf("${ASSOCIATION[name=*]}");
+	private void processWildcardAssoications(
+		final StringBuilder dot, 
+		final Map<String, GraphvizNode> classNodes,
+		final Map<String, GraphvizEdge> associationNodes
+	) throws ServiceException {
+		final int startPos = dot.indexOf("${ASSOCIATION[name=*");
 		if (startPos >= 0) {
-			final int endPos = startPos + "${ASSOCIATION[name=*]}".length();
+			final int endPos = getEndPosition("${ASSOCIATION[name=*…]}", dot, startPos);
+			final CharSequence parameterValues = dot.subSequence(startPos + "${ASSOCIATION[name=*".length(), endPos);
 			final StringBuilder associationEdges = new StringBuilder();
 			// Associations
 			for (ModelElement_1_0 elementDef : model.getContent()) {
@@ -269,6 +263,8 @@ public class GraphvizTemplates {
 							&& classNodes.containsKey(end2Type.getQualifiedName())
 							&& !associationNodes.containsKey(elementDef.getQualifiedName())) {
 						GraphvizEdge associationNode = new GraphvizEdge(styleSheet, sink, graphvizHasIssue144);
+						final GraphvizAttributes parameters = associationNode.getParameters();
+						parameters.parseParameters(parameterValues);
 						associationNode.setId(elementDef.getQualifiedName());
 						associationNode.setAssociationDef(elementDef);
 						associationEdges.append("\n\t").append(associationNode);
@@ -296,7 +292,7 @@ public class GraphvizTemplates {
 					}
 				}
 			}
-			dot.replace(startPos, endPos, associationEdges.toString());
+			dot.replace(startPos, endPos + 2, associationEdges.toString());
 		}
 	}
 
@@ -306,34 +302,24 @@ public class GraphvizTemplates {
 	private Map<String, GraphvizEdge> processNamedAssociations(final StringBuilder dot) throws ServiceException {
 		final Map<String, GraphvizEdge> associationNodes = new HashMap<String, GraphvizEdge>();
 		for (int startPos = dot.indexOf("${ASSOCIATION["); startPos >= 0; ) {
-			final int endPos = dot.indexOf("]}", startPos);
-			if (endPos > startPos) {
-				final GraphvizEdge associationNode = new GraphvizEdge(styleSheet, sink, graphvizHasIssue144);
-				final GraphvizAttributes parameters = associationNode.getParameters();
-				parameters.parseParameters(dot.subSequence(startPos + "${ASSOCIATION[".length(), endPos));
-				final String qualifiedName = parameters.getValue("name");
-				if (!isWildcard(qualifiedName)) {
-					ModelElement_1_0 associationDef = model.getElement(qualifiedName);
-					associationNode.setId(associationDef.getQualifiedName());
-					associationNode.setAssociationDef(associationDef);
-					associationNodes.put(associationNode.getId(), associationNode);
-					dot.replace(startPos, endPos + 2, associationNode.toString());
-				}
+			final int endPos = getEndPosition("${ASSOCIATION[…]}", dot, startPos);
+			final GraphvizEdge associationNode = new GraphvizEdge(styleSheet, sink, graphvizHasIssue144);
+			final GraphvizAttributes parameters = associationNode.getParameters();
+			parameters.parseParameters(dot.subSequence(startPos + "${ASSOCIATION[".length(), endPos));
+			final String qualifiedName = parameters.getValue("name");
+			if (isWildcard(qualifiedName)) {
+				startPos = dot.indexOf("${ASSOCIATION[", endPos);
 			} else {
-				throw new ServiceException(
-					BasicException.Code.DEFAULT_DOMAIN, 
-					BasicException.Code.PARSE_FAILURE,
-					"${ASSOCIATION[…]} place holder is not properly closed",
-					new BasicException.Parameter("dot", dot.substring(startPos))
-				);
+				ModelElement_1_0 associationDef = model.getElement(qualifiedName);
+				associationNode.setId(associationDef.getQualifiedName());
+				associationNode.setAssociationDef(associationDef);
+				associationNodes.put(associationNode.getId(), associationNode);
+				final String replacement = associationNode.toString();
+				dot.replace(startPos, endPos + 2, replacement);
+				startPos = dot.indexOf("${ASSOCIATION[", startPos + replacement.length());
 			}
-			startPos = dot.indexOf("${ASSOCIATION[", endPos);
 		}
 		return associationNodes;
-	}
-
-	private boolean isWildcard(final String qualifiedName) {
-		return "*".equals(qualifiedName);
 	}
 
 	/**
@@ -399,25 +385,17 @@ public class GraphvizTemplates {
 	private Map<String, GraphvizNode> processClasses(final StringBuilder dot) throws ServiceException {
 		final Map<String, GraphvizNode> classNodes = new HashMap<String, GraphvizNode>();
 		for (int startPos = dot.indexOf("${CLASS["); startPos >= 0;) {
-			final int endPos = dot.indexOf("]}", startPos);
-			if (endPos > startPos) {
-				final GraphvizNode classNode = new GraphvizNode(styleSheet, sink);
-				classNode.getParameters().parseParameters(dot.subSequence(startPos + "${CLASS[".length(), endPos));
-				final String qualifiedName = classNode.getParameters().getValue("name");
-				final ModelElement_1_0 classDef = model.getElement(qualifiedName);
-				classNode.setElementDef(classDef);
-				classNode.setId(classDef.getQualifiedName());
-				classNodes.put(classNode.getId(), classNode);
-				dot.replace(startPos, endPos + 2, classNode.toString());
-			} else {
-				throw new ServiceException(
-					BasicException.Code.DEFAULT_DOMAIN, 
-					BasicException.Code.PARSE_FAILURE,
-					"${CLASS[…]} place holder is not properly closed",
-					new BasicException.Parameter("dot", dot.substring(startPos))
-				);
-			}
-			startPos = dot.indexOf("${CLASS[", endPos);
+			final int endPos = getEndPosition("${CLASS[…]}", dot, startPos);
+			final GraphvizNode classNode = new GraphvizNode(styleSheet, sink);
+			classNode.getParameters().parseParameters(dot.subSequence(startPos + "${CLASS[".length(), endPos));
+			final String qualifiedName = classNode.getParameters().getValue("name");
+			final ModelElement_1_0 classDef = model.getElement(qualifiedName);
+			classNode.setElementDef(classDef);
+			classNode.setId(classDef.getQualifiedName());
+			classNodes.put(classNode.getId(), classNode);
+			final String replacement = classNode.toString();
+			dot.replace(startPos, endPos + 2, replacement);
+			startPos = dot.indexOf("${CLASS[", startPos + replacement.length());
 		}
 		return classNodes;
 	}
@@ -441,6 +419,27 @@ public class GraphvizTemplates {
 			CharacterLargeObjects.streamCopy(source, 0L, target);
 			return target.getBuilder();
 		}
+	}
+
+	private int getEndPosition(
+		final String placeholder, 
+		final StringBuilder dot, 
+		int startPos
+	) throws ServiceException {
+		final int endPos = dot.indexOf("]}", startPos);
+		if (endPos < 0) {
+			throw new ServiceException(
+				BasicException.Code.DEFAULT_DOMAIN, 
+				BasicException.Code.PARSE_FAILURE,
+				placeholder + " place holder is not properly closed",
+				new BasicException.Parameter("dot", dot.substring(startPos))
+			);
+		}
+		return endPos;
+	}
+
+	private boolean isWildcard(final String qualifiedName) {
+		return "*".equals(qualifiedName);
 	}
 
 }

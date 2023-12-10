@@ -60,9 +60,6 @@ repositories {
     maven {
        url = uri("file:" + File(project.rootDir, "publish/build/repos/releases"))
     }
-	flatDir {
-		dirs(System.getProperty("user.home") + "/Repository/flat")
-	}
 }
 
 var env = Properties()
@@ -178,7 +175,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:4.2.0")    
     testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
     // openmdxBase
-    openmdxBase("org.openmdx:openmdx-base:2.18.9")
+    openmdxBase("org.openmdx:openmdx-base:2.18.10")
     // openmdxBootstrap
     openmdxBootstrap(files(file(layout.buildDirectory.dir("generated/classes/openmdxBootstrap"))))
     openmdxBootstrap("javax:javaee-api:8.0.+")

@@ -47,8 +47,6 @@ package org.openmdx.application.mof.mapping.pimdoc.text;
 import java.io.PrintWriter;
 import java.util.function.Function;
 
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Stereotypes;
 
@@ -121,11 +119,7 @@ class ClassPropertiesMapper extends CompartmentMapper {
 
 	
 	private Boolean isAbstract(){
-		try {
-			return element.isAbstract();
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
+		return element.isAbstract();
 	}
 
 	private boolean isMixInClass() {

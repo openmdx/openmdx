@@ -47,8 +47,6 @@ package org.openmdx.application.mof.mapping.pimdoc.text;
 import java.io.PrintWriter;
 import java.util.function.Function;
 
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
@@ -124,11 +122,7 @@ class StructuralFeaturesMapper extends CompartmentMapper {
 	}
 
 	private boolean isChangeable(ModelElement_1_0 current){
-		try {
-			return Boolean.TRUE.equals(current.isChangeable());
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
+		return Boolean.TRUE.equals(current.isChangeable());
 	}
 	
 	private void mapDerived(ModelElement_1_0 current) {
@@ -136,33 +130,21 @@ class StructuralFeaturesMapper extends CompartmentMapper {
 	}
 
 	private boolean isDerived(ModelElement_1_0 current){
-		try {
-			return Boolean.TRUE.equals(current.isDerived());
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
+		return Boolean.TRUE.equals(current.isDerived());
 	}
 	
 	private String getStyleClass(ModelElement_1_0 current) {
-		try {
-			return 
-				current.isReference() ? "uml-reference" :
-				current.isAttributeType() ? "uml-attribute" :
-				"uml-structural-feature";
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
+		return 
+			current.isReference() ? "uml-reference" :
+			current.isAttributeType() ? "uml-attribute" :
+			"uml-structural-feature";
 	}
 
 	private String getKind(ModelElement_1_0 current) {
-		try {
-			return 
-				current.isReference() ? "Reference" :
-				current.isAttributeType() ? "Attribute" :
-				current.getDelegate().getRecordName();
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
+		return 
+			current.isReference() ? "Reference" :
+			current.isAttributeType() ? "Attribute" :
+			current.getDelegate().getRecordName();
 	}
 	
 	private String getStyleClass(boolean inherited) {

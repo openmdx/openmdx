@@ -47,8 +47,6 @@ package org.openmdx.application.mof.mapping.pimdoc.text;
 import java.io.PrintWriter;
 import java.util.function.Function;
 
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
@@ -116,19 +114,11 @@ class BehaviouralFeaturesMapper extends CompartmentMapper {
 	}
 
 	private boolean isDerived(ModelElement_1_0 current){
-		try {
-			return Boolean.TRUE.equals(current.isDerived());
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
+		return Boolean.TRUE.equals(current.isDerived());
 	}
 	
 	private boolean isAbstract(ModelElement_1_0 current) {
-		try {
-			return Boolean.TRUE.equals(current.isAbstract());
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
+		return Boolean.TRUE.equals(current.isAbstract());
 	}
 
 	private String getKind(ModelElement_1_0 current) {

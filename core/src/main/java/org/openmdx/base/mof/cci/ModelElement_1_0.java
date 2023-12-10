@@ -111,7 +111,7 @@ public interface ModelElement_1_0 {
 
     public boolean isTagType();
     
-    public boolean isReferenceStoredAsAttribute() throws ServiceException;
+    public boolean isReferenceStoredAsAttribute();
     
     public boolean isSet(String feature);
     
@@ -125,25 +125,25 @@ public interface ModelElement_1_0 {
     
     public String getSegmentName();
     
-    public Path getReferencedEnd() throws ServiceException;
+    public Path getReferencedEnd();
     
-    public Path getExposedEnd() throws ServiceException;
+    public Path getExposedEnd();
     
-    public String getAggregation() throws ServiceException;
+    public String getAggregation();
     
-    public Path getContainer() throws ServiceException;
+    public Path getContainer();
     
-    public Boolean isDerived() throws ServiceException;
+    public Boolean isDerived();
     
-    public Boolean isChangeable() throws ServiceException;
+    public Boolean isChangeable();
     
-    public Boolean isAbstract() throws ServiceException;
+    public Boolean isAbstract();
     
-    public Path getType() throws ServiceException;
+    public Path getType();
 
-    public String getMultiplicity() throws ServiceException;
+    public String getMultiplicity();
     
-    public Path getQualifierType() throws ServiceException;
+    public Path getQualifierType();
     
     /**
      * Tells whether the given feature is a reference. The same as 
@@ -152,16 +152,13 @@ public interface ModelElement_1_0 {
      * @param feature the feature to be inspected
      * 
      * @return {@code true} if the given feature is a reference
-     * 
-     * @throws ServiceException
      */
-    public boolean isReference() throws ServiceException;
+    public boolean isReference();
         
     /**
      * CR20020817 support
      * 
      * @return the dereferenced type
-     * 
      * @throws ServiceException 
      */
     ModelElement_1_0 getDereferencedType() throws ServiceException;

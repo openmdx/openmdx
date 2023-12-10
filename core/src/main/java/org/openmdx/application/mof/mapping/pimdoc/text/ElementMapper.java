@@ -45,8 +45,6 @@
 package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
@@ -110,11 +108,7 @@ abstract class ElementMapper extends HTMLMapper {
 	}
 	
 	protected boolean isAbstract() {
-		try {
-			return Boolean.TRUE.equals(element.isAbstract());
-		} catch (ServiceException e) {
-			throw new RuntimeServiceException(e);
-		}
+		return Boolean.TRUE.equals(element.isAbstract());
 	}
 
 	protected abstract void columnBody();

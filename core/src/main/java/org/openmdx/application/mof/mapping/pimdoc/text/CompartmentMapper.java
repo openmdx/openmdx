@@ -228,12 +228,8 @@ abstract class CompartmentMapper extends MapperTemplate {
 
 			@Override
 			public boolean test(ModelElement_1_0 t) {
-				try {
-					final Path container = t.getContainer();
-					return container != null && supertypes.contains(container);
-				} catch (ServiceException e) {
-					throw new RuntimeServiceException(e);
-				}
+				final Path container = t.getContainer();
+				return container != null && supertypes.contains(container);
 			}
 			
 		};
