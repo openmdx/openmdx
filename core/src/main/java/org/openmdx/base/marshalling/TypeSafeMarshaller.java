@@ -47,8 +47,8 @@ package org.openmdx.base.marshalling;
 import java.util.Optional;
 
 /**
-* Marshaller Interface
-*/
+ * Marshaller Interface
+ */
 public interface TypeSafeMarshaller<U,M> {
 
     /**

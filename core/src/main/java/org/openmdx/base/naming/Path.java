@@ -53,8 +53,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.marshalling.TypeSafeMarshaller;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.xri.XRI_1Protocols;

@@ -97,9 +97,12 @@ dependencies {
     implementation("javax.jdo:jdo-api:3.1")    
     implementation("org.apache.directory.api:apache-ldap-api:2.0.+")    
     // Test
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-    testImplementation("org.mockito:mockito-core:4.2.0")    
-    testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
+    testImplementation("org.mockito:mockito-core:5.8.0")    
+    testImplementation("org.mockito:mockito-junit-jupiter:5.8.0")    
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-commons:1.10.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-engine:1.10.1")
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 }

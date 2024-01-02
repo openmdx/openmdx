@@ -241,11 +241,10 @@ public final class XRI_2Marshaller
                 // openMDX cross reference
                 //
                 try {
-                    String xRef = marshal(new Path(segment).getComponents());
                     oid.append(
                         '('
                     ).append(
-                        xRef.substring(XRI_2Protocols.SCHEME_PREFIX.length())
+                        toCrossReferencePath(segment)
                     ).append(
                         ')'
                     );
@@ -260,6 +259,12 @@ public final class XRI_2Marshaller
         }
         return oid.toString();
     }
+
+
+	@SuppressWarnings("deprecation")
+	private String toCrossReferencePath(String segment) {
+		return marshal(new Path(segment).getComponents()).substring(XRI_2Protocols.SCHEME_PREFIX.length());
+	}
 
 	static String xriRepresentationOfGeneralSegment(
 		boolean authority,	

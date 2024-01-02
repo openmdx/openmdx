@@ -112,11 +112,6 @@ public class PathTransformationTest {
 		Assertions.assertEquals("xri://@openmdx*x/y/(@openmdx*a/b/c/(@openmdx*1/2/3))", p2.toString(), "p2.toString()");
 		Assertions.assertEquals("xri:@openmdx:x/y/(@openmdx:a/b/c/(@openmdx:1/2/3))", p2.toXri(), "p2.toXri()");
 		Assertions.assertEquals("spice://x/y/a%2fb%2fc%2f1%2f%2f2%2f%2f3", p2.toUri(), "p2.toUri()");
-//        XRI xref = new XRI("@openmdx:1/2/3");
-//        assertTrue("isAbsolute()", xref.isAbsolute());
-//        assertFalse("isRelative()", xref.isRelative());
-//        assertEquals("xref aurhority path", "@openmdx:1", xref.getAuthorityPath().toString());
-//        assertEquals("xref xri path", "/2/3", xref.getXRIPath().toString());
 	}
 
 	@Test

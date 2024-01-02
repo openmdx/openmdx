@@ -102,9 +102,12 @@ dependencies {
     implementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     // test
     testImplementation(project(":core"))
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-    testImplementation("org.mockito:mockito-core:4.2.0")    
-    testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
+    testImplementation("org.mockito:mockito-core:5.8.0")    
+    testImplementation("org.mockito:mockito-junit-jupiter:5.8.0")    
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-commons:1.10.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-engine:1.10.1")
 	testRuntimeOnly("com.atomikos:transactions-jta:6.0.0")
 	testRuntimeOnly("com.atomikos:transactions-jdbc:6.0.0")
     // openmdxBootstrap

@@ -171,12 +171,12 @@ dependencies {
 	implementation("com.atomikos:transactions-jta:6.0.0")
 	implementation("com.atomikos:transactions-jdbc:6.0.0")
     // Test
+    testImplementation("org.mockito:mockito-core:5.8.0")    
+    testImplementation("org.mockito:mockito-junit-jupiter:5.8.0")    
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-    testImplementation("org.junit.platform:junit-platform-commons:1.10.1")
-    testImplementation("org.junit.platform:junit-platform-engine:1.10.1")
-    testImplementation("org.mockito:mockito-core:4.2.0")    
-    testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-commons:1.10.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-engine:1.10.1")
     // openmdxBase
     openmdxBase("org.openmdx:openmdx-base:2.18.10")
     // openmdxBootstrap

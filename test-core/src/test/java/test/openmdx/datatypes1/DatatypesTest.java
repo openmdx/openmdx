@@ -64,7 +64,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import javax.jdo.FetchGroup;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;

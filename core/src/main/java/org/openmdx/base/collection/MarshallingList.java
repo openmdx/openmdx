@@ -49,12 +49,14 @@ import java.util.AbstractList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.ExceptionListenerMarshaller;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.marshalling.ReluctantUnmarshalling;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * A Marshalling List
@@ -67,7 +69,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
      * 
      * @param marshaller
      * @param list
-     * @param unmarshalling
+     * @param unmarshalling the non-null value telling whether the value is eagerly or reluctant unmarshalled
      */    
     public MarshallingList(
         Marshaller marshaller,
@@ -76,7 +78,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
     ) {
         this.marshaller = marshaller;
         this.delegate = list;
-        this.unmarshalling = unmarshalling;
+        this.unmarshalling = Objects.requireNonNull(unmarshalling, "Unmarshalling is a required argument");
     }
 
     /**
@@ -148,6 +150,9 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
         int index, 
         E element
     ) {
+    	//
+    	// Unmarshalling can't be avoided
+    	//
         try {
             getDelegate().add(
                 index,
@@ -166,12 +171,14 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
     public boolean add(
         E element
     ) {
+    	//
+    	// Unmarshalling can't be avoided
+    	//
         try {
             return getDelegate().add(
                 marshaller.unmarshal(element)
             );
-        }
-        catch(ServiceException e) {
+        } catch(ServiceException e) {
             throw new RuntimeServiceException(e);
         }        
     }
@@ -192,11 +199,17 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
         Object candidate
     ) {
         try {
-            return getDelegate().contains(
-                marshaller.unmarshal(candidate)
-            );
-        }
-        catch(ServiceException e) {
+            switch(this.unmarshalling) {
+                case RELUCTANT:
+                    return super.contains(candidate);
+                case EAGER:
+                    return getDelegate().contains(
+                        marshaller.unmarshal(candidate)
+                    );
+                default:    
+                	throw createUnmarshallingException();
+            }
+        } catch(ServiceException e) {
             throw new RuntimeServiceException(e);
         }        
     }
@@ -209,8 +222,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
             return (E) marshaller.marshal(
                 getDelegate().get(index)
             );
-        }
-        catch(ServiceException e) {
+        } catch(ServiceException e) {
             throw new RuntimeServiceException(e);
         }        
     }
@@ -227,10 +239,11 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
                 case RELUCTANT:
                     return super.indexOf(candidate);
                 case EAGER:
-                default:    
                     return getDelegate().indexOf(
                         marshaller.unmarshal(candidate)
                     );
+                default:    
+                	throw createUnmarshallingException();
             }
         }
         catch(ServiceException e) {
@@ -258,10 +271,11 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
                 case RELUCTANT:
                     return super.lastIndexOf(candidate);
                 case EAGER:
-                default:    
                     return getDelegate().lastIndexOf(
                         marshaller.unmarshal(candidate)
                     );
+                default:    
+                	throw createUnmarshallingException();
             }
         }
         catch(ServiceException e) {
@@ -295,13 +309,13 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
                 case RELUCTANT:
                     return super.remove(candidate);
                 case EAGER:
-                default:    
                     return getDelegate().remove(
                         marshaller.unmarshal(candidate)
                     );
+                default:    
+                	throw createUnmarshallingException();
             }
-        }
-        catch(ServiceException e) {
+        } catch(ServiceException e) {
             throw new RuntimeServiceException(e);
         }        
     }
@@ -386,6 +400,9 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
         public void add(
             E element
         ) {
+        	//
+        	// Unmarshalling can't be avoided
+        	// 
             try {
                 this.delegate.add(
                     marshaller.unmarshal(element)
@@ -408,13 +425,11 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
 
         public E next(
         ) {
-            
             try {
                 return (E)marshaller.marshal(
                     this.delegate.next()
                 );
-            }
-            catch(ServiceException e) {
+            } catch(ServiceException e) {
                 throw new RuntimeServiceException(e);
             }            
         }
@@ -430,8 +445,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
                 return (E)marshaller.marshal(
                     this.delegate.previous()
                 );
-            }
-            catch(ServiceException e) {
+            } catch(ServiceException e) {
                 throw new RuntimeServiceException(e);
             }            
         }
@@ -453,12 +467,20 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
                 this.delegate.set(
                     marshaller.unmarshal(element)
                 );
-            }
-            catch(ServiceException e) {
+            } catch(ServiceException e) {
                 throw new RuntimeServiceException(e);
             }            
         }
        
     }
         
+	private RuntimeServiceException createUnmarshallingException() {
+		return new RuntimeServiceException(
+			BasicException.Code.DEFAULT_DOMAIN, 
+			BasicException.Code.ASSERTION_FAILURE, 
+			"Unexpected unmarshlling value", 
+			new BasicException.Parameter("unmarshalling", this.unmarshalling)
+		);
+	}
+
 }
