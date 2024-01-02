@@ -1,6 +1,6 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: Path/ObjectId Marshaller 
  * Owner:       the original authors.
  * ====================================================================
@@ -45,8 +45,11 @@
  */
 package org.openmdx.base.naming;
 
+import java.util.Optional;
+
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.TypeSafeMarshaller;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
 import org.openmdx.kernel.xri.XRI_2Protocols;
 import org.openmdx.kernel.xri.XRIAuthorities;
@@ -55,9 +58,7 @@ import org.openmdx.kernel.xri.XRIAuthorities;
 /**
  * Path/ObjectId Marshaller
  */
-public final class IRI_2Marshaller
-    implements Marshaller
-{
+public final class IRI_2Marshaller implements TypeSafeMarshaller<String[], String> {
 
     private IRI_2Marshaller(
     ){
@@ -67,12 +68,12 @@ public final class IRI_2Marshaller
     /**
      * Memorize the singleton
      */ 
-    final static private Marshaller instance = new IRI_2Marshaller();
+    final static private TypeSafeMarshaller<String[], String> instance = new IRI_2Marshaller();
     
     /**
      * Return the singleton
      */ 
-    static public Marshaller getInstance(
+    static public TypeSafeMarshaller<String[], String> getInstance(
     ){
         return IRI_2Marshaller.instance;
     }
@@ -89,10 +90,11 @@ public final class IRI_2Marshaller
      *            The array of CharSequences to be marshalled.
      * 
      * @return      A CharSequence containing the marshalled objects.
-   */
-    public Object marshal (
-        Object charSequences
-    ) throws ServiceException {
+     */
+    @Override
+    public String marshal (
+        String[] charSequences
+    ){
         throw new UnsupportedOperationException(
             "Direct IRI marshalling not supported yet"
         );
@@ -107,11 +109,11 @@ public final class IRI_2Marshaller
      * @return    A String array containing the unmarshaled sequence
      *                  of objects.
      * @exception ServiceException ILLEGAL_ARGUMENT
-    */
-    public Object unmarshal (
-        Object charSequence
-    ) throws ServiceException {
-        String source = charSequence.toString();
+     */
+    @Override
+    public String[] unmarshal (
+        String source
+    ){
         String iri;
         if(source.indexOf('%') < 0) {
             iri = source;
@@ -140,8 +142,18 @@ public final class IRI_2Marshaller
         try {
             return XRI_2Marshaller.getInstance().unmarshal(iri);
         } catch (RuntimeException exception) {
-            throw new ServiceException(exception);
+            throw new RuntimeServiceException(exception);
         }
     }
         
+	@Override
+	public Optional<String[]> asUnmarshalledValue(Object value) {
+		return value instanceof String[] ? Optional.of((String[])value) : Optional.empty();
+	}
+
+	@Override
+	public Optional<String> asMarshalledValue(Object value) {
+		return value instanceof String ? Optional.of((String)value) : Optional.empty();
+	}
+
 }

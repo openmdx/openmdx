@@ -47,6 +47,7 @@ package org.openmdx.base.collection;
 import java.util.AbstractCollection;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Optional;
 
 import org.openmdx.base.marshalling.TypeSafeMarshaller;
 
@@ -106,10 +107,8 @@ public class TypeSafeMarshallingCollection<U,M>
     public boolean contains(
         Object element
     ) {
-        final U unmarshalled = marshaller.asUnmarshalledValue(element);
-        return
-            unmarshalled != null &&
-            this.delegate.contains(unmarshalled);
+        final Optional<U> unmarshalled = marshaller.asUnmarshalledValue(element);
+        return unmarshalled.isPresent() && this.delegate.contains(unmarshalled.get());
     }
 
     /* (non-Javadoc)
@@ -136,10 +135,8 @@ public class TypeSafeMarshallingCollection<U,M>
     public boolean remove(
         Object element
     ) {
-        final U unmarshalled = marshaller.asUnmarshalledValue(element);
-        return
-            unmarshalled != null &&
-            this.delegate.remove(unmarshalled);
+        final Optional<U> unmarshalled = marshaller.asUnmarshalledValue(element);
+        return unmarshalled.isPresent() && this.delegate.remove(unmarshalled.get());
     }
 
     @Override

@@ -49,6 +49,7 @@ import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.openmdx.base.marshalling.TypeSafeMarshaller;
@@ -114,10 +115,8 @@ public class TypeSafeMarshallingMap<K,U,M>
     public boolean containsValue(
         Object value
     ) {
-        M marshalled = this.marshaller.asMarshalledValue(value);
-        return 
-            marshalled != null &&
-            this.delegate.containsValue(this.marshaller.unmarshal(marshalled));
+        final Optional<M> marshalled = this.marshaller.asMarshalledValue(value);
+        return marshalled.isPresent() && this.delegate.containsValue(this.marshaller.unmarshal(marshalled.get()));
     }
 
     /**

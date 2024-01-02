@@ -45,9 +45,12 @@
 package org.openmdx.base.naming;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.TypeSafeMarshaller;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.xri.XRI_1Protocols;
 import org.openmdx.kernel.xri.XRI_2Protocols;
@@ -56,10 +59,7 @@ import org.openmdx.kernel.xri.XRIAuthorities;
 /**
  * Path/XRI Marshaller
  */
-@SuppressWarnings({"rawtypes","unchecked"})
-public final class XRI_1Marshaller
-implements Marshaller
-{
+public final class XRI_1Marshaller implements TypeSafeMarshaller<String[],String> {
 
     private XRI_1Marshaller(
     ){
@@ -69,12 +69,20 @@ implements Marshaller
     /**
      * Memorize the singleton
      */
-    final static private Marshaller instance = new XRI_1Marshaller();
+    private final static TypeSafeMarshaller<String[],String> instance = new XRI_1Marshaller();
 
+    private final static String XREF_BEGIN = "(";
+
+    private final static String XREF_END = ")";
+
+    private final static String XRI_XREF_PREFIX = XREF_BEGIN + XRI_2Protocols.SCHEME_PREFIX;
+
+    private final static String OPENMDX_XREF_PREFIX = XREF_BEGIN + XRIAuthorities.OPENMDX_AUTHORITY + ":";
+    
     /**
      * Return the singleton
      */
-    static public Marshaller getInstance(
+    static public TypeSafeMarshaller<String[],String> getInstance(
     ){
         return XRI_1Marshaller.instance;
     }
@@ -92,18 +100,18 @@ implements Marshaller
      * 
      * @return      A CharSequence containing the marshalled objects.
      */
-    public Object marshal (
-        Object charSequences
-    ) throws ServiceException {
-        if (charSequences == null) return null;
-        Object[]source = (Object[])charSequences;
-        StringBuilder xri = new StringBuilder(XRI_1Protocols.OPENMDX_PREFIX);
+    @Override
+    public String marshal (
+        String[] source
+    ){
+        if (source == null) return null;
+        final StringBuilder xri = new StringBuilder(XRI_1Protocols.OPENMDX_PREFIX);
         char delimiter = ':';
         for(
                 int i=0;
                 i<source.length;
         ){
-            encode(
+            encodeSegment(
                 source[i],
                 xri.append(delimiter),
                 i == 0,
@@ -114,27 +122,26 @@ implements Marshaller
         try {
             return xri.toString();
         } catch (IllegalArgumentException e) {
-            throw new ServiceException(
+            throw new RuntimeServiceException(
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
                 "Path marshalling failed",
-                new BasicException.Parameter(BasicException.Parameter.XRI, charSequences)
+                new BasicException.Parameter(BasicException.Parameter.XRI, (Object[])source)
             );
         }
     }
 
     @SuppressWarnings("deprecation")
-    static void encode(
-        Object charSequence,
+    private static void encodeSegment(
+        String source,
         StringBuilder xri,
         boolean authority,
         boolean terminal
     ){
-        String source = charSequence.toString();
         if (
-                source.startsWith(XRI_XREF_PREFIX) &&
-                source.endsWith(XREF_END)
+            source.startsWith(XRI_XREF_PREFIX) &&
+            source.endsWith(XREF_END)
         ) {
             encode(
                 source.substring(XRI_XREF_PREFIX.length()),
@@ -167,7 +174,7 @@ implements Marshaller
      * The following, then, are the XRI-specific steps required to convert an XRI into a URI.
      * <ol>
      * <li>Escape all percent "%" characters within a segment as "%25".
-     * <lo>Escape unbalanced paranthesis within a segment as "%28" and "%29".
+     * <lo>Escape unbalanced parenthesis within a segment as "%28" and "%29".
      * <li>Escape all number sign "#" characters that appear within a segment as "%23".
      * <li>Escape all question mark "?" characters that appear within a segment as "%3F".
      * <li>Escape all slash "/" characters that appear within a segment as "%2F".
@@ -241,18 +248,18 @@ implements Marshaller
      *                  of objects.
      * @exception ServiceException ILLEGAL_ARGUMENT
      */
-    public Object unmarshal (
-        Object charSequence
-    ) throws ServiceException {
+    public String[] unmarshal (
+        String charSequence
+    ){
         if (charSequence == null) return null;
-        String source = SpecialResourceIdentifiers.unescapeResourceIdentifier(charSequence.toString());
-        if(!source.toLowerCase().startsWith(XRI_1Protocols.OPENMDX_PREFIX)) throw new ServiceException (
+        final String source = SpecialResourceIdentifiers.unescapeResourceIdentifier(charSequence);
+        if(!source.toLowerCase().startsWith(XRI_1Protocols.OPENMDX_PREFIX)) throw new RuntimeServiceException (
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
             "'xri' scheme and '" + XRIAuthorities.OPENMDX_AUTHORITY + "' authority expected",
             new BasicException.Parameter(BasicException.Parameter.XRI,source)
         );
-        ArrayList target = new ArrayList();
+        List<String> target = new ArrayList<>();
         if(source.length() == XRI_1Protocols.OPENMDX_PREFIX.length()) {
             // Valid Empty Path
         } else if (":**".equals(source.substring(XRI_1Protocols.OPENMDX_PREFIX.length()))) {
@@ -321,7 +328,7 @@ implements Marshaller
                 )
             );
         } catch (Exception exception) {
-            throw new ServiceException(
+            throw new RuntimeServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
@@ -345,7 +352,7 @@ implements Marshaller
         String source,
         boolean authority,
         boolean terminal
-    ) throws ServiceException{
+    ){
         if(source.startsWith(OPENMDX_XREF_PREFIX) && source.endsWith(XREF_END)) {
             StringBuilder target = new StringBuilder();
             boolean xrefAuthority = true;
@@ -444,12 +451,14 @@ implements Marshaller
         );
     }
 
-    private final static String XREF_BEGIN = "(";
+	@Override
+	public Optional<String[]> asUnmarshalledValue(Object value) {
+		return value instanceof String[] ? Optional.of((String[])value) : Optional.empty();
+	}
 
-    private final static String XREF_END = ")";
-
-    private final static String XRI_XREF_PREFIX = XREF_BEGIN + XRI_2Protocols.SCHEME_PREFIX;
-
-    private final static String OPENMDX_XREF_PREFIX = XREF_BEGIN + XRIAuthorities.OPENMDX_AUTHORITY + ":";
+	@Override
+	public Optional<String> asMarshalledValue(Object value) {
+		return value instanceof String ? Optional.of((String)value) : Optional.empty();
+	}
 
 }

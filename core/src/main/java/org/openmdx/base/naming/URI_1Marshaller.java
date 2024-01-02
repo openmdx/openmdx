@@ -45,9 +45,12 @@
 package org.openmdx.base.naming;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.TypeSafeMarshaller;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -55,8 +58,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Handles SPICE URIs
  */
-@SuppressWarnings({"rawtypes","unchecked"})
-public final class URI_1Marshaller implements Marshaller {
+public final class URI_1Marshaller implements TypeSafeMarshaller<String[],String> {
 
     private URI_1Marshaller(
     ){
@@ -66,17 +68,25 @@ public final class URI_1Marshaller implements Marshaller {
     /**
      * Memorize the singleton
      */ 
-    final static private Marshaller instance = new URI_1Marshaller();
+    private final static TypeSafeMarshaller<String[],String> instance = new URI_1Marshaller();
 
     /**
      * Legacy' URI Scheme Prefix
      */
     public final static String OPENMDX_PREFIX = "spice:/";
 
+    private final static char COMPONENT_DELIMITER = '/';
+
+    private final static char FIELD_DELIMITER = ':';
+
+    private final static char ESCAPE = '%';
+
+    private final static int RADIX = 16;
+    
     /**
      * Return the singleton
      */ 
-    static public Marshaller getInstance(
+    static public TypeSafeMarshaller<String[],String> getInstance(
     ){
         return URI_1Marshaller.instance;
     }
@@ -94,21 +104,21 @@ public final class URI_1Marshaller implements Marshaller {
      * 
      * @return      A CharSequence containing the marshalled objects.
      */
-    public Object marshal (
-        Object charSequences
-    ) throws ServiceException {
-        if (charSequences == null) return null;
-        Object[]source = (Object[])charSequences;
-        StringBuilder target = new StringBuilder(URI_1Marshaller.OPENMDX_PREFIX);
+    @Override
+    public String marshal (
+        String[] source
+    ){
+        if (source == null) return null;
+        final StringBuilder target = new StringBuilder(URI_1Marshaller.OPENMDX_PREFIX);
         for(
-                int i=0;
-                i < source.length;
-        )encode(
+            int i=0;
+            i < source.length;
+        ) encode(
             source[i],
             target.append(COMPONENT_DELIMITER),
             ++i == source.length
         );
-        return target;
+        return target.toString();
     }
 
 
@@ -122,11 +132,12 @@ public final class URI_1Marshaller implements Marshaller {
      *                  of objects.
      * @exception ServiceException ILLEGAL_ARGUMENT
      */
-    public Object unmarshal (
-        Object charSequence
-    ) throws ServiceException {
+    @Override
+    public String[] unmarshal (
+        String charSequence
+    ) {
         if (charSequence == null) return null;
-        ArrayList target = new ArrayList();
+        final List<String> target = new ArrayList<>();
         try {
             String source = charSequence.toString();
             if(source.length() > URI_1Marshaller.OPENMDX_PREFIX.length()){
@@ -158,8 +169,8 @@ public final class URI_1Marshaller implements Marshaller {
                 } while (toIndex > 0);
             }
             return target.toArray(new String[target.size()]);
-        } catch (RuntimeException exception){
-            throw new ServiceException(
+        } catch (Exception exception){
+            throw new RuntimeServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
@@ -176,7 +187,7 @@ public final class URI_1Marshaller implements Marshaller {
         Object charSequence,
         StringBuilder target,
         boolean terminal
-    ) throws ServiceException {
+    ){
         String string = charSequence.toString();
         if(terminal && string.endsWith("%")) {
             encode(
@@ -231,7 +242,7 @@ public final class URI_1Marshaller implements Marshaller {
                 }
             }
         } catch (RuntimeException exception) {
-            throw new ServiceException(exception);
+            throw new RuntimeServiceException(exception);
         }
     }
 
@@ -260,19 +271,14 @@ public final class URI_1Marshaller implements Marshaller {
                 }
     }
 
+	@Override
+	public Optional<String[]> asUnmarshalledValue(Object value) {
+		return value instanceof String[] ? Optional.of((String[])value) : Optional.empty();
+	}
 
-    //------------------------------------------------------------------------
-    // Constants
-    //------------------------------------------------------------------------
-
-    final static public String ROOT = "/";
-
-    final static public char COMPONENT_DELIMITER = '/';
-
-    final static public char FIELD_DELIMITER = ':';
-
-    final static public char ESCAPE = '%';
-
-    final static int RADIX = 16;
+	@Override
+	public Optional<String> asMarshalledValue(Object value) {
+		return value instanceof String ? Optional.of((String)value) : Optional.empty();
+	}
 
 }

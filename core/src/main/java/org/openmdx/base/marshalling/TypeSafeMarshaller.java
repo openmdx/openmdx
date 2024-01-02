@@ -44,6 +44,8 @@
  */
 package org.openmdx.base.marshalling;
 
+import java.util.Optional;
+
 /**
 * Marshaller Interface
 */
@@ -82,17 +84,17 @@ public interface TypeSafeMarshaller<U,M> {
      * 
      * @param value the value to be tested
      * 
-     * @return the value if is an instance of the M, {@code null} 
+     * @return {@code Optional.of(value)} if the value is an instance of the U, {@code Optional.empty()} otherwise 
      */
-    U asUnmarshalledValue(Object value);
+    Optional<U> asUnmarshalledValue(Object value);
     
     /**
      * Masks out values not being an instance of M
      * 
      * @param value the value to be tested
      * 
-     * @return the value if is an instance of the M, {@code null} 
+     * @return {@code Optional.of(value)} if the value is an instance of the M, {@code Optional.empty()} otherwise 
      */
-    M asMarshalledValue(Object value);
+    Optional<M> asMarshalledValue(Object value);
     
 }

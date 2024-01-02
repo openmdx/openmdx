@@ -45,6 +45,7 @@
 package org.openmdx.application.mof.repository.accessor;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.openmdx.base.marshalling.TypeSafeMarshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -104,16 +105,16 @@ public class ModelElementMarshaller implements TypeSafeMarshaller<Path, ModelEle
      * @see org.openmdx.base.marshalling.TypeSafeMarshaller#asUnmarshalledValue(java.lang.Object)
      */
     @Override
-    public Path asUnmarshalledValue(Object value) {
-        return value instanceof Path ? (Path) value : null;
+    public Optional<Path> asUnmarshalledValue(Object value) {
+        return value instanceof Path ? Optional.of((Path)value) : Optional.empty();
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.marshalling.TypeSafeMarshaller#asMarshalledValue(java.lang.Object)
      */
     @Override
-    public ModelElement_1_0 asMarshalledValue(Object value) {
-        return value instanceof ModelElement_1_0 ? (ModelElement_1_0) value : null;
+    public Optional<ModelElement_1_0> asMarshalledValue(Object value) {
+        return value instanceof ModelElement_1_0 ? Optional.of((ModelElement_1_0) value) : Optional.empty();
     }
 
     /**

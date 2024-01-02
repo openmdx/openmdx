@@ -55,6 +55,7 @@ import java.util.UUID;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.TypeSafeMarshaller;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.xri.XRI_1Protocols;
 import org.openmdx.kernel.xri.XRI_2Protocols;
@@ -198,9 +199,9 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
      */ 
     private Path (
         String charSequence,
-        Marshaller marshaller
+        TypeSafeMarshaller<String[], String> marshaller
     ){
-    	this(getComponents(charSequence, marshaller));
+    	this(marshaller.unmarshal(charSequence));
     	if(marshaller == XRI_2Marshaller.getInstance()) {
     		this.xri = charSequence;
     	}
@@ -271,25 +272,6 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
 	private static final long serialVersionUID = -6970183208008259633L;
 
     /**
-     * Parse the components with the given marshaller
-     * 
-     * @param charSequence
-     * @param marshaller
-     * 
-     * @return the components
-     */
-    private static String[] getComponents(
-		String charSequence,
-		Marshaller marshaller
-	) {
-    	try {
-    		return (String[])marshaller.unmarshal(charSequence);
-    	} catch (ServiceException exception) {
-    		throw new RuntimeServiceException(exception);
-    	}
-    }
-
-    /**
      * Retrieves the components in their classic representation
      * 
      * @return the components in their classic representation
@@ -348,11 +330,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
      * @return the legacy path representation
      */
     public String toClassicRepresentation(){
-        try {
-            return LegacyMarshaller.getInstance().marshal(getComponents()).toString();
-        } catch (ServiceException exception) {
-            throw new RuntimeServiceException(exception);
-        }
+        return LegacyMarshaller.getInstance().marshal(getComponents()).toString();
     }
     
     /**
@@ -494,11 +472,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     @Deprecated
     public String toUri()
     {
-        try {
-            return URI_1Marshaller.getInstance().marshal(this.getComponents()).toString();
-        } catch (ServiceException exception) {
-            throw new RuntimeServiceException(exception);
-        }
+        return URI_1Marshaller.getInstance().marshal(this.getComponents()).toString();
     }
 
     /**
@@ -539,11 +513,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     @Deprecated
     public String toXri()
     {
-        try {
-            return XRI_1Marshaller.getInstance().marshal(this.getComponents()).toString();
-        } catch (ServiceException exception) {
-            throw new RuntimeServiceException(exception);
-        }
+        return XRI_1Marshaller.getInstance().marshal(this.getComponents());
     }
 
     /**

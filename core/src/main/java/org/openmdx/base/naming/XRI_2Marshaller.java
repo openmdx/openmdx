@@ -49,22 +49,23 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.TypeSafeMarshaller;
 import org.openmdx.base.text.conversion.URITransformation;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.xri.XRI_2Protocols;
 import org.openmdx.kernel.xri.XRIAuthorities;
+import org.openmdx.kernel.xri.XRI_2Protocols;
 
 /**
  * XRI 2 Marshaller
  */
 public final class XRI_2Marshaller
-    implements Marshaller
+    implements TypeSafeMarshaller<String[], String>
 {
 
     private XRI_2Marshaller(
@@ -75,7 +76,7 @@ public final class XRI_2Marshaller
     /**
      * Memorize the singleton
      */ 
-    final static private Marshaller instance = new XRI_2Marshaller();
+    final static private TypeSafeMarshaller<String[], String> instance = new XRI_2Marshaller();
     
     /**
      * xri://@openmdx
@@ -92,7 +93,7 @@ public final class XRI_2Marshaller
     /**
      * Return the singleton
      */ 
-    static public Marshaller getInstance(
+    static public TypeSafeMarshaller<String[], String> getInstance(
     ){
         return XRI_2Marshaller.instance;
     }
@@ -109,10 +110,11 @@ public final class XRI_2Marshaller
      *            The array of CharSequences to be marshalled.
      * 
      * @return      A CharSequence containing the marshalled objects.
-   */
-    public Object marshal (
-        Object charSequences
-    ) throws ServiceException {
+     */
+    @Override
+    public String marshal (
+        String[] charSequences
+    ){
         if (charSequences == null) return null;
         Object[]segments = (Object[])charSequences;        
         StringBuilder oid = new StringBuilder(XRI_2Protocols.OPENMDX_PREFIX);
@@ -239,11 +241,11 @@ public final class XRI_2Marshaller
                 // openMDX cross reference
                 //
                 try {
-                    Object xRef = marshal(new Path(segment).getSuffix(0));
+                    String xRef = marshal(new Path(segment).getComponents());
                     oid.append(
                         '('
                     ).append(
-                        xRef.toString().substring(XRI_2Protocols.SCHEME_PREFIX.length())
+                        xRef.substring(XRI_2Protocols.SCHEME_PREFIX.length())
                     ).append(
                         ')'
                     );
@@ -351,158 +353,149 @@ public final class XRI_2Marshaller
      * @return    A String array containing the unmarshaled sequence
      *                  of objects.
      * @exception ServiceException ILLEGAL_ARGUMENT
-    */
-    public Object unmarshal (
-        Object charSequence
-    ) throws ServiceException {
-        String xriString = SpecialResourceIdentifiers.unescapeResourceIdentifier(charSequence.toString());
-        try {
-            boolean treeWildcard = xriString.endsWith(")/($...)");
-            List<Segment> segments = getObjectIdentifier(false, xriString);
-            String authority = segments.get(0).toString();
-            if(XRIAuthorities.OPENMDX_AUTHORITY.equals(authority)) return ROOT;
-            String[] reply = new String[
-                segments.size() - (treeWildcard ? 1 : 0)
-            ];
-            reply[0] = authority.charAt(8) == '*' ? authority.substring(9).replaceAll(
-                "\\(\\$\\.\\.\\.\\)", "%"
-            ).replaceAll(
-                "\\(\\$\\.\\.\\)", ":*"
-            ).replaceAll(
-                "\\(\\$\\./([^\\)]+)\\)",
-                "\1:*"
-            ).replaceAll(
-                "\\(\\$\\.\\)",
-                ":*"
-            ).replaceAll(
-                "\\.",
-                ":"
-            ) : authority.substring(8);
-            for(
-                int i = 1;
-                i < reply.length;
-                i++
-            ) {
-                Segment segment = segments.get(i);
-                List<String> subSegments = segment.getSubSegments();
-                int jLimit = subSegments.size();
-                boolean subSegmentsWildcard = segment.getSubSegmentAt(jLimit - 1).equals("*($..)");
-                StringBuilder target = new StringBuilder();
-                boolean parameter = false;
-                boolean wildcard = false;
-                SubSegments: for(
-                    int j = 0; 
-                    j < jLimit;
-                    j++
-                ) {                                
-                    boolean wasParameter = parameter;
-                    boolean wasWildcard = wildcard;
-                    parameter = false;
-                    wildcard = false;
-                    String subSegment = segment.getSubSegmentAt(j);
-                    String source = subSegment.toString().substring(1);
-                    String delimiter = 
-                        wasParameter ? "=" :
-                        subSegment.startsWith("!") ? "!" :
-                        j == 0 ? "" : 
-                        "*";
-                    parameter = false;
-                    if(subSegment.startsWith("(", 1))  {
-                        List<Segment> xriReference = parseCrossReference(false, subSegment);
-                        if (xriReference != null) {
-                            Segment authorityPath = xriReference.get(0);
-                            if(authorityPath == null) {
-                                target.append(delimiter).append(source);
-                            } else {
-                                String xrefAuthority = authorityPath.toString();
-                                if("$..".equals(xrefAuthority)) {
-                                    if(i + 1 == reply.length && treeWildcard) {
-                                        target.append(":%");
-                                    } else if(j == 0) {
-                                        target.append(":*");
-                                    } else if(!wasWildcard) {
-                                        target.append(subSegment);
-                                    }
-                                } else if ("$.".equals(xrefAuthority)) {
-                                    target.append(subSegment);
-                                } else if (xrefAuthority.startsWith("$.*")) {
-                                    if(i + 1 == reply.length && treeWildcard) {
-                                        target.append(
-                                            xrefAuthority.substring(3)
-                                        ).append(
-                                            '%'
-                                        );
-                                        break SubSegments;
-                                    } else if (j + 2 == jLimit && subSegmentsWildcard) {
-                                        target.append(
-                                            ':'
-                                        ).append(
-                                            xrefAuthority.substring(3)
-                                        ).append(
-                                            '*'
-                                        );
-                                        wildcard = true;
-                                    } else {
-                                        target.append(subSegment);
-                                    }
-                                } else if (xrefAuthority.startsWith("$.!")) {
-                                    if(i + 1 == reply.length && treeWildcard) {
-                                        target.append(
-                                            xrefAuthority.substring(2)
-                                        ).append(
-                                            '%'
-                                        );
-                                        break SubSegments;
-                                    } else if (j + 1 == jLimit && subSegmentsWildcard) {
-                                        target.append(
-                                            ':'
-                                        ).append(
-                                            xrefAuthority.substring(2)
-                                        ).append(
-                                            '*'
-                                        );
-                                        wildcard = true;
-                                    } else {
-                                        target.append(subSegment);
-                                    }
-                                } else if ("$...".equals(xrefAuthority)) {
-                                    target.append('%');
-                                } else if (OPENMDX_OBJECT_AUTHORITY.matcher(xrefAuthority).matches()) {
-                                    String embeddedXri = source.substring(1, source.length() - 1);
-                                    target.append(
-                                        delimiter
-                                    ).append(
-                                        new Path(
-                                            embeddedXri.startsWith(XRI_2Protocols.SCHEME_PREFIX) ? embeddedXri : XRI_2Protocols.SCHEME_PREFIX + embeddedXri
-                                        ).toClassicRepresentation()
-                                    );
-                                } else {
-                                    target.append(
-                                        delimiter
-                                    ).append(
-                                        source
-                                    );
-                                }
-                            }
-                        } else {
+     */
+    @Override
+    public String[] unmarshal (
+        String charSequence
+    ){
+        final String xriString = SpecialResourceIdentifiers.unescapeResourceIdentifier(charSequence.toString());
+        final boolean treeWildcard = xriString.endsWith(")/($...)");
+        final List<Segment> segments = getObjectIdentifier(false, xriString);
+        final String authority = segments.get(0).toString();
+        if(XRIAuthorities.OPENMDX_AUTHORITY.equals(authority)) return ROOT;
+        final String[] reply = new String[
+            segments.size() - (treeWildcard ? 1 : 0)
+        ];
+        reply[0] = authority.charAt(8) == '*' ? authority.substring(9).replaceAll(
+            "\\(\\$\\.\\.\\.\\)", "%"
+        ).replaceAll(
+            "\\(\\$\\.\\.\\)", ":*"
+        ).replaceAll(
+            "\\(\\$\\./([^\\)]+)\\)",
+            "\1:*"
+        ).replaceAll(
+            "\\(\\$\\.\\)",
+            ":*"
+        ).replaceAll(
+            "\\.",
+            ":"
+        ) : authority.substring(8);
+        for(
+            int i = 1;
+            i < reply.length;
+            i++
+        ) {
+            Segment segment = segments.get(i);
+            List<String> subSegments = segment.getSubSegments();
+            int jLimit = subSegments.size();
+            boolean subSegmentsWildcard = segment.getSubSegmentAt(jLimit - 1).equals("*($..)");
+            StringBuilder target = new StringBuilder();
+            boolean parameter = false;
+            boolean wildcard = false;
+            SubSegments: for(
+                int j = 0; 
+                j < jLimit;
+                j++
+            ) {                                
+                boolean wasParameter = parameter;
+                boolean wasWildcard = wildcard;
+                parameter = false;
+                wildcard = false;
+                String subSegment = segment.getSubSegmentAt(j);
+                String source = subSegment.toString().substring(1);
+                String delimiter = 
+                    wasParameter ? "=" :
+                    subSegment.startsWith("!") ? "!" :
+                    j == 0 ? "" : 
+                    "*";
+                parameter = false;
+                if(subSegment.startsWith("(", 1))  {
+                    List<Segment> xriReference = parseCrossReference(false, subSegment);
+                    if (xriReference != null) {
+                        Segment authorityPath = xriReference.get(0);
+                        if(authorityPath == null) {
                             target.append(delimiter).append(source);
+                        } else {
+                            String xrefAuthority = authorityPath.toString();
+                            if("$..".equals(xrefAuthority)) {
+                                if(i + 1 == reply.length && treeWildcard) {
+                                    target.append(":%");
+                                } else if(j == 0) {
+                                    target.append(":*");
+                                } else if(!wasWildcard) {
+                                    target.append(subSegment);
+                                }
+                            } else if ("$.".equals(xrefAuthority)) {
+                                target.append(subSegment);
+                            } else if (xrefAuthority.startsWith("$.*")) {
+                                if(i + 1 == reply.length && treeWildcard) {
+                                    target.append(
+                                        xrefAuthority.substring(3)
+                                    ).append(
+                                        '%'
+                                    );
+                                    break SubSegments;
+                                } else if (j + 2 == jLimit && subSegmentsWildcard) {
+                                    target.append(
+                                        ':'
+                                    ).append(
+                                        xrefAuthority.substring(3)
+                                    ).append(
+                                        '*'
+                                    );
+                                    wildcard = true;
+                                } else {
+                                    target.append(subSegment);
+                                }
+                            } else if (xrefAuthority.startsWith("$.!")) {
+                                if(i + 1 == reply.length && treeWildcard) {
+                                    target.append(
+                                        xrefAuthority.substring(2)
+                                    ).append(
+                                        '%'
+                                    );
+                                    break SubSegments;
+                                } else if (j + 1 == jLimit && subSegmentsWildcard) {
+                                    target.append(
+                                        ':'
+                                    ).append(
+                                        xrefAuthority.substring(2)
+                                    ).append(
+                                        '*'
+                                    );
+                                    wildcard = true;
+                                } else {
+                                    target.append(subSegment);
+                                }
+                            } else if ("$...".equals(xrefAuthority)) {
+                                target.append('%');
+                            } else if (OPENMDX_OBJECT_AUTHORITY.matcher(xrefAuthority).matches()) {
+                                String embeddedXri = source.substring(1, source.length() - 1);
+                                target.append(
+                                    delimiter
+                                ).append(
+                                    new Path(
+                                        embeddedXri.startsWith(XRI_2Protocols.SCHEME_PREFIX) ? embeddedXri : XRI_2Protocols.SCHEME_PREFIX + embeddedXri
+                                    ).toClassicRepresentation()
+                                );
+                            } else {
+                                target.append(
+                                    delimiter
+                                ).append(
+                                    source
+                                );
+                            }
                         }
                     } else {
                         target.append(delimiter).append(source);
-                    }                    
-                }
-                reply[i] = unescape(target.toString());
+                    }
+                } else {
+                    target.append(delimiter).append(source);
+                }                    
             }
-            return reply;
-        } catch (RuntimeServiceException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.TRANSFORMATION_FAILURE,
-                "Input is not a valid resource identifier",
-                new BasicException.Parameter(BasicException.Parameter.XRI, xriString)
-            );
+            reply[i] = unescape(target.toString());
         }
+        return reply;
     }
     
     private String unescape(
@@ -1106,5 +1099,15 @@ public final class XRI_2Marshaller
         }
         
     }
+
+	@Override
+	public Optional<String[]> asUnmarshalledValue(Object value) {
+		return value instanceof String[] ? Optional.of((String[])value) : Optional.empty();
+	}
+
+	@Override
+	public Optional<String> asMarshalledValue(Object value) {
+		return value instanceof String ? Optional.of((String)value) : Optional.empty();
+	}
 
 }

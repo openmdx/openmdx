@@ -46,16 +46,17 @@ package org.openmdx.base.naming;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.marshalling.TypeSafeMarshaller;
 import org.openmdx.kernel.exception.BasicException;
 
 
 /**
  * This marshaller is able to marshal the path's legacy format.
  */
-public final class LegacyMarshaller implements Marshaller {
+public final class LegacyMarshaller implements TypeSafeMarshaller<String[], String> {
 
     private LegacyMarshaller (
     ){
@@ -68,12 +69,12 @@ public final class LegacyMarshaller implements Marshaller {
     /**
      * Memorize the singleton
      */ 
-    final private static Marshaller instance = new LegacyMarshaller();
+    final private static TypeSafeMarshaller<String[], String> instance = new LegacyMarshaller();
 
     /**
      * Return the singleton
      */ 
-    static public Marshaller getInstance(
+    static public TypeSafeMarshaller<String[], String> getInstance(
     ){
         return LegacyMarshaller.instance;
     }
@@ -91,23 +92,23 @@ public final class LegacyMarshaller implements Marshaller {
      * 
      * @return      A CharSequence containing the marshalled objects.
      */
-    public Object marshal (
-        Object charSequences
-    ) throws ServiceException {
-        Object[] source = (Object[])charSequences;
+    @Override
+    public String marshal (
+        String[] source
+    ){
         if (source == null) return null;
         if (source.length==0) return "";
-        StringBuilder target = new StringBuilder();
+        final StringBuilder target = new StringBuilder();
         appendMarshalled(target,source[0]);
         for(
-                int i=1;
-                i<source.length;
-                i++
-        )appendMarshalled(
+            int i=1;
+            i<source.length;
+            i++
+        ) appendMarshalled(
             target.append(COMPONENT_SEPARATOR),
             source[i]
         );
-        return target;
+        return target.toString();
     }
 
     /**
@@ -121,10 +122,10 @@ public final class LegacyMarshaller implements Marshaller {
     private void appendMarshalled (
         StringBuilder buffer,
         Object charSequence
-    ) throws ServiceException {
+    ){
         int cursor = buffer.length();
         buffer.append(charSequence);
-        if(cursor == buffer.length())throw new ServiceException(
+        if(cursor == buffer.length()) throw new RuntimeServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
             "One of the paths' components is empty"
@@ -154,21 +155,21 @@ public final class LegacyMarshaller implements Marshaller {
      * @return    A String array containing the unmarshaled sequence
      *                  of objects.
      */
-    public Object unmarshal (
-        Object charSequence
-    ) throws ServiceException {
-        final ArrayList<String> target = new ArrayList<String>();
-        final String source = charSequence.toString();
+    @Override
+    public String[] unmarshal (
+        String source
+    ) {
+        final List<String> target = new ArrayList<>();
         if (source.length() > 0) { 
             int begin = 0;
             int end = source.indexOf (COMPONENT_SEPARATOR);
-            if(end==0) throw new ServiceException(
+            if(end==0) throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
                 "Path starts with '" + COMPONENT_SEPARATOR + "'"
             );  
             while(end != -1) {
-                if(end+1==source.length()) throw new ServiceException(
+                if(end+1==source.length()) throw new RuntimeServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
                     "Path ends with '" + COMPONENT_SEPARATOR + "'"
@@ -219,5 +220,15 @@ public final class LegacyMarshaller implements Marshaller {
         }
         target.add(buffer.toString());
     }
+
+	@Override
+	public Optional<String[]> asUnmarshalledValue(Object value) {
+		return value instanceof String[] ? Optional.of((String[])value) : Optional.empty();
+	}
+
+	@Override
+	public Optional<String> asMarshalledValue(Object value) {
+		return value instanceof String ? Optional.of((String)value) : Optional.empty();
+	}
 
 }

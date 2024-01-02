@@ -49,7 +49,7 @@ import org.openmdx.base.exception.ServiceException;
 /**
 * Marshaller Interface
 */
-public interface Marshaller {
+public interface Marshaller<U,M> {
 
     /**
      * Marshals an object
@@ -61,8 +61,8 @@ public interface Marshaller {
      * @exception        ServiceException
      *                   MARSHAL_FAILURE: Object can't be marshalled
      */
-    Object marshal (
-        Object source
+    M marshal (
+        U source
     ) throws ServiceException;
 
     /**
@@ -75,8 +75,8 @@ public interface Marshaller {
      * @exception       ServiceException
      *                  MARSHAL_FAILURE: Object can't be unmarshalled
      */
-    Object unmarshal (
-        Object source
+    U unmarshal (
+        M source
     ) throws ServiceException;
 
 }
