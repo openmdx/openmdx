@@ -44,6 +44,8 @@
  */
 package org.openmdx.base.marshalling;
 
+import java.util.Optional;
+
 import org.openmdx.base.exception.ServiceException;
 
 
@@ -57,9 +59,10 @@ public interface MarshallerProvider {
      *  
      * @param type the qualified model class name with single colon separators, e.g. "org:w3c:String
      * 
-     * @return the corresponding marshaller, or {@code null} if this instance can't provide it
+     * @return the corresponding {@code Optional.of(marshaller)}, 
+     * or {@code Optional.empty()} if this instance can't provide it
      */
-    Marshaller getMarshaller(
+    Optional<Marshaller> getMarshaller(
         String type
     ) throws ServiceException;
     

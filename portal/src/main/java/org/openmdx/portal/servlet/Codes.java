@@ -59,6 +59,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedMap;
@@ -452,7 +453,7 @@ public final class Codes implements Serializable {
     							entry,
     							existing,
     							loadedObjects, // object cache
-    							null, // ignorable features
+    							Optional.empty(), // ignorable features
     							true // compareWithBeforeImage
     						);
     					}
@@ -468,7 +469,7 @@ public final class Codes implements Serializable {
     						entry,
     						newEntry,
     						loadedObjects, // object cache
-    						null, // ignorable features
+    						Optional.empty(), // ignorable features
     						true // compareWithBeforeImage
     					);
     					Path parentIdentity = entryPath.getParent().getParent();

@@ -44,24 +44,22 @@
  */
 package org.openmdx.application.dataprovider.cci;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import javax.resource.cci.MappedRecord;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
+import org.openmdx.base.accessor.spi.StandardPrimitiveTypeMarshallerProvider;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSparseArray;
@@ -71,7 +69,6 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
-import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.LenientPathComparator;
 import org.openmdx.base.rest.spi.Facades;
@@ -79,9 +76,7 @@ import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.cci2.SparseArray;
-import org.w3c.spi2.Datatypes;
 
-//---------------------------------------------------------------------------
 @SuppressWarnings("unchecked")
 public class JmiHelper {
 
@@ -92,7 +87,6 @@ public class JmiHelper {
         SystemAttributes.OBJECT_CLASS
     );
     
-    //-------------------------------------------------------------------------
     static class ToRefObjectValueMarshaller implements Marshaller {
 
         ToRefObjectValueMarshaller(
@@ -127,29 +121,10 @@ public class JmiHelper {
                         ReducedJDOHelper.getObjectId(source)
                     );
                 }
-            } else if(PrimitiveTypes.DATETIME.equals(this.typeName)) {
-                return source instanceof Date ? source : Datatypes.create(
-                    Date.class, 
-                    (String)source
-                );
-            } else if(PrimitiveTypes.DATE.equals(this.typeName)) {                
-                return source instanceof XMLGregorianCalendar ? source : Datatypes.create(
-                    XMLGregorianCalendar.class, 
-                    (String)source
-                );
-            } else if(PrimitiveTypes.DURATION.equals(this.typeName)) {                
-                return source instanceof Duration ? source : Datatypes.create(
-                    Duration.class, 
-                    (String)source
-                );
-            } else if(PrimitiveTypes.ANYURI.equals(this.typeName)) {                
-                return source instanceof URI ? source : Datatypes.create(
-                    URI.class, 
-                    (String)source
-                );
             } else {
-                return source;
-            }            
+            	final Optional<Marshaller> marshaller = StandardPrimitiveTypeMarshallerProvider.getInstance().getMarshaller(this.typeName);
+				return marshaller.isPresent() ? marshaller.get().marshal(source) : source;
+            }
         }
 
         public Object unmarshal(
@@ -249,16 +224,17 @@ public class JmiHelper {
         MappedRecord source,
         RefObject target,
         Map<Path,RefObject> objectCache,
-        Collection<String> ignorableFeatures, 
+        Optional<Collection<String>> ignorableFeatures, 
         boolean compareWithBeforeImage
     ) throws ServiceException {
+    	if(ignorableFeatures == null) ignorableFeatures = Optional.empty();
         PersistenceManager pm = ReducedJDOHelper.getPersistenceManager(target);
         String typeName = Object_2Facade.getObjectClass(source);
         Object_2Facade facade = Facades.asObject(source);
         Model_1_0 model = ((RefPackage_1_0)target.refImmediatePackage()).refModel();
         ModelElement_1_0 classDef = model.getElement(typeName);
         Features: for(String featureName: (Set<String>)facade.getValue().keySet()) {
-            if((ignorableFeatures == null ? DEFAULT_SET_OF_IGNORABLE_FEATURES : ignorableFeatures).contains(featureName)) {
+        	if(ignorableFeatures.orElse(DEFAULT_SET_OF_IGNORABLE_FEATURES).contains(featureName)) {
                 continue Features;
             }
             ModelElement_1_0 featureDef = model.getFeatureDef(

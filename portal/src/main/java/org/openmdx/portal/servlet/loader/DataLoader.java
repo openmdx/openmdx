@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -172,7 +173,7 @@ public class DataLoader
 	                                        entry,
 	                                        existing,
 	                                        loadedObjects, // object cache
-	                                        null, // ignorable features
+	                                        Optional.empty(), // ignorable features
 	                                        true // compareWithBeforeImage
 	                                    ); // modified is no longer determined by toRefObject()
 	                                } else {
@@ -187,7 +188,7 @@ public class DataLoader
 	                                        entry,
 	                                        newEntry,
 	                                        loadedObjects, // object cache
-	                                        null, // ignorable features
+	                                        Optional.empty(), // ignorable features
 	                                        true // compareWithBeforeImage
 	                                    );
 	                                    Path entryPath = Object_2Facade.getPath(entry);

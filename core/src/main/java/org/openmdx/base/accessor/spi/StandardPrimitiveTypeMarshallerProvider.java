@@ -46,6 +46,7 @@ package org.openmdx.base.accessor.spi;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.marshalling.MarshallerProvider;
@@ -88,8 +89,8 @@ public class StandardPrimitiveTypeMarshallerProvider implements MarshallerProvid
      * @see org.openmdx.base.marshalling.MarshallerProvider#getMarshaller(java.lang.String)
      */
     @Override
-    public Marshaller getMarshaller(String qualifiedTypeName) {
-        return 
+    public Optional<Marshaller> getMarshaller(String qualifiedTypeName) {
+        return Optional.ofNullable(
             NO_MARSHALLING_REQUIRED.contains(qualifiedTypeName) ? IdentityMarshaller.INSTANCE :
             PrimitiveTypes.DATETIME.equals(qualifiedTypeName) ? DateTimeMarshaller.NORMALIZE :
             PrimitiveTypes.DATE.equals(qualifiedTypeName) ? DateMarshaller.NORMALIZE :
@@ -99,7 +100,8 @@ public class StandardPrimitiveTypeMarshallerProvider implements MarshallerProvid
             PrimitiveTypes.INTEGER.equals(qualifiedTypeName) ? IntegerMarshaller.NORMALIZE :
             PrimitiveTypes.LONG.equals(qualifiedTypeName) ? LongMarshaller.NORMALIZE :
             PrimitiveTypes.DECIMAL.equals(qualifiedTypeName) ? DecimalMarshaller.NORMALIZING :
-            null;
+            null
+        );
     }
 
 }

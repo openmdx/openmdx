@@ -56,6 +56,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.UUID;
@@ -795,12 +796,10 @@ public class RefRootPackage_1
 
     Marshaller getMarshaller(String type) throws ServiceException {
         for(MarshallerProvider marshallerProvider : PRIMITIVE_TYPE_MARSHALLERS) {
-            Marshaller marshaller = marshallerProvider.getMarshaller(type);
-            if(marshaller != null) {
-                return marshaller;
-            }
+            final Optional<Marshaller> marshaller = marshallerProvider.getMarshaller(type);
+            if(marshaller.isPresent()) return marshaller.get();
         }
-        Model_1_0 model = refModel();
+        final Model_1_0 model = refModel();
         return 
             model.isClassType(type) || model.isStructureType(type) ? RefRootPackage_1.this :
             IdentityMarshaller.INSTANCE; // fall back

@@ -44,6 +44,8 @@
  */
 package test.openmdx.datatypes1.dto;
 
+import java.util.Optional;
+
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.marshalling.MarshallerProvider;
@@ -57,12 +59,12 @@ public class PrimitiveTypeMarshallerProvider implements MarshallerProvider {
      * @see org.openmdx.base.marshalling.MarshallerProvider#getMarshaller(java.lang.String)
      */
     @Override
-    public Marshaller getMarshaller(
+    public Optional<Marshaller> getMarshaller(
         String type
     ) throws ServiceException {
         return 
-            "test:openmdx:datatypes1:CountryCode".equals(type) ? CountryCodeMarshaller.INSTANCE: 
-            null;
+        	"test:openmdx:datatypes1:CountryCode".equals(type) ? Optional.of(CountryCodeMarshaller.INSTANCE): 
+            Optional.empty();
     }
 
 }

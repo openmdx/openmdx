@@ -47,6 +47,7 @@ package org.openmdx.application.xml.jmi;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOObjectNotFoundException;
@@ -320,7 +321,7 @@ public class StateImportPlugIn implements ImportPlugIn {
 		        objectHolder, // source
 		        dateState, // target
 		        cache, // maps externalIds to refObjects
-		        StateImportPlugIn.IGNORABLE_FEATURES_FOR_STATE_CAPABLE_INSTANCES, 
+		        Optional.of(StateImportPlugIn.IGNORABLE_FEATURES_FOR_STATE_CAPABLE_INSTANCES), 
 		        !Parameters.STRICT_QUERY
 		    );
 		    if(!ReducedJDOHelper.isPersistent(refObject)){

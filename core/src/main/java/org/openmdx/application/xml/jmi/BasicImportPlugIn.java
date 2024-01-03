@@ -45,6 +45,7 @@
 package org.openmdx.application.xml.jmi;
 
 import java.util.Map;
+import java.util.Optional;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOObjectNotFoundException;
@@ -200,7 +201,7 @@ public class BasicImportPlugIn implements ImportPlugIn {
             objectHolder, // source
             refObject, // target
             cache, // maps externalIds to refObjects
-            null, // ignorable features
+            Optional.empty(), // ignorable features
             true // compareWithBeforeImage
         );
     }
