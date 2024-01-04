@@ -48,6 +48,7 @@ import javax.xml.datatype.Duration;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.TypeSafeMarshaller;
 import org.w3c.spi.DatatypeFactories;
 
 /**
@@ -66,13 +67,13 @@ public class DurationMarshaller {
     /**
      * Datatype Instance <-> ISO 8601 Basic String
      */
-    public static final Marshaller BASIC_FORMAT_TO_DATATYPE = new DatatypeMarshaller(
+    public static final TypeSafeMarshaller<String,Duration> BASIC_FORMAT_TO_DATATYPE = new DatatypeMarshaller<Duration>(
         Duration.class
     ){
 
         @Override
-        protected String toBasicFormat(Object datatype) {
-            return ((Duration)datatype).toString();
+        protected String toBasicFormat(Duration datatype) {
+            return datatype.toString();
         }
         
     };

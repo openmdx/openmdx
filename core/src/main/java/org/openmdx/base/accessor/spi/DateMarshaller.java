@@ -48,6 +48,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.TypeSafeMarshaller;
 
 /**
  * Date Marshaller
@@ -65,13 +66,13 @@ public class DateMarshaller {
     /**
      * {@code Datatype} Instance <-> ISO 8601 Basic {@code String}
      */
-    public static final Marshaller BASIC_FORMAT_TO_DATATYPE = new DatatypeMarshaller(
+    public static final TypeSafeMarshaller<String,XMLGregorianCalendar> BASIC_FORMAT_TO_DATATYPE = new DatatypeMarshaller<XMLGregorianCalendar>(
         XMLGregorianCalendar.class
     ){
 
         @Override
-        protected String toBasicFormat(Object datatype) {
-            return ((XMLGregorianCalendar)datatype).toXMLFormat().replaceAll("-", "");
+        protected String toBasicFormat(XMLGregorianCalendar datatype) {
+            return datatype.toXMLFormat().replaceAll("-", "");
         }
         
     };

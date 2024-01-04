@@ -1,22 +1,23 @@
 package org.openmdx.base.accessor.spi;
 
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.Marshaller;
+import java.util.Optional;
+
+import org.openmdx.base.marshalling.TypeSafeMarshaller;
 import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi2.Datatypes;
 
 /**
  * Datatype Marshaller
  */
-public abstract class DatatypeMarshaller implements Marshaller {
+public abstract class DatatypeMarshaller<T> implements TypeSafeMarshaller<String, T> {
 
     /**
      * Constructor 
      *
      * @param targetClass
      */
-    public DatatypeMarshaller(
-        Class<?> targetClass
+    protected DatatypeMarshaller(
+        Class<T> targetClass
     ) {
         this.targetClass = targetClass;
     }
@@ -24,23 +25,23 @@ public abstract class DatatypeMarshaller implements Marshaller {
     /**
      * The datatype's java class
      */
-    protected final Class<?> targetClass;
+    protected final Class<T> targetClass;
 
     /* (non-Javadoc)
      * @see org.openmdx.base.marshalling.Marshaller#marshal(java.lang.Object)
      */
-    public Object marshal(
-        Object source
-    ) throws ServiceException {
-        return Datatypes.create(this.targetClass, (String)source);
+    public T marshal(
+        String source
+    ){
+        return Datatypes.create(this.targetClass, source);
     }
     
     /* (non-Javadoc)
      * @see org.openmdx.base.marshalling.Marshaller#unmarshal(java.lang.Object)
      */
-    public Object unmarshal(
-        Object source
-    ) throws ServiceException {
+    public String unmarshal(
+        T source
+    ){
         return
             source == null ? null :
             source instanceof ImmutableDatatype<?> ? ((ImmutableDatatype<?>)source).toBasicFormat() :
@@ -48,7 +49,17 @@ public abstract class DatatypeMarshaller implements Marshaller {
     }
     
     protected abstract String toBasicFormat(
-        Object datatype
+        T datatype
     );
+
+	@Override
+	public Optional<String> asUnmarshalledValue(Object value) {
+		return value instanceof String ? Optional.of((String)value) : Optional.empty();
+	}
+
+	@Override
+	public Optional<T> asMarshalledValue(Object value) {
+		return this.targetClass.isInstance(value) ? Optional.of(this.targetClass.cast(value)) : Optional.empty();
+	}
     
 }

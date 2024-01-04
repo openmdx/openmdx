@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Standard Marshaller Provider 
+ * Description: Standard Primitive Type Marshaller Provider 
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -44,8 +44,8 @@
  */
 package org.openmdx.base.accessor.spi;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.openmdx.base.marshalling.Marshaller;
@@ -54,7 +54,7 @@ import org.openmdx.base.mof.cci.PrimitiveTypes;
 
 
 /**
- * StandardMarshallerProvider
+ * Standard Primitive Type Marshaller Provider
  */
 public class StandardPrimitiveTypeMarshallerProvider implements MarshallerProvider {
 
@@ -71,6 +71,11 @@ public class StandardPrimitiveTypeMarshallerProvider implements MarshallerProvid
     private static final MarshallerProvider INSTANCE = new StandardPrimitiveTypeMarshallerProvider();
     
     /**
+     * The mapping
+     */
+    private static final Map<String, Marshaller> PRIMITIVE_TYPE_MARSHALLERS = new HashMap<>();
+    
+    /**
      * Retrieve an instance
      * 
      * @return an instance
@@ -79,29 +84,26 @@ public class StandardPrimitiveTypeMarshallerProvider implements MarshallerProvid
         return INSTANCE;
     }
     
-    private static final List<String> NO_MARSHALLING_REQUIRED = Arrays.asList(
-        PrimitiveTypes.STRING,
-        PrimitiveTypes.BOOLEAN,
-        PrimitiveTypes.BINARY
-    );
-    
     /* (non-Javadoc)
      * @see org.openmdx.base.marshalling.MarshallerProvider#getMarshaller(java.lang.String)
      */
     @Override
     public Optional<Marshaller> getMarshaller(String qualifiedTypeName) {
-        return Optional.ofNullable(
-            NO_MARSHALLING_REQUIRED.contains(qualifiedTypeName) ? IdentityMarshaller.INSTANCE :
-            PrimitiveTypes.DATETIME.equals(qualifiedTypeName) ? DateTimeMarshaller.NORMALIZE :
-            PrimitiveTypes.DATE.equals(qualifiedTypeName) ? DateMarshaller.NORMALIZE :
-            PrimitiveTypes.ANYURI.equals(qualifiedTypeName) ? URIMarshaller.NORMALIZE :
-            PrimitiveTypes.DURATION.equals(qualifiedTypeName) ? DurationMarshaller.NORMALIZE :
-            PrimitiveTypes.SHORT.equals(qualifiedTypeName) ? ShortMarshaller.NORMALIZE :
-            PrimitiveTypes.INTEGER.equals(qualifiedTypeName) ? IntegerMarshaller.NORMALIZE :
-            PrimitiveTypes.LONG.equals(qualifiedTypeName) ? LongMarshaller.NORMALIZE :
-            PrimitiveTypes.DECIMAL.equals(qualifiedTypeName) ? DecimalMarshaller.NORMALIZING :
-            null
-        );
+        return Optional.ofNullable(PRIMITIVE_TYPE_MARSHALLERS.get(qualifiedTypeName));
     }
 
+    static {
+    	PRIMITIVE_TYPE_MARSHALLERS.put(PrimitiveTypes.STRING, IdentityMarshaller.INSTANCE);
+    	PRIMITIVE_TYPE_MARSHALLERS.put(PrimitiveTypes.BOOLEAN, IdentityMarshaller.INSTANCE);
+    	PRIMITIVE_TYPE_MARSHALLERS.put(PrimitiveTypes.BINARY, IdentityMarshaller.INSTANCE);
+    	PRIMITIVE_TYPE_MARSHALLERS.put(PrimitiveTypes.DATETIME, DateTimeMarshaller.NORMALIZE);
+    	PRIMITIVE_TYPE_MARSHALLERS.put(PrimitiveTypes.DATE, DateMarshaller.NORMALIZE);
+    	PRIMITIVE_TYPE_MARSHALLERS.put(PrimitiveTypes.ANYURI, URIMarshaller.NORMALIZE);
+    	PRIMITIVE_TYPE_MARSHALLERS.put(PrimitiveTypes.DURATION, DurationMarshaller.NORMALIZE);
+    	PRIMITIVE_TYPE_MARSHALLERS.put(PrimitiveTypes.SHORT, ShortMarshaller.NORMALIZE);
+    	PRIMITIVE_TYPE_MARSHALLERS.put(PrimitiveTypes.INTEGER, IntegerMarshaller.NORMALIZE);
+    	PRIMITIVE_TYPE_MARSHALLERS.put(PrimitiveTypes.LONG, LongMarshaller.NORMALIZE);
+    	PRIMITIVE_TYPE_MARSHALLERS.put(PrimitiveTypes.DECIMAL, DecimalMarshaller.NORMALIZING);
+    }
+    
 }

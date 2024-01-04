@@ -44,13 +44,6 @@
  */
 package org.openmdx.base.accessor.rest;
 
-import static org.openmdx.base.mof.cci.PrimitiveTypes.DATE;
-import static org.openmdx.base.mof.cci.PrimitiveTypes.DATETIME;
-import static org.openmdx.base.mof.cci.PrimitiveTypes.DURATION;
-import static org.openmdx.base.mof.cci.PrimitiveTypes.INTEGER;
-import static org.openmdx.base.mof.cci.PrimitiveTypes.LONG;
-import static org.openmdx.base.mof.cci.PrimitiveTypes.SHORT;
-
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -112,13 +105,8 @@ import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.rest.spi.LockAssertions;
 import org.openmdx.base.accessor.rest.spi.ObjectRecords;
 import org.openmdx.base.accessor.spi.AbstractDataObject_1;
-import org.openmdx.base.accessor.spi.DateMarshaller;
-import org.openmdx.base.accessor.spi.DateTimeMarshaller;
-import org.openmdx.base.accessor.spi.DurationMarshaller;
 import org.openmdx.base.accessor.spi.ExceptionHelper;
-import org.openmdx.base.accessor.spi.IntegerMarshaller;
-import org.openmdx.base.accessor.spi.LongMarshaller;
-import org.openmdx.base.accessor.spi.ShortMarshaller;
+import org.openmdx.base.accessor.spi.StandardPrimitiveTypeMarshallerProvider;
 import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.collection.MarshallingList;
@@ -501,11 +489,6 @@ public class DataObject_1
      * 
      */
     private boolean loadLock = false;
-
-    /**
-     * Map a data types's qualified name to its marshaller
-     */
-    static final Map<String, Marshaller> DATA_TYPE_MARSHALLER = new HashMap<String, Marshaller>();
 
     private static final String ANONYMOUS_XRI = "";
 
@@ -3829,13 +3812,9 @@ public class DataObject_1
      */
     private final Marshaller getMarshaller(
         ModelElement_1_0 feature
-    )
-        throws ServiceException {
-        Marshaller marshaller = feature == null ? null
-            : DataObject_1.DATA_TYPE_MARSHALLER.get(
-                feature.getModel().getDereferencedType(feature.getType()).getQualifiedName()
-            );
-        return marshaller == null ? this.dataObjectManager : marshaller;
+    ) throws ServiceException {
+    	final String qualifiedName = feature.getModel().getDereferencedType(feature.getType()).getQualifiedName();
+    	return StandardPrimitiveTypeMarshallerProvider.getInstance().getMarshaller(qualifiedName).orElse(this.dataObjectManager);
     }
 
     /**
@@ -5785,15 +5764,6 @@ public class DataObject_1
     }
 
     static {
-        //
-        // DATA_TYPE_MARSHALLER initalization
-        //
-        DATA_TYPE_MARSHALLER.put(DATE, DateMarshaller.NORMALIZE);
-        DATA_TYPE_MARSHALLER.put(DATETIME, DateTimeMarshaller.NORMALIZE);
-        DATA_TYPE_MARSHALLER.put(DURATION, DurationMarshaller.NORMALIZE);
-        DATA_TYPE_MARSHALLER.put(SHORT, ShortMarshaller.NORMALIZE);
-        DATA_TYPE_MARSHALLER.put(INTEGER, IntegerMarshaller.NORMALIZE);
-        DATA_TYPE_MARSHALLER.put(LONG, LongMarshaller.NORMALIZE);
         //
         // lifecycleListenerClass initalization
         //
