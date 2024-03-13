@@ -358,8 +358,8 @@ public class Model_1DiagramDrawer {
                         hasLabelDistance = "labeldistance".equals(parameter.getKey());
                         hasStyleInvis = "style".equals(parameter.getKey()) && "invis".equals(parameter.getValue());
                     }
-                    if (!hasConstraint) {
-                        s += ",constraint=false";
+                    if (hasConstraint) {
+                        s += ",constraint=true";
                     }
                     if (!hasLabelDistance) {
                         s += ",labeldistance=3";
@@ -406,8 +406,8 @@ public class Model_1DiagramDrawer {
                         hasLabelDistance = "labeldistance".equals(parameter.getKey());
                         hasStyleInvis = "style".equals(parameter.getKey()) && "invis".equals(parameter.getValue());
                     }
-                    if (!hasConstraint) {
-                        s += ",constraint=false";
+                    if (hasConstraint) {
+                        s += ",constraint=true";
                     }
                     if (!hasLabelDistance) {
                         s += ",labeldistance=3";
