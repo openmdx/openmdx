@@ -55,7 +55,7 @@ class DerIndefLenConverter {
 
     private static final int LEN_LONG            = 0x80; // bit 8 set
     private static final int LEN_MASK            = 0x7f; // bits 7 - 1
-    private static final int SKIP_EOC_BYTES      = 2;
+//  private static final int SKIP_EOC_BYTES      = 2;
 
     private byte[] data, newData;
     private int newDataPos, dataPos, dataSize, index;
@@ -288,22 +288,22 @@ class DerIndefLenConverter {
 
     // Returns the number of bytes needed to represent the given length
     // in ASN.1 notation
-    private int getNumOfLenBytes(int len) {
-        int numOfLenBytes = 0;
-
-        if (len < 128) {
-            numOfLenBytes = 1;
-        } else if (len < (1 << 8)) {
-            numOfLenBytes = 2;
-        } else if (len < (1 << 16)) {
-            numOfLenBytes = 3;
-        } else if (len < (1 << 24)) {
-            numOfLenBytes = 4;
-        } else {
-            numOfLenBytes = 5;
-        }
-        return numOfLenBytes;
-    }
+//  private int getNumOfLenBytes(int len) {
+//      int numOfLenBytes = 0;
+//
+//      if (len < 128) {
+//          numOfLenBytes = 1;
+//      } else if (len < (1 << 8)) {
+//          numOfLenBytes = 2;
+//      } else if (len < (1 << 16)) {
+//          numOfLenBytes = 3;
+//      } else if (len < (1 << 24)) {
+//          numOfLenBytes = 4;
+//      } else {
+//          numOfLenBytes = 5;
+//      }
+//      return numOfLenBytes;
+//  }
 
     /**
      * Parse the value;

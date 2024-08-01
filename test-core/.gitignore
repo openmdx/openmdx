@@ -5,3 +5,4 @@
 bin/
 /tmlog*.log
 /tmlog.lck
+/.DS_Store

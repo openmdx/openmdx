@@ -27,7 +27,7 @@ package org.openmdx.dalvik.uses.sun.security.util;
 
 import java.io.InputStream;
 import java.io.IOException;
-import java.io.EOFException;
+// import java.io.EOFException;
 import java.util.Date;
 import java.util.Vector;
 import java.math.BigInteger;

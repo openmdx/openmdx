@@ -186,7 +186,7 @@ class ObjectIdentifier implements Serializable
 
         int pos = 0;
         byte[] tmp = new byte[oid.length()];
-        int first = 0, second;
+        int first = 0; //, second;
         int count = 0;
 
         try {
@@ -278,7 +278,7 @@ class ObjectIdentifier implements Serializable
     public ObjectIdentifier (DerInputStream in) throws IOException
     {
         byte    type_id;
-        int     bufferEnd;
+//      int     bufferEnd;
 
         /*
          * Object IDs are a "universal" type, and their tag needs only
@@ -609,17 +609,17 @@ class ObjectIdentifier implements Serializable
      * @param ooffset the starting position to paste
      * @return the number of bytes pasted
      */
-    private static int pack8(byte[] in, int ioffset, int ilength, byte[] out, int ooffset) {
-        byte[] pack = pack(in, ioffset, ilength, 7, 8);
-        int firstNonZero = pack.length-1;   // paste at least one byte
-        for (int i=pack.length-2; i>=0; i--) {
-            if (pack[i] != 0) {
-                firstNonZero = i;
-            }
-        }
-        System.arraycopy(pack, firstNonZero, out, ooffset, pack.length-firstNonZero);
-        return pack.length-firstNonZero;
-    }
+//  private static int pack8(byte[] in, int ioffset, int ilength, byte[] out, int ooffset) {
+//      byte[] pack = pack(in, ioffset, ilength, 7, 8);
+//      int firstNonZero = pack.length-1;   // paste at least one byte
+//      for (int i=pack.length-2; i>=0; i--) {
+//          if (pack[i] != 0) {
+//              firstNonZero = i;
+//          }
+//      }
+//      System.arraycopy(pack, firstNonZero, out, ooffset, pack.length-firstNonZero);
+//      return pack.length-firstNonZero;
+//  }
 
     /**
      * Pack the int into a OID sub-identifier DER encoding

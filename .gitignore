@@ -8,3 +8,5 @@ build
 .gradle/
 /.project
 /bin/
+/.classpath
+/.DS_Store
