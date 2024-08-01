@@ -4,3 +4,4 @@
 .project
 .settings/
 src/main/maven/*.asc
+/.DS_Store
