@@ -167,19 +167,19 @@ dependencies {
     implementation("javax:javaee-api:8.0.+")
     implementation("javax.jdo:jdo-api:3.1")
     implementation("javax.cache:cache-api:1.1.+")
-	implementation("com.vladsch.flexmark:flexmark:0.62.2")
+	implementation("com.vladsch.flexmark:flexmark:0.64.8")
 	implementation("com.atomikos:transactions-jta:6.0.0")
 	implementation("com.atomikos:transactions-jdbc:6.0.0")
     // Test
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-    testImplementation("org.mockito:mockito-core:4.2.0")    
-    testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+    testImplementation("org.mockito:mockito-core:5.14.2")    
+    testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")    
     // openmdxBase
     openmdxBase("org.openmdx:openmdx-base:2.18.10")
     // openmdxBootstrap
     openmdxBootstrap(files(file(layout.buildDirectory.dir("generated/classes/openmdxBootstrap"))))
     openmdxBootstrap("javax:javaee-api:8.0.+")
-	openmdxBootstrap("com.vladsch.flexmark:flexmark:0.62.2")
+	openmdxBootstrap("com.vladsch.flexmark:flexmark:0.64.8")
     // jdo-api
     jdoApi("javax.jdo:jdo-api:3.1")
     // cache-api
