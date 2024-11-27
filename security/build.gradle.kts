@@ -95,11 +95,11 @@ dependencies {
     implementation(project(":core"))
     implementation("javax:javaee-api:8.0.+")
     implementation("javax.jdo:jdo-api:3.1")    
-    implementation("org.apache.directory.api:apache-ldap-api:2.0.+")    
+    implementation("org.apache.directory.api:apache-ldap-api:2.1.+")    
     // Test
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-    testImplementation("org.mockito:mockito-core:4.2.0")    
-    testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")    
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+    testImplementation("org.mockito:mockito-core:5.14.2")    
+    testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")    
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 }
