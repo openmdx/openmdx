@@ -99,7 +99,7 @@ dependencies {
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 	// test
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
 }
 
 sourceSets {

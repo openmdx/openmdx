@@ -835,6 +835,21 @@ public class TestMain {
 				super.taskId = null;
 			}
 			//
+			// I111
+			//
+			try {
+				super.taskId = "I111";
+				PersistenceHelper.retrieveAllDescendants(invoice);
+				Container<Property> properties = invoice.getProperty();
+				Assertions.assertEquals(properties.size(), 1, "Invoice Properties");
+				Property property = invoice.getProperty("flag");
+				Assertions.assertEquals("A SparseArray Of Flags", property.getDescription());
+				Container<InvoicePosition> positions = invoice.getInvoicePosition();
+				Assertions.assertEquals(positions.size(), 10, "Invoice Positions");
+			} finally {
+				super.taskId = null;
+			}
+			//
 			// CR20020449
 			//
 			try {

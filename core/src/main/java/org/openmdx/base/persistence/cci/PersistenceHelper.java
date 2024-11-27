@@ -46,6 +46,7 @@ package org.openmdx.base.persistence.cci;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
@@ -108,7 +109,7 @@ public class PersistenceHelper {
              );
         } catch (Exception exception) {
             throw new JDOFatalInternalException(
-                "Transaction factory acquisition failure",
+                "Unit Of Work Factory acquisition failure",
                 exception
             );
         }
@@ -138,7 +139,8 @@ public class PersistenceHelper {
     /**
      * Return a clone of the object
      * 
-     * @param object
+     * @param object the object to be cloned
+     * @param excludedFeatures the features not to be cloned
      * 
      * @return a clone, or {@code null} if the object is {@code null}
      * 
@@ -147,16 +149,16 @@ public class PersistenceHelper {
     @SuppressWarnings("unchecked")
     public static <T> T clone(
         T object,
-        String... exclude
+        String... excludedFeatures
     ) {
         if(object instanceof org.openmdx.base.persistence.spi.Cloneable) {
-            return ((org.openmdx.base.persistence.spi.Cloneable<T>)object).openmdxjdoClone(exclude);
-        } else if(exclude != null && exclude.length > 0) {
+            return ((org.openmdx.base.persistence.spi.Cloneable<T>)object).openmdxjdoClone(excludedFeatures);
+        } else if(excludedFeatures != null && excludedFeatures.length > 0) {
         	throw new RuntimeServiceException(
 	            BasicException.Code.DEFAULT_DOMAIN,
 	            BasicException.Code.BAD_PARAMETER,
 	            "Exclude is supported for org.openmdx.base.persistence.spi.Cloneable objects only",
-	            new BasicException.Parameter("exclude", (Object[])exclude),
+	            new BasicException.Parameter("exclude", (Object[])excludedFeatures),
 	            new BasicException.Parameter("supported", java.lang.Cloneable.class.getName(), org.openmdx.base.persistence.spi.Cloneable.class.getName()),
 	            new BasicException.Parameter("class", object.getClass().getName())
 	        );
@@ -235,17 +237,62 @@ public class PersistenceHelper {
      * @exception ClassCastException if the xriPattern is neither assignable to 
      * org.openmdx.base.naming.Path nor to java-lang.String
      * @exception RuntimeServiceException in case of an invalid xriPattern String
+     * 
+     * @deprecated use either {@code org.openmdx.base.persistence.cci.PersistenceHelper.getCandidates(Extent<E>, String)}
+     * or {@code org.openmdx.base.persistence.cci.PersistenceHelper.getCandidates(Extent<E>, Path)}
      */
+    @Deprecated
     public static <E> Collection<E> getCandidates(
         Extent<E> extent,
         Object xriPattern
     ){
-        return new ExtentCollection<E>(
-            extent, 
-            xriPattern instanceof String ? new Path((String)xriPattern) : (Path)xriPattern
+    	return xriPattern instanceof String ? getCandidates(
+    		extent,
+    		(String) xriPattern
+    	) : getCandidates(
+    		extent,
+    		(Path)xriPattern
         );
     }
 
+    /**
+     * Retrieve a candidate collection
+     * 
+     * @param extent the extent
+     * @param xriPattern the XRI pattern's String representation
+     * 
+     * @return the candidate collection
+     * 
+     * @exception RuntimeServiceException in case of an invalid xriPattern String
+     */
+    public static <E> Collection<E> getCandidates(
+        Extent<E> extent,
+        String xriPattern
+    ){
+        return getCandidates(
+            extent, 
+            new Path(xriPattern)
+        );
+    }
+    
+    /**
+     * Retrieve a candidate collection
+     * 
+     * @param extent the extent
+     * @param xriPattern the XRI pattern's Path representation
+     * 
+     * @return the candidate collection
+     */
+    public static <E> Collection<E> getCandidates(
+        Extent<E> extent,
+        Path xriPattern
+    ){
+        return new ExtentCollection<E>(
+            extent, 
+            xriPattern
+        );
+    }
+    
     /**
      * Retrieve a filter collection for a sub-query
      * 
@@ -316,10 +363,26 @@ public class PersistenceHelper {
     public static void retrieveAllDescendants(
         Object pc
     ){
+    	retrieveDescendants(pc);
+    }
+    
+    /**
+     * Retrieve all descendants of a given object
+     * 
+     * @param pc the objects for the descendants shall be fetched
+     * @param excludedFeatures the fully qualified names of the features not to be retrieved
+     * 
+     * @exception NullPointerException if the argument {@code pc} is {@code null}
+     * @exception IllegalArgumentException if the argument is not a {@code javax.jmi.reflect.RefObject} instance
+     */
+    public static void retrieveDescendants(
+        Object pc,
+        String... excludedFeatures
+    ){
         if(!(pc instanceof RefObject)) {
             throw BasicException.initHolder(
                 new IllegalArgumentException(
-                    "The given argument is inapprpriate for descendant retrieval",
+                    "The given argument is inappropriate for descendant retrieval",
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN, 
                         BasicException.Code.BAD_PARAMETER, 
@@ -332,20 +395,22 @@ public class PersistenceHelper {
         try {
             RefObject refObject = (RefObject) pc;
             RefPackage_1_0 refPackage = (RefPackage_1_0) refObject.refOutermostPackage();
-            retrieveAllDescendants(
+            retrieveDescendants(
                 refPackage,
                 (Path)ReducedJDOHelper.getObjectId(pc),
-                refPackage.refModel().getElement(refObject.refClass().refMofId())
+                refPackage.refModel().getElement(refObject.refClass().refMofId()),
+                Arrays.asList(excludedFeatures)
             );
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
         }
     }
 
-    private static void retrieveAllDescendants(
+    private static void retrieveDescendants(
         RefPackage_1_0 refPackage,
-        Path objectId,
-        ModelElement_1_0 type
+        Path parentPattern,
+        ModelElement_1_0 type,
+        Collection<String> excludedFeatures
     ) throws ServiceException {
         Map<String,ModelElement_1_0> nonDerivedAttributes = refPackage.refModel().getStructuralFeatureDefs(
             type, 
@@ -355,38 +420,39 @@ public class PersistenceHelper {
         );  
         for(Map.Entry<String,ModelElement_1_0> e : nonDerivedAttributes.entrySet()){
             ModelElement_1_0 candidate = e.getValue();
+            String qualifiedFeatureName = candidate.getQualifiedName();
             if(
+            	!excludedFeatures.contains(qualifiedFeatureName) &&	
                 candidate.isReference() && 
                 !ModelHelper.isStoredAsAttribute(candidate) &&
                 ModelHelper.isCompositeEnd(candidate, false)
             ){
-                Path childPattern = objectId.getDescendant(e.getKey(),":*");
-                ModelElement_1_0 childType = refPackage.refModel().getElementType(candidate);
-                String extentClassName = childType.getQualifiedName();
-                Class<?> extentClass;
+                final Path childPattern = parentPattern.getDescendant(e.getKey(),":*");
+                final ModelElement_1_0 childType = refPackage.refModel().getElementType(candidate);
+                final String extentClassName = childType.getQualifiedName();
+                final Class<?> extentClass;
                 try {
                     extentClass = Classes.getApplicationClass(
                         Names.toClassName(extentClassName, Names.JMI1_PACKAGE_SUFFIX)
                     );
                 } catch (ClassNotFoundException exception) {
-                    throw new ServiceException(
+					throw new ServiceException(
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN, 
                         BasicException.Code.BAD_QUERY_CRITERIA, 
                         "Unable to retrieve extent class",
-                        new BasicException.Parameter("feature", candidate.getQualifiedName()),
+                        new BasicException.Parameter("feature", qualifiedFeatureName),
                         new BasicException.Parameter("pattern", childPattern),
                         new BasicException.Parameter("type", extentClassName)
                     );
                 }
-                Collection<?> extent = getCandidates(
+                final Collection<?> extent = getCandidates(
                     refPackage.refPersistenceManager().getExtent(extentClass),
                     childPattern
                 );
                 refPackage.refPersistenceManager().retrieveAll(extent);
-                retrieveAllDescendants(refPackage,childPattern,childType);
+                retrieveDescendants(refPackage,childPattern,childType, excludedFeatures);
             }
-                
         }
     }
     
