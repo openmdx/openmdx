@@ -1292,8 +1292,6 @@ public class Database_2
      * Retrieve streamBufferDirectory.
      *
      * @return Returns the streamBufferDirectory.
-     * 
-     *         @deprecated("For JRE 5/setStreamByValue support only")
      */
     protected String getStreamBufferDirectory() {
         return this.streamBufferDirectory == null ? null
@@ -7046,10 +7044,7 @@ public class Database_2
      * @return a new temporary file
      * 
      * @throws IOException
-     * 
-     *             @deprecated("For JRE 5/setStreamByValue support only")
      */
-    @Deprecated
     private File newTemporaryFile()
         throws IOException {
         File file = File.createTempFile(
@@ -7096,10 +7091,7 @@ public class Database_2
      * 
      * @return the newly created CLOB
      * @throws IOException
-     * 
-     *             @deprecated("For JRE 5/setStreamByValue support only")
      */
-    @Deprecated
     protected CharacterLargeObject tallyLargeObject(Reader stream)
         throws IOException {
         final File file = newTemporaryFile();
@@ -7553,7 +7545,7 @@ public class Database_2
      * Configured embedded features. The elements are stored as {key=embedded
      * feature name, value=upper bound}
      */
-    protected Map<String, Integer> embeddedFeatures = new TreeMap<String, Integer>();
+    protected Map<String, Integer> embeddedFeatures = new TreeMap<>();
 
     /**
      * macros
@@ -7564,11 +7556,16 @@ public class Database_2
     protected SparseArray<String> pathMacroName = SortedMaps.emptySparseArray();
     protected SparseArray<String> pathMacroValue = SortedMaps.emptySparseArray();
 
-    // referenceId format
+    /**
+     * referenceId format
+     */
     private String referenceIdFormat = LayerConfigurationEntries.REFERENCE_ID_FORMAT_TYPE_WITH_PATH_COMPONENTS;
 
-    // useNormalizedReferences. If true, all DB operations are performed on the
-    // normalized values of object references, i.e. rid, oid.
+    
+    /**
+     * useNormalizedReferences. If true, all DB operations are performed on the
+     * normalized values of object references, i.e. rid, oid.
+     */
     private boolean useNormalizedReferences = false;
 
     /**
@@ -7581,10 +7578,10 @@ public class Database_2
      * <columnName,attributeName> mapping. Calculating attribute names from
      * column names and vice versa is expensive. Therefore it is cached.
      */
-    protected final ConcurrentMap<String, String> featureNames = new ConcurrentHashMap<String, String>();
-    protected final ConcurrentMap<String, String> publicColumnNames = new ConcurrentHashMap<String, String>();
-    protected final ConcurrentMap<String, String> privateColumnNames = new ConcurrentHashMap<String, String>();
-    protected final ConcurrentMap<String, String> databaseProductNames = new ConcurrentHashMap<String, String>();
+    protected final ConcurrentMap<String, String> featureNames = new ConcurrentHashMap<>();
+    protected final ConcurrentMap<String, String> publicColumnNames = new ConcurrentHashMap<>();
+    protected final ConcurrentMap<String, String> privateColumnNames = new ConcurrentHashMap<>();
+    protected final ConcurrentMap<String, String> databaseProductNames = new ConcurrentHashMap<>();
 
     private Set<String> nonPersistentFeatures = Collections.emptySet();
 
@@ -7656,10 +7653,6 @@ public class Database_2
         "org:openmdx:base:ExtentCapable"
     );
 
-    /**
-     * @deprecated("For JRE 5/setStreamByValue support only")
-     */
-    @Deprecated
     protected File streamBufferDirectory;
 
     /**
@@ -7671,11 +7664,11 @@ public class Database_2
      * The macro configuration is eagerly provided, but it's handler lazily
      */
     private final MacroConfiguration macroConfiguration = new ClassicMacroConfiguration(
-        () -> getStringMacroColumn(),
-        () -> getStringMacroName(),
-        () -> getStringMacroValue(),
-        () -> getPathMacroName(),
-        () -> getPathMacroValue()
+        this::getStringMacroColumn,
+        this::getStringMacroName,
+        this::getStringMacroValue,
+        this::getPathMacroName,
+        this::getPathMacroValue
     );
 
 }
