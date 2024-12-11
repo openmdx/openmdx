@@ -164,6 +164,47 @@ val openmdxBootstrap by configurations
 val jdoApi by configurations
 val cacheApi by configurations
 
+configurations {
+	// needed
+	register("compile")
+	register("testCompile")
+	register("runtime")
+	register("testRuntime")
+	for (i in 2..4) {
+		register("openmdx${i}Compile")
+		register("openmdx${i}TestCompile")
+		register("openmdx${i}Runtime")
+		register("openmdx${i}TestRuntime")
+	}
+}
+
+configure<com.microsoft.javaflavours.JavaFlavoursExtension> {
+	flavour("${project.extra["mdx2"]}")
+	flavour("${project.extra["mdx3"]}")
+	flavour("${project.extra["mdx4"]}")
+	val testJavaPathResolver: (String) -> String = { flavour -> "src/$flavour-test/java" }
+	val testResourcesPathResolver: (String) -> String = { flavour -> "src/$flavour-test/resources" }
+}
+
+sourceSets {
+	main {
+		java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
+		resources { srcDir("src/main/resources") }
+	}
+	val openmdx2 by getting {
+		java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
+		resources { srcDir("src/main/resources") }
+	}
+	val openmdx3 by getting {
+		java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
+		resources { srcDir("src/main/resources") }
+	}
+	val openmdx4 by getting {
+		java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
+		resources { srcDir("src/main/resources") }
+	}
+}
+
 dependencies {
     // implementation
     implementation(libs.javax.javaee.api)
@@ -214,6 +255,21 @@ sourceSets {
         	srcDir("src/test/resources")
         }
     }
+tasks.withType<JavaCompile> {
+	if (name.contains("Openmdx2")) {
+		javaCompiler = javaToolchains.compilerFor {
+			languageVersion.set(JavaLanguageVersion.of(targetPlatform.majorVersion))
+		}
+
+	} else if (name.contains("Openmdx3")) {
+		javaCompiler = javaToolchains.compilerFor {
+			languageVersion.set(JavaLanguageVersion.of(targetPlatform.majorVersion))
+		}
+	} else if (name.contains("Openmdx4")) {
+		javaCompiler = javaToolchains.compilerFor {
+			languageVersion.set(JavaLanguageVersion.of(targetPlatformOpenmdx4.majorVersion))
+		}
+	}
 }
 
 tasks {
@@ -266,6 +322,10 @@ tasks {
 
 	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+
+	for (i in 2..4) {
+		named("openmdx${i}Jar", Jar::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+	}
 
 	register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 	    inputs.dir("$projectDir/src/model/emf")

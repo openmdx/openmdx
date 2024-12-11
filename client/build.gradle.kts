@@ -99,6 +99,49 @@ val openmdxBootstrap by configurations
 project.configurations.maybeCreate("javaeeApi")
 val javaeeApi by configurations
 
+configurations {
+    // needed
+    register("compile")
+    register("testCompile")
+    register("runtime")
+    register("testRuntime")
+    for (i in 2..4) {
+        register("openmdx${i}Compile")
+        register("openmdx${i}TestCompile")
+        register("openmdx${i}Runtime")
+        register("openmdx${i}TestRuntime")
+    }
+}
+
+configure<com.microsoft.javaflavours.JavaFlavoursExtension> {
+    flavour("${project.extra["mdx2"]}")
+    flavour("${project.extra["mdx3"]}")
+    flavour("${project.extra["mdx4"]}")
+    val testJavaPathResolver: (String) -> String = { flavour -> "src/$flavour-test/java" }
+    val testResourcesPathResolver: (String) -> String = { flavour -> "src/$flavour-test/resources" }
+}
+
+sourceSets {
+//	main {
+//    java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
+//    resources { srcDir("src/main/resources") }
+//	}
+    val openmdx2 by getting {
+        java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
+        resources { srcDir("src/main/resources") }
+    }
+
+    val openmdx3 by getting {
+        java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
+        resources { srcDir("src/main/resources") }
+    }
+
+    val openmdx4 by getting {
+        java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
+        resources { srcDir("src/main/resources") }
+    }
+}
+
 dependencies {
     // implementation
     implementation("javax:javaee-api:8.0.+")
@@ -131,14 +174,23 @@ sourceSets {
         java {
             srcDir("src/main/java")
 			srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
+tasks.withType<JavaCompile> {
+//	options.compilerArgs.add("-Xplugin:Manifold")
+    if (name.contains("Openmdx2")) {
+//		options.compilerArgs.add("-AJAVA_FLAVOUR_MDX2")
+        javaCompiler = javaToolchains.compilerFor {
+            languageVersion.set(JavaLanguageVersion.of(targetPlatform.majorVersion))
         }
-        resources {
-        	srcDir("src/main/resources")
+    } else if (name.contains("Openmdx3")) {
+        javaCompiler = javaToolchains.compilerFor {
+            languageVersion.set(JavaLanguageVersion.of(targetPlatform.majorVersion))
+        }
+    } else if (name.contains("Openmdx4")) {
+        javaCompiler = javaToolchains.compilerFor {
+            languageVersion.set(JavaLanguageVersion.of(targetPlatformOpenmdx4.majorVersion))
         }
     }
 }
-
-
 
 tasks {
 	val openmdxCommonIncludes = listOf<String>( )
@@ -195,45 +247,53 @@ tasks {
 	named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 
-	test {
-		useJUnitPlatform()
-		maxHeapSize = "4G"
-	}
-	compileJava {
-		dependsOn(
-			":core:openmdx-base.jar",
-			":security:openmdx-security.jar"
-		)
-		doFirst {
-			var f = file(layout.buildDirectory.dir("resources/main/META-INF/openmdxmof.properties"))
-			touch(f)
-			f.writeText(zipTree(File(getDeliverDir(), "../core/lib/openmdx-base.jar")).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText() )
-			f.appendText(zipTree(File(getDeliverDir(), "../security/lib/openmdx-security.jar")).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText() )
-		}
-	    options.release.set(Integer.valueOf(targetPlatform.majorVersion))
-	}
-	distTar {
-		dependsOn(
-			"openmdx-client.jar",
-			"openmdx-dalvik.jar",
-			"openmdx-client-sources.jar",
-			"openmdx-dalvik-sources.jar"
-		)
-	}
-	distZip {
-		dependsOn(
-			"openmdx-client.jar",
-			"openmdx-dalvik.jar",
-			"openmdx-client-sources.jar",
-			"openmdx-dalvik-sources.jar"
-		)
-	}
-	assemble {
-		dependsOn(
-            "openmdx-client.jar",
-            "openmdx-client-sources.jar",
-            "openmdx-dalvik.jar",
-            "openmdx-dalvik-sources.jar"
+    for (i in 2..4) {
+        named("openmdx${i}Jar", Jar::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+    }
+
+    test {
+        useJUnitPlatform()
+        maxHeapSize = "4G"
+    }
+    compileJava {
+
+        dependsOn(
+            ":core:openmdx-base.jar", ":security:openmdx-security.jar"
+        )
+        doFirst {
+            var f = file(layout.buildDirectory.dir("resources/main/META-INF/openmdxmof.properties"))
+            touch(f)
+            f.writeText(
+                zipTree(
+                    File(
+                        getDeliverDir(), "../core/lib/openmdx-base.jar"
+                    )
+                ).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText()
+            )
+            f.appendText(
+                zipTree(
+                    File(
+                        getDeliverDir(), "../security/lib/openmdx-security.jar"
+                    )
+                ).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText()
+            )
+        }
+        options.release.set(Integer.valueOf(targetPlatform.majorVersion))
+    }
+
+    distTar {
+        dependsOn(
+            "openmdx-client.jar", "openmdx-dalvik.jar", "openmdx-client-sources.jar", "openmdx-dalvik-sources.jar"
+        )
+    }
+    distZip {
+        dependsOn(
+            "openmdx-client.jar", "openmdx-dalvik.jar", "openmdx-client-sources.jar", "openmdx-dalvik-sources.jar"
+        )
+    }
+    assemble {
+        dependsOn(
+            "openmdx-client.jar", "openmdx-client-sources.jar", "openmdx-dalvik.jar", "openmdx-dalvik-sources.jar"
         )
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-client.jar") {
@@ -430,4 +490,98 @@ distributions {
 			from("../$path") { into(path) }
 		}
 	}
+
+//    main {
+//        distributionBaseName.set("openmdx-${getProjectImplementationVersion()}-${project.name}-jre-$targetPlatform")
+//        contents {
+//            // client
+//            from(".") {
+//                into(project.name); include(
+//                "LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts"
+//            )
+//            }
+//            from("src") { into(project.name + "/src") }
+//            // etc
+//            from("etc") { into(project.name + "/etc") }
+//            // rootDir
+//            from("..") { include("*.properties", "*.kts") }
+//            // jre-...
+//            var path = "openmdx-$targetPlatform/${project.name}/lib"
+//            from("../$path") { into(path) }
+//            path = "openmdx-$targetPlatform/gradle/repo"
+//            from("../$path") { into(path) }
+//        }
+//    }
+
+    // Create unique distribution tasks based on extra keys
+    arrayOf(
+        "${project.extra["mdx2"]}", "${project.extra["mdx3"]}", "${project.extra["mdx4"]}"
+    ).forEach { flavour ->
+
+        val version = "${project.extra["${flavour}Version"]}" ?: return@forEach // Skip if version is not defined
+        val jre = if (flavour == "openmdx4") targetPlatformOpenmdx4.majorVersion else targetPlatform
+
+        create(flavour) {
+            distributionBaseName.set("openmdx-$version-${project.name}-jre-$jre")
+            contents {
+                // client
+                from(".") {
+                    into(project.name)
+                    include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts")
+                }
+                val buildDirAsFile = project.layout.buildDirectory.asFile.get()
+                from(File(buildDirAsFile, "classes/java/$flavour")) { into(project.name + "/src") }
+                // etc
+                from("etc") { into(project.name + "/etc") }
+                // rootDir
+                from("..") { include("*.properties", "*.kts") }
+                // jre-...
+                var path = "openmdx-$jre/${project.name}-$version/lib"
+                from("../$path") { into(path) }
+                path = "openmdx-$targetPlatform/gradle/repo"
+                from("../$path") { into(path) }
+            }
+
+        }
+    }
+}
+
+var flav = project.extra["mdx2"]
+tasks.named<Zip>("${flav}DistZip") {
+    dependsOn("compileOpenmdx2Java")
+//    archiveFileName.set(getArchiveName(flav, targetPlatform))
+}
+
+flav = project.extra["mdx3"]
+tasks.named<Zip>("${flav}DistZip") {
+    dependsOn("compileOpenmdx3Java")
+//    archiveFileName.set(getArchiveName(flav, targetPlatform))
+}
+flav = project.extra["mdx4"]
+tasks.named<Zip>("${flav}DistZip"){
+    dependsOn("compileOpenmdx4Java")
+//    archiveFileName.set(getArchiveName(flav, targetPlatformOpenmdx4.majorVersion))
+}
+
+
+flav = project.extra["mdx2"]
+tasks.named<Tar>("${flav}DistTar") {
+    dependsOn("compileOpenmdx2Java")
+//    archiveFileName.set(getArchiveName(flav, targetPlatform))
+}
+
+flav = project.extra["mdx3"]
+tasks.named<Tar>("${flav}DistTar") {
+    dependsOn("compileOpenmdx3Java")
+//    archiveFileName.set(getArchiveName(flav, targetPlatform))
+}
+
+flav = project.extra["mdx4"]
+tasks.named<Tar>("${flav}DistTar") {
+    dependsOn("compileOpenmdx4Java")
+//    archiveFileName.set(getArchiveName(flav, targetPlatformOpenmdx4.majorVersion))
+}
+
+tasks.named<Zip>("${flav}DistZip") {
+    dependsOn("compileOpenmdx3Java")
 }
