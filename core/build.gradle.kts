@@ -66,6 +66,7 @@ repositories {
 var env = Properties()
 env.load(FileInputStream(File(project.rootDir, "build.properties")))
 val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
+val targetPlatformOpenmdx4 = JavaVersion.valueOf(env.getProperty("target.platform.openmdx4"))
 
 eclipse {
 	project {

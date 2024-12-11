@@ -65,6 +65,7 @@ repositories {
 var env = Properties()
 env.load(FileInputStream(File(project.rootDir, "build.properties")))
 val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
+val targetPlatformOpenmdx4 = JavaVersion.valueOf(env.getProperty("target.platform.openmdx4"))
 
 if(System.getenv("JRE_18") == null) {
    throw GradleException("ERROR: JRE_18 not set (e.g. export JRE_18=/usr/lib/jvm/java-8-openjdk-amd64/jre)")
