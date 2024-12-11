@@ -1,0 +1,58 @@
+[versions]
+openmdx-base = "2.18.10"
+
+atomikos-transaction = "6.0.0"
+
+apache-directory-api = "2.1.+"
+apache-tomcat = "9.0.+"
+
+javax-javaee-api = "8.0.+"
+javax-jdo-api = "3.1"
+javax-cache-api = "1.1.+"
+javax-servlet-api = "3.1.0"
+
+jakarta-jakartaee-api = "10.0.0"
+
+systems-manifold = "2024.1.41"
+
+postgresql = "42.7.+"
+
+codehaus-groovy = "3.0.+"
+vladsch-flexmark = "0.64.8"
+tinyradius = "1.1.+"
+
+junit-jupiter = "5.11.3"
+mockito = "5.14.2"
+
+# ============================================================================ #
+
+[libraries]
+openmdx-base = { group = "org.openmdx", name = "openmdx-base", version.ref = "openmdx-base" }
+
+atomikos-transaction-jta = { group = "com.atomikos", name = "transactions-jta", version.ref = "atomikos-transaction" }
+atomikos-transaction-jdbc = { group = "com.atomikos", name = "transactions-jdbc", version.ref = "atomikos-transaction" }
+
+apache-directory-ldap-api = { group = "org.apache.directory.api", name = "apache-ldap-api", version.ref = "apache-directory-api" }
+apache-tomcat-catalina = { group = "org.apache.tomcat", name = "tomcat-catalina", version.ref = "apache-tomcat" }
+
+codehaus-groovy = { group = "org.codehaus.groovy", name = "groovy", version.ref = "codehaus-groovy" }
+vladsch-flexmark = { group = "com.vladsch.flexmark", name = "flexmark", version.ref = "vladsch-flexmark" }
+tinyradius = { group = "org.tinyradius", name = "tinyradius", version.ref = "tinyradius" }
+
+javax-cache-api = { group = "javax.cache", name = "cache-api", version.ref = "javax-cache-api" }
+javax-javaee-api = { group = "javax", name = "javaee-api", version.ref = "javax-javaee-api" }
+javax-jdo-api = { group = "javax.jdo", name = "jdo-api", version.ref = "javax-jdo-api" }
+javax-servlet-api = { group = "javax.servlet", name = "javax.servlet-api", version.ref = "javax-servlet-api" }
+
+jakarta-platform-jakartaee-api = { group = "jakarta.platform", name = "jakarta.jakartaee-api", version.ref = "jakarta-jakartaee-api" }
+
+systems-manifold-preprocessor = { group = "systems.manifold", name = "manifold-preprocessor", version.ref = "systems-manifold" }
+systems-manifold-props-rt = { group = "systems.manifold", name = "manifold-props-rt", version.ref = "systems-manifold" }
+systems-manifold-ext = { group = "systems.manifold", name = "manifold-ext", version.ref = "systems-manifold" }
+
+postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
+
+junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit-jupiter" }
+junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit-jupiter" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockito-junit-jupiter = { group = "org.mockito", name = "mockito-junit-jupiter", version.ref = "mockito" }

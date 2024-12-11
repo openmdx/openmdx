@@ -96,17 +96,17 @@ dependencies {
     // implementation
     implementation(project(":core"))
     implementation(project(":security"))
-    implementation("javax:javaee-api:8.0.+")
-    implementation("org.apache.directory.api:apache-ldap-api:2.1.+")
-    implementation("org.tinyradius:tinyradius:1.1.+")
-    implementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
+    implementation(libs.javax.javaee.api)
+    implementation(libs.apache.directory.ldap.api)
+    implementation(libs.tinyradius)
+    implementation(libs.junit.jupiter.api)
     // test
     testImplementation(project(":core"))
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
-    testImplementation("org.mockito:mockito-core:5.14.2")    
-    testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")    
-	testRuntimeOnly("com.atomikos:transactions-jta:6.0.0")
-	testRuntimeOnly("com.atomikos:transactions-jdbc:6.0.0")
+    testImplementation(libs.junit.jupiter.engine)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junit.jupiter)
+	testRuntimeOnly(libs.atomikos.transaction.jta)
+	testRuntimeOnly(libs.atomikos.transaction.jdbc)
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 }

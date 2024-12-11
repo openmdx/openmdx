@@ -93,13 +93,13 @@ val openmdxBootstrap by configurations
 dependencies {
     // implementation
     implementation(project(":core"))
-    implementation("javax:javaee-api:8.0.+")
-    implementation("javax.jdo:jdo-api:3.1")    
-    implementation("org.apache.directory.api:apache-ldap-api:2.1.+")    
+    implementation(libs.javax.javaee.api)
+    implementation(libs.javax.jdo.api)
+    implementation(libs.apache.directory.ldap.api)
     // Test
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
-    testImplementation("org.mockito:mockito-core:5.14.2")    
-    testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")    
+    testImplementation(libs.junit.jupiter.engine)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junit.jupiter)
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 }

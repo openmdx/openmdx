@@ -101,11 +101,26 @@ dependencies {
     implementation("javax:javaee-api:8.0.+")
     implementation(project(":core"))
     implementation(project(":security"))
-    implementation(files(File(System.getenv("JRE_18"), "lib/rt.jar"))) 
-    // openmdxBootstrap
-    openmdxBootstrap(project(":core"))
-    // javaee-api    
-    javaeeApi("javax:javaee-api:8.0.+")
+	implementation(files(File(System.getenv("JRE_18"), "lib/rt.jar")))
+//	"openmdx2Implementation"(files(File(System.getenv("JRE_18"), "lib/rt.jar")))
+//	"openmdx3Implementation"(files(File(System.getenv("JRE_18"), "lib/rt.jar")))
+    // manifold preprocessor
+    implementation(libs.systems.manifold.preprocessor)
+    implementation(libs.systems.manifold.props.rt)
+    implementation(libs.systems.manifold.ext)
+
+    // javaee-api
+    javaeeApi(libs.javax.javaee.api)
+    implementation(libs.javax.javaee.api)
+
+//	"openmdx2Implementation"(javaee)
+//	"openmdx3Implementation"(javaee)
+
+//	"openmdx4Implementation"("javax:javaee-api:8.0.+")
+	"openmdx4Implementation"(libs.jakarta.platform.jakartaee.api)
+
+//	"openmdx3Implementation"("org.apache.commons:commons-lang3:3.12.0")
+
 }
 
 sourceSets {

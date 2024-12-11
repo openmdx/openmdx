@@ -94,8 +94,8 @@ dependencies {
     // implementation
     implementation(project(":core"))
     implementation(project(":security"))
-    implementation("javax:javaee-api:8.0.+")
-    implementation("org.apache.tomcat:tomcat-catalina:9.0.+")
+    implementation(libs.javax.javaee.api)
+    implementation(libs.apache.tomcat.catalina)
 }
 
 sourceSets {

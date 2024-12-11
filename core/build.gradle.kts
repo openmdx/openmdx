@@ -164,26 +164,33 @@ val cacheApi by configurations
 
 dependencies {
     // implementation
-    implementation("javax:javaee-api:8.0.+")
-    implementation("javax.jdo:jdo-api:3.1")
-    implementation("javax.cache:cache-api:1.1.+")
-	implementation("com.vladsch.flexmark:flexmark:0.64.8")
-	implementation("com.atomikos:transactions-jta:6.0.0")
-	implementation("com.atomikos:transactions-jdbc:6.0.0")
+    implementation(libs.javax.javaee.api)
+    implementation(libs.javax.jdo.api)
+    implementation(libs.javax.cache.api)
+	implementation(libs.vladsch.flexmark)
+	implementation(libs.atomikos.transaction.jta)
+	implementation(libs.atomikos.transaction.jdbc)
     // Test
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
-    testImplementation("org.mockito:mockito-core:5.14.2")    
-    testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")    
+    testImplementation(libs.junit.jupiter.engine)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junit.jupiter)
     // openmdxBase
-    openmdxBase("org.openmdx:openmdx-base:2.18.10")
+    openmdxBase(libs.openmdx.base)
     // openmdxBootstrap
     openmdxBootstrap(files(file(layout.buildDirectory.dir("generated/classes/openmdxBootstrap"))))
-    openmdxBootstrap("javax:javaee-api:8.0.+")
-	openmdxBootstrap("com.vladsch.flexmark:flexmark:0.64.8")
+    openmdxBootstrap(libs.javax.javaee.api)
+	openmdxBootstrap(libs.vladsch.flexmark)
+	// manifold preprocessor
+	implementation(libs.systems.manifold.preprocessor)
+	implementation(libs.systems.manifold.props.rt)
+	implementation(libs.systems.manifold.ext)
     // jdo-api
-    jdoApi("javax.jdo:jdo-api:3.1")
+    jdoApi(libs.javax.jdo.api)
     // cache-api
-    cacheApi("javax.cache:cache-api:1.1.+")
+    cacheApi(libs.javax.cache.api)
+
+	"openmdx4Implementation"("jakarta.platform:jakarta.jakartaee-api:10.0.0")
+
 }
 
 sourceSets {

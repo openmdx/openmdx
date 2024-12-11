@@ -92,14 +92,14 @@ val openmdxBootstrap by configurations
 
 dependencies {
     // implementation
-    implementation("javax:javaee-api:8.0.+")
-    implementation("javax.jdo:jdo-api:3.1")
-    implementation("org.codehaus.groovy:groovy:3.0.+")
+    implementation(libs.javax.javaee.api)
+    implementation(libs.javax.jdo.api)
+    implementation(libs.codehaus.groovy)
     implementation(project(":core"))
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 	// test
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+    testImplementation(libs.junit.jupiter.engine)
 }
 
 sourceSets {
