@@ -51,6 +51,7 @@ plugins {
 	eclipse
 	distribution
 	id("com.microsoft.javaflavours")
+	id("systems.manifold.manifold-gradle-plugin")
 }
 
 repositories {
@@ -84,7 +85,7 @@ fun getProjectImplementationVersion(): String {
 }
 
 fun getDeliverDir(): File {
-	return File(project.rootDir, "jre-" + targetPlatform + "/" + project.name);
+	return File(project.rootDir, "openmdx3/${project.name}");
 }
 
 fun touch(file: File) {
@@ -206,6 +207,7 @@ sourceSets {
 }
 
 dependencies {
+
     // implementation
     implementation(libs.javax.javaee.api)
     implementation(libs.javax.jdo.api)
@@ -236,25 +238,6 @@ dependencies {
 
 }
 
-sourceSets {
-    main {
-        java {
-            srcDir("src/main/java")
-            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
-        }
-        resources {
-        	srcDir("src/main/resources")
-            srcDir(layout.buildDirectory.dir("generated/resources/main"))
-        }
-    }
-    test {
-        java {
-            srcDir("src/test/java")
-        }
-        resources {
-        	srcDir("src/test/resources")
-        }
-    }
 tasks.withType<JavaCompile> {
 	if (name.contains("Openmdx2")) {
 		javaCompiler = javaToolchains.compilerFor {
@@ -439,18 +422,19 @@ tasks {
 		include(openmdxBaseIncludes)
 		exclude(openmdxBaseExcludes)
 	}
+
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-base-sources.jar") {
 		destinationDirectory.set(File(getDeliverDir(), "lib"))
 		archiveFileName.set("openmdx-base-sources.jar")
-	    includeEmptyDirs = false
+		includeEmptyDirs = false
 		manifest {
-	        attributes(
-	        	getManifest(
-	        		"openMDX Base Sources",
-	        		"openmdx-base-sources"
-	        	)
-	        )
-	    }
+			attributes(
+				getManifest(
+					"openMDX Base Sources",
+					"openmdx-base-sources"
+				)
+			)
+		}
 		from(
 			"src/main/java",
 			File(buildDirAsFile, "generated/sources/java/main")
@@ -458,6 +442,7 @@ tasks {
 		include(openmdxBaseIncludes)
 		exclude(openmdxBaseExcludes)
 	}
+
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-system.jar") {
 		destinationDirectory.set(File(getDeliverDir(), "lib"))
 	    dependsOn(":core:compileJava")

@@ -86,8 +86,8 @@ publishing {
     publications {
         create<MavenPublication>("openmdxSystem") {
             artifactId = "openmdx-system"
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/core/lib/openmdx-system.jar")) { type = "jar" })
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/core/lib/openmdx-system-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/core/lib/openmdx-system.jar")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/core/lib/openmdx-system-sources.jar")) { type = "jar"; classifier = "sources" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-system-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
             pom {
                 name.set("openmdx-system")
@@ -120,8 +120,8 @@ publishing {
         }
         create<MavenPublication>("openmdxBase") {
             artifactId = "openmdx-base"
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/core/lib/openmdx-base.jar")) { type = "jar" })
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/core/lib/openmdx-base-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/core/lib/openmdx-base.jar")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/core/lib/openmdx-base-sources.jar")) { type = "jar"; classifier = "sources" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-base-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
             pom {
                 name.set("openmdx-base")
@@ -188,8 +188,8 @@ publishing {
         }
         create<MavenPublication>("openmdxClient") {
             artifactId = "openmdx-client"
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/client/lib/openmdx-client.jar")) { type = "jar" })
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/client/lib/openmdx-client-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/client/lib/openmdx-client.jar")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/client/lib/openmdx-client-sources.jar")) { type = "jar"; classifier = "sources" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-client-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
             pom {
                 name.set("openmdx-client")
@@ -222,8 +222,8 @@ publishing {
         }
         create<MavenPublication>("openmdxDalvik") {
             artifactId = "openmdx-dalvik"
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/client/lib/openmdx-dalvik.jar")) { type = "jar" })
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/client/lib/openmdx-dalvik-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/client/lib/openmdx-dalvik.jar")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/client/lib/openmdx-dalvik-sources.jar")) { type = "jar"; classifier = "sources" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-dalvik-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
             pom {
                 name.set("openmdx-dalvik")
@@ -256,8 +256,8 @@ publishing {
         }
         create<MavenPublication>("openmdxSecurity") {
             artifactId = "openmdx-security"
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/security/lib/openmdx-security.jar")) { type = "jar" })
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/security/lib/openmdx-security-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/security/lib/openmdx-security.jar")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/security/lib/openmdx-security-sources.jar")) { type = "jar"; classifier = "sources" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-security-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
             pom {
                 name.set("openmdx-security")
@@ -324,8 +324,8 @@ publishing {
         }
         create<MavenPublication>("openmdxAuthentication") {
             artifactId = "openmdx-authentication"
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/security/lib/openmdx-authentication.jar")) { type = "jar" })
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/security/lib/openmdx-authentication-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/security/lib/openmdx-authentication.jar")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/security/lib/openmdx-authentication-sources.jar")) { type = "jar"; classifier = "sources" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-authentication-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
             pom {
                 name.set("openmdx-authentication")
@@ -358,8 +358,8 @@ publishing {
         }
         create<MavenPublication>("openmdxLdap") {
             artifactId = "openmdx-ldap"
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/security/lib/openmdx-ldap.jar")) { type = "jar" })
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/security/lib/openmdx-ldap-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/security/lib/openmdx-ldap.jar")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/security/lib/openmdx-ldap-sources.jar")) { type = "jar"; classifier = "sources" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-ldap-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
             pom {
                 name.set("openmdx-ldap")
@@ -392,8 +392,8 @@ publishing {
         }
         create<MavenPublication>("openmdxPki") {
             artifactId = "openmdx-pki"
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/security/lib/openmdx-pki.jar")) { type = "jar" })
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/security/lib/openmdx-pki-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/security/lib/openmdx-pki.jar")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/security/lib/openmdx-pki-sources.jar")) { type = "jar"; classifier = "sources" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-pki-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
             pom {
                 name.set("openmdx-pki")
@@ -426,8 +426,8 @@ publishing {
         }
         create<MavenPublication>("openmdxRadius") {
             artifactId = "openmdx-radius"
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/security/lib/openmdx-radius.jar")) { type = "jar" })
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/security/lib/openmdx-radius-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/security/lib/openmdx-radius.jar")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/security/lib/openmdx-radius-sources.jar")) { type = "jar"; classifier = "sources" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-radius-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
             pom {
                 name.set("openmdx-radius")
@@ -460,8 +460,8 @@ publishing {
         }
         create<MavenPublication>("openmdxResource") {
             artifactId = "openmdx-resource"
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/security/lib/openmdx-resource.jar")) { type = "jar" })
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/security/lib/openmdx-resource-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/security/lib/openmdx-resource.jar")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/security/lib/openmdx-resource-sources.jar")) { type = "jar"; classifier = "sources" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-resource-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
             pom {
                 name.set("openmdx-resource")
@@ -494,8 +494,8 @@ publishing {
         }
         create<MavenPublication>("openmdxPortal") {
             artifactId = "openmdx-portal"
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/portal/lib/openmdx-portal.jar")) { type = "jar" })
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/portal/lib/openmdx-portal-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/portal/lib/openmdx-portal.jar")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/portal/lib/openmdx-portal-sources.jar")) { type = "jar"; classifier = "sources" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-portal-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
             pom {
                 name.set("openmdx-portal")
@@ -562,7 +562,7 @@ publishing {
         }
         create<MavenPublication>("openmdxInspector") {
             artifactId = "openmdx-inspector"
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/portal/deployment-unit/openmdx-inspector.war")) { type = "war" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/portal/deployment-unit/openmdx-inspector.war")) { type = "war" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-inspector-sources.jar")) { type = "jar"; classifier = "sources" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-inspector-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
             pom {
@@ -596,8 +596,8 @@ publishing {
         }
         create<MavenPublication>("openmdxCatalina") {
             artifactId = "catalina-openmdx"
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/tomcat/lib/catalina-openmdx.jar")) { type = "war" })
-            artifact(project.artifacts.add("archives", File("${rootDir}/jre-" + targetPlatform + "/tomcat/lib/catalina-openmdx-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/tomcat/lib/catalina-openmdx.jar")) { type = "war" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/openmdx-" + targetPlatform + "/tomcat/lib/catalina-openmdx-sources.jar")) { type = "jar"; classifier = "sources" })
             artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/catalina-openmdx-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
             pom {
                 name.set("catalina-openmdx")

@@ -82,7 +82,7 @@ fun getProjectImplementationVersion(): String {
 }
 
 fun getDeliverDir(): File {
-	return File(project.rootDir, "jre-" + targetPlatform + "/" + project.name);
+	return File(project.rootDir, "openmdx3/${project.name}");
 }
 
 fun touch(file: File) {
@@ -159,9 +159,9 @@ distributions {
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-            var path = "jre-$targetPlatform/${project.name}/lib"
+            var path = "openmdx-$targetPlatform/${project.name}/lib"
             from("../$path") { into(path) }
-            path = "jre-$targetPlatform/gradle/repo"
+            path = "openmdx-$targetPlatform/gradle/repo"
             from("../$path") { into(path) }
         }
     }

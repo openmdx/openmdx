@@ -47,6 +47,7 @@ import java.util.*
 
 plugins {
 	java
+    id("systems.manifold.manifold-gradle-plugin") version "0.0.2-alpha"
 }
 
 allprojects {
@@ -74,10 +75,10 @@ tasks.clean {
     }
 }
 
-var env = Properties()
-env.load(FileInputStream(File(project.rootDir, "build.properties")))
-val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
+//var env = Properties()
+//env.load(FileInputStream(File(project.rootDir, "build.properties")))
+//val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
 
 fun getPlatformDir(): File {
-	return File(project.rootDir, "jre-$targetPlatform");
+	return File(project.rootDir, "openmdx3");
 }

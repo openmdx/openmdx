@@ -2,6 +2,8 @@ distribution/
 source-archive/
 build/
 jre-*/
+openmdx*/
+openmdx-*/
 .metadata/
 opt/xstream/
 build
