@@ -50,6 +50,7 @@ plugins {
 	`java-library`
 	eclipse
 	distribution
+	id("com.microsoft.javaflavours")
 }
 
 repositories {

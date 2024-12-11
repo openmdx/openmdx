@@ -47,10 +47,12 @@ import java.io.FileInputStream
 import java.util.*
 
 plugins {
-	java
-	`java-library`
-	eclipse
-	distribution
+    java
+    `java-library`
+    eclipse
+    distribution
+    id("com.microsoft.javaflavours")
+    id("systems.manifold.manifold-gradle-plugin")
 }
 
 repositories {

@@ -52,7 +52,21 @@ plugins {
 allprojects {
     group = "org.openmdx"
     version = "2.18.10"
+    ext {
+        for (i in 2..4) {
+            extra["mdx${i}"] = "openmdx${i}"
+            extra["openmdx${i}Group"] = "org.openmdx.v${i}"
+            extra["openmdx${i}Version"] = "${i}.20.0"
+        }
+    }
 }
+
+buildscript {
+    dependencies {
+        classpath(files("buildSrc/libs/gradle-java-flavors-1.0.2.5.jar"))
+    }
+}
+apply(plugin = "com.microsoft.javaflavours")
 
 tasks.clean {
     doLast {
