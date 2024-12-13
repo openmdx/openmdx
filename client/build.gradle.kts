@@ -43,7 +43,9 @@
  * listed in the NOTICE file.
  */
 
+import org.openmdx.gradle.JavaFlavoursExtension
 import java.io.FileInputStream
+import java.util.regex.Pattern
 import java.util.*
 
 plugins {
@@ -51,7 +53,7 @@ plugins {
     `java-library`
     eclipse
     distribution
-    id("com.microsoft.javaflavours")
+	id("org.openmdx.java-flavours-plugin")
     id("systems.manifold.manifold-gradle-plugin")
 }
 
@@ -64,34 +66,60 @@ repositories {
 
 var env = Properties()
 env.load(FileInputStream(File(project.rootDir, "build.properties")))
-val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
-val targetPlatformOpenmdx4 = JavaVersion.valueOf(env.getProperty("target.platform.openmdx4"))
 
-if (System.getenv("JRE_18") == null) {
-    throw GradleException("ERROR: JRE_18 not set (e.g. export JRE_18=/usr/lib/jvm/java-8-openjdk-amd64/jre)")
-}
+var flavour = currentFlavour()
+var flavourVersion = currentFlavourVersion()
+var flavourJavaVersion : JavaVersion = project.extra["${flavour}JavaVersion"] as JavaVersion
 
 eclipse {
-    project {
-        name = "openMDX 2 ~ Client"
+	project {
+    	name = "openMDX ${flavourVersion} ~ Client"
     }
     jdt {
-        sourceCompatibility = targetPlatform
-        targetCompatibility = targetPlatform
-        javaRuntimeName = "JavaSE-$targetPlatform"
+		sourceCompatibility = flavourJavaVersion
+    	targetCompatibility = flavourJavaVersion
+    	javaRuntimeName = "JavaSE-$flavourJavaVersion"
     }
+}
+
+fun currentFlavour(): String {
+    val taskRequestsStr = gradle.startParameter.taskRequests.toString()
+    val pattern = Pattern.compile("\\w*([Oo]penmdx[2-4])\\w*")
+    val matcher = pattern.matcher(taskRequestsStr)
+    val flavour = if (matcher.find()) {
+        matcher.group(1).lowercase()
+    } else {
+        "main"
+    }
+    return flavour
+}
+
+fun currentFlavourVersion(): String {
+    val taskRequestsStr = gradle.startParameter.taskRequests.toString()
+    val pattern = Pattern.compile("\\w*[Oo]penmdx([2-4])\\w*")
+    val matcher = pattern.matcher(taskRequestsStr)
+    val flavourVersion = if (matcher.find()) {
+        matcher.group(1)
+    } else {
+        "2"
+    }
+    return flavourVersion
 }
 
 fun getProjectImplementationVersion(): String {
-    return project.version.toString();
+	return "${flavourVersion}.${project.version}";
 }
 
 fun getDeliverDir(): File {
-	return File(project.rootDir, "openmdx3/${project.name}");
+	return File(project.rootDir, "${flavour}/${project.name}");
 }
 
 fun touch(file: File) {
 	ant.withGroovyBuilder { "touch"("file" to file, "mkdirs" to true) }
+}
+
+if (flavourVersion != "4" && System.getenv("JRE_18") == null) {
+    throw GradleException("ERROR: JRE_18 not set (e.g. export JRE_18=/usr/lib/jvm/java-8-openjdk-amd64/jre)")
 }
 
 project.configurations.maybeCreate("openmdxBootstrap")
@@ -113,33 +141,10 @@ configurations {
     }
 }
 
-configure<com.microsoft.javaflavours.JavaFlavoursExtension> {
-    flavour("${project.extra["mdx2"]}")
-    flavour("${project.extra["mdx3"]}")
-    flavour("${project.extra["mdx4"]}")
-    val testJavaPathResolver: (String) -> String = { flavour -> "src/$flavour-test/java" }
-    val testResourcesPathResolver: (String) -> String = { flavour -> "src/$flavour-test/resources" }
-}
-
-sourceSets {
-//	main {
-//    java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
-//    resources { srcDir("src/main/resources") }
-//	}
-    val openmdx2 by getting {
-        java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
-        resources { srcDir("src/main/resources") }
-    }
-
-    val openmdx3 by getting {
-        java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
-        resources { srcDir("src/main/resources") }
-    }
-
-    val openmdx4 by getting {
-        java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
-        resources { srcDir("src/main/resources") }
-    }
+configure<org.openmdx.gradle.JavaFlavoursExtension> {
+    flavour("openmdx2")
+    flavour("openmdx3")
+    flavour("openmdx4")
 }
 
 dependencies {
@@ -172,21 +177,10 @@ dependencies {
 }
 
 tasks.withType<JavaCompile> {
-//	options.compilerArgs.add("-Xplugin:Manifold")
-    if (name.contains("Openmdx2")) {
-//		options.compilerArgs.add("-AJAVA_FLAVOUR_MDX2")
-        javaCompiler = javaToolchains.compilerFor {
-            languageVersion.set(JavaLanguageVersion.of(targetPlatform.majorVersion))
-        }
-    } else if (name.contains("Openmdx3")) {
-        javaCompiler = javaToolchains.compilerFor {
-            languageVersion.set(JavaLanguageVersion.of(targetPlatform.majorVersion))
-        }
-    } else if (name.contains("Openmdx4")) {
-        javaCompiler = javaToolchains.compilerFor {
-            languageVersion.set(JavaLanguageVersion.of(targetPlatformOpenmdx4.majorVersion))
-        }
-    }
+    val flavourLanguageVersion : JavaLanguageVersion = project.extra["${flavour}JavaLanguageVersion"] as JavaLanguageVersion    
+	javaCompiler = javaToolchains.compilerFor {
+		languageVersion.set(flavourLanguageVersion)
+	}
 }
 
 tasks {
@@ -275,7 +269,7 @@ tasks {
                 ).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText()
             )
         }
-        options.release.set(Integer.valueOf(targetPlatform.majorVersion))
+//	    options.release.set(Integer.valueOf(flavourJavaVersion.majorVersion))
     }
 
     distTar {
@@ -315,7 +309,7 @@ tasks {
         with(
             copySpec {
                 from(
-                    File(buildDirAsFile, "classes/java/main"),
+                    File(buildDirAsFile, "classes/main/java"),
                     File(buildDirAsFile, "resources/main"),
                     "src/main/resources"
                 ).include(
@@ -364,7 +358,7 @@ tasks {
         }
         with(copySpec {
             from(
-                "src/main/java", File(buildDirAsFile, "generated/sources/java/main")
+                "src/main/java", File(buildDirAsFile, "generated/sources/main/java")
             ).include(
                 openmdxClientIncludes
             ).exclude(
@@ -419,7 +413,7 @@ tasks {
                 )
             }, copySpec {
                 from(
-                    File(buildDirAsFile, "classes/java/main"), File(buildDirAsFile, "resources/main"), "src/main/dalvik"
+                    File(buildDirAsFile, "classes/main/java"), File(buildDirAsFile, "resources/main"), "src/main/dalvik"
                 ).exclude(
                     "META-INF/*/**"
                 )
@@ -443,7 +437,7 @@ tasks {
             copySpec {
                 from(
                     "src/main/java",
-                    File(buildDirAsFile, "generated/sources/java/main"),
+                    File(buildDirAsFile, "generated/sources/main/java"),
                     zipTree(File(getDeliverDir(), "../client/lib/openmdx-client-sources.jar"))
                 ).include(
                     openmdxDalvikIncludes
@@ -480,12 +474,10 @@ distributions {
 //    }
 
     // Create unique distribution tasks based on extra keys
-    arrayOf(
-        "${project.extra["mdx2"]}", "${project.extra["mdx3"]}", "${project.extra["mdx4"]}"
-    ).forEach { flavour ->
+	project.javaFlavours.getFlavours().forEach { flavour ->
 
-        val version = "${project.extra["${flavour}Version"]}" ?: return@forEach // Skip if version is not defined
-        val jre = if (flavour == "openmdx4") targetPlatformOpenmdx4.majorVersion else targetPlatform
+        val version : String = project.extra["${flavour}ProjectImplementationVersion"] as String
+        var jre : JavaVersion = project.extra["${flavour}JavaVersion"] as JavaVersion
 
         create(flavour) {
             distributionBaseName.set("openmdx-$version-${project.name}-jre-$jre")
@@ -504,7 +496,7 @@ distributions {
                 // jre-...
                 var path = "openmdx-$jre/${project.name}-$version/lib"
                 from("../$path") { into(path) }
-                path = "openmdx-$targetPlatform/gradle/repo"
+                path = "openmdx-$jre/gradle/repo"
                 from("../$path") { into(path) }
             }
 
@@ -512,37 +504,37 @@ distributions {
     }
 }
 
-var flav = project.extra["mdx2"]
+var flav = "openmdx2"
 tasks.named<Zip>("${flav}DistZip") {
     dependsOn("compileOpenmdx2Java")
 //    archiveFileName.set(getArchiveName(flav, targetPlatform))
 }
 
-flav = project.extra["mdx3"]
+flav = "openmdx3"
 tasks.named<Zip>("${flav}DistZip") {
     dependsOn("compileOpenmdx3Java")
 //    archiveFileName.set(getArchiveName(flav, targetPlatform))
 }
-flav = project.extra["mdx4"]
+flav = "openmdx4"
 tasks.named<Zip>("${flav}DistZip"){
     dependsOn("compileOpenmdx4Java")
 //    archiveFileName.set(getArchiveName(flav, targetPlatformOpenmdx4.majorVersion))
 }
 
 
-flav = project.extra["mdx2"]
+flav = "openmdx2"
 tasks.named<Tar>("${flav}DistTar") {
     dependsOn("compileOpenmdx2Java")
 //    archiveFileName.set(getArchiveName(flav, targetPlatform))
 }
 
-flav = project.extra["mdx3"]
+flav = "openmdx3"
 tasks.named<Tar>("${flav}DistTar") {
     dependsOn("compileOpenmdx3Java")
 //    archiveFileName.set(getArchiveName(flav, targetPlatform))
 }
 
-flav = project.extra["mdx4"]
+flav = "openmdx4"
 tasks.named<Tar>("${flav}DistTar") {
     dependsOn("compileOpenmdx4Java")
 //    archiveFileName.set(getArchiveName(flav, targetPlatformOpenmdx4.majorVersion))

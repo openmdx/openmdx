@@ -44,6 +44,7 @@
  */
 
 import java.io.FileInputStream
+import java.util.regex.Pattern;
 import java.util.*
 
 plugins {
@@ -62,25 +63,52 @@ repositories {
 
 var env = Properties()
 env.load(FileInputStream(File(project.rootDir, "build.properties")))
-val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
+
+var flavour = currentFlavour()
+var flavourVersion = currentFlavourVersion()
+var flavourJavaVersion : JavaVersion = project.extra["${flavour}JavaVersion"] as JavaVersion
 
 eclipse {
 	project {
-    	name = "openMDX 2 ~ Tomcat"
+    	name = "openMDX ${flavourVersion} ~ Tomcat"
     }
     jdt {
-		sourceCompatibility = targetPlatform
-    	targetCompatibility = targetPlatform
-    	javaRuntimeName = "JavaSE-$targetPlatform"
+		sourceCompatibility = flavourJavaVersion
+    	targetCompatibility = flavourJavaVersion
+    	javaRuntimeName = "JavaSE-$flavourJavaVersion"
     }
+}
+
+fun currentFlavour(): String {
+    val taskRequestsStr = gradle.startParameter.taskRequests.toString()
+    val pattern = Pattern.compile("\\w*([Oo]penmdx[2-4])\\w*")
+    val matcher = pattern.matcher(taskRequestsStr)
+    val flavour = if (matcher.find()) {
+        matcher.group(1).lowercase()
+    } else {
+        "main"
+    }
+    return flavour
+}
+
+fun currentFlavourVersion(): String {
+    val taskRequestsStr = gradle.startParameter.taskRequests.toString()
+    val pattern = Pattern.compile("\\w*[Oo]penmdx([2-4])\\w*")
+    val matcher = pattern.matcher(taskRequestsStr)
+    val flavourVersion = if (matcher.find()) {
+        matcher.group(1)
+    } else {
+        "2"
+    }
+    return flavourVersion
 }
 
 fun getProjectImplementationVersion(): String {
-	return project.version.toString();
+	return "${flavourVersion}.${project.version}";
 }
 
 fun getDeliverDir(): File {
-	return File(project.rootDir, "openmdx3/${project.name}");
+	return File(project.rootDir, "${flavour}/${project.name}");
 }
 
 fun touch(file: File) {
@@ -102,7 +130,7 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
+            srcDir(layout.buildDirectory.dir("generated/sources/main/java"))
         }
         resources {
         	srcDir("src/main/resources")
@@ -111,7 +139,7 @@ sourceSets {
     test {
         java {
             srcDir("src/test/java")
-            srcDir(layout.buildDirectory.dir("generated/sources/java/test"))
+            srcDir(layout.buildDirectory.dir("generated/sources/test/java"))
         }
         resources {
         	srcDir("src/test/resources")
@@ -131,7 +159,7 @@ tasks {
 	    maxHeapSize = "4G"
 	}
 	compileJava {
- 	   options.release.set(Integer.valueOf(targetPlatform.majorVersion))
+//	    options.release.set(Integer.valueOf(flavourJavaVersion.majorVersion))
 	}
 	assemble {
 		dependsOn(
@@ -168,7 +196,7 @@ tasks {
 	        )
 	    }
 		from(
-			File(buildDirAsFile, "classes/java/main"),
+			File(buildDirAsFile, "classes/main/java"),
 			File(buildDirAsFile, "resources/main"),
 			"src/main/resources"
 		)
@@ -189,7 +217,7 @@ tasks {
 	    }
 		from(
 			"src/main/java",
-			File(buildDirAsFile, "generated/sources/java/main")
+			File(buildDirAsFile, "generated/sources/main/java")
 		)
 		include(openmdxCatalinaIncludes)
 		exclude(openmdxCatalinaExcludes)
@@ -198,7 +226,7 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-${project.name}-jre-" + targetPlatform)
+    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-${project.name}-jre-" + flavourJavaVersion)
         contents {
         	// test-core
         	from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
@@ -208,9 +236,9 @@ distributions {
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-			var path = "openmdx-$targetPlatform/${project.name}/lib"
+			var path = "openmdx-$flavourJavaVersion/${project.name}/lib"
 			from("../$path") { into(path) }
-			path = "openmdx-$targetPlatform/gradle/repo"
+			path = "openmdx-$flavourJavaVersion/gradle/repo"
 			from("../$path") { into(path) }
         }
     }

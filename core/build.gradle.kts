@@ -43,6 +43,7 @@
  * listed in the NOTICE file.
  */
 import java.io.FileInputStream
+import java.util.regex.Pattern;
 import java.util.*
 
 plugins {
@@ -50,7 +51,7 @@ plugins {
 	`java-library`
 	eclipse
 	distribution
-	id("com.microsoft.javaflavours")
+	id("org.openmdx.java-flavours-plugin")
 	id("systems.manifold.manifold-gradle-plugin")
 }
 
@@ -66,33 +67,59 @@ repositories {
 
 var env = Properties()
 env.load(FileInputStream(File(project.rootDir, "build.properties")))
-val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
-val targetPlatformOpenmdx4 = JavaVersion.valueOf(env.getProperty("target.platform.openmdx4"))
+
+var flavour = currentFlavour()
+var flavourVersion = currentFlavourVersion()
+var flavourJavaVersion : JavaVersion = project.extra["${flavour}JavaVersion"] as JavaVersion
 
 eclipse {
 	project {
-    	name = "openMDX 2 ~ Core"
+    	name = "openMDX ${flavourVersion} ~ Core"
     }
     jdt {
-		sourceCompatibility = targetPlatform
-    	targetCompatibility = targetPlatform
-    	javaRuntimeName = "JavaSE-$targetPlatform"
+		sourceCompatibility = flavourJavaVersion
+    	targetCompatibility = flavourJavaVersion
+    	javaRuntimeName = "JavaSE-$flavourJavaVersion"
     }
+}
+
+fun currentFlavour(): String {
+    val taskRequestsStr = gradle.startParameter.taskRequests.toString()
+    val pattern = Pattern.compile("\\w*([Oo]penmdx[2-4])\\w*")
+    val matcher = pattern.matcher(taskRequestsStr)
+    val flavour = if (matcher.find()) {
+        matcher.group(1).lowercase()
+    } else {
+        "main"
+    }
+    return flavour
+}
+
+fun currentFlavourVersion(): String {
+    val taskRequestsStr = gradle.startParameter.taskRequests.toString()
+    val pattern = Pattern.compile("\\w*[Oo]penmdx([2-4])\\w*")
+    val matcher = pattern.matcher(taskRequestsStr)
+    val flavourVersion = if (matcher.find()) {
+        matcher.group(1)
+    } else {
+        "2"
+    }
+    return flavourVersion
 }
 
 fun getProjectImplementationVersion(): String {
-	return project.version.toString();
+	return "${flavourVersion}.${project.version}";
 }
 
 fun getDeliverDir(): File {
-	return File(project.rootDir, "openmdx3/${project.name}");
+	return File(project.rootDir, "${flavour}/${project.name}");
 }
 
 fun touch(file: File) {
 	ant.withGroovyBuilder { "touch"("file" to file, "mkdirs" to true) }
 }
 
-fun getVersionClass(packageName: String): String {
+fun getVersionClass(packageName: String, projectImplementationVersion: String): String {
 
 	return """
 
@@ -101,44 +128,67 @@ fun getVersionClass(packageName: String): String {
         public class Version {
 
             /**
-            * A specification version is compliant with a given one if<ol>
-            * <li>its major numbers is equal to the given one
-            * <li>its minor number is greater than or equal to the given one
-            * </ol>
-            */
-            private final static String SPECIFICATION_VERSION = "${project.version.toString().substring(0, 4)}";
+             * The Flavour version tells which openMDX version is used:<ul>
+             * <li>openMDX 2: Jakarta EE 8 and classic JMI API
+             * <li>openMDX 3: Jakarta EE 8 and contemporary JMI API
+             * <li>openMDX 4: Jakarta EE 10 and contemporary JMI API
+             * </ol>
+             */
+            private final static String FLAVOUR_VERSION = "${projectImplementationVersion.substring(0, 1)}";
             
             /**
-            * An implementation version is compliant with a given one if
-            * their string representations are equal.
-            */
-            private final static String IMPLEMENTATION_VERSION = "${project.version}";
+             * A specification version is compliant with a given one if<ol>
+             * <li>its major numbers is equal to the given one
+             * <li>its minor number is greater than or equal to the given one
+             * </ol>
+             */
+            private final static String SPECIFICATION_VERSION = "${projectImplementationVersion.substring(0, 4)}";
+            
+            /**
+             * An implementation version is compliant with a given one if
+             * their string representations are equal.
+             */
+            private final static String IMPLEMENTATION_VERSION = "${projectImplementationVersion}";
+            
+            /**
+             * Get the openMDX flavour version:<ul>
+             * <li>openMDX 2: Jakarta EE 8 and classic JMI API
+             * <li>openMDX 3: Jakarta EE 8 and contemporary JMI API
+             * <li>openMDX 4: Jakarta EE 10 and contemporary JMI API
+             * </ul>
+             *
+             * @return the flavour version
+             */
+            public static String getFlavourVersion(
+            ){
+                return Version.FLAVOUR_VERSION;
+            }
 
             /**
-            * Get the specification version.
-            *
-            * @return the implementation version
-            */
+             * Get the specification version.
+             *
+             * @return the implementation version
+             */
             public static String getSpecificationVersion(
             ){
                 return Version.SPECIFICATION_VERSION;
             }
 
             /**
-            * Get the implementation version.
-            *
-            * @return the implementation version
-            */
+             * Get the implementation version.
+             *
+             * @return the implementation version
+             */
             public static String getImplementationVersion(
             ){
                 return Version.IMPLEMENTATION_VERSION;
             }
                     
             /**
-            * Define a main so that the version may easily be printed by a tool
-            * 
-            * @param arguments	the program arguments
-            */
+             * Define a main so that the version may easily be printed by a tool
+             * 
+             * @param arguments	the program arguments
+             */
             public static void main(
                 String arguments[]
             ) {
@@ -156,6 +206,12 @@ fun getVersionClass(packageName: String): String {
         """.trimIndent()
 }
 
+configure<org.openmdx.gradle.JavaFlavoursExtension> {
+	flavour("openmdx2")
+	flavour("openmdx3")
+	flavour("openmdx4")
+}
+
 project.configurations.maybeCreate("openmdxBase")
 project.configurations.maybeCreate("openmdxBootstrap")
 project.configurations.maybeCreate("jdoApi")
@@ -164,6 +220,7 @@ val openmdxBase by configurations
 val openmdxBootstrap by configurations
 val jdoApi by configurations
 val cacheApi by configurations
+val openmdx4Implementation by configurations
 
 configurations {
 	// needed
@@ -172,6 +229,7 @@ configurations {
 	register("runtime")
 	register("testRuntime")
 	for (i in 2..4) {
+        register("openmdx${i}Build")
 		register("openmdx${i}Compile")
 		register("openmdx${i}TestCompile")
 		register("openmdx${i}Runtime")
@@ -179,29 +237,9 @@ configurations {
 	}
 }
 
-configure<com.microsoft.javaflavours.JavaFlavoursExtension> {
-	flavour("${project.extra["mdx2"]}")
-	flavour("${project.extra["mdx3"]}")
-	flavour("${project.extra["mdx4"]}")
-	val testJavaPathResolver: (String) -> String = { flavour -> "src/$flavour-test/java" }
-	val testResourcesPathResolver: (String) -> String = { flavour -> "src/$flavour-test/resources" }
-}
-
 sourceSets {
 	main {
-		java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
-		resources { srcDir("src/main/resources") }
-	}
-	val openmdx2 by getting {
-		java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
-		resources { srcDir("src/main/resources") }
-	}
-	val openmdx3 by getting {
-		java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
-		resources { srcDir("src/main/resources") }
-	}
-	val openmdx4 by getting {
-		java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/java/main")) }
+		java { srcDir("src/main/java"); srcDir(layout.buildDirectory.dir("generated/sources/main/java")); srcDir(layout.buildDirectory.dir("generated/sources/openmdx2/java")) }
 		resources { srcDir("src/main/resources") }
 	}
 }
@@ -219,6 +257,7 @@ dependencies {
     testImplementation(libs.junit.jupiter.engine)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.junit.jupiter)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     // openmdxBase
     openmdxBase(libs.openmdx.base)
     // openmdxBootstrap
@@ -233,25 +272,14 @@ dependencies {
     jdoApi(libs.javax.jdo.api)
     // cache-api
     cacheApi(libs.javax.cache.api)
-
-	"openmdx4Implementation"("jakarta.platform:jakarta.jakartaee-api:10.0.0")
+	openmdx4Implementation("jakarta.platform:jakarta.jakartaee-api:10.0.0")
 
 }
 
 tasks.withType<JavaCompile> {
-	if (name.contains("Openmdx2")) {
-		javaCompiler = javaToolchains.compilerFor {
-			languageVersion.set(JavaLanguageVersion.of(targetPlatform.majorVersion))
-		}
-
-	} else if (name.contains("Openmdx3")) {
-		javaCompiler = javaToolchains.compilerFor {
-			languageVersion.set(JavaLanguageVersion.of(targetPlatform.majorVersion))
-		}
-	} else if (name.contains("Openmdx4")) {
-		javaCompiler = javaToolchains.compilerFor {
-			languageVersion.set(JavaLanguageVersion.of(targetPlatformOpenmdx4.majorVersion))
-		}
+    val flavourLanguageVersion : JavaLanguageVersion = project.extra["${flavour}JavaLanguageVersion"] as JavaLanguageVersion    
+	javaCompiler = javaToolchains.compilerFor {
+		languageVersion.set(flavourLanguageVersion)
 	}
 }
 
@@ -327,7 +355,7 @@ tasks {
 	            from(
 	                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
 	            )
-	            into(layout.buildDirectory.dir("generated/sources/java/main"))
+	            into(layout.buildDirectory.dir("generated/sources/main/java"))
 	            include(
 	                "**/*.java"
 	            )
@@ -372,19 +400,23 @@ tasks {
 	compileJava {
 	    dependsOn("generate-model")
 	    doFirst {
-	    	// base/Version
-			var f: File = file(layout.buildDirectory.dir("generated/sources/java/main/org/openmdx/base/Version.java"))
-			f.writeText(getVersionClass("org.openmdx.base"))
-	    	// application/Version
-	        f = file(layout.buildDirectory.dir("generated/sources/java/main/org/openmdx/application/Version.java"))
-	        touch(f)
-	        f.writeText(getVersionClass("org.openmdx.application"))
-	        // system/Version
-	        f = file(layout.buildDirectory.dir("generated/sources/java/main/org/openmdx/system/Version.java"))
-	        touch(f)
-	        f.writeText(getVersionClass("org.openmdx.system"))
+    		for (i in 2..4) {
+    		    var v: String = "${i}." + project.version.toString();    
+		    	// base/Version
+				var f: File = file(layout.buildDirectory.dir("generated/sources/openmdx${i}/java/org/openmdx/base/Version.java"))
+		        touch(f)
+				f.writeText(getVersionClass("org.openmdx.base", v))
+		    	// application/Version
+		        f = file(layout.buildDirectory.dir("generated/sources/openmdx${i}/java/org/openmdx/application/Version.java"))
+		        touch(f)
+		        f.writeText(getVersionClass("org.openmdx.application", v))
+		        // system/Version
+		        f = file(layout.buildDirectory.dir("generated/sources/openmdx${i}/java/org/openmdx/system/Version.java"))
+		        touch(f)
+		        f.writeText(getVersionClass("org.openmdx.system", v))
+	        }
 	    }
-	    options.release.set(Integer.valueOf(targetPlatform.majorVersion))
+//	    options.release.set(Integer.valueOf(flavourJavaVersion.majorVersion))
 	}
 	assemble {
 		dependsOn(
@@ -412,7 +444,7 @@ tasks {
 	        )
 	    }
 		from(
-			File(buildDirAsFile, "classes/java/main"),
+			File(buildDirAsFile, "classes/main/java"),
 			File(buildDirAsFile, "resources/main"),
 			File(buildDirAsFile, "generated/resources/main"),
 			"src/main/resources",
@@ -437,7 +469,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDirAsFile, "generated/sources/java/main")
+			File(buildDirAsFile, "generated/sources/main/java")
 		)
 		include(openmdxBaseIncludes)
 		exclude(openmdxBaseExcludes)
@@ -457,7 +489,7 @@ tasks {
 	        )
 	    }
 	    from(
-	  		File(buildDirAsFile, "classes/java/main")
+	  		File(buildDirAsFile, "classes/main/java")
 	  	)
 	  	include(openmdxSystemIncludes)
 	  	exclude(openmdxSystemExcludes)
@@ -476,7 +508,7 @@ tasks {
 	    }
 		from(
 			"src/main/java",
-			File(buildDirAsFile, "generated/sources/java/main")
+			File(buildDirAsFile, "generated/sources/main/java")
 		)
 		include(openmdxSystemIncludes)
 		exclude(openmdxSystemExcludes)
@@ -485,7 +517,8 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-core-jre-" + targetPlatform)
+        val mainTargetPlatform = JavaVersion.VERSION_1_8
+    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-core-jre-" + mainTargetPlatform)
         contents {
         	// core
         	from(".") { into("core"); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
@@ -495,9 +528,9 @@ distributions {
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-			var path = "jre-$targetPlatform/${project.name}/lib"
+			var path = "jre-$mainTargetPlatform/${project.name}/lib"
 			from("../$path") { into(path) }
-			path = "jre-$targetPlatform/gradle/repo"
+			path = "jre-$mainTargetPlatform/gradle/repo"
 			from("../$path") { into(path) }
         }
     }

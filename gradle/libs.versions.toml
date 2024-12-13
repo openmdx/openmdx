@@ -18,11 +18,11 @@ systems-manifold = "2024.1.41"
 postgresql = "42.7.+"
 
 codehaus-groovy = "3.0.+"
-vladsch-flexmark = "0.64.8"
+vladsch-flexmark = "0.62.2"
 tinyradius = "1.1.+"
 
 junit-jupiter = "5.11.3"
-mockito = "5.14.2"
+mockito = "4.11.0"
 
 # ============================================================================ #
 

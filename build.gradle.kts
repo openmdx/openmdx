@@ -52,22 +52,26 @@ plugins {
 
 allprojects {
     group = "org.openmdx"
-    version = "2.18.10"
+    version = "20.0"
     ext {
-        for (i in 2..4) {
-            extra["mdx${i}"] = "openmdx${i}"
-            extra["openmdx${i}Group"] = "org.openmdx.v${i}"
-            extra["openmdx${i}Version"] = "${i}.20.0"
-        }
+        extra["mainGroup"] = "org.openmdx"
+        extra["mainProjectImplementationVersion"] = "2.${version}"
+        extra["mainJavaLanguageVersion"] = JavaLanguageVersion.of(8)
+		extra["mainJavaVersion"] = JavaVersion.VERSION_1_8
+        extra["openmdx2Group"] = "org.openmdx"
+        extra["openmdx2ProjectImplementationVersion"] = "2.${version}"
+        extra["openmdx2JavaLanguageVersion"] = JavaLanguageVersion.of(8)
+		extra["openmdx2JavaVersion"] = JavaVersion.VERSION_1_8
+        extra["openmdx3Group"] = "org.openmdx.v3"
+        extra["openmdx3ProjectImplementationVersion"] = "3.${version}"
+        extra["openmdx2JavaLanguageVersion"] = JavaLanguageVersion.of(8)
+		extra["openmdx3JavaVersion"] = JavaVersion.VERSION_1_8
+        extra["openmdx4Group"] = "org.openmdx.v4"
+        extra["openmdx4ProjectImplementationVersion"] = "4.${version}"
+        extra["openmdx4JavaLanguageVersion"] = JavaLanguageVersion.of(21)
+		extra["openmdx4JavaVersion"] = JavaVersion.VERSION_21
     }
 }
-
-buildscript {
-    dependencies {
-        classpath(files("buildSrc/libs/gradle-java-flavors-1.0.2.5.jar"))
-    }
-}
-apply(plugin = "com.microsoft.javaflavours")
 
 tasks.clean {
     doLast {
