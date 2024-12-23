@@ -42,47 +42,47 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-import java.io.FileInputStream
-import java.util.*
-
 plugins {
-	java
-    id("systems.manifold.manifold-gradle-plugin") version "0.0.2-alpha"
+    kotlin("jvm") version "2.1.0"
 }
+
+val projectFlavour = providers.gradleProperty("flavour").getOrElse("2")
+val projectSpecificationVersion = "19"
+val projectMaintenanceVersion = "0"
+val runtimeCompatibility = if (projectFlavour < "4") JavaVersion.VERSION_1_8 else JavaVersion.VERSION_21
+val jmiClassic = projectFlavour == "2"
 
 allprojects {
+
     group = "org.openmdx"
-    version = "20.0"
+    version = "${projectFlavour}.${projectSpecificationVersion}.${projectMaintenanceVersion}"
+    layout.buildDirectory.set(layout.projectDirectory.dir("build${projectFlavour}"))
+
     ext {
-        extra["mainGroup"] = "org.openmdx"
-        extra["mainProjectImplementationVersion"] = "2.${version}"
-        extra["mainJavaLanguageVersion"] = JavaLanguageVersion.of(8)
-		extra["mainJavaVersion"] = JavaVersion.VERSION_1_8
-        extra["openmdx2Group"] = "org.openmdx"
-        extra["openmdx2ProjectImplementationVersion"] = "2.${version}"
-        extra["openmdx2JavaLanguageVersion"] = JavaLanguageVersion.of(8)
-		extra["openmdx2JavaVersion"] = JavaVersion.VERSION_1_8
-        extra["openmdx3Group"] = "org.openmdx.v3"
-        extra["openmdx3ProjectImplementationVersion"] = "3.${version}"
-        extra["openmdx2JavaLanguageVersion"] = JavaLanguageVersion.of(8)
-		extra["openmdx3JavaVersion"] = JavaVersion.VERSION_1_8
-        extra["openmdx4Group"] = "org.openmdx.v4"
-        extra["openmdx4ProjectImplementationVersion"] = "4.${version}"
-        extra["openmdx4JavaLanguageVersion"] = JavaLanguageVersion.of(21)
-		extra["openmdx4JavaVersion"] = JavaVersion.VERSION_21
+        extra["projectFlavour"] = projectFlavour
+        extra["projectSpecificationVersion"] = projectSpecificationVersion
+        extra["projectMaintenanceVersion"] = projectMaintenanceVersion
+        extra["runtimeCompatibility"] = runtimeCompatibility
     }
-}
+    
+	repositories {
+		mavenCentral()
+	    maven {
+	        url = uri("https://datura.econoffice.ch/maven2")
+	    }
+	    maven {
+	       url = uri("file:" + File(project.rootDir, "publish/build/repos/releases"))
+	    }
+	}
 
-tasks.clean {
-    doLast {
-        getPlatformDir().deleteRecursively();
+    tasks.withType<JavaCompile> {
+        sourceCompatibility = runtimeCompatibility.majorVersion
+        targetCompatibility = runtimeCompatibility.majorVersion
+        options.compilerArgs.add("-Xplugin:Manifold")
+        if(jmiClassic) {
+        	options.compilerArgs.add("-AJMI_CLASSIC")
+        }
+        options.annotationProcessorPath = configurations.annotationProcessor.get()
     }
-}
 
-//var env = Properties()
-//env.load(FileInputStream(File(project.rootDir, "build.properties")))
-//val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
-
-fun getPlatformDir(): File {
-	return File(project.rootDir, "openmdx3");
 }
