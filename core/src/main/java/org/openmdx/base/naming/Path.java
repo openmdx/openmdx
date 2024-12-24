@@ -901,6 +901,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
      * @deprecated no need to lock anymore: proxy paths must not be locked and
      * all other paths are read-only
      */
+    @Deprecated
     public Path lock(
     ) {
         return this;
