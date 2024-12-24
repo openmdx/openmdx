@@ -553,6 +553,7 @@ public class ObjectAndValidStateComparator {
      * @return a string representation of the value
      * @deprecated Use {@link #toString(Object)} instead
      */
+	@Deprecated
     public static Object toString(
     	Object value, 
     	Multiplicity multiplicity
