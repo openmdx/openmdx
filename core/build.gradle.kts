@@ -42,9 +42,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-import java.io.FileInputStream
-import java.util.regex.Pattern;
-import java.util.*
 
 plugins {
 	java
@@ -70,7 +67,7 @@ val runtimeCompatibility = project.extra["runtimeCompatibility"] as JavaVersion
 
 eclipse {
 	project {
-    	name = "openMDX ${projectFlavour} ~ Core"
+    	name = "openMDX $projectFlavour ~ Core"
     }
     jdt {
 		sourceCompatibility = runtimeCompatibility
@@ -181,9 +178,8 @@ val cacheApi by configurations
 
 dependencies {
     val projectPlatform = ":openmdx-${projectFlavour}-platform"
-    
-    implementation(platform(project(projectPlatform)))
     // implementation
+    implementation(platform(project(projectPlatform)))
 	implementation("jakarta.platform:jakarta.jakartaee-api")
     implementation("javax.jdo:jdo-api")
     implementation("javax.cache:cache-api")
@@ -198,7 +194,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     // openmdxBase
     openmdxBase(platform(project(projectPlatform)))
-    openmdxBase("org.openmdx:openmdx-base:")
+    openmdxBase("org.openmdx:openmdx-base")
     // openmdxBootstrap
     openmdxBootstrap(platform(project(projectPlatform)))
     openmdxBootstrap(files(file(layout.buildDirectory.dir("generated/classes/openmdxBootstrap"))))
@@ -238,6 +234,7 @@ sourceSets {
 }
 
 tasks {
+
 	val openmdxBaseIncludes = listOf(
 		"javax/cache/*/**",
 		"javax/jdo/*/**",
@@ -398,10 +395,8 @@ tasks {
 		include(openmdxBaseIncludes)
 		exclude(openmdxBaseExcludes)
 	}
-
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-base-sources.jar") {
 		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
-
 		archiveFileName.set("openmdx-base-sources.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -419,10 +414,8 @@ tasks {
 		include(openmdxBaseIncludes)
 		exclude(openmdxBaseExcludes)
 	}
-
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-system.jar") {
 		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
-
 	    dependsOn(":core:compileJava")
 		archiveFileName.set("openmdx-system.jar")
 	    includeEmptyDirs = false
@@ -442,7 +435,6 @@ tasks {
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-system-sources.jar") {
 		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
-
 		archiveFileName.set("openmdx-system-sources.jar")
 	    includeEmptyDirs = false
 		manifest {
@@ -464,13 +456,16 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-${project.version}-core-jre-${runtimeCompatibility}")
+    	distributionBaseName.set("openmdx-${project.version}-${project.name}-jre-${runtimeCompatibility}")
         contents {
         	// core
-        	from(".") { into("core"); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
-            from("src") { into("core/src") }
+        	from(".") {
+				into(project.name)
+				include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts")
+			}
+            from("src") { into("${project.name}/src") }
             // etc
-            from("etc") { into("core/etc") }
+            from("etc") { into("${project.name}/etc") }
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...

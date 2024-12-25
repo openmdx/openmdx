@@ -43,10 +43,6 @@
  * listed in the NOTICE file.
  */
 
-import java.io.FileInputStream
-import java.util.regex.Pattern;
-import java.util.*
-
 plugins {
 	java
 	`java-library`
@@ -59,56 +55,25 @@ repositories {
     maven {
         url = uri("https://datura.econoffice.ch/maven2")
     }
+    maven {
+       url = uri("file:" + File(project.rootDir, "publish/build/repos/releases"))
+    }
 }
 
-var env = Properties()
-env.load(FileInputStream(File(project.rootDir, "build.properties")))
-
-var flavour = currentFlavour()
-var flavourVersion = currentFlavourVersion()
-var flavourJavaVersion : JavaVersion = project.extra["${flavour}JavaVersion"] as JavaVersion
+val projectFlavour = project.extra["projectFlavour"] as String
+val projectSpecificationVersion = project.extra["projectSpecificationVersion"] as String
+val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
+val runtimeCompatibility = project.extra["runtimeCompatibility"] as JavaVersion
 
 eclipse {
 	project {
-    	name = "openMDX ${flavourVersion} ~ Security"
+    	name = "openMDX ${projectFlavour} ~ Security"
     }
     jdt {
-		sourceCompatibility = flavourJavaVersion
-    	targetCompatibility = flavourJavaVersion
-    	javaRuntimeName = "JavaSE-$flavourJavaVersion"
-    }
-}
-
-fun currentFlavour(): String {
-    val taskRequestsStr = gradle.startParameter.taskRequests.toString()
-    val pattern = Pattern.compile("\\w*([Oo]penmdx[2-4])\\w*")
-    val matcher = pattern.matcher(taskRequestsStr)
-    val flavour = if (matcher.find()) {
-        matcher.group(1).lowercase()
-    } else {
-        "main"
-    }
-    return flavour
-}
-
-fun currentFlavourVersion(): String {
-    val taskRequestsStr = gradle.startParameter.taskRequests.toString()
-    val pattern = Pattern.compile("\\w*[Oo]penmdx([2-4])\\w*")
-    val matcher = pattern.matcher(taskRequestsStr)
-    val flavourVersion = if (matcher.find()) {
-        matcher.group(1)
-    } else {
-        "2"
-    }
-    return flavourVersion
-}
-
-fun getProjectImplementationVersion(): String {
-	return "${flavourVersion}.${project.version}";
-}
-
-fun getDeliverDir(): File {
-	return File(project.rootDir, "${flavour}/${project.name}");
+		sourceCompatibility = runtimeCompatibility
+		targetCompatibility = runtimeCompatibility
+		javaRuntimeName = "JavaSE-${runtimeCompatibility.majorVersion}"
+	}
 }
 
 fun touch(file: File) {
@@ -119,15 +84,22 @@ project.configurations.maybeCreate("openmdxBootstrap")
 val openmdxBootstrap by configurations
 
 dependencies {
+	val projectPlatform = ":openmdx-${projectFlavour}-platform"
     // implementation
     implementation(project(":core"))
-    implementation(libs.javax.javaee.api)
-    implementation(libs.javax.jdo.api)
-    implementation(libs.apache.directory.ldap.api)
+	implementation(platform(project(projectPlatform)))
+    implementation("jakarta.platform:jakarta.jakartaee-api")
+    implementation("javax.jdo:jdo-api")
+    implementation("org.apache.directory.api:apache-ldap-api")
     // Test
-    testImplementation(libs.junit.jupiter.engine)
-    testImplementation(libs.mockito.core)
-    testImplementation(libs.mockito.junit.jupiter)
+	testRuntimeOnly(platform(project(projectPlatform)))
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("org.mockito:mockito-junit-jupiter")
+	// manifold preprocessor
+	compileOnly("systems.manifold:manifold-preprocessor")
+	annotationProcessor(platform(project(projectPlatform)))
+	annotationProcessor("systems.manifold:manifold-preprocessor")
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 }
@@ -136,10 +108,11 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir(layout.buildDirectory.dir("generated/sources/main/java"))
+            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
         }
         resources {
         	srcDir("src/main/resources")
+            srcDir(layout.buildDirectory.dir("generated/resources/main"))
         }
     }
     test {
@@ -153,6 +126,7 @@ sourceSets {
 }
 
 tasks {
+
 	test {
 	    useJUnitPlatform()
 	    maxHeapSize = "4G"
@@ -202,7 +176,7 @@ tasks {
 	            from(
 	                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
 	            )
-	            into(layout.buildDirectory.dir("generated/sources/main/java"))
+	            into(layout.buildDirectory.dir("generated/sources/java/main"))
 	            include(
 	                "**/*.java"
 	            )
@@ -211,7 +185,6 @@ tasks {
 	}
 	compileJava {
 	    dependsOn("generate-model")
-//	    options.release.set(Integer.valueOf(flavourJavaVersion.majorVersion))
 	}
 	assemble {
 		dependsOn(
@@ -253,7 +226,7 @@ tasks {
 			":security:generate-model",
 			":security:processResources"
 		)
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-security.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -276,7 +249,7 @@ tasks {
 
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-security-sources.jar") {
 		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-security-sources.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -308,7 +281,7 @@ tasks {
 			":security:compileJava",
 			":security:processResources"
 		)
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-authentication.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -329,7 +302,7 @@ tasks {
 	}
 
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-authentication-sources.jar") {
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-authentication-sources.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -361,7 +334,7 @@ tasks {
 	val openmdxRadiusExcludes = listOf<String>( )
 
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-radius.jar") {
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		dependsOn(
 			":core:openmdx-base.jar",
 			":security:compileJava",
@@ -381,14 +354,14 @@ tasks {
 			File(buildDirAsFile, "classes/main/java"),
 			File(buildDirAsFile, "resources/main"),
 			"src/main/resources",
-			zipTree(File(getDeliverDir(), "../core/lib/openmdx-base.jar"))
+			zipTree(File(project.rootDir, "build${projectFlavour}/core/lib/openmdx-base.jar"))
 		)
 		include(openmdxRadiusIncludes)
 		exclude(openmdxRadiusExcludes)
 	}
 
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-radius-sources.jar") {
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-radius-sources.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -413,7 +386,7 @@ tasks {
 	val openmdxLdapExcludes = listOf<String>( )
 
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-ldap.jar") {
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		dependsOn(
 			":security:compileJava",
 			":security:processResources"
@@ -438,7 +411,7 @@ tasks {
 	}
 
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-ldap-sources.jar") {
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-ldap-sources.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -464,7 +437,7 @@ tasks {
 	val openmdxPkiExcludes = listOf<String>( )
 
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-pki.jar") {
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		dependsOn(
 			":security:compileJava",
 			":security:processResources"
@@ -489,7 +462,7 @@ tasks {
 	}
 
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-pki-sources.jar") {
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-pki-sources.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -515,7 +488,7 @@ tasks {
 	val openmdxResourceExcludes = listOf<String>( )
 
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-resource.jar") {
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		dependsOn(
 			":security:compileJava",
 			":security:processResources"
@@ -539,7 +512,7 @@ tasks {
 		exclude(openmdxResourceExcludes)
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-resource-sources.jar") {
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-resource-sources.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -561,19 +534,22 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-" + project.name + "-jre-" + flavourJavaVersion)
+    	distributionBaseName.set("openmdx-${project.version}-${project.name}-jre-${runtimeCompatibility}")
         contents {
         	// security
-        	from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
-            from("src") { into(project.name + "/src") }
+        	from(".") {
+				into(project.name)
+				include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts")
+			}
+            from("src") { into("${project.name}/src") }
             // etc
-            from("etc") { into(project.name + "/etc") }
+            from("etc") { into("${project.name}/etc") }
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-			var path = "openmdx-$flavourJavaVersion/${project.name}/lib"
+			var path = "jre-${runtimeCompatibility}/${project.name}/lib"
 			from("../$path") { into(path) }
-			path = "openmdx-$flavourJavaVersion/gradle/repo"
+			path = "jre-${runtimeCompatibility}/gradle/repo"
 			from("../$path") { into(path) }
         }
     }

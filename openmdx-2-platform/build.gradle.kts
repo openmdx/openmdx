@@ -52,7 +52,7 @@ javaPlatform {
 
 dependencies {
     constraints {
-    	
+
 		val atomikosVersion = "6.0.0"
 		val bootstrapVersion = "2.18.10"
 		val cacheVersion = "1.1.1"
@@ -68,7 +68,7 @@ dependencies {
 		val radiusVersion = "1.1.+"
 		val servletVersion = "3.1.0"
 		val tomcatVersion = "9.0.+"
-		
+
 		api("com.atomikos:transactions-jta:$atomikosVersion")
 		api("com.atomikos:transactions-jdbc:$atomikosVersion")
 	    api("com.vladsch.flexmark:flexmark:$flexmarkVersion")

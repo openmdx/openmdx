@@ -58,13 +58,12 @@ include(
     "openmdx-2-platform",
     "openmdx-3-platform",
     "openmdx-4-platform",
-    "core"
-//,    
-//    "portal",
-//    "security", 
-//    "client",
-//    "test-core",
-//    "test-security",
-//    "tomcat",
-//    "publish"
+    "core",
+    "portal",
+    "security",
+    "client",
+    "test-core",
+    "test-security",
+    "tomcat",
+    "publish"
 )

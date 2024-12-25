@@ -42,9 +42,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-import java.io.FileInputStream
-import java.util.regex.Pattern;
-import java.util.*
 
 plugins {
 	java
@@ -61,56 +58,25 @@ repositories {
     maven {
         url = uri("https://datura.econoffice.ch/maven2")
     }
+    maven {
+        url = uri("file:" + File(project.rootDir, "publish/build/repos/releases"))
+    }
 }
 
-var env = Properties()
-env.load(FileInputStream(File(project.rootDir, "build.properties")))
-
-var flavour = currentFlavour()
-var flavourVersion = currentFlavourVersion()
-var flavourJavaVersion : JavaVersion = project.extra["${flavour}JavaVersion"] as JavaVersion
+val projectFlavour = project.extra["projectFlavour"] as String
+val projectSpecificationVersion = project.extra["projectSpecificationVersion"] as String
+val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
+val runtimeCompatibility = project.extra["runtimeCompatibility"] as JavaVersion
 
 eclipse {
 	project {
-    	name = "openMDX ${flavourVersion} ~ Test Security"
+    	name = "openMDX $projectFlavour ~ Test Security"
     }
     jdt {
-		sourceCompatibility = flavourJavaVersion
-    	targetCompatibility = flavourJavaVersion
-    	javaRuntimeName = "JavaSE-$flavourJavaVersion"
+        sourceCompatibility = runtimeCompatibility
+        targetCompatibility = runtimeCompatibility
+        javaRuntimeName = "JavaSE-${runtimeCompatibility.majorVersion}"
     }
-}
-
-fun currentFlavour(): String {
-    val taskRequestsStr = gradle.startParameter.taskRequests.toString()
-    val pattern = Pattern.compile("\\w*([Oo]penmdx[2-4])\\w*")
-    val matcher = pattern.matcher(taskRequestsStr)
-    val flavour = if (matcher.find()) {
-        matcher.group(1).lowercase()
-    } else {
-        "main"
-    }
-    return flavour
-}
-
-fun currentFlavourVersion(): String {
-    val taskRequestsStr = gradle.startParameter.taskRequests.toString()
-    val pattern = Pattern.compile("\\w*[Oo]penmdx([2-4])\\w*")
-    val matcher = pattern.matcher(taskRequestsStr)
-    val flavourVersion = if (matcher.find()) {
-        matcher.group(1)
-    } else {
-        "2"
-    }
-    return flavourVersion
-}
-
-fun getProjectImplementationVersion(): String {
-	return "${flavourVersion}.${project.version}";
-}
-
-fun getDeliverDir(): File {
-	return File(project.rootDir, "${flavour}/${project.name}");
 }
 
 fun touch(file: File) {
@@ -121,20 +87,26 @@ project.configurations.maybeCreate("openmdxBootstrap")
 val openmdxBootstrap by configurations
 
 dependencies {
+    val projectPlatform = ":openmdx-${projectFlavour}-platform"
     // implementation
     implementation(project(":core"))
     implementation(project(":security"))
-    implementation(libs.javax.javaee.api)
-    implementation(libs.apache.directory.ldap.api)
-    implementation(libs.tinyradius)
-    implementation(libs.junit.jupiter.api)
+    implementation(platform(project(projectPlatform)))
+    implementation("jakarta.platform:jakarta.jakartaee-api")
+    implementation("org.apache.directory.api:apache-ldap-api")
+    implementation("org.tinyradius:tinyradius")
+    implementation("org.junit.jupiter:junit-jupiter-api")
+    // manifold preprocessor
+    compileOnly("systems.manifold:manifold-preprocessor")
+    annotationProcessor(platform(project(projectPlatform)))
+    annotationProcessor("systems.manifold:manifold-preprocessor")
     // test
     testImplementation(project(":core"))
-    testImplementation(libs.junit.jupiter.engine)
-    testImplementation(libs.mockito.core)
-    testImplementation(libs.mockito.junit.jupiter)
-	testRuntimeOnly(libs.atomikos.transaction.jta)
-	testRuntimeOnly(libs.atomikos.transaction.jdbc)
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("org.mockito:mockito-junit-jupiter")
+    testRuntimeOnly("com.atomikos:transactions-jta")
+    testRuntimeOnly("com.atomikos:transactions-jdbc")
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 }
@@ -147,12 +119,12 @@ sourceSets {
         }
         resources {
         	srcDir("src/main/resources")
+            srcDir(layout.buildDirectory.dir("generated/resources/main"))
         }
     }
     test {
         java {
             srcDir("src/test/java")
-            srcDir(layout.buildDirectory.dir("generated/sources/test/java"))
         }
         resources {
         	srcDir("src/test/resources")
@@ -161,12 +133,10 @@ sourceSets {
 }
 
 tasks {
+
 	test {
 	    useJUnitPlatform()
 	    maxHeapSize = "4G"
-	}
-	compileJava {
-//	    options.release.set(Integer.valueOf(flavourJavaVersion.majorVersion))
 	}
 	assemble {
 		dependsOn()
@@ -177,19 +147,22 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-${project.name}-jre-" + flavourJavaVersion)
+    	distributionBaseName.set("openmdx-${project.version}-${project.name}-jre-${runtimeCompatibility}")
         contents {
         	// test-core
-        	from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
-            from("src") { into(project.name + "/src") }
+        	from(".") {
+                into(project.name)
+                include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts")
+            }
+            from("src") { into("${project.name}/src") }
             // etc
-            from("etc") { into(project.name + "/etc") }
+            from("etc") { into("${project.name}/etc") }
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-            var path = "openmdx-$flavourJavaVersion/${project.name}/lib"
+			var path = "jre-${runtimeCompatibility}/${project.name}/lib"
             from("../$path") { into(path) }
-            path = "openmdx-$flavourJavaVersion/gradle/repo"
+			path = "jre-${runtimeCompatibility}/gradle/repo"
             from("../$path") { into(path) }
         }
     }
