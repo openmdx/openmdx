@@ -82,6 +82,7 @@ dependencies {
 	implementation("javax.jdo:jdo-api")
 	implementation("org.codehaus.groovy:groovy")
 	// test
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
 	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 	// manifold preprocessor
 	compileOnly("systems.manifold:manifold-preprocessor")

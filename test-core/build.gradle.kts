@@ -84,9 +84,9 @@ dependencies {
     implementation("org.junit.jupiter:junit-jupiter-api")
     // test
     testImplementation(project(":core"))
-    testImplementation("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.mockito:mockito-core")
     testImplementation("org.mockito:mockito-junit-jupiter")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testRuntimeOnly("org.postgresql:postgresql")
     testRuntimeOnly("javax.servlet:javax.servlet-api")
     testRuntimeOnly("com.atomikos:transactions-jta")

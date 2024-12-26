@@ -89,9 +89,10 @@ dependencies {
     annotationProcessor("systems.manifold:manifold-preprocessor")
     // test
     testImplementation(project(":core"))
-    testImplementation("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.mockito:mockito-core")
     testImplementation("org.mockito:mockito-junit-jupiter")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testRuntimeOnly("com.atomikos:transactions-jta")
     testRuntimeOnly("com.atomikos:transactions-jdbc")
     // openmdxBootstrap

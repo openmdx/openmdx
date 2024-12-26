@@ -82,7 +82,7 @@ dependencies {
     implementation("javax.jdo:jdo-api")
     implementation("org.apache.directory.api:apache-ldap-api")
     // Test
-	testRuntimeOnly(platform(project(projectPlatform)))
+    implementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.mockito:mockito-core")
     testImplementation("org.mockito:mockito-junit-jupiter")
