@@ -228,7 +228,7 @@ tasks {
 			)
 		}
 		from(
-			File(buildDirAsFile, "classes/main/java"),
+			File(buildDirAsFile, "classes/java/main"),
 			File(buildDirAsFile, "resources/main"),
 			"src/main/resources",
 			zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-" + project.name + ".openmdx-xmi.zip"))
@@ -252,7 +252,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDirAsFile, "generated/sources/main/java")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxSecurityIncludes)
 		exclude(openmdxSecurityExcludes)
@@ -283,7 +283,7 @@ tasks {
 			)
 		}
 		from(
-			File(buildDirAsFile, "classes/main/java"),
+			File(buildDirAsFile, "classes/java/main"),
 			File(buildDirAsFile, "resources/main"),
 			"src/main/resources"
 		)
@@ -305,7 +305,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDirAsFile, "generated/sources/main/java")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxAuthenticationIncludes)
 		exclude(openmdxAuthenticationExcludes)
@@ -341,7 +341,7 @@ tasks {
 			)
 		}
 		from(
-			File(buildDirAsFile, "classes/main/java"),
+			File(buildDirAsFile, "classes/java/main"),
 			File(buildDirAsFile, "resources/main"),
 			"src/main/resources",
 			zipTree(File(project.rootDir, "build${projectFlavour}/core/lib/openmdx-base.jar"))
@@ -364,7 +364,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDirAsFile, "generated/sources/main/java")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxRadiusIncludes)
 		exclude(openmdxRadiusExcludes)
@@ -392,7 +392,7 @@ tasks {
 			)
 		}
 		from(
-			File(buildDirAsFile, "classes/main/java"),
+			File(buildDirAsFile, "classes/java/main"),
 			File(buildDirAsFile, "resources/main"),
 			"src/main/resources"
 		)
@@ -414,7 +414,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDirAsFile, "generated/sources/main/java")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxLdapIncludes)
 		exclude(openmdxLdapExcludes)
@@ -443,7 +443,7 @@ tasks {
 			)
 		}
 		from(
-			File(buildDirAsFile, "classes/main/java"),
+			File(buildDirAsFile, "classes/java/main"),
 			File(buildDirAsFile, "resources/main"),
 			"src/main/resources"
 		)
@@ -465,7 +465,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDirAsFile, "generated/sources/main/java")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxPkiIncludes)
 		exclude(openmdxPkiExcludes)
@@ -494,7 +494,7 @@ tasks {
 			)
 		}
 		from(
-			File(buildDirAsFile, "classes/main/java"),
+			File(buildDirAsFile, "classes/java/main"),
 			File(buildDirAsFile, "resources/main"),
 			"src/main/resources"
 		)
@@ -515,7 +515,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(buildDirAsFile, "generated/sources/main/java")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxResourceIncludes)
 		exclude(openmdxResourceExcludes)

@@ -233,7 +233,7 @@ tasks {
         with(
             copySpec {
                 from(
-                    File(buildDirAsFile, "classes/main/java"),
+                    File(buildDirAsFile, "classes/java/main"),
                     File(buildDirAsFile, "resources/main"),
                     "src/main/resources"
                 ).include(
@@ -282,7 +282,7 @@ tasks {
         with(
             copySpec {
                 from(
-                    "src/main/java", File(buildDirAsFile, "generated/sources/main/java")
+                    "src/main/java", File(buildDirAsFile, "generated/sources/java/main")
                 ).include(
                     openmdxClientIncludes
                 ).exclude(
@@ -364,7 +364,7 @@ tasks {
             copySpec {
                 from(
                     "src/main/java",
-                    File(buildDirAsFile, "generated/sources/main/java"),
+                    File(buildDirAsFile, "generated/sources/java/main"),
                     zipTree(File(project.rootDir, "build${projectFlavour}/client/lib/openmdx-client-sources.jar"))
                 ).include(
                     openmdxDalvikIncludes

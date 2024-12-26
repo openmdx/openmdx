@@ -95,7 +95,7 @@ sourceSets {
 	main {
 		java {
 			srcDir("src/main/java")
-			srcDir(layout.buildDirectory.dir("generated/sources/main/java"))
+			srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
 		}
 		resources {
 			srcDir("src/main/resources")
@@ -145,7 +145,7 @@ tasks {
 	            from(
 	                zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}-models.zip"))
 	            )
-	            into(layout.buildDirectory.dir("generated/sources/main/java"))
+	            into(layout.buildDirectory.dir("generated/sources/java/main"))
 	            include(
 	                "**/*.java"
 	            )
@@ -313,7 +313,7 @@ tasks {
 			)
 		}
 		from(
-			File(this.buildDirAsFile, "classes/main/java"),
+			File(this.buildDirAsFile, "classes/java/main"),
 			File(this.buildDirAsFile, "resources/main"),
 			"src/main/resources",
 			zipTree(layout.buildDirectory.dir("generated/sources/model/openmdx-${project.name}.openmdx-xmi.zip"))
@@ -336,7 +336,7 @@ tasks {
 		}
 		from(
 			"src/main/java",
-			File(this.buildDirAsFile, "generated/sources/main/java")
+			File(this.buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxPortalIncludes)
 		exclude(openmdxPortalExcludes)

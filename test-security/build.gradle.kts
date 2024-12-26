@@ -102,7 +102,7 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir(layout.buildDirectory.dir("generated/sources/main/java"))
+            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
         }
         resources {
         	srcDir("src/main/resources")

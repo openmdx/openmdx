@@ -91,7 +91,7 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
-            srcDir(layout.buildDirectory.dir("generated/sources/main/java"))
+            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
         }
         resources {
         	srcDir("src/main/resources")
@@ -155,7 +155,7 @@ tasks {
 	        )
 	    }
 		from(
-			File(buildDirAsFile, "classes/main/java"),
+			File(buildDirAsFile, "classes/java/main"),
 			File(buildDirAsFile, "resources/main"),
 			"src/main/resources"
 		)
@@ -176,7 +176,7 @@ tasks {
 	    }
 		from(
 			"src/main/java",
-			File(buildDirAsFile, "generated/sources/main/java")
+			File(buildDirAsFile, "generated/sources/java/main")
 		)
 		include(openmdxCatalinaIncludes)
 		exclude(openmdxCatalinaExcludes)
