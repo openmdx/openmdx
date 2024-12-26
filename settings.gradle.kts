@@ -61,9 +61,12 @@ include(
     "core",
     "portal",
     "security",
-    "client",
     "test-core",
     "test-security",
     "tomcat",
     "publish"
 )
+val flavour: String = gradle.startParameter.projectProperties.getOrDefault("flavour", "2")
+if (flavour == "2") include("client")
+
+
