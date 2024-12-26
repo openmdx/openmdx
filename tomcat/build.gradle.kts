@@ -50,16 +50,6 @@ plugins {
 	distribution
 }
 
-repositories {
-	mavenCentral()
-    maven {
-        url = uri("https://datura.econoffice.ch/maven2")
-    }
-	maven {
-		url = uri("file:" + File(project.rootDir, "publish/build/repos/releases"))
-	}
-}
-
 val projectFlavour = project.extra["projectFlavour"] as String
 val projectSpecificationVersion = project.extra["projectSpecificationVersion"] as String
 val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
@@ -208,10 +198,14 @@ distributions {
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-			var path = "jre-${runtimeCompatibility}/${project.name}/lib"
-			from("../$path") { into(path) }
-			path = "jre-${runtimeCompatibility}/gradle/repo"
-			from("../$path") { into(path) }
+			var path = "${project.name}/lib"
+			from("../build$projectFlavour/$path") {
+				into("jre-$runtimeCompatibility/$path")
+			}
+			path = "gradle/repo"
+			from("../build$projectFlavour/$path") {
+				into("jre-$runtimeCompatibility/$path")
+			}
         }
     }
 }

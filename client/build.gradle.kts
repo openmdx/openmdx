@@ -50,20 +50,15 @@ plugins {
     distribution
 }
 
-repositories {
-    mavenCentral()
-    maven {
-        url = uri("https://datura.econoffice.ch/maven2")
-    }
-    maven {
-        url = uri("file:" + File(project.rootDir, "publish/build/repos/releases"))
-    }
-}
-
 val projectFlavour = project.extra["projectFlavour"] as String
 val projectSpecificationVersion = project.extra["projectSpecificationVersion"] as String
 val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
 val runtimeCompatibility = project.extra["runtimeCompatibility"] as JavaVersion
+
+if (runtimeCompatibility == JavaVersion.VERSION_1_8 && System.getenv("JRE_18") == null) {
+    throw GradleException("ERROR: JRE_18 not set " +
+            "(e.g. export JRE_18=/usr/lib/jvm/java-8-openjdk-amd64/jre)")
+}
 
 eclipse {
     project {
@@ -91,8 +86,10 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":security"))
     implementation(platform(project(projectPlatform)))
-    implementation("jakarta.platform:jakarta.jakartaee-api:8.0.+")
-    implementation(files(File(System.getenv("JRE_18"), "lib/rt.jar")))
+    implementation("jakarta.platform:jakarta.jakartaee-api")
+    if (runtimeCompatibility == JavaVersion.VERSION_1_8) {
+        implementation(files(File(System.getenv("JRE_18"), "lib/rt.jar")))
+    }
     // manifold preprocessor
     compileOnly("systems.manifold:manifold-preprocessor")
     annotationProcessor(platform(project(projectPlatform)))
@@ -401,10 +398,14 @@ distributions {
             // rootDir
             from("..") { include("*.properties", "*.kts") }
             // jre-...
-            var path = "jre-${runtimeCompatibility}/${project.name}/lib"
-            from("../$path") { into(path) }
-            path = "jre-${runtimeCompatibility}/gradle/repo"
-            from("../$path") { into(path) }
+            var path = "${project.name}/lib"
+            from("../build$projectFlavour/$path") {
+                into("jre-$runtimeCompatibility/$path")
+            }
+            path = "gradle/repo"
+            from("../build$projectFlavour/$path") {
+                into("jre-$runtimeCompatibility/$path")
+            }
         }
     }
 }

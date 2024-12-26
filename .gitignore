@@ -2,10 +2,6 @@ distribution/
 source-archive/
 build/
 /jre-1.8/
-/main/
-/openmdx2/
-/openmdx3/
-/openmdx4/
 .metadata/
 opt/xstream/
 build

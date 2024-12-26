@@ -44,13 +44,11 @@
  */
 plugins {
     `kotlin-dsl`
-    groovy
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(gradleApi())
-    implementation(localGroovy())
 }
 
 repositories {
