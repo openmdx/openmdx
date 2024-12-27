@@ -53,13 +53,13 @@ javaPlatform {
 // TODO update versions where restriction came from runtime target
 dependencies {
     constraints {
-    	
+
 		val atomikosVersion = "6.0.0"
 		val bootstrapVersion = "2.18.10"
 		val cacheVersion = "1.1.1"
 		val flexmarkVersion = "0.62.2"
 		val groovyVersion = "3.0.+"
-		val jdoVersion = "3.1"
+		val jdoVersion = "3.2.1"
 		val jakartaVersion = "10.0.0"
 		val junitVersion = "5.11.3"
 		val ldapVersion = "2.1.+"
@@ -69,7 +69,7 @@ dependencies {
 		val radiusVersion = "1.1.+"
 		val servletVersion = "3.1.0"
 		val tomcatVersion = "9.0.+"
-		
+
 		api("com.atomikos:transactions-jta:$atomikosVersion")
 		api("com.atomikos:transactions-jdbc:$atomikosVersion")
 	    api("com.vladsch.flexmark:flexmark:$flexmarkVersion")
@@ -90,5 +90,5 @@ dependencies {
 	    api("systems.manifold:manifold-preprocessor:$manifoldVersion")
 
     }
-    
+
 }
