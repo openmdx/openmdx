@@ -44,7 +44,7 @@
  */
 package org.openmdx.audit2.aop1;
 
-import javax.resource.cci.InteractionSpec;
+import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
 
 import org.openmdx.audit2.spi.Configuration;
 import org.openmdx.base.accessor.cci.DataObject_1_0;

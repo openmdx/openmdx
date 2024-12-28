@@ -44,10 +44,17 @@
  */
 package org.openmdx.application.transaction;
 
+#if JAVA_8
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.spi.LocalTransactionException;
 import javax.transaction.TransactionSynchronizationRegistry;
+#else
+import jakarta.resource.NotSupportedException;
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.LocalTransactionException;
+import jakarta.transaction.TransactionSynchronizationRegistry;
+#endif
 
 import org.openmdx.base.transaction.LocalUserTransaction;
 import org.openmdx.kernel.exception.BasicException;

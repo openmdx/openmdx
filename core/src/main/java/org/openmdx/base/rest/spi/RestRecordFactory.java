@@ -46,9 +46,15 @@ package org.openmdx.base.rest.spi;
 
 import java.util.Optional;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.MappedRecord;
+#endif
 
 /**
  * REST Record Factory

@@ -49,9 +49,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Duration;
 
+#if JAVA_8
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.spi.CommException;
+#else
+import jakarta.resource.NotSupportedException;
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.CommException;
+#endif
 
 import org.openmdx.application.rest.http.spi.Message;
 import org.openmdx.application.rest.http.spi.MessageFactory;

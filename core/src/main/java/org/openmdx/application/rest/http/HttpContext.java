@@ -49,7 +49,7 @@ package org.openmdx.application.rest.http;
 import java.net.URL;
 import java.time.Duration;
 
-import javax.resource.ResourceException;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 import org.openmdx.base.exception.ServiceException;
 

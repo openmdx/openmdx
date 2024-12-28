@@ -54,12 +54,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.ZipOutputStream;
-
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
 import javax.resource.spi.IllegalStateException;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.cci.MappedRecord;
+import jakarta.resource.spi.IllegalStateException;
+#endif
 
 import org.openmdx.application.mof.cci.ModelExceptions;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;

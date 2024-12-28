@@ -44,8 +44,13 @@
  */
 package org.openmdx.audit2.aopa;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Interaction;
+#endif
 
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.spi.RestInteractionSpec;

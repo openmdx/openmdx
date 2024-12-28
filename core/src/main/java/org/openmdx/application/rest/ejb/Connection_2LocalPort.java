@@ -44,6 +44,7 @@
  */
 package org.openmdx.application.rest.ejb;
 
+#if JAVA_8
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
 import javax.resource.ResourceException;
@@ -53,6 +54,17 @@ import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 import javax.resource.spi.CommException;
 import javax.resource.spi.ResourceAllocationException;
+#else
+import jakarta.ejb.CreateException;
+import jakarta.ejb.EJBException;
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Connection;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.Record;
+import jakarta.resource.spi.CommException;
+import jakarta.resource.spi.ResourceAllocationException;
+#endif
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.spi.AbstractInteraction;
@@ -163,7 +175,7 @@ class Connection_2LocalPort implements Port<RestConnection> {
          */
         @Override
         public Record execute(
-            InteractionSpec ispec, 
+            InteractionSpec ispec,
             Record input
         ) throws ResourceException {
             try{

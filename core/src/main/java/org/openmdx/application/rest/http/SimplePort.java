@@ -54,9 +54,15 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.resource.spi.CommException;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.spi.CommException;
+#endif
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.net.CookieManager;

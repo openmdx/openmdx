@@ -46,6 +46,7 @@ package org.openmdx.application.rest.ejb;
 
 import java.rmi.RemoteException;
 
+#if JAVA_8
 import javax.ejb.CreateException;
 import javax.ejb.HomeHandle;
 import javax.resource.ResourceException;
@@ -58,6 +59,20 @@ import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 import javax.resource.spi.CommException;
 import javax.resource.spi.ResourceAllocationException;
+#else
+import jakarta.ejb.CreateException;
+import jakarta.ejb.HomeHandle;
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Connection;
+import jakarta.resource.cci.ConnectionSpec;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.MappedRecord;
+import jakarta.resource.cci.Record;
+import jakarta.resource.spi.CommException;
+import jakarta.resource.spi.ResourceAllocationException;
+#endif
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.spi.AbstractInteraction;

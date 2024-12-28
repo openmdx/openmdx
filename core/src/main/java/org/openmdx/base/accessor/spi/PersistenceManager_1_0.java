@@ -48,7 +48,7 @@ import java.security.PrivilegedExceptionAction;
 import java.util.UUID;
 
 import javax.jdo.JDODataStoreException;
-import javax.resource.cci.InteractionSpec;
+import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
 
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.persistence.spi.UnitOfWork;

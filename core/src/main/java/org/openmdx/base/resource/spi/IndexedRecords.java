@@ -1,6 +1,6 @@
 package org.openmdx.base.resource.spi;
 
-import javax.resource.cci.IndexedRecord;
+import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
 
 public class IndexedRecords {
 

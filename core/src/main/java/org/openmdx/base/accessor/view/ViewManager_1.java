@@ -70,7 +70,7 @@ import javax.jdo.Transaction;
 import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
 import javax.jdo.listener.InstanceLifecycleListener;
-import javax.resource.cci.InteractionSpec;
+import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
 
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
@@ -1696,7 +1696,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
     // Extends CachingMarshaller
     //------------------------------------------------------------------------
 
-    /**
+     /**
      * Marshals an object
      *
      * @param source

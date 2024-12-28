@@ -47,6 +47,7 @@ package org.openmdx.base.resource.spi;
 import java.util.Date;
 import java.util.List;
 
+#if JAVA_8
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -55,6 +56,16 @@ import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 import javax.resource.cci.ResourceWarning;
 import javax.resource.spi.IllegalStateException;
+#else
+import jakarta.resource.NotSupportedException;
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Connection;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.Record;
+import jakarta.resource.cci.ResourceWarning;
+import jakarta.resource.spi.IllegalStateException;
+#endif
 
 import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.kernel.exception.BasicException;

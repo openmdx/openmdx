@@ -46,11 +46,17 @@ package org.openmdx.application.mof.repository.layer.model;
 
 import java.util.Date;
 import java.util.List;
-
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.cci.MappedRecord;
+#endif
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.resource.spi.RestInteractionSpec;

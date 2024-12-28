@@ -44,7 +44,7 @@
  */
 package org.openmdx.base.dataprovider.layer.persistence.jdbc;
 
-import javax.resource.ResourceException;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.cci.ObjectRecord;

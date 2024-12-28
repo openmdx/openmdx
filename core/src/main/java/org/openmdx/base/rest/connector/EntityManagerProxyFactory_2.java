@@ -53,9 +53,15 @@ import java.util.Optional;
 import javax.jdo.Constants;
 import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOFatalDataStoreException;
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.resource.spi.ResourceAllocationException;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.spi.ResourceAllocationException;
+#endif
 
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.rest.DataObjectManager_1;

@@ -44,8 +44,13 @@
  */
 package org.openmdx.base.dataprovider.cci;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.ConnectionSpec;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.ConnectionSpec;
+#endif
 
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.rest.cci.RestConnection;

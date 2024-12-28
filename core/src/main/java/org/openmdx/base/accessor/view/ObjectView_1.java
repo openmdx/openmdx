@@ -51,7 +51,7 @@ import javax.jdo.JDODataStoreException;
 import javax.jdo.listener.ClearCallback;
 import javax.jdo.listener.DeleteCallback;
 import javax.jdo.listener.StoreCallback;
-import javax.resource.cci.InteractionSpec;
+import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
 
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;

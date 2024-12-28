@@ -45,11 +45,19 @@
 
 package org.openmdx.base.dataprovider.cci;
 
+#if JAVA_8
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.LocalTransaction;
 import javax.resource.spi.UnavailableException;
+#else
+import jakarta.resource.NotSupportedException;
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.cci.LocalTransaction;
+import jakarta.resource.spi.UnavailableException;
+#endif
 
 import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.Port;

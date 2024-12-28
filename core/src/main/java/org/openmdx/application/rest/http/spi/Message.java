@@ -44,7 +44,7 @@
  */
 package org.openmdx.application.rest.http.spi;
 
-import javax.resource.ResourceException;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.rest.spi.RestSource;

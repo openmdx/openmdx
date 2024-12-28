@@ -44,7 +44,7 @@
  */
 package org.openmdx.base.rest.cci;
 
-import javax.resource.cci.MappedRecord;
+import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 
 /**
  * openMDX' JDO Query Extension

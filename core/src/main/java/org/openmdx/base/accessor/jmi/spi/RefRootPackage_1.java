@@ -82,9 +82,16 @@ import javax.jmi.reflect.RefException;
 import javax.jmi.reflect.RefFeatured;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
+#if JAVA_8
+import javax.persistence.TypedQuery;
 import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.Record;
+#endif
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.cci2.QualifierType;
@@ -1846,7 +1853,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[], boolean)
          */
-        @Override
+//        @Override
         public void makeTransientAll(Object[] pcs, boolean useFetchPlan) {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }

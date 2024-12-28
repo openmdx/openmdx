@@ -46,7 +46,7 @@ package org.openmdx.application.mof.externalizer.cci;
 
 import java.util.List;
 
-import javax.resource.ResourceException;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 public interface ModelExternalizer_1_0 {
 

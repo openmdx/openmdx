@@ -44,7 +44,7 @@
  */
 package org.openmdx.application.mof.externalizer.cci;
 
-import javax.resource.ResourceException;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 import org.openmdx.base.dataprovider.cci.Channel;
 

@@ -50,7 +50,7 @@ import javax.jmi.reflect.RefException;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import javax.jmi.reflect.RefStruct;
-import javax.resource.cci.Record;
+import #if JAVA_8 javax.resource.cci.Record #else jakarta.resource.cci.Record #endif;
 
 import org.openmdx.base.exception.ServiceException;
 

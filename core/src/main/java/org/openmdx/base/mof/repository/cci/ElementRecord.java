@@ -46,12 +46,14 @@ package org.openmdx.base.mof.repository.cci;
 
 import java.util.Set;
 
+import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
+
 import org.openmdx.base.naming.Path;
 
 /**
  * org::omg::model1::Element Record
  */
-public interface ElementRecord extends javax.resource.cci.MappedRecord {
+public interface ElementRecord extends MappedRecord {
 
     Path getObjectId();
     Set<String> getStereotype();

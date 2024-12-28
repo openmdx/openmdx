@@ -44,9 +44,15 @@
  */
 package org.openmdx.application.rest.ejb;
 
+#if JAVA_8
 import javax.ejb.CreateException;
 import javax.ejb.EJBLocalHome;
 import javax.resource.cci.ConnectionSpec;
+#else
+import jakarta.ejb.CreateException;
+import jakarta.ejb.EJBLocalHome;
+import jakarta.resource.cci.ConnectionSpec;
+#endif
 
 /**
  * Connection 2 Local Home Interface

@@ -47,8 +47,13 @@ package org.openmdx.base.rest.spi;
 import java.util.Arrays;
 import java.util.UUID;
 
+#if JAVA_8
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.cci.MappedRecord;
+import jakarta.resource.cci.Record;
+#endif
 
 import org.openmdx.base.naming.Path;
 

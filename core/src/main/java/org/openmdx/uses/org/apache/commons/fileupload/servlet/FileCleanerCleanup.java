@@ -25,9 +25,15 @@
  */
 package org.openmdx.uses.org.apache.commons.fileupload.servlet;
 
+#if JAVA_8
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletContextEvent;
+#else
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletContextEvent;
+#endif
 
 import org.openmdx.uses.org.apache.commons.io.FileCleaningTracker;
 
