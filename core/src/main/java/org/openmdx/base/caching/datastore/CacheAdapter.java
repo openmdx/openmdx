@@ -148,7 +148,7 @@ public interface CacheAdapter extends JDODataStoreCache {
      * @deprecated use {@link #evictAll(Predicate)}
      */
     @SuppressWarnings("rawtypes")
-    @Override
+//    @Override
     @Deprecated
     default void evictAll (Class pcClass, boolean subclasses) {
         throw new UnsupportedOperationException(
@@ -193,7 +193,7 @@ public interface CacheAdapter extends JDODataStoreCache {
      * @deprecated use {@link #pinAll(Predicate)}
      */
     @SuppressWarnings("rawtypes")
-    @Override
+//    @Override
     @Deprecated
     default void pinAll(
         Class pcClass,
@@ -243,7 +243,7 @@ public interface CacheAdapter extends JDODataStoreCache {
      * @deprecated use {@link #unpinAll(Predicate)}
      */
     @SuppressWarnings("rawtypes")
-    @Override
+//    @Override
     @Deprecated
     default void unpinAll(Class pcClass, boolean subclasses) {
         throw new UnsupportedOperationException(

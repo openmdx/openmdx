@@ -120,7 +120,7 @@ public class Jmi1DataStoreCache implements JDODataStoreCache {
      * @see javax.jdo.datastore.DataStoreCache#evictAll(java.lang.Class, boolean)
      */
     @SuppressWarnings("rawtypes")
-    @Override
+//    @Override
     @Deprecated
     public void evictAll(
         Class pcClass,
@@ -170,7 +170,7 @@ public class Jmi1DataStoreCache implements JDODataStoreCache {
      * @see javax.jdo.datastore.DataStoreCache#pinAll(java.lang.Class, boolean)
      */
     @SuppressWarnings("rawtypes")
-    @Override
+//    @Override
     @Deprecated
     public void pinAll(
         Class pcClass,
@@ -220,7 +220,7 @@ public class Jmi1DataStoreCache implements JDODataStoreCache {
      * @see javax.jdo.datastore.DataStoreCache#unpinAll(java.lang.Class, boolean)
      */
     @SuppressWarnings("rawtypes")
-    @Override
+//    @Override
     @Deprecated
     public void unpinAll(
         Class pcClass,

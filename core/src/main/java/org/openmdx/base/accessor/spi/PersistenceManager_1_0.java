@@ -58,7 +58,7 @@ import org.openmdx.kernel.jdo.JDOPersistenceManager;
  * Persistence Manager Interface 1.0
  */
 public interface PersistenceManager_1_0 extends JDOPersistenceManager {
-    
+
     /**
      * Retrieve an {@code InteractionSpec} specific persistence manager
      * 
@@ -111,7 +111,6 @@ public interface PersistenceManager_1_0 extends JDOPersistenceManager {
         PrivilegedExceptionAction<T> action
     ) throws Exception;
 
-    
     /**
      * Retrieve the object's last XRI segment
      * 
@@ -131,8 +130,8 @@ public interface PersistenceManager_1_0 extends JDOPersistenceManager {
      * @return the transient id of the object's container, 
      * or {@code null} if the object is not contained 
      */
-	public TransientContainerId getContainerId(
-    	Object pc
+    TransientContainerId getContainerId(
+            Object pc
     );
 
     /**
@@ -140,6 +139,6 @@ public interface PersistenceManager_1_0 extends JDOPersistenceManager {
      * 
      * @return the persistence manager's unit of work
      */
-    public UnitOfWork currentUnitOfWork();
+    UnitOfWork currentUnitOfWork();
 
 }

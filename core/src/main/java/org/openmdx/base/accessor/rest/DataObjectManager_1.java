@@ -80,12 +80,19 @@ import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
 import javax.jdo.listener.InstanceLifecycleEvent;
 import javax.jdo.listener.InstanceLifecycleListener;
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.LocalTransaction;
-
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Connection;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.LocalTransaction;
+#endif
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
@@ -153,8 +160,8 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         this.principalChain = getPrincipalChain(connectionSpec);
         this.connection = getConnection((ConnectionFactory) factory.getConnectionFactory(), connectionSpec);
         this.connection2 = requiresNonTransactionalDataStoreConnection(factory) ? getConnection((ConnectionFactory) factory.getConnectionFactory2(), connectionSpec) : null;
-        this.optimalFetchSize = optimalFetchSize.orElse(OPTIMAL_FETCH_SIZE_DEFAULT).intValue();
-        this.cacheThreshold = cacheThreshold.orElse(CACHE_THRESHOLD_DEFAULT).intValue();
+        this.optimalFetchSize = optimalFetchSize.orElse(OPTIMAL_FETCH_SIZE_DEFAULT);
+        this.cacheThreshold = cacheThreshold.orElse(CACHE_THRESHOLD_DEFAULT);
         this.workContext = new HashMap<Object, Object>();
         this.plugIns = getRegisteredPlugIns(plugIns);
         setCopyOnAttach(factory.getCopyOnAttach());
@@ -1341,7 +1348,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * 
      * @see javax.jdo.PersistenceManager#getObjectsById(java.lang.Object[], boolean)
      */
-    @Override
+//    @Override
     public Object[] getObjectsById(
         Object[] oids,
         boolean validate
@@ -1633,7 +1640,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * 
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[], boolean)
      */
-    @Override
+//    @Override
     public void makeTransientAll(
         Object[] pcs,
         boolean useFetchPlan
@@ -1987,7 +1994,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * 
      * @see javax.jdo.PersistenceManager#retrieveAll(java.lang.Object[], boolean)
      */
-    @Override
+//    @Override
     public void retrieveAll(
         Object[] pcs,
         boolean useFetchPlan

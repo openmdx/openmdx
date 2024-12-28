@@ -149,6 +149,7 @@ import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.loading.Factory;
 import org.w3c.jpa3.AbstractObject;
+import org.w3c.jpa3.DateTime;
 import org.w3c.spi.StateAccessor;
 
 /**
@@ -168,7 +169,7 @@ public class RefRootPackage_1
      * @param viewManager
      * @param interactionSpec
      * @param delegate
-     * @param packageImpls
+     * @param implementationMapper
      * @param userObjects
      * @param persistenceManagerFactory
      */
@@ -1481,7 +1482,7 @@ public class RefRootPackage_1
 	                    "Unsupported query language",
 	                    new BasicException.Parameter(
 	                        "supported", 
-	                        org.openmdx.base.persistence.cci.Queries.QUERY_LANGUAGE
+	                        Queries.QUERY_LANGUAGE
 	                    ),
 	                    new BasicException.Parameter(
 	                        "actual",
@@ -2031,7 +2032,7 @@ public class RefRootPackage_1
          */
         @Override
         public void setMultithreaded(boolean flag) {
-            if(flag != getMultithreaded()) throw new javax.jdo.JDOUnsupportedOptionException(
+            if(flag != getMultithreaded()) throw new JDOUnsupportedOptionException(
                 "The " + ConfigurableProperty.Multithreaded.qualifiedName() + 
                 " property can be set at factory level only"
             );
@@ -2135,7 +2136,7 @@ public class RefRootPackage_1
                     } else if (ModelHelper.isDerived(attributeDef)){
                         Object value = 
                             PrimitiveTypes.DATE.equals(typeName) ? org.w3c.jpa3.Date.toJDO((XMLGregorianCalendar) source) :
-                            PrimitiveTypes.DATETIME.equals(typeName) ? org.w3c.jpa3.DateTime.toJDO((Date) source) :
+                            PrimitiveTypes.DATETIME.equals(typeName) ? DateTime.toJDO((Date) source) :
                             source;
                         try {
                             jpaClass.getField(jpaFeature).set(jpaObject, value);

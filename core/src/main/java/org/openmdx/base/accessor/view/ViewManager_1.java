@@ -1044,7 +1044,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
      * 
      * @see javax.jdo.PersistenceManager#getObjectsById(java.lang.Object[], boolean)
      */
-    @Override
+//    @Override
     public Object[] getObjectsById(
         Object[] oids,
         boolean validate
@@ -1248,7 +1248,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
      * 
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[], boolean)
      */
-    @Override
+//    @Override
     public void makeTransientAll(
         Object[] pcs,
         boolean useFetchPlan
@@ -1578,7 +1578,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
      * 
      * @see javax.jdo.PersistenceManager#retrieveAll(java.lang.Object[], boolean)
      */
-    @Override
+//    @Override
     public void retrieveAll(
         Object[] pcs,
         boolean useFetchPlan

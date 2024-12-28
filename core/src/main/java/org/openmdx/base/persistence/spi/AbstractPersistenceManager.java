@@ -567,7 +567,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectsById(java.lang.Object[], boolean)
      */
-    @Override
+//    @Override
     public Object[] getObjectsById(Object[] oids, boolean validate) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
@@ -615,7 +615,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(java.lang.Object[], boolean)
      */
-    @Override
+//    @Override
     public void retrieveAll(Object[] pcs, boolean useFetchPlan) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
