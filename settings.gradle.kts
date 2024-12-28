@@ -59,11 +59,11 @@ include(
     "openmdx-3-platform",
     "openmdx-4-platform",
     "core",
-//    "portal",
+    "portal",
     "security",
     "test-core",
     "test-security",
-//    "tomcat",
+    "tomcat",
     "publish"
 )
 val flavour: String = gradle.startParameter.projectProperties.getOrDefault("flavour", "2")

@@ -176,6 +176,7 @@ dependencies {
 	implementation("com.vladsch.flexmark:flexmark")
 	implementation("com.atomikos:transactions-jta")
 	implementation("com.atomikos:transactions-jdbc")
+	implementation(files(File(System.getenv("JRE_18"), "lib/rt.jar")))
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.mockito:mockito-core")
@@ -188,7 +189,11 @@ dependencies {
     // openmdxBootstrap
     openmdxBootstrap(platform(project(projectPlatform)))
     openmdxBootstrap(files(file(layout.buildDirectory.dir("generated/classes/openmdxBootstrap"))))
-    openmdxBootstrap("jakarta.platform:jakarta.jakartaee-api")
+    openmdxBootstrap("jakarta.platform:jakarta.jakartaee-api") {
+		version {
+			strictly("8.0.0")
+		}
+	}
 	openmdxBootstrap("com.vladsch.flexmark:flexmark")
 	// manifold preprocessor
 	compileOnly("systems.manifold:manifold-preprocessor")
