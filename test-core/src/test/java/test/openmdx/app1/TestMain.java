@@ -96,9 +96,15 @@ import javax.jmi.reflect.InvalidObjectException;
 import javax.jmi.reflect.RefBaseObject;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
+#if JAVA_8
 import javax.resource.spi.CommException;
 import javax.servlet.ServletException;
 import javax.transaction.UserTransaction;
+#else
+import jakarta.resource.spi.CommException;
+import jakarta.servlet.ServletException;
+import jakarta.transaction.UserTransaction;
+#endif;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 

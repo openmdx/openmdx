@@ -44,8 +44,13 @@
  */
 package test.openmdx.app1.layer.application;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Interaction;
+#endif
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
