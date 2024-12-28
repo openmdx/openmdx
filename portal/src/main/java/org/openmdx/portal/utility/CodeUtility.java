@@ -66,8 +66,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.MappedRecord;
+#endif
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 

@@ -57,7 +57,7 @@ import java.util.List;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
-import javax.resource.ResourceException;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;

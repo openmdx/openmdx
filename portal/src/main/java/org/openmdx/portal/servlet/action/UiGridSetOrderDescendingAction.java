@@ -53,9 +53,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+#if JAVA_8
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+#else
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+#endif
 
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.kernel.exception.Throwables;

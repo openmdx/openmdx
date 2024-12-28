@@ -54,10 +54,17 @@ import java.util.Map;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
+#if JAVA_8
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+#else
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+#endif
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;

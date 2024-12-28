@@ -54,9 +54,15 @@ import java.util.Arrays;
 import java.util.Map;
 
 import javax.jdo.PersistenceManager;
+#if JAVA_8
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+#else
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+#endif
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -81,7 +87,7 @@ public class FindObjectAction extends BoundAction {
 	public ActionPerformResult perform(
 		ObjectView view,
 		HttpServletRequest request,
-		HttpServletResponse response,        
+		HttpServletResponse response,
 		String parameter,
 		HttpSession session,
 		Map<String,String[]> requestParameters,
