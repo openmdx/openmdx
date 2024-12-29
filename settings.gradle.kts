@@ -59,12 +59,11 @@ include(
     "openmdx-3-platform",
     "openmdx-4-platform",
     "core",
-    "portal",
     "security",
     "test-core",
     "test-security",
-    "tomcat",
     "publish"
 )
 val flavour: String = gradle.startParameter.projectProperties.getOrDefault("flavour", "2")
 if (flavour == "2") include("client")
+if (flavour == "2" || flavour == "3") include("portal", "tomcat")
