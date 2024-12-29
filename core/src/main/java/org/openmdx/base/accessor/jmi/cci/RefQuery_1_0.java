@@ -148,7 +148,7 @@ public interface RefQuery_1_0 extends Query, Cloneable {
   /* (non-Javadoc)
    * @see java.lang.Object#clone()
    */
-  public RefQuery_1_0 clone();
+  RefQuery_1_0 clone();
    
 }
 
