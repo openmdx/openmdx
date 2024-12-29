@@ -88,7 +88,7 @@ dependencies {
     testImplementation("org.mockito:mockito-junit-jupiter")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testRuntimeOnly("org.postgresql:postgresql")
-    testRuntimeOnly("javax.servlet:javax.servlet-api")
+    testRuntimeOnly("jakarta.servlet:jakarta.servlet-api")
     testRuntimeOnly("com.atomikos:transactions-jta")
     testRuntimeOnly("com.atomikos:transactions-jdbc")
     // manifold preprocessor

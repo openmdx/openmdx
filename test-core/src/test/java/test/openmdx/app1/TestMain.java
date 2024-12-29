@@ -104,7 +104,7 @@ import javax.transaction.UserTransaction;
 import jakarta.resource.spi.CommException;
 import jakarta.servlet.ServletException;
 import jakarta.transaction.UserTransaction;
-#endif;
+#endif
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 

@@ -1753,14 +1753,12 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /**
-     * @param aClass
-     * @param <T>
-     * @return
-     */
+    #if JAVA_8 #else
+    @Override	
     public <T> JDOQLTypedQuery<T> newJDOQLTypedQuery(Class<T> aClass) {
         throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
     }
+    #endif
 
     /*
      * (non-Javadoc)

@@ -65,5 +65,4 @@ include(
     "publish"
 )
 val flavour: String = gradle.startParameter.projectProperties.getOrDefault("flavour", "2")
-if (flavour == "2") include("client")
-if (flavour == "2" || flavour == "3") include("portal", "tomcat")
+if (flavour == "2") include("client", "portal", "tomcat") // will be enabled for (flavour != "3") with MDX-2

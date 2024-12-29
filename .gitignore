@@ -6,7 +6,6 @@ build/
 opt/xstream/
 build
 .gradle/
-/.project
 /bin/
 /.classpath
 /.DS_Store
