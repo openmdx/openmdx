@@ -55,14 +55,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jdo.PersistenceManager;
-
-#if JAVA_8
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-#else
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-#endif
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.naming.Path;

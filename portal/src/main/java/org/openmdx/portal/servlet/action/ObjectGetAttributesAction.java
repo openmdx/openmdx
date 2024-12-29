@@ -52,17 +52,10 @@ package org.openmdx.portal.servlet.action;
 import java.io.IOException;
 import java.util.Map;
 
-#if JAVA_8
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-#else
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-#endif
 
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;

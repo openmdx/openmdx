@@ -57,13 +57,9 @@ import java.util.Map;
 
 import javax.jdo.PersistenceManager;
 import javax.servlet.ServletException;
-#if JAVA_8
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-#else
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-#endif
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.naming.Path;

@@ -49,13 +49,8 @@ package org.openmdx.portal.servlet.action;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-#if JAVA_8
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
-#else
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-#endif
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * AbstractAction
@@ -73,7 +68,7 @@ public abstract class AbstractAction {
      */
     protected PrintWriter getWriter(
         HttpServletRequest request,
-        HttpServletResponse response
+        HttpServletResponse response        
     ) throws IOException {
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");

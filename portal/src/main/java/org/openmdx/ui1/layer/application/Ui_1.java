@@ -62,15 +62,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
-#else
-import jakarta.resource.ResourceException;
-import jakarta.resource.cci.Interaction;
-import jakarta.resource.cci.MappedRecord;
-#endif
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;

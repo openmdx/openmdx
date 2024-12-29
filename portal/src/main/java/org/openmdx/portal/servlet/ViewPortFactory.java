@@ -50,7 +50,7 @@ import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
-import #if JAVA_8 javax.servlet.http.HttpServletRequest #else jakarta.servlet.http.HttpServletRequest #endif;
+import javax.servlet.http.HttpServletRequest;
 
 import org.openmdx.portal.servlet.component.View;
 

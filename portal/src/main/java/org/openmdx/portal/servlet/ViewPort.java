@@ -57,7 +57,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import #if JAVA_8 javax.servlet.http.HttpServletRequest #else jakarta.servlet.http.HttpServletRequest #endif;
+import javax.servlet.http.HttpServletRequest;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.component.View;
