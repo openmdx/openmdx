@@ -52,9 +52,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
-import javax.resource.ResourceException;
-import javax.resource.cci.Record;
-import javax.resource.spi.EISSystemException;
+#if JAVA_8 
+	import javax.resource.ResourceException;
+	import javax.resource.spi.EISSystemException;
+	import javax.resource.cci.Record;
+#else 
+	import jakarta.resource.ResourceException; 
+	import jakarta.resource.spi.EISSystemException;
+	import jakarta.resource.cci.Record;
+#endif;
 
 /**
  * Manual serialization/deserialization of JCA {@code Record}s in order to

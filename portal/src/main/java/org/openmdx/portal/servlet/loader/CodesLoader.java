@@ -60,8 +60,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.jdo.PersistenceManagerFactory;
-import javax.resource.ResourceException;
-import javax.resource.cci.MappedRecord;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
+import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 import javax.servlet.ServletContext;
 
 import org.openmdx.application.xml.Importer;

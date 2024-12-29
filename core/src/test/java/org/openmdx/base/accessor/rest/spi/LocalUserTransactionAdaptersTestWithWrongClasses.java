@@ -46,10 +46,16 @@ package org.openmdx.base.accessor.rest.spi;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import javax.resource.ResourceException;
+#if JAVA_8 
+	import javax.resource.ResourceException;
+	import javax.resource.cci.LocalTransaction;
+	import javax.resource.spi.LocalTransactionException;
+#else 
+	import jakarta.resource.ResourceException;
+	import jakarta.resource.cci.LocalTransaction;
+	import jakarta.resource.spi.LocalTransactionException;
+#endif;
 
-import javax.resource.cci.LocalTransaction;
-import javax.resource.spi.LocalTransactionException;
 
 public class LocalUserTransactionAdaptersTestWithWrongClasses extends AbstractLocalUserTransactionAdaptersTest {
 

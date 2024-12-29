@@ -53,7 +53,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
 import javax.naming.NamingException;
-import javax.resource.ResourceException;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
