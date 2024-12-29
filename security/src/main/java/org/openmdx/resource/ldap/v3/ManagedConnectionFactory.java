@@ -309,7 +309,7 @@ public class ManagedConnectionFactory
     }
 
     @Override
-    protected javax.resource.spi.ManagedConnection newManagedConnection(
+    protected #if JAVA_8 javax #else jakarta #endif.resource.spi.ManagedConnection newManagedConnection(
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {

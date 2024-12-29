@@ -47,9 +47,15 @@ package org.openmdx.resource.ldap.ldif;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.ConnectionManager;
+import jakarta.resource.spi.ConnectionRequestInfo;
+#endif
 import javax.security.auth.Subject;
 
 import org.apache.directory.api.ldap.model.exception.LdapConfigurationException;
@@ -149,7 +155,7 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
         }
     }
     @Override
-    protected javax.resource.spi.ManagedConnection newManagedConnection(
+    protected #if JAVA_8 javax #else jakarta #endif.resource.spi.ManagedConnection newManagedConnection(
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
