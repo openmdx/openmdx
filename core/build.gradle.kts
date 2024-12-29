@@ -176,7 +176,6 @@ dependencies {
 	implementation("com.vladsch.flexmark:flexmark")
 	implementation("com.atomikos:transactions-jta")
 	implementation("com.atomikos:transactions-jdbc")
-	implementation(files(File(System.getenv("JRE_18"), "lib/rt.jar")))
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.mockito:mockito-core")

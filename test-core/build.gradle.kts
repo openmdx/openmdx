@@ -82,7 +82,6 @@ dependencies {
     implementation("javax.jdo:jdo-api")
     implementation("javax.cache:cache-api")
     implementation("org.junit.jupiter:junit-jupiter-api")
-    implementation(files(File(System.getenv("JRE_18"), "lib/rt.jar")))
     // test
     testImplementation(project(":core"))
     testImplementation("org.mockito:mockito-core")
