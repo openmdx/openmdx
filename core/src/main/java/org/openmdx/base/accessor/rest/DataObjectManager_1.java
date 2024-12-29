@@ -61,21 +61,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.jdo.Constants;
-import javax.jdo.Extent;
-import javax.jdo.FetchGroup;
-import javax.jdo.FetchPlan;
-import javax.jdo.JDODataStoreException;
-import javax.jdo.JDOException;
-import javax.jdo.JDOFatalInternalException;
-import javax.jdo.JDOFatalUserException;
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.JDOUnsupportedOptionException;
-import javax.jdo.JDOUserException;
-import javax.jdo.ObjectState;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
-import javax.jdo.Transaction;
+import javax.jdo.*;
 import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
 import javax.jdo.listener.InstanceLifecycleEvent;
@@ -1765,6 +1751,15 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         Object query
     ) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+    }
+
+    /**
+     * @param aClass
+     * @param <T>
+     * @return
+     */
+    public <T> JDOQLTypedQuery<T> newJDOQLTypedQuery(Class<T> aClass) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
     }
 
     /*

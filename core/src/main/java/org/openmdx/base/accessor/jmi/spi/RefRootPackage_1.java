@@ -60,18 +60,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.UUID;
 
-import javax.jdo.Extent;
-import javax.jdo.FetchPlan;
-import javax.jdo.JDOException;
-import javax.jdo.JDOFatalUserException;
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.JDOUnsupportedOptionException;
-import javax.jdo.JDOUserException;
-import javax.jdo.ObjectState;
-import javax.jdo.PersistenceManager;
-import javax.jdo.PersistenceManagerFactory;
-import javax.jdo.Query;
-import javax.jdo.Transaction;
+import javax.jdo.*;
 import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
 import javax.jdo.spi.PersistenceCapable;
@@ -1496,6 +1485,15 @@ public class RefRootPackage_1
             		exception
             	);
             }
+        }
+
+        /**
+         * @param aClass
+         * @param <T>
+         * @return
+         */
+        public <T> JDOQLTypedQuery<T> newJDOQLTypedQuery(Class<T> aClass) {
+            throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
         }
 
         /* (non-Javadoc)
