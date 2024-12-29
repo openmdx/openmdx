@@ -45,6 +45,7 @@
 package org.openmdx.base.accessor.rest;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.jdo.Extent;
@@ -180,6 +181,13 @@ class Aspect_1 implements Query {
         throw new UnsupportedOperationException(
             "Method not supported by aspect query"
         );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public void close() throws Exception {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
     }
 
     /* (non-Javadoc)
@@ -534,6 +542,246 @@ class Aspect_1 implements Query {
     @Override
     public Boolean getSerializeRead() {
         return Boolean.FALSE;
+    }
+
+    /**
+     * @param s
+     * @return
+     */
+    public Query saveAsNamedQuery(String s) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param s
+     * @return
+     */
+    public Query filter(String s) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param s
+     * @return
+     */
+    public Query orderBy(String s) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param s
+     * @return
+     */
+    public Query groupBy(String s) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param s
+     * @return
+     */
+    public Query result(String s) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param l
+     * @param l1
+     * @return
+     */
+    public Query range(long l, long l1) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param s
+     * @return
+     */
+    public Query range(String s) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param query
+     * @param s
+     * @param s1
+     * @return
+     */
+    public Query subquery(Query query, String s, String s1) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param query
+     * @param s
+     * @param s1
+     * @param s2
+     * @return
+     */
+    public Query subquery(Query query, String s, String s1, String s2) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param query
+     * @param s
+     * @param s1
+     * @param strings
+     * @return
+     */
+    public Query subquery(Query query, String s, String s1, String... strings) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param query
+     * @param s
+     * @param s1
+     * @param map
+     * @return
+     */
+    public Query subquery(Query query, String s, String s1, Map map) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param s
+     * @return
+     */
+    public Query imports(String s) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param s
+     * @return
+     */
+    public Query parameters(String s) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param s
+     * @return
+     */
+    public Query variables(String s) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param integer
+     * @return
+     */
+    public Query datastoreReadTimeoutMillis(Integer integer) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param integer
+     * @return
+     */
+    public Query datastoreWriteTimeoutMillis(Integer integer) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param aBoolean
+     * @return
+     */
+    public Query serializeRead(Boolean aBoolean) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @return
+     */
+    public Query unmodifiable() {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param b
+     * @return
+     */
+    public Query ignoreCache(boolean b) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param s
+     * @param o
+     * @return
+     */
+    public Query extension(String s, Object o) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param map
+     * @return
+     */
+    public Query extensions(Map map) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param objects
+     * @return
+     */
+    public Query setParameters(Object... objects) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @return
+     */
+    public List executeList() {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @return
+     */
+    public Object executeUnique() {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @return
+     */
+    public List<Object> executeResultList() {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @return
+     */
+    public Object executeResultUnique() {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param aClass
+     * @return
+     */
+    public Object executeResultUnique(Class aClass) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param aClass
+     * @return
+     */
+    public List executeResultList(Class aClass) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+
+    /**
+     * @param map
+     * @return
+     */
+    public Query setNamedParameters(Map map) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
     }
 
 }
