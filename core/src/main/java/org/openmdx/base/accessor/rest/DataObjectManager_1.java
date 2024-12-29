@@ -1347,8 +1347,10 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * (non-Javadoc)
      * 
      * @see javax.jdo.PersistenceManager#getObjectsById(java.lang.Object[], boolean)
+     *
+     * @deprecated with JDO 2.1
+     * removed with JDO 3.2
      */
-//    @Override
     public Object[] getObjectsById(
         Object[] oids,
         boolean validate
@@ -1639,8 +1641,10 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * (non-Javadoc)
      * 
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[], boolean)
+     *
+     * @deprecated with JDO 2.1
+     * removed with JDO 3.2
      */
-//    @Override
     public void makeTransientAll(
         Object[] pcs,
         boolean useFetchPlan
@@ -1993,8 +1997,10 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * (non-Javadoc)
      * 
      * @see javax.jdo.PersistenceManager#retrieveAll(java.lang.Object[], boolean)
+     *
+     * @deprecated with JDO 2.1
+     * removed with JDO 3.2
      */
-//    @Override
     public void retrieveAll(
         Object[] pcs,
         boolean useFetchPlan
