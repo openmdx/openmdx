@@ -563,23 +563,27 @@ public final class DataproviderRequestProcessor implements Channel {
 
             ObjectRecord getDelegate() {
                 if (success == null) {
-                    throw new IllegalStateException(
-                        "The REST request has not been executed yet", 
-                        BasicException.newEmbeddedExceptionStack(
-                            BasicException.Code.DEFAULT_DOMAIN, 
-                            BasicException.Code.ILLEGAL_STATE, 
-                            new BasicException.Parameter(
-                                "interactionVerb", 
-                                interactionSpec.getInteractionVerbName()
-                            ), new BasicException.Parameter(
-                                "function", 
-                                interactionSpec.getFunctionName()
-                            ), new BasicException.Parameter(
-                                BasicException.Parameter.XRI, 
-                                request.getResourceIdentifier()
+                    try {
+                        throw new IllegalStateException(
+                            "The REST request has not been executed yet",
+                            BasicException.newEmbeddedExceptionStack(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.ILLEGAL_STATE,
+                                new BasicException.Parameter(
+                                    "interactionVerb",
+                                    interactionSpec.getInteractionVerbName()
+                                ), new BasicException.Parameter(
+                                    "function",
+                                    interactionSpec.getFunctionName()
+                                ), new BasicException.Parameter(
+                                    BasicException.Parameter.XRI,
+                                    request.getResourceIdentifier()
+                                )
                             )
-                        )
-                    );
+                        );
+                    } catch (IllegalStateException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
                 if (delegate == null) {
                     throw new RuntimeServiceException(
