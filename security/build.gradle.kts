@@ -81,6 +81,7 @@ dependencies {
     implementation("jakarta.platform:jakarta.jakartaee-api")
     implementation("javax.jdo:jdo-api")
     implementation("org.apache.directory.api:apache-ldap-api")
+	implementation(files(File(System.getenv("JRE_18"), "lib/rt.jar")))
     // Test
     implementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
