@@ -63,7 +63,7 @@ import java.util.concurrent.ConcurrentMap;
 import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
-import javax.resource.spi.ResourceAllocationException;
+import #if JAVA_8 javax.resource.spi.ResourceAllocationException #else jakarta.resource.spi.ResourceAllocationException #endif;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.ietf.jgss.Oid;
