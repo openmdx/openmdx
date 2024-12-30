@@ -167,7 +167,7 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 		"--pathMapPath=file:" + File(project.rootDir, "portal/src/model/emf") + "/",
 		"--url=file:src/model/emf/models.uml",
 		"--xmi=emf",
-		"--out=" + File(project.getBuildDir(), "generated/sources/model/openmdx-${project.name}-models.zip"),
+		"--out=" + project.layout.buildDirectory.file("generated/sources/model/openmdx-${project.name}-models.zip").get().asFile,
 		"--openmdxjdo=" + File(project.projectDir, "src/main/resources"),
 		"--dataproviderVersion=2",
 		"--format=xmi1",
