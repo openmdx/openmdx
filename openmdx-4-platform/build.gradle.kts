@@ -55,7 +55,7 @@ dependencies {
     constraints {
 
 		val atomikosVersion = "6.0.0"
-		val bootstrapVersion = "2.19.0"
+		val bootstrapVersion = "4.18.99"
 		val cacheVersion = "1.1.1"
 		val flexmarkVersion = "0.62.2"
 		val groovyVersion = "3.0.+"
@@ -70,8 +70,8 @@ dependencies {
 		val servletVersion = "6.0.+"
 		val tomcatVersion = "9.0.+"
 
-		api("com.atomikos:transactions-jta:$atomikosVersion")
-		api("com.atomikos:transactions-jdbc:$atomikosVersion")
+		api("com.atomikos:transactions-jta:$atomikosVersion:jakarta")
+		api("com.atomikos:transactions-jdbc:$atomikosVersion:jakarta")
 	    api("com.vladsch.flexmark:flexmark:$flexmarkVersion")
 	    api("jakarta.platform:jakarta.jakartaee-api:$jakartaVersion")
 	    api("jakarta.servlet:jakarta.servlet-api:$servletVersion")
