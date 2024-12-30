@@ -43,9 +43,6 @@
  * listed in the NOTICE file.
  */
 
-import java.io.FileInputStream
-import java.util.*
-
 plugins {
 	java
 	`java-library`
@@ -53,34 +50,20 @@ plugins {
 	distribution
 }
 
-repositories {
-	mavenCentral()
-    maven {
-        url = uri("https://datura.econoffice.ch/maven2")
-    }
-}
-
-var env = Properties()
-env.load(FileInputStream(File(project.rootDir, "build.properties")))
-val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
+val projectFlavour = project.extra["projectFlavour"] as String
+val projectSpecificationVersion = project.extra["projectSpecificationVersion"] as String
+val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
+val runtimeCompatibility = project.extra["runtimeCompatibility"] as JavaVersion
 
 eclipse {
 	project {
-    	name = "openMDX 2 ~ Tomcat"
+    	name = "openMDX $projectFlavour ~ Tomcat"
     }
-    jdt {
-		sourceCompatibility = targetPlatform
-    	targetCompatibility = targetPlatform
-    	javaRuntimeName = "JavaSE-$targetPlatform"
-    }
-}
-
-fun getProjectImplementationVersion(): String {
-	return project.version.toString();
-}
-
-fun getDeliverDir(): File {
-	return File(project.rootDir, "jre-" + targetPlatform + "/" + project.name);
+	jdt {
+		sourceCompatibility = runtimeCompatibility
+		targetCompatibility = runtimeCompatibility
+		javaRuntimeName = "JavaSE-${runtimeCompatibility.majorVersion}"
+	}
 }
 
 fun touch(file: File) {
@@ -91,11 +74,17 @@ project.configurations.maybeCreate("openmdxBootstrap")
 val openmdxBootstrap by configurations
 
 dependencies {
-    // implementation
-    implementation(project(":core"))
-    implementation(project(":security"))
-    implementation("javax:javaee-api:8.0.+")
-    implementation("org.apache.tomcat:tomcat-catalina:9.0.+")
+	val projectPlatform = ":openmdx-${projectFlavour}-platform"
+	// implementation
+	implementation(project(":core"))
+	implementation(project(":security"))
+	implementation(platform(project(projectPlatform)))
+	implementation("jakarta.platform:jakarta.jakartaee-api")
+	implementation("org.apache.tomcat:tomcat-catalina")
+	// manifold preprocessor
+	compileOnly("systems.manifold:manifold-preprocessor")
+	annotationProcessor(platform(project(projectPlatform)))
+	annotationProcessor("systems.manifold:manifold-preprocessor")
 }
 
 sourceSets {
@@ -106,12 +95,13 @@ sourceSets {
         }
         resources {
         	srcDir("src/main/resources")
+            srcDir(layout.buildDirectory.dir("generated/resources/main"))
         }
     }
     test {
         java {
             srcDir("src/test/java")
-            srcDir(layout.buildDirectory.dir("generated/sources/java/test"))
+            srcDir(layout.buildDirectory.dir("generated/sources/test/java"))
         }
         resources {
         	srcDir("src/test/resources")
@@ -129,9 +119,6 @@ tasks {
 	test {
 	    useJUnitPlatform()
 	    maxHeapSize = "4G"
-	}
-	compileJava {
- 	   options.release.set(Integer.valueOf(targetPlatform.majorVersion))
 	}
 	assemble {
 		dependsOn(
@@ -156,7 +143,7 @@ tasks {
 	        ":tomcat:compileJava",
 	        ":tomcat:processResources"
 	    )
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("catalina-openmdx.jar")
 	    includeEmptyDirs = false
 		manifest {
@@ -176,7 +163,7 @@ tasks {
 		exclude(openmdxCatalinaExcludes)
 	}
 	register<org.openmdx.gradle.ArchiveTask>("catalina-openmdx-sources.jar") {
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("catalina-openmdx-sources.jar")
 	    includeEmptyDirs = false
 		manifest {
@@ -198,20 +185,27 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-${project.name}-jre-" + targetPlatform)
+		distributionBaseName.set("openmdx-${project.version}-${project.name}-jre-${runtimeCompatibility}")
         contents {
         	// test-core
-        	from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
-            from("src") { into(project.name + "/src") }
+        	from(".") {
+				into(project.name)
+				include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts")
+			}
+            from("src") { into("${project.name}/src") }
             // etc
-            from("etc") { into(project.name + "/etc") }
+            from("etc") { into("${project.name}/etc") }
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-			var path = "jre-$targetPlatform/${project.name}/lib"
-			from("../$path") { into(path) }
-			path = "jre-$targetPlatform/gradle/repo"
-			from("../$path") { into(path) }
+			var path = "${project.name}/lib"
+			from("../build$projectFlavour/$path") {
+				into("jre-$runtimeCompatibility/$path")
+			}
+			path = "gradle/repo"
+			from("../build$projectFlavour/$path") {
+				into("jre-$runtimeCompatibility/$path")
+			}
         }
     }
 }

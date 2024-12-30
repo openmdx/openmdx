@@ -3,3 +3,6 @@
 .settings/
 bin/
 /.DS_Store
+/build2/
+/build3/
+/build4/

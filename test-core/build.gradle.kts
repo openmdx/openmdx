@@ -43,9 +43,6 @@
  * listed in the NOTICE file.
  */
 
-import java.io.FileInputStream
-import java.util.*
-
 plugins {
 	java
 	`java-library`
@@ -53,34 +50,20 @@ plugins {
 	distribution
 }
 
-repositories {
-	mavenCentral()
-    maven {
-        url = uri("https://datura.econoffice.ch/maven2")
-    }
-}
-
-var env = Properties()
-env.load(FileInputStream(File(project.rootDir, "build.properties")))
-val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
+val projectFlavour = project.extra["projectFlavour"] as String
+val projectSpecificationVersion = project.extra["projectSpecificationVersion"] as String
+val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
+val runtimeCompatibility = project.extra["runtimeCompatibility"] as JavaVersion
 
 eclipse {
 	project {
-    	name = "openMDX 2 ~ Test Core"
+    	name = "openMDX $projectFlavour ~ Test Core"
     }
     jdt {
-		sourceCompatibility = targetPlatform
-    	targetCompatibility = targetPlatform
-    	javaRuntimeName = "JavaSE-$targetPlatform"
+        sourceCompatibility = runtimeCompatibility
+        targetCompatibility = runtimeCompatibility
+        javaRuntimeName = "JavaSE-${runtimeCompatibility.majorVersion}"
     }
-}
-
-fun getProjectImplementationVersion(): String {
-	return project.version.toString();
-}
-
-fun getDeliverDir(): File {
-	return File(project.rootDir, "jre-" + targetPlatform + "/" + project.name);
 }
 
 fun touch(file: File) {
@@ -91,21 +74,27 @@ project.configurations.maybeCreate("openmdxBootstrap")
 val openmdxBootstrap by configurations
 
 dependencies {
+    val projectPlatform = ":openmdx-${projectFlavour}-platform"
     // main
     implementation(project(":core"))
-    implementation("javax:javaee-api:8.0.+")
-    implementation("javax.jdo:jdo-api:3.1")
-    implementation("javax.cache:cache-api:1.1.+")    
-    implementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
+    implementation(platform(project(projectPlatform)))
+    implementation("jakarta.platform:jakarta.jakartaee-api")
+    implementation("javax.jdo:jdo-api")
+    implementation("javax.cache:cache-api")
+    implementation("org.junit.jupiter:junit-jupiter-api")
     // test
     testImplementation(project(":core"))
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
-    testImplementation("org.mockito:mockito-core:5.14.2")    
-    testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")    
- 	testRuntimeOnly("org.postgresql:postgresql:42.7.+")
-	testRuntimeOnly("javax.servlet:javax.servlet-api:3.1.0")
-	testRuntimeOnly("com.atomikos:transactions-jta:6.0.0")
-	testRuntimeOnly("com.atomikos:transactions-jdbc:6.0.0")
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("org.mockito:mockito-junit-jupiter")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testRuntimeOnly("org.postgresql:postgresql")
+    testRuntimeOnly("javax.servlet:javax.servlet-api")
+    testRuntimeOnly("com.atomikos:transactions-jta")
+    testRuntimeOnly("com.atomikos:transactions-jdbc")
+    // manifold preprocessor
+    compileOnly("systems.manifold:manifold-preprocessor")
+    annotationProcessor(platform(project(projectPlatform)))
+    annotationProcessor("systems.manifold:manifold-preprocessor")
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 }
@@ -206,7 +195,6 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 
 tasks.compileJava {
     dependsOn("generate-model")
-    options.release.set(Integer.valueOf(targetPlatform.majorVersion))
 }
 
 
@@ -219,20 +207,27 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-${project.name}-jre-" + targetPlatform)
+        distributionBaseName.set("openmdx-${project.version}-${project.name}-jre-${runtimeCompatibility}")
         contents {
         	// test-core
-        	from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
-            from("src") { into(project.name + "/src") }
+        	from(".") {
+                into(project.name)
+                include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts")
+            }
+            from("src") { into("${project.name}/src") }
             // etc
-            from("etc") { into(project.name + "/etc") }
+            from("etc") { into("${project.name}/etc") }
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-            var path = "jre-$targetPlatform/${project.name}/lib"
-            from("../$path") { into(path) }
-            path = "jre-$targetPlatform/gradle/repo"
-            from("../$path") { into(path) }
+            var path = "${project.name}/lib"
+            from("../build$projectFlavour/$path") {
+                into("jre-$runtimeCompatibility/$path")
+            }
+            path = "gradle/repo"
+            from("../build$projectFlavour/$path") {
+                into("jre-$runtimeCompatibility/$path")
+            }
         }
     }
 }

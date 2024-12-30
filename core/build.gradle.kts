@@ -42,8 +42,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-import java.io.FileInputStream
-import java.util.*
 
 plugins {
 	java
@@ -52,37 +50,20 @@ plugins {
 	distribution
 }
 
-repositories {
-	mavenCentral()
-    maven {
-        url = uri("https://datura.econoffice.ch/maven2")
-    }
-    maven {
-       url = uri("file:" + File(project.rootDir, "publish/build/repos/releases"))
-    }
-}
-
-var env = Properties()
-env.load(FileInputStream(File(project.rootDir, "build.properties")))
-val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
+val projectFlavour = project.extra["projectFlavour"] as String
+val projectSpecificationVersion = project.extra["projectSpecificationVersion"] as String
+val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
+val runtimeCompatibility = project.extra["runtimeCompatibility"] as JavaVersion
 
 eclipse {
 	project {
-    	name = "openMDX 2 ~ Core"
+    	name = "openMDX $projectFlavour ~ Core"
     }
     jdt {
-		sourceCompatibility = targetPlatform
-    	targetCompatibility = targetPlatform
-    	javaRuntimeName = "JavaSE-$targetPlatform"
+		sourceCompatibility = runtimeCompatibility
+    	targetCompatibility = runtimeCompatibility
+    	javaRuntimeName = "JavaSE-${runtimeCompatibility.majorVersion}"
     }
-}
-
-fun getProjectImplementationVersion(): String {
-	return project.version.toString();
-}
-
-fun getDeliverDir(): File {
-	return File(project.rootDir, "jre-" + targetPlatform + "/" + project.name);
 }
 
 fun touch(file: File) {
@@ -98,44 +79,67 @@ fun getVersionClass(packageName: String): String {
         public class Version {
 
             /**
-            * A specification version is compliant with a given one if<ol>
-            * <li>its major numbers is equal to the given one
-            * <li>its minor number is greater than or equal to the given one
-            * </ol>
-            */
-            private final static String SPECIFICATION_VERSION = "${project.version.toString().substring(0, 4)}";
+             * The Flavour version tells which openMDX version is used:<ul>
+             * <li>openMDX 2: Jakarta EE 8 and classic JMI API
+             * <li>openMDX 3: Jakarta EE 8 and contemporary JMI API
+             * <li>openMDX 4: Jakarta EE 10 and contemporary JMI API
+             * </ol>
+             */
+            private final static String FLAVOUR_VERSION = "${projectFlavour}";
             
             /**
-            * An implementation version is compliant with a given one if
-            * their string representations are equal.
-            */
-            private final static String IMPLEMENTATION_VERSION = "${project.version}";
+             * A specification version is compliant with a given one if<ol>
+             * <li>its major numbers is equal to the given one
+             * <li>its minor number is greater than or equal to the given one
+             * </ol>
+             */
+            private final static String SPECIFICATION_VERSION = FLAVOUR_VERSION + ".${projectSpecificationVersion}";
+            
+            /**
+             * An implementation version is compliant with a given one if
+             * their string representations are equal.
+             */
+            private final static String IMPLEMENTATION_VERSION = SPECIFICATION_VERSION + ".${projectMaintenanceVersion}";
+            
+            /**
+             * Get the openMDX flavour version:<ul>
+             * <li>openMDX 2: Jakarta EE 8 and classic JMI API
+             * <li>openMDX 3: Jakarta EE 8 and contemporary JMI API
+             * <li>openMDX 4: Jakarta EE 10 and contemporary JMI API
+             * </ul>
+             *
+             * @return the flavour version
+             */
+            public static String getFlavourVersion(
+            ){
+                return Version.FLAVOUR_VERSION;
+            }
 
             /**
-            * Get the specification version.
-            *
-            * @return the implementation version
-            */
+             * Get the specification version.
+             *
+             * @return the implementation version
+             */
             public static String getSpecificationVersion(
             ){
                 return Version.SPECIFICATION_VERSION;
             }
 
             /**
-            * Get the implementation version.
-            *
-            * @return the implementation version
-            */
+             * Get the implementation version.
+             *
+             * @return the implementation version
+             */
             public static String getImplementationVersion(
             ){
                 return Version.IMPLEMENTATION_VERSION;
             }
                     
             /**
-            * Define a main so that the version may easily be printed by a tool
-            * 
-            * @param arguments	the program arguments
-            */
+             * Define a main so that the version may easily be printed by a tool
+             * 
+             * @param arguments	the program arguments
+             */
             public static void main(
                 String arguments[]
             ) {
@@ -163,27 +167,39 @@ val jdoApi by configurations
 val cacheApi by configurations
 
 dependencies {
+    val projectPlatform = ":openmdx-${projectFlavour}-platform"
     // implementation
-    implementation("javax:javaee-api:8.0.+")
-    implementation("javax.jdo:jdo-api:3.1")
-    implementation("javax.cache:cache-api:1.1.+")
-	implementation("com.vladsch.flexmark:flexmark:0.64.8")
-	implementation("com.atomikos:transactions-jta:6.0.0")
-	implementation("com.atomikos:transactions-jdbc:6.0.0")
+    implementation(platform(project(projectPlatform)))
+	implementation("jakarta.platform:jakarta.jakartaee-api")
+    implementation("javax.jdo:jdo-api")
+    implementation("javax.cache:cache-api")
+	implementation("com.vladsch.flexmark:flexmark")
+	implementation("com.atomikos:transactions-jta")
+	implementation("com.atomikos:transactions-jdbc")
     // Test
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
-    testImplementation("org.mockito:mockito-core:5.14.2")    
-    testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")    
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("org.mockito:mockito-junit-jupiter")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     // openmdxBase
-    openmdxBase("org.openmdx:openmdx-base:2.18.10")
+    openmdxBase(platform(project(projectPlatform)))
+    openmdxBase("org.openmdx:openmdx-base")
     // openmdxBootstrap
+    openmdxBootstrap(platform(project(projectPlatform)))
     openmdxBootstrap(files(file(layout.buildDirectory.dir("generated/classes/openmdxBootstrap"))))
-    openmdxBootstrap("javax:javaee-api:8.0.+")
-	openmdxBootstrap("com.vladsch.flexmark:flexmark:0.64.8")
+    openmdxBootstrap("jakarta.platform:jakarta.jakartaee-api")
+	openmdxBootstrap("com.vladsch.flexmark:flexmark")
+	// manifold preprocessor
+	compileOnly("systems.manifold:manifold-preprocessor")
+    annotationProcessor(platform(project(projectPlatform)))
+    annotationProcessor("systems.manifold:manifold-preprocessor")
     // jdo-api
-    jdoApi("javax.jdo:jdo-api:3.1")
+    jdoApi(platform(project(projectPlatform)))
+    jdoApi("javax.jdo:jdo-api")
     // cache-api
-    cacheApi("javax.cache:cache-api:1.1.+")
+    cacheApi(platform(project(projectPlatform)))
+    cacheApi("javax.cache:cache-api")
 }
 
 sourceSets {
@@ -332,7 +348,6 @@ tasks {
 	        touch(f)
 	        f.writeText(getVersionClass("org.openmdx.system"))
 	    }
-	    options.release.set(Integer.valueOf(targetPlatform.majorVersion))
 	}
 	assemble {
 		dependsOn(
@@ -348,7 +363,7 @@ tasks {
 	        ":core:compileJava",
 	        ":core:processResources"
 	    )
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-base.jar")
 	    includeEmptyDirs = false
 		manifest {
@@ -371,17 +386,17 @@ tasks {
 		exclude(openmdxBaseExcludes)
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-base-sources.jar") {
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-base-sources.jar")
-	    includeEmptyDirs = false
+		includeEmptyDirs = false
 		manifest {
-	        attributes(
-	        	getManifest(
-	        		"openMDX Base Sources",
-	        		"openmdx-base-sources"
-	        	)
-	        )
-	    }
+			attributes(
+				getManifest(
+					"openMDX Base Sources",
+					"openmdx-base-sources"
+				)
+			)
+		}
 		from(
 			"src/main/java",
 			File(buildDirAsFile, "generated/sources/java/main")
@@ -390,7 +405,7 @@ tasks {
 		exclude(openmdxBaseExcludes)
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-system.jar") {
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 	    dependsOn(":core:compileJava")
 		archiveFileName.set("openmdx-system.jar")
 	    includeEmptyDirs = false
@@ -409,7 +424,7 @@ tasks {
 	  	exclude(openmdxSystemExcludes)
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-system-sources.jar") {
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-system-sources.jar")
 	    includeEmptyDirs = false
 		manifest {
@@ -431,20 +446,27 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-core-jre-" + targetPlatform)
+    	distributionBaseName.set("openmdx-${project.version}-${project.name}-jre-${runtimeCompatibility}")
         contents {
         	// core
-        	from(".") { into("core"); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
-            from("src") { into("core/src") }
+        	from(".") {
+				into(project.name)
+				include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts")
+			}
+            from("src") { into("${project.name}/src") }
             // etc
-            from("etc") { into("core/etc") }
+            from("etc") { into("${project.name}/etc") }
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-			var path = "jre-$targetPlatform/${project.name}/lib"
-			from("../$path") { into(path) }
-			path = "jre-$targetPlatform/gradle/repo"
-			from("../$path") { into(path) }
+			var path = "${project.name}/lib"
+			from("../build$projectFlavour/$path") {
+				into("jre-$runtimeCompatibility/$path")
+			}
+			path = "gradle/repo"
+			from("../build$projectFlavour/$path") {
+				into("jre-$runtimeCompatibility/$path")
+			}
         }
     }
 }

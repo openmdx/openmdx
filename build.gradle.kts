@@ -42,28 +42,47 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-import java.io.FileInputStream
-import java.util.*
-
 plugins {
-	java
+    kotlin("jvm") version "2.1.0"
 }
+
+val projectFlavour = providers.gradleProperty("flavour").getOrElse("2")
+val projectSpecificationVersion = "19"
+val projectMaintenanceVersion = "0"
+val runtimeCompatibility = if (projectFlavour < "4") JavaVersion.VERSION_1_8 else JavaVersion.VERSION_21
+val jmiClassic = projectFlavour == "2"
 
 allprojects {
+
     group = "org.openmdx"
-    version = "2.18.10"
-}
+    version = "${projectFlavour}.${projectSpecificationVersion}.${projectMaintenanceVersion}"
+    layout.buildDirectory.set(layout.projectDirectory.dir("build${projectFlavour}"))
 
-tasks.clean {
-    doLast {
-        getPlatformDir().deleteRecursively();
+    ext {
+        extra["projectFlavour"] = projectFlavour
+        extra["projectSpecificationVersion"] = projectSpecificationVersion
+        extra["projectMaintenanceVersion"] = projectMaintenanceVersion
+        extra["runtimeCompatibility"] = runtimeCompatibility
     }
-}
+    
+	repositories {
+		mavenCentral()
+	    maven {
+	        url = uri("https://datura.econoffice.ch/maven2")
+	    }
+	    maven {
+	       url = uri("file:" + File(project.rootDir, "publish/build/repos/releases"))
+	    }
+	}
 
-var env = Properties()
-env.load(FileInputStream(File(project.rootDir, "build.properties")))
-val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
+    tasks.withType<JavaCompile> {
+        sourceCompatibility = runtimeCompatibility.majorVersion
+        targetCompatibility = runtimeCompatibility.majorVersion
+        options.compilerArgs.add("-Xplugin:Manifold")
+        if(jmiClassic) {
+        	options.compilerArgs.add("-AJMI_CLASSIC")
+        }
+        options.annotationProcessorPath = configurations.annotationProcessor.get()
+    }
 
-fun getPlatformDir(): File {
-	return File(project.rootDir, "jre-$targetPlatform");
 }

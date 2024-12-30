@@ -1,7 +1,7 @@
 distribution/
 source-archive/
 build/
-jre-*/
+/jre-1.8/
 .metadata/
 opt/xstream/
 build
@@ -10,3 +10,6 @@ build
 /bin/
 /.classpath
 /.DS_Store
+/build2/
+/build3/
+/build4/

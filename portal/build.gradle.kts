@@ -43,9 +43,6 @@
  * listed in the NOTICE file.
  */
 
-import java.io.FileInputStream
-import java.util.*
-
 plugins {
 	java
 	`java-library`
@@ -53,34 +50,20 @@ plugins {
 	distribution
 }
 
-repositories {
-	mavenCentral()
-    maven {
-        url = uri("https://datura.econoffice.ch/maven2")
-    }
-}
-
-var env = Properties()
-env.load(FileInputStream(File(project.rootDir, "build.properties")))
-val targetPlatform = JavaVersion.valueOf(env.getProperty("target.platform"))
+val projectFlavour = project.extra["projectFlavour"] as String
+val projectSpecificationVersion = project.extra["projectSpecificationVersion"] as String
+val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
+val runtimeCompatibility = project.extra["runtimeCompatibility"] as JavaVersion
 
 eclipse {
 	project {
-    	name = "openMDX 2 ~ Portal"
+    	name = "openMDX $projectFlavour ~ Portal"
     }
-    jdt {
-		sourceCompatibility = targetPlatform
-    	targetCompatibility = targetPlatform
-    	javaRuntimeName = "JavaSE-$targetPlatform"
-    }
-}
-
-fun getProjectImplementationVersion(): String {
-	return project.version.toString();
-}
-
-fun getDeliverDir(): File {
-	return File(project.rootDir, "jre-" + targetPlatform + "/" + project.name);
+	jdt {
+		sourceCompatibility = runtimeCompatibility
+		targetCompatibility = runtimeCompatibility
+		javaRuntimeName = "JavaSE-${runtimeCompatibility.majorVersion}"
+	}
 }
 
 fun touch(file: File) {
@@ -91,36 +74,44 @@ project.configurations.maybeCreate("openmdxBootstrap")
 val openmdxBootstrap by configurations
 
 dependencies {
-    // implementation
-    implementation("javax:javaee-api:8.0.+")
-    implementation("javax.jdo:jdo-api:3.1")
-    implementation("org.codehaus.groovy:groovy:3.0.+")
-    implementation(project(":core"))
-    // openmdxBootstrap
-    openmdxBootstrap(project(":core"))
+	val projectPlatform = ":openmdx-${projectFlavour}-platform"
+	// implementation
+	implementation(platform(project(projectPlatform)))
+	implementation(project(":core"))
+	implementation("jakarta.platform:jakarta.jakartaee-api")
+	implementation("javax.jdo:jdo-api")
+	implementation("org.codehaus.groovy:groovy")
 	// test
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+	// manifold preprocessor
+	compileOnly("systems.manifold:manifold-preprocessor")
+	annotationProcessor(platform(project(projectPlatform)))
+	annotationProcessor("systems.manifold:manifold-preprocessor")
+	// openmdxBootstrap
+	openmdxBootstrap(project(":core"))
 }
 
 sourceSets {
-    main {
-        java {
-            srcDir("src/main/java")
-            srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
-        }
-        resources {
-        	srcDir("src/main/resources")
-        }
-    }
-    test {
-        java {
-            srcDir("src/test/java")
-            srcDir(layout.buildDirectory.dir("generated/sources/java/test"))
-        }
-        resources {
-        	srcDir("src/test/resources")
-        }
-    }
+	main {
+		java {
+			srcDir("src/main/java")
+			srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
+		}
+		resources {
+			srcDir("src/main/resources")
+			srcDir(layout.buildDirectory.dir("generated/resources/main"))
+		}
+	}
+	test {
+		java {
+			srcDir("src/test/java")
+			srcDir(layout.buildDirectory.dir("generated/sources/test/java"))
+		}
+		resources {
+			srcDir("src/test/resources")
+		}
+	}
 }
 
 touch(file(layout.buildDirectory.dir("generated/sources/js/portal-all.js")))
@@ -284,7 +275,6 @@ tasks {
 	}
 	compileJava {
 	    dependsOn("generate-model")
-	    options.release.set(Integer.valueOf(targetPlatform.majorVersion))
 	}
 	assemble {
 		dependsOn(
@@ -312,7 +302,7 @@ tasks {
 			":portal:generate-model",
 			":portal:processResources"
 		)
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-portal.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -334,7 +324,7 @@ tasks {
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-portal-sources.jar") {
 		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-		destinationDirectory.set(File(getDeliverDir(), "lib"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-portal-sources.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -354,7 +344,7 @@ tasks {
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-inspector.war") {
 		dependsOn("compress-and-append-js")
-		destinationDirectory.set(File(getDeliverDir(), "deployment-unit"))
+		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/deployment-unit"))
 		archiveFileName.set("openmdx-inspector.war")
 		includeEmptyDirs = false
 		manifest {
@@ -423,20 +413,27 @@ tasks {
 
 distributions {
     main {
-    	distributionBaseName.set("openmdx-" + getProjectImplementationVersion() + "-${project.name}-jre-" + targetPlatform)
+		distributionBaseName.set("openmdx-${project.version}-${project.name}-jre-${runtimeCompatibility}")
         contents {
         	// portal
-        	from(".") { into(project.name); include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts") }
-            from("src") { into(project.name + "/src") }
+        	from(".") {
+				into(project.name)
+				include("LICENSE", "*.LICENSE", "NOTICE", "*.properties", "build*.*", "*.xml", "*.kts")
+			}
+            from("src") { into("${project.name}/src") }
             // etc
-            from("etc") { into(project.name + "/etc") }
+            from("etc") { into("${project.name}/etc") }
             // rootDir
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
-			var path = "jre-$targetPlatform/${project.name}/lib"
-			from("../$path") { into(path) }
-			path = "jre-$targetPlatform/gradle/repo"
-			from("../$path") { into(path) }
+			var path = "${project.name}/lib"
+			from("../build$projectFlavour/$path") {
+				into("jre-$runtimeCompatibility/$path")
+			}
+			path = "gradle/repo"
+			from("../build$projectFlavour/$path") {
+				into("jre-$runtimeCompatibility/$path")
+			}
         }
     }
 }
