@@ -54,7 +54,7 @@ dependencies {
     constraints {
     	
 		val atomikosVersion = "6.0.0"
-		val bootstrapVersion = "2.18.99"
+		val bootstrapVersion = "3.18.99"
 		val cacheVersion = "1.1.1"
 		val flexmarkVersion = "0.62.2"
 		val groovyVersion = "3.0.+"
