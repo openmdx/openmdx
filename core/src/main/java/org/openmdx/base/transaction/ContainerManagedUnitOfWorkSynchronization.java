@@ -44,8 +44,13 @@
  */
 package org.openmdx.base.transaction;
 
+#if JAVA_8
 import javax.transaction.Synchronization;
 import javax.transaction.TransactionSynchronizationRegistry;
+#else
+import jakarta.transaction.Synchronization;
+import jakarta.transaction.TransactionSynchronizationRegistry;
+#endif
 
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.exception.RuntimeServiceException;

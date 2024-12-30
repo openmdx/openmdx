@@ -46,7 +46,7 @@ package org.openmdx.application.transaction;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.transaction.TransactionManager;
+import #if JAVA_8 javax.transaction.TransactionManager #else jakarta.transaction.TransactionManager #endif;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.exception.BasicException;
