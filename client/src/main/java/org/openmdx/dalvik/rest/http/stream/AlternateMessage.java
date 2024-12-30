@@ -48,7 +48,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
-import javax.resource.ResourceException;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 import javax.resource.cci.InteractionSpec;
 
 import org.openmdx.application.rest.http.HttpContext;

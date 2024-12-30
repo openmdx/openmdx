@@ -47,7 +47,7 @@ package org.openmdx.base.resource.spi;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javax.resource.cci.IndexedRecord;
+import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

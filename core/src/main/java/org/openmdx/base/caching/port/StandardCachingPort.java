@@ -44,7 +44,7 @@
  */
 package org.openmdx.base.caching.port;
 
-import javax.resource.ResourceException;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 import org.openmdx.base.caching.datastore.CacheAdapter;
 import org.openmdx.base.caching.virtualobjects.VirtualObjectProvider;

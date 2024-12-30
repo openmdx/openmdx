@@ -46,7 +46,7 @@ package org.openmdx.base.rest.cci;
 
 import java.io.Serializable;
 
-import javax.resource.cci.ConnectionSpec;
+import #if JAVA_8 javax.resource.cci.ConnectionSpec #else jakarta.resource.cci.ConnectionSpec #endif;
 
 /**
  * REST Connection Specification

@@ -44,9 +44,15 @@
  */
 package org.openmdx.base.resource.spi;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Connection;
+import jakarta.resource.cci.Interaction;
+#endif
 
 
 /**

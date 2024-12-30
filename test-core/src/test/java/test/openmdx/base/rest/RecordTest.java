@@ -49,8 +49,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.MappedRecord;
+#endif
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

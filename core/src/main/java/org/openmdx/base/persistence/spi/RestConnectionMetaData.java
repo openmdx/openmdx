@@ -48,8 +48,13 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.ConnectionMetaData;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.ConnectionMetaData;
+#endif
 
 import org.openmdx.base.Version;
 

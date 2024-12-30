@@ -93,8 +93,13 @@ dependencies {
     testImplementation("org.mockito:mockito-core")
     testImplementation("org.mockito:mockito-junit-jupiter")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
-    testRuntimeOnly("com.atomikos:transactions-jta")
-    testRuntimeOnly("com.atomikos:transactions-jdbc")
+	if(runtimeCompatibility == JavaVersion.VERSION_1_8) {
+		testRuntimeOnly(group = "com.atomikos", name = "transactions-jta")
+		testRuntimeOnly(group = "com.atomikos", name = "transactions-jdbc")
+	} else {
+		testRuntimeOnly(group = "com.atomikos", name = "transactions-jta", classifier = "jakarta")
+		testRuntimeOnly(group = "com.atomikos", name = "transactions-jdbc", classifier = "jakarta")
+	}
     // openmdxBootstrap
     openmdxBootstrap(project(":core"))
 }

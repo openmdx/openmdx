@@ -47,8 +47,13 @@ package org.openmdx.application.mof.repository.accessor;
 import java.util.Collections;
 import java.util.Map;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Interaction;
+#endif
 
 import org.openmdx.base.dataprovider.kernel.Dataprovider_2;
 import org.openmdx.base.resource.spi.Port;

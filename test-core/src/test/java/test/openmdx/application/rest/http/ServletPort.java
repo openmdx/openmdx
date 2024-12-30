@@ -63,6 +63,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.servlet.AsyncContext;
@@ -84,6 +85,31 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
+import javax.servlet.http.HttpSessionContext;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Interaction;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletConnection;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.WriteListener;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpUpgradeHandler;
+import jakarta.servlet.http.Part;
+#endif
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -283,13 +309,16 @@ public class ServletPort
             public ServletContext getServletContext() {
                 throw new UnsupportedOperationException();
             }
+            #if JAVA_8
             /**
-             * @deprecated
+             * @deprecated with no replacement
              */
+            @Deprecated
             @SuppressWarnings("dep-ann")
-            public javax.servlet.http.HttpSessionContext getSessionContext() {
+            public HttpSessionContext getSessionContext() {
                 throw new UnsupportedOperationException();
             }
+            #endif
             /* (non-Javadoc)
              * @see javax.servlet.http.HttpSession#getValue(java.lang.String)
              */
@@ -468,6 +497,7 @@ public class ServletPort
             class EmbeddedRequest implements HttpServletRequest {
                 private final Map<String,String> headers = new HashMap<String,String>();
                 private final Map<String,String[]> parameters = new HashMap<String,String[]>();
+                
                 @Override
                 public String getAuthType() {
                     throw new UnsupportedOperationException();
@@ -574,7 +604,7 @@ public class ServletPort
                 public boolean isRequestedSessionIdFromURL() {
                     throw new UnsupportedOperationException();
                 }
-                @Override
+//              @Override
                 public boolean isRequestedSessionIdFromUrl() {
                     throw new UnsupportedOperationException();
                 }
@@ -684,7 +714,7 @@ public class ServletPort
                         ServletMessage.this.outputTarget.body.getCharacterSource()
                     );
                 }
-                @Override
+//              @Override
                 public String getRealPath(
                     String path
                 ) {
@@ -848,16 +878,14 @@ public class ServletPort
                  */
                 @Override
                 public long getContentLengthLong() {
-                    // TODO Auto-generated method stub
-                    return 0;
+                    throw new UnsupportedOperationException();
                 }
                 /* (non-Javadoc)
                  * @see javax.servlet.http.HttpServletRequest#changeSessionId()
                  */
                 @Override
                 public String changeSessionId() {
-                    // TODO Auto-generated method stub
-                    return null;
+                    throw new UnsupportedOperationException();
                 }
                 /* (non-Javadoc)
                  * @see javax.servlet.http.HttpServletRequest#upgrade(java.lang.Class)
@@ -866,9 +894,22 @@ public class ServletPort
                 public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass)
                     throws IOException,
                     ServletException {
-                    // TODO Auto-generated method stub
-                    return null;
+                    throw new UnsupportedOperationException();
                 }
+                #if JAVA_8 #else
+				@Override
+				public String getRequestId() {
+                    throw new UnsupportedOperationException();
+				}
+				@Override
+				public String getProtocolRequestId() {
+                    throw new UnsupportedOperationException();
+				}
+				@Override
+				public ServletConnection getServletConnection() {
+                    throw new UnsupportedOperationException();
+				}
+				#endif
             }
             class EmbeddedResponse implements HttpServletResponse {
                 protected final Map<String,String> headers = new HashMap<String,String>();

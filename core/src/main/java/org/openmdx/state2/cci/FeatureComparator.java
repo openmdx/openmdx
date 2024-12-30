@@ -43,7 +43,7 @@
  */
 package org.openmdx.state2.cci;
 
-import javax.resource.cci.MappedRecord;
+import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;

@@ -54,10 +54,17 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.MappedRecord;
+import jakarta.resource.cci.Record;
+#endif
 
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.mof.cci.Multiplicity;

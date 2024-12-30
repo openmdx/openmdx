@@ -46,7 +46,7 @@ package org.openmdx.base.accessor.rest.spi;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import javax.resource.spi.LocalTransactionException;
+import #if JAVA_8 javax.resource.spi.LocalTransactionException #else jakarta.resource.spi.LocalTransactionException #endif;
 
 /**
  * Must not run with other test classes due to factory caching"

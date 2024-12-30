@@ -47,8 +47,13 @@ package org.openmdx.base.accessor.jmi.cci;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefPackage;
 import javax.jmi.reflect.RefStruct;
+#if JAVA_8
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.Record;
+#endif
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;

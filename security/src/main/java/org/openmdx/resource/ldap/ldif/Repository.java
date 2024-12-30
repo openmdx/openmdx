@@ -50,8 +50,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.spi.CommException;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.CommException;
+#endif
 
 import org.apache.directory.api.asn1.util.Oid;
 import org.apache.directory.api.ldap.codec.api.BinaryAttributeDetector;

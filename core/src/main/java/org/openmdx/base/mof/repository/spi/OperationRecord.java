@@ -48,7 +48,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 
-import javax.resource.cci.IndexedRecord;
+import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
 
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.naming.Path;

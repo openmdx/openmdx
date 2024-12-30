@@ -44,7 +44,7 @@
  */
 package org.openmdx.state2.aopm;
 
-import javax.resource.ResourceException;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.state2.spi.TechnicalAttributes;

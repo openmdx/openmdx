@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+#if JAVA_8
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -57,6 +58,15 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
+#else
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
+#endif
 
 /** A servlet filter that simply adds all header specified in its config
 to replies the filter is mapped to. An example would be to set the cache

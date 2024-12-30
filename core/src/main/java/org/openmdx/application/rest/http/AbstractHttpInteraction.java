@@ -47,11 +47,19 @@ package org.openmdx.application.rest.http;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 import javax.resource.spi.CommException;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.Record;
+import jakarta.resource.spi.CommException;
+#endif
 
 import org.openmdx.application.rest.http.spi.Message;
 import org.openmdx.base.exception.ServiceException;

@@ -67,7 +67,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import javax.resource.cci.MappedRecord;
+import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 import javax.xml.datatype.DatatypeFactory;
 
 import org.junit.jupiter.api.Assertions;

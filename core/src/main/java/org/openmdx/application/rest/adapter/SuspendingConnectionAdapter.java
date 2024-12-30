@@ -44,6 +44,8 @@
  */
 package org.openmdx.application.rest.adapter;
 
+#if JAVA_8
+import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
@@ -51,8 +53,10 @@ import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.Record;
 import javax.resource.spi.EISSystemException;
+import javax.resource.spi.IllegalStateException;
 import javax.resource.spi.LocalTransactionException;
 import javax.resource.spi.ResourceAllocationException;
+import javax.resource.spi.SecurityException;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.InvalidTransactionException;
@@ -61,6 +65,28 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
+#else
+import jakarta.resource.NotSupportedException;
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Connection;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.LocalTransaction;
+import jakarta.resource.cci.Record;
+import jakarta.resource.spi.EISSystemException;
+import jakarta.resource.spi.IllegalStateException;
+import jakarta.resource.spi.LocalTransactionException;
+import jakarta.resource.spi.ResourceAllocationException;
+import jakarta.resource.spi.SecurityException;
+import jakarta.transaction.HeuristicMixedException;
+import jakarta.transaction.HeuristicRollbackException;
+import jakarta.transaction.InvalidTransactionException;
+import jakarta.transaction.RollbackException;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.Transaction;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.UserTransaction;
+#endif
 
 import org.openmdx.application.transaction.TransactionManagerFactory;
 import org.openmdx.application.transaction.UserTransactions;
@@ -229,18 +255,20 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
                 }
             } catch (SystemException exception) {
             	throw ResourceExceptions.initHolder(
-                    new javax.resource.spi.EISSystemException(
+                    new EISSystemException(
 	                    "Unable to start the current transaction",
                         BasicException.newEmbeddedExceptionStack(exception)
                     )
                 );
-            } catch (javax.transaction.NotSupportedException exception) {
+            } catch (NotSupportedException exception) {
             	throw ResourceExceptions.initHolder(
-                    new javax.resource.NotSupportedException(
+                    new #if JAVA_8 javax #else jakarta #endif.resource.NotSupportedException(
 	                    "Unable to start the current transaction",
                         BasicException.newEmbeddedExceptionStack(exception)
                     )
                 );
+            } catch (#if JAVA_8 javax #else jakarta #endif.transaction.NotSupportedException exception) {
+                	// TODO: handle exception
             }
         }
 
@@ -258,21 +286,21 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
                 }
             } catch (SystemException exception) {
             	throw ResourceExceptions.initHolder(
-                    new javax.resource.spi.EISSystemException(
+                    new EISSystemException(
 	                    "Unable to commit the current transaction",
                         BasicException.newEmbeddedExceptionStack(exception)
                     )
                 );
             } catch (SecurityException exception) {
             	throw ResourceExceptions.initHolder(
-                    new javax.resource.spi.SecurityException(
+                    new SecurityException(
 	                    "Unable to commit the current transaction",
                         BasicException.newEmbeddedExceptionStack(exception)
                     )
                 );
             } catch (IllegalStateException exception) {
             	throw ResourceExceptions.initHolder(
-                    new javax.resource.spi.IllegalStateException(
+                    new IllegalStateException(
 	                    "Unable to commit the current transaction",
                         BasicException.newEmbeddedExceptionStack(exception)
                     )
@@ -367,7 +395,7 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
 	                );
                 } catch (IllegalStateException exception) {
                 	throw ResourceExceptions.initHolder(
-	                    new javax.resource.spi.IllegalStateException(
+	                    new IllegalStateException(
                         "Unable to resume the given transaction",
 	                        BasicException.newEmbeddedExceptionStack(exception)
 	                    )
@@ -409,7 +437,7 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
          */
         private <T> T execute(
             Class<T> returnType,
-            InteractionSpec ispec, 
+            InteractionSpec ispec,
             Record input,
             Record output
         ) throws ResourceException {

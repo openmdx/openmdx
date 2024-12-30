@@ -44,8 +44,13 @@
  */
 package org.openmdx.state2.aopm;
 
+#if JAVA_8
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
+#else
+import jakarta.resource.NotSupportedException;
+import jakarta.resource.ResourceException;
+#endif
 
 import org.openmdx.base.dataprovider.layer.spi.AbstractLayer;
 import org.openmdx.base.resource.cci.RestFunction;

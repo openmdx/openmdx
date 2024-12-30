@@ -47,7 +47,7 @@ package org.openmdx.base.rest.spi;
 import java.util.Collection;
 import java.util.List;
 
-import javax.resource.cci.IndexedRecord;
+import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
 
 import org.openmdx.base.rest.cci.ConditionRecord;
 import org.openmdx.base.rest.cci.FeatureOrderRecord;

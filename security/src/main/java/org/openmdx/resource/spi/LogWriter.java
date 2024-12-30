@@ -46,7 +46,7 @@ package org.openmdx.resource.spi;
 
 import java.io.PrintWriter;
 
-import javax.resource.ResourceException;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 public class LogWriter extends PrintWriter {
 

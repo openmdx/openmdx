@@ -48,11 +48,20 @@ import java.io.Serializable;
 
 import javax.naming.NamingException;
 import javax.naming.Reference;
+
+#if JAVA_8
 import javax.resource.Referenceable;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnectionFactory;
+#else
+import jakarta.resource.Referenceable;
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.ConnectionManager;
+import jakarta.resource.spi.ConnectionRequestInfo;
+import jakarta.resource.spi.ManagedConnectionFactory;
+#endif
 
 import org.openmdx.resource.cci.AuthenticationInfo;
 import org.openmdx.resource.cci.ConnectionFactory;

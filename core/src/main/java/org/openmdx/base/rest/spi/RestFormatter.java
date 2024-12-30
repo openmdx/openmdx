@@ -46,8 +46,13 @@ package org.openmdx.base.rest.spi;
 
 import java.io.ObjectOutput;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.IndexedRecord;
+#endif
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;

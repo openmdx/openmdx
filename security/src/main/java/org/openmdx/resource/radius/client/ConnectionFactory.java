@@ -44,8 +44,13 @@
  */
 package org.openmdx.resource.radius.client;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.ConnectionManager;
+#endif
 
 import org.openmdx.resource.spi.AbstractConnectionFactory;
 import org.openmdx.uses.net.sourceforge.jradiusclient.RadiusConnection;

@@ -54,28 +54,28 @@ dependencies {
     constraints {
     	
 		val atomikosVersion = "6.0.0"
-		val bootstrapVersion = "2.18.10"
+		val bootstrapVersion = "3.18.99"
 		val cacheVersion = "1.1.1"
 		val flexmarkVersion = "0.62.2"
 		val groovyVersion = "3.0.+"
 		val jdoVersion = "3.1"
-		val jakartaVersion = "8.0.0"
+		val jakartaVersion = "8.0.+"
 		val junitVersion = "5.11.3"
 		val ldapVersion = "2.1.+"
 		val manifoldVersion = "2024.1.43"
 		val mockitoVersion = "4.11.0"
 		val postgresVersion = "42.7.+"
 		val radiusVersion = "1.1.+"
-		val servletVersion = "3.1.0"
+		val servletVersion = "4.0.+"
 		val tomcatVersion = "9.0.+"
 		
 		api("com.atomikos:transactions-jta:$atomikosVersion")
 		api("com.atomikos:transactions-jdbc:$atomikosVersion")
 	    api("com.vladsch.flexmark:flexmark:$flexmarkVersion")
 	    api("jakarta.platform:jakarta.jakartaee-api:$jakartaVersion")
+	    api("jakarta.servlet:jakarta.servlet-api:$servletVersion")
 	    api("javax.cache:cache-api:$cacheVersion")
 	    api("javax.jdo:jdo-api:$jdoVersion")
-	    api("javax.servlet:javax.servlet-api:$servletVersion")
 		api("org.apache.directory.api:apache-ldap-api:$ldapVersion")
 		api("org.apache.tomcat:tomcat-catalina:$tomcatVersion")
 	    api("org.codehaus.groovy:groovy:$groovyVersion")

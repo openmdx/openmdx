@@ -174,8 +174,13 @@ dependencies {
     implementation("javax.jdo:jdo-api")
     implementation("javax.cache:cache-api")
 	implementation("com.vladsch.flexmark:flexmark")
-	implementation("com.atomikos:transactions-jta")
-	implementation("com.atomikos:transactions-jdbc")
+	if(runtimeCompatibility == JavaVersion.VERSION_1_8) {
+		implementation(group = "com.atomikos", name = "transactions-jta")
+		implementation(group = "com.atomikos", name = "transactions-jdbc")
+	} else {
+		implementation(group = "com.atomikos", name = "transactions-jta", classifier = "jakarta")
+		implementation(group = "com.atomikos", name = "transactions-jdbc", classifier = "jakarta")
+	}
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.mockito:mockito-core")

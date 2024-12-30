@@ -46,11 +46,17 @@ package org.openmdx.base.resource.cci;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.RecordFactory;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.MappedRecord;
+import jakarta.resource.cci.RecordFactory;
+#endif
 
 /**
  * The ExtendedRecordFactory interface is used for creating

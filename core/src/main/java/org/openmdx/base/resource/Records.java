@@ -47,9 +47,15 @@ package org.openmdx.base.resource;
 
 import java.lang.reflect.Array;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.Record;
+#endif
 
 import org.openmdx.base.resource.cci.ArrayBasedIndexedRecord;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;

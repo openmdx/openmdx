@@ -53,9 +53,15 @@ import java.util.UUID;
 import javax.jdo.JDOUserException;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.Record;
+#endif
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;

@@ -44,9 +44,15 @@
  */
 package org.openmdx.base.dataprovider.layer.persistence.jdbc;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.Record;
+#endif
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Multiplicity;

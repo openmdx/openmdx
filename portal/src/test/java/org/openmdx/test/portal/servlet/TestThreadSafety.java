@@ -64,6 +64,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
+import org.openmdx.base.Version;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.WebKeys;
@@ -172,7 +173,7 @@ public class TestThreadSafety {
         String name
     ) throws MalformedURLException, FileNotFoundException, IOException {
         try(
-            InputStream is = new FileInputStream("build/temp/TestThreadSafety.config");
+            InputStream is = new FileInputStream("build" + Version.getFlavourVersion() + "/temp/TestThreadSafety.config");
             BufferedReader reader = new BufferedReader(
                 new InputStreamReader(is)
             )

@@ -44,6 +44,7 @@
  */
 package org.openmdx.base.rest.spi;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.IndexedRecord;
@@ -54,6 +55,18 @@ import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 import javax.resource.spi.EISSystemException;
 import javax.resource.spi.LocalTransactionException;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Connection;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.LocalTransaction;
+import jakarta.resource.cci.MappedRecord;
+import jakarta.resource.cci.Record;
+import jakarta.resource.spi.EISSystemException;
+import jakarta.resource.spi.LocalTransactionException;
+#endif
 
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.InteractionSpecs;

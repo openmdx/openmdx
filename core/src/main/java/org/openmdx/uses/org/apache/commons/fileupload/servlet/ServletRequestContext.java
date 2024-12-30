@@ -30,7 +30,7 @@ import static java.lang.String.format;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.servlet.http.HttpServletRequest;
+import #if JAVA_8 javax.servlet.http.HttpServletRequest #else jakarta.servlet.http.HttpServletRequest #endif;
 
 import org.openmdx.uses.org.apache.commons.fileupload.FileUploadBase;
 import org.openmdx.uses.org.apache.commons.fileupload.UploadContext;

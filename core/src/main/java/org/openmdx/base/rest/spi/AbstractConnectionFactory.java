@@ -44,9 +44,16 @@
  */
 package org.openmdx.base.rest.spi;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.RecordFactory;
 import javax.resource.cci.ResourceAdapterMetaData;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.RecordFactory;
+import jakarta.resource.cci.ResourceAdapterMetaData;
+#endif
+
 
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.ConnectionFactory;

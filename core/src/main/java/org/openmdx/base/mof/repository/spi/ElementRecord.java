@@ -50,8 +50,13 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.IndexedRecord;
+#endif
 
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.RuntimeServiceException;

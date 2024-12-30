@@ -56,7 +56,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.resource.cci.MappedRecord;
+import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.application.xml.Importer;
