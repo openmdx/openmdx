@@ -520,7 +520,7 @@ public class TestRecord {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+ 	@SuppressWarnings("unchecked")
 	public void testVariableSizedMappedRecordDeserialization() throws Throwable {
 		MappedRecord original = Records.getRecordFactory().createMappedRecord("tbs");
 		String key1 = "k";
@@ -534,14 +534,14 @@ public class TestRecord {
 		}
 		{
 			Object key = getKey(original, "v2");
-			if("2".equals(Version.getFlavourVersion())) { 
-				// JDO 3.1
-				Assertions.assertNotSame(key2, key);
-			} else {
-				// JDO 3.2
+			if("4".equals(Version.getFlavourVersion())) {
+				// Java 21
 				Assertions.assertSame(key2, key);
+			} else {
+				// Java 8
+				Assertions.assertNotSame(key2, key);
 			}
-			Assertions.assertSame(Integer.valueOf(17), key);
+ 			Assertions.assertSame(Integer.valueOf(17), key);
 		}
 		ByteArrayOutputStream out0 = new ByteArrayOutputStream();
 		ObjectOutputStream out1 = new ObjectOutputStream(out0);
@@ -558,12 +558,12 @@ public class TestRecord {
 		}
 		{
 			Object key = getKey(copy, "v2");
-			if("2".equals(Version.getFlavourVersion())) { 
-				// JDO 3.1
-				Assertions.assertNotSame(key2, key);
-			} else {
-				// JDO 3.2
+			if("4".equals(Version.getFlavourVersion())) {
+				// Java 21
 				Assertions.assertSame(key2, key);
+			} else {
+				// Java 8
+				Assertions.assertNotSame(key2, key);
 			}
 			Assertions.assertSame(Integer.valueOf(17), key);
 		}
