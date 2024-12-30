@@ -48,7 +48,7 @@ import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
-import javax.transaction.Synchronization;
+import javax.transaction.Synchronization; // JDO 3 requires JTA 1.3!
 
 import org.openmdx.base.persistence.spi.UnitOfWork;
 import org.openmdx.base.transaction.Status;
@@ -56,7 +56,7 @@ import org.openmdx.base.transaction.Status;
 /**
  * Transaction Adapter
  */
-class TransactionAdapter implements Transaction, javax.transaction.Synchronization {
+class TransactionAdapter implements Transaction, Synchronization {
 
     /**
      * Constructor

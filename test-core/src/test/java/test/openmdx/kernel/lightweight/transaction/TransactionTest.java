@@ -53,7 +53,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
 import javax.naming.NamingException;
-import javax.transaction.Synchronization; // Jakarta 8 for JDO!
+import javax.transaction.Synchronization; // JDO 3 requires JTA 1.3!
 #if JAVA_8
 	import javax.resource.ResourceException;
 	import javax.transaction.SystemException;
