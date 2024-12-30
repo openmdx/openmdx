@@ -82,9 +82,16 @@ import javax.jmi.reflect.RefException;
 import javax.jmi.reflect.RefFeatured;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
+#if JAVA_8
+import javax.persistence.TypedQuery;
 import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.Record;
+#endif
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.cci2.QualifierType;
@@ -142,6 +149,7 @@ import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.loading.Factory;
 import org.w3c.jpa3.AbstractObject;
+import org.w3c.jpa3.DateTime;
 import org.w3c.spi.StateAccessor;
 
 /**
@@ -161,7 +169,7 @@ public class RefRootPackage_1
      * @param viewManager
      * @param interactionSpec
      * @param delegate
-     * @param packageImpls
+     * @param implementationMapper
      * @param userObjects
      * @param persistenceManagerFactory
      */
@@ -1474,7 +1482,7 @@ public class RefRootPackage_1
 	                    "Unsupported query language",
 	                    new BasicException.Parameter(
 	                        "supported", 
-	                        org.openmdx.base.persistence.cci.Queries.QUERY_LANGUAGE
+	                        Queries.QUERY_LANGUAGE
 	                    ),
 	                    new BasicException.Parameter(
 	                        "actual",
@@ -1489,6 +1497,13 @@ public class RefRootPackage_1
             	);
             }
         }
+
+        #if JAVA_8 #else
+        @Override	
+        public <T> javax.jdo.JDOQLTypedQuery<T> newJDOQLTypedQuery(Class<T> aClass) {
+            throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+        }
+        #endif
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class)
@@ -1846,7 +1861,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[], boolean)
          */
-        @Override
+//        @Override
         public void makeTransientAll(Object[] pcs, boolean useFetchPlan) {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
@@ -2024,7 +2039,7 @@ public class RefRootPackage_1
          */
         @Override
         public void setMultithreaded(boolean flag) {
-            if(flag != getMultithreaded()) throw new javax.jdo.JDOUnsupportedOptionException(
+            if(flag != getMultithreaded()) throw new JDOUnsupportedOptionException(
                 "The " + ConfigurableProperty.Multithreaded.qualifiedName() + 
                 " property can be set at factory level only"
             );
@@ -2128,7 +2143,7 @@ public class RefRootPackage_1
                     } else if (ModelHelper.isDerived(attributeDef)){
                         Object value = 
                             PrimitiveTypes.DATE.equals(typeName) ? org.w3c.jpa3.Date.toJDO((XMLGregorianCalendar) source) :
-                            PrimitiveTypes.DATETIME.equals(typeName) ? org.w3c.jpa3.DateTime.toJDO((Date) source) :
+                            PrimitiveTypes.DATETIME.equals(typeName) ? DateTime.toJDO((Date) source) :
                             source;
                         try {
                             jpaClass.getField(jpaFeature).set(jpaObject, value);

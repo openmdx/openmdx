@@ -69,6 +69,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Dumper;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.Version;
 import org.openmdx.junit5.JDOExtension;
 import org.openmdx.junit5.OpenmdxTestCoreStandardExtension;
 import org.openmdx.kernel.loading.Resources;
@@ -167,15 +168,21 @@ public class TestModelRepository {
             }
         }
     }
-            
+     
+    /**
+     * Determine the flavour specific build directory
+     * 
+     * @return the flavour specific build directory
+     */
+    private static File getBuildDirectory() {
+    	return new File("build" + Version.getFlavourVersion()); 
+    }
+    
     public static void main(String...strings) throws ServiceException, FileNotFoundException{
         Set<String> classes = new HashSet<String>();
         final Model_1_0 model = Model_1Factory.getModel();
-//        for(ModelElement_1_0 element : model.getContent()) {
-//            classes.add(element.objGetClass().substring(15));
-//        }
         classes.add("Tag");
-        final File dir = new File("build/src/java/org/openmdx/base/mof/repository/spi");
+        final File dir = new File(getBuildDirectory(), "src/java/org/openmdx/base/mof/repository/spi");
         dir.mkdirs();
         for(String name : classes) {
             final File file = new File(dir, name + "Record.java");
@@ -283,7 +290,7 @@ public class TestModelRepository {
     
     @Test
     public void dumpModel() throws FileNotFoundException, ServiceException, InterruptedException{
-        final File build = new File("build");
+        final File build = getBuildDirectory();
         final File temp = new File(build, "tmp");
         final File destination = new File(temp, "dumpModel");
         final boolean created = destination.mkdir();

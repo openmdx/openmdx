@@ -48,9 +48,13 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.MappedRecord;
+#endif
 
 import org.omg.mof.spi.Names;
 import org.openmdx.application.xml.spi.Dataprovider_2Target;

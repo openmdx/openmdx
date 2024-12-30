@@ -71,8 +71,13 @@ import javax.jmi.reflect.RefException;
 import javax.jmi.reflect.RefFeatured;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.InteractionSpec;
+#endif
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.mof.cci.ModelAttributes;

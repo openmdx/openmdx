@@ -46,8 +46,13 @@ package org.openmdx.resource.spi;
 
 import java.util.Arrays;
 
+#if JAVA_8
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.security.PasswordCredential;
+#else
+import jakarta.resource.spi.ManagedConnectionFactory;
+import jakarta.resource.spi.security.PasswordCredential;
+#endif
 import javax.security.auth.Subject;
 
 import org.openmdx.resource.cci.AuthenticationInfo;
@@ -94,7 +99,7 @@ public class PasswordCredentials {
      * Create a password credential
      * 
      * @param target the managed connection factory for which it is meant
-     * @param userName the EIS user name
+     * @param userName the EIS username
      * @param password the EIS password
      * 
      * @return a new password credential
@@ -116,7 +121,7 @@ public class PasswordCredentials {
      * Create a password credential
      * 
      * @param target the managed connection factory for which it is meant
-     * @param userName the EIS user name
+     * @param userName the EIS username
      * @param password the EIS password
      * 
      * @return a new password credential
@@ -137,9 +142,7 @@ public class PasswordCredentials {
      * Create a password credential
      * 
      * @param target the managed connection factory for which it is meant
-     * @param userName the EIS user name
-     * @param password the EIS password
-     * 
+     * @param authenticationInfo the authentication information
      * @return a new password credential
      */
     public static PasswordCredential newPasswordCredential(

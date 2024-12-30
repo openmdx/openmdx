@@ -58,9 +58,15 @@ import java.security.cert.CertPathValidatorResult;
 import java.security.cert.Certificate;
 import java.security.cert.PKIXParameters;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.security.PasswordCredential;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.ConnectionRequestInfo;
+import jakarta.resource.spi.security.PasswordCredential;
+#endif
 import javax.security.auth.Subject;
 
 import org.openmdx.resource.spi.AbstractManagedConnection;

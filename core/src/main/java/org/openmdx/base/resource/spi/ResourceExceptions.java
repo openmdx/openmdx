@@ -44,9 +44,15 @@
  */
 package org.openmdx.base.resource.spi;
 
+#if JAVA_8
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.spi.EISSystemException;
+#else
+import jakarta.resource.NotSupportedException;
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.EISSystemException;
+#endif
 
 import org.openmdx.kernel.exception.BasicException;
 

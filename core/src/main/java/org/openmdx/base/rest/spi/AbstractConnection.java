@@ -44,18 +44,25 @@
  */
 package org.openmdx.base.rest.spi;
 
-import javax.resource.NotSupportedException;
-import javax.resource.ResourceException;
-import org.openmdx.base.resource.cci.ConnectionFactory;
-import javax.resource.cci.ResultSetInfo;
-import javax.resource.spi.IllegalStateException;
-
 import org.openmdx.base.Version;
+import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionMetaData;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.kernel.exception.BasicException;
+
+#if JAVA_8
+import javax.resource.NotSupportedException;
+import javax.resource.ResourceException;
+import javax.resource.cci.ResultSetInfo;
+import javax.resource.spi.IllegalStateException;
+#else
+import jakarta.resource.NotSupportedException;
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.ResultSetInfo;
+import jakarta.resource.spi.IllegalStateException;
+#endif
 
 /**
  * Abstract Connection

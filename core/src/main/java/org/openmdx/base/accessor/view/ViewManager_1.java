@@ -70,7 +70,7 @@ import javax.jdo.Transaction;
 import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
 import javax.jdo.listener.InstanceLifecycleListener;
-import javax.resource.cci.InteractionSpec;
+import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
 
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
@@ -1043,8 +1043,10 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
      * (non-Javadoc)
      * 
      * @see javax.jdo.PersistenceManager#getObjectsById(java.lang.Object[], boolean)
+     *
+     * @deprecated with JDO 2.1
+     * removed with JDO 3.2
      */
-    @Override
     public Object[] getObjectsById(
         Object[] oids,
         boolean validate
@@ -1247,8 +1249,10 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
      * (non-Javadoc)
      * 
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[], boolean)
+     *
+     * @deprecated with JDO 2.1
+     * removed with JDO 3.2
      */
-    @Override
     public void makeTransientAll(
         Object[] pcs,
         boolean useFetchPlan
@@ -1366,6 +1370,13 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
     ) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
+
+    #if JAVA_8 #else
+    @Override	
+    public <T> javax.jdo.JDOQLTypedQuery<T> newJDOQLTypedQuery(Class<T> aClass) {
+        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+    }
+    #endif
 
     /*
      * (non-Javadoc)
@@ -1577,8 +1588,10 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
      * (non-Javadoc)
      * 
      * @see javax.jdo.PersistenceManager#retrieveAll(java.lang.Object[], boolean)
+     *
+     * @deprecated with JDO 2.1
+     * removed with JDO 3.2
      */
-    @Override
     public void retrieveAll(
         Object[] pcs,
         boolean useFetchPlan
@@ -1696,7 +1709,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
     // Extends CachingMarshaller
     //------------------------------------------------------------------------
 
-    /**
+     /**
      * Marshals an object
      *
      * @param source

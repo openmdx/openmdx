@@ -94,9 +94,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.cci.MappedRecord;
+#endif
+
 import javax.sql.DataSource;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;

@@ -48,9 +48,9 @@ package org.openmdx.base.dataprovider.layer.persistence.jdbc;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import javax.resource.ResourceException;
-import javax.resource.cci.IndexedRecord;
-import javax.resource.cci.MappedRecord;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
+import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
+import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.jupiter.api.Assertions;

@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import #if JAVA_8 javax.servlet.http.HttpServletRequest #else jakarta.servlet.http.HttpServletRequest #endif;
 
 import org.openmdx.uses.org.apache.commons.fileupload.FileItem;
 import org.openmdx.uses.org.apache.commons.fileupload.FileItemFactory;

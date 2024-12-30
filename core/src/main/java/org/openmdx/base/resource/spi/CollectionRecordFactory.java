@@ -49,9 +49,15 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+#if JAVA_8
 import javax.resource.NotSupportedException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
+#else
+import jakarta.resource.NotSupportedException;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.MappedRecord;
+#endif
 
 /**
  * Collection Record Factory

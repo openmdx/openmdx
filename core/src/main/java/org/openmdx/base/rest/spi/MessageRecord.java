@@ -51,9 +51,14 @@ import java.io.InvalidObjectException;
 import java.io.NotSerializableException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-
+#if JAVA_8
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.cci.MappedRecord;
+import jakarta.resource.cci.Record;
+#endif
+
 
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;

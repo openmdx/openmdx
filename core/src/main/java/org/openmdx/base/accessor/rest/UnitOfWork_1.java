@@ -60,10 +60,15 @@ import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.JDOUserCallbackException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
-
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Connection;
+import jakarta.resource.cci.Interaction;
+#endif
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.rest.spi.LocalUserTransactionAdapters;
 import org.openmdx.base.aop0.PlugIn_1_0;

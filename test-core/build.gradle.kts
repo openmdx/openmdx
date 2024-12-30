@@ -88,9 +88,14 @@ dependencies {
     testImplementation("org.mockito:mockito-junit-jupiter")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testRuntimeOnly("org.postgresql:postgresql")
-    testRuntimeOnly("javax.servlet:javax.servlet-api")
-    testRuntimeOnly("com.atomikos:transactions-jta")
-    testRuntimeOnly("com.atomikos:transactions-jdbc")
+    testRuntimeOnly("jakarta.servlet:jakarta.servlet-api")
+	if(runtimeCompatibility == JavaVersion.VERSION_1_8) {
+		testRuntimeOnly(group = "com.atomikos", name = "transactions-jta")
+		testRuntimeOnly(group = "com.atomikos", name = "transactions-jdbc")
+	} else {
+		testRuntimeOnly(group = "com.atomikos", name = "transactions-jta", classifier = "jakarta")
+		testRuntimeOnly(group = "com.atomikos", name = "transactions-jdbc", classifier = "jakarta")
+	}
     // manifold preprocessor
     compileOnly("systems.manifold:manifold-preprocessor")
     annotationProcessor(platform(project(projectPlatform)))

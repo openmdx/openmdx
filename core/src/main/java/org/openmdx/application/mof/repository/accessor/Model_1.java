@@ -60,7 +60,7 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 
-import javax.resource.cci.MappedRecord;
+import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 

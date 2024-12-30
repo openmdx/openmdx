@@ -47,6 +47,7 @@ package org.openmdx.base.rest.spi;
 import java.util.Collection;
 import java.util.List;
 
+#if JAVA_8
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.ConnectionMetaData;
@@ -54,6 +55,15 @@ import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.NotSupportedException;
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.ConnectionMetaData;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.Record;
+#endif
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Multiplicity;
@@ -336,8 +346,8 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
      */
     @Override
     public boolean execute(
-        InteractionSpec ispec, 
-        Record input, 
+        InteractionSpec ispec,
+        Record input,
         Record output
     ) throws ResourceException {
     	assertOpened();

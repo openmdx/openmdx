@@ -66,7 +66,7 @@ import javax.jdo.FetchPlan;
 import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
-import javax.resource.cci.InteractionSpec;
+import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.Container_1_0;

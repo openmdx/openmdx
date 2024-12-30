@@ -49,10 +49,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ValidatingManagedConnectionFactory;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.ConnectionManager;
+import jakarta.resource.spi.ConnectionRequestInfo;
+import jakarta.resource.spi.ValidatingManagedConnectionFactory;
+#endif
 import javax.security.auth.Subject;
 
 import org.apache.directory.api.ldap.model.exception.LdapConfigurationException;
@@ -302,7 +309,7 @@ public class ManagedConnectionFactory
     }
 
     @Override
-    protected javax.resource.spi.ManagedConnection newManagedConnection(
+    protected #if JAVA_8 javax #else jakarta #endif.resource.spi.ManagedConnection newManagedConnection(
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {

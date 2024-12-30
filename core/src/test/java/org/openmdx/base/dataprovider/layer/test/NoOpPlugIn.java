@@ -44,9 +44,15 @@
  */
 package org.openmdx.base.dataprovider.layer.test;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.cci.Record;
+#endif
 
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.RestInteractionSpec;

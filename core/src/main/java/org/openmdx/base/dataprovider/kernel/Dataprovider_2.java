@@ -50,10 +50,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.resource.spi.InvalidPropertyException;
 import javax.resource.spi.ResourceAllocationException;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.spi.InvalidPropertyException;
+import jakarta.resource.spi.ResourceAllocationException;
+#endif
 
 import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.base.resource.cci.ConnectionFactory;

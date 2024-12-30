@@ -1,7 +1,12 @@
 package org.openmdx.base.dataprovider.cci;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Record;
+#endif
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;

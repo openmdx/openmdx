@@ -44,10 +44,17 @@
  */
 package org.openmdx.application.rest.ejb;
 
+#if JAVA_8
 import javax.ejb.EJBLocalObject;
 import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
+#else
+import jakarta.ejb.EJBLocalObject;
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.Record;
+#endif
 
 /**
  * Connection 2.0 Local Interface

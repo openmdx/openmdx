@@ -47,9 +47,15 @@ package org.openmdx.base.dataprovider.layer.type;
 import java.util.Collection;
 import java.util.Map;
 
+#if JAVA_8
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
+#else
+import jakarta.resource.NotSupportedException;
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.MappedRecord;
+#endif
 
 import org.openmdx.base.dataprovider.layer.spi.AbstractLayer;
 import org.openmdx.base.exception.ServiceException;

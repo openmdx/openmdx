@@ -6,10 +6,10 @@ build/
 opt/xstream/
 build
 .gradle/
-/.project
 /bin/
 /.classpath
 /.DS_Store
 /build2/
 /build3/
 /build4/
+/.project

@@ -57,7 +57,7 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
-import javax.resource.ResourceException;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 import org.omg.mof.cci.DirectionKind;
 import org.omg.mof.cci.ScopeKind;

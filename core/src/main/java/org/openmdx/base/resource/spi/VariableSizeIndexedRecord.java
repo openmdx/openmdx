@@ -50,7 +50,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 
-import javax.resource.cci.IndexedRecord;
+import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
 
 import org.openmdx.base.resource.cci.Freezable;
 import org.openmdx.kernel.exception.BasicException;

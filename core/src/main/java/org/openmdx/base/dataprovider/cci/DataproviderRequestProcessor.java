@@ -49,10 +49,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
+import javax.resource.spi.IllegalStateException;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Interaction;
+import jakarta.resource.cci.MappedRecord;
+import jakarta.resource.cci.Record;
+import jakarta.resource.spi.IllegalStateException;
+#endif
 
 import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.application.dataprovider.cci.FilterProperty;
@@ -144,7 +153,7 @@ public final class DataproviderRequestProcessor implements Channel {
     public void beginBatch() throws ResourceException {
         if (isBatching()) {
             throw ResourceExceptions.initHolder(
-                new javax.resource.spi.IllegalStateException(
+                new IllegalStateException(
                     "Request processor is already in batching mode", BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.ILLEGAL_STATE
                     )
@@ -161,7 +170,7 @@ public final class DataproviderRequestProcessor implements Channel {
     public boolean endBatch() throws ResourceException {
         if (!this.isBatching()) {
             throw ResourceExceptions.initHolder(
-                new javax.resource.spi.IllegalStateException(
+                new IllegalStateException(
                     "Request processor is not in batching mode", BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.ILLEGAL_STATE
                     )
@@ -554,23 +563,27 @@ public final class DataproviderRequestProcessor implements Channel {
 
             ObjectRecord getDelegate() {
                 if (success == null) {
-                    throw new IllegalStateException(
-                        "The REST request has not been executed yet", 
-                        BasicException.newEmbeddedExceptionStack(
-                            BasicException.Code.DEFAULT_DOMAIN, 
-                            BasicException.Code.ILLEGAL_STATE, 
-                            new BasicException.Parameter(
-                                "interactionVerb", 
-                                interactionSpec.getInteractionVerbName()
-                            ), new BasicException.Parameter(
-                                "function", 
-                                interactionSpec.getFunctionName()
-                            ), new BasicException.Parameter(
-                                BasicException.Parameter.XRI, 
-                                request.getResourceIdentifier()
+                    try {
+                        throw new IllegalStateException(
+                            "The REST request has not been executed yet",
+                            BasicException.newEmbeddedExceptionStack(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.ILLEGAL_STATE,
+                                new BasicException.Parameter(
+                                    "interactionVerb",
+                                    interactionSpec.getInteractionVerbName()
+                                ), new BasicException.Parameter(
+                                    "function",
+                                    interactionSpec.getFunctionName()
+                                ), new BasicException.Parameter(
+                                    BasicException.Parameter.XRI,
+                                    request.getResourceIdentifier()
+                                )
                             )
-                        )
-                    );
+                        );
+                    } catch (IllegalStateException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
                 if (delegate == null) {
                     throw new RuntimeServiceException(

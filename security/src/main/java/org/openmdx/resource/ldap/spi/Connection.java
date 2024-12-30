@@ -1004,6 +1004,7 @@ class Connection extends AbstractConnection implements LdapConnection {
      * @deprecated
      * @see org.apache.directory.ldap.client.api.LdapConnection#doesFutureExistFor(int)
      */
+    @Deprecated
     public boolean doesFutureExistFor(
         int messageId
     ) {

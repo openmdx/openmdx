@@ -50,7 +50,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import javax.resource.cci.IndexedRecord;
+import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
 
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;

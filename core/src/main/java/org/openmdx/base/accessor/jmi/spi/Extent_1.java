@@ -83,7 +83,14 @@ public class Extent_1<E> implements Extent<E> {
     private final boolean subclasses;
     
     private FetchPlan fetchPlan = null;
-    
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Extent#close()
+     */
+    public void close() {
+        // Nothing to do yet
+    }
+
     /* (non-Javadoc)
      * @see javax.jdo.Extent#close(java.util.Iterator)
      */

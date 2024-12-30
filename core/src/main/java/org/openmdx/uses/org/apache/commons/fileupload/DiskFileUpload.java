@@ -27,7 +27,7 @@ package org.openmdx.uses.org.apache.commons.fileupload;
 
 import java.io.File;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
+import #if JAVA_8 javax.servlet.http.HttpServletRequest #else jakarta.servlet.http.HttpServletRequest #endif;
 
 /**
  * <p>High level API for processing file uploads.</p>

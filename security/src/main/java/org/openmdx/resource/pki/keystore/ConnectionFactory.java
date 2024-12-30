@@ -47,8 +47,13 @@ package org.openmdx.resource.pki.keystore;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertStoreException;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.ConnectionManager;
+#endif
 
 import org.openmdx.resource.spi.AbstractConnectionFactory;
 
