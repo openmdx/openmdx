@@ -49,6 +49,9 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Date;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.ReferenceDef;
@@ -67,7 +70,6 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
 
 	/**
 	 * Constructor
-	 * @param markdown TODO
 	 */
 	public NativeMetaDataMapper(
         ModelElement_1_0 classDef, 
@@ -77,8 +79,11 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
         String packageSuffix,
 		String sliceClassName, 
         MetaData_1_0 metaData, 
-        boolean markdown, 
-        PrimitiveTypeMapper primitiveTypeMapper, ObjectRepositoryMetadataPlugin plugin
+        AnnotationFlavour annotationFlavour, 
+        JakartaFlavour jakartaFlavour, 
+        JMIFlavour jmiFlavour, 
+        PrimitiveTypeMapper primitiveTypeMapper, 
+        ObjectRepositoryMetadataPlugin plugin
     ) throws ServiceException {
         super(
             classDef,
@@ -87,9 +92,12 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
             format, 
             packageSuffix, 
     		sliceClassName, 
-            markdown, 
+            annotationFlavour, 
+            jakartaFlavour, 
+            jmiFlavour, 
             metaData, 
-            primitiveTypeMapper, plugin
+            primitiveTypeMapper, 
+            plugin
         );
 	}
 

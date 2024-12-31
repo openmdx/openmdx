@@ -44,6 +44,7 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc.text;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
 import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -60,10 +61,10 @@ abstract class ElementMapper extends HTMLMapper {
     	String elementId,
         Sink sink, 
         ModelElement_1_0 element,
-        boolean markdown, 
+        AnnotationFlavour annotationFlavour, 
         PIMDocConfiguration configuration
     ){
-		super(sink, element, markdown, configuration);
+		super(sink, element, annotationFlavour, configuration);
 		this.elementKind = elementId;		
 		this.element = element;
     }    

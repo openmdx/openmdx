@@ -56,7 +56,6 @@ import jakarta.resource.cci.MappedRecord;
 #endif
 import org.openmdx.application.mof.externalizer.cci.ModelExternalizer_1_0;
 import org.openmdx.application.mof.externalizer.cci.ModelImporter_1_0;
-import org.openmdx.application.mof.mapping.cci.MappingTypes;
 import org.openmdx.application.mof.repository.accessor.ModelProvider_2;
 import org.openmdx.base.dataprovider.cci.Channel;
 import org.openmdx.base.dataprovider.cci.DataproviderRequestProcessor;
@@ -89,13 +88,15 @@ public class ModelExternalizer_1 implements ModelExternalizer_1_0 {
 	 */
 	public ModelExternalizer_1(
 		String openmdxjdoDir, 
-		boolean markdown
+		AnnotationFlavour annotationFlavour,
+		JakartaFlavour jakartaFlavour,
+		JMIFlavour jmiFlavour
 	){
 		try {
-			this.dataprovider = ModelProvider_2.newModelExternalizationDataprovider(
-				openmdxjdoDir
-			);
-			this.markdown = markdown;
+			this.dataprovider = ModelProvider_2.newModelExternalizationDataprovider(openmdxjdoDir);
+			this.annotationFlavour = annotationFlavour;
+			this.jakartaFlavour = jakartaFlavour;
+			this.jmiFlavour = jmiFlavour;
 		} catch (RuntimeException e) {
 			throw Throwables.log(e);
 		}
@@ -106,10 +107,20 @@ public class ModelExternalizer_1 implements ModelExternalizer_1_0 {
     private static final String PROVIDER_NAME = "Mof";
     
     /**
-     * Tells whether annotations use markdown
+     * Tells whether annotations use markdown or not
      */
-    private final boolean markdown;
+    private final AnnotationFlavour annotationFlavour;
 
+    /**
+     * Tells which Jakarta flavour to use
+     */
+    private final JakartaFlavour jakartaFlavour;
+
+    /**
+     * Tells which JMI flavour to use
+     */
+    private final JMIFlavour jmiFlavour;
+    
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -154,9 +165,9 @@ public class ModelExternalizer_1 implements ModelExternalizer_1_0 {
 		request.setBody(params);
 		IndexedRecord values = Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.code());
 		params.put("format", values);
-		if(markdown) {
-			values.add(MappingTypes.MARKDOWN);
-		}
+		annotationFlavour.applyExtendedFormat(values);
+		jakartaFlavour.applyExtendedFormat(values);
+		jmiFlavour.applyExtendedFormat(values);
 		values.addAll(formats);
 		MessageRecord result = channnel.addOperationRequest(request);
 		return (byte[]) result.getBody().get("packageAsJar");

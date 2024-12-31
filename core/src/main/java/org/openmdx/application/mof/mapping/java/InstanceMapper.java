@@ -55,6 +55,9 @@ import java.util.Map;
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.ExceptionDef;
@@ -91,7 +94,10 @@ extends AbstractClassMapper {
         Format format, 
         String packageSuffix,
         MetaData_1_0 metaData, 
-        boolean markdown, PrimitiveTypeMapper primitiveTypeMapper
+        AnnotationFlavour annotationFlavour,
+        JakartaFlavour jakartaFlavour,
+        JMIFlavour jmiFlavour, 
+        PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             classDef,
@@ -100,7 +106,9 @@ extends AbstractClassMapper {
             format, 
             packageSuffix, 
             metaData, 
-            markdown,
+            annotationFlavour,
+            jakartaFlavour, 
+            jmiFlavour, 
             primitiveTypeMapper
         );
         this.pwSlice = writerJdoSlice == null ? null : new PrintWriter(writerJdoSlice);

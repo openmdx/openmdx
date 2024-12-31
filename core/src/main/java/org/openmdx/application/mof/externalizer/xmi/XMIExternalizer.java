@@ -57,9 +57,13 @@ import java.util.Map;
 import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 import org.openmdx.application.mof.externalizer.cci.ModelExternalizer_1_0;
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.externalizer.spi.ModelExternalizer_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.uses.gnu.getopt.Getopt;
 import org.openmdx.uses.gnu.getopt.LongOpt;
 
@@ -75,8 +79,10 @@ public class XMIExternalizer {
 		String[] arguments	
 	){
         String openmdxjdo = null;
-        String stXMIDialect = "emf";
-        boolean markdown = false;
+        String xmiDialect = "emf";
+        AnnotationFlavour annotationFlavour = AnnotationFlavour.STANDARD;
+        JakartaFlavour jakartaFlavour = JakartaFlavour.VERSION_8;
+        JMIFlavour jmiFlavour = JMIFlavour.CLASSIC;
         final List<String> pathMapSymbols = new ArrayList<String>();
         final List<String> pathMapPaths = new ArrayList<String>();
         final List<String> formats = new ArrayList<String>();
@@ -85,11 +91,17 @@ public class XMIExternalizer {
         int c;
         while ((c = g.getopt()) != -1) {
             switch(c) {
+	            case 'f':
+					final String flavour = g.getOptarg();
+					SysLog.info("Externalizing model for openMDX " + flavour);
+					jakartaFlavour = JakartaFlavour.fromFlavourVersion(flavour);
+					jmiFlavour = JMIFlavour.fromFlavourVersion(flavour);
+	                break;
 	            case 'j':
 	                openmdxjdo = g.getOptarg();
 	                break;
                 case 'm':
-                    markdown = true;
+                	annotationFlavour = AnnotationFlavour.MARKDOWN;
                     break;
                 case 'o':
                     outFileName = g.getOptarg();
@@ -113,15 +125,15 @@ public class XMIExternalizer {
                     url = g.getOptarg();
                     break;
                 case 'x':
-                    stXMIDialect = g.getOptarg();
+                    xmiDialect = g.getOptarg();
                     break;
             }
         }
         
         this.modelNames = getModelNames(arguments, g);
         this.formats = formats;
-        this.modelExternalizer = new ModelExternalizer_1(openmdxjdo, markdown);
-    	this.xmiFormat = toFormat(stXMIDialect);
+        this.modelExternalizer = new ModelExternalizer_1(openmdxjdo, annotationFlavour, jakartaFlavour, jmiFlavour);
+    	this.xmiFormat = toFormat(xmiDialect);
     	this.pathMap = toPathMap(pathMapSymbols, pathMapPaths);
 	}
 
@@ -214,18 +226,18 @@ public class XMIExternalizer {
     }
     
 	private static short toFormat(
-		String stXMIDialect
+		String xmiDialect
 	) {
-		if("poseidon".equals(stXMIDialect)) {
+		if("poseidon".equals(xmiDialect)) {
             System.out.println("INFO:    Gentleware Poseidon XMI 1");
             return XMIImporter_1.XMI_FORMAT_POSEIDON;
-        } else if("magicdraw".equals(stXMIDialect)) {
-            System.out.println("INFO:    No Magic MagicDraw XMI 1");
+        } else if("magicdraw".equals(xmiDialect)) {
+            System.out.println("INFO:    MagicDraw XMI 1");
             return XMIImporter_1.XMI_FORMAT_MAGICDRAW;
-        } else if("rsm".equals(stXMIDialect)) {
+        } else if("rsm".equals(xmiDialect)) {
             System.out.println("INFO:    IBM Rational Software Modeler XMI 2");          
             return XMIImporter_1.XMI_FORMAT_RSM;
-        } else if("emf".equals(stXMIDialect)) {
+        } else if("emf".equals(xmiDialect)) {
             System.out.println("INFO:    Eclipse UML2 Tools");          
             return XMIImporter_1.XMI_FORMAT_EMF;
         } else {
@@ -245,7 +257,7 @@ public class XMIExternalizer {
 		    args,
 		    "",
 		    new LongOpt[]{
-		        new LongOpt("dataproviderVersion", LongOpt.REQUIRED_ARGUMENT, null, 'd'), // ignored
+		        new LongOpt("flavour", LongOpt.REQUIRED_ARGUMENT, null, 'f'), 
 		        new LongOpt("openmdxjdo", LongOpt.REQUIRED_ARGUMENT, null, 'j'),
 		        new LongOpt("markdown-annotations", LongOpt.NO_ARGUMENT, null, 'm'),
 		        new LongOpt("out", LongOpt.REQUIRED_ARGUMENT, null, 'o'),

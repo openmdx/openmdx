@@ -48,6 +48,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.ZipSink;
@@ -64,44 +65,47 @@ public class PIMDocMapper implements Mapper_1_0 {
      * 
      * Uses default configuration values
      * 
-     * @param markdown {@code true} if annotations use markdown
+     * @param annotationFlavour tells whether annotations use markdown or not
      * 
      * @throws ServiceException 
      */
     public PIMDocMapper(
-    	boolean markdown
+    	AnnotationFlavour annotationFlavour
     ) throws ServiceException{
-        this(markdown, new PIMDocConfiguration(null));   
+        this(annotationFlavour, new PIMDocConfiguration(null));   
     }
 
     /**
      * Public Constructor
      * 
-     * @param markdown {@code true} if annotations use markdown
+     * @param annotationFlavour tells whether annotations use markdown or not
      * @param configurationDirectory the PIMDoc Configuration Directory
      * 
      * @throws ServiceException
      */
-    public PIMDocMapper(boolean markdown, String configurationDirectory) throws ServiceException {
-    	this(markdown, new PIMDocConfiguration(configurationDirectory));
+    public PIMDocMapper(
+    	AnnotationFlavour annotationFlavour, 
+    	String configurationDirectory
+    ) throws ServiceException {
+    	this(annotationFlavour, new PIMDocConfiguration(configurationDirectory));
 	}
 
     /**
      * Internal Constructor 
      * 
-     * @param markdown {@code true} if annotations use markdown
+     * @param annotationFlavour tells whether annotations use markdown or not
      * @param configuration the PIMDoc Configuration
      * 
      */
     private PIMDocMapper(
-    	boolean markdown,
+        AnnotationFlavour annotationFlavour, 
     	PIMDocConfiguration configuration
     ){
-    	this.markdown = markdown;
+    	this.annotationFlavour = annotationFlavour;
         this.configuration = configuration;
     }
     
-    private final boolean markdown;
+    private final AnnotationFlavour annotationFlavour;
     private final PIMDocConfiguration configuration;
     
     /**
@@ -116,7 +120,7 @@ public class PIMDocMapper implements Mapper_1_0 {
 		final ZipOutputStream zip
 	) throws ServiceException {
     	validateArguments(qualifiedPackageName);
-    	final PIMDocExternalizer pimDocExternalizer = new PIMDocExternalizer(model, new ZipSink(zip), markdown, configuration);
+    	final PIMDocExternalizer pimDocExternalizer = new PIMDocExternalizer(model, new ZipSink(zip), annotationFlavour, configuration);
     	pimDocExternalizer.externalize();
     }
 

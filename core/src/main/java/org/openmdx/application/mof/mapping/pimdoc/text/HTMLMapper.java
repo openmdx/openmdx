@@ -48,6 +48,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.stream.Stream;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
 import org.openmdx.application.mof.mapping.pimdoc.spi.AbstractMapper;
@@ -65,18 +66,24 @@ import org.openmdx.base.mof.spi.PIMDocFileType;
  */
 abstract class HTMLMapper extends AbstractMapper {
 
-	protected HTMLMapper(Sink sink, Model_1_0 model, URI entryName, boolean markdown, PIMDocConfiguration configuration) {
-		super(sink, model, markdown, configuration);
+	protected HTMLMapper(
+		Sink sink, 
+		Model_1_0 model, 
+		URI entryName, 
+		AnnotationFlavour annotationFlavour, 
+		PIMDocConfiguration configuration
+	) {
+		super(sink, model, annotationFlavour, configuration);
 		this.entryName = entryName.getPath().substring(1);
 	}
 	
-	protected HTMLMapper(Sink sink, Model_1_0 model, MagicFile entryType, boolean markdown, PIMDocConfiguration configuration) {
-		super(sink, model, markdown, configuration);
+	protected HTMLMapper(Sink sink, Model_1_0 model, MagicFile entryType, AnnotationFlavour annotationFlavour, PIMDocConfiguration configuration) {
+		super(sink, model, annotationFlavour, configuration);
 		this.entryName = entryType.getFileName(MagicFile.Type.TEXT);
 	}
 
-	protected HTMLMapper(Sink sink, ModelElement_1_0 element, boolean markdown, PIMDocConfiguration configuration) {
-		super(sink, element.getModel(), markdown, configuration);
+	protected HTMLMapper(Sink sink, ModelElement_1_0 element, AnnotationFlavour annotationFlavour, PIMDocConfiguration configuration) {
+		super(sink, element.getModel(), annotationFlavour, configuration);
 		this.entryName = getEntryName(element);
 	}
 

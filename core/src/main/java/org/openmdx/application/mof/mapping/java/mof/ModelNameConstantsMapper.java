@@ -53,6 +53,9 @@ import java.util.List;
 import java.util.zip.ZipOutputStream;
 
 import org.omg.mof.cci.VisibilityKind;
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_1;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
@@ -78,12 +81,16 @@ public class ModelNameConstantsMapper
     /**
      * Constructor 
      * 
-     * @param markdown {@code true} if annotations use markdown
+     * @param annotationFlavour tells whether annotations use markdown
+     * @param jakartaFlavour tells whether Jakarta 8 or a contemporary flavour is targeted
+     * @param jmiFlavour tells whether the classic or the contemporary JMI mapping shall be applied
      */
     public ModelNameConstantsMapper(
-    	boolean markdown
+    	AnnotationFlavour annotationFlavour, 
+    	JakartaFlavour jakartaFlavour, 
+    	JMIFlavour jmiFlavour
     ){
-        super(markdown, PACKAGE_SUFFIX);    
+        super(annotationFlavour, jakartaFlavour, jmiFlavour, PACKAGE_SUFFIX);    
     }
     
     /**
@@ -394,7 +401,10 @@ public class ModelNameConstantsMapper
                             this.model, 
                             MAPPING_FORMAT, 
                             this.packageSuffix,
-                            this.metaData, markdown
+                            this.metaData, 
+                            annotationFlavour, 
+                            jakartaFlavour, 
+                            jmiFlavour
                         );
                         InstanceFeaturesMapper instanceIntfMapper = new InstanceFeaturesMapper(
                             element, 
@@ -402,7 +412,10 @@ public class ModelNameConstantsMapper
                             this.model, 
                             MAPPING_FORMAT, 
                             this.packageSuffix,
-                            this.metaData, markdown
+                            this.metaData, 
+                            annotationFlavour, 
+                            jakartaFlavour, 
+                            jmiFlavour
                         );
                         this.mapBeginClass(
                             element,
@@ -461,7 +474,10 @@ public class ModelNameConstantsMapper
                                 this.model, 
                                 MAPPING_FORMAT, 
                                 this.packageSuffix,
-                                this.metaData, markdown
+                                this.metaData, 
+                                annotationFlavour, 
+                                jakartaFlavour, 
+                                jmiFlavour
                             );
                             this.mapBeginStruct(
                                 element,

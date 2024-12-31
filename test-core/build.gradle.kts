@@ -159,6 +159,7 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
     classpath(configurations["openmdxBootstrap"])
     classpath(sourceSets["openmdxDatatype"].runtimeClasspath)
 	args = listOf(
+		"--flavour=" + projectFlavour,
 		"--pathMapSymbol=openMDX 2 ~ Core (EMF)",
 		"--pathMapPath=file:" + File(project.rootDir, "core/src/model/emf") + "/",
 		"--pathMapSymbol=openMDX 2 ~ Security (EMF)",

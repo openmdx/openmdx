@@ -47,6 +47,9 @@ package org.openmdx.application.mof.mapping.java.mof;
 import java.io.Writer;
 import java.util.Iterator;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
@@ -71,7 +74,10 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
         Model_1_0 model,
         Format format, 
         String packageSuffix,
-        MetaData_1_0 metaData, boolean markdown
+        MetaData_1_0 metaData, 
+        AnnotationFlavour annotationFlavour, 
+        JakartaFlavour jakartaFlavour, 
+        JMIFlavour jmiFlavour
     ) throws ServiceException {
         super(
         	classDef,
@@ -80,7 +86,10 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
             format, 
             packageSuffix,
             metaData, 
-            markdown, new StandardPrimitiveTypeMapper()
+            annotationFlavour, 
+            jakartaFlavour, 
+            jmiFlavour, 
+            new StandardPrimitiveTypeMapper()
         );
         this.classDef = new ClassDef(classDef, model);
     }

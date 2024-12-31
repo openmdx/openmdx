@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Repository Mode
+ * Description: Dataprovider Mode
  * Owner:       the original authors.
  * ====================================================================
  *

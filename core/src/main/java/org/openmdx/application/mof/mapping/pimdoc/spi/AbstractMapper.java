@@ -48,14 +48,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Function;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
 import org.openmdx.application.mof.mapping.spi.MapperTemplate;
 import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.Sink;
-import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 
 /**
@@ -66,14 +64,14 @@ public abstract class AbstractMapper extends MapperTemplate implements Archiving
 	private AbstractMapper(
 		Sink sink, 
 		Model_1_0 model, 
-		boolean markdown, 
+		AnnotationFlavour annotationFlavour, 
 		PIMDocConfiguration configuration, 
 		ByteArrayOutputStream stream
 	) {
 		super(
 			new OutputStreamWriter(stream, StandardCharsets.UTF_8), 
 			model, 
-			markdown ? configuration.getMarkdownRendererFactory().instantiate() : Function.identity()
+			annotationFlavour.createRenderer(configuration::getMarkdownRendererFactory)
 		);
 		this.sink = sink;
 		this.buffer = stream;
@@ -83,10 +81,10 @@ public abstract class AbstractMapper extends MapperTemplate implements Archiving
 	protected AbstractMapper(
 		Sink sink, 
 		Model_1_0 model, 
-		boolean markdown, 
+		AnnotationFlavour annotationFlavour, 
 		PIMDocConfiguration configuration
 	){
-		this(sink, model, markdown, configuration, new ByteArrayOutputStream());
+		this(sink, model, annotationFlavour, configuration, new ByteArrayOutputStream());
 	}
 
 	protected final Sink sink;

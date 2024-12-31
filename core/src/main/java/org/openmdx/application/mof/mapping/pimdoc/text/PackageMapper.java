@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -68,10 +69,10 @@ public class PackageMapper extends ElementMapper {
     public PackageMapper(
     	Sink sink, 
         ModelElement_1_0 packageToBeExported,
-        boolean markdown, 
+        AnnotationFlavour annotationFlavour, 
         PIMDocConfiguration configuration
     ){
-		super("Package", sink, packageToBeExported, markdown, configuration);
+		super("Package", sink, packageToBeExported, annotationFlavour, configuration);
 		this.classesMapper = new ClassesMapper(pw, this.element, annotationRenderer);
 		this.dataTypesMapper = new DataTypesMapper(pw, this.element, annotationRenderer);
 		this.albumMapper = new AlbumMapper(pw, this.element, annotationRenderer, getAlbum());

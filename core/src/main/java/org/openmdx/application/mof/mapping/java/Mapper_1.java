@@ -63,6 +63,9 @@ import org.omg.mof.cci.VisibilityKind;
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.ClassifierDef;
@@ -99,7 +102,9 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
      * 
      * @param mappingFormat
      *            mapping format defined MapperFactory_1.
-     * @param markdown TODO
+     * @param annotationFlavour tells whether annotations use markdown
+     * @param jakartaFlavour tells which jakartaFlavour to use
+     * @param jmiClassic tells which JMI flavour to use
      * @param packageSuffix
      *            The suffix for the package to be generated in (without leading
      *            dot), e.g. 'cci'.
@@ -108,11 +113,13 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
      */
     public Mapper_1(
         String mappingFormat,
-        boolean markdown,
+        AnnotationFlavour annotationFlavour,
+        JakartaFlavour jakartaFlavour, 
+        JMIFlavour jmiFlavour, 
         String packageSuffix, 
         String fileExtension
     ) throws ServiceException {
-        super(markdown, packageSuffix);
+        super(annotationFlavour, jakartaFlavour, jmiFlavour, packageSuffix);
         this.fileExtension = fileExtension;
         if (mappingFormat.startsWith(MappingTypes.JPA3 + ':')) {
             this.format = Format.JPA3;
@@ -145,8 +152,6 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
     private final Format format;
 
     private final PrimitiveTypeMapper primitiveTypeMapper;
-    
-    private  boolean markdown;
     
     /**
      * Is called for all ModelAttribute features of a class including supertypes.
@@ -1183,14 +1188,17 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                     PackageMapper packageMapper = null;
                     if (jmi1) {
                         pkgFile.reset();
-                        packageMapper =
-                            new PackageMapper(
-                                packageWriter,
-                                getModel(),
-                                this.format,
-                                this.packageSuffix,
-                                this.metaData, 
-                                markdown, getPrimitiveTypeMapper());
+                        packageMapper = new PackageMapper(
+                            packageWriter,
+                            getModel(),
+                            this.format,
+                            this.packageSuffix,
+                            this.metaData, 
+                            annotationFlavour, 
+                            jakartaFlavour, 
+                            jmiFlavour, 
+                            getPrimitiveTypeMapper()
+                         );
                         // initialize package
                         this.mapBeginPackage(currentPackageName, packageMapper);
                     }
@@ -1248,7 +1256,8 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             this.format,
                                             this.packageSuffix,
                                             this.metaData, 
-                                            markdown, getPrimitiveTypeMapper()
+                                            annotationFlavour, 
+                                            jakartaFlavour, jmiFlavour, getPrimitiveTypeMapper()
                                          ) : null;
                                         InstanceMapper instanceMapper = new InstanceMapper(
                                             element,
@@ -1258,7 +1267,9 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             this.format,
                                             this.packageSuffix,
                                             this.metaData, 
-                                            markdown,
+                                            this.annotationFlavour,
+                                            this.jakartaFlavour,
+                                            this.jmiFlavour,
                                             getPrimitiveTypeMapper()
                                         );
                                         InterfaceMapper interfaceMapper = jpa3 && instanceMapper.hasSPI() ? new InterfaceMapper(
@@ -1268,7 +1279,10 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             Format.SPI2,
                                             Names.SPI2_PACKAGE_SUFFIX,
                                             this.metaData, 
-                                            markdown, getPrimitiveTypeMapper()
+                                            this.annotationFlavour, 
+                                            this.jakartaFlavour,
+                                            this.jmiFlavour,
+                                            getPrimitiveTypeMapper()
                                          ) : null;
                                         AbstractMetaDataMapper ormMetaDataMapper = jpa3 ? new StandardMetaDataMapper(
                                             element,
@@ -1278,8 +1292,11 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             this.packageSuffix,
                                             null,
                                             this.metaData,
-                                            markdown, 
-                                            getPrimitiveTypeMapper(), geObjectRepositoryMetadataPlugin()
+                                            annotationFlavour, 
+                                            jakartaFlavour, 
+                                            jmiFlavour, 
+                                            getPrimitiveTypeMapper(), 
+                                            geObjectRepositoryMetadataPlugin()
                                          ) : cci2 ? new NativeMetaDataMapper(
                                                  element,
                                                  ormMetaDataWriter,
@@ -1288,8 +1305,11 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                                  this.packageSuffix,
                                                  null,
                                                  this.metaData,
-                                                 markdown, 
-                                                 getPrimitiveTypeMapper(), geObjectRepositoryMetadataPlugin()
+                                                 annotationFlavour, 
+                                                 jakartaFlavour, 
+                                                 jmiFlavour, 
+                                                 getPrimitiveTypeMapper(), 
+                                                 geObjectRepositoryMetadataPlugin()
                                           ) : null;
                                         AbstractMetaDataMapper ormSliceMetaDataMapper = jpa3 ? new StandardMetaDataMapper(
                                             element,
@@ -1299,16 +1319,22 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             this.packageSuffix,
                                             InstanceMapper.SLICE_CLASS_NAME,
                                             this.metaData,
-                                            markdown, 
-                                            getPrimitiveTypeMapper(), geObjectRepositoryMetadataPlugin()
+                                            annotationFlavour, 
+                                            jakartaFlavour, 
+                                            jmiFlavour, 
+                                            getPrimitiveTypeMapper(), 
+                                            geObjectRepositoryMetadataPlugin()
                                          ) : null;
                                         QueryMapper queryMapper = cci2 ? new QueryMapper(
-                                                queryWriter,
-                                                getModel(),
-                                                this.format,
-                                                this.packageSuffix,
-                                                this.metaData, 
-                                                markdown, getPrimitiveTypeMapper()
+                                            queryWriter,
+                                            getModel(),
+                                            this.format,
+                                            this.packageSuffix,
+                                            this.metaData, 
+                                            annotationFlavour, 
+                                            jakartaFlavour, 
+                                            jmiFlavour, 
+                                            getPrimitiveTypeMapper()
                                         ) : null;
                                         this.mapBeginClass(
                                             element,
@@ -1436,13 +1462,16 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                 }
                                 if (cci2) queryFile.reset();
                                 StructureMapper structureMapper = jpa3 ? null : new StructureMapper(
-                                        element,
-                                        structWriter,
-                                        getModel(),
-                                        this.format,
-                                        this.packageSuffix,
-                                        this.metaData, 
-                                        markdown, getPrimitiveTypeMapper()
+                                    element,
+                                    structWriter,
+                                    getModel(),
+                                    this.format,
+                                    this.packageSuffix,
+                                    this.metaData, 
+                                    annotationFlavour, 
+                                    jakartaFlavour, 
+                                    jmiFlavour, 
+                                    getPrimitiveTypeMapper()
                                 );
                                 QueryMapper queryMapper = cci2 ? new QueryMapper(
                                     queryWriter,
@@ -1450,7 +1479,10 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                     this.format,
                                     this.packageSuffix,
                                     this.metaData, 
-                                    markdown, getPrimitiveTypeMapper()
+                                    annotationFlavour, 
+                                    jakartaFlavour, 
+                                    jmiFlavour, 
+                                    getPrimitiveTypeMapper()
                                 ) : null;
                                 if (structureMapper != null) {
                                     this.mapBeginStructure(
@@ -1512,7 +1544,10 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                         this.format,
                                         packageSuffix,
                                         this.metaData, 
-                                        markdown, getPrimitiveTypeMapper()
+                                        annotationFlavour, 
+                                        jakartaFlavour, 
+                                        jmiFlavour, 
+                                        getPrimitiveTypeMapper()
                                     );
                                     this.mapException(element, exceptionMapper);
                                     exceptionWriter.flush();
@@ -1546,7 +1581,10 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                         this.format,
                                         this.packageSuffix,
                                         this.metaData, 
-                                        markdown, getPrimitiveTypeMapper()
+                                        annotationFlavour, 
+                                        jakartaFlavour, 
+                                        jmiFlavour, 
+                                        getPrimitiveTypeMapper()
                                     );
                                     if (mapAssociation(
                                         element,

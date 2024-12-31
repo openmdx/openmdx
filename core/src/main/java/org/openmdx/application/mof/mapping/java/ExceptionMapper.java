@@ -48,6 +48,9 @@ import java.io.Writer;
 import java.util.List;
 
 import org.omg.mof.spi.Names;
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ExceptionDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
@@ -61,7 +64,6 @@ public class ExceptionMapper extends AbstractMapper {
     
     /**
      * Constructor 
-     * @param markdown TODO
      */
     public ExceptionMapper(
         ModelElement_1_0 exceptionDef,
@@ -70,7 +72,10 @@ public class ExceptionMapper extends AbstractMapper {
         Format format, 
         String packageSuffix, 
         MetaData_1_0 metaData, 
-        boolean markdown, PrimitiveTypeMapper primitiveTypeMapper
+        AnnotationFlavour annotationFlavour, 
+        JakartaFlavour jakartaFlavour, 
+        JMIFlavour jmiFlavour, 
+        PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             writer,
@@ -78,7 +83,9 @@ public class ExceptionMapper extends AbstractMapper {
             format, 
             packageSuffix,
             metaData, 
-            markdown,
+            annotationFlavour,
+            jakartaFlavour, 
+            jmiFlavour, 
             primitiveTypeMapper
         );
         this.exceptionDef = new ExceptionDef(exceptionDef, model);

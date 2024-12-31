@@ -45,8 +45,7 @@
 package org.openmdx.application.mof.mapping.spi;
 
 import java.util.function.Function;
-
-import org.openmdx.kernel.loading.Factory;
+import java.util.function.Supplier;
 
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
@@ -55,7 +54,7 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
 /**
  * Markdown Renderer Factory
  */
-public class MarkdownRendererFactory implements Factory<Function<String, String>> {
+public class MarkdownRendererFactory implements Supplier<Function<String, String>> {
 
 	/**
 	 * Cosnstructor using the default link target {@code "_self"}
@@ -82,16 +81,11 @@ public class MarkdownRendererFactory implements Factory<Function<String, String>
 	}
 
 	@Override
-	public Function<String, String> instantiate() {
+	public Function<String, String> get() {
 		final MutableDataSet flexmarkOptions = FlexmarkExtensions.getOptions(linkTarget);
         final Parser parser = Parser.builder(flexmarkOptions).build();
         final HtmlRenderer renderer = HtmlRenderer.builder(flexmarkOptions).build();
 		return new MarkownRenderer(parser, renderer);
 	}
 
-	@Override
-	public Class<? extends Function<String, String>> getInstanceClass() {
-		return MarkownRenderer.class;
-	}
-	
 }
