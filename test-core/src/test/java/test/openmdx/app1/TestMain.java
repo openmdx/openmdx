@@ -2777,7 +2777,9 @@ public class TestMain {
 						thread2.start();
 						thread1.join();
 						thread2.join();
-						Assertions.assertTrue(thread1.isCommitted() ^ thread2.isCommitted(), "With " + pause + " ms pause one thread must fail and one succeed");
+						boolean thread1committed = thread1.isCommitted();
+						boolean thread2committed = thread2.isCommitted();
+						Assertions.assertTrue(thread1committed ^ thread2committed, "With " + pause + " ms pause one thread must fail and one succeed, thread1=", + thread1committed + ", thread2=" + thread2committed);
 					}
 					for (long pause = 50L; pause < 1000L; pause += 50L) {
 						CountryChanger thread1 = new CountryChanger(anAddressId, "Deutschland" + pause, -1, pause);

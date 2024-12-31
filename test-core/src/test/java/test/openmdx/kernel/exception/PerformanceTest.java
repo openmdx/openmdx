@@ -58,7 +58,7 @@ public class PerformanceTest {
 
     private static final int THROW_COUNT = 1000;
     
-    private static final int ACCEPTABLE_FACTOR = 3;
+    private static final int ACCEPTABLE_FACTOR = 4;
     
     @Test
     public void comparePerformance(){

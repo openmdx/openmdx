@@ -48,6 +48,7 @@ package org.openmdx.junit5;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import javax.naming.NamingException;
 
@@ -92,7 +93,7 @@ public class OpenmdxTestSecurityStandardExtension implements BeforeAllCallback {
 	}
 
 	private void configureTimezone(final Properties buildProperties) {
-		System.setProperty("user.timezone", buildProperties.getProperty(BuildProperties.TIMEZONE_KEY));
+		TimeZone.setDefault(TimeZone.getTimeZone(System.setProperty("user.timezone", buildProperties.getProperty(BuildProperties.TIMEZONE_KEY))));
 	}
 
 }
