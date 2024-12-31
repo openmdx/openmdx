@@ -50,6 +50,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
 import org.openmdx.application.mof.mapping.pimdoc.image.ClusterDiagramMapper;
 import org.openmdx.application.mof.mapping.pimdoc.spi.Archiving;
 import org.openmdx.application.mof.mapping.pimdoc.spi.NamespaceFilter;
@@ -76,12 +77,12 @@ class PIMDocExternalizer {
     PIMDocExternalizer(
     	Model_1_0 model,
     	Sink sink,
-		boolean markdown, 
+    	AnnotationFlavour annotationFlavour, 
 		PIMDocConfiguration configuration
     ){
     	this.model = model;
     	this.sink = sink;
-    	this.markdown = markdown;
+    	this.annotationFlavour = annotationFlavour;
         this.configuration = configuration;
     }
 
@@ -90,7 +91,7 @@ class PIMDocExternalizer {
     /**
      * Tells whether annotations use markdown
      */
-    private final boolean markdown;
+    private final AnnotationFlavour annotationFlavour;
     
     /**
      * The configuration providing default values where necessary
@@ -239,44 +240,44 @@ class PIMDocExternalizer {
 	}
 
 	private void exportIndexFile() {
-		try (Archiving indexMapper = new IndexMapper(sink, model, markdown, configuration)){
+		try (Archiving indexMapper = new IndexMapper(sink, model, annotationFlavour, configuration)){
 			indexMapper.createArchiveEntry();
 		}
 	}
 
 	private void exportPackageFile(ModelElement_1_0 packageToBeExported){
-		try (Archiving mapper = new PackageMapper(sink, packageToBeExported, markdown, configuration)){
+		try (Archiving mapper = new PackageMapper(sink, packageToBeExported, annotationFlavour, configuration)){
 			mapper.createArchiveEntry();
 		}
 	}
 
 	private void exportClassFile(ModelElement_1_0 classToBeExported){
-		try (Archiving mapper = new ClassMapper(sink, classToBeExported, markdown, configuration)){
+		try (Archiving mapper = new ClassMapper(sink, classToBeExported, annotationFlavour, configuration)){
 			mapper.createArchiveEntry();
 		}
 	}
 
 	private void exportStructureFile(ModelElement_1_0 structureToBeExported){
-		try (Archiving mapper = new StructureMapper(sink, structureToBeExported, markdown, configuration)){
+		try (Archiving mapper = new StructureMapper(sink, structureToBeExported, annotationFlavour, configuration)){
 			mapper.createArchiveEntry();
 		}
 	}
 
 	private void exportAllPackageCluster(){
-		try (Archiving mapper = new ClusterDiagramMapper(sink, model, markdown, configuration)){
+		try (Archiving mapper = new ClusterDiagramMapper(sink, model, annotationFlavour, configuration)){
 			mapper.createArchiveEntry();
 		}
 	}
 	
 	private void exportPackageCluster(ModelElement_1_0 ancestor){
-		try (Archiving mapper = new ClusterDiagramMapper(sink, ancestor, markdown, configuration)){
+		try (Archiving mapper = new ClusterDiagramMapper(sink, ancestor, annotationFlavour, configuration)){
 			mapper.createArchiveEntry();
 		}
 	}
 
 	private void exportImageFrame(URI name, String title){
 		if(PIMDocFileType.GRAPHVIZ_SOURCE.test(name.getPath())) {
-			try (Archiving mapper = new ImageFrameMapper(sink, model, name, title, markdown, configuration)){
+			try (Archiving mapper = new ImageFrameMapper(sink, model, name, title, annotationFlavour, configuration)){
 				mapper.createArchiveEntry();
 			}
 		}

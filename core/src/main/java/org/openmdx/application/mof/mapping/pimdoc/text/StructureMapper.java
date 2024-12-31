@@ -44,6 +44,7 @@
  */
 package org.openmdx.application.mof.mapping.pimdoc.text;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
 import org.openmdx.base.io.Sink;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -59,10 +60,10 @@ public class StructureMapper extends ElementMapper {
     public StructureMapper(
         Sink sink, 
         ModelElement_1_0 classToBeExported,
-        boolean markdown, 
+        AnnotationFlavour annotationFlavour, 
         PIMDocConfiguration configuration
     ){
-		super("Structure", sink, classToBeExported, markdown, configuration);
+		super("Structure", sink, classToBeExported, annotationFlavour, configuration);
 		this.structureFieldsMapper = new StructureFieldsMapper(pw, element, annotationRenderer);		
     }    
     

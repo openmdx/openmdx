@@ -48,6 +48,9 @@ package org.openmdx.application.mof.mapping.java;
 import java.io.Writer;
 
 import org.omg.mof.spi.Identifier;
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.java.metadata.FieldMetaData;
 import org.openmdx.application.mof.mapping.java.metadata.Visibility;
@@ -75,7 +78,10 @@ extends AbstractClassMapper {
         Format format, 
         String packageSuffix,
         MetaData_1_0 metaData, 
-        boolean markdown, PrimitiveTypeMapper primitiveTypeMapper
+        AnnotationFlavour annotationFlavour, 
+        JakartaFlavour jakartaFlavour,
+        JMIFlavour jmiFlavour,
+        PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             classDef,
@@ -84,7 +90,10 @@ extends AbstractClassMapper {
             format, 
             packageSuffix, 
             metaData, 
-            markdown, primitiveTypeMapper
+            annotationFlavour, 
+            jakartaFlavour, 
+            jmiFlavour, 
+            primitiveTypeMapper
         );
     }
 

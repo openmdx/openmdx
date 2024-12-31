@@ -56,6 +56,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.openmdx.application.mof.mapping.pimdoc.spi.PackageGroupComparator;
 import org.openmdx.application.mof.mapping.spi.MarkdownRendererFactory;
@@ -63,8 +64,6 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.image.GraphvizStyle;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.loading.Factory;
-
 
 /**
  * PIMDoc configuration
@@ -158,7 +157,7 @@ public class PIMDocConfiguration {
 			.orElse(Collections.emptyList());
 	}
 	
-	public Factory<Function<String, String>> getMarkdownRendererFactory() {
+	public Supplier<Function<String, String>> getMarkdownRendererFactory() {
 		return new MarkdownRendererFactory(getLinkTarget());
 	}
 	

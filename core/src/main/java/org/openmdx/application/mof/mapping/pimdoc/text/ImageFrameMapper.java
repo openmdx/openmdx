@@ -46,6 +46,7 @@ package org.openmdx.application.mof.mapping.pimdoc.text;
 
 import java.net.URI;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
 import org.openmdx.base.io.Sink;
@@ -65,10 +66,10 @@ public class ImageFrameMapper extends HTMLMapper {
     	Model_1_0 model,
         URI graphvizSourceURI,
         String title,
-        boolean markdown, 
+        AnnotationFlavour annotationFlavour, 
         PIMDocConfiguration configuration
     ){
-		super(sink, model, toFrameURI(graphvizSourceURI), markdown, configuration);
+		super(sink, model, toFrameURI(graphvizSourceURI), annotationFlavour, configuration);
 		this.title = title;
     }    
     

@@ -50,6 +50,9 @@ import java.io.Writer;
 import java.util.Iterator;
 
 import org.omg.mof.spi.Identifier;
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.ClassifierDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.ReferenceDef;
@@ -67,14 +70,6 @@ public class QueryMapper
 
     /**
      * Constructor 
-     *
-     * @param writer
-     * @param model
-     * @param format 
-     * @param packageSuffix
-     * @param metaData 
-     * @param markdown TODO
-     * @param primitiveTypeMapper 
      */
     public QueryMapper(
         Writer writer,
@@ -82,8 +77,10 @@ public class QueryMapper
         Format format, 
         String packageSuffix, 
         MetaData_1_0 metaData, 
-        boolean markdown, 
-        																																																															PrimitiveTypeMapper primitiveTypeMapper
+        AnnotationFlavour annotationFlavour, 
+        JakartaFlavour jakartaFlavour, 
+        JMIFlavour jmiFlavour, 
+        PrimitiveTypeMapper primitiveTypeMapper
     ) {
         super(
             writer,
@@ -91,7 +88,9 @@ public class QueryMapper
             format, 
             packageSuffix,
             metaData, 
-            markdown, 
+            annotationFlavour, 
+            jakartaFlavour, 
+            jmiFlavour, 
             primitiveTypeMapper
         );
     }

@@ -52,6 +52,9 @@ import java.util.jar.JarEntry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -68,14 +71,20 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
   /**
    * Constructor
    * 
-   * @param markdown {@code true} if annotations use markdown
+   * @param annotationFlavour tells whether annotations use markdown
+   * @param jakartaFlavour tells whether Jakarta 8 or a contemporary flavour shall be used
+   * @param jmiFlavour tells whether the classic or the contemporary JMI API shall be used
    * @param packageSuffix the (optional) package suffix
    */
   protected AbstractMapper_1(
-    boolean markdown, 
+    AnnotationFlavour annotationFlavour, 
+    JakartaFlavour jakartaFlavour, 
+    JMIFlavour jmiFlavour, 
     String packageSuffix
   ) {
-    this.markdown = markdown;
+    this.annotationFlavour = annotationFlavour;
+    this.jakartaFlavour = jakartaFlavour;
+    this.jmiFlavour = jmiFlavour;
     this.packageSuffix = packageSuffix;
   }
   
@@ -90,9 +99,19 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
   protected final String packageSuffix;
   
   /**
-   * Tells whether annoations use markdown.
+   * Tells whether annotations use markdown.
    */
-  protected final boolean markdown;
+  protected final AnnotationFlavour annotationFlavour;
+  
+  /**
+   * Tells whether Jakarta 8 or a contemporary flavour shall be used
+   */
+  protected final JakartaFlavour jakartaFlavour;
+  
+  /**
+   * Tells whether the classic or the contemporary JMI API shall be used
+   */
+  protected final JMIFlavour jmiFlavour;
 
   protected void addToZip(
     ZipOutputStream zip,
