@@ -61,7 +61,6 @@ import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.ManagedConnectionMetaData;
 import javax.resource.spi.security.PasswordCredential;
-import javax.transaction.xa.XAResource;
 #else
 import jakarta.resource.NotSupportedException;
 import jakarta.resource.ResourceException;
@@ -73,9 +72,9 @@ import jakarta.resource.spi.ManagedConnection;
 import jakarta.resource.spi.ManagedConnectionFactory;
 import jakarta.resource.spi.ManagedConnectionMetaData;
 import jakarta.resource.spi.security.PasswordCredential;
-import jakarta.transaction.xa.XAResource;
 #endif
 import javax.security.auth.Subject;
+import javax.transaction.xa.XAResource;
 
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.resource.spi.ResourceExceptions;
