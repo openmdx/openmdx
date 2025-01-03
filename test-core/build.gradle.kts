@@ -92,9 +92,11 @@ dependencies {
 	if(runtimeCompatibility == JavaVersion.VERSION_1_8) {
 		testRuntimeOnly(group = "com.atomikos", name = "transactions-jta")
 		testRuntimeOnly(group = "com.atomikos", name = "transactions-jdbc")
+        testRuntimeOnly(group = "com.oracle.database.jdbc", name = "ojdbc8")
 	} else {
 		testRuntimeOnly(group = "com.atomikos", name = "transactions-jta", classifier = "jakarta")
 		testRuntimeOnly(group = "com.atomikos", name = "transactions-jdbc", classifier = "jakarta")
+        testRuntimeOnly(group = "com.oracle.database.jdbc", name = "ojdbc17")
 	}
     // manifold preprocessor
     compileOnly("systems.manifold:manifold-preprocessor")

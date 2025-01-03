@@ -65,6 +65,7 @@ dependencies {
 		val ldapVersion = "2.1.+"
 		val manifoldVersion = "2024.1.43"
 		val mockitoVersion = "4.11.0"
+		val oracleVersion = "23.6.0.24.10"
 		val postgresVersion = "42.7.+"
 		val radiusVersion = "1.1.+"
 		val servletVersion = "6.0.+"
@@ -81,14 +82,15 @@ dependencies {
 		api("org.apache.tomcat:tomcat-catalina:$tomcatVersion")
 	    api("org.codehaus.groovy:groovy:$groovyVersion")
 	    api("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-	    runtime("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 	    api("org.mockito:mockito-core:$mockitoVersion")
 	    api("org.mockito:mockito-junit-jupiter:$mockitoVersion")
         api("org.openmdx:openmdx-base:$bootstrapVersion")	
-        runtime("org.postgresql:postgresql:$postgresVersion")
 	    api("org.tinyradius:tinyradius:$radiusVersion")	
 	    api("systems.manifold:manifold-preprocessor:$manifoldVersion")
 
+	    runtime("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+        runtime("com.oracle.database.jdbc:ojdbc17:$oracleVersion")
+        runtime("org.postgresql:postgresql:$postgresVersion")
     }
 
 }

@@ -55,6 +55,7 @@ import javax.naming.NamingException;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.openmdx.kernel.lightweight.naming.LightweightInitialContextFactoryBuilder;
+import org.openmdx.kernel.log.SysLog;
 
 /**
  * JUnit 5 Standard Extension for openMDX/Test Security
@@ -93,7 +94,10 @@ public class OpenmdxTestSecurityStandardExtension implements BeforeAllCallback {
 	}
 
 	private void configureTimezone(final Properties buildProperties) {
-		TimeZone.setDefault(TimeZone.getTimeZone(System.setProperty("user.timezone", buildProperties.getProperty(BuildProperties.TIMEZONE_KEY))));
+		String configuredTimeZone = buildProperties.getProperty(BuildProperties.TIMEZONE_KEY);
+		SysLog.info("Use the configured timezone", configuredTimeZone);
+		System.setProperty("user.timezone", configuredTimeZone);
+		TimeZone.setDefault(TimeZone.getTimeZone(configuredTimeZone));
 	}
 
 }
