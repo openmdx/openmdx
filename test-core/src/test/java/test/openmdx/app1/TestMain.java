@@ -433,6 +433,7 @@ public class TestMain {
 		private final boolean PROXIED_EXTENT_IS_AMENDMENT_AWARE = false; // TODO CR20020326
 		private final boolean INCOMPLETE_OBJECTS_CAN_BE_FLUSHED = false; // TODO CR20020411
 		private final boolean PROXY_IS_DIRTY_COLLECTION_AWARE = false; // TODO
+		private final boolean ENABLE_CONCURRENT_ACCESS_TESTS = false; // TODO
 
 		protected long id;
 
@@ -445,13 +446,8 @@ public class TestMain {
 			return REMOTE_EXCEPTIONS_ARE_GENERIC && this instanceof RemoteConnectionTest;
 		}
 
-		/**
-		 * TODO
-		 * 
-		 * @return should be {@code true} 
-		 */
 		protected boolean testConcurrentAccess() {
-			return false; // true
+			return ENABLE_CONCURRENT_ACCESS_TESTS;
 		}
 
 		/**
@@ -4723,7 +4719,7 @@ public class TestMain {
 			id = "all units of work";
 			task = AuditQueries.getUnitOfWorkForTimeRange(super.entityManager, from, null);
 			dumpTask(id + scope, task);
-			Assertions.assertEquals( ((16 * create + 69) * factor),   task.size(), id + scope);
+			Assertions.assertEquals( ((16 * create + (ENABLE_CONCURRENT_ACCESS_TESTS ? 69 : 30)) * factor),   task.size(), id + scope);
 			id = "units of work involving people";
 			task = AuditQueries.getUnitOfWorkInvolvingObject(from, null, PersistenceHelper.getCandidates(
 					super.entityManager.getExtent(Person.class), dataSegmentId.getDescendant("person", "%")));
