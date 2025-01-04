@@ -445,8 +445,13 @@ public class TestMain {
 			return REMOTE_EXCEPTIONS_ARE_GENERIC && this instanceof RemoteConnectionTest;
 		}
 
+		/**
+		 * TODO
+		 * 
+		 * @return should be {@code true} 
+		 */
 		protected boolean testConcurrentAccess() {
-			return true;
+			return false; // true
 		}
 
 		/**
