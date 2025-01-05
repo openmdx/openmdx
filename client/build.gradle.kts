@@ -55,7 +55,7 @@ val projectSpecificationVersion = project.extra["projectSpecificationVersion"] a
 val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
 val runtimeCompatibility = project.extra["runtimeCompatibility"] as JavaVersion
 
-if (runtimeCompatibility == JavaVersion.VERSION_1_8 && System.getenv("JRE_18") == null) {
+if (runtimeCompatibility.isJava8() && System.getenv("JRE_18") == null) {
     throw GradleException("ERROR: JRE_18 not set " +
             "(e.g. export JRE_18=/usr/lib/jvm/java-8-openjdk-amd64/jre)")
 }
@@ -87,7 +87,7 @@ dependencies {
     implementation(project(":security"))
     implementation(platform(project(projectPlatform)))
     implementation("jakarta.platform:jakarta.jakartaee-api")
-    if (runtimeCompatibility == JavaVersion.VERSION_1_8) {
+    if (runtimeCompatibility.isJava8()) {
         implementation(files(File(System.getenv("JRE_18"), "lib/rt.jar")))
     }
     // manifold preprocessor

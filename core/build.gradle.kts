@@ -174,7 +174,7 @@ dependencies {
     implementation("javax.jdo:jdo-api")
     implementation("javax.cache:cache-api")
 	implementation("com.vladsch.flexmark:flexmark")
-	if(runtimeCompatibility == JavaVersion.VERSION_1_8) {
+	if(runtimeCompatibility.isJava8()) {
 		implementation(group = "com.atomikos", name = "transactions-jta")
 		implementation(group = "com.atomikos", name = "transactions-jdbc")
 	} else {

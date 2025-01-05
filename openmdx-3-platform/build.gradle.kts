@@ -54,7 +54,7 @@ dependencies {
     constraints {
     	
 		val atomikosVersion = "6.0.0"
-		val bootstrapVersion = "3.18.99"
+		val bootstrapVersion = "3.19.0"
 		val cacheVersion = "1.1.1"
 		val flexmarkVersion = "0.62.2"
 		val groovyVersion = "3.0.+"
@@ -62,7 +62,7 @@ dependencies {
 		val jakartaVersion = "8.0.+"
 		val junitVersion = "5.11.3"
 		val ldapVersion = "2.1.+"
-		val manifoldVersion = "2024.1.43"
+		val manifoldVersion = "2024.1.47"
 		val mockitoVersion = "4.11.0"
 		val oracleVersion = "23.6.0.24.10"
 		val postgresVersion = "42.7.+"

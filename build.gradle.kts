@@ -78,7 +78,13 @@ allprojects {
     tasks.withType<JavaCompile> {
         sourceCompatibility = runtimeCompatibility.majorVersion
         targetCompatibility = runtimeCompatibility.majorVersion
+        options.release.set(runtimeCompatibility.majorVersion.toInt())
         options.compilerArgs.add("-Xplugin:Manifold")
+    	options.compilerArgs.add("-Amanifold.source.target=${runtimeCompatibility.majorVersion}")
+    	options.compilerArgs.add("-Amanifold.dump.generated=true")
+        if(runtimeCompatibility.isJava8()) {
+        	options.compilerArgs.add("-Xlint:-options")
+        }
         if(jmiClassic) {
         	options.compilerArgs.add("-AJMI_CLASSIC")
         }

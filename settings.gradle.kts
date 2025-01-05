@@ -61,8 +61,8 @@ include(
     "core",
     "security",
     "test-core",
-    "test-security" // ,
-    // "publish"
+    "test-security",
+    "publish"
 )
 val flavour: String = gradle.startParameter.projectProperties.getOrDefault("flavour", "2")
 if (flavour == "2") include("client", "portal", "tomcat") // will be enabled for (flavour != "3") with MDX-2

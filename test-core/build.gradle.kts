@@ -89,7 +89,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testRuntimeOnly("org.postgresql:postgresql")
     testRuntimeOnly("jakarta.servlet:jakarta.servlet-api")
-	if(runtimeCompatibility == JavaVersion.VERSION_1_8) {
+	if(runtimeCompatibility.isJava8()) {
 		testRuntimeOnly(group = "com.atomikos", name = "transactions-jta")
 		testRuntimeOnly(group = "com.atomikos", name = "transactions-jdbc")
         testRuntimeOnly(group = "com.oracle.database.jdbc", name = "ojdbc8")
