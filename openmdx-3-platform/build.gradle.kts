@@ -58,7 +58,7 @@ dependencies {
 		val cacheVersion = "1.1.1"
 		val flexmarkVersion = "0.62.2"
 		val groovyVersion = "3.0.+"
-		val jdoVersion = "3.1"
+		val jdoVersion = "3.1" // TODO to  be changed to 3.2.1 for MDX-1
 		val jakartaVersion = "8.0.+"
 		val junitVersion = "5.11.3"
 		val ldapVersion = "2.1.+"
