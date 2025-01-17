@@ -82,6 +82,7 @@ allprojects {
         options.compilerArgs.add("-Xplugin:Manifold")
     	options.compilerArgs.add("-Amanifold.source.target=${runtimeCompatibility.majorVersion}")
     	options.compilerArgs.add("-Amanifold.dump.generated=true")
+        options.annotationProcessorGeneratedSourcesDirectory = layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main").get().getAsFile()
         if(runtimeCompatibility.isJava8()) {
         	options.compilerArgs.add("-Xlint:-options")
         }

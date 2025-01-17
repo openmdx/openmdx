@@ -212,6 +212,7 @@ sourceSets {
         java {
             srcDir("src/main/java")
             srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
+			srcDir(layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main"))
         }
         resources {
         	srcDir("src/main/resources")
