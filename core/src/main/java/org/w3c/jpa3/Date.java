@@ -45,6 +45,8 @@
 package org.w3c.jpa3;
 
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import org.w3c.cci2.ImmutableDate;
 import org.w3c.format.DateTimeFormat;
@@ -61,9 +63,9 @@ public class Date {
     }
 
     /**
-     * Convert an XML Gregorian Calendar to an SQL date
+     * Convert an org::w3c::date value to an SQL date
      * 
-     * @param cciDate the XML Gregorian Calendar to be converted
+     * @param cciDate the org::w3c::date value to be converted
      * 
      * @return a corresponding SQL date instance
      */
@@ -74,18 +76,16 @@ public class Date {
     }
 
     /**
-     * Convert an SQL date to an XML Gregorian Calendar
+     * Convert an SQL date to an org::w3c::date value
      * 
      * @param jdoDate the SQL date to be converted
      * 
-     * @return a corresponding XML Gregorian Calendar instance
+     * @return the corresponding org::w3c::date value
      */
-    public static final javax.xml.datatype.XMLGregorianCalendar toCCI (
+    public static final  #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif toCCI (
         java.sql.Date jdoDate
     ){
-        String value = jdoDate == null ?
-            null :
-                jdoDate.toString();
+        String value = jdoDate == null ? null : jdoDate.toString();
         if(value == null) {
             return null;
         } else try {
@@ -94,9 +94,17 @@ public class Date {
             throw new IllegalArgumentException(exception);
         }
         if(DateTimeFormat.BASIC_DATE_PATTERN.matcher(value).matches()) {
+            #if CLASSIC_CHRONO_TYPES
             return new ImmutableDate(value);
+            #else
+            return LocalDate.parse(value, DateTimeFormatter.BASIC_ISO_DATE);
+            #endif
         } else if(DateTimeFormat.EXTENDED_DATE_PATTERN.matcher(value).matches()) {
+            #if CLASSIC_CHRONO_TYPES
             return new ImmutableDate(value.replaceAll("-", ""));
+            #else
+            return LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE);
+            #endif
         } else {
             throw new IllegalArgumentException(
                 "The value does not match the org::w3c::date pattern. Pattern=YYYY[...]-MM-DD. Value=" + value

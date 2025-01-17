@@ -9,7 +9,5 @@ build
 /bin/
 /.classpath
 /.DS_Store
-/build2/
-/build3/
-/build4/
+/build/
 /.project

@@ -50,7 +50,7 @@ import java.io.Writer;
 import java.util.Date;
 
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
@@ -81,7 +81,7 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
         MetaData_1_0 metaData, 
         AnnotationFlavour annotationFlavour, 
         JakartaFlavour jakartaFlavour, 
-        JMIFlavour jmiFlavour, 
+        ChronoFlavour chronoFlavour,
         PrimitiveTypeMapper primitiveTypeMapper, 
         ObjectRepositoryMetadataPlugin plugin
     ) throws ServiceException {
@@ -93,8 +93,8 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
             packageSuffix, 
     		sliceClassName, 
             annotationFlavour, 
-            jakartaFlavour, 
-            jmiFlavour, 
+            jakartaFlavour,
+			chronoFlavour,
             metaData, 
             primitiveTypeMapper, 
             plugin
@@ -102,13 +102,9 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
 	}
 
 	/**
-	 * Return the persistence modifier if explicitly defined
-	 * 
-	 * @param featureDef
-	 * 
+	 * Determine the persistence modifier if explicitly defined
+	 *
 	 * @return the persistence modifier if it is explicitly defined
-	 * 
-	 * @throws ServiceException
 	 */
     protected Boolean isPersistent(
         StructuralFeatureDef featureDef
@@ -117,9 +113,7 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
         if(fieldMetaData != null) {
         	FieldPersistenceModifier persistenceModifier = fieldMetaData.getPersistenceModifier();
         	if(persistenceModifier != null){
-        		return Boolean.valueOf(
-        			persistenceModifier == FieldPersistenceModifier.PERSISTENT || persistenceModifier == FieldPersistenceModifier.VERSION
-        		);
+        		return persistenceModifier == FieldPersistenceModifier.PERSISTENT || persistenceModifier == FieldPersistenceModifier.VERSION;
         	}
         }
         return null;
@@ -129,7 +123,7 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
 	 * @see org.openmdx.application.mof.mapping.java.AbstractMetaDataMapper#mapReference(org.openmdx.application.mof.mapping.cci.ReferenceDef)
 	 */
 	@Override
-	public void mapReference(ReferenceDef featureDef) throws ServiceException {
+	public void mapReference(ReferenceDef featureDef) {
 		// never invoked
 	}
 
@@ -139,7 +133,7 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
 	@Override
 	public void mapSize(
 		StructuralFeatureDef featureDef
-	) throws ServiceException {
+	) {
 		// never invoked
 	}
 
@@ -150,7 +144,7 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
 	public void mapEmbedded(
 		StructuralFeatureDef featureDef,
 		FieldMetaData fieldMetaData
-	) throws ServiceException {
+	) {
 		// never invoked
 	}
 
@@ -165,7 +159,7 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
 				printLine(
 					attributeDef.getQualifiedName().replaceAll(":", "\\\\:"),
 					" = ",
-					persistent.booleanValue() ? "PERSISTENT" : "TRANSIENT"
+                        persistent ? "PERSISTENT" : "TRANSIENT"
 				);
 			}
 		}

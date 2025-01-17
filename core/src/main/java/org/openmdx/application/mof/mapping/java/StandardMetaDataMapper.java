@@ -55,7 +55,7 @@ import java.util.List;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
@@ -93,7 +93,7 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         MetaData_1_0 metaData, 
         AnnotationFlavour annotationFlavour, 
         JakartaFlavour jakartaFlavour, 
-        JMIFlavour jmiFlavour, 
+        ChronoFlavour chronoFlavour,
         PrimitiveTypeMapper primitiveTypeMapper, 
         ObjectRepositoryMetadataPlugin plugin
     ) throws ServiceException {
@@ -105,17 +105,16 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
             packageSuffix, 
             sliceClassName,
             annotationFlavour,
-            jakartaFlavour, 
-            jmiFlavour, 
+            jakartaFlavour,
+            chronoFlavour,
             metaData, 
             primitiveTypeMapper, 
             plugin
         );
 	}
 
-    //-----------------------------------------------------------------------
     protected String ormTableName(
-    ) throws ServiceException {
+    )  {
         return this.classMetaData == null || this.classMetaData.getTable() == null ? 
             this.getTableName(this.qualifiedClassName) : 
                 DEFAULT_IDENTIFIER_MAPPING.equals(this.classMetaData.getTable()) ? 
@@ -123,7 +122,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
                     (this.sliceClassName == null ? this.classMetaData.getTable() : this.plugin.getSliceTableName(this.classMetaData.getTable()));
     }
 
-    //-----------------------------------------------------------------------
     protected boolean isPersistent(
         StructuralFeatureDef featureDef
     ) throws ServiceException {
@@ -142,13 +140,11 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         return fieldMetaData != null && fieldMetaData.getPersistenceModifier() == FieldPersistenceModifier.VERSION;
     }
     
-    //-----------------------------------------------------------------------
     protected String getDiscriminatorValue(
     ) {
         return this.classDef.getQualifiedName();
     }
 
-    //-----------------------------------------------------------------------
     @Override
     public void mapReference(
         ReferenceDef featureDef
@@ -264,7 +260,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         }
     }
 
-    //-----------------------------------------------------------------------
     @Override
 	public void mapSize(
 	    StructuralFeatureDef featureDef
@@ -314,7 +309,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         }
 	}
 
-    //-----------------------------------------------------------------------
     @Override
     public void mapEmbedded(
         StructuralFeatureDef featureDef,
@@ -323,9 +317,9 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
        if(!this.isPersistenceAware(this.classDef)) {
           boolean isPersistent = this.isPersistent(featureDef); 
           for(
-               int i = 0, embedded = fieldMetaData.getEmbedded().intValue();
-               i < embedded;
-               i++
+                  int i = 0, embedded = fieldMetaData.getEmbedded();
+                  i < embedded;
+                  i++
           ) {
               if(isPersistent) {
                   this.pwBasicAttributes.print("      <basic");
@@ -362,7 +356,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
        }
     }
     
-    //-----------------------------------------------------------------------
     protected void printColumn(
         PrintWriter pw,
         ColumnMetaData columnMetaData,
@@ -382,7 +375,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         );
     }
     
-    //-----------------------------------------------------------------------
     protected void printColumn(
         PrintWriter pw,
         String columnTag,
@@ -440,7 +432,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         pw.println("/>");        
     }
 
-    //-----------------------------------------------------------------------
     @Override
     public void mapAttribute(
         AttributeDef featureDef
@@ -488,7 +479,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         }
     }
 
-    //-----------------------------------------------------------------------
     @Override
 	public void mapEnd(
         AbstractMetaDataMapper sliceClass
@@ -515,7 +505,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         }
 	}
 
-    //-----------------------------------------------------------------------
     private void mapSliceClassEnd(
     ) throws ServiceException {
         try {
@@ -539,7 +528,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         }
     }
     
-    //-----------------------------------------------------------------------
     @Override
 	public void mapBegin(
 	    boolean isSliceHolder
@@ -746,7 +734,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
 		}
 	}
 
-	//-----------------------------------------------------------------------
 	/**
 	 * Print the XML file header
 	 */
@@ -772,7 +759,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
 		pw.println("  <access>FIELD</access>");		
 	}
     
-    //-----------------------------------------------------------------------
     /**
      * Print the XML file footer
      */
@@ -782,7 +768,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         pw.print("</entity-mappings>");
     }
     
-    //-----------------------------------------------------------------------
     private void embed(
         StandardMetaDataMapper that
     ) throws ServiceException {
@@ -793,7 +778,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         }
     }
 
-    //-----------------------------------------------------------------------
     public static void printAttribute(
         PrintWriter pw,
         String name, 
@@ -809,14 +793,8 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         }
     }
     
-    //-----------------------------------------------------------------------
     /**
 	 * Convert a model name to a database name
-	 * 
-	 * @param fieldName
-	 * @param size 
-     * 
-	 * @return
 	 */
 	protected String toColumnName(
         String fieldName
@@ -828,7 +806,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
             this.plugin.getFieldColumnName(this.qualifiedClassName, fieldName);
 	}
 
-    //-----------------------------------------------------------------------
     private String getPackagePrefix(
         List<String> qualifiedClassName
     ){
@@ -853,12 +830,9 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         }
     }
     
-    //-----------------------------------------------------------------------
     /**
      * Convert a model name to a database name
-     * @param qualifiedClassName 
-     * @param modelName
-     * 
+     *
      * @return the table name
      */
     private String getTableName(
@@ -870,7 +844,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
             this.plugin.getSliceTableName(tableName);
     }
     
-    //-----------------------------------------------------------------------
     private InheritanceStrategy getInheritanceStrategy(
     ) {
         InheritanceStrategy thisStrategy = getInheritanceStrategy(this.classDef);
@@ -883,7 +856,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         return thisStrategy;
     }
 
-    //-----------------------------------------------------------------------
     protected static InheritanceStrategy getInheritanceStrategy(
         ClassDef classDef
     ) {
@@ -897,7 +869,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         return null;
     }
     
-    //-----------------------------------------------------------------------
     @Override
     public void setProcess(
         boolean process
@@ -905,7 +876,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         this.process = process;
     }
     
-    //-----------------------------------------------------------------------
     static final String DEFAULT_IDENTIFIER_MAPPING = "?";
     
     private boolean process;    

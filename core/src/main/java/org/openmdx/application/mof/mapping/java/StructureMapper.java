@@ -52,7 +52,7 @@ import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.StructDef;
@@ -80,7 +80,7 @@ public class StructureMapper extends AbstractMapper {
         MetaData_1_0 metaData, 
         AnnotationFlavour annotationFlavour, 
         JakartaFlavour jakartaFlavour, 
-        JMIFlavour jmiFlavour,
+        ChronoFlavour chronoFlavour,
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
@@ -90,8 +90,8 @@ public class StructureMapper extends AbstractMapper {
             packageSuffix,
             metaData, 
             annotationFlavour, 
-            jakartaFlavour, 
-            jmiFlavour, 
+            jakartaFlavour,
+            chronoFlavour,
             primitiveTypeMapper
         );
         this.structDef = new StructDef(
@@ -103,7 +103,6 @@ public class StructureMapper extends AbstractMapper {
         );
     }
 
-    //-----------------------------------------------------------------------
     public void mapFieldGetSparseArray(
         StructuralFeatureDef fieldDef
     ) throws ServiceException {
@@ -123,7 +122,6 @@ public class StructureMapper extends AbstractMapper {
         newLine();
     }
 
-    //-----------------------------------------------------------------------
     public void mapFieldGetSet(
         StructuralFeatureDef fieldDef
     ) throws ServiceException {
@@ -143,7 +141,6 @@ public class StructureMapper extends AbstractMapper {
         newLine();
     }
 
-    //-----------------------------------------------------------------------
     public void mapFieldGetList(
         StructuralFeatureDef fieldDef
     ) throws ServiceException {
@@ -165,7 +162,6 @@ public class StructureMapper extends AbstractMapper {
         }
     }
 
-    //-----------------------------------------------------------------------
     public void mapFieldGet1_1(
         StructuralFeatureDef structureFieldDef
     ) throws ServiceException {
@@ -182,7 +178,6 @@ public class StructureMapper extends AbstractMapper {
         newLine();
     }
 
-    //-----------------------------------------------------------------------
     public void mapFieldGet0_1(
         StructuralFeatureDef structureFieldDef
     ) throws ServiceException {
@@ -199,7 +194,6 @@ public class StructureMapper extends AbstractMapper {
         newLine();
     }
 
-    //-----------------------------------------------------------------------
     public void mapFieldGetStream(
         StructuralFeatureDef structureFieldDef
     ) {
@@ -248,7 +242,6 @@ public class StructureMapper extends AbstractMapper {
         }
     }
 
-    //-----------------------------------------------------------------------
     public void mapEnd(
     ) throws ServiceException {
         newLine();
@@ -275,7 +268,6 @@ public class StructureMapper extends AbstractMapper {
         printLine("}");
     }
 
-    //-----------------------------------------------------------------------
     public void mapBegin(
     ) throws ServiceException {
         this.trace("StructureType/Begin");
@@ -295,10 +287,9 @@ public class StructureMapper extends AbstractMapper {
             );
         }
         printLine("{");
-        this.members = new ArrayList<String>();
+        this.members = new ArrayList<>();
     }
 
-    //-----------------------------------------------------------------------
     static final String REF_STRUCT_INTERFACE_NAME = "org.openmdx.base.accessor.jmi.cci.RefStruct_1_0";
     
     private final StructDef structDef;

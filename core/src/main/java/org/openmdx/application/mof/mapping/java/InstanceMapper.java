@@ -56,7 +56,7 @@ import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
@@ -96,7 +96,7 @@ extends AbstractClassMapper {
         MetaData_1_0 metaData, 
         AnnotationFlavour annotationFlavour,
         JakartaFlavour jakartaFlavour,
-        JMIFlavour jmiFlavour, 
+        ChronoFlavour chronoFlavour,
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
@@ -107,26 +107,23 @@ extends AbstractClassMapper {
             packageSuffix, 
             metaData, 
             annotationFlavour,
-            jakartaFlavour, 
-            jmiFlavour, 
+            jakartaFlavour,
+            chronoFlavour,
             primitiveTypeMapper
         );
         this.pwSlice = writerJdoSlice == null ? null : new PrintWriter(writerJdoSlice);
-        this.localFeatures = new HashMap<String,ModelElement_1_0>(
-            (Map<String,ModelElement_1_0>)classDef.objGetMap("allFeature")
-        );
+        this.localFeatures = new HashMap<>(classDef.objGetMap("allFeature"));
         if(isBaseClass()) {            
             this.superFeatures = Collections.emptyMap();
         } 
         else {
-            this.superFeatures = (Map<String,ModelElement_1_0>)model.getElement(
+            this.superFeatures = model.getElement(
                 this.extendsClassDef.getQualifiedName()
             ).objGetMap("allFeature"); 
             this.localFeatures.keySet().removeAll(superFeatures.keySet());                
         }
     }
 
-    // -----------------------------------------------------------------------
     public void mapReferenceAddWithoutQualifier(
         ReferenceDef referenceDef
     ) throws ServiceException {
@@ -161,13 +158,12 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    // -----------------------------------------------------------------------
     public void mapReferenceAddWithQualifier(
         ReferenceDef referenceDef
     ) throws ServiceException {
         if(
-                referenceDef.isChangeable() && 
-                (referenceDef.isComposition() || referenceDef.isShared())
+            referenceDef.isChangeable() &&
+            (referenceDef.isComposition() || referenceDef.isShared())
         ){
             Format format = getFormat();
             if(format == Format.JMI1) {
@@ -251,21 +247,18 @@ extends AbstractClassMapper {
         }
     }
 
-    // -----------------------------------------------------------------------
     public void mapReferenceRemoveOptional(
         ReferenceDef referenceDef
-    ) throws ServiceException {
+    ) {
         // Nothing to do 
     }
 
-    // -----------------------------------------------------------------------
     public void mapReferenceRemoveWithQualifier(
         ReferenceDef referenceDef
-    ) throws ServiceException {
+    ) {
         // Nothing to do 
     }
 
-    // -----------------------------------------------------------------------
     public void mapReferenceSetNoQualifier(
         ReferenceDef referenceDef, 
         boolean optional, 
@@ -337,18 +330,13 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    // -----------------------------------------------------------------------
     public void mapReferenceGetx_1NoQualifier(
         ReferenceDef referenceDef, 
         boolean optional, 
         boolean referencedEnd
     ) throws ServiceException {
-        String referenceName = referencedEnd ?
-            getFeatureName(referenceDef) :
-                getFeatureName(referenceDef.getExposedEndName());
-        String qualifiedTypeName = referencedEnd ?
-            referenceDef.getQualifiedTypeName() :
-                referenceDef.getExposedEndQualifiedTypeName();
+        String referenceName = referencedEnd ? getFeatureName(referenceDef) : getFeatureName(referenceDef.getExposedEndName());
+        String qualifiedTypeName = referencedEnd ? referenceDef.getQualifiedTypeName() : referenceDef.getExposedEndQualifiedTypeName();
         ClassDef classDef = getClassDef(qualifiedTypeName);
         ClassType classType = getClassType(classDef);
         if(getFormat() == Format.JPA3) {
@@ -390,7 +378,6 @@ extends AbstractClassMapper {
         }
     }
 
-    // -----------------------------------------------------------------------
     public void mapReferenceGet0_nWithQualifier(
         ReferenceDef referenceDef, 
         boolean delegate
@@ -443,15 +430,14 @@ extends AbstractClassMapper {
         ) + '.' + Identifier.CLASS_PROXY_NAME.toIdentifier(
             referenceDef.getName()
         ) : "java.util.Set";
-        ClassMetaData classMetaData;
 
+        final ClassMetaData classMetaData;
         if(getFormat() == Format.JPA3) {
             classMetaData = (ClassMetaData) getClassDef(referenceDef.getQualifiedTypeName()).getClassMetaData();
             if(classMetaData.isRequiresExtent()) {
                 if (referenceDef.isComposition()) {
                     // No member for composites. Composites are retrieved by query
-                }
-                else {
+                } else {
                     this.trace("Instance/ReferenceDeclaration");
                     newLine();
                     printLine("  /**");
@@ -468,8 +454,7 @@ extends AbstractClassMapper {
                     newLine();
                 }
             }
-        } 
-        else {
+        } else {
             classMetaData = null;
         }
         this.trace("Instance/ReferenceGet0_nWithQuery");
@@ -562,7 +547,6 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    // -----------------------------------------------------------------------
     public void mapReferenceGet0_nNoQuery(
         ReferenceDef referenceDef, 
         boolean delegate
@@ -661,7 +645,6 @@ extends AbstractClassMapper {
         }
     }
 
-    // -----------------------------------------------------------------------
     public void mapReferenceGet0_1WithQualifier(
         ReferenceDef referenceDef
     ) throws ServiceException {
@@ -705,19 +688,12 @@ extends AbstractClassMapper {
                     printLine("    boolean ", qualifierPersistencyArgumentName, ",");
                 }
                 printLine("    ", this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false), " ", referenceDef.getQualifierName());
-                if(format == Format.JPA3) {
-                    printLine("  ){");                    
-                    printLine("    throw new java.lang.UnsupportedOperationException(\"Not yet implemented\");"); // TODO
-                    printLine("  }");
-                } else {
-                    printLine("  );");
-                }
+                printLine("  );");
                 newLine();
             }
         } 
     }
 
-    // -----------------------------------------------------------------------
     public void mapReferenceGet1_1WithQualifier(
         ReferenceDef referenceDef
     ) throws ServiceException {
@@ -764,7 +740,6 @@ extends AbstractClassMapper {
         }
     }
 
-    // -----------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     public void mapOperation(
         OperationDef operationDef
@@ -832,7 +807,6 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    // -----------------------------------------------------------------------
     public void mapEnd(
     ) throws ServiceException {
         this.trace("Instance/End");
@@ -863,15 +837,11 @@ extends AbstractClassMapper {
                 this.mapAuthority();
             }
         } 
-        else {
-            // nothing to do
-        }
         printLine("}");
     }
 
-    // -----------------------------------------------------------------------
     private void mapAuthority(
-    ) throws ServiceException {
+    ){
         switch(getFormat()) {
             case CCI2: {
                 printLine("  /**");
@@ -893,7 +863,6 @@ extends AbstractClassMapper {
         }
     }
 
-    // -----------------------------------------------------------------------
     private void mapContainment(
     ) throws ServiceException{
 
@@ -982,7 +951,6 @@ extends AbstractClassMapper {
         newLine();            
     }
 
-    // -----------------------------------------------------------------------
     protected String toQualifierAccessor(
         String qualifiedTypeName
     ){
@@ -1005,7 +973,6 @@ extends AbstractClassMapper {
                                                                         "identityParser.nextString()";
     }
 
-    // -----------------------------------------------------------------------
     protected String getQualifierMutator(
         String qualifiedTypeName
     ){
@@ -1028,24 +995,20 @@ extends AbstractClassMapper {
                                                                         "appendString";
     }
 
-    // -----------------------------------------------------------------------
     boolean isAuthority(){
         return 
         "org:openmdx:base:Authority".equals(this.classDef.getQualifiedName());
     }
 
-    // -----------------------------------------------------------------------
     boolean hasSPI(){
         return this.spiFeatures != null;
     }
 
-    // -----------------------------------------------------------------------
     boolean isProvider(){
         return 
         "org:openmdx:base:Provider".equals(this.classDef.getQualifiedName());
     }
 
-    // -----------------------------------------------------------------------
     boolean hasSlices(
     ){
         return 
@@ -1054,9 +1017,8 @@ extends AbstractClassMapper {
             !this.sliced.isEmpty();
     }
 
-    // -----------------------------------------------------------------------
     public void mapSingleValuedFields(
-    ) throws ServiceException{
+    ) {
         if(this.hasSlices()) {
             for(Map.Entry<String,String> e : this.sliced.entrySet()){
                 this.mapDeclareSize("    ", e.getKey());
@@ -1065,7 +1027,6 @@ extends AbstractClassMapper {
         }
     }
 
-    // -----------------------------------------------------------------------
     public void mapMultivaluedFields(
     ) throws ServiceException{
         if(this.isSliceHolder() || this.hasSlices()) {
@@ -1231,7 +1192,6 @@ extends AbstractClassMapper {
         }
     }
 
-    // -----------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     public void mapBegin(
     ) throws ServiceException {
@@ -1272,7 +1232,7 @@ extends AbstractClassMapper {
                 interfaceType(
                     this.classDef, 
                     hasSPI() ? Visibility.SPI : Visibility.CCI,
-                        false
+                    false
                 )
             );
             newLine();
@@ -1374,7 +1334,6 @@ extends AbstractClassMapper {
         }
     }
 
-    // -----------------------------------------------------------------------
     public void mapAttributeSetStream(AttributeDef attributeDef) {
         this.trace("Instance/AttributeSetStream");
         newLine();
@@ -1454,7 +1413,6 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    // -----------------------------------------------------------------------
     public void mapAttributeSet1_1(
         AttributeDef attributeDef
     ) throws ServiceException {
@@ -1500,7 +1458,6 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    // -----------------------------------------------------------------------
     public void mapAttributeSet0_1(
         AttributeDef attributeDef
     ) throws ServiceException {
@@ -1543,10 +1500,9 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    // -----------------------------------------------------------------------
     public void mapAttributeGetStream(
         AttributeDef attributeDef
-    ) throws ServiceException {
+    ) {
         this.trace("Instance/AttributeGetStream");
         newLine();
         String newValue = getFeatureName(attributeDef);
@@ -1594,7 +1550,6 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    // -----------------------------------------------------------------------
     public void mapAttributeGetSparseArray(
         AttributeDef attributeDef
     ) throws ServiceException {
@@ -1644,7 +1599,6 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    // -----------------------------------------------------------------------
     public void mapAttributeGetSet(
         AttributeDef attributeDef
     ) throws ServiceException {
@@ -1663,7 +1617,7 @@ extends AbstractClassMapper {
                 String fieldType = getType(attributeDef.getQualifiedTypeName(), getFormat(), true);
                 for(
                     int i = 0;
-                    i < embedded.intValue();
+                    i < embedded;
                     i++
                 ){
                     printLine("  private ", fieldType, " ", attributeName, SUFFIX_SEPARATOR, Integer.toString(i), ";");
@@ -1720,14 +1674,14 @@ extends AbstractClassMapper {
                 printLine("      switch(index){");
                 for(
                     int i = 0;
-                    i < embedded.intValue();
+                    i < embedded;
                     i++
                 ){
                     printLine("         case ", Integer.toString(i), ": return ", attributeName, SUFFIX_SEPARATOR,Integer.toString(i), ";");
                 }
                 printLine(
                 	"         default: throw new IndexOutOfBoundsException(\"Index \", + index + \" is not in [0..",
-                	Integer.toString(embedded.intValue() - 1),
+                	Integer.toString(embedded - 1),
                 	"]\");"
                 );
                 printLine("      }");
@@ -1737,7 +1691,7 @@ extends AbstractClassMapper {
                 printLine("      switch(index){");
                 for(
                     int i = 0;
-                    i < embedded.intValue();
+                    i < embedded;
                     i++
                 ){
                     printLine(
@@ -1752,7 +1706,7 @@ extends AbstractClassMapper {
                 }
                 printLine(
                 	"         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0..", 
-                	Integer.toString(embedded.intValue() - 1),
+                	Integer.toString(embedded - 1),
                 	"]\");"
                 );
                 printLine("      }");
@@ -1774,7 +1728,6 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    // -----------------------------------------------------------------------
     public void mapAttributeGetMap(
         AttributeDef attributeDef
     ) throws ServiceException {
@@ -1819,7 +1772,6 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    // -----------------------------------------------------------------------
     public void mapAttributeSetList(
         AttributeDef attributeDef
     ) throws ServiceException {
@@ -1894,7 +1846,6 @@ extends AbstractClassMapper {
         }
     }
 
-    //-----------------------------------------------------------------------
     public void mapAttributeSetSet(
         AttributeDef attributeDef
     ) throws ServiceException {
@@ -1964,8 +1915,6 @@ extends AbstractClassMapper {
         }
     }
 
-    //-----------------------------------------------------------------------
-
     public void mapAttributeSetSparseArray(
         AttributeDef attributeDef
     ) throws ServiceException {
@@ -2003,8 +1952,6 @@ extends AbstractClassMapper {
             newLine();
         }
     }
-
-    //-----------------------------------------------------------------------
 
     public void mapReferenceSetWithQualifier(
         ReferenceDef referenceDef)
@@ -2092,7 +2039,6 @@ extends AbstractClassMapper {
         printLine(prefix + "}");
     }
     
-    // -----------------------------------------------------------------------
     public void mapAttributeGetList(
         AttributeDef attributeDef
     ) throws ServiceException {
@@ -2110,7 +2056,7 @@ extends AbstractClassMapper {
                 String fieldType = getType(attributeDef.getQualifiedTypeName(), getFormat(), true);
                 for(
                     int i = 0;
-                    i < embedded.intValue();
+                    i < embedded;
                     i++
                 ){
                     printLine("  private ", fieldType, " ", attributeName, SUFFIX_SEPARATOR, Integer.toString(i), ";");
@@ -2164,12 +2110,12 @@ extends AbstractClassMapper {
                 printLine("      switch(index){");
                 for(
                     int i = 0;
-                    i < embedded.intValue();
+                    i < embedded;
                     i++
                 ){
                     printLine("         case ", Integer.toString(i), ": return ", attributeName, SUFFIX_SEPARATOR, Integer.toString(i), ";");
                 }
-                printLine("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0..", Integer.toString(embedded.intValue() - 1), "]\");");
+                printLine("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0..", Integer.toString(embedded - 1), "]\");");
                 printLine("      }");
                 printLine("    }");
                 newLine();
@@ -2177,14 +2123,14 @@ extends AbstractClassMapper {
                 printLine("      switch(index){");
                 for(
                     int i = 0;
-                    i < embedded.intValue();
+                    i < embedded;
                     i++
                 ){
                     printLine("         case ", Integer.toString(i), ": ", attributeName + SUFFIX_SEPARATOR, Integer.toString(i), " = element;");
                 }
                 printLine(
                 	"         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0..", 
-                	Integer.toString(embedded.intValue() - 1), 
+                	Integer.toString(embedded - 1),
                 	"]\");"
                 );
                 printLine("      }");
@@ -2206,7 +2152,6 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    // -----------------------------------------------------------------------
     public void mapAttributeGet1_1(
         AttributeDef attributeDef
     ) throws ServiceException {
@@ -2218,7 +2163,7 @@ extends AbstractClassMapper {
         if(format == Format.JPA3) {
             mapDeclareValue(
                 "  ", 
-                this.getType(modelType, format, false), 
+                this.getType(modelType, format, false),
                 attributeName, 
                 attributeDef.isDerived() ? "public" : null
             );
@@ -2253,7 +2198,6 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    // -----------------------------------------------------------------------
     public void mapAttributeGet0_1(
         AttributeDef attributeDef
     ) throws ServiceException {
@@ -2263,7 +2207,7 @@ extends AbstractClassMapper {
         if(getFormat() == Format.JPA3) {
             mapDeclareValue(
                 "  ", 
-                this.getType(modelType, this.getFormat(), true), 
+                this.getType(modelType, this.getFormat(), true),
                 attributeName, 
                 attributeDef.isDerived() ? "public" : null
             );
@@ -2299,16 +2243,14 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    //-----------------------------------------------------------------------
     protected boolean mapValueType(
         String qualifiedTypeName
     ) throws ServiceException {
-        String cci2Type = this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, Format.CCI2, false);
-        String jpa3Type = this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, Format.JPA3, false);
+        String cci2Type = this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, Format.CCI2, false, this.chronoFlavour.isClassic());
+        String jpa3Type = this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, Format.JPA3, false, this.chronoFlavour.isClassic());
         return !cci2Type.equals(jpa3Type);
     }
 
-    //-----------------------------------------------------------------------
     protected void mapDeclareValue(
         PrintWriter pw,
         String indentation,
@@ -2316,7 +2258,7 @@ extends AbstractClassMapper {
         String attributeName,
         String visibility,
         boolean settersAndGetters
-    ) throws ServiceException{
+    ) {
         this.trace(pw, "Instance/DeclareValue");
         pw.println();
         pw.println(indentation + "/**");
@@ -2351,13 +2293,12 @@ extends AbstractClassMapper {
         }
     }
 
-    //-----------------------------------------------------------------------
     protected void mapDeclareValue(
         String indentation,
         String attributeType, 
         String attributeName,
         String visibility
-    ) throws ServiceException{
+    ) {
         this.mapDeclareValue(
             this.pw, 
             indentation, 
@@ -2368,7 +2309,6 @@ extends AbstractClassMapper {
         );
     }
     
-    //-----------------------------------------------------------------------
     protected void mapDeclareReference(
         PrintWriter pw,
         String indentation,
@@ -2376,7 +2316,7 @@ extends AbstractClassMapper {
         String referenceName, 
         boolean unused,
         boolean accessors
-    ) throws ServiceException{
+    ) {
         this.trace(pw, "Instance/ReferenceDeclaration");
         if(unused){
             printLine("  @SuppressWarnings(\"unused\")");
@@ -2413,13 +2353,12 @@ extends AbstractClassMapper {
         }        
     }
 
-    //-----------------------------------------------------------------------
     protected void mapDeclareReference(
         String indentation,
         String qualifiedTypeName, 
         String referenceName, 
         boolean referencedEnd
-    ) throws ServiceException{
+    ) {
         this.mapDeclareReference(
             this.pw,
             indentation, 
@@ -2430,11 +2369,10 @@ extends AbstractClassMapper {
         );
     }
     
-    //-----------------------------------------------------------------------
     protected void mapDeclareSize(
         String indentation,
         String attributeName
-    ) throws ServiceException{
+    )  {
         this.trace("Instance/DeclareSize");
         newLine();
         printLine(indentation + "/**");
@@ -2444,10 +2382,8 @@ extends AbstractClassMapper {
         newLine();
     }
 
-    //-----------------------------------------------------------------------
     /**
      * Retrieve not inherited features
-     * @param inherited
      *
      * @return Returns the implementsClassDef.
      */
@@ -2458,7 +2394,7 @@ extends AbstractClassMapper {
     //-----------------------------------------------------------------------
     private final Map<String,ModelElement_1_0> superFeatures;
     private final Map<String,ModelElement_1_0> localFeatures;
-    private final Map<String,String> sliced = new LinkedHashMap<String,String>();   
+    private final Map<String,String> sliced = new LinkedHashMap<>();
     private final PrintWriter pwSlice;
 
     static final String OPENMDX_JDO_PREFIX = "openmdxjdo";
@@ -2471,8 +2407,6 @@ extends AbstractClassMapper {
     static final String QUALIFIED_IDENTITY_FEATURE_CLASS_NAME = "java.lang.String";
     static final String QUALIFIED_IDENTITY_CLASS_NAME = "org.oasisopen.cci2." + OBJECT_IDENTITY_CLASS_NAME;
     static final String QUALIFIED_ABSTRACT_OBJECT_CLASS_NAME = "org.w3c.jpa3.AbstractObject";
-    static final String QUALIFIED_ABSTRACT_OBJECT_IDENTITY_CLASS_NAME = "org.oasisopen.jdo2.Abstract" + OBJECT_IDENTITY_CLASS_NAME;
-    static final String QUALIFIED_ABSTRACT_SLICE_ID_CLASS_NAME = QUALIFIED_ABSTRACT_OBJECT_CLASS_NAME + ".AbstractSliceId";
     static final String SUFFIX_SEPARATOR = "_";
     static final String SIZE_SUFFIX = SUFFIX_SEPARATOR + "size";
     static final String QUALIFIER_TYPE_WORD = "type";
@@ -2481,4 +2415,5 @@ extends AbstractClassMapper {
     static final String PERSISTENCY_SUFFIX = "IsPersistent";
     static final String ID_SUFFIX = SUFFIX_SEPARATOR + "Id";
     static final String REF_OBJECT_INTERFACE_NAME = "org.openmdx.base.accessor.jmi.cci.RefObject_1_0"; 
+
 }

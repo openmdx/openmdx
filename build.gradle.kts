@@ -46,17 +46,17 @@ plugins {
     kotlin("jvm") version "2.1.0"
 }
 
-val projectFlavour = providers.gradleProperty("flavour").getOrElse("2")
+val projectFlavour = providers.gradleProperty("flavour").getOrElse("4")
 val projectSpecificationVersion = "19"
-val projectMaintenanceVersion = "0"
+val projectMaintenanceVersion = "1"
 val runtimeCompatibility = if (projectFlavour < "4") JavaVersion.VERSION_1_8 else JavaVersion.VERSION_21
-val jmiClassic = projectFlavour == "2"
+val classicChronoTypes = projectFlavour == "2" || projectFlavour == "4"
 
 allprojects {
 
     group = "org.openmdx"
     version = "${projectFlavour}.${projectSpecificationVersion}.${projectMaintenanceVersion}"
-    layout.buildDirectory.set(layout.projectDirectory.dir("build${projectFlavour}"))
+    layout.buildDirectory.set(layout.projectDirectory.dir("build/openmdx-${projectFlavour}"))
 
     ext {
         extra["projectFlavour"] = projectFlavour
@@ -71,7 +71,7 @@ allprojects {
 	        url = uri("https://datura.econoffice.ch/maven2")
 	    }
 	    maven {
-	       url = uri("file:" + File(project.rootDir, "publish/build${projectFlavour}/repos/releases"))
+	       url = uri("file:" + File(project.rootDir, "publish/build/openmdx-${projectFlavour}/repos/releases"))
 	    }
 	}
 
@@ -86,8 +86,8 @@ allprojects {
         if(runtimeCompatibility.isJava8()) {
         	options.compilerArgs.add("-Xlint:-options")
         }
-        if(jmiClassic) {
-        	options.compilerArgs.add("-AJMI_CLASSIC")
+        if(classicChronoTypes) {
+        	options.compilerArgs.add("-ACLASSIC_CHRONO_TYPES")
         }
         options.annotationProcessorPath = configurations.annotationProcessor.get()
     }

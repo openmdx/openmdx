@@ -53,7 +53,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -73,18 +73,18 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
    * 
    * @param annotationFlavour tells whether annotations use markdown
    * @param jakartaFlavour tells whether Jakarta 8 or a contemporary flavour shall be used
-   * @param jmiFlavour tells whether the classic or the contemporary JMI API shall be used
+   * @param chronoFlavour tells whether the classic or the contemporary JMI API shall be used
    * @param packageSuffix the (optional) package suffix
    */
   protected AbstractMapper_1(
     AnnotationFlavour annotationFlavour, 
     JakartaFlavour jakartaFlavour, 
-    JMIFlavour jmiFlavour, 
+    ChronoFlavour chronoFlavour,
     String packageSuffix
   ) {
     this.annotationFlavour = annotationFlavour;
     this.jakartaFlavour = jakartaFlavour;
-    this.jmiFlavour = jmiFlavour;
+    this.chronoFlavour = chronoFlavour;
     this.packageSuffix = packageSuffix;
   }
   
@@ -111,7 +111,7 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
   /**
    * Tells whether the classic or the contemporary JMI API shall be used
    */
-  protected final JMIFlavour jmiFlavour;
+  protected final ChronoFlavour chronoFlavour;
 
   protected void addToZip(
     ZipOutputStream zip,
@@ -189,7 +189,7 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
         zip,
         os,
         element,
-        element == null ? "" : (String)element.getName(),
+        element == null ? "" : element.getName(),
         suffix
       );
     }
@@ -221,7 +221,7 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
     final String qualifiedPackageName
   ) throws ServiceException {
     final List<ModelElement_1_0> modelPackages = new ArrayList<>();
-    final boolean wildcard = qualifiedPackageName.indexOf("%") >= 0;
+    final boolean wildcard = qualifiedPackageName.contains("%");
     final String pattern = wildcard 
       ? qualifiedPackageName.substring(0, qualifiedPackageName.indexOf("%"))
       : qualifiedPackageName;

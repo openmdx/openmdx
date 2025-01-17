@@ -95,7 +95,7 @@ public enum JakartaFlavour {
 	}
 
 	public static JakartaFlavour fromFlavourVersion(String flavourVersion) {
-		return "4".equals(flavourVersion) ? CONTEMPORARY : VERSION_8;
+		return "2".equals(flavourVersion) || "3".equals(flavourVersion) ? VERSION_8 : CONTEMPORARY;
 	}
 	
 	public static JakartaFlavour fromExtendedFormats(Collection<String> extendedFormats) {

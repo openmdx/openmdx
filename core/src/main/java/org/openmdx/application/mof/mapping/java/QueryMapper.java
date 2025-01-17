@@ -51,7 +51,7 @@ import java.util.Iterator;
 
 import org.omg.mof.spi.Identifier;
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.ClassifierDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
@@ -79,7 +79,7 @@ public class QueryMapper
         MetaData_1_0 metaData, 
         AnnotationFlavour annotationFlavour, 
         JakartaFlavour jakartaFlavour, 
-        JMIFlavour jmiFlavour, 
+        ChronoFlavour chronoFlavour,
         PrimitiveTypeMapper primitiveTypeMapper
     ) {
         super(
@@ -89,17 +89,12 @@ public class QueryMapper
             packageSuffix,
             metaData, 
             annotationFlavour, 
-            jakartaFlavour, 
-            jmiFlavour, 
+            jakartaFlavour,
+            chronoFlavour,
             primitiveTypeMapper
         );
     }
     
-    /**
-     * @param classDef
-     * @param featureDef
-     * @throws ServiceException
-     */
     public void mapStructuralFeature(
         ClassifierDef classDef,
         StructuralFeatureDef featureDef
@@ -260,20 +255,12 @@ public class QueryMapper
         }
     }
 
-    /**
-     * 
-     */
     public void mapEnd(
     ) {
         this.trace("Query/End");
         printLine("}        ");
     }
 
-    /**
-     * 
-     * @param classifierDef
-     * @throws ServiceException
-     */
     public void mapBegin(
         ClassifierDef classifierDef
     ) throws ServiceException {

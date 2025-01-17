@@ -47,7 +47,7 @@ package org.openmdx.application.mof.mapping.java.mof;
 import java.io.Writer;
 
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.StructDef;
@@ -74,7 +74,7 @@ public class StructFeaturesMapper extends FeaturesMapper {
         MetaData_1_0 metaData, 
         AnnotationFlavour annotationFlavour, 
         JakartaFlavour jakartaFlavour, 
-        JMIFlavour jmiFlavour
+        ChronoFlavour chronoFlavour
     ) throws ServiceException {
         super(
     		structDef,
@@ -84,8 +84,8 @@ public class StructFeaturesMapper extends FeaturesMapper {
             packageSuffix,
             metaData, 
             annotationFlavour, 
-            jakartaFlavour, 
-            jmiFlavour, 
+            jakartaFlavour,
+            chronoFlavour,
             new StandardPrimitiveTypeMapper()
         );
         this.structDef = new StructDef(
@@ -94,23 +94,13 @@ public class StructFeaturesMapper extends FeaturesMapper {
         );
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.model1.mapping.java.JMIAbstractMapper#getId()
-     */
     protected String mapperId() {
         return Version.getImplementationVersion();
     }
     
-    /**
-     * Map field
-     * 
-     * @param structureFieldDef
-     * 
-     * @throws ServiceException
-     */
     public void mapField(
         StructuralFeatureDef structureFieldDef
-    ) throws ServiceException {
+    ){
         printLine("  /**");
         MapperUtils.wrapText(
             "   * ",

@@ -54,7 +54,7 @@ import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.ElementDef;
@@ -80,39 +80,35 @@ import org.openmdx.kernel.exception.BasicException;
  * Abstract Mapper
  */
 public abstract class AbstractMapper extends MapperTemplate {
-    
+
     protected AbstractMapper(
         Writer writer,
         Model_1_0 model,
-        Format format, 
+        Format format,
         String packageSuffix,
-        MetaData_1_0 metaData, 
-        AnnotationFlavour annotationFlavour, 
-        JakartaFlavour jakartaFlavour, 
-        JMIFlavour jmiFlavour, 
+        MetaData_1_0 metaData,
+        AnnotationFlavour annotationFlavour,
+        JakartaFlavour jakartaFlavour,
+        ChronoFlavour chronoFlavour,
         PrimitiveTypeMapper primitiveTypeMapper
     ) {
         super(writer, model, annotationFlavour.createRenderer());
         this.metaData = metaData;
         this.format = format;
         this.jakartaFlavour = jakartaFlavour;
-        this.jmiFlavour = jmiFlavour;
+        this.chronoFlavour = chronoFlavour;
         this.packageSuffix = packageSuffix;
         this.primitiveTypeMapper = primitiveTypeMapper;
     }
 
-    
-	// -----------------------------------------------------------------------
     protected Model_1_0 getModel(){
         return super.model;
     }
-    
-    // -----------------------------------------------------------------------
+
     protected Format getFormat(){
         return this.format;
     }
 
-    // -----------------------------------------------------------------------
     protected String getReturnType(
         OperationDef featureDef
     ) throws ServiceException {
@@ -123,30 +119,29 @@ public abstract class AbstractMapper extends MapperTemplate {
         ClassType resultType = this.getClassType(resultTypeDef);
         return resultType.getType(resultTypeDef, this.getFormat(), TypeMode.RESULT);
     }
-    
-    // -----------------------------------------------------------------------
+
     protected String getType(
-        StructuralFeatureDef featureDef, 
-        String collectionClass, 
+        StructuralFeatureDef featureDef,
+        String collectionClass,
         Boolean returnValue,
-        TypeMode featureUsage, 
+        TypeMode featureUsage,
         Boolean optional
     ) throws ServiceException {
         return this.getFeatureType(
             featureDef.getQualifiedTypeName(),
             collectionClass,
             returnValue,
-            featureUsage, 
+            featureUsage,
             "", // amendment
-            optional, 
+            optional,
             null // slice
         );
     }
-    
+
     // -----------------------------------------------------------------------
     protected String getMapType(
-        StructuralFeatureDef featureDef, 
-        String collectionClass, 
+        StructuralFeatureDef featureDef,
+        String collectionClass,
         Boolean returnValue,
         TypeMode featureUsage,
         String elementType
@@ -155,13 +150,12 @@ public abstract class AbstractMapper extends MapperTemplate {
             featureDef.getQualifiedTypeName(),
             collectionClass,
             returnValue,
-            featureUsage, 
-            "," + elementType, 
+            featureUsage,
+            "," + elementType,
             null, null
         );
     }
 
-    // -----------------------------------------------------------------------
     protected String getFeatureType(
         StructuralFeatureDef featureDef,
         Boolean returnValue,
@@ -171,7 +165,7 @@ public abstract class AbstractMapper extends MapperTemplate {
     	if(multiplicity == null) {
         	return this.getType(featureDef, "java.util.List", returnValue, featureUsage, null); // TODO verify whether this branch is really necessary
         } else {
-	        switch(multiplicity) { 
+	        switch(multiplicity) {
 		        case OPTIONAL: {
 		            String type = featureDef.getQualifiedTypeName();
 		        	return this.model.isPrimitiveType(type) ? this.getType(type, getFormat(), true) : getFeatureType(type, null, returnValue, featureUsage, "", Boolean.TRUE, null);
@@ -188,7 +182,7 @@ public abstract class AbstractMapper extends MapperTemplate {
 		        	return this.getType(featureDef, "org.w3c.cci2.SparseArray", returnValue, featureUsage, null);
 		        case STREAM: {
 		            String type = featureDef.getQualifiedTypeName();
-		        	return 
+		        	return
 		        		PrimitiveTypes.BINARY.equals(type) ? "java.io.InputStream" :
 		                PrimitiveTypes.STRING.equals(type) ? "java.io.Reader" :
 		                "java.io.DataInput";
@@ -205,15 +199,14 @@ public abstract class AbstractMapper extends MapperTemplate {
 	        }
         }
     }
-        
-    // -----------------------------------------------------------------------
+
     private String getFeatureType(
-        String qualifiedTypeName, 
-        String collectionClass, 
+        String qualifiedTypeName,
+        String collectionClass,
         Boolean returnValue,
-        TypeMode featureUsage, 
-        String amendment, 
-        Boolean optional, 
+        TypeMode featureUsage,
+        String amendment,
+        Boolean optional,
         Boolean slice
     ) throws ServiceException {
         boolean multiValued = collectionClass != null;
@@ -234,23 +227,23 @@ public abstract class AbstractMapper extends MapperTemplate {
         } else if(returnValue == null) {
             ClassDef classDef = this.getClassDef(qualifiedTypeName);
             String javaType = this.getClassType(classDef).getType(
-                classDef, 
+                classDef,
                 this.getFormat() == Format.JPA3 ? Format.CCI2 : this.getFormat(),
                 featureUsage
-            ); 
+            );
             return multiValued ? qualified(collectionClass,qualifiedTypeName,false) + '<' + javaType + amendment + '>' : javaType;
         } else {
             String javaType = this.interfaceType(
-                qualifiedTypeName, 
-                org.openmdx.application.mof.mapping.java.metadata.Visibility.CCI, 
-                multiValued ? false : returnValue.booleanValue()
+                qualifiedTypeName,
+                org.openmdx.application.mof.mapping.java.metadata.Visibility.CCI,
+                !multiValued && returnValue
             );
-            if(returnValue.booleanValue()) {
+            if(returnValue) {
                 return "<T extends " + javaType + "> " + (
                     multiValued ? qualified(collectionClass,qualifiedTypeName,true) + "<T>" : "T"
-                ); 
+                );
             } else if (multiValued) {
-                return "".equals(amendment) ? 
+                return "".equals(amendment) ?
                     qualified(collectionClass,qualifiedTypeName,false) + "<? extends " + javaType + '>' :
                     qualified(collectionClass,qualifiedTypeName,false) + "<" + javaType + amendment + '>';
             } else {
@@ -258,16 +251,11 @@ public abstract class AbstractMapper extends MapperTemplate {
             }
         }
     }
-    
+
     /**
      * Add a scope to collectionClass if it is unqualified
-     * 
-     * @param collectionClass
-     * @param javaType
-     * 
+     *
      * @return the qualifiedCollection class
-     * 
-     * @throws ServiceException
      */
     private String qualified(
         String collectionClass,
@@ -276,50 +264,46 @@ public abstract class AbstractMapper extends MapperTemplate {
     ) throws ServiceException {
         if(collectionClass.indexOf('.') < 0) {
             return this.interfaceType(
-                qualifiedTypeName, 
-                org.openmdx.application.mof.mapping.java.metadata.Visibility.CCI, 
+                qualifiedTypeName,
+                org.openmdx.application.mof.mapping.java.metadata.Visibility.CCI,
                 returnValue
             ) + '.' + collectionClass;
         } else {
             return collectionClass;
         }
     }
-    
-    // -----------------------------------------------------------------------
+
     protected String getType(
-        String qualifiedTypeName, 
-        Format format, 
-        boolean alwaysAsObject
-    ) throws ServiceException {
+        String qualifiedTypeName,
+        Format format,
+        boolean alwaysAsObject) throws ServiceException {
     	if("org:w3c:anyType".equals(qualifiedTypeName)) {
     		return Object.class.getName();
     	} else {
 	        boolean primitiveType = this.model.isPrimitiveType(qualifiedTypeName);
 	        if(primitiveType) {
-	            return this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, format, alwaysAsObject);
-	        } else if(this.model.isStructureType(qualifiedTypeName) && format == Format.JPA3) { 
+	            return this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, format, alwaysAsObject, this.chronoFlavour.isClassic());
+	        } else if(this.model.isStructureType(qualifiedTypeName) && format == Format.JPA3) {
 	            return this.getInterfaceType(qualifiedTypeName);
 	        } else {
 	            return this.getModelType(qualifiedTypeName);
 	        }
     	}
     }
-    
-    // -----------------------------------------------------------------------
+
     protected String getInterfaceType(
         String qualifiedTypeName
-    ) throws ServiceException {        
+    ) throws ServiceException {
         return this.interfaceType(qualifiedTypeName, Visibility.CCI, false);
     }
-    
-    // -----------------------------------------------------------------------
+
     protected boolean requiresDowncast(
     	StructuralFeatureDef featureDef
-    ) throws ServiceException {
+    ){
     	if(getFormat() == Format.JPA3) {
     		if(featureDef instanceof ReferenceDef) {
     			ReferenceDef referenceDef = (ReferenceDef) featureDef;
-    			return !referenceDef.isComposition() && !referenceDef.isShared(); 
+    			return !referenceDef.isComposition() && !referenceDef.isShared();
     		} else {
     			return true;
     		}
@@ -327,68 +311,64 @@ public abstract class AbstractMapper extends MapperTemplate {
         	return false;
     	}
     }
-    
-    // -----------------------------------------------------------------------
+
     protected String printAnnotationAndReturnCast(
-        StructuralFeatureDef featureDef, 
+        StructuralFeatureDef featureDef,
         String collectionClass
     ) throws ServiceException {
         String qualifiedTypeName = featureDef.getQualifiedTypeName();
         if(this.model.isPrimitiveType(qualifiedTypeName)) {
             return "";
-        } else { 
+        } else {
             if(requiresDowncast(featureDef)) {
                 printLine("  @SuppressWarnings(\"unchecked\")");
-            } 
+            }
             return '(' + (
                 collectionClass == null ? "T" : collectionClass + "<T>"
             ) + ')';
         }
     }
 
-    // -----------------------------------------------------------------------
     protected final String printAnnotationAndReturnMapCast(
-        StructuralFeatureDef featureDef, 
+        StructuralFeatureDef featureDef,
         Class<?> keyClass
     ) throws ServiceException {
         String qualifiedTypeName = featureDef.getQualifiedTypeName();
         if(this.model.isPrimitiveType(qualifiedTypeName)){
             return "";
-        } else { 
+        } else {
             if(getFormat() == Format.JPA3) {
                 printLine("  @SuppressWarnings(\"unchecked\")");
-            } 
+            }
             return "(java.util.Map<" + keyClass.getName() + ", T>)";
         }
     }
 
-    // -----------------------------------------------------------------------
     protected String getMapType(
-        StructuralFeatureDef featureDef, 
-        Class<?> keyClass, 
+        StructuralFeatureDef featureDef,
+        Class<?> keyClass,
         Boolean returnValue
     ) throws ServiceException {
         String qualifiedTypeName = featureDef.getQualifiedTypeName();
         boolean primitive = this.model.isPrimitiveType(qualifiedTypeName);
         Format elementFormat = getFormat() == Format.JPA3 ? Format.CCI2 : getFormat();
         String baseTypeName = primitive ? getType(qualifiedTypeName, elementFormat, true) : interfaceType(
-            qualifiedTypeName, 
-            Visibility.CCI, 
+            qualifiedTypeName,
+            Visibility.CCI,
             Boolean.TRUE.equals(returnValue)
-        ); 
+        );
         String keyTypeName = keyClass.getName();
         if(returnValue != null && !primitive) {
-            if(returnValue.booleanValue()) {
-                return "<T extends " + baseTypeName + "> java.util.Map<" + keyTypeName +",T>"; 
+            if(returnValue) {
+                return "<T extends " + baseTypeName + "> java.util.Map<" + keyTypeName +",T>";
             } else {
-                return "java.util.Map<" + keyTypeName +",? extends " + baseTypeName + '>'; 
+                return "java.util.Map<" + keyTypeName +",? extends " + baseTypeName + '>';
             }
         } else {
             return "java.util.Map<" + keyTypeName +',' + baseTypeName + '>';
         }
     }
-    
-    // -----------------------------------------------------------------------
+
     protected String getFeatureType(
         StructuralFeatureDef featureDef,
         Boolean returnValue
@@ -396,22 +376,20 @@ public abstract class AbstractMapper extends MapperTemplate {
         return this.getFeatureType(
             featureDef,
             returnValue,
-            TypeMode.MEMBER            
+            TypeMode.MEMBER
         );
     }
-    
-    // -----------------------------------------------------------------------
+
     protected String getParameterType(
-        StructuralFeatureDef featureDef 
+        StructuralFeatureDef featureDef
     ) throws ServiceException {
         return this.getFeatureType(
             featureDef,
             null,
-            TypeMode.PARAMETER            
+            TypeMode.PARAMETER
         );
     }
-    
-	// -----------------------------------------------------------------------
+
     protected void mapAnnotation(
         String prefix,
         ElementDef elementDef
@@ -421,11 +399,10 @@ public abstract class AbstractMapper extends MapperTemplate {
 			MapperUtils.wrapText(prefix, renderAnnotation(annotation), this::printLine);
         }
     }
-    
-	// -----------------------------------------------------------------------
+
     protected void mapParameter(
         String prefix,
-        StructuralFeatureDef featureDef, 
+        StructuralFeatureDef featureDef,
         String suffix
     ) throws ServiceException {
         printLine(
@@ -436,8 +413,7 @@ public abstract class AbstractMapper extends MapperTemplate {
             suffix
         );
     }
-    
-    // -----------------------------------------------------------------------
+
     protected void mapGetMember(
         String accessModifier,
         StructuralFeatureDef featureDef
@@ -454,22 +430,20 @@ public abstract class AbstractMapper extends MapperTemplate {
         printLine("  ) {");
         printLine("    return this.", this.getFeatureName(featureDef), ";");
         printLine("  }");
-        newLine();        
+        newLine();
     }
 
-    // -----------------------------------------------------------------------
     protected void mapInitializeMember(
         StructuralFeatureDef featureDef
-    ) throws ServiceException {
+    ) {
         String name = this.getFeatureName(featureDef);
         printLine("    this." + name + " = " + name + ';');
     }
-    
-    // -----------------------------------------------------------------------
+
     protected void mapInitializeMember(
-        StructuralFeatureDef featureDef, 
+        StructuralFeatureDef featureDef,
         String source
-    ) throws ServiceException {
+    ) {
         printLine(
             "    this.",
             this.getFeatureName(featureDef),
@@ -480,8 +454,7 @@ public abstract class AbstractMapper extends MapperTemplate {
             "();"
         );
     }
-    
-    // -----------------------------------------------------------------------
+
     public void mapGetFeatureUsingObjectType(
         String accessModifier,
         StructuralFeatureDef featureDef
@@ -591,7 +564,7 @@ public abstract class AbstractMapper extends MapperTemplate {
 	                	"  ",
 	                	accessModifier,
 	                	" ",
-	                	this.getMapType(featureDef, java.lang.String.class, Boolean.TRUE), 
+	                	this.getMapType(featureDef, java.lang.String.class, Boolean.TRUE),
 	                	" ",
 	                	featureDef.getBeanGetterName(),
 	                	" ("
@@ -646,51 +619,50 @@ public abstract class AbstractMapper extends MapperTemplate {
     		}
     	}
     }
-    
-    // -----------------------------------------------------------------------
+
     public void mapGetFeatureIndexedUsingNativeType(
         String accessModifier,
         StructuralFeatureDef featureDef
     ) throws ServiceException {
         printLine(
-        	"  ", 
-        	accessModifier, 
-        	" ", 
-        	this.getType(featureDef.getQualifiedTypeName(), getFormat(), false), 
-        	" ", 
-        	this.getMethodName(featureDef.getBeanGetterName()), 
+        	"  ",
+        	accessModifier,
+        	" ",
+        	this.getType(featureDef.getQualifiedTypeName(), getFormat(), false),
+        	" ",
+        	this.getMethodName(featureDef.getBeanGetterName()),
         	"("
         );
         printLine("    int index");
         printLine("  ) {");
         if (PrimitiveTypes.BOOLEAN.equals(featureDef.getQualifiedTypeName())) {
             printLine(
-            	"    return ((java.lang.Boolean)this.refGetValue(\"", 
-            	featureDef.getQualifiedName(), 
+            	"    return ((java.lang.Boolean)this.refGetValue(\"",
+            	featureDef.getQualifiedName(),
             	"\", index)).booleanValue();"
             );
         } else if (PrimitiveTypes.DATETIME.equals(featureDef
             .getQualifiedTypeName())) {
             printLine(
-            	"    return (java.util.Date)this.refGetValue(\"", 
-            	featureDef.getQualifiedName(), 
+            	"    return (java.util.Date)this.refGetValue(\"",
+            	featureDef.getQualifiedName(),
             	"\", index);"
             );
         } else if (
             PrimitiveTypes.DATE.equals(featureDef.getQualifiedTypeName()) ||
             PrimitiveTypes.DURATION.equals(featureDef.getQualifiedTypeName()) ||
-            PrimitiveTypes.ANYURI.equals(featureDef.getQualifiedTypeName())             
+            PrimitiveTypes.ANYURI.equals(featureDef.getQualifiedTypeName())
         ) {
             printLine(
                 "    return (",
                 getType(featureDef.getQualifiedTypeName(), getFormat(), false),
-                ")this.refGetValue(\"", 
-                featureDef.getQualifiedName(), 
+                ")this.refGetValue(\"",
+                featureDef.getQualifiedName(),
                 "\", index);"
             );
         } else if (
-            PrimitiveTypes.INTEGER.equals(featureDef.getQualifiedTypeName()) || 
-            PrimitiveTypes.SHORT.equals(featureDef.getQualifiedTypeName()) || 
+            PrimitiveTypes.INTEGER.equals(featureDef.getQualifiedTypeName()) ||
+            PrimitiveTypes.SHORT.equals(featureDef.getQualifiedTypeName()) ||
             PrimitiveTypes.LONG.equals(featureDef.getQualifiedTypeName())
         ) {
             printLine(
@@ -712,18 +684,17 @@ public abstract class AbstractMapper extends MapperTemplate {
         printLine("  }");
         newLine();
     }
-     
-    // -----------------------------------------------------------------------
+
     public void mapGetFeatureKeyedUsingNativeType(
         String accessModifier,
         StructuralFeatureDef featureDef
     ) throws ServiceException {
         printLine(
-        	"  ", 
-        	accessModifier, 
-        	" ", 
-        	this.getType(featureDef.getQualifiedTypeName(), getFormat(), false), 
-        	" ", 
+        	"  ",
+        	accessModifier,
+        	" ",
+        	this.getType(featureDef.getQualifiedTypeName(), getFormat(), false),
+        	" ",
         	this.getMethodName(featureDef.getBeanGetterName()),
         	"("
         );
@@ -739,18 +710,18 @@ public abstract class AbstractMapper extends MapperTemplate {
         } else if (
             PrimitiveTypes.DATE.equals(featureDef.getQualifiedTypeName()) ||
             PrimitiveTypes.DURATION.equals(featureDef.getQualifiedTypeName()) ||
-            PrimitiveTypes.ANYURI.equals(featureDef.getQualifiedTypeName())             
+            PrimitiveTypes.ANYURI.equals(featureDef.getQualifiedTypeName())
         ) {
             printLine(
                 "    return (" +
                 getType(featureDef.getQualifiedTypeName(), getFormat(), false),
-                ")this.refGetValue(\"", 
-                featureDef.getQualifiedName(), 
+                ")this.refGetValue(\"",
+                featureDef.getQualifiedName(),
                 "\", key);"
             );
         } else if (
-            PrimitiveTypes.INTEGER.equals(featureDef.getQualifiedTypeName()) || 
-            PrimitiveTypes.SHORT.equals(featureDef.getQualifiedTypeName()) || 
+            PrimitiveTypes.INTEGER.equals(featureDef.getQualifiedTypeName()) ||
+            PrimitiveTypes.SHORT.equals(featureDef.getQualifiedTypeName()) ||
             PrimitiveTypes.LONG.equals(featureDef.getQualifiedTypeName())
         ) {
             printLine(
@@ -770,10 +741,9 @@ public abstract class AbstractMapper extends MapperTemplate {
             );
         }
         printLine("  }");
-        newLine();        
+        newLine();
     }
 
-    // -----------------------------------------------------------------------
     /**
      * Maps a list of namespace name components to a namespace name in the
      * destination language.
@@ -786,7 +756,7 @@ public abstract class AbstractMapper extends MapperTemplate {
             this.packageSuffix
         );
     }
-    
+
     /**
      * Maps a list of namespace name components to a namespace name in the
      * destination language.
@@ -797,8 +767,8 @@ public abstract class AbstractMapper extends MapperTemplate {
     ) {
     	StringBuilder namespace = new StringBuilder();
         for(
-            int i = 0, iLimit = namespaceNameComponents.size(); 
-            i < iLimit; 
+            int i = 0, iLimit = namespaceNameComponents.size();
+            i < iLimit;
             i++
         ) AbstractNames.openmdx2NamespaceElement(
             i == 0 ? namespace : namespace.append('.'),
@@ -810,15 +780,14 @@ public abstract class AbstractMapper extends MapperTemplate {
             packageSuffix
         ).toString();
     }
-    
-    // -----------------------------------------------------------------------
+
     protected String interfaceType(
-        String qualifiedTypeName, 
+        String qualifiedTypeName,
         Visibility visibility,
         boolean returnValue
     ) throws ServiceException {
         ClassDef interfaceTypeDef = new ClassDef(
-            this.model.getElement(qualifiedTypeName), 
+            this.model.getElement(qualifiedTypeName),
             this.model
         );
         ClassType interfaceType = this.getClassType(interfaceTypeDef);
@@ -827,20 +796,18 @@ public abstract class AbstractMapper extends MapperTemplate {
             : interfaceType.getType(interfaceTypeDef, this.getFormat(), TypeMode.INTERFACE);
     }
 
-    // -----------------------------------------------------------------------
     protected String interfaceType(
-        ElementDef elementDef, 
+        ElementDef elementDef,
         Visibility visibility,
         boolean returnValue
     ) throws ServiceException {
         return this.interfaceType(
-            elementDef.getQualifiedName(), 
+            elementDef.getQualifiedName(),
             visibility,
             returnValue
         );
     }
-    
-    // -----------------------------------------------------------------------
+
     protected String getPackageSuffix(
         Visibility visbility
     ){
@@ -850,8 +817,7 @@ public abstract class AbstractMapper extends MapperTemplate {
             default: return null;
         }
     }
-    
-    // -----------------------------------------------------------------------
+
     protected String cciType(
         OperationDef operationDef
     ) throws ServiceException {
@@ -859,14 +825,13 @@ public abstract class AbstractMapper extends MapperTemplate {
             "void" :
             interfaceType(operationDef.getQualifiedReturnTypeName(), org.openmdx.application.mof.mapping.java.metadata.Visibility.CCI, false);
     }
-    
-    // -----------------------------------------------------------------------
+
     protected String getQueryType(
-        String qualifiedTypeName, 
+        String qualifiedTypeName,
         String targetNamspace
     ) throws ServiceException {
         if(this.model.isPrimitiveType(qualifiedTypeName)) {
-            return primitiveTypeMapper.getPredicateType(qualifiedTypeName);
+            return primitiveTypeMapper.getPredicateType(qualifiedTypeName, chronoFlavour.isClassic());
         } else {
             List<String> nameComponents = MapperUtils.getNameComponents(qualifiedTypeName);
             String namespace = getNamespace(
@@ -875,9 +840,9 @@ public abstract class AbstractMapper extends MapperTemplate {
             );
             return (
                 namespace.equals(targetNamspace) ? "" : namespace + '.'
-            ) + Identifier.CLASS_PROXY_NAME.toIdentifier( 
+            ) + Identifier.CLASS_PROXY_NAME.toIdentifier(
                 nameComponents.get(nameComponents.size()-1), // modelElementName
-                null, // removablePrefix, 
+                null, // removablePrefix,
                 null, // prependablePrefix
                 null,
                 "Query" // appendableSuffix
@@ -886,13 +851,13 @@ public abstract class AbstractMapper extends MapperTemplate {
     }
 
     protected String getParseExpression(
-        String qualifiedTypeName, 
+        String qualifiedTypeName,
         Multiplicity multiplicity,
         CharSequence expression
     ) throws ServiceException {
         if(this.model.isPrimitiveType(qualifiedTypeName)) {
             if(multiplicity.isSingleValued()) {
-                String parsePattern = this.primitiveTypeMapper.getParsePattern(qualifiedTypeName, getFormat(), multiplicity == Multiplicity.OPTIONAL);
+                String parsePattern = this.primitiveTypeMapper.getParsePattern(qualifiedTypeName, getFormat(), multiplicity == Multiplicity.OPTIONAL, this.chronoFlavour.isClassic());
                 return parsePattern.replace(PrimitiveTypeMapper.EXPRESSION_PLACEHOLDER , expression);
             } else {
                 return "null // TODO support parsing of multi-valued arguments";
@@ -901,32 +866,28 @@ public abstract class AbstractMapper extends MapperTemplate {
             return "null // TODO support parsing of non-primitive arguments";
         }
     }
-    
-    // -----------------------------------------------------------------------
 
     protected String getObjectType(
         StructuralFeatureDef featureDef
     ) throws ServiceException {
         return getType(featureDef.getQualifiedTypeName(), getFormat(), true);
     }
-    
-    // -----------------------------------------------------------------------
+
     protected String getModelType(
         String qualifiedTypeName
     ) throws ServiceException {
         List<String> nameComponents = MapperUtils.getNameComponents(qualifiedTypeName);
         return AbstractMapper.getNamespace(
             MapperUtils.getNameComponents(MapperUtils.getPackageName(qualifiedTypeName)),
-            this.format == Format.JPA3 && 
-            getModel().getElement(qualifiedTypeName).objGetList("stereotype").contains(Stereotypes.ROOT) ? 
-                Names.CCI2_PACKAGE_SUFFIX : 
+            this.format == Format.JPA3 &&
+            getModel().getElement(qualifiedTypeName).objGetList("stereotype").contains(Stereotypes.ROOT) ?
+                Names.CCI2_PACKAGE_SUFFIX :
                 this.packageSuffix
-        ) + '.' + Identifier.CLASS_PROXY_NAME.toIdentifier( 
+        ) + '.' + Identifier.CLASS_PROXY_NAME.toIdentifier(
             nameComponents.get(nameComponents.size()-1)
         );
     }
 
-    // -----------------------------------------------------------------------
     protected String getOrderType(
         StructuralFeatureDef featureDef
     ){
@@ -941,7 +902,6 @@ public abstract class AbstractMapper extends MapperTemplate {
         return null;
     }
 
-    // -----------------------------------------------------------------------
     /**
      * Maps a method name to a method name that does not collide with an
      * operation name in the root object class in the destination language (e.g.
@@ -957,8 +917,6 @@ public abstract class AbstractMapper extends MapperTemplate {
 
     /**
      * Determine a mapping expression
-     * 
-     * @throws ServiceException
      */
     protected String getMappingExpression(
         String qualifiedClassName,
@@ -967,40 +925,34 @@ public abstract class AbstractMapper extends MapperTemplate {
         CharSequence name
     ) throws ServiceException{
         return this.primitiveTypeMapper.getMappingPattern(
-            qualifiedClassName, 
-            from, 
+            qualifiedClassName,
+            from,
             to
         ).replace(
-            PrimitiveTypeMapper.EXPRESSION_PLACEHOLDER, 
+            PrimitiveTypeMapper.EXPRESSION_PLACEHOLDER,
             name
         );
     }
-    
-    // -----------------------------------------------------------------------
+
     /**
      * Compose a method name
-     * 
-     * @param prependablePrefix
-     * @param methodName
-     * @param appendableSuffix
-     * 
+     *
      * @return the resulting method name
      */
     public String getMethodName(
-        String prependablePrefix, 
+        String prependablePrefix,
         String methodName,
         String appendableSuffix
     ) {
         return Identifier.OPERATION_NAME.toIdentifier(
             methodName,
             null, // removablePrefix
-            prependablePrefix, 
-            null, // removableSuffix 
-            appendableSuffix            
+            prependablePrefix,
+            null, // removableSuffix
+            appendableSuffix
         );
     }
-    
-    // -----------------------------------------------------------------------
+
     /**
      * Maps a parameter name to a parameter name that does not collide with a
      * keyword name in the destination language
@@ -1011,7 +963,6 @@ public abstract class AbstractMapper extends MapperTemplate {
         return getFeatureName(featureDef.getName());
     }
 
-    // -----------------------------------------------------------------------
     /**
      * Maps a parameter name to a parameter name that does not collide with a
      * keyword name in the destination language
@@ -1022,10 +973,6 @@ public abstract class AbstractMapper extends MapperTemplate {
         return Identifier.ATTRIBUTE_NAME.toIdentifier(featureName);
     }
 
-    // -----------------------------------------------------------------------
-    /**
-     * 
-     */
     public String getPredicateName(
         String prefix,
         StructuralFeatureDef fieldDef
@@ -1034,8 +981,7 @@ public abstract class AbstractMapper extends MapperTemplate {
             (prefix == null ? "" : prefix + ' ') + fieldDef.getBeanGenericName()
         );
     }
-    
-    // -----------------------------------------------------------------------
+
     public void mapGeneratedAnnotation(
     ) {
     	mapGeneratedAnnotation(this::printLine);
@@ -1050,9 +996,7 @@ public abstract class AbstractMapper extends MapperTemplate {
     	target.accept("  comments = \"" + "Generated by openMDX " + Version.getImplementationVersion() + " - DO NOT CHANGE MANUALLY\"");
     	target.accept(")");
     }
-    
-    
-    // -----------------------------------------------------------------------
+
     public void trace(
         PrintWriter pw,
         String text
@@ -1062,36 +1006,32 @@ public abstract class AbstractMapper extends MapperTemplate {
         pw.println("// ----------------------------------------------------------------------------");
     }
 
-    // -----------------------------------------------------------------------
     public void trace(
         String text
     ) {
         this.trace(
-            this.pw, 
+            this.pw,
             text
         );
     }
-    
-    // -----------------------------------------------------------------------
+
     protected ClassType getClassType(
         ClassDef classDef
-    ) throws ServiceException{
-        return 
+    ){
+        return
             classDef.getStereotype().contains(Stereotypes.ROOT) ? ClassType.MIXIN :
             classDef.isAbstract() && classDef.getSuperClassDef(true) != null ? ClassType.EXTENSION :
             ClassType.OBJECT;
     }
 
-    // -----------------------------------------------------------------------
     protected boolean isRoot(
         ModelElement_1_0 classDef
     ) throws ServiceException{
-        return 
+        return
             classDef != null &&
             classDef.objGetList("stereotype").contains(Stereotypes.ROOT);
     }
 
-    // -----------------------------------------------------------------------
     protected boolean isRoot(
         String qualifiedTypeName
     ) throws ServiceException{
@@ -1100,7 +1040,6 @@ public abstract class AbstractMapper extends MapperTemplate {
         );
     }
 
-    // -----------------------------------------------------------------------
     protected ClassDef getClassDef(
         String qualifiedName
     ) throws ServiceException{
@@ -1108,25 +1047,21 @@ public abstract class AbstractMapper extends MapperTemplate {
             this.model.getElement(qualifiedName),
             this.model,
             this.metaData
-            
-        ); 
+
+        );
     }
-    
-    // -----------------------------------------------------------------------
+
     protected static boolean isDerived(
         ModelElement_1_0 modelElement
     ) throws ServiceException {
         return Boolean.TRUE.equals(modelElement.isDerived());
     }
-    
-    // -----------------------------------------------------------------------
+
     private final String packageSuffix;
-    private final Format format;    
+    private final Format format;
     protected final JakartaFlavour jakartaFlavour;
-    protected final JMIFlavour jmiFlavour;
+    protected final ChronoFlavour chronoFlavour;
     protected final MetaData_1_0 metaData;
     protected final PrimitiveTypeMapper primitiveTypeMapper;
 
 }
-
-// --- End of File -----------------------------------------------------------

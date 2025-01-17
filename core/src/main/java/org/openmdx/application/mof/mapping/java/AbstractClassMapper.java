@@ -53,7 +53,7 @@ import java.util.Set;
 
 import org.omg.mof.spi.Identifier;
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
@@ -80,7 +80,7 @@ public abstract class AbstractClassMapper extends AbstractMapper {
         MetaData_1_0 metaData, 
         AnnotationFlavour annotationFlavour, 
         JakartaFlavour jakartaFlavour, 
-        JMIFlavour jmiFlavour, 
+        ChronoFlavour chronoFlavour,
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
@@ -90,8 +90,8 @@ public abstract class AbstractClassMapper extends AbstractMapper {
             packageSuffix,
             metaData, 
             annotationFlavour, 
-            jakartaFlavour, 
-            jmiFlavour, 
+            jakartaFlavour,
+                chronoFlavour,
             primitiveTypeMapper
         );
         this.classDef = new ClassDef(classDef, model, metaData);
@@ -139,39 +139,21 @@ public abstract class AbstractClassMapper extends AbstractMapper {
         return this.classDef.isInstanceOf(qualifiedName);
     }
     
-    /**
-     * 
-     * @return
-     */
     protected final boolean isBaseClass(
     ){
         return this.extendsClassDef == null;        
     }
 
-    /**
-     * 
-     * @return
-     */
     protected final boolean hasContainer(
     ){
         return this.directCompositeReference != null;        
     }
 
-    /**
-     * 
-     * @return
-     */
     protected final boolean isSliceHolder(
     ){
         return this.sliceHolder;        
     }
     
-    /**
-     * 
-     * @param referenceDef
-     * @return
-     * @throws ServiceException
-     */
     protected boolean isTransient(
         ReferenceDef referenceDef
     ) throws ServiceException {
@@ -184,12 +166,8 @@ public abstract class AbstractClassMapper extends AbstractMapper {
 
     /**
      * Test whether the reference refers to a mix-in class or not.
-     * 
-     * @param referenceDef
-     * 
+     *
      * @return {@code true} if the reference refers to a mix-in class
-     * 
-     * @throws ServiceException
      */
     protected boolean isMixIn(
         ReferenceDef referenceDef
@@ -197,20 +175,6 @@ public abstract class AbstractClassMapper extends AbstractMapper {
         return getClassType(getClassDef(referenceDef.getQualifiedTypeName())) == ClassType.MIXIN;
     }
     
-    /**
-     * 
-     */
-    @Override
-    protected ClassDef getClassDef(
-        String qualifiedName
-    ) throws ServiceException {
-        return new ClassDef(
-            this.model.getElement(qualifiedName), 
-            this.model,
-            this.metaData
-        );
-    }
-
     protected ClassDef getClassDef(
         StructuralFeatureDef featureDef
     ) throws ServiceException {
@@ -220,12 +184,6 @@ public abstract class AbstractClassMapper extends AbstractMapper {
         return this.getClassDef(className);
     }
 
-    /**
-     * 
-     * @param qualifiedName
-     * @return
-     * @throws ServiceException
-     */
     protected FieldMetaData getFieldMetaData(
         String qualifiedName
     ) throws ServiceException {
@@ -255,45 +213,15 @@ public abstract class AbstractClassMapper extends AbstractMapper {
         return this.mixIn;
     }
     
-    /**
-     * 
-     */
     private final boolean mixIn;
-    
-    /**
-     * 
-     */
     protected final ClassDef classDef;
-    
-    /**
-     * 
-     */
     protected final String className;
-    
-    /**
-     * 
-     */
     protected final ClassMetaData classMetaData;
-    
-    /**
-     * 
-     */
     protected final Collection<FieldMetaData> spiFeatures;
-    
-    /**
-     * 
-     */
     protected final ClassDef extendsClassDef;
-
-    /**
-     * 
-     */
     protected final ClassDef baseClassDef;
-
-    /**
-     * 
-     */
     private final boolean sliceHolder;
+    protected final List<String> qualifiedClassName;
 
     /**
      * Direct composite reference
@@ -305,11 +233,6 @@ public abstract class AbstractClassMapper extends AbstractMapper {
      */
     protected final ReferenceDef compositeReference;
 
-    /**
-     * 
-     */
-    protected final List<String> qualifiedClassName;
-    
     /**
      * References to the following object types are considered to be transient
      */

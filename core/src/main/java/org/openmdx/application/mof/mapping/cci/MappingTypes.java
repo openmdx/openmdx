@@ -66,8 +66,13 @@ public class MappingTypes {
     /**
      * This is a modifier telling to use classic JMI mapping
      */
-    public static final String JMI_CLASSIC = "--jmi-classic";
-    
+    public static final String CLASSIC_CHRONO_TYPES = "--classic-chrono-types";
+
+    /**
+     * This is a modifier telling to export packages even if they are already provided
+     */
+    public static final String INCLUDE_PROVIDED_PACKAGES = "--include-provided-packages";
+
     /**
      * openMDX model mapping
      */

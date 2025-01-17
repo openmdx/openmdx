@@ -534,12 +534,12 @@ public class TestRecord {
 		}
 		{
 			Object key = getKey(original, "v2");
-			if("4".equals(Version.getFlavourVersion())) {
-				// Java 21
-				Assertions.assertSame(key2, key);
-			} else {
+			if(isJava8Flavour()) {
 				// Java 8
 				Assertions.assertNotSame(key2, key);
+			} else {
+				// Java 21
+				Assertions.assertSame(key2, key);
 			}
  			Assertions.assertSame(Integer.valueOf(17), key);
 		}
@@ -558,12 +558,12 @@ public class TestRecord {
 		}
 		{
 			Object key = getKey(copy, "v2");
-			if("4".equals(Version.getFlavourVersion())) {
-				// Java 21
-				Assertions.assertSame(key2, key);
-			} else {
+			if(isJava8Flavour()) {
 				// Java 8
 				Assertions.assertNotSame(key2, key);
+			} else {
+				// Java 21
+				Assertions.assertSame(key2, key);
 			}
 			Assertions.assertSame(Integer.valueOf(17), key);
 		}
@@ -584,8 +584,12 @@ public class TestRecord {
 		IntIdentity intIdentity = new IntIdentity(Void.class, value);
 		return (Integer) intIdentity.getKeyAsObject();
 	}
-	
-	
+
+	private boolean isJava8Flavour() {
+		String flavourVersion = Version.getFlavourVersion();
+		return "2".equals(flavourVersion) || "3".equals(flavourVersion);
+	}
+
 	// --------------------------------------------------------------------------
 	// Instance members
 	// --------------------------------------------------------------------------

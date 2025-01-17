@@ -48,7 +48,7 @@ import java.util.Collection;
 
 import org.openmdx.application.mof.mapping.cci.MappingTypes;
 
-public enum JMIFlavour {
+public enum ChronoFlavour {
 	
 	CLASSIC {
 		@Override
@@ -65,7 +65,7 @@ public enum JMIFlavour {
 	};
 
 	
-	private static final String EXTENDED_FORMAT = MappingTypes.JAKARTA_8;
+	private static final String EXTENDED_FORMAT = MappingTypes.CLASSIC_CHRONO_TYPES;
 
 	public abstract void applyExtendedFormat(Collection<String> extendedFormats);
 	
@@ -73,11 +73,11 @@ public enum JMIFlavour {
 		return this == CLASSIC;
 	}
 	
-	public static JMIFlavour fromFlavourVersion(String flavourVersion) {
-		return "2".equals(flavourVersion) ? CLASSIC : CONTEMPORARY;
+	public static ChronoFlavour fromFlavourVersion(String flavourVersion) {
+		return "2".equals(flavourVersion) || "4".equals(flavourVersion) ? CLASSIC : CONTEMPORARY;
 	}	
 
-	public static JMIFlavour fromExtendedFormats(Collection<String> extendedFormats) {
+	public static ChronoFlavour fromExtendedFormats(Collection<String> extendedFormats) {
 		return extendedFormats.remove(EXTENDED_FORMAT) ? CLASSIC : CONTEMPORARY;
 	}
 	

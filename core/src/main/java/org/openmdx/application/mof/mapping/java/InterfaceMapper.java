@@ -49,7 +49,7 @@ import java.io.Writer;
 
 import org.omg.mof.spi.Identifier;
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.java.metadata.FieldMetaData;
@@ -69,7 +69,6 @@ extends AbstractClassMapper {
 
     /**
      * Constructor 
-     * @param markdown TODO
      */
     public InterfaceMapper(
         ModelElement_1_0 classDef,
@@ -80,7 +79,7 @@ extends AbstractClassMapper {
         MetaData_1_0 metaData, 
         AnnotationFlavour annotationFlavour, 
         JakartaFlavour jakartaFlavour,
-        JMIFlavour jmiFlavour,
+        ChronoFlavour chronoFlavour,
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
@@ -91,16 +90,12 @@ extends AbstractClassMapper {
             packageSuffix, 
             metaData, 
             annotationFlavour, 
-            jakartaFlavour, 
-            jmiFlavour, 
+            jakartaFlavour,
+            chronoFlavour,
             primitiveTypeMapper
         );
     }
 
-    /**
-     * 
-     * @throws ServiceException
-     */
     public void mapEnd(
     ) throws ServiceException {
         this.trace("Interface/End.vm");
@@ -109,10 +104,6 @@ extends AbstractClassMapper {
         printLine("}");
     }
 
-    /**
-     * 
-     * @throws ServiceException
-     */
     public void mapBegin(
     ) throws ServiceException {
         this.trace("Interface/Begin");
@@ -136,10 +127,6 @@ extends AbstractClassMapper {
         printLine("public interface ", this.className, " extends ", this.interfaceType(this.classDef, Visibility.CCI, false), " {"); 
     }
 
-    /**
-     * 
-     *
-     */
     private void mapPrivateFields(
     ) throws ServiceException {
         for(FieldMetaData field : this.spiFeatures){
@@ -204,11 +191,6 @@ extends AbstractClassMapper {
         }
     }
 
-    /**
-     * 
-     * @param fieldMetaData
-     * @return
-     */
     private boolean isMultivalued(
         FieldMetaData fieldMetaData
     ){
@@ -218,11 +200,6 @@ extends AbstractClassMapper {
         fieldType.startsWith("java.util.List<");
     }
 
-    /**
-     * 
-     * @param fieldMetaData
-     * @return
-     */
     private String getType(
         FieldMetaData fieldMetaData
     ) throws ServiceException {

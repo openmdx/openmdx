@@ -44,7 +44,6 @@
  */
 package org.openmdx.application.mof.externalizer.xmi;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -58,11 +57,11 @@ import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.Resour
 
 import org.openmdx.application.mof.externalizer.cci.ModelExternalizer_1_0;
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.externalizer.spi.ModelExternalizer_1;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.uses.gnu.getopt.Getopt;
 import org.openmdx.uses.gnu.getopt.LongOpt;
@@ -82,10 +81,10 @@ public class XMIExternalizer {
         String xmiDialect = "emf";
         AnnotationFlavour annotationFlavour = AnnotationFlavour.STANDARD;
         JakartaFlavour jakartaFlavour = JakartaFlavour.VERSION_8;
-        JMIFlavour jmiFlavour = JMIFlavour.CLASSIC;
-        final List<String> pathMapSymbols = new ArrayList<String>();
-        final List<String> pathMapPaths = new ArrayList<String>();
-        final List<String> formats = new ArrayList<String>();
+        ChronoFlavour chronoFlavour = ChronoFlavour.CLASSIC;
+        final List<String> pathMapSymbols = new ArrayList<>();
+        final List<String> pathMapPaths = new ArrayList<>();
+        final List<String> formats = new ArrayList<>();
 
         final Getopt g = getOptions(arguments); 
         int c;
@@ -95,7 +94,7 @@ public class XMIExternalizer {
 					final String flavour = g.getOptarg();
 					SysLog.info("Externalizing model for openMDX " + flavour);
 					jakartaFlavour = JakartaFlavour.fromFlavourVersion(flavour);
-					jmiFlavour = JMIFlavour.fromFlavourVersion(flavour);
+					chronoFlavour = ChronoFlavour.fromFlavourVersion(flavour);
 	                break;
 	            case 'j':
 	                openmdxjdo = g.getOptarg();
@@ -132,7 +131,7 @@ public class XMIExternalizer {
         
         this.modelNames = getModelNames(arguments, g);
         this.formats = formats;
-        this.modelExternalizer = new ModelExternalizer_1(openmdxjdo, annotationFlavour, jakartaFlavour, jmiFlavour);
+        this.modelExternalizer = new ModelExternalizer_1(openmdxjdo, annotationFlavour, jakartaFlavour, chronoFlavour);
     	this.xmiFormat = toFormat(xmiDialect);
     	this.pathMap = toPathMap(pathMapSymbols, pathMapPaths);
 	}
@@ -170,7 +169,7 @@ public class XMIExternalizer {
 		List<String> pathMapSymbols,
 		List<String> pathMapPaths
 	) {
-		final Map<String,String> pathMap = new HashMap<String,String>();
+		final Map<String,String> pathMap = new HashMap<>();
         for(int i = 0; i < pathMapSymbols.size(); i++) {
             pathMap.put(
                 pathMapSymbols.get(i),
@@ -183,8 +182,6 @@ public class XMIExternalizer {
 
     /**
      * Main
-     * 
-     * @param arguments
      */
     public static void main(
         String... arguments
@@ -194,7 +191,7 @@ public class XMIExternalizer {
         	xmiExternalizer.importModel();
         	xmiExternalizer.exportModel();
         } catch(Exception e) {
-        	new ServiceException(e).log().printStackTrace();
+			Throwables.log(e);
             System.exit(-1);
         }
     }
@@ -215,7 +212,7 @@ public class XMIExternalizer {
     
     private void exportModel(
 	) throws IOException, ResourceException {
-        try (FileOutputStream fos = new FileOutputStream(new File(outFileName))){
+        try (FileOutputStream fos = new FileOutputStream(outFileName)){
         	fos.write(
     			modelExternalizer.externalizePackageAsJar(
     				modelNames.get(0),
@@ -252,7 +249,7 @@ public class XMIExternalizer {
 	private static Getopt getOptions(
 		String[] args
 	) {
-		Getopt options = new Getopt(
+		return new Getopt(
 		    XMIExternalizer.class.getName(),
 		    args,
 		    "",
@@ -268,7 +265,6 @@ public class XMIExternalizer {
 		        new LongOpt("xmi", LongOpt.REQUIRED_ARGUMENT, null, 'x'),
 		    }
 		);
-		return options;
 	}
 
 	/**

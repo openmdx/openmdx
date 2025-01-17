@@ -83,20 +83,20 @@ public class ModelExternalizer_1 implements ModelExternalizer_1_0 {
 	 * 
 	 * @param openmdxjdoDir
 	 *            base URL for openmdxjdo files
-	 * @param markdown 
-	 *            {@code true} if annotations use markdown
+	 * @param annotationFlavour
+	 *            tells whetherß annotations use markdown
 	 */
 	public ModelExternalizer_1(
 		String openmdxjdoDir, 
 		AnnotationFlavour annotationFlavour,
 		JakartaFlavour jakartaFlavour,
-		JMIFlavour jmiFlavour
+		ChronoFlavour chronoFlavour
 	){
 		try {
 			this.dataprovider = ModelProvider_2.newModelExternalizationDataprovider(openmdxjdoDir);
 			this.annotationFlavour = annotationFlavour;
 			this.jakartaFlavour = jakartaFlavour;
-			this.jmiFlavour = jmiFlavour;
+			this.chronoFlavour = chronoFlavour;
 		} catch (RuntimeException e) {
 			throw Throwables.log(e);
 		}
@@ -119,7 +119,7 @@ public class ModelExternalizer_1 implements ModelExternalizer_1_0 {
     /**
      * Tells which JMI flavour to use
      */
-    private final JMIFlavour jmiFlavour;
+    private final ChronoFlavour chronoFlavour;
     
 	/*
 	 * (non-Javadoc)
@@ -167,7 +167,7 @@ public class ModelExternalizer_1 implements ModelExternalizer_1_0 {
 		params.put("format", values);
 		annotationFlavour.applyExtendedFormat(values);
 		jakartaFlavour.applyExtendedFormat(values);
-		jmiFlavour.applyExtendedFormat(values);
+		chronoFlavour.applyExtendedFormat(values);
 		values.addAll(formats);
 		MessageRecord result = channnel.addOperationRequest(request);
 		return (byte[]) result.getBody().get("packageAsJar");

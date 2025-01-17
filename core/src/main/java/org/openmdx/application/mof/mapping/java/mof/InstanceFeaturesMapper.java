@@ -48,7 +48,7 @@ import java.io.Writer;
 import java.util.Iterator;
 
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
@@ -77,7 +77,7 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
         MetaData_1_0 metaData, 
         AnnotationFlavour annotationFlavour, 
         JakartaFlavour jakartaFlavour, 
-        JMIFlavour jmiFlavour
+        ChronoFlavour chronoFlavour
     ) throws ServiceException {
         super(
         	classDef,
@@ -87,30 +87,23 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
             packageSuffix,
             metaData, 
             annotationFlavour, 
-            jakartaFlavour, 
-            jmiFlavour, 
+            jakartaFlavour,
+            chronoFlavour,
             new StandardPrimitiveTypeMapper()
         );
         this.classDef = new ClassDef(classDef, model);
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.model1.mapping.java.JMIAbstractMapper#getId()
-     */
     protected String mapperId() {
         return Version.getImplementationVersion();
     }
 
     /**
      * Map reference name
-     * 
-     * @param referenceDef
-     * 
-     * @throws ServiceException
      */
     public void mapReference(
         ReferenceDef referenceDef
-    ) throws ServiceException {
+    ){
         printLine("   /**");
         MapperUtils.wrapText(
             "    * ",
@@ -128,14 +121,10 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
 
     /**
      * Map operation name
-     * 
-     * @param operationDef
-     * 
-     * @throws ServiceException
      */
     public void mapOperation(
         OperationDef operationDef
-    ) throws ServiceException {
+    ) {
         printLine("   /**");
         MapperUtils.wrapText(
             "    * ",
@@ -151,19 +140,10 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
         newLine();
     }
 
-    /**
-     * 
-     *
-     */
     public void mapEnd() {
-//      this.trace("ClassFeatures/End");
         printLine("}");
     }
 
-    /**
-     * 
-     * @throws ServiceException
-     */
     public void mapBegin()
         throws ServiceException {
         printLine(
@@ -195,13 +175,10 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
 
     /**
      * Map operation name
-     * 
-     * @param attributeDef
-     * @throws ServiceException
-     */    
+     */
     public void mapAttribute(
         AttributeDef attributeDef
-    ) throws ServiceException {
+    ) {
         printLine("   /**");
         MapperUtils.wrapText(
             "    * ",
@@ -217,9 +194,6 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
         newLine();
     }
 
-    /**
-     * 
-     */
     private final ClassDef classDef;
         
 }

@@ -143,7 +143,7 @@ tasks {
 	        ":tomcat:compileJava",
 	        ":tomcat:processResources"
 	    )
-		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
+		destinationDirectory.set(File(project.rootDir, "build/openmdx-${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("catalina-openmdx.jar")
 	    includeEmptyDirs = false
 		manifest {
@@ -163,7 +163,7 @@ tasks {
 		exclude(openmdxCatalinaExcludes)
 	}
 	register<org.openmdx.gradle.ArchiveTask>("catalina-openmdx-sources.jar") {
-		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
+		destinationDirectory.set(File(project.rootDir, "build/openmdx-${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("catalina-openmdx-sources.jar")
 	    includeEmptyDirs = false
 		manifest {

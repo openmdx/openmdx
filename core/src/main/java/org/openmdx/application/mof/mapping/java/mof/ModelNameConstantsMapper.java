@@ -48,13 +48,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
 import org.omg.mof.cci.VisibilityKind;
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_1;
@@ -83,14 +82,14 @@ public class ModelNameConstantsMapper
      * 
      * @param annotationFlavour tells whether annotations use markdown
      * @param jakartaFlavour tells whether Jakarta 8 or a contemporary flavour is targeted
-     * @param jmiFlavour tells whether the classic or the contemporary JMI mapping shall be applied
+     * @param chronoFlavour tells whether the classic or the contemporary JMI mapping shall be applied
      */
     public ModelNameConstantsMapper(
     	AnnotationFlavour annotationFlavour, 
     	JakartaFlavour jakartaFlavour, 
-    	JMIFlavour jmiFlavour
+    	ChronoFlavour chronoFlavour
     ){
-        super(annotationFlavour, jakartaFlavour, jmiFlavour, PACKAGE_SUFFIX);    
+        super(annotationFlavour, jakartaFlavour, chronoFlavour, PACKAGE_SUFFIX);
     }
     
     /**
@@ -115,12 +114,6 @@ public class ModelNameConstantsMapper
 
     /**
      * Map Structural Feature
-     * 
-     * @param classDef
-     * @param attributeDef
-     * @param instanceIntfMapper
-     * 
-     * @throws ServiceException
      */
     private void mapAttribute(
         ModelElement_1_0 classDef,
@@ -148,12 +141,6 @@ public class ModelNameConstantsMapper
 
     /**
      * Map Reference Feature
-     * 
-     * @param classDef
-     * @param referenceDef
-     * @param instanceIntfMapper
-     * 
-     * @throws ServiceException
      */
     private void mapReference(
         ModelElement_1_0 classDef,
@@ -180,12 +167,6 @@ public class ModelNameConstantsMapper
 
     /**
      * Map Behavioural Feature
-     * 
-     * @param classDef
-     * @param operationDef
-     * @param instanceIntfMapper
-     * 
-     * @throws ServiceException
      */
     private void mapOperation(
         ModelElement_1_0 classDef,
@@ -212,11 +193,6 @@ public class ModelNameConstantsMapper
 
     /**
      * Map Class Constants Begin
-     * 
-     * @param classDef
-     * @param classIntfMapper
-     * @param instanceIntfMapper
-     * @throws ServiceException
      */
     private void mapBeginClass(
         ModelElement_1_0 classDef,
@@ -234,13 +210,7 @@ public class ModelNameConstantsMapper
     }
 
     /**
-     * Map Class Cnstants ENd
-     * 
-     * @param classDef
-     * @param classIntfMapper
-     * @param instanceIntfMapper
-     * 
-     * @throws ServiceException
+     * Map Class End
      */
     private void mapEndClass(
         ModelElement_1_0 classDef,
@@ -248,45 +218,42 @@ public class ModelNameConstantsMapper
         InstanceFeaturesMapper instanceIntfMapper
     ) throws ServiceException {
         // add additional template references to context
-        List<StructuralFeatureDef> structuralFeatures = new ArrayList<StructuralFeatureDef>();
-        List<OperationDef> operations = new ArrayList<OperationDef>();
-        for(
-            Iterator<?> i = classDef.objGetList("feature").iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 feature = this.model.getElement(i.next());
-            if(VisibilityKind.PUBLIC_VIS.equals(feature.objGetValue("visibility"))) {
-                if(feature.isAttributeType()) {
+        List<StructuralFeatureDef> structuralFeatures = new ArrayList<>();
+        List<OperationDef> operations = new ArrayList<>();
+        for (Object o : classDef.objGetList("feature")) {
+            ModelElement_1_0 feature = this.model.getElement(o);
+            if (VisibilityKind.PUBLIC_VIS.equals(feature.objGetValue("visibility"))) {
+                if (feature.isAttributeType()) {
                     structuralFeatures.add(
-                        new AttributeDef(
-                            feature, 
-                            this.model
-                        )
+                            new AttributeDef(
+                                    feature,
+                                    this.model
+                            )
                     );
-                } else if(feature.isReferenceType()) {
+                } else if (feature.isReferenceType()) {
                     ModelElement_1_0 referencedEnd = this.model.getElement(
-                        feature.objGetValue("referencedEnd")
+                            feature.objGetValue("referencedEnd")
                     );
                     List<?> qualifierTypes = referencedEnd.objGetList("qualifierType");
                     // skip references for which a qualifier exists and the qualifier is
                     // not a primitive type
-                    if(
-                        qualifierTypes.isEmpty() ||
-                        this.model.isPrimitiveType(qualifierTypes.get(0))
+                    if (
+                            qualifierTypes.isEmpty() ||
+                                    this.model.isPrimitiveType(qualifierTypes.get(0))
                     ) {
                         structuralFeatures.add(
-                            new ReferenceDef(
-                                feature,
-                                model
-                            )
+                                new ReferenceDef(
+                                        feature,
+                                        model
+                                )
                         );
                     }
-                } else if(feature.isOperationType()) {
+                } else if (feature.isOperationType()) {
                     operations.add(
-                        new OperationDef(
-                            feature,
-                            this.model
-                        )
+                            new OperationDef(
+                                    feature,
+                                    this.model
+                            )
                     );
                 }
             }
@@ -297,11 +264,6 @@ public class ModelNameConstantsMapper
 
     /**
      * Map Struct Constants Begin
-     * 
-     * @param structDef
-     * @param structIntfMapper
-     * 
-     * @throws ServiceException
      */
     private void mapBeginStruct(
         ModelElement_1_0 structDef,
@@ -317,12 +279,6 @@ public class ModelNameConstantsMapper
 
     /**
      * Map Struct Constants End
-     * 
-     * @param classDef
-     * @param structureFieldDef
-     * @param structIntfMapper
-     * 
-     * @throws ServiceException
      */
     private void mapStructField(
         ModelElement_1_0 classDef,
@@ -348,9 +304,6 @@ public class ModelNameConstantsMapper
 
     /**
      * Map Struct Constants End
-     * 
-     * @param structIntfMapper
-     * @throws ServiceException
      */
     private void jmiEndStruct(
         StructFeaturesMapper structIntfMapper
@@ -403,8 +356,8 @@ public class ModelNameConstantsMapper
                             this.packageSuffix,
                             this.metaData, 
                             annotationFlavour, 
-                            jakartaFlavour, 
-                            jmiFlavour
+                            jakartaFlavour,
+                            chronoFlavour
                         );
                         InstanceFeaturesMapper instanceIntfMapper = new InstanceFeaturesMapper(
                             element, 
@@ -414,8 +367,8 @@ public class ModelNameConstantsMapper
                             this.packageSuffix,
                             this.metaData, 
                             annotationFlavour, 
-                            jakartaFlavour, 
-                            jmiFlavour
+                            jakartaFlavour,
+                            chronoFlavour
                         );
                         this.mapBeginClass(
                             element,
@@ -423,29 +376,26 @@ public class ModelNameConstantsMapper
                             instanceIntfMapper
                         );
                         // get class features
-                        for(
-                            Iterator<?> j = element.objGetList("feature").iterator();
-                            j.hasNext();
-                        ) {
-                            ModelElement_1_0 feature = this.model.getElement(j.next());
+                        for (Object o : element.objGetList("feature")) {
+                            ModelElement_1_0 feature = this.model.getElement(o);
                             SysLog.trace("processing class feature", feature.jdoGetObjectId());
-                            if(feature.isAttributeType()) {
+                            if (feature.isAttributeType()) {
                                 this.mapAttribute(
-                                    element,
-                                    feature,
-                                    instanceIntfMapper
+                                        element,
+                                        feature,
+                                        instanceIntfMapper
                                 );
-                            } else if(feature.isReferenceType()) {
+                            } else if (feature.isReferenceType()) {
                                 this.mapReference(
-                                    element,
-                                    feature,
-                                    instanceIntfMapper
+                                        element,
+                                        feature,
+                                        instanceIntfMapper
                                 );
-                            } else if(feature.isOperationType()) {
+                            } else if (feature.isOperationType()) {
                                 this.mapOperation(
-                                    element,
-                                    feature,
-                                    instanceIntfMapper
+                                        element,
+                                        feature,
+                                        instanceIntfMapper
                                 );
                             }
                         }
@@ -476,25 +426,22 @@ public class ModelNameConstantsMapper
                                 this.packageSuffix,
                                 this.metaData, 
                                 annotationFlavour, 
-                                jakartaFlavour, 
-                                jmiFlavour
+                                jakartaFlavour,
+                                chronoFlavour
                             );
                             this.mapBeginStruct(
                                 element,
                                 structFeaturesMapper
                             );
                             // StructureFields
-                            for(
-                                Iterator<?> j = element.objGetList("content").iterator();
-                                j.hasNext();
-                            ) {
-                                ModelElement_1_0 feature = this.model.getElement(j.next());
+                            for (Object o : element.objGetList("content")) {
+                                ModelElement_1_0 feature = this.model.getElement(o);
                                 SysLog.trace("processing structure field", feature.jdoGetObjectId());
-                                if(feature.isStructureFieldType()) {
+                                if (feature.isStructureFieldType()) {
                                     this.mapStructField(
-                                        element,
-                                        feature,
-                                        structFeaturesMapper
+                                            element,
+                                            feature,
+                                            structFeaturesMapper
                                     );
                                 }
                             }                            
@@ -531,10 +478,6 @@ public class ModelNameConstantsMapper
      *            all models contained in package 'org', 'org:openmdx:%' exports
      *            all models contained in package 'org:openmdx'. All models are
      *            written to os.
-     * @param model
-     * @param os
-     * 
-     * @throws ServiceException
      */
     public void externalize(
         String qualifiedPackageName,

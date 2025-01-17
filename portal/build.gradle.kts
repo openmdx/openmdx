@@ -302,7 +302,7 @@ tasks {
 			":portal:generate-model",
 			":portal:processResources"
 		)
-		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
+		destinationDirectory.set(File(project.rootDir, "build/openmdx-${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-portal.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -324,7 +324,7 @@ tasks {
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-portal-sources.jar") {
 		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
+		destinationDirectory.set(File(project.rootDir, "build/openmdx-${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-portal-sources.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -344,7 +344,7 @@ tasks {
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-inspector.war") {
 		dependsOn("compress-and-append-js")
-		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/deployment-unit"))
+		destinationDirectory.set(File(project.rootDir, "build/openmdx-${projectFlavour}/${project.name}/deployment-unit"))
 		archiveFileName.set("openmdx-inspector.war")
 		includeEmptyDirs = false
 		manifest {

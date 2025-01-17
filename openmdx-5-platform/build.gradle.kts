@@ -50,47 +50,47 @@ javaPlatform {
     allowDependencies()
 }
 
+// TODO update versions where restriction came from runtime target
 dependencies {
     constraints {
 
-		val atomikosVersion = "6.0.0"
-		val bootstrapVersion = "2.19.1"
-		val cacheVersion = "1.1.1"
-		val flexmarkVersion = "0.62.2"
-		val groovyVersion = "3.0.+"
-		val jdoVersion = "3.1"
-		val jakartaVersion = "8.0.+"
-		val junitVersion = "5.11.3"
-		val ldapVersion = "2.1.+"
-		val manifoldVersion = "2024.1.47"
-		val mockitoVersion = "4.11.0"
-		val oracleVersion = "23.6.0.24.10"
-		val postgresVersion = "42.7.+"
-		val radiusVersion = "1.1.+"
-		val servletVersion = "4.0.+"
-		val tomcatVersion = "9.0.+"
+        val atomikosVersion = "6.0.0"
+        val bootstrapVersion = "4.19.1"  // 5.19.1 can't be created during development!
+        val cacheVersion = "1.1.1"
+        val flexmarkVersion = "0.62.2"
+        val groovyVersion = "3.0.+"
+        val jdoVersion = "3.2.1"
+        val jakartaVersion = "10.0.0"
+        val junitVersion = "5.11.3"
+        val ldapVersion = "2.1.+"
+        val manifoldVersion = "2024.1.47"
+        val mockitoVersion = "4.11.0"
+        val oracleVersion = "23.6.0.24.10"
+        val postgresVersion = "42.7.+"
+        val radiusVersion = "1.1.+"
+        val servletVersion = "6.0.+"
+        val tomcatVersion = "9.0.+"
 
-		api("com.atomikos:transactions-jta:$atomikosVersion")
-		api("com.atomikos:transactions-jdbc:$atomikosVersion")
-	    api("com.vladsch.flexmark:flexmark:$flexmarkVersion")
-	    api("jakarta.platform:jakarta.jakartaee-api:$jakartaVersion")
-	    api("jakarta.servlet:jakarta.servlet-api:$servletVersion")
-	    api("javax.cache:cache-api:$cacheVersion")
-	    api("javax.jdo:jdo-api:$jdoVersion")
-		api("org.apache.directory.api:apache-ldap-api:$ldapVersion")
-		api("org.apache.tomcat:tomcat-catalina:$tomcatVersion")
-	    api("org.codehaus.groovy:groovy:$groovyVersion")
-	    api("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-	    api("org.mockito:mockito-core:$mockitoVersion")
-	    api("org.mockito:mockito-junit-jupiter:$mockitoVersion")
-        api("org.openmdx:openmdx-base:$bootstrapVersion")	
-	    api("org.tinyradius:tinyradius:$radiusVersion")	
-	    api("systems.manifold:manifold-preprocessor:$manifoldVersion")
+        api("com.atomikos:transactions-jta:$atomikosVersion:jakarta")
+        api("com.atomikos:transactions-jdbc:$atomikosVersion:jakarta")
+        api("com.vladsch.flexmark:flexmark:$flexmarkVersion")
+        api("jakarta.platform:jakarta.jakartaee-api:$jakartaVersion")
+        api("jakarta.servlet:jakarta.servlet-api:$servletVersion")
+        api("javax.cache:cache-api:$cacheVersion")
+        api("javax.jdo:jdo-api:$jdoVersion")
+        api("org.apache.directory.api:apache-ldap-api:$ldapVersion")
+        api("org.apache.tomcat:tomcat-catalina:$tomcatVersion")
+        api("org.codehaus.groovy:groovy:$groovyVersion")
+        api("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+        api("org.mockito:mockito-core:$mockitoVersion")
+        api("org.mockito:mockito-junit-jupiter:$mockitoVersion")
+        api("org.openmdx:openmdx-base:$bootstrapVersion")
+        api("org.tinyradius:tinyradius:$radiusVersion")
+        api("systems.manifold:manifold-preprocessor:$manifoldVersion")
 
-	    runtime("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
-        runtime("com.oracle.database.jdbc:ojdbc8:$oracleVersion")
+        runtime("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+        runtime("com.oracle.database.jdbc:ojdbc17:$oracleVersion")
         runtime("org.postgresql:postgresql:$postgresVersion")
-
     }
-    
+
 }

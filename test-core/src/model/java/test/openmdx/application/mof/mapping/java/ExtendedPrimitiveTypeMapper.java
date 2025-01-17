@@ -79,7 +79,8 @@ public class ExtendedPrimitiveTypeMapper extends StandardPrimitiveTypeMapper {
     public String getFeatureType(
         String qualifiedTypeName, 
         Format format, 
-        boolean asObject
+        boolean asObject,
+        boolean classicChronoTypes
     ) throws ServiceException {
         Matcher matcher = CODE_PATTERN.matcher(qualifiedTypeName);
         if(matcher.matches()) {
@@ -90,7 +91,7 @@ public class ExtendedPrimitiveTypeMapper extends StandardPrimitiveTypeMapper {
                 return getJavaClassName(matcher);
             }
         } else {
-            return super.getFeatureType(qualifiedTypeName, format, asObject);
+            return super.getFeatureType(qualifiedTypeName, format, asObject, classicChronoTypes);
         }
     }
 

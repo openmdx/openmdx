@@ -87,18 +87,18 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
      * Determines the Java equivalent for a given primitive type
      * <p>
      * <em>This method must be overridden in order to support non-standard primitive types.</em>
-     * 
-     * @param qualifiedTypeName the qualified model class name
-     * @param alwaysAsObject tells whether the object or scalar variant of a Java built-in types is required
+     *
+     * @param qualifiedTypeName  the qualified model class name
+     * @param alwaysAsObject     tells whether the object or scalar variant of a Java built-in types is required
+     * @param classicChronoTypes tells whether the XML datatypes or the java.time classes shall be used
      * @return the Java equivalent for the given primitive type
-     * 
-     * @throws ServiceException
      */
     @Override
     public String getFeatureType(
         String qualifiedTypeName,
         Format format, 
-        boolean alwaysAsObject
+        boolean alwaysAsObject,
+        boolean classicChronoTypes
     ) throws ServiceException{
         if(PrimitiveTypes.STRING.equals(qualifiedTypeName)) return "java.lang.String";
         if(PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) return alwaysAsObject ? "java.lang.Boolean" : "boolean";
@@ -106,9 +106,14 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
         if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) return alwaysAsObject ? "java.lang.Long" : "long";
         if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) return alwaysAsObject ? "java.lang.Integer" : "int";
         if(PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) return "java.math.BigDecimal";
-        if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) return format == Format.JPA3 ? "java.sql.Timestamp" : "java.util.Date";
-        if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) return format == Format.JPA3 ? "java.sql.Date" : "javax.xml.datatype.XMLGregorianCalendar";
-        if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) return "javax.xml.datatype.Duration";
+        if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) return
+                format == Format.JPA3 ? "java.sql.Timestamp" :
+                        classicChronoTypes ? "java.util.Date" : "java.time.Instant";
+        if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) return
+                format == Format.JPA3 ? "java.sql.Date" :
+                        classicChronoTypes ? "javax.xml.datatype.XMLGregorianCalendar" : "java.time.LocalDate";
+        if(PrimitiveTypes.DURATION.equals(qualifiedTypeName))
+            return classicChronoTypes ? "javax.xml.datatype.Duration" : "java.time.Duration";
         if(PrimitiveTypes.BINARY.equals(qualifiedTypeName)) return "byte[]";
         if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) return "java.net.URI";
         if(PrimitiveTypes.XRI.equals(qualifiedTypeName)) return "java.lang.String"; // no standard implementation as openMDX sticks to XRI 2
@@ -132,17 +137,16 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
      * Determines the Java predicate for a given primitive type
      * <p>
      * <em>This method may be overridden in order to support non-standard primitive type queries.</em>
-     * 
-     * @param qualifiedTypeName the qualified model class name
-     * 
+     *
+     * @param qualifiedTypeName  the qualified model class name
+     * @param classicChronoTypes tells whether the XML datatypes or the java.time classes shall be used
      * @return the Java predicate for the given primitive type
-     * 
-     * @throws ServiceException
      */
     @Override
     public String getPredicateType(
-        String qualifiedTypeName
-    ) throws ServiceException {
+        String qualifiedTypeName,
+        boolean classicChronoTypes
+    ){
         if(PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) return "org.w3c.cci2.BooleanTypePredicate";
         if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) return "org.w3c.cci2.ComparableTypePredicate<java.lang.Short>";
         if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) return "org.w3c.cci2.ComparableTypePredicate<java.lang.Long>";
@@ -151,10 +155,15 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
         if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) return "org.w3c.cci2.ResourceIdentifierTypePredicate<java.net.URI>";
         if(PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)) return "org.w3c.cci2.StringTypePredicate";
         if(PrimitiveTypes.XRI.equals(qualifiedTypeName)) return "org.w3c.cci2.StringTypePredicate";
-        if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) return "org.w3c.cci2.ComparableTypePredicate<java.util.Date>";
-        if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) return "org.w3c.cci2.PartiallyOrderedTypePredicate<javax.xml.datatype.XMLGregorianCalendar>";
-        if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) return "org.w3c.cci2.ComparableTypePredicate<java.net.URI>";
-        if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) return "org.w3c.cci2.PartiallyOrderedTypePredicate<javax.xml.datatype.Duration>";
+        if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) return "org.w3c.cci2.ComparableTypePredicate<" +
+                (classicChronoTypes ? "java.util.Date" : "java.time.LocalDate") +
+                ">";
+        if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) return "org.w3c.cci2.PartiallyOrderedTypePredicate<" +
+                (classicChronoTypes ? "javax.xml.datatype.XMLGregorianCalendar" : "java.time.Instant") +
+                ">";
+        if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) return "org.w3c.cci2.PartiallyOrderedTypePredicate<" +
+                (classicChronoTypes ? "javax.xml.datatype.Duration" : "java.time.Duration") +
+                ">";
         if(PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) return "org.w3c.cci2.ComparableTypePredicate<java.math.BigDecimal>";
         return "org.w3c.cci2.AnyTypePredicate"; // has always a reasonable default value   
     }
@@ -163,20 +172,20 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
      * Provide the Java pattern to parse a given expression represented by the EXPRESSION_PLACE_HOLDER.
      * <p>
      * There is usually no need to override this method.
-     *  
-     * @param qualifiedTypeName the qualified model class name
-     * @param asObject tells whether the object or scalar variant of a Java built-in types is required
+     *
+     * @param qualifiedTypeName  the qualified model class name
+     * @param asObject           tells whether the object or scalar variant of a Java built-in types is required
+     * @param classicChronoTypes tells whether XML datatype or java.time chrono types shall be used
      * @return the Java pattern to parse a given expression, e.g. "Boolean.valueOf({})"
-     * 
-     * @throws ServiceException
-     * 
-     * @see {@link PrimitiveTypeMapper#EXPRESSION_PLACEHOLDER}
+     *
+     * @see #EXPRESSION_PLACEHOLDER
      */
     @Override
     public String getParsePattern(
         String qualifiedTypeName, 
         Format format, 
-        boolean asObject
+        boolean asObject,
+        boolean classicChronoTypes
     ) throws ServiceException {
         if(!asObject){
             if(PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) return "java.lang.Boolean.parseBoolean(" + EXPRESSION_PLACEHOLDER + ")";
@@ -184,7 +193,7 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
             if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) return "java.lang.Integer.parseInt(" + EXPRESSION_PLACEHOLDER + ")";
             if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) return "java.lang.Long.parseLong(" + EXPRESSION_PLACEHOLDER + ")";
         }
-        String type = getFeatureType(qualifiedTypeName, format, asObject);
+        String type = getFeatureType(qualifiedTypeName, format, asObject, classicChronoTypes);
         return "org.w3c.spi2.Datatypes.create(" + type + ".class," + EXPRESSION_PLACEHOLDER + ")";
     }
 

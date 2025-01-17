@@ -47,7 +47,7 @@ package org.openmdx.application.mof.mapping.java.mof;
 import java.io.Writer;
 
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.java.AbstractClassMapper;
@@ -66,12 +66,6 @@ public class ClassMapper
     extends AbstractClassMapper 
 {
 
-    /**
-     * Constructor 
-     * @param jakartaFlavour TODO
-     * @param jmiFlavour TODO
-     * @param markdown TODO
-     */
     public ClassMapper(
         ModelElement_1_0 classDef,        
         Writer writer, 
@@ -81,7 +75,7 @@ public class ClassMapper
         MetaData_1_0 metaData, 
         AnnotationFlavour annotationFlavour, 
         JakartaFlavour jakartaFlavour, 
-        JMIFlavour jmiFlavour
+        ChronoFlavour chronoFlavour
     ) throws ServiceException {
         super(
             classDef,
@@ -91,8 +85,8 @@ public class ClassMapper
             packageSuffix, 
             metaData, 
             annotationFlavour, 
-            jakartaFlavour, 
-            jmiFlavour, 
+            jakartaFlavour,
+                chronoFlavour,
             new StandardPrimitiveTypeMapper()
         );
     }

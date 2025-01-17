@@ -48,7 +48,7 @@ import java.io.Writer;
 
 import org.omg.mof.spi.Identifier;
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AssociationDef;
 import org.openmdx.application.mof.mapping.cci.AssociationEndDef;
@@ -76,10 +76,10 @@ public class AssociationMapper
         MetaData_1_0 metaData, 
         AnnotationFlavour annotationFlavour, 
         JakartaFlavour jakartaFlavour, 
-        JMIFlavour jmiFlavour, 
+        ChronoFlavour chronoFlavour,
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
-        super(writer, model, format, packageSuffix, metaData, annotationFlavour, jakartaFlavour, jmiFlavour, primitiveTypeMapper);
+        super(writer, model, format, packageSuffix, metaData, annotationFlavour, jakartaFlavour, chronoFlavour, primitiveTypeMapper);
         this.associationName = Identifier.CLASS_PROXY_NAME.toIdentifier(
             element.getName(),
             null, // removablePrefix
@@ -98,12 +98,9 @@ public class AssociationMapper
     final AssociationDef associationDef;
 
     static final String QUALIFIED_CONTAINER_CLASS_NAME = "org.w3c.cci2.Container";
-    static final String QUALIFIED_COLLECTION_CLASS_NAME = "java.util.Collection";
-    
+
     /**
      * Begin
-     * 
-     * @throws ServiceException
      */
     protected void mapBegin(
     ) throws ServiceException {
@@ -130,8 +127,6 @@ public class AssociationMapper
 
     /**
      * End
-     * 
-     * @throws ServiceException
      */
     protected void mapEnd(
     ) throws ServiceException {
@@ -141,8 +136,6 @@ public class AssociationMapper
     
     /**
      * End
-     * 
-     * @throws ServiceException
      */
     protected void mapAssociationEnd(
         AssociationEndDef associationEnd
@@ -189,8 +182,6 @@ public class AssociationMapper
     
     /**
      * Map Association
-     * 
-     * @throws ServiceException 
      */
     public boolean mapAssociation(
     ) throws ServiceException {

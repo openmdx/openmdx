@@ -175,7 +175,7 @@ public class TestModelRepository {
      * @return the flavour specific build directory
      */
     private static File getBuildDirectory() {
-    	return new File("build" + Version.getFlavourVersion()); 
+    	return new File("build/openmdx-" + Version.getFlavourVersion());
     }
     
     public static void main(String...strings) throws ServiceException, FileNotFoundException{

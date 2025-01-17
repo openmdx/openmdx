@@ -168,7 +168,7 @@ tasks {
                 zipTree(
                     File(
                         project.rootDir,
-                        "build${projectFlavour}/core/lib/openmdx-base.jar"
+                        "build/openmdx-${projectFlavour}/core/lib/openmdx-base.jar"
                     )
                 ).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText()
             )
@@ -176,7 +176,7 @@ tasks {
                 zipTree(
                     File(
                         project.rootDir,
-                        "build${projectFlavour}/security/lib/openmdx-security.jar"
+                        "build/openmdx-${projectFlavour}/security/lib/openmdx-security.jar"
                     )
                 ).matching { include("META-INF/openmdxmof.properties") }.singleFile.readText()
             )
@@ -219,7 +219,7 @@ tasks {
             ":client:processResources",
             ":security:openmdx-security.jar"
         )
-        destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
+        destinationDirectory.set(File(project.rootDir, "build/openmdx-${projectFlavour}/${project.name}/lib"))
         archiveFileName.set("openmdx-client.jar")
         includeEmptyDirs = false
         manifest {
@@ -244,9 +244,9 @@ tasks {
             },
             copySpec {
                 from(
-                    zipTree(File(project.rootDir, "build${projectFlavour}/core/lib/openmdx-base.jar")),
-                    zipTree(File(project.rootDir, "build${projectFlavour}/core/lib/openmdx-system.jar")),
-                    zipTree(File(project.rootDir, "build${projectFlavour}/security/lib/openmdx-security.jar"))
+                    zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/core/lib/openmdx-base.jar")),
+                    zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/core/lib/openmdx-system.jar")),
+                    zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/security/lib/openmdx-security.jar"))
                 ).include(
                     openmdxCommonIncludes
                 ).exclude(
@@ -268,7 +268,7 @@ tasks {
             ":core:openmdx-system-sources.jar",
             ":security:openmdx-security-sources.jar"
         )
-        destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
+        destinationDirectory.set(File(project.rootDir, "build/openmdx-${projectFlavour}/${project.name}/lib"))
         archiveFileName.set("openmdx-client-sources.jar")
         includeEmptyDirs = false
         manifest {
@@ -291,9 +291,9 @@ tasks {
             },
             copySpec {
                 from(
-                    zipTree(File(project.rootDir, "build${projectFlavour}/core/lib/openmdx-base-sources.jar")),
-                    zipTree(File(project.rootDir, "build${projectFlavour}/core/lib/openmdx-system-sources.jar")),
-                    zipTree(File(project.rootDir, "build${projectFlavour}/security/lib/openmdx-security-sources.jar"))
+                    zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/core/lib/openmdx-base-sources.jar")),
+                    zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/core/lib/openmdx-system-sources.jar")),
+                    zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/security/lib/openmdx-security-sources.jar"))
                 ).include(
                     openmdxCommonIncludes
                 ).exclude(
@@ -308,7 +308,7 @@ tasks {
         dependsOn(
             "openmdx-client.jar", ":client:compileJava", ":client:processResources"
         )
-        destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
+        destinationDirectory.set(File(project.rootDir, "build/openmdx-${projectFlavour}/${project.name}/lib"))
         archiveFileName.set("openmdx-dalvik.jar")
         includeEmptyDirs = false
         manifest {
@@ -321,7 +321,7 @@ tasks {
         with(
             copySpec {
                 from(
-                    zipTree(File(project.rootDir, "build${projectFlavour}/client/lib/openmdx-client.jar"))
+                    zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/client/lib/openmdx-client.jar"))
                 ).include(
                     "META-INF/*.properties"
                 ).exclude(
@@ -331,7 +331,7 @@ tasks {
                 }
             }, copySpec {
                 from(
-                    zipTree(File(project.rootDir, "build${projectFlavour}/client/lib/openmdx-client.jar"))
+                    zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/client/lib/openmdx-client.jar"))
                 ).include(
                     openmdxDalvikIncludes
                 ).exclude(
@@ -349,7 +349,7 @@ tasks {
     register<org.openmdx.gradle.ArchiveTask>("openmdx-dalvik-sources.jar") {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         dependsOn(":client:openmdx-client-sources.jar")
-        destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
+        destinationDirectory.set(File(project.rootDir, "build/openmdx-${projectFlavour}/${project.name}/lib"))
         archiveFileName.set("openmdx-dalvik-sources.jar")
         includeEmptyDirs = false
         manifest {
@@ -365,7 +365,7 @@ tasks {
                 from(
                     "src/main/java",
                     File(buildDirAsFile, "generated/sources/java/main"),
-                    zipTree(File(project.rootDir, "build${projectFlavour}/client/lib/openmdx-client-sources.jar"))
+                    zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/client/lib/openmdx-client-sources.jar"))
                 ).include(
                     openmdxDalvikIncludes
                 ).exclude(

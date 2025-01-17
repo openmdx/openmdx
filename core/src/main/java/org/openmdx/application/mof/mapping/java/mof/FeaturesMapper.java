@@ -47,13 +47,12 @@ package org.openmdx.application.mof.mapping.java.mof;
 import java.io.Writer;
 
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.java.AbstractMapper;
 import org.openmdx.application.mof.mapping.java.Format;
 import org.openmdx.application.mof.mapping.java.PrimitiveTypeMapper;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 
@@ -71,9 +70,9 @@ public abstract class FeaturesMapper extends AbstractMapper {
         MetaData_1_0 metaData, 
         AnnotationFlavour annotationFlavour, 
         JakartaFlavour jakartaFlavour, 
-        JMIFlavour jmiFlavour, 
+        ChronoFlavour chronoFlavour,
         PrimitiveTypeMapper primitiveTypeMapper
-    ) throws ServiceException {
+    ){
         super(
             writer, 
             model,
@@ -81,8 +80,8 @@ public abstract class FeaturesMapper extends AbstractMapper {
             packageSuffix,
             metaData, 
             annotationFlavour, 
-            jakartaFlavour, 
-            jmiFlavour, 
+            jakartaFlavour,
+            chronoFlavour,
             primitiveTypeMapper
         );
     }
@@ -91,7 +90,7 @@ public abstract class FeaturesMapper extends AbstractMapper {
      * Convert feature to constant names, e.g. "A_FEATURE"
      * for "aFeature".
      * 
-     * @param feature
+     * @param feature the feature's simple name
      * 
      * @return the constant name for the given feature
      */

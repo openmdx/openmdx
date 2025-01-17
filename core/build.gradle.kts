@@ -369,7 +369,7 @@ tasks {
 	        ":core:compileJava",
 	        ":core:processResources"
 	    )
-		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
+		destinationDirectory.set(File(project.rootDir, "build/openmdx-${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-base.jar")
 	    includeEmptyDirs = false
 		manifest {
@@ -392,7 +392,7 @@ tasks {
 		exclude(openmdxBaseExcludes)
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-base-sources.jar") {
-		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
+		destinationDirectory.set(File(project.rootDir, "build/openmdx-${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-base-sources.jar")
 		includeEmptyDirs = false
 		manifest {
@@ -411,7 +411,7 @@ tasks {
 		exclude(openmdxBaseExcludes)
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-system.jar") {
-		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
+		destinationDirectory.set(File(project.rootDir, "build/openmdx-${projectFlavour}/${project.name}/lib"))
 	    dependsOn(":core:compileJava")
 		archiveFileName.set("openmdx-system.jar")
 	    includeEmptyDirs = false
@@ -430,7 +430,7 @@ tasks {
 	  	exclude(openmdxSystemExcludes)
 	}
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-system-sources.jar") {
-		destinationDirectory.set(File(project.rootDir, "build${projectFlavour}/${project.name}/lib"))
+		destinationDirectory.set(File(project.rootDir, "build/openmdx-${projectFlavour}/${project.name}/lib"))
 		archiveFileName.set("openmdx-system-sources.jar")
 	    includeEmptyDirs = false
 		manifest {

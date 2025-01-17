@@ -58,11 +58,10 @@ include(
     "openmdx-2-platform",
     "openmdx-3-platform",
     "openmdx-4-platform",
+    "openmdx-5-platform",
     "core",
-    "security",
-    "test-core",
-    "test-security",
     "publish"
 )
-val flavour: String = gradle.startParameter.projectProperties.getOrDefault("flavour", "2")
+val flavour: String = gradle.startParameter.projectProperties.getOrDefault("flavour", "4")
+if (flavour != "3" && flavour != "5") include("security", "test-core", "test-security") // will be enabled for (flavour != "3") with MDX-2
 if (flavour == "2") include("client", "portal", "tomcat") // will be enabled for (flavour != "3") with MDX-2

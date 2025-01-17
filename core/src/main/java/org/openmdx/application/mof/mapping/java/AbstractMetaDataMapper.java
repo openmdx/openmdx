@@ -47,7 +47,7 @@ package org.openmdx.application.mof.mapping.java;
 import java.io.Writer;
 
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
@@ -76,7 +76,7 @@ public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
 		String sliceClassName, 
         AnnotationFlavour annotationFlavour, 
         JakartaFlavour jakartaFlavour, 
-        JMIFlavour jmiFlavour, 
+        ChronoFlavour chronoFlavour,
         MetaData_1_0 metaData, 
         PrimitiveTypeMapper primitiveTypeMapper, 
         ObjectRepositoryMetadataPlugin plugin
@@ -89,8 +89,8 @@ public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
             packageSuffix, 
             metaData, 
             annotationFlavour, 
-            jakartaFlavour, 
-            jmiFlavour, 
+            jakartaFlavour,
+            chronoFlavour,
             primitiveTypeMapper
         );
         this.writer = writer;
@@ -112,9 +112,7 @@ public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
 	
     /**
      * Test whether a given class is persistence aware
-     * 
-     * @param classDef 
-     * 
+     *
      * @return {@code true} if the given class is persistence aware
      */
     protected boolean isPersistenceAware(
@@ -128,9 +126,7 @@ public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
 
     /**
      * Tells whether the method is invoked in its own class specific meta data mapper
-     * 
-     * @param attributeDef
-     * 
+     *
      * @return {@code true} if the method is invoked in its own class specific meta data mapper
      */
     protected boolean isDeclaringClass(

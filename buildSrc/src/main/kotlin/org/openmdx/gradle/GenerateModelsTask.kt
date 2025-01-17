@@ -52,7 +52,7 @@ import java.io.File
 open class GenerateModelsTask : JavaExec() {
 
 	@Input
-    val generateFlavour = if (project.hasProperty("flavour")) project.property("flavour") else "2"
+    val generateFlavour = if (project.hasProperty("flavour")) project.property("flavour") else "4"
     
 	init {
 		mainClass.set("org.openmdx.application.mof.externalizer.xmi.XMIExternalizer")

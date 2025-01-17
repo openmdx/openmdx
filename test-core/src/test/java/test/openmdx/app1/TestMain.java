@@ -3571,7 +3571,7 @@ public class TestMain {
 			formattedName = person.formatNameAs(personFormatNameAsParams);
 			this.commit(); // result available after commit only
 			System.out.println("formatted name=" + formattedNameString);
-			if (this instanceof ProxyConnectionTest && "4".equals(Version.getFlavourVersion())) {
+			if (this instanceof ProxyConnectionTest && !isJava8Flavour()) {
 				// raises java.lang.reflect.UndeclaredThrowableException
 			} else {
 				try {
@@ -5222,6 +5222,11 @@ public class TestMain {
 			return ReducedJDOHelper.getPersistenceManagerFactory(configuration(), ENTITY_MANAGER_PROXY_FACTORY_NAME);
 		}
 
+	}
+
+	private static boolean isJava8Flavour() {
+		String flavourVersion = Version.getFlavourVersion();
+		return "2".equals(flavourVersion) || "3".equals(flavourVersion);
 	}
 
 }

@@ -53,62 +53,59 @@ public interface PrimitiveTypeMapper {
 
     /**
      * Determines the Java equivalent for a given primitive type
-     * 
-     * @param qualifiedTypeName the qualified model class name
-     * @param format, e.g. CCI2, JMI1 etc.
-     * @param asObject tells whether the object or scalar variant of a Java built-in types is required
+     *
+     * @param format,            e.g. CCI2, JMI1 etc.
+     * @param qualifiedTypeName  the qualified model class name
+     * @param asObject           tells whether the object or scalar variant of a Java built-in types is required
+     * @param classicChronoTypes tells whether XML or java.time chrono types shall be used
      * @return the Java equivalent for the given primitive type
-     * 
-     * @throws ServiceException
      */
     String getFeatureType(
         String qualifiedTypeName, 
         Format format, 
-        boolean asObject
+        boolean asObject,
+        boolean classicChronoTypes
     ) throws ServiceException;
     
     /**
      * Determines the Java predicate for a given primitive type
-     * 
-     * @param qualifiedTypeName the qualified model class name
-     * 
+     *
+     * @param qualifiedTypeName  the qualified model class name
+     * @param classicChronoTypes
      * @return the Java predicate for the given primitive type
-     * 
-     * @throws ServiceException
      */
     String getPredicateType(
-        String qualifiedTypeName
-    ) throws ServiceException;
+        String qualifiedTypeName,
+        boolean classicChronoTypes) throws ServiceException;
 
     /**
      * Provide the Java pattern to parse a given expression represented by the EXPRESSION_PLACE_HOLDER.
-     *  
-     * @param qualifiedTypeName the qualified model class name
-     * @param format, e.g. CCI2, JMI1 etc.
-     * @param asObject tells whether the object or scalar variant of a Java built-in types is required
+     *
+     * @param format,            e.g. CCI2, JMI1 etc.
+     * @param qualifiedTypeName  the qualified model class name
+     * @param asObject           tells whether the object or scalar variant of a Java built-in types is required
+     * @param classicChronoTypes tells whether XMI datatype or java.time chrono types are to be used
      * @return the Java pattern to parse a given expression, e.g. "Boolean.valueOf({})"
-     * 
-     * @throws ServiceException
-     * 
-     * @see {@link #EXPRESSION_PLACEHOLDER}
+     * @see #EXPRESSION_PLACEHOLDER
      */
     String getParsePattern(
         String qualifiedTypeName, 
         Format format, 
-        boolean asObject
+        boolean asObject,
+        boolean classicChronoTypes
     ) throws ServiceException;
 
     /**
      * Maps between the type of the JPA3 property value and the type of the CCI2 property value
      * 
-     * @param qualifiedTypeName
+     * @param qualifiedTypeName the qualified model name
      * @param from, either CCI2 or JPA3
      * @param to, either CCI2 or JPA3
      * @return the pattern to map the value from the {@code from} format to the {@code to} format
      * 
      * @throws ServiceException in case of an unsupported combination of arguments
      * 
-     * @see {@link #EXPRESSION_PLACEHOLDER}
+     * @see #EXPRESSION_PLACEHOLDER
      */
     String getMappingPattern(
         String qualifiedTypeName, 
@@ -119,6 +116,6 @@ public interface PrimitiveTypeMapper {
     /**
      * The placeholder for the expression inside a pattern
      */
-    final String EXPRESSION_PLACEHOLDER = "{}";
+    String EXPRESSION_PLACEHOLDER = "{}";
 
 }
