@@ -46,9 +46,15 @@ package org.openmdx.kernel.lightweight.naming;
 
 import javax.naming.NamingException;
 import javax.naming.NoInitialContextException;
+#if JAVA_8
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 import javax.transaction.UserTransaction;
+#else
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.TransactionSynchronizationRegistry;
+import jakarta.transaction.UserTransaction;
+#endif
 
 import org.openmdx.kernel.lightweight.naming.jdbc.AbstractDataSourceContext;
 import org.openmdx.kernel.lightweight.naming.jdbc.BitronixDataSourceContext;

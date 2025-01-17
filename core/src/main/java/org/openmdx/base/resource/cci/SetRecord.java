@@ -50,7 +50,7 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.Spliterator;
 
-import javax.resource.cci.IndexedRecord;
+import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
 
 /**
  * {@code "set"} Record

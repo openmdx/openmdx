@@ -57,6 +57,16 @@ public class MappingTypes {
      * This is a modifier telling that annotations use markdown
      */
     public static final String MARKDOWN = "--markdown-annotations";
+
+    /**
+     * This is a modifier telling to use Jakarta 8
+     */
+    public static final String JAKARTA_8 = "--jakarta-8";
+
+    /**
+     * This is a modifier telling to use classic JMI mapping
+     */
+    public static final String JMI_CLASSIC = "--jmi-classic";
     
     /**
      * openMDX model mapping

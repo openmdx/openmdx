@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Build Properties for openMDX/Test Core
+ * Description: Build Properties for openMDX/Test Security
  * Owner:       Datura Informatik + Organisation AG, Switzerland, 
  *              https://www.datura.ch
  * ====================================================================
@@ -50,8 +50,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.openmdx.kernel.log.SysLog;
+
 /**
- * Build Properties for openMDX/Test Core
+ * Build Properties for openMDX/Test Security
  */
 public class BuildProperties {
 
@@ -59,12 +61,13 @@ public class BuildProperties {
 	public static final String DATASOURCE_KEY = "org.openmdx.test-core.datasource";
 
 	private static final String TIMEZONE_DEFAULT = "Europe/Zurich";
+	
 	/**
 	 * The (legacy) format for non-XA drivers would look like:
 	 * {@code "jdbc:postgresql:\\/\\/localhost\\/openmdx-test?user=openmdx-test&password=secret&driverClassName=org.postgresql.Driver"}
 	 */
 	private static final String DATASOURCE_DEFAULT = "jdbc:xa:org.postgresql.xa.PGXADataSource?user=openmdx-test&password=secret&databaseName=openmdx-test";
-
+	
 	private static final String FILE_NAME = "build.properties";
 
 	public static Properties getBuildProperties() throws IOException {
@@ -75,7 +78,10 @@ public class BuildProperties {
 		final Properties userBuildProperties = new Properties(getProjectBuildProperties());
 		final File userBuildPropertiesFile = new File(System.getProperty("user.home"), FILE_NAME);
 		if (userBuildPropertiesFile.canRead()) {
+			SysLog.info("Optional User Build Properties found", userBuildPropertiesFile.getAbsolutePath());
 			userBuildProperties.load(new FileInputStream(userBuildPropertiesFile));
+		} else {
+			SysLog.info("No opptional User Build Properties found", userBuildPropertiesFile.getAbsolutePath());
 		}
 		return userBuildProperties;
 	}
@@ -84,7 +90,10 @@ public class BuildProperties {
 		final Properties projectBuildProperties = new Properties(getStandardBuildProperties());
 		final File projectBuildPropertiesFile = new File(FILE_NAME);
 		if (projectBuildPropertiesFile.canRead()) {
+			SysLog.info("Optional Project Build Properties found", projectBuildPropertiesFile.getAbsolutePath());
 			projectBuildProperties.load(new FileInputStream(projectBuildPropertiesFile));
+		} else {
+			SysLog.info("No optional Project Build Properties found", projectBuildPropertiesFile.getAbsolutePath());
 		}
 		return projectBuildProperties;
 	}

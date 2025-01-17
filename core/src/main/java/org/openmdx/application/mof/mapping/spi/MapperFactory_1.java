@@ -48,6 +48,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
 import org.openmdx.application.mof.mapping.cci.MappingTypes;
 import org.openmdx.base.exception.RuntimeServiceException;
@@ -69,8 +73,10 @@ public class MapperFactory_1 implements Iterable<Mapper_1_0> {
 	public MapperFactory_1(
 		List<String> extendedFormats
 	) {
-		this.formats = new ArrayList<String>(extendedFormats);
-		this.markdown = this.formats.remove(MappingTypes.MARKDOWN);
+		this.formats = new ArrayList<>(extendedFormats);
+		this.annotationFlavour = AnnotationFlavour.fromExtendedFormats(formats);
+		this.jakartaFlavour = JakartaFlavour.fromExtendedFormats(formats);
+		this.jmiFlavour = JMIFlavour.fromExtendedFormats(formats);
 	}
 
 	/**
@@ -81,7 +87,17 @@ public class MapperFactory_1 implements Iterable<Mapper_1_0> {
 	/**
 	 * Tells whether annotations are in markdpown format
 	 */
-	private final boolean markdown;
+	private final AnnotationFlavour annotationFlavour;
+
+	/**
+	 * Tells whether to use Jakarta 8 or a contemprary flavour
+	 */
+	private final JakartaFlavour jakartaFlavour;
+
+	/**
+	 * Tells whether to use classic or a contemprary flavour
+	 */
+	private final JMIFlavour jmiFlavour;
 	
 	private static final List<String> JAVA_FORMATS = Arrays.asList(
         MappingTypes.CCI2,
@@ -105,26 +121,35 @@ public class MapperFactory_1 implements Iterable<Mapper_1_0> {
         if(JAVA_FORMATS.contains(parser.getId())) {
             return new org.openmdx.application.mof.mapping.java.Mapper_1(
                 format,
-                markdown,
-                parser.getId(), "java"            
+                annotationFlavour,
+                jakartaFlavour, 
+                jmiFlavour, 
+                parser.getId(), 
+                "java"            
             );
         } else if (MappingTypes.XMI1.equals(format)) {
             return new org.openmdx.application.mof.mapping.xmi.XMIMapper_1();
         } else if (MappingTypes.MOF1.equals(format)) {
-            return new org.openmdx.application.mof.mapping.java.mof.ModelNameConstantsMapper(markdown);
+            return new org.openmdx.application.mof.mapping.java.mof.ModelNameConstantsMapper(annotationFlavour, jakartaFlavour, jmiFlavour);
         } else if (MappingTypes.PIMDOC.equals(parser.getId())) {
           return parser.getArguments().length == 0 ? new org.openmdx.application.mof.mapping.pimdoc.PIMDocMapper(
-        	  markdown
+        	  annotationFlavour
           ) : new org.openmdx.application.mof.mapping.pimdoc.PIMDocMapper(
-        	  markdown, 
+        	  annotationFlavour, 
         	  parser.getArguments()[0]
           );
         } else {
             try {
+            	List<Object> arguments = new ArrayList<>(
+            		Arrays.asList(annotationFlavour, jakartaFlavour, jmiFlavour)
+            	);
+            	arguments.addAll(
+            		Arrays.asList((Object[])parser.getArguments())
+            	);
                 return Classes.<Mapper_1_0>newApplicationInstance(
                 	Mapper_1_0.class, 
                 	parser.getId(), 
-                	(Object[])parser.getArguments()
+                	arguments.toArray(new Object[arguments.size()])
                 );
             } catch (Exception exception) {
                 throw new ServiceException(exception);

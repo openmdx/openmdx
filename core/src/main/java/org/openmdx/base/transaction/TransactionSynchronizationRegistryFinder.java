@@ -44,7 +44,7 @@
  */
 package org.openmdx.base.transaction;
 
-import javax.transaction.TransactionSynchronizationRegistry;
+import #if JAVA_8 javax.transaction.TransactionSynchronizationRegistry #else jakarta.transaction.TransactionSynchronizationRegistry #endif;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.exception.BasicException;

@@ -46,12 +46,21 @@ package org.openmdx.resource.ldap.spi;
 
 import java.io.IOException;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.EISSystemException;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.SecurityException;
 import javax.resource.spi.security.PasswordCredential;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.ConnectionRequestInfo;
+import jakarta.resource.spi.EISSystemException;
+import jakarta.resource.spi.ManagedConnectionFactory;
+import jakarta.resource.spi.SecurityException;
+import jakarta.resource.spi.security.PasswordCredential;
+#endif
 import javax.security.auth.Subject;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;

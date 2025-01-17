@@ -44,7 +44,7 @@
  */
 package org.openmdx.base.aop1;
 
-import javax.resource.cci.InteractionSpec;
+import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
 
 import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.view.Interceptor_1;

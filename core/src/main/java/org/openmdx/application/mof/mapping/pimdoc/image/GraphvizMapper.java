@@ -48,6 +48,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile.Type;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
@@ -69,10 +70,10 @@ abstract class GraphvizMapper extends AbstractMapper {
 	protected GraphvizMapper(
 		Sink sink, 
 		Model_1_0 model, 
-		boolean markdown, 
+		AnnotationFlavour annotationFlavour, 
 		PIMDocConfiguration configuration
 	){
-		super(sink, model, markdown, configuration);
+		super(sink, model, annotationFlavour, configuration);
 	}
 
     protected String getMapperId() {

@@ -6,23 +6,23 @@
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,9 +36,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
@@ -46,8 +46,15 @@ package org.openmdx.base.resource.spi;
 
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
+#if JAVA_8
 import javax.resource.ResourceException;
+import javax.resource.cci.LocalTransaction;
 import javax.resource.spi.LocalTransactionException;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.LocalTransaction;
+import jakarta.resource.spi.LocalTransactionException;
+#endif
 
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.cci.UnitOfWork;
@@ -59,7 +66,7 @@ import org.openmdx.base.persistence.cci.UnitOfWork;
 public class LocalTransactions {
 
     /**
-     * Constructor 
+     * Constructor
      */
     private LocalTransactions() {
         // Avoid instantiation
@@ -67,35 +74,35 @@ public class LocalTransactions {
 
     /**
      * Acquire a local transaction adapter
-     * 
+     *
      * @param delegate a {@code LocalTransaction}
-     * 
+     *
      * @return the local transaction adapter
-     * 
+     *
      * @throws ResourceException
      */
-    public static javax.resource.spi.LocalTransaction getLocalTransaction(
-        javax.resource.cci.LocalTransaction delegate
+    public static #if JAVA_8 javax #else jakarta #endif.resource.spi.LocalTransaction getLocalTransaction(
+        LocalTransaction delegate
     ) throws ResourceException {
         return new LocalTransactionWrapper(delegate);
     }
-    
+
     /**
      * Acquire a persistence manager adapter
-     * 
+     *
      * @param delegate the {@code Transaction}'s owner
-     * 
+     *
      * @return a persistence manager adapter
-     * 
+     *
      * @throws ResourceException
      */
-    public static javax.resource.cci.LocalTransaction getLocalTransaction(
+    public static LocalTransaction getLocalTransaction(
         PersistenceManager delegate
     ) throws ResourceException {
         return new PersistenceManagerWrapper(delegate);
     }
 
-    
+
     //------------------------------------------------------------------------
     // Class PersistenceManagerWrapper
     //------------------------------------------------------------------------
@@ -103,10 +110,10 @@ public class LocalTransactions {
     /**
      * Adapter delegating to a persistence manager's current transaction
      */
-    static class PersistenceManagerWrapper implements  javax.resource.cci.LocalTransaction {
+    static class PersistenceManagerWrapper implements LocalTransaction {
 
         /**
-         * Constructor 
+         * Constructor
          *
          * @param persistenceManager
          */
@@ -122,7 +129,7 @@ public class LocalTransactions {
         private UnitOfWork currentUnitOfWork(){
             return PersistenceHelper.currentUnitOfWork(persistenceManager);
         }
-        
+
         /* (non-Javadoc)
          * @see javax.resource.cci.LocalTransaction#begin()
          */
@@ -167,26 +174,26 @@ public class LocalTransactions {
                 );
             }
         }
-        
+
     }
 
-    
+
     //------------------------------------------------------------------------
     // Class LocalTransactionWrapper
     //------------------------------------------------------------------------
-    
+
     /**
      * Adapter delegating to the connector's transaction
      */
-    static class LocalTransactionWrapper implements  javax.resource.spi.LocalTransaction {
+    static class LocalTransactionWrapper implements #if JAVA_8 javax #else jakarta #endif.resource.spi.LocalTransaction {
 
         /**
-         * Constructor 
+         * Constructor
          *
          * @param delegate
          */
         LocalTransactionWrapper(
-            javax.resource.cci.LocalTransaction delegate
+            LocalTransaction delegate
         ){
             this.delegate = delegate;
         }
@@ -194,8 +201,8 @@ public class LocalTransactions {
         /**
          * The connector's local transaction
          */
-        private final javax.resource.cci.LocalTransaction delegate;
-        
+        private final LocalTransaction delegate;
+
         /* (non-Javadoc)
          * @see javax.resource.spi.LocalTransaction#begin()
          */
@@ -219,7 +226,7 @@ public class LocalTransactions {
         ) throws ResourceException {
             this.delegate.rollback();
         }
-        
+
     }
-    
+
 }

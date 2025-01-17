@@ -54,6 +54,9 @@ import java.util.List;
 
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
@@ -88,7 +91,9 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         String packageSuffix,
 		String sliceClassName, 
         MetaData_1_0 metaData, 
-        boolean markdown, 
+        AnnotationFlavour annotationFlavour, 
+        JakartaFlavour jakartaFlavour, 
+        JMIFlavour jmiFlavour, 
         PrimitiveTypeMapper primitiveTypeMapper, 
         ObjectRepositoryMetadataPlugin plugin
     ) throws ServiceException {
@@ -99,7 +104,9 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
             format, 
             packageSuffix, 
             sliceClassName,
-            markdown,
+            annotationFlavour,
+            jakartaFlavour, 
+            jmiFlavour, 
             metaData, 
             primitiveTypeMapper, 
             plugin

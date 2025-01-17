@@ -45,6 +45,7 @@
 package org.openmdx.application.transaction;
 
 import javax.jdo.JDODataStoreException;
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.spi.LocalTransactionException;
 import javax.transaction.HeuristicMixedException;
@@ -53,6 +54,16 @@ import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.LocalTransactionException;
+import jakarta.transaction.HeuristicMixedException;
+import jakarta.transaction.HeuristicRollbackException;
+import jakarta.transaction.NotSupportedException;
+import jakarta.transaction.RollbackException;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.UserTransaction;
+#endif
 
 import org.openmdx.base.transaction.Status;
 import org.openmdx.base.transaction.LocalUserTransaction;

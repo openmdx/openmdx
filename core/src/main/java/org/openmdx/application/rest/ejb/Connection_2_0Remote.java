@@ -45,11 +45,17 @@
 package org.openmdx.application.rest.ejb;
 
 import java.rmi.RemoteException;
-
+#if JAVA_8
 import javax.ejb.EJBObject;
 import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
+#else
+import jakarta.ejb.EJBObject;
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.Record;
+#endif
 
 /**
  * Connection 2.0 Remote Interface
@@ -86,7 +92,7 @@ public interface Connection_2_0Remote extends EJBObject {
      * @throws NotSupportedException Operation not supported 
      */
     Record execute(
-        InteractionSpec ispec, 
+        InteractionSpec ispec,
         Record input
     ) throws ResourceException, RemoteException;
 

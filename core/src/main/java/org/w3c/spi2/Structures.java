@@ -75,9 +75,15 @@ import java.util.concurrent.ConcurrentMap;
 import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.RefStruct;
+#if JAVA_8
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.MappedRecord;
+import jakarta.resource.cci.Record;
+#endif
 
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;

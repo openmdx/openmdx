@@ -45,9 +45,15 @@
 package org.openmdx.base.accessor.rest.spi;
 
 import javax.jdo.PersistenceManager;
+#if JAVA_8
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.spi.LocalTransaction;
+#else
+import jakarta.resource.NotSupportedException;
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.LocalTransaction;
+#endif
 
 import org.openmdx.base.accessor.rest.DataObjectManager_1;
 import org.openmdx.base.resource.spi.LocalTransactions;

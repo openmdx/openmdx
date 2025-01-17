@@ -48,6 +48,9 @@ package test.openmdx.application.mof.mapping.java;
 import org.openmdx.application.mof.mapping.java.Mapper_1;
 import org.openmdx.application.mof.mapping.java.PrimitiveTypeMapper;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 
 /**
  * Primitive Type Mapper
@@ -63,9 +66,12 @@ public class PrimitiveTypeMapper_1 extends Mapper_1 {
      * @throws ServiceException
      */
     public PrimitiveTypeMapper_1(
+        AnnotationFlavour annotationFlavour,
+        JakartaFlavour jakartaFlavour, 
+        JMIFlavour jmiFlavour, 
         String mappingFormat
     ) throws ServiceException {
-        super(mappingFormat, false, mappingFormat, "java");
+        super(mappingFormat, annotationFlavour, jakartaFlavour, jmiFlavour, mappingFormat, "java");
     }
     
     /* (non-Javadoc)

@@ -51,6 +51,9 @@ import java.util.List;
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.StructDef;
 import org.openmdx.application.mof.mapping.cci.StructuralFeatureDef;
@@ -67,7 +70,6 @@ public class StructureMapper extends AbstractMapper {
     
     /**
      * Constructor 
-     * @param markdown TODO
      */
     public StructureMapper(
         ModelElement_1_0 structDef,
@@ -76,7 +78,9 @@ public class StructureMapper extends AbstractMapper {
         Format format, 
         String packageSuffix, 
         MetaData_1_0 metaData, 
-        boolean markdown, 
+        AnnotationFlavour annotationFlavour, 
+        JakartaFlavour jakartaFlavour, 
+        JMIFlavour jmiFlavour,
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
@@ -85,7 +89,9 @@ public class StructureMapper extends AbstractMapper {
             format, 
             packageSuffix,
             metaData, 
-            markdown, 
+            annotationFlavour, 
+            jakartaFlavour, 
+            jmiFlavour, 
             primitiveTypeMapper
         );
         this.structDef = new StructDef(

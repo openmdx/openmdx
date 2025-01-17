@@ -46,7 +46,7 @@ package org.openmdx.state2.spi;
 
 import java.util.Date;
 
-import javax.resource.cci.InteractionSpec;
+import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
 
 import org.openmdx.state2.cci.StateContext;
 import org.openmdx.state2.cci.ViewKind;

@@ -55,13 +55,20 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import javax.jdo.identity.IntIdentity;
-import javax.resource.cci.IndexedRecord;
-import javax.resource.cci.MappedRecord;
-import javax.resource.cci.Record;
+#if JAVA_8
+	import javax.resource.cci.IndexedRecord; 
+	import javax.resource.cci.MappedRecord;
+	import javax.resource.cci.Record;
+#else 
+	import jakarta.resource.cci.IndexedRecord; 
+	import jakarta.resource.cci.MappedRecord;
+	import jakarta.resource.cci.Record;
+#endif
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openmdx.base.Version;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
 import org.openmdx.base.resource.cci.SparseArrayRecord;
@@ -513,7 +520,7 @@ public class TestRecord {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+ 	@SuppressWarnings("unchecked")
 	public void testVariableSizedMappedRecordDeserialization() throws Throwable {
 		MappedRecord original = Records.getRecordFactory().createMappedRecord("tbs");
 		String key1 = "k";
@@ -527,8 +534,14 @@ public class TestRecord {
 		}
 		{
 			Object key = getKey(original, "v2");
-			Assertions.assertNotSame(key2, key);
-			Assertions.assertSame(Integer.valueOf(17), key);
+			if("4".equals(Version.getFlavourVersion())) {
+				// Java 21
+				Assertions.assertSame(key2, key);
+			} else {
+				// Java 8
+				Assertions.assertNotSame(key2, key);
+			}
+ 			Assertions.assertSame(Integer.valueOf(17), key);
 		}
 		ByteArrayOutputStream out0 = new ByteArrayOutputStream();
 		ObjectOutputStream out1 = new ObjectOutputStream(out0);
@@ -545,7 +558,13 @@ public class TestRecord {
 		}
 		{
 			Object key = getKey(copy, "v2");
-			Assertions.assertNotSame(key2, key);
+			if("4".equals(Version.getFlavourVersion())) {
+				// Java 21
+				Assertions.assertSame(key2, key);
+			} else {
+				// Java 8
+				Assertions.assertNotSame(key2, key);
+			}
 			Assertions.assertSame(Integer.valueOf(17), key);
 		}
 	}

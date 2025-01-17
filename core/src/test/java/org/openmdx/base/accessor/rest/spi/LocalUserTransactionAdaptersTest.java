@@ -43,9 +43,9 @@
  */
 package org.openmdx.base.accessor.rest.spi;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-import javax.resource.ResourceException;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,10 +60,9 @@ public class LocalUserTransactionAdaptersTest {
 	@Test
 	void testGetContainerManagedUserTransactionAdapter() throws ResourceException {
 		// act
-		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters
-				.getContainerManagedUserTransactionAdapter();
+		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters.getContainerManagedUserTransactionAdapter();
 		// assert
-		assertTrue(localUserTransaction instanceof ContainerManagedLocalUserTransactionAdapter);
+		assertInstanceOf(ContainerManagedLocalUserTransactionAdapter.class, localUserTransaction);
 	}
 
 	@Test
@@ -71,7 +70,7 @@ public class LocalUserTransactionAdaptersTest {
 		// act
 		final LocalUserTransaction localUserTransaction = LocalUserTransactionAdapters.getJTAUserTransactionAdapter();
 		// assert
-		assertTrue(localUserTransaction instanceof JTALocalUserTransactionAdapter);
+		assertInstanceOf(JTALocalUserTransactionAdapter.class, localUserTransaction);
 	}
 
 }

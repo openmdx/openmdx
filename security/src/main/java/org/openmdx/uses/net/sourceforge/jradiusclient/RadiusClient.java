@@ -1009,16 +1009,6 @@ public class RadiusClient
     }
 
     /**
-     * overrides finalize to close socket and then normal finalize on super class
-     */
-    @Override
-    public void finalize(
-    ) throws Throwable{
-        this.close();
-        super.finalize();
-    }
-
-    /**
      * We should not reuse radius clients with send/receive failures
      * 
      * @return {@code true} unless there was a send/receive failure

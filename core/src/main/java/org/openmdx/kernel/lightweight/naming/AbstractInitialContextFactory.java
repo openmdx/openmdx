@@ -52,10 +52,15 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.NoInitialContextException;
 import javax.naming.spi.InitialContextFactory;
-import javax.transaction.TransactionManager;
-import javax.transaction.TransactionSynchronizationRegistry;
-import javax.transaction.UserTransaction;
-
+#if JAVA_8
+	import javax.transaction.TransactionManager;
+	import javax.transaction.TransactionSynchronizationRegistry;
+	import javax.transaction.UserTransaction;
+#else
+	import jakarta.transaction.TransactionManager;
+	import jakarta.transaction.TransactionSynchronizationRegistry;
+	import jakarta.transaction.UserTransaction;
+#endif
 import org.openmdx.kernel.lightweight.naming.java.javaURLContextFactory;
 import org.openmdx.kernel.lightweight.naming.jdbc.AbstractDataSourceContext;
 import org.openmdx.kernel.lightweight.naming.spi.DelegatingContext;

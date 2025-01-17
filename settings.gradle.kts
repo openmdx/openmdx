@@ -42,7 +42,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 buildscript {
     repositories {
         mavenCentral()
@@ -56,12 +55,14 @@ buildscript {
 }
 rootProject.name = "openmdx"
 include(
-    ":core",
-    ":portal",
-    ":security", 
-    ":client",
-    ":test-core",
-    ":test-security",
-    ":tomcat",
-    ":publish"
+    "openmdx-2-platform",
+    "openmdx-3-platform",
+    "openmdx-4-platform",
+    "core",
+    "security",
+    "test-core",
+    "test-security",
+    "publish"
 )
+val flavour: String = gradle.startParameter.projectProperties.getOrDefault("flavour", "2")
+if (flavour == "2") include("client", "portal", "tomcat") // will be enabled for (flavour != "3") with MDX-2

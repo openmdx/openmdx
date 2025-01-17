@@ -57,6 +57,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.omg.mof.cci.VisibilityKind;
 import org.omg.mof.spi.Names;
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
 import org.openmdx.application.mof.mapping.spi.AbstractMapper_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
@@ -78,7 +79,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
      */
     public XMIMapper_1(
     ) {
-        super(false, Names.XMI_PACKAGE_SUFFIX);
+        super(AnnotationFlavour.STANDARD, null, null, Names.XMI_PACKAGE_SUFFIX);
     }
 
     /**

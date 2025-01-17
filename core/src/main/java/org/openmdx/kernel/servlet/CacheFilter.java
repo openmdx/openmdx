@@ -48,18 +48,29 @@ package org.openmdx.kernel.servlet;
 
 import java.io.IOException;
 
+#if JAVA_8
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
+#else
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
+#endif
 
 /**
  * CacheFilter
  *
  */
-public class CacheFilter implements javax.servlet.Filter {
+public class CacheFilter implements Filter {
 
     //-----------------------------------------------------------------------
     public void init(

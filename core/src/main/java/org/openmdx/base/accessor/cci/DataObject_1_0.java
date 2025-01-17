@@ -52,10 +52,17 @@ import java.util.UUID;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
+#if JAVA_8
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.NotSupportedException;
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.Record;
+#endif
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;

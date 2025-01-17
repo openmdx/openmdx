@@ -47,8 +47,13 @@ package test.openmdx.resource.ldap;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.ConnectionManager;
+#endif
 
 import org.apache.directory.api.ldap.model.entry.Attribute;
 import org.apache.directory.api.ldap.model.entry.Entry;

@@ -47,6 +47,9 @@ package org.openmdx.application.mof.mapping.java;
 import java.io.Writer;
 import java.util.List;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
@@ -67,7 +70,9 @@ public class ClassMapper extends AbstractClassMapper {
         Format format, 
         String packageSuffix,
         MetaData_1_0 metaData, 
-        boolean markdown, 
+        AnnotationFlavour annotationFlavour, 
+        JakartaFlavour jakartaFlavour, 
+        JMIFlavour jmiFlavour, 
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
@@ -77,12 +82,13 @@ public class ClassMapper extends AbstractClassMapper {
             format, 
             packageSuffix, 
             metaData, 
-            markdown, 
+            annotationFlavour, 
+            jakartaFlavour, 
+            jmiFlavour, 
             primitiveTypeMapper
         );
     }
     
-    //-----------------------------------------------------------------------
     public void mapInstanceExtenderRequiredAttributes(
         ClassDef superclassDef,
         List requiredAttributes
@@ -90,7 +96,6 @@ public class ClassMapper extends AbstractClassMapper {
         // Nothing to do
     }
 
-    //-----------------------------------------------------------------------
     public void mapIntfInstanceExtenderAllAttributes(
         ClassDef superclassDef,
         List attributes
@@ -98,27 +103,23 @@ public class ClassMapper extends AbstractClassMapper {
         // Nothing to do
     }
 
-    //-----------------------------------------------------------------------
     public void mapInstanceCreatorRequiredAttributes(
         List requiredAttributes
     ) throws ServiceException {
         // Nothing to do
     }
 
-    //-----------------------------------------------------------------------
     public void mapIntfInstanceCreatorAllAttributes(
         List attributes
     ) throws ServiceException {
         // Nothing to do
     }
 
-    //-----------------------------------------------------------------------
     public void mapEnd() {
         this.trace("ClassProxy/End.vm");
         printLine("}");
     }
 
-    //-----------------------------------------------------------------------
     public void mapBegin(
     ) {
         this.trace("ClassProxy/Begin");

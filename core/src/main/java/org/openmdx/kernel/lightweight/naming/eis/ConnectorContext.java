@@ -47,8 +47,13 @@ package org.openmdx.kernel.lightweight.naming.eis;
 import java.util.HashMap;
 
 import javax.naming.NamingException;
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.spi.ManagedConnectionFactory;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.ManagedConnectionFactory;
+#endif
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;

@@ -46,9 +46,15 @@ package org.openmdx.application.rest.ejb;
 
 import java.rmi.RemoteException;
 
+#if JAVA_8
 import javax.ejb.CreateException;
 import javax.ejb.EJBHome;
 import javax.resource.cci.ConnectionSpec;
+#else
+import jakarta.ejb.CreateException;
+import jakarta.ejb.EJBHome;
+import jakarta.resource.cci.ConnectionSpec;
+#endif
 
 /**
  * Connection 2 Home Interface

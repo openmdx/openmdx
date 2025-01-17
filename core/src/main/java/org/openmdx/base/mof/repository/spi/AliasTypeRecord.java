@@ -47,7 +47,7 @@ package org.openmdx.base.mof.repository.spi;
 import java.util.Collection;
 import java.util.Date;
 
-import javax.resource.cci.MappedRecord;
+import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 
 import org.openmdx.base.naming.Path;
 

@@ -47,12 +47,15 @@ package org.openmdx.junit5;
 
 import java.util.Collections;
 import java.util.Properties;
+import java.util.TimeZone;
+import java.util.logging.Level;
 
 import javax.naming.NamingException;
 
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.openmdx.kernel.lightweight.naming.LightweightInitialContextFactoryBuilder;
+import org.openmdx.kernel.log.SysLog;
 
 /**
  * JUnit 5 Standard Extension for openMDX/Test Core
@@ -70,16 +73,20 @@ public class OpenmdxTestCoreStandardExtension implements BeforeAllCallback {
 	private void configureLightweightContainer(
 		final Properties buildProperties
 	) throws NamingException {
+		String dataSourceURL = buildProperties.getProperty(BuildProperties.DATASOURCE_KEY);
+		SysLog.log(Level.INFO, "Sys|Build Property {0}|{1}", BuildProperties.DATASOURCE_KEY, dataSourceURL);
 		LightweightInitialContextFactoryBuilder.install(
 			Collections.singletonMap(
 				"org.openmdx.comp.env.jdbc.DataSource", 
-				buildProperties.getProperty(BuildProperties.DATASOURCE_KEY)
+				dataSourceURL
 			)
 		);
 	}
 
 	private void configureTimezone(final Properties buildProperties) {
-		System.setProperty("user.timezone",buildProperties.getProperty(BuildProperties.TIMEZONE_KEY));
+		String configuredTimeZone = buildProperties.getProperty(BuildProperties.TIMEZONE_KEY);
+		System.setProperty("user.timezone", configuredTimeZone);
+		TimeZone.setDefault(TimeZone.getTimeZone(configuredTimeZone));
 	}
 
 }

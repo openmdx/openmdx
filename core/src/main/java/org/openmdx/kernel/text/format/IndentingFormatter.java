@@ -50,7 +50,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.resource.cci.Record;
+import #if JAVA_8 javax.resource.cci.Record #else jakarta.resource.cci.Record #endif;
 
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;

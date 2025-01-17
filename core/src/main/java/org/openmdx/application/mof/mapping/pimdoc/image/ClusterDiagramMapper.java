@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
 import org.openmdx.base.io.Sink;
@@ -67,11 +68,11 @@ public class ClusterDiagramMapper extends GraphvizMapper {
     public ClusterDiagramMapper(
     	Sink sink, 
         ModelElement_1_0 cluster,
-        boolean markdown, 
+        AnnotationFlavour annotationFlavour, 
         PIMDocConfiguration configuration
         
     ){
-		super(sink, cluster.getModel(), markdown, configuration);
+		super(sink, cluster.getModel(), annotationFlavour, configuration);
 		this.cluster = cluster;
     }    
 
@@ -81,10 +82,10 @@ public class ClusterDiagramMapper extends GraphvizMapper {
     public ClusterDiagramMapper(
     	Sink sink, 
         Model_1_0 model,
-        boolean markdown, 
+        AnnotationFlavour annotationFlavour, 
         PIMDocConfiguration configuration
     ){
-		super(sink, model, markdown, configuration);
+		super(sink, model, annotationFlavour, configuration);
 		this.cluster = null;
     }    
     

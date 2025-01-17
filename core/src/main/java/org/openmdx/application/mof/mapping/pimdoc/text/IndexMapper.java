@@ -49,6 +49,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
 import org.openmdx.application.mof.mapping.pimdoc.MagicFile;
 import org.openmdx.application.mof.mapping.pimdoc.PIMDocConfiguration;
 import org.openmdx.application.mof.mapping.pimdoc.spi.PackageGroupComparator;
@@ -66,8 +67,13 @@ public class IndexMapper extends HTMLMapper {
     /**
      * Constructor
      */
-    public IndexMapper(Sink sink, Model_1_0 model, boolean markdown, PIMDocConfiguration configuration) {
-        super(sink, model, MagicFile.TABLE_OF_CONTENT, markdown, configuration);
+    public IndexMapper(
+		Sink sink, 
+		Model_1_0 model, 
+		AnnotationFlavour annotationFlavour, 
+		PIMDocConfiguration configuration
+	) {
+        super(sink, model, MagicFile.TABLE_OF_CONTENT, annotationFlavour, configuration);
     }
 
 	private Stream<PackageGroup> streamPackageGroups() {

@@ -44,8 +44,13 @@
  */
 package org.openmdx.application.transaction;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.transaction.UserTransaction;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.transaction.UserTransaction;
+#endif
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.naming.ComponentEnvironment;

@@ -45,14 +45,19 @@
 package org.openmdx.gradle
 
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.Input
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import java.io.File
 
 open class GenerateModelsTask : JavaExec() {
 
+	@Input
+    val generateFlavour = if (project.hasProperty("flavour")) project.property("flavour") else "2"
+    
 	init {
 		mainClass.set("org.openmdx.application.mof.externalizer.xmi.XMIExternalizer")
 		args = listOf(
+		    "--flavour=${generateFlavour}",
 			"--pathMapSymbol=openMDX 2 ~ Core (EMF)",
 			"--pathMapPath=file:" + File("${project.rootDir}/core/src/model/emf") + "/",
 			"--pathMapSymbol=openMDX 2 ~ Security (EMF)",

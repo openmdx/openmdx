@@ -50,6 +50,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.openmdx.kernel.log.SysLog;
+
 /**
  * Build Properties for openMDX/Test Core
  */
@@ -61,8 +63,14 @@ public class BuildProperties {
 	private static final String TIMEZONE_DEFAULT = "Europe/Zurich";
 	
 	/**
-	 * The (legacy) format for non-XA drivers would look like:
-	 * {@code "jdbc:postgresql:\\/\\/localhost\\/openmdx-test?user=openmdx-test&password=secret&driverClassName=org.postgresql.Driver"}
+	 * XA driver's URIs look like:<ul>
+	 * <li>{@code "jdbc:xa:org.postgresql.xa.PGXADataSource?user=openmdx-test&password=secret&databaseName=openmdx-test"}</li>
+	 * <li>{@code "jdbc:xa:oracle.jdbc.xa.client.OracleXADataSource?user=OPENMDX_TEST&password=SECRET&serverName=localhost&portNumber=1521&serviceName=XEPDB1&driverType=thin"}</li>
+	 * </ul>
+     * <p/>
+	 * The (legacy) URIs for non-XA drivers would look like:<ul>
+	 * <li>{@code "jdbc:postgresql:\\/\\/localhost\\/openmdx-test?user=openmdx-test&password=secret&driverClassName=org.postgresql.Driver"}</li>
+	 * </ul>
 	 */
 	private static final String DATASOURCE_DEFAULT = "jdbc:xa:org.postgresql.xa.PGXADataSource?user=openmdx-test&password=secret&databaseName=openmdx-test";
 	
@@ -76,7 +84,10 @@ public class BuildProperties {
 		final Properties userBuildProperties = new Properties(getProjectBuildProperties());
 		final File userBuildPropertiesFile = new File(System.getProperty("user.home"), FILE_NAME);
 		if (userBuildPropertiesFile.canRead()) {
+			SysLog.info("Optional User Build Properties found", userBuildPropertiesFile);
 			userBuildProperties.load(new FileInputStream(userBuildPropertiesFile));
+		} else {
+			SysLog.info("No opptional User Build Properties", userBuildPropertiesFile);
 		}
 		return userBuildProperties;
 	}
@@ -85,7 +96,10 @@ public class BuildProperties {
 		final Properties projectBuildProperties = new Properties(getStandardBuildProperties());
 		final File projectBuildPropertiesFile = new File(FILE_NAME);
 		if (projectBuildPropertiesFile.canRead()) {
+			SysLog.info("Optional Project Build Properties found", projectBuildPropertiesFile);
 			projectBuildProperties.load(new FileInputStream(projectBuildPropertiesFile));
+		} else {
+			SysLog.info("No optional Project Build Properties found", projectBuildPropertiesFile);
 		}
 		return projectBuildProperties;
 	}

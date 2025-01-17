@@ -46,7 +46,7 @@ package org.openmdx.base.resource.spi;
 
 import java.util.AbstractList;
 
-import javax.resource.cci.IndexedRecord;
+import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
 
 /**
  * Singleton Indexed Record
@@ -55,7 +55,7 @@ import javax.resource.cci.IndexedRecord;
 @SuppressWarnings("rawtypes")
 final class SingletonIndexedRecord
     extends AbstractList
-    implements IndexedRecord 
+    implements IndexedRecord
 {
 
     /**

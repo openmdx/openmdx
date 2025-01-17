@@ -44,7 +44,7 @@
  */
 package org.openmdx.base.resource.spi;
 
-import javax.resource.cci.InteractionSpec;
+import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
 
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.RestFunction;

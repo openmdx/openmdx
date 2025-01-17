@@ -58,8 +58,13 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.MappedRecord;
+#endif
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;

@@ -53,8 +53,13 @@ import java.io.ObjectOutput;
 import java.util.Collection;
 import java.util.Set;
 
+#if JAVA_8
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Record;
+#else
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.Record;
+#endif
 
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.naming.Path;

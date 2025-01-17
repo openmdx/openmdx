@@ -48,8 +48,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.InteractionSpec;
+#endif
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 

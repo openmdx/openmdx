@@ -48,9 +48,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+#if JAVA_8
 import javax.resource.ResourceException;
-import javax.resource.cci.Interaction;
 import javax.resource.cci.Record;
+import javax.resource.cci.Interaction;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.Record;
+import jakarta.resource.cci.Interaction;
+#endif
 
 import org.openmdx.base.caching.port.CachingPort;
 import org.openmdx.base.collection.Maps;

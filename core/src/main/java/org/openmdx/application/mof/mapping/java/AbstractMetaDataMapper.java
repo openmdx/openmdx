@@ -46,6 +46,9 @@ package org.openmdx.application.mof.mapping.java;
 
 import java.io.Writer;
 
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
@@ -71,7 +74,9 @@ public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
         Format format, 
         String packageSuffix,
 		String sliceClassName, 
-        boolean markdown, 
+        AnnotationFlavour annotationFlavour, 
+        JakartaFlavour jakartaFlavour, 
+        JMIFlavour jmiFlavour, 
         MetaData_1_0 metaData, 
         PrimitiveTypeMapper primitiveTypeMapper, 
         ObjectRepositoryMetadataPlugin plugin
@@ -83,7 +88,10 @@ public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
             format, 
             packageSuffix, 
             metaData, 
-            markdown, primitiveTypeMapper
+            annotationFlavour, 
+            jakartaFlavour, 
+            jmiFlavour, 
+            primitiveTypeMapper
         );
         this.writer = writer;
 		this.sliceClassName = sliceClassName;

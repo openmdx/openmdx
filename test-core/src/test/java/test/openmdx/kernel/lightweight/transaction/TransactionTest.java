@@ -53,11 +53,16 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
 import javax.naming.NamingException;
-import javax.resource.ResourceException;
-import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
-import javax.transaction.UserTransaction;
-
+import javax.transaction.Synchronization; // JDO 3 requires JTA 1.3!
+#if JAVA_8
+	import javax.resource.ResourceException;
+	import javax.transaction.SystemException;
+	import javax.transaction.UserTransaction;
+#else
+	import jakarta.resource.ResourceException;
+	import jakarta.transaction.SystemException;
+	import jakarta.transaction.UserTransaction;
+#endif	
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

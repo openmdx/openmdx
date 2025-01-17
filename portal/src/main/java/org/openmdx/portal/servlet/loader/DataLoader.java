@@ -62,8 +62,8 @@ import java.util.TreeSet;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefObject;
-import javax.resource.cci.MappedRecord;
-import javax.servlet.ServletContext;
+import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
+import #if JAVA_8 javax.servlet.ServletContext #else jakarta.servlet.ServletContext #endif;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;

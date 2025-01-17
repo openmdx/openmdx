@@ -128,7 +128,7 @@ public class TimeZoneTest {
 		//
 		// Assert
 		//
-		Assertions.assertTrue(now.endsWith(configuredTimeZone));
+		Assertions.assertTrue(now.endsWith(configuredTimeZone), "configuredTimeZone=" + configuredTimeZone + ", now=" + now);
 	}
     
 }

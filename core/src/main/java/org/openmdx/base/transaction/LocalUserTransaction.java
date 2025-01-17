@@ -44,8 +44,13 @@
  */
 package org.openmdx.base.transaction;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.spi.LocalTransaction;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.LocalTransaction;
+#endif
 
 /**
  * User Transaction

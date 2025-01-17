@@ -52,6 +52,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.omg.mof.spi.Identifier;
+import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.JMIFlavour;
+import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.ReferenceDef;
@@ -75,7 +78,10 @@ public abstract class AbstractClassMapper extends AbstractMapper {
         Format format, 
         String packageSuffix, 
         MetaData_1_0 metaData, 
-        boolean markdown, PrimitiveTypeMapper primitiveTypeMapper
+        AnnotationFlavour annotationFlavour, 
+        JakartaFlavour jakartaFlavour, 
+        JMIFlavour jmiFlavour, 
+        PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             writer, 
@@ -83,7 +89,9 @@ public abstract class AbstractClassMapper extends AbstractMapper {
             format, 
             packageSuffix,
             metaData, 
-            markdown, 
+            annotationFlavour, 
+            jakartaFlavour, 
+            jmiFlavour, 
             primitiveTypeMapper
         );
         this.classDef = new ClassDef(classDef, model, metaData);

@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Repository Mode
+ * Description: Dataprovider Mode
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -47,8 +47,13 @@ package org.openmdx.application.mof.externalizer.spi;
 import java.util.Collection;
 import java.util.List;
 
+#if JAVA_8
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.MappedRecord;
+#endif
 
 import org.openmdx.base.rest.cci.ObjectRecord;
 

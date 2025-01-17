@@ -42,9 +42,13 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 plugins {
     `kotlin-dsl`
+}
+
+dependencies {
+    implementation(kotlin("stdlib"))
+    implementation(gradleApi())
 }
 
 repositories {
