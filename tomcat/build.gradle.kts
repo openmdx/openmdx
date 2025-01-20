@@ -199,12 +199,12 @@ distributions {
             from("..") { include("*.properties", "*.kts" ) }
             // jre-...
 			var path = "${project.name}/lib"
-			from("../build$projectFlavour/$path") {
-				into("jre-$runtimeCompatibility/$path")
+			from("../build/openmdx-${projectFlavour}/${path}") {
+				into("jre-$runtimeCompatibility/${path}")
 			}
 			path = "gradle/repo"
-			from("../build$projectFlavour/$path") {
-				into("jre-$runtimeCompatibility/$path")
+			from("../build/openmdx-${projectFlavour}/${path}") {
+				into("jre-$runtimeCompatibility/${path}")
 			}
         }
     }

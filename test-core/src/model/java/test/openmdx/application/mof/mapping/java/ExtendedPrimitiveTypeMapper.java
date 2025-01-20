@@ -70,8 +70,7 @@ public class ExtendedPrimitiveTypeMapper extends StandardPrimitiveTypeMapper {
      * E.g. test:openmdx:datatypes1:CountryCode
      */
     Pattern CODE_PATTERN = Pattern.compile("(.+):([^:]+Code)");
-    
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.application.mof.mapping.java.StandardPrimitiveTypeMapper#getPrimitiveType(java.lang.String, boolean)
      */

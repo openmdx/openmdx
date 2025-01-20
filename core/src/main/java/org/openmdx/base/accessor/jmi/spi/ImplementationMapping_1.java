@@ -47,14 +47,7 @@ package org.openmdx.base.accessor.jmi.spi;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -75,6 +68,7 @@ import jakarta.resource.cci.Record;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
@@ -266,11 +260,11 @@ class ImplementationMapping_1 implements Mapping_1_0 {
                 // Aspect Implementation Classes
                 //
                 aspectImplementationClasses = new ArrayList<>();
-                for(Object supertypePath : Model_1Factory.getModel().getElement(qualifiedClassName).objGetList("allSupertype")){                    
-                    AspectImplementationDescriptor descriptor = this.getAspectDescriptor(((Path)supertypePath).getLastSegment().toClassicRepresentation());
-                    if(descriptor != null) {
-                        ImplementationDescriptor.add(descriptor, aspectImplementationClasses);
-                    }
+                for(Object supertypePath : Model_1Factory.getModel().getElement(qualifiedClassName).objGetList("allSupertype")){
+                    String qualifiedNameOfSupertype = ((Path) supertypePath).getLastSegment().toClassicRepresentation();
+                    getAspectDescriptor(qualifiedNameOfSupertype).ifPresent(
+                        descriptor -> ImplementationDescriptor.add(descriptor, aspectImplementationClasses)
+                    );
                 }
                 //
                 // Mixed-in Interfaces
@@ -320,66 +314,102 @@ class ImplementationMapping_1 implements Mapping_1_0 {
      * @param qualifiedClassName
      * 
      * @return the class' aspect descriptor
-     * @throws ServiceException  
      */
-    private AspectImplementationDescriptor getAspectDescriptor(
+    private Optional<AspectImplementationDescriptor> getAspectDescriptor(
         String qualifiedClassName
     ) throws ServiceException {
-        AspectImplementationDescriptor aspectDescriptor = this.aspectDescriptors.get(qualifiedClassName);
-        if(aspectDescriptor == null){
-            if(this.aspectImplementationPackageNames != null) {
-                SpecificationMapping_1.SpecificationDescriptor interfaceDescriptor = this.specificationMapping.getSpecificationDescriptor(qualifiedClassName);
-                if(interfaceDescriptor != null) {
-                    int i = qualifiedClassName.lastIndexOf(":"); 
-                    String modelPackageName = qualifiedClassName.substring(0,i);
-                    String aspectImplementationPackageName = this.aspectImplementationPackageNames.get(modelPackageName);
-                    if(aspectImplementationPackageName != null) try {
-                        Class<?> implementationClass = Classes.getApplicationClass(
-                            aspectImplementationPackageName + '.' + interfaceDescriptor.simpleClassName + "Impl"
-                        );
-                        Constructor<?> aspectImplementationConstructor;
-                        try {
-                            aspectImplementationConstructor = implementationClass.getConstructor(
-                                interfaceDescriptor.jmi1Interface,
-                                interfaceDescriptor.cci2Interface
-                            );
-                        } catch(NoSuchMethodException ignorable) {
-                            try {
-                                aspectImplementationConstructor = implementationClass.getConstructor(
-                                    interfaceDescriptor.cci2Interface,
-                                    interfaceDescriptor.cci2Interface
-                                );
-                            } catch(NoSuchMethodException exception) {
-                                throw new ServiceException(
-                                    exception,
-                                    BasicException.Code.DEFAULT_DOMAIN,
-                                    BasicException.Code.VALIDATION_FAILURE,
-                                    "Invalid aspect implementation class, missing expected and fallback constructor",
-                                    new BasicException.Parameter("expected", interfaceDescriptor.simpleClassName + '(' + interfaceDescriptor.jmi1Interface.getName() + ',' + interfaceDescriptor.cci2Interface.getName() + ')'), 
-                                    new BasicException.Parameter("fallback", interfaceDescriptor.simpleClassName + '(' + interfaceDescriptor.cci2Interface.getName() + ',' + interfaceDescriptor.cci2Interface.getName() + ')')
-                                ).log();
-                            }
-                        }
-                        aspectDescriptor = new AspectImplementationDescriptor(
-                            interfaceDescriptor.jmi1Interface,
-                            implementationClass,
-                            aspectImplementationConstructor
-                        );
-                    } catch(Exception exception) {
-                        // Save to NULL
-                    }
-                }
-            }
-            this.aspectDescriptors.putIfAbsent(
-                qualifiedClassName.intern(),
-                aspectDescriptor == null ? AspectImplementationDescriptor.NULL : aspectDescriptor
-            );
-            return aspectDescriptor;
-        } else {
-            return aspectDescriptor == AspectImplementationDescriptor.NULL ? null : aspectDescriptor;
+        try {
+            final AspectImplementationDescriptor aspectDescriptor = this.aspectDescriptors.computeIfAbsent(qualifiedClassName, this::determineAspectDescriptor);
+            return aspectDescriptor == AspectImplementationDescriptor.NULL ? Optional.empty() : Optional.of(aspectDescriptor);
+        } catch (RuntimeServiceException e) {
+            throw new ServiceException(e);
         }
     }
-        
+
+    /**
+     * Provides an {@code AspectImplementationDescriptor.NULL} if an implementation exists
+     * and returns {@code AspectImplementationDescriptor.NULL} otherwise.
+     *
+     * @return an {@code AspectImplementationDescriptor} or else {@code AspectImplementationDescriptor.NULL}
+     */
+    private AspectImplementationDescriptor determineAspectDescriptor(
+        String qualifiedClassName
+    ){
+        if(this.aspectImplementationPackageNames == null) {
+            return AspectImplementationDescriptor.NULL;
+        }
+        final String modelPackageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(":"));
+        return determineAspectDescriptor(
+            this.aspectImplementationPackageNames.get(modelPackageName),
+            getSpecificationDescriptor(qualifiedClassName)
+        );
+    }
+
+    private SpecificationMapping_1.SpecificationDescriptor getSpecificationDescriptor(
+        String qualifiedClassName
+    ){
+        try {
+            return this.specificationMapping.getSpecificationDescriptor(qualifiedClassName);
+        } catch (ServiceException e) {
+            throw new RuntimeServiceException(e);
+        }
+    }
+
+    /**
+     * Provides an {@code AspectImplementationDescriptor.NULL} if an implementation exists
+     * and returns {@code AspectImplementationDescriptor.NULL} otherwise.
+     *
+     * @param aspectImplementationPackageNames a comma separated list of Java implementation
+     *                                         package names for the given model package
+     * @return an {@code AspectImplementationDescriptor} or else {@code AspectImplementationDescriptor.NULL}
+     */
+    private AspectImplementationDescriptor determineAspectDescriptor(
+        String aspectImplementationPackageNames,
+        SpecificationMapping_1.SpecificationDescriptor interfaceDescriptor
+    ) {
+        if(interfaceDescriptor == null || aspectImplementationPackageNames == null || aspectImplementationPackageNames.isEmpty()) {
+            return AspectImplementationDescriptor.NULL;
+        }
+        for (String aspectImplementationPackageName : aspectImplementationPackageNames.split(",")) {
+            try {
+                Class<?> implementationClass = Classes.getApplicationClass(
+                        aspectImplementationPackageNames + '.' + interfaceDescriptor.simpleClassName + "Impl"
+                );
+                Constructor<?> aspectImplementationConstructor;
+                try {
+                    aspectImplementationConstructor = implementationClass.getConstructor(
+                            interfaceDescriptor.jmi1Interface,
+                            interfaceDescriptor.cci2Interface
+                    );
+                } catch (NoSuchMethodException ignorable) {
+                    try {
+                        aspectImplementationConstructor = implementationClass.getConstructor(
+                                interfaceDescriptor.cci2Interface,
+                                interfaceDescriptor.cci2Interface
+                        );
+                    } catch (NoSuchMethodException exception) {
+                        throw new ServiceException(
+                                exception,
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.VALIDATION_FAILURE,
+                                "Invalid aspect implementation class, missing expected and fallback constructor",
+                                new BasicException.Parameter("expected", interfaceDescriptor.simpleClassName + '(' + interfaceDescriptor.jmi1Interface.getName() + ',' + interfaceDescriptor.cci2Interface.getName() + ')'),
+                                new BasicException.Parameter("fallback", interfaceDescriptor.simpleClassName + '(' + interfaceDescriptor.cci2Interface.getName() + ',' + interfaceDescriptor.cci2Interface.getName() + ')')
+                        ).log();
+                    }
+                }
+                return new AspectImplementationDescriptor(
+                    interfaceDescriptor.jmi1Interface,
+                    implementationClass,
+                    aspectImplementationConstructor
+                );
+            } catch (Exception exception) {
+                // Safely try next package
+            }
+        }
+        return AspectImplementationDescriptor.NULL;
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.Mapping_1_0#getExceptionConstructor(java.lang.String,java.lang.String)
      */
