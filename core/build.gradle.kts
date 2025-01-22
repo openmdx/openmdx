@@ -252,7 +252,7 @@ tasks {
 		"org/openmdx/kernel/*/**",
 		"org/openmdx/jdo/*/**",
 		"org/openmdx/uses/gnu/*/**",
-		"org/openmdx/uses/java/**",
+		"org/openmdx/uses/javax/*/**",
 		"org/openmdx/uses/org/apache/commons/collections/*/**",
 		"org/openmdx/uses/org/apache/commons/fileupload/*/**",
 		"org/openmdx/uses/org/apache/commons/io/*/**",
