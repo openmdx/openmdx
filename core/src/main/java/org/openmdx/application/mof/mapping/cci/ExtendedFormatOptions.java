@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Primitive Type Mapper 
+ * Description: Mapping Types 
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -39,44 +39,38 @@
  * 
  * ------------------
  * 
- * This product includes software developed by other organizations as
- * listed in the NOTICE file.
+ * This product includes or is based on software developed by other 
+ * organizations as listed in the NOTICE file.
  */
-
-package test.openmdx.application.mof.mapping.java;
-
-import org.openmdx.application.mof.mapping.java.Mapper_1;
-import org.openmdx.application.mof.mapping.java.PrimitiveTypeMapper;
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
+package org.openmdx.application.mof.mapping.cci;
 
 /**
- * Primitive Type Mapper
+ * This class defines options being passed as extended format values to the model provider
  */
-public class PrimitiveTypeMapper_1 extends Mapper_1 {
-
+public class ExtendedFormatOptions {
+    
+    private ExtendedFormatOptions() {
+        // Avoid instantiation
+    }
+    
+    /**
+     * This is a modifier telling that annotations use markdown
+     */
+    public static final String MARKDOWN = "--markdown-annotations";
 
     /**
-     * Constructor 
-     * 
-     * @param mappingFormat the mapping format
+     * This is a modifier telling to use Jakarta 8
      */
-    public PrimitiveTypeMapper_1(
-        AnnotationFlavour annotationFlavour,
-        JakartaFlavour jakartaFlavour, 
-        ChronoFlavour chronoFlavour,
-        String mappingFormat
-    ) {
-        super(mappingFormat, annotationFlavour, jakartaFlavour, chronoFlavour, mappingFormat, "java", false);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.application.mof.mapping.java.Mapper_1#newPrimitiveTypeMapper()
+    public static final String JAKARTA_8 = "--jakarta-8";
+
+    /**
+     * This is a modifier telling to use classic JMI mapping
      */
-    @Override
-    protected PrimitiveTypeMapper newPrimitiveTypeMapper() {
-        return new ExtendedPrimitiveTypeMapper();
-    }
-    
+    public static final String CLASSIC_CHRONO_TYPES = "--classic-chrono-types";
+
+    /**
+     * This is a modifier telling to export packages even if they are already provided
+     */
+    public static final String INCLUDE_PROVIDED_PACKAGES = "--include-provided-packages";
+
 }

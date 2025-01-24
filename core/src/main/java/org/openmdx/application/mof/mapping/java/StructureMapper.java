@@ -51,9 +51,7 @@ import java.util.List;
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.StructDef;
 import org.openmdx.application.mof.mapping.cci.StructuralFeatureDef;
@@ -75,23 +73,17 @@ public class StructureMapper extends AbstractMapper {
         ModelElement_1_0 structDef,
         Writer writer,
         Model_1_0 model,
-        Format format, 
-        String packageSuffix, 
-        MetaData_1_0 metaData, 
-        AnnotationFlavour annotationFlavour, 
-        JakartaFlavour jakartaFlavour, 
-        ChronoFlavour chronoFlavour,
+        ExternalizationConfiguration configuration,
+        JavaExportFormat format,
+        MetaData_1_0 metaData,
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             writer,
             model,
-            format, 
-            packageSuffix,
-            metaData, 
-            annotationFlavour, 
-            jakartaFlavour,
-            chronoFlavour,
+            configuration,
+            format,
+            metaData,
             primitiveTypeMapper
         );
         this.structDef = new StructDef(
@@ -146,7 +138,7 @@ public class StructureMapper extends AbstractMapper {
     ) throws ServiceException {
         this.trace("StructureType/FieldGetList");
         this.members.add(fieldDef.getBeanGenericName());
-        if(getFormat() != Format.JMI1) {
+        if(!this.format.isJMI1()) {
             printLine("  /**");
             MapperUtils
                 .wrapText(
@@ -172,7 +164,7 @@ public class StructureMapper extends AbstractMapper {
         mapAnnotation("   * ", structureFieldDef);
         printLine("   * @return The non-null value for structure field {@code ", structureFieldDef.getName(), "}.");
         printLine("   */");
-        String memberType = this.getType(structureFieldDef.getQualifiedTypeName(), getFormat(), false);
+        String memberType = this.getType(structureFieldDef.getQualifiedTypeName(), this.format, false);
         printLine("  public ", memberType, " ", this.getMethodName(structureFieldDef.getBeanGetterName()), "(");
         printLine("  );");        
         newLine();
@@ -188,7 +180,7 @@ public class StructureMapper extends AbstractMapper {
         mapAnnotation("   * ", structureFieldDef);
         printLine("   * @return The possibly null value for structure field {@code ", structureFieldDef.getName(), "}.");
         printLine("   */");
-        String memberType = this.getType(structureFieldDef.getQualifiedTypeName(), getFormat(), true);
+        String memberType = this.getType(structureFieldDef.getQualifiedTypeName(), this.format, true);
         printLine("  public ", memberType, " ", this.getMethodName(structureFieldDef.getBeanGetterName()), "(");
         printLine("  );");        
         newLine();
@@ -245,7 +237,7 @@ public class StructureMapper extends AbstractMapper {
     public void mapEnd(
     ) throws ServiceException {
         newLine();
-        if(getFormat() == Format.CCI2) {
+        if(this.format.isCCI2()) {
             this.trace("StructureType/Member");
             newLine();
             printLine("  /**");
@@ -276,10 +268,10 @@ public class StructureMapper extends AbstractMapper {
         newLine();
         this.mapGeneratedAnnotation();
         printLine("public interface ", this.structName);
-        if(getFormat() == Format.JMI1) {            
+        if(this.format.isJMI1()) {
             print("  extends " + REF_STRUCT_INTERFACE_NAME + ", ");
         }
-        if(getFormat() != Format.CCI2) {
+        if(!this.format.isCCI2()) {
             printLine(
                 getNamespace(nameComponents, Names.CCI2_PACKAGE_SUFFIX),    
                 ".",

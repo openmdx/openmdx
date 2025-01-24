@@ -80,23 +80,17 @@ public class ModelExternalizer_1 implements ModelExternalizer_1_0 {
 	 * imported to this dataprovider and with operations such as
 	 * externalizeAsJar() operations can be performed on the populated
 	 * dataprovider.
-	 * 
-	 * @param openmdxjdoDir
-	 *            base URL for openmdxjdo files
-	 * @param annotationFlavour
-	 *            tells whetherß annotations use markdown
+	 *
+	 * @param openmdxjdoDir        base URL for openmdxjdo files
+	 * @param configuration the model externalization configuration
 	 */
 	public ModelExternalizer_1(
-		String openmdxjdoDir, 
-		AnnotationFlavour annotationFlavour,
-		JakartaFlavour jakartaFlavour,
-		ChronoFlavour chronoFlavour
+		String openmdxjdoDir,
+		ExternalizationConfiguration configuration
 	){
+		this.configuration = configuration;
 		try {
 			this.dataprovider = ModelProvider_2.newModelExternalizationDataprovider(openmdxjdoDir);
-			this.annotationFlavour = annotationFlavour;
-			this.jakartaFlavour = jakartaFlavour;
-			this.chronoFlavour = chronoFlavour;
 		} catch (RuntimeException e) {
 			throw Throwables.log(e);
 		}
@@ -104,23 +98,13 @@ public class ModelExternalizer_1 implements ModelExternalizer_1_0 {
 
 	protected final Port<RestConnection> dataprovider;
 
-    private static final String PROVIDER_NAME = "Mof";
-    
-    /**
-     * Tells whether annotations use markdown or not
-     */
-    private final AnnotationFlavour annotationFlavour;
+	/**
+	 * The model externalization configuration
+	 */
+	private final ExternalizationConfiguration configuration;
 
-    /**
-     * Tells which Jakarta flavour to use
-     */
-    private final JakartaFlavour jakartaFlavour;
+	private static final String PROVIDER_NAME = "Mof";
 
-    /**
-     * Tells which JMI flavour to use
-     */
-    private final ChronoFlavour chronoFlavour;
-    
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -148,27 +132,23 @@ public class ModelExternalizer_1 implements ModelExternalizer_1_0 {
 		String modelName, 
 		List formats
 	) throws ResourceException {
-
 		final Channel channnel = newChannel();
-
-		SysLog.trace("> Externalize package " + modelName);
-
+		SysLog.trace("> Externalize package", modelName);
 		final Path modelPackagePath = toModelId(modelName);
-
-		SysLog.trace("> Externalize package");
 		//
 		// Call externalizePackage
 		//
+		IndexedRecord values = Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.code());
+		configuration.annotationFlavour.applyExtendedFormat(values);
+		configuration.jakartaFlavour.applyExtendedFormat(values);
+		configuration.chronoFlavour.applyExtendedFormat(values);
+		configuration.externalizationScope.applyExtendedFormat(values);
+		values.addAll(formats);
+		MappedRecord params = Records.getRecordFactory().createMappedRecord("org:omg:model1:PackageExternalizeParams");
+		params.put("format", values);
 		MessageRecord request = Records.getRecordFactory().createMappedRecord(MessageRecord.class);
 		request.setResourceIdentifier(modelPackagePath.getChild("externalizePackage"));
-		MappedRecord params = Records.getRecordFactory().createMappedRecord("org:omg:model1:PackageExternalizeParams");
 		request.setBody(params);
-		IndexedRecord values = Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.code());
-		params.put("format", values);
-		annotationFlavour.applyExtendedFormat(values);
-		jakartaFlavour.applyExtendedFormat(values);
-		chronoFlavour.applyExtendedFormat(values);
-		values.addAll(formats);
 		MessageRecord result = channnel.addOperationRequest(request);
 		return (byte[]) result.getBody().get("packageAsJar");
 	}

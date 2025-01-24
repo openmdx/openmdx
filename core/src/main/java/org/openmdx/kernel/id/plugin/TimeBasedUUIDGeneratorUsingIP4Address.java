@@ -46,16 +46,19 @@ package org.openmdx.kernel.id.plugin;
 
 import java.net.InetAddress;
 
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
 import org.openmdx.kernel.id.spi.TimeBasedIdGenerator;
+import org.openmdx.kernel.log.SysLog;
 
 import java.util.UUID;
 
 /**
  * Time Based UUID Provider using IP 4 Address Based Nodes
  * <p>
- * This implementation follow the guidelines of
- * http://www.ietf.org/internet-drafts/draft-mealling-uuid-urn-03.txt and avoids
+ * This implementation follow the guidelines of <a
+ * href="https://datatracker.ietf.org/doc/html/draft-mealling-uuid-urn-03"
+ * >A UUID URN Namespace</a> and avoids
  * conflicts with TimeBasedUUIDGeneratorUsingRandomBasedNodes by setting the
  * bit next to the MAC address multicast bit.
  */
@@ -81,8 +84,8 @@ public class TimeBasedUUIDGeneratorUsingIP4Address
                 ((ipAddress[0] & 0xFFL) << 24) | ((ipAddress[1] & 0xFFL) << 16) |
                 ((ipAddress[2] & 0xFFL) << 8) | ((ipAddress[3] & 0xFFL)); // IP v4 Address
         } catch(Exception exception){
-            exception.printStackTrace();
-            System.err.println("Falling back to random based node id");
+            Throwables.log(exception);
+            SysLog.error("Falling back to random based node id");
             return createRandomBasedNode();
         }
     }

@@ -48,9 +48,7 @@ import java.io.Writer;
 import java.util.List;
 
 import org.omg.mof.spi.Names;
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ExceptionDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
@@ -69,23 +67,17 @@ public class ExceptionMapper extends AbstractMapper {
         ModelElement_1_0 exceptionDef,
         Writer writer,
         Model_1_0 model,
-        Format format, 
-        String packageSuffix, 
-        MetaData_1_0 metaData, 
-        AnnotationFlavour annotationFlavour, 
-        JakartaFlavour jakartaFlavour, 
-        ChronoFlavour chronoFlavour,
+        ExternalizationConfiguration configuration,
+        JavaExportFormat format,
+        MetaData_1_0 metaData,
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             writer,
             model,
-            format, 
-            packageSuffix,
-            metaData, 
-            annotationFlavour,
-            jakartaFlavour,
-            chronoFlavour,
+            configuration,
+            format,
+            metaData,
             primitiveTypeMapper
         );
         this.exceptionDef = new ExceptionDef(exceptionDef, model);
@@ -106,7 +98,7 @@ public class ExceptionMapper extends AbstractMapper {
         printLine("@SuppressWarnings(\"serial\")");
         printLine("public class ", this.exceptionDef.getName() );
         print("  extends ");
-        if(this.getFormat() == Format.JMI1) {
+        if(this.format.isJMI1()) {
             print(AbstractMapper.getNamespace(namespacePrefix,Names.CCI2_PACKAGE_SUFFIX) + '.' + this.exceptionDef.getName());
         } else {
             printLine("javax.jmi.reflect.RefException");
@@ -129,7 +121,7 @@ public class ExceptionMapper extends AbstractMapper {
             separator = "    , ";
         }
         printLine("  ) {");
-        switch(this.getFormat()) {
+        switch(this.format) {
             case CCI2:
                 if(hasMessage) {
                     printLine("    super(message);");

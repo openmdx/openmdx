@@ -60,6 +60,7 @@ import org.openmdx.base.persistence.spi.QueryExtension;
 import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.loading.Resources;
+import org.openmdx.kernel.log.SysLog;
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -87,13 +88,13 @@ public class FilterTest {
                     Quantifier.FOR_ALL,
                     "fGreater",
                     true,
-                    Integer.valueOf(-1000)
+                    -1000
                 ),
                 new IsGreaterCondition(
                     Quantifier.FOR_ALL,
                     "fGreater",
                     false,
-                    Integer.valueOf(1000)
+                    1000
                 ),
                 new IsGreaterOrEqualCondition(
                     Quantifier.FOR_ALL,
@@ -199,7 +200,7 @@ public class FilterTest {
         extension.setDecimalParam(BigDecimal.ONE, BigDecimal.TEN);
         extension.setStringParam("String parameter 0", "String parameter 1");
         String xml = JavaBeans.toXML(filter);
-        System.out.println(xml);
+        SysLog.info(xml);
         Object filter2 = JavaBeans.fromXML(xml);
         Assertions.assertEquals(filter, filter2, "Deserialization");
     }

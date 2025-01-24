@@ -45,6 +45,7 @@
 package test.openmdx.preferences2;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.prefs.PreferencesFactory;
@@ -52,7 +53,6 @@ import java.util.prefs.PreferencesFactory;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,7 +102,7 @@ public class PreferencesTest {
      */
     protected Segment resetSegment(
         String name
-    ) throws ResourceException {
+    ) {
         PersistenceManager entity = this.entityManagerFactory.getPersistenceManager();
         Authority authority = entity.getObjectById(Authority.class, Preferences2Package.AUTHORITY_XRI);
         Assertions.assertNotNull(authority, "Authority '" + Preferences2Package.AUTHORITY_XRI + "'");
@@ -127,7 +127,7 @@ public class PreferencesTest {
      */
     protected Segment retrieveSegment(
         String name
-    ) throws ResourceException {
+    )  {
         PersistenceManager entity = this.entityManagerFactory.getPersistenceManager();
         Authority authority = entity.getObjectById(Authority.class, Preferences2Package.AUTHORITY_XRI);
         Assertions.assertNotNull(authority, "Authority '" + Preferences2Package.AUTHORITY_XRI + "'");
@@ -138,12 +138,10 @@ public class PreferencesTest {
     
     /**
      * Create Preferences through the JMI API
-     * 
-     * @exception ResourceException
      */
     @Test
     public void jmiCreatePreferences(
-    ) throws ResourceException{
+    ) {
         Segment segment = resetSegment(JMI_SEGMENT_NAME);
         PersistenceManager persistenceManager = JDOHelper.getPersistenceManager(segment);
         persistenceManager.currentTransaction().begin();
@@ -197,8 +195,6 @@ public class PreferencesTest {
 
     /**
      * Read Preferences through the JDK API
-     * 
-     * @throwsa BackingStoreException 
      */
     @Test
     public void jdkReadPreferences(
@@ -224,19 +220,16 @@ public class PreferencesTest {
     }
 
     private void assertArrayEquals(String string, String[] strings, String[] keys) {
-		// TODO Auto-generated method stub
+
 		
 	}
 
 	/**
      * Create Preferences through the JDK API
-     * 
-     * @throws BackingStoreException 
-     * @throws ResourceException 
      */
     @Test
     public void jdkCreatePreferences(
-    ) throws ResourceException, BackingStoreException {
+    ) throws BackingStoreException {
         resetSegment(JDK_SEGMENT_NAME);
         PreferencesFactory testee = new EmbeddedPreferencesFactory(JDK_SEGMENT_NAME);
         {
@@ -261,10 +254,10 @@ public class PreferencesTest {
             Assertions.assertEquals(Sets.asSet(Arrays.asList("preferences2", "dummy0")),  Sets.asSet(Arrays.asList(parentNode.childrenNames())), "The parent node's transient children");
             packageNode.put("kind", "wrong");
             packageNode.putBoolean("flag", false);
-            Assertions.assertEquals(Sets.asSet(new String[]{"kind","flag"}),  Sets.asSet(packageNode.keys()), "The package node's keys");
+            Assertions.assertEquals(Sets.asSet("kind","flag"),  Sets.asSet(packageNode.keys()), "The package node's keys");
             packageNode.remove("kind");
             dummyNode.removeNode();
-            Assertions.assertEquals(Sets.asSet(Arrays.asList("preferences2")),  Sets.asSet(Arrays.asList(parentNode.childrenNames())), "The parent node's persistent children");
+            Assertions.assertEquals(Sets.asSet(Collections.singletonList("preferences2")),  Sets.asSet(Arrays.asList(parentNode.childrenNames())), "The parent node's persistent children");
         }
     }
 
@@ -275,13 +268,10 @@ public class PreferencesTest {
     
     /**
      * Read Preferences through the JMI API
-     * 
-     * @throws BackingStoreException 
-     * @throws ResourceException 
      */
     @Test
     public void jmiReadPreferences(
-    ) throws BackingStoreException, ResourceException{
+    ){
         Segment segment = retrieveSegment(JDK_SEGMENT_NAME);
         jmiReadPreferences(segment, "System");
         jmiReadPreferences(segment, System.getProperty("user.name"));
@@ -291,15 +281,11 @@ public class PreferencesTest {
      * Reads and writes the preferences through the JDK API
      * 
      * @param node the preferences to be touched
-     * @param touch 
-     * 
-     * @throws BackingStoreException 
-     * @throws ResourceException 
      */
     private void jdkTraversePreferences(
         Preferences node, 
         boolean touch
-    ) throws ResourceException, BackingStoreException {
+    ) throws BackingStoreException {
         for(String key : node.keys()) {
             String value = node.get(key, null);
             if(touch) {
@@ -313,16 +299,10 @@ public class PreferencesTest {
         }
     }
     
-    /**
-     * @param root
-     * @param touch 
-     * @throws ResourceException
-     * @throws BackingStoreException
-     */
     private void jdkLoadAndTraversePreferences(
         Preferences root, 
         boolean touch
-    ) throws ResourceException, BackingStoreException {
+    ) throws BackingStoreException {
         ((Retrievable)root).retrieveAll();
         int expectedCount = touch ? RidOidQueryDatabase_2.getUpdateCount() : RidOidQueryDatabase_2.getQueryCount(); 
         jdkTraversePreferences(root, touch);
@@ -332,13 +312,10 @@ public class PreferencesTest {
 
     /**
      * Reads and writes the preferences through the JDK API
-     * 
-     * @throws BackingStoreException 
-     * @throws ResourceException 
      */
     @Test
     public void jdkTouchPreferences(
-    ) throws ResourceException, BackingStoreException {
+    ) throws BackingStoreException {
         PreferencesFactory testee = new EmbeddedPreferencesFactory(JDK_SEGMENT_NAME);
         jdkLoadAndTraversePreferences(testee.systemRoot(), true);
         jdkLoadAndTraversePreferences(testee.userRoot(), true);
@@ -346,13 +323,10 @@ public class PreferencesTest {
 
     /**
      * Reads and writes the preferences through the JDK API
-     * 
-     * @throws BackingStoreException 
-     * @throws ResourceException 
      */
     @Test
     public void jdkDumpPreferences(
-    ) throws ResourceException, BackingStoreException {
+    ) throws BackingStoreException {
         PreferencesFactory testee = new EmbeddedPreferencesFactory(JDK_SEGMENT_NAME);
         jdkLoadAndTraversePreferences(testee.systemRoot(), false);
         jdkLoadAndTraversePreferences(testee.userRoot(), false);
@@ -366,12 +340,6 @@ public class PreferencesTest {
 
         /**
          * Constructor 
-         *
-         * @param persistenceManager
-         * @param providerXRI
-         * @param segmentName
-         * @param userRootName
-         * @param systemRootName
          */
         protected EmbeddedPreferencesFactory(
             String segmentName

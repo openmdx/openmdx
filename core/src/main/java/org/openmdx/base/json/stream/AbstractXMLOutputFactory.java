@@ -122,17 +122,17 @@ public abstract class AbstractXMLOutputFactory extends XMLOutputFactory {
     public abstract XMLStreamWriter createXMLStreamWriter(Writer writer) throws XMLStreamException;
 
     public Object getProperty(String arg0) throws IllegalArgumentException {
-        // TODO Auto-generated method stub
+
         return null;
     }
 
     public boolean isPropertySupported(String arg0) {
-        // TODO Auto-generated method stub
+
         return false;
     }
 
     public void setProperty(String arg0, Object arg1) throws IllegalArgumentException {
-        // TODO Auto-generated method stub
+
         
     }
 

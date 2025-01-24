@@ -55,6 +55,7 @@ import org.openmdx.base.text.format.UUIDFormatter;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
 import org.openmdx.kernel.id.spi.TimeBasedIdBuilder;
+import org.openmdx.kernel.log.SysLog;
 
 /**
  * TestUUID
@@ -94,7 +95,7 @@ public class UUIDTest {
     final static private InternalUUIDProvider provider = new InternalUUIDProvider();
 
     /**
-     * Defines how many entries per test are written to System.out -
+     * Defines how many entries per test are written to the Log -
      * except for the allocation performance test of course.
      */
     final static int OUT_LIMIT = 1;
@@ -112,7 +113,7 @@ public class UUIDTest {
         if(OUT_LIMIT > 0) log("testPerformance", uuid);
         long t = System.currentTimeMillis();
         for(int i = 0; i < 1000000; i++) uuid = generator.next();
-        System.out.println((System.currentTimeMillis() - t) + " nsec per UUID");
+        SysLog.info("nsec per UUID", System.currentTimeMillis() - t);
     }
 
     /**
@@ -120,29 +121,29 @@ public class UUIDTest {
      */
     @Test
     public void testUUIDs(
-    ) throws Exception {
+    ){
         UUIDGenerator[] generator = new UUIDGenerator[GENERATOR_COUNT];
         for(int g = 0; g < GENERATOR_COUNT; g++) {
             generator[g] = UUIDs.getGenerator();
         }
         for(int i = 0; i < 8; i++){
             UUID uuid = generator[i % GENERATOR_COUNT].next();
-            Assertions.assertEquals(uuid.variant(), 2, "Leach-Salz variant");
-			// TODO Auto-generated method stub
+            Assertions.assertEquals(2, uuid.variant(), "Leach-Salz variant");
+
             Assertions.assertEquals(uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)), "Base36");
-			// TODO Auto-generated method stub
+
             Assertions.assertEquals(uuid, UUIDConversion.fromString(UUIDConversion.toURN(uuid)), "urn");
-			// TODO Auto-generated method stub
+
             if(OUT_LIMIT > i) log("testUUIDs", uuid);
         }
         UUID[] uuids = new UUID[500000];
         for(int i=0; i < uuids.length; i++){
            uuids[i] = generator[i % GENERATOR_COUNT].next();
            Assertions.assertEquals(uuids[i], UUIDConversion.fromString(UUIDConversion.toUID(uuids[i])), "Base36");
-		// TODO Auto-generated method stub
+
         }
-        Assertions.assertEquals(uuids.length, new HashSet<UUID>(Arrays.asList(uuids)).size(), "Duplicates");
-		// TODO Auto-generated method stub
+        Assertions.assertEquals(uuids.length, new HashSet<>(Arrays.asList(uuids)).size(), "Duplicates");
+
     }
     
     /**
@@ -150,16 +151,16 @@ public class UUIDTest {
      */
     @Test
     public void testNIL(
-    ) throws Exception {
+    ){
         UUID uuid = UUIDs.NIL;
         Assertions.assertEquals(new UUID(0L, 0L), uuid, "NIL value");
-		// TODO Auto-generated method stub
+
         Assertions.assertEquals("00000000-0000-0000-0000-000000000000", uuid.toString(), "NIL String");
-		// TODO Auto-generated method stub
+
         Assertions.assertEquals(uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)), "toBase36");
-		// TODO Auto-generated method stub
+
         Assertions.assertEquals(uuid, UUIDConversion.fromString(UUIDConversion.toURN(uuid)), "toURN");
-		// TODO Auto-generated method stub
+
         if(OUT_LIMIT > 0) log("testNIL", uuid);
     }
 
@@ -168,27 +169,23 @@ public class UUIDTest {
      */
     @Test
     public void testJavaRandomUUID(
-    ) throws Exception {
+    ){
         for(int i = 0; i < 8; i++){
             UUID uuid = UUID.randomUUID();
-            Assertions.assertEquals(uuid.variant(), 2, "Leach-Salz variant");
-			// TODO Auto-generated method stub
-            Assertions.assertEquals(uuid.version(), 4, "Randomly generated");
-			// TODO Auto-generated method stub
-            Assertions.assertEquals(uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)), "toBase36");
-			// TODO Auto-generated method stub
-            Assertions.assertEquals(uuid, UUIDConversion.fromString(UUIDConversion.toURN(uuid)), "toURN");
-			// TODO Auto-generated method stub
+            Assertions.assertEquals(2, uuid.variant(), "Leach-Salz variant");
+            Assertions.assertEquals(4, uuid.version(), "Randomly generated");
+            Assertions.assertEquals(UUIDConversion.fromString(UUIDConversion.toUID(uuid)), uuid, "toBase36");
+            Assertions.assertEquals(UUIDConversion.fromString(UUIDConversion.toURN(uuid)), uuid, "toURN");
             if(OUT_LIMIT > i) log("testJavaRandomUUID", uuid);
         }
         UUID[] uuids = new UUID[500000];
         for(int i=0; i < uuids.length; i++){
             uuids[i] = UUID.randomUUID();
             Assertions.assertEquals(uuids[i], UUIDConversion.fromString(UUIDConversion.toUID(uuids[i])), "Base36");
-			// TODO Auto-generated method stub
+
         }
-        Assertions.assertEquals(uuids.length, new HashSet<UUID>(Arrays.asList(uuids)).size(), "Duplicates");
-		// TODO Auto-generated method stub
+        Assertions.assertEquals(uuids.length, new HashSet<>(Arrays.asList(uuids)).size(), "Duplicates");
+
     }
 
     /**
@@ -196,19 +193,19 @@ public class UUIDTest {
      */
     @Test
     public void testUuidgenRandomUUID(
-    ) throws Exception {
+    ){
         for(int i = 0; i < UUIDGEN_RANDOM_UUID.length; i++){
             UUID uuid = UUID.fromString(UUIDGEN_RANDOM_UUID[i]);
-            Assertions.assertEquals(uuid.variant(), 2, "Leach-Salz variant");
-			// TODO Auto-generated method stub
-            Assertions.assertEquals(uuid.version(), 4, "Randomly generated");
-			// TODO Auto-generated method stub
-            Assertions.assertEquals(UUIDGEN_RANDOM_UUID[i], uuid.toString(), "UUID String");
-			// TODO Auto-generated method stub
-            Assertions.assertEquals(uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)), "toBase36");
-			// TODO Auto-generated method stub
-            Assertions.assertEquals(uuid, UUIDConversion.fromString(UUIDConversion.toURN(uuid)), "toURN");
-			// TODO Auto-generated method stub
+            Assertions.assertEquals(2, uuid.variant(), "Leach-Salz variant");
+
+            Assertions.assertEquals(4, uuid.version(), "Randomly generated");
+
+            Assertions.assertEquals(uuid.toString(), UUIDGEN_RANDOM_UUID[i], "UUID String");
+
+            Assertions.assertEquals(UUIDConversion.fromString(UUIDConversion.toUID(uuid)), uuid, "toBase36");
+
+            Assertions.assertEquals(UUIDConversion.fromString(UUIDConversion.toURN(uuid)), uuid, "toURN");
+
             if(OUT_LIMIT > i) log("testUuidgenRandomUUID", uuid);
         }
     }
@@ -218,24 +215,24 @@ public class UUIDTest {
      */
     @Test
     public void testUuidgenSequentialUUID(
-    ) throws Exception {
+    ){
         UUID last = null;
         for(int i = 0; i < UUIDGEN_SEQUENTIAL_UUID.length; i++){
             UUID uuid = UUID.fromString(UUIDGEN_SEQUENTIAL_UUID[i]);
-            Assertions.assertEquals(uuid.variant(), 2, "Leach-Salz variant");
-			// TODO Auto-generated method stub
-            Assertions.assertEquals(uuid.version(), 1, "Time-based version");
-			// TODO Auto-generated method stub
+            Assertions.assertEquals(2, uuid.variant(), "Leach-Salz variant");
+
+            Assertions.assertEquals(1, uuid.version(), "Time-based version");
+
             Assertions.assertEquals(UUIDGEN_SEQUENTIAL_UUID[i], uuid.toString(), "UUID String" + i);
-			// TODO Auto-generated method stub
+
             Assertions.assertEquals(uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)), "toBase36");
-			// TODO Auto-generated method stub
+
             Assertions.assertEquals(uuid, UUIDConversion.fromString(UUIDConversion.toURN(uuid)), "toURN");
-			// TODO Auto-generated method stub
+
             if(OUT_LIMIT > i) log("testUuidgenSequentialUUID", uuid);
             if(last != null){
                 Assertions.assertEquals( uuid.node(),  last.node(), "Node");
-				// TODO Auto-generated method stub
+
                 Assertions.assertTrue(uuid.timestamp() > last.timestamp(), "Sequence");
             }
             last = uuid;
@@ -247,14 +244,14 @@ public class UUIDTest {
      */
     @Test
     public void testTimeBasedUUIDBuilder(
-    ) throws Exception {
+    ) {
         for(int i = 0; i < UUIDGEN_SEQUENTIAL_UUID.length; i++){
             UUID original = UUID.fromString(UUIDGEN_SEQUENTIAL_UUID[i]);
             if(OUT_LIMIT > i) log("testTimeBasedUUIDBuilder original", original);
             UUID copy = provider.createUUID(original);
             if(OUT_LIMIT > i) log("testTimeBasedUUIDBuilder copy", copy);
             Assertions.assertEquals(original, copy, UUIDGEN_SEQUENTIAL_UUID[i]);
-			// TODO Auto-generated method stub
+
         }
     }
 
@@ -263,11 +260,11 @@ public class UUIDTest {
      */
     @Test
     public void testOID(
-    ) throws Exception {
+    ) {
         for(int i = 0; i < OBJECT_ID_UUID.length; i++){
             UUID uuid = UUID.fromString(OBJECT_ID_UUID[i]);
             Assertions.assertEquals(OBJECT_ID_DOT[i], UUIDConversion.toOID(uuid), "OID");
-			// TODO Auto-generated method stub
+
         }
     }
 
@@ -286,15 +283,12 @@ public class UUIDTest {
     
     /**
      * Log a UUID
-     * 
-     * @param message
-     * @param uuid
      */
-    private final static void log(
+    private static void log(
         String message,
         UUID uuid
     ){
-        System.out.println(message + ": " + new UUIDFormatter(uuid) + "\tUID: " + UUIDConversion.toUID(uuid));
+        SysLog.info(message, "UUID=" + new UUIDFormatter(uuid) + ", UID=" + UUIDConversion.toUID(uuid));
     }
 
     

@@ -46,12 +46,10 @@ package org.openmdx.application.mof.mapping.java.mof;
 
 import java.io.Writer;
 
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.java.AbstractMapper;
-import org.openmdx.application.mof.mapping.java.Format;
+import org.openmdx.application.mof.mapping.java.JavaExportFormat;
 import org.openmdx.application.mof.mapping.java.PrimitiveTypeMapper;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -62,26 +60,20 @@ import org.openmdx.base.mof.cci.Model_1_0;
 public abstract class FeaturesMapper extends AbstractMapper {
 
     public FeaturesMapper(
-        ModelElement_1_0 featuredDef,        
-        Writer writer, 
+        ModelElement_1_0 featuredDef,
+        Writer writer,
         Model_1_0 model,
-        Format format, 
-        String packageSuffix,
-        MetaData_1_0 metaData, 
-        AnnotationFlavour annotationFlavour, 
-        JakartaFlavour jakartaFlavour, 
-        ChronoFlavour chronoFlavour,
+        ExternalizationConfiguration configuration,
+        JavaExportFormat format,
+        MetaData_1_0 metaData,
         PrimitiveTypeMapper primitiveTypeMapper
     ){
         super(
             writer, 
             model,
-            format, 
-            packageSuffix,
-            metaData, 
-            annotationFlavour, 
-            jakartaFlavour,
-            chronoFlavour,
+            configuration,
+            format,
+            metaData,
             primitiveTypeMapper
         );
     }

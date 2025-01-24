@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Mapping Types 
+ * Description: Primitive Type Mapper 
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -39,68 +39,46 @@
  * 
  * ------------------
  * 
- * This product includes or is based on software developed by other 
- * organizations as listed in the NOTICE file.
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
-package org.openmdx.application.mof.mapping.cci;
+
+package test.openmdx.application.mof.mapping.java;
+
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
+import org.openmdx.application.mof.mapping.java.JavaExportFormat;
+import org.openmdx.application.mof.mapping.java.Mapper_1;
+import org.openmdx.application.mof.mapping.java.PrimitiveTypeMapper;
 
 /**
- * Mapping Types
+ * This Java mapper provides extended primitive type support
+ * <p>
+ *  <em>
+ *      Note: This class is loaded by reflection!
+ *  </em>
+ * </p>
  */
-public class MappingTypes {
-    
-    private MappingTypes() {
-        // Avoid instantiation
+public class MyMapper extends Mapper_1 {
+
+    /**
+     * Constructor.
+     *
+     * @param configuration the mapping configuration
+     * @param exportFormatId the Java export format id
+     */
+    public MyMapper(
+        ExternalizationConfiguration configuration,
+        String exportFormatId
+    ) {
+        super(configuration, JavaExportFormat.fromId(exportFormatId));
     }
     
-    /**
-     * This is a modifier telling that annotations use markdown
+    /* (non-Javadoc)
+     * @see org.openmdx.application.mof.mapping.java.Mapper_1#newPrimitiveTypeMapper()
      */
-    public static final String MARKDOWN = "--markdown-annotations";
-
-    /**
-     * This is a modifier telling to use Jakarta 8
-     */
-    public static final String JAKARTA_8 = "--jakarta-8";
-
-    /**
-     * This is a modifier telling to use classic JMI mapping
-     */
-    public static final String CLASSIC_CHRONO_TYPES = "--classic-chrono-types";
-
-    /**
-     * This is a modifier telling to export packages even if they are already provided
-     */
-    public static final String INCLUDE_PROVIDED_PACKAGES = "--include-provided-packages";
-
-    /**
-     * openMDX model mapping
-     */
-    public static final String XMI1 = "xmi1";
-    
-    /**
-     * Non-JMI mapping
-     */
-    public static final String CCI2 = "cci2";
-    
-    /**
-     * Extends cci2 mapping with JMI's reflective interfaces
-     */
-    public static final String JMI1 = "jmi1";
-
-    /**
-     * Standard JPA mapping
-     */
-    public static final String JPA3 = "jpa3";
-
-    /**
-     * Java interfaces with the model
-     */
-    public static final String MOF1 = "mof1";
-
-    /**
-     * PIM Documentation
-     */
-    public static final String PIMDOC = "pimdoc";
+    @Override
+    protected PrimitiveTypeMapper newPrimitiveTypeMapper() {
+        return new ExtendedPrimitiveTypeMapper();
+    }
     
 }

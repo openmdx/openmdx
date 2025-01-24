@@ -96,7 +96,7 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
     @Override
     public String getFeatureType(
         String qualifiedTypeName,
-        Format format, 
+        JavaExportFormat format,
         boolean alwaysAsObject,
         boolean classicChronoTypes
     ) throws ServiceException{
@@ -107,10 +107,10 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
         if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) return alwaysAsObject ? "java.lang.Integer" : "int";
         if(PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) return "java.math.BigDecimal";
         if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) return
-                format == Format.JPA3 ? "java.sql.Timestamp" :
+                format.isJPA3() ? "java.sql.Timestamp" :
                         classicChronoTypes ? "java.util.Date" : "java.time.Instant";
         if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) return
-                format == Format.JPA3 ? "java.sql.Date" :
+                format.isJPA3() ? "java.sql.Date" :
                         classicChronoTypes ? "javax.xml.datatype.XMLGregorianCalendar" : "java.time.LocalDate";
         if(PrimitiveTypes.DURATION.equals(qualifiedTypeName))
             return classicChronoTypes ? "javax.xml.datatype.Duration" : "java.time.Duration";
@@ -183,7 +183,7 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
     @Override
     public String getParsePattern(
         String qualifiedTypeName, 
-        Format format, 
+        JavaExportFormat format,
         boolean asObject,
         boolean classicChronoTypes
     ) throws ServiceException {
@@ -215,12 +215,12 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
     @Override
     public String getMappingPattern(
         String qualifiedTypeName,
-        Format from,
-        Format to
+        JavaExportFormat from,
+        JavaExportFormat to
     ) throws ServiceException {
-        if(from == Format.CCI2 && to == Format.JPA3) {
+        if(from.isCCI2() && to.isJPA3()) {
             return getMappingClass(qualifiedTypeName) + ".toJDO(" + EXPRESSION_PLACEHOLDER + ")";
-        } else if (from == Format.JPA3 && to == Format.CCI2) {
+        } else if (from.isJPA3() && to.isCCI2()) {
             return getMappingClass(qualifiedTypeName) + ".toCCI(" + EXPRESSION_PLACEHOLDER + ")";
         } else {
             throw new ServiceException(

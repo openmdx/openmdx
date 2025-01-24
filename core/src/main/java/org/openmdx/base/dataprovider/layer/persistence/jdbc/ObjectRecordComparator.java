@@ -61,7 +61,7 @@ public class ObjectRecordComparator implements Comparator<ObjectRecord> {
     public int compare(
         ObjectRecord o1, ObjectRecord o2
     ) {
-        // TODO Auto-generated method stub
+
         return o1.getResourceIdentifier().compareTo(o2.getResourceIdentifier());
     }
 

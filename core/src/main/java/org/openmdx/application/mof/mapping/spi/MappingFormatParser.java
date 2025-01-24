@@ -44,17 +44,25 @@
  */
 package org.openmdx.application.mof.mapping.spi;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
+import org.openmdx.application.mof.mapping.cci.ExtendedFormatOptions;
+
 /**
  * Mapping Format Parser
  */
-public class MappingFormatParser {
+class MappingFormatParser {
 
 	/**
 	 * Constructor
 	 * 
 	 * @param format the format to be parsed
 	 */
-	MappingFormatParser(String format) {
+	MappingFormatParser(
+		String format
+	) {
         if(format.endsWith(")")){
             int open = format.indexOf('(');
             int close = format.length() - 1;
@@ -74,10 +82,8 @@ public class MappingFormatParser {
 	
 	/**
 	 * Either one of the predefined mapping types or a fully qualified class name
-	 * 
-	 * @return the format id
-	 * 
-	 * @see org.openmdx.application.mof.mapping.cci.MappingTypes
+	 *
+	 * @see ExtendedFormatOptions
 	 */
 	private final String id;
 	
@@ -91,14 +97,20 @@ public class MappingFormatParser {
 	 * 
 	 * @return the format id
 	 * 
-	 * @see org.openmdx.application.mof.mapping.cci.MappingTypes
+	 * @see ExtendedFormatOptions
 	 */
 	String getId() {
 		return id;
 	}
 	
-	String[] getArguments() {
-		return arguments;
+	List<String> getArguments() {
+		return Arrays.asList(arguments);
 	}
-	
+
+	Object[] getAmendedArguments(ExternalizationConfiguration configuration) {
+		List<Object> arguments = new ArrayList<>(getArguments());
+		arguments.add(0, configuration);
+		return arguments.toArray();
+	}
+
 }

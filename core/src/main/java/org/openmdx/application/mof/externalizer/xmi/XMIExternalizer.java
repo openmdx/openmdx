@@ -47,19 +47,12 @@ package org.openmdx.application.mof.externalizer.xmi;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 
 import org.openmdx.application.mof.externalizer.cci.ModelExternalizer_1_0;
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
-import org.openmdx.application.mof.externalizer.spi.ModelExternalizer_1;
+import org.openmdx.application.mof.externalizer.spi.*;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
@@ -78,10 +71,11 @@ public class XMIExternalizer {
 		String[] arguments	
 	){
         String openmdxjdo = null;
-        String xmiDialect = "emf";
-        AnnotationFlavour annotationFlavour = AnnotationFlavour.STANDARD;
-        JakartaFlavour jakartaFlavour = JakartaFlavour.VERSION_8;
-        ChronoFlavour chronoFlavour = ChronoFlavour.CLASSIC;
+        String xmiDialect = DEFAULT_XMI_DIALECT;
+        AnnotationFlavour annotationFlavour = AnnotationFlavour.DEFAULT;
+        JakartaFlavour jakartaFlavour = JakartaFlavour.DEFAULT;
+        ChronoFlavour chronoFlavour = ChronoFlavour.DEFAULT;
+		ExternalizationScope externalizationScope = ExternalizationScope.DEFAULT;
         final List<String> pathMapSymbols = new ArrayList<>();
         final List<String> pathMapPaths = new ArrayList<>();
         final List<String> formats = new ArrayList<>();
@@ -96,6 +90,9 @@ public class XMIExternalizer {
 					jakartaFlavour = JakartaFlavour.fromFlavourVersion(flavour);
 					chronoFlavour = ChronoFlavour.fromFlavourVersion(flavour);
 	                break;
+				case 'i':
+					externalizationScope = ExternalizationScope.EXTENDED;
+					break;
 	            case 'j':
 	                openmdxjdo = g.getOptarg();
 	                break;
@@ -131,10 +128,20 @@ public class XMIExternalizer {
         
         this.modelNames = getModelNames(arguments, g);
         this.formats = formats;
-        this.modelExternalizer = new ModelExternalizer_1(openmdxjdo, annotationFlavour, jakartaFlavour, chronoFlavour);
+        this.modelExternalizer = new ModelExternalizer_1(
+			openmdxjdo,
+			new ExternalizationConfiguration(
+				annotationFlavour,
+				jakartaFlavour,
+				chronoFlavour,
+				externalizationScope
+			)
+		);
     	this.xmiFormat = toFormat(xmiDialect);
     	this.pathMap = toPathMap(pathMapSymbols, pathMapPaths);
 	}
+
+	private static final String DEFAULT_XMI_DIALECT = "emf";
 
 	private final short xmiFormat;
     private String url = null;
@@ -254,7 +261,8 @@ public class XMIExternalizer {
 		    args,
 		    "",
 		    new LongOpt[]{
-		        new LongOpt("flavour", LongOpt.REQUIRED_ARGUMENT, null, 'f'), 
+		        new LongOpt("flavour", LongOpt.REQUIRED_ARGUMENT, null, 'f'),
+				new LongOpt("include-provided-packages", LongOpt.REQUIRED_ARGUMENT, null, 'i'),
 		        new LongOpt("openmdxjdo", LongOpt.REQUIRED_ARGUMENT, null, 'j'),
 		        new LongOpt("markdown-annotations", LongOpt.NO_ARGUMENT, null, 'm'),
 		        new LongOpt("out", LongOpt.REQUIRED_ARGUMENT, null, 'o'),
@@ -262,7 +270,7 @@ public class XMIExternalizer {
 		        new LongOpt("pathMapSymbol", LongOpt.REQUIRED_ARGUMENT, null, 's'),
 		        new LongOpt("format", LongOpt.REQUIRED_ARGUMENT, null, 't'),
 		        new LongOpt("url", LongOpt.REQUIRED_ARGUMENT, null, 'u'),
-		        new LongOpt("xmi", LongOpt.REQUIRED_ARGUMENT, null, 'x'),
+				new LongOpt("xmi", LongOpt.REQUIRED_ARGUMENT, null, 'x')
 		    }
 		);
 	}

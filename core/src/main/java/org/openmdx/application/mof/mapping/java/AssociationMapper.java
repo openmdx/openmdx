@@ -47,9 +47,7 @@ package org.openmdx.application.mof.mapping.java;
 import java.io.Writer;
 
 import org.omg.mof.spi.Identifier;
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
 import org.openmdx.application.mof.mapping.cci.AssociationDef;
 import org.openmdx.application.mof.mapping.cci.AssociationEndDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
@@ -71,15 +69,19 @@ public class AssociationMapper
         ModelElement_1_0 element,
         Writer writer,
         Model_1_0 model,
-        Format format,
-        String packageSuffix,
-        MetaData_1_0 metaData, 
-        AnnotationFlavour annotationFlavour, 
-        JakartaFlavour jakartaFlavour, 
-        ChronoFlavour chronoFlavour,
+        ExternalizationConfiguration configuration,
+        JavaExportFormat format,
+        MetaData_1_0 metaData,
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
-        super(writer, model, format, packageSuffix, metaData, annotationFlavour, jakartaFlavour, chronoFlavour, primitiveTypeMapper);
+        super(
+            writer,
+            model,
+            configuration,
+            format,
+            metaData,
+            primitiveTypeMapper
+        );
         this.associationName = Identifier.CLASS_PROXY_NAME.toIdentifier(
             element.getName(),
             null, // removablePrefix
@@ -144,7 +146,7 @@ public class AssociationMapper
         String name = Identifier.CLASS_PROXY_NAME.toIdentifier(associationEnd.getName());            
         String qualifierValueName = Identifier.ATTRIBUTE_NAME.toIdentifier(associationEnd.getQualifierName());
         String qualifierTypeName = qualifierValueName + InstanceMapper.QUALIFIER_TYPE_SUFFIX;
-        String qualifierValueType = getType(associationEnd.getQualifierType(), getFormat(), false);
+        String qualifierValueType = getType(associationEnd.getQualifierType(), this.format, false);
         String objectValueName = Identifier.ATTRIBUTE_NAME.toIdentifier(associationEnd.getName());
         if(objectValueName.equals(qualifierValueName)) {
             objectValueName = '_' + objectValueName;

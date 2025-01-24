@@ -46,13 +46,11 @@ package org.openmdx.application.mof.mapping.java.mof;
 
 import java.io.Writer;
 
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.java.AbstractClassMapper;
-import org.openmdx.application.mof.mapping.java.Format;
-import org.openmdx.application.mof.mapping.java.StandardPrimitiveTypeMapper;
+import org.openmdx.application.mof.mapping.java.JavaExportFormat;
+import org.openmdx.application.mof.mapping.java.PrimitiveTypeMapper;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
 import org.openmdx.base.Version;
 import org.openmdx.base.exception.ServiceException;
@@ -67,27 +65,22 @@ public class ClassMapper
 {
 
     public ClassMapper(
-        ModelElement_1_0 classDef,        
-        Writer writer, 
+        ModelElement_1_0 classDef,
+        Writer writer,
         Model_1_0 model,
-        Format format, 
-        String packageSuffix,
-        MetaData_1_0 metaData, 
-        AnnotationFlavour annotationFlavour, 
-        JakartaFlavour jakartaFlavour, 
-        ChronoFlavour chronoFlavour
+        ExternalizationConfiguration configuration,
+        JavaExportFormat format,
+        MetaData_1_0 metaData,
+        PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             classDef,
             writer, 
             model,
-            format, 
-            packageSuffix, 
-            metaData, 
-            annotationFlavour, 
-            jakartaFlavour,
-                chronoFlavour,
-            new StandardPrimitiveTypeMapper()
+            configuration,
+            format,
+            metaData,
+            primitiveTypeMapper
         );
     }
 

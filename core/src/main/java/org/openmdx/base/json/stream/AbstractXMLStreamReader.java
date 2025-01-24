@@ -67,7 +67,7 @@ public abstract class AbstractXMLStreamReader implements XMLStreamReader {
     protected Node node;
     
     public boolean isAttributeSpecified(int arg0) {
-        // TODO Auto-generated method stub
+
         return false;
     }
 
@@ -80,7 +80,7 @@ public abstract class AbstractXMLStreamReader implements XMLStreamReader {
     }
 
     public boolean isStandalone() {
-        // TODO Auto-generated method stub
+
         return false;
     }
 
@@ -179,7 +179,7 @@ public abstract class AbstractXMLStreamReader implements XMLStreamReader {
     }
 
     public boolean hasName() {
-        // TODO Auto-generated method stub
+
         return false;
     }
 
@@ -254,7 +254,7 @@ public abstract class AbstractXMLStreamReader implements XMLStreamReader {
         return text != null ? text.toCharArray() : new char[]{};
     }
 
-    public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length) throws XMLStreamException {
+    public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length)  {
     	String text = getText();
     	if (text != null) {
             text.getChars(sourceStart,sourceStart+length,target,targetStart);

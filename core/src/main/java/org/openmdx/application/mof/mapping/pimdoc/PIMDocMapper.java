@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.zip.ZipOutputStream;
 
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.ZipSink;
@@ -62,32 +63,32 @@ public class PIMDocMapper implements Mapper_1_0 {
 
     /**
      * Public Constructor 
-     * 
+     * <p>
      * Uses default configuration values
-     * 
-     * @param annotationFlavour tells whether annotations use markdown or not
-     * 
-     * @throws ServiceException 
+     * </p>
+	 * @param configuration the complete externalization configuration
+     *
+	 * @throws ServiceException if the PIM Doc Configuration fails
      */
     public PIMDocMapper(
-    	AnnotationFlavour annotationFlavour
+    	ExternalizationConfiguration configuration
     ) throws ServiceException{
-        this(annotationFlavour, new PIMDocConfiguration(null));   
+        this(configuration.annotationFlavour, new PIMDocConfiguration(null));
     }
 
     /**
      * Public Constructor
-     * 
-     * @param annotationFlavour tells whether annotations use markdown or not
+     *
+	 * @param configuration the complete externalization configuration
      * @param configurationDirectory the PIMDoc Configuration Directory
      * 
-     * @throws ServiceException
+     * @throws ServiceException if the PIM Doc Configuration fails
      */
     public PIMDocMapper(
-    	AnnotationFlavour annotationFlavour, 
+		ExternalizationConfiguration configuration,
     	String configurationDirectory
     ) throws ServiceException {
-    	this(annotationFlavour, new PIMDocConfiguration(configurationDirectory));
+    	this(configuration.annotationFlavour, new PIMDocConfiguration(configurationDirectory));
 	}
 
     /**
@@ -95,7 +96,6 @@ public class PIMDocMapper implements Mapper_1_0 {
      * 
      * @param annotationFlavour tells whether annotations use markdown or not
      * @param configuration the PIMDoc Configuration
-     * 
      */
     private PIMDocMapper(
         AnnotationFlavour annotationFlavour, 

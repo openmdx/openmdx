@@ -47,7 +47,7 @@ package test.openmdx.application.mof.mapping.java;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.openmdx.application.mof.mapping.java.Format;
+import org.openmdx.application.mof.mapping.java.JavaExportFormat;
 import org.openmdx.application.mof.mapping.java.StandardPrimitiveTypeMapper;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
@@ -77,14 +77,14 @@ public class ExtendedPrimitiveTypeMapper extends StandardPrimitiveTypeMapper {
     @Override
     public String getFeatureType(
         String qualifiedTypeName, 
-        Format format, 
+        JavaExportFormat format,
         boolean asObject,
         boolean classicChronoTypes
     ) throws ServiceException {
         Matcher matcher = CODE_PATTERN.matcher(qualifiedTypeName);
         if(matcher.matches()) {
             System.out.println("ExtendedPrimitiveTypeMapper: " + qualifiedTypeName + " matches CODE_PATTERN");
-            if(format == Format.JPA3) {
+            if(format.isJPA3()) {
                 return "java.lang.String";
             } else {
                 return getJavaClassName(matcher);
@@ -100,14 +100,14 @@ public class ExtendedPrimitiveTypeMapper extends StandardPrimitiveTypeMapper {
     @Override
     public String getMappingPattern(
         String qualifiedTypeName,
-        Format from,
-        Format to
+        JavaExportFormat from,
+        JavaExportFormat to
     ) throws ServiceException {
         Matcher matcher = CODE_PATTERN.matcher(qualifiedTypeName);
         if(matcher.matches()) {
-            if(from == Format.CCI2 && to == Format.JPA3) {
+            if(from == JavaExportFormat.CCI2 && to == JavaExportFormat.JPA3) {
                 return EXPRESSION_PLACEHOLDER + ".getValue()";
-            } else if (from == Format.JPA3 && to == Format.CCI2) {
+            } else if (from == JavaExportFormat.JPA3 && to == JavaExportFormat.CCI2) {
                 return getJavaClassName(matcher) + ".valueOf(" + EXPRESSION_PLACEHOLDER + ")";
             } else {
                 throw new ServiceException(

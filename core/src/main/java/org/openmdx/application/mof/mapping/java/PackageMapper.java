@@ -51,9 +51,7 @@ import java.util.List;
 
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.ClassifierDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
@@ -72,23 +70,17 @@ public class PackageMapper extends AbstractMapper {
     public PackageMapper(
         Writer writer,
         Model_1_0 model,
-        Format format, 
-        String packageSuffix, 
-        MetaData_1_0 metaData, 
-        AnnotationFlavour annotationFlavour, 
-        JakartaFlavour jakartaFlavour, 
-        ChronoFlavour chronoFlavour,
+        ExternalizationConfiguration configuration,
+        JavaExportFormat format,
+        MetaData_1_0 metaData,
         PrimitiveTypeMapper primitiveTypeMapper
     ) {
         super(
             writer,
             model,
-            format, 
-            packageSuffix,
-            metaData, 
-            annotationFlavour,
-            jakartaFlavour,
-            chronoFlavour,
+            configuration,
+            format,
+            metaData,
             primitiveTypeMapper
         );
     }
@@ -127,7 +119,7 @@ public class PackageMapper extends AbstractMapper {
         this.trace("Package/ClassAccessor");
         printLine(
         	"  public ",
-        	this.getType(classDef.getQualifiedName(), getFormat(), false),
+        	this.getType(classDef.getQualifiedName(), this.format, false),
         	"Class ",
         	getMethodName("get" + MapperUtils.getElementName(classDef.getQualifiedName())),
         	"();"
@@ -150,7 +142,7 @@ public class PackageMapper extends AbstractMapper {
         String packageField = buffer.toString();
         buffer.setLength(buffer.length() - 7);
         String authorityField = buffer.append("Authority").toString();
-        String authorityType = this.getType("org:openmdx:base:Authority", getFormat(), false);
+        String authorityType = this.getType("org:openmdx:base:Authority", this.format, false);
         String xri = MapperUtils.getAuthorityId(nameComponents);
         printLine(" /**");
         MapperUtils.wrapText(
@@ -205,7 +197,7 @@ public class PackageMapper extends AbstractMapper {
             null, // removableSuffix
             null // appendableSuffix
         );
-        printLine("  public ", this.getType(structDef.getQualifiedName(), getFormat(), false), " ", methodName, "(");
+        printLine("  public ", this.getType(structDef.getQualifiedName(), this.format, false), " ", methodName, "(");
         int ii = 0;
         for (Iterator<?> i = structDef.getFields().iterator(); i.hasNext(); ii++) {
             StructuralFeatureDef fieldDef = (StructuralFeatureDef) i.next();

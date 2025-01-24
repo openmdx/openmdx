@@ -45,11 +45,82 @@
 
 package org.openmdx.application.mof.mapping.java;
 
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
+import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
+import org.openmdx.application.mof.mapping.java.mof.ModelNameConstantsMapper;
+
 /**
- * Format
+ * Java Export Formats
  */
-public enum Format {
+public enum JavaExportFormat {
     
-    CCI2, SPI2, JMI1, JPA3
-        
+    CCI2,
+    SPI2,
+    JMI1,
+    JPA3,
+    MOF1 {
+
+        @Override
+        public Mapper_1_0 createMapper(ExternalizationConfiguration configuration){
+            return new ModelNameConstantsMapper(configuration);
+        }
+
+    };
+
+    public boolean isCCI2(){
+        return this == CCI2;
+    }
+    public boolean isSPI2(){
+        return this == SPI2;
+    }
+    public boolean isJMI1(){
+        return this == JMI1;
+    }
+    public boolean isJPA3(){
+        return this == JPA3;
+    }
+    public boolean isMOF1(){
+        return this == MOF1;
+    }
+
+    public Mapper_1_0 createMapper(ExternalizationConfiguration configuration){
+        return new Mapper_1(configuration, this);
+    }
+
+    /**
+     * Determine the name of the subpackage to be used for the given mapping
+     *
+     * @return The name of the subpackage to be used for the given mapping
+     */
+    public String getPackageSuffix(){
+        return name().toLowerCase();
+    }
+
+    /**
+     * Determine the canonical name of the format
+     *
+     * @return the canonical name of the format
+     */
+    public String getId(){
+        return name().toLowerCase();
+    }
+
+    public static JavaExportFormat fromId(String id) {
+        for(JavaExportFormat format : JavaExportFormat.values()) {
+            if (format.getId().equals(id)) {
+                return format;
+            }
+        }
+        throw new IllegalArgumentException("Unknown format: " + id);
+    }
+
+    public static boolean supports(String id) {
+        for(JavaExportFormat format : JavaExportFormat.values()) {
+            if (format.getId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

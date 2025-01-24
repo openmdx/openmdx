@@ -78,18 +78,14 @@ allprojects {
     tasks.withType<JavaCompile> {
         sourceCompatibility = runtimeCompatibility.majorVersion
         targetCompatibility = runtimeCompatibility.majorVersion
-        options.release.set(runtimeCompatibility.majorVersion.toInt())
-        options.compilerArgs.add("-Xplugin:Manifold")
-    	options.compilerArgs.add("-Amanifold.source.target=${runtimeCompatibility.majorVersion}")
-    	options.compilerArgs.add("-Amanifold.dump.generated=true")
-        options.annotationProcessorGeneratedSourcesDirectory = layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main").get().getAsFile()
-        if(runtimeCompatibility.isJava8()) {
-        	options.compilerArgs.add("-Xlint:-options")
-        }
-        if(classicChronoTypes) {
-        	options.compilerArgs.add("-ACLASSIC_CHRONO_TYPES")
-        }
+        options.release = runtimeCompatibility.majorVersion.toInt()
+        options.generatedSourceOutputDirectory = layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main").get().getAsFile()
         options.annotationProcessorPath = configurations.annotationProcessor.get()
+        options.compilerArgs.add("-Xplugin:Manifold")
+        options.compilerArgs.add("-Amanifold.source.target=${runtimeCompatibility.majorVersion}")
+        options.compilerArgs.add("-Amanifold.dump.generated=true")
+        if(runtimeCompatibility.isJava8()) options.compilerArgs.add("-Xlint:-options")
+        if(classicChronoTypes) options.compilerArgs.add("-ACLASSIC_CHRONO_TYPES")
     }
 
 }

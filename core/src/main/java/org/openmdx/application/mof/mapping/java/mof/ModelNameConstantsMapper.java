@@ -52,17 +52,16 @@ import java.util.List;
 import java.util.zip.ZipOutputStream;
 
 import org.omg.mof.cci.VisibilityKind;
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
+import org.openmdx.application.mof.externalizer.spi.*;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_1;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.OperationDef;
 import org.openmdx.application.mof.mapping.cci.ReferenceDef;
 import org.openmdx.application.mof.mapping.cci.StructuralFeatureDef;
-import org.openmdx.application.mof.mapping.java.Format;
+import org.openmdx.application.mof.mapping.java.JavaExportFormat;
 import org.openmdx.application.mof.mapping.java.MetaData_2;
+import org.openmdx.application.mof.mapping.java.StandardPrimitiveTypeMapper;
 import org.openmdx.application.mof.mapping.spi.AbstractMapper_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -79,37 +78,27 @@ public class ModelNameConstantsMapper
 
     /**
      * Constructor 
-     * 
-     * @param annotationFlavour tells whether annotations use markdown
-     * @param jakartaFlavour tells whether Jakarta 8 or a contemporary flavour is targeted
-     * @param chronoFlavour tells whether the classic or the contemporary JMI mapping shall be applied
+     *
+     * @param configuration the externalization configuration
      */
     public ModelNameConstantsMapper(
-    	AnnotationFlavour annotationFlavour, 
-    	JakartaFlavour jakartaFlavour, 
-    	ChronoFlavour chronoFlavour
+        ExternalizationConfiguration configuration
     ){
-        super(annotationFlavour, jakartaFlavour, chronoFlavour, PACKAGE_SUFFIX);
+        super(configuration, MAPPING_FORMAT.getPackageSuffix());
     }
-    
-    /**
-     * The suffix for the package to be generated in (without leading dot), e.g. 'cci2'.
-     */
-    private static final String PACKAGE_SUFFIX = "mof1";
     
     /**
      * The file extension (without leading point), e.g. 'java'.
      */
     private static final String FILE_EXTENSION = "java";
-    
+
     /**
      * Mapping format defined MapperFactory_1.
      */
-    private static final Format MAPPING_FORMAT = null;
-    
-    /**
-     * 
-     */
+    private static final JavaExportFormat MAPPING_FORMAT = JavaExportFormat.MOF1;
+
+    private static final StandardPrimitiveTypeMapper STANDARD_PRIMITIVE_TYPE_MAPPER = new StandardPrimitiveTypeMapper();
+
     private MetaData_1_0 metaData;
 
     /**
@@ -351,25 +340,19 @@ public class ModelNameConstantsMapper
                         ClassMapper classIntfMapper = new ClassMapper(
                             element, 
                             classWriter, 
-                            this.model, 
-                            MAPPING_FORMAT, 
-                            this.packageSuffix,
-                            this.metaData, 
-                            annotationFlavour, 
-                            jakartaFlavour,
-                            chronoFlavour
-                        );
+                            this.model,
+                            this.configuration,
+                            MAPPING_FORMAT,
+                            this.metaData,
+                            STANDARD_PRIMITIVE_TYPE_MAPPER);
                         InstanceFeaturesMapper instanceIntfMapper = new InstanceFeaturesMapper(
                             element, 
                             instanceFeaturesWriter, 
-                            this.model, 
-                            MAPPING_FORMAT, 
-                            this.packageSuffix,
-                            this.metaData, 
-                            annotationFlavour, 
-                            jakartaFlavour,
-                            chronoFlavour
-                        );
+                            this.model,
+                            this.configuration,
+                            MAPPING_FORMAT,
+                            this.metaData,
+                            STANDARD_PRIMITIVE_TYPE_MAPPER);
                         this.mapBeginClass(
                             element,
                             classIntfMapper,
@@ -421,14 +404,11 @@ public class ModelNameConstantsMapper
                             StructFeaturesMapper structFeaturesMapper = new StructFeaturesMapper(
                                 element, 
                                 structFeaturesWriter, 
-                                this.model, 
-                                MAPPING_FORMAT, 
-                                this.packageSuffix,
-                                this.metaData, 
-                                annotationFlavour, 
-                                jakartaFlavour,
-                                chronoFlavour
-                            );
+                                this.model,
+                                this.configuration,
+                                MAPPING_FORMAT,
+                                this.metaData,
+                                STANDARD_PRIMITIVE_TYPE_MAPPER);
                             this.mapBeginStruct(
                                 element,
                                 structFeaturesMapper

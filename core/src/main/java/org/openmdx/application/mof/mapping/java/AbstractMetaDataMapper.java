@@ -46,9 +46,7 @@ package org.openmdx.application.mof.mapping.java;
 
 import java.io.Writer;
 
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
@@ -68,29 +66,23 @@ import org.openmdx.base.mof.cci.Model_1_0;
 public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
 
 	protected AbstractMetaDataMapper(
-        ModelElement_1_0 classDef, 
+        ModelElement_1_0 classDef,
         Writer writer,
-		Model_1_0 model, 
-        Format format, 
-        String packageSuffix,
-		String sliceClassName, 
-        AnnotationFlavour annotationFlavour, 
-        JakartaFlavour jakartaFlavour, 
-        ChronoFlavour chronoFlavour,
-        MetaData_1_0 metaData, 
-        PrimitiveTypeMapper primitiveTypeMapper, 
+        Model_1_0 model,
+        ExternalizationConfiguration configuration,
+        JavaExportFormat format,
+        String sliceClassName,
+        MetaData_1_0 metaData,
+        PrimitiveTypeMapper primitiveTypeMapper,
         ObjectRepositoryMetadataPlugin plugin
     ) throws ServiceException {
         super(
             classDef,
             writer, 
             model,
-            format, 
-            packageSuffix, 
-            metaData, 
-            annotationFlavour, 
-            jakartaFlavour,
-            chronoFlavour,
+            configuration,
+            format,
+            metaData,
             primitiveTypeMapper
         );
         this.writer = writer;

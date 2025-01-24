@@ -46,7 +46,7 @@ package org.openmdx.application.mof.externalizer.spi;
 
 import java.util.Collection;
 
-import org.openmdx.application.mof.mapping.cci.MappingTypes;
+import org.openmdx.application.mof.mapping.cci.ExtendedFormatOptions;
 
 public enum ChronoFlavour {
 	
@@ -64,8 +64,9 @@ public enum ChronoFlavour {
 		}
 	};
 
-	
-	private static final String EXTENDED_FORMAT = MappingTypes.CLASSIC_CHRONO_TYPES;
+
+	public static final ChronoFlavour DEFAULT = CLASSIC;
+	private static final String EXTENDED_FORMAT = ExtendedFormatOptions.CLASSIC_CHRONO_TYPES;
 
 	public abstract void applyExtendedFormat(Collection<String> extendedFormats);
 	

@@ -68,7 +68,7 @@ open class GenerateModelsTask : JavaExec() {
 			"--xmi=emf",
 			"--out=" + project.layout.buildDirectory.file("generated/sources/model/openmdx-${project.getName()}-models.zip").get().asFile,
 			"--openmdxjdo=" + File("${project.projectDir}/src/main/resources"),
-			"--markdown-annotations", 
+			"--markdown-annotations",
 			"--format=xmi1",
 			"--format=cci2",
 			"--format=jmi1",

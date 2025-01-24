@@ -55,9 +55,7 @@ import java.util.Map;
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.ExceptionDef;
@@ -91,24 +89,18 @@ extends AbstractClassMapper {
         Writer writer,
         Writer writerJdoSlice,
         Model_1_0 model,
-        Format format, 
-        String packageSuffix,
-        MetaData_1_0 metaData, 
-        AnnotationFlavour annotationFlavour,
-        JakartaFlavour jakartaFlavour,
-        ChronoFlavour chronoFlavour,
+        ExternalizationConfiguration configuration,
+        JavaExportFormat format,
+        MetaData_1_0 metaData,
         PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             classDef,
             writer,
             model,
-            format, 
-            packageSuffix, 
-            metaData, 
-            annotationFlavour,
-            jakartaFlavour,
-            chronoFlavour,
+            configuration,
+            format,
+            metaData,
             primitiveTypeMapper
         );
         this.pwSlice = writerJdoSlice == null ? null : new PrintWriter(writerJdoSlice);
@@ -127,10 +119,10 @@ extends AbstractClassMapper {
     public void mapReferenceAddWithoutQualifier(
         ReferenceDef referenceDef
     ) throws ServiceException {
-        if(this.getFormat() == Format.JMI1) return;
+        if(this.format.isJMI1()) return;
         this.trace("Instance/ReferenceAddWithoutQualifier");
         ClassDef classDef = getClassDef(referenceDef.getQualifiedTypeName());
-        String referenceType = getClassType(classDef).getType(classDef, this.getFormat(), TypeMode.MEMBER);
+        String referenceType = getClassType(classDef).getType(classDef, this.format, TypeMode.MEMBER);
         printLine("  /**");
         MapperUtils
             .wrapText(
@@ -165,8 +157,8 @@ extends AbstractClassMapper {
             referenceDef.isChangeable() &&
             (referenceDef.isComposition() || referenceDef.isShared())
         ){
-            Format format = getFormat();
-            if(format == Format.JMI1) {
+            JavaExportFormat format = this.format;
+            if(format.isJMI1()) {
                 this.trace("Instance/ReferenceAddWithQualifier");
                 ClassDef classDef = getClassDef(referenceDef.getQualifiedTypeName());
                 ClassType classType = getClassType(classDef);
@@ -194,8 +186,8 @@ extends AbstractClassMapper {
                 printLine("   * @param ", valueHolder, " The element to be appended.");
                 printLine("   */");
                 printLine("  public void ", this.getMethodName("add" + referenceDef.getBeanGenericName()), " (");
-                printLine("    boolean ", qualifierName, PERSISTENCY_SUFFIX, ",");            
-                printLine("    ", this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false), " ", qualifierName, ",");
+                printLine("    boolean ", qualifierName, PERSISTENCY_SUFFIX, ",");
+                printLine("    ", this.getType(referenceDef.getQualifiedQualifierTypeName(), this.format, false), " ", qualifierName, ",");
                 printLine("    ", referenceType, " ", valueHolder);        
                 printLine("  );");
                 newLine();
@@ -218,7 +210,7 @@ extends AbstractClassMapper {
                 printLine("   * @param ", valueHolder, " The element to be appended.");
                 printLine("   */");
                 printLine("  public void ", this.getMethodName("add" + referenceDef.getBeanGenericName()), " (");
-                printLine("    ", this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false), " ", qualifierName, ",");
+                printLine("    ", this.getType(referenceDef.getQualifiedQualifierTypeName(), this.format, false), " ", qualifierName, ",");
                 printLine("    ", referenceType, " ", valueHolder);        
                 printLine("  );");
                 newLine();
@@ -288,7 +280,7 @@ extends AbstractClassMapper {
                 null // appendableSuffix
             );
             ClassDef classDef = getClassDef(qualifiedTypeName);
-            argumentType = getClassType(classDef).getType(classDef, this.getFormat(), TypeMode.MEMBER);
+            argumentType = getClassType(classDef).getType(classDef, this.format, TypeMode.MEMBER);
         }
         this.trace("Instance/ReferenceSetNoQualifier");
         printLine("  /**");
@@ -308,7 +300,7 @@ extends AbstractClassMapper {
         printLine("   */");
         printLine("  public void ", methodName, "(");
         printLine("    ", argumentType, " ", referenceName);
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             printLine("  ){");                
             printLine("    throw new javax.jdo.JDOFatalUserException(");
             printLine("      \"Typed set not handled by data object\",");
@@ -339,7 +331,7 @@ extends AbstractClassMapper {
         String qualifiedTypeName = referencedEnd ? referenceDef.getQualifiedTypeName() : referenceDef.getExposedEndQualifiedTypeName();
         ClassDef classDef = getClassDef(qualifiedTypeName);
         ClassType classType = getClassType(classDef);
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             mapDeclareReference("  ", qualifiedTypeName, referenceName, referencedEnd);
         }
         if(referencedEnd) {
@@ -354,10 +346,10 @@ extends AbstractClassMapper {
             print(optional ? "&mdash;possibly {@code null}&mdash;" : " non-{@code null} ");
             printLine(" value for this reference.");
             printLine("   */");
-            String accessorType = classType.getType(classDef, this.getFormat(), TypeMode.RESULT); 
+            String accessorType = classType.getType(classDef, this.format, TypeMode.RESULT);
             String methodName = this.getMethodName(referenceDef.getBeanGetterName());
             printLine("  public ", accessorType, " ", methodName, "(");
-            if(getFormat() == Format.JPA3) {
+            if(this.format.isJPA3()) {
                 printLine("  ) {");
                 printLine("    throw new javax.jdo.JDOFatalUserException(");
                 printLine("      \"This signature is not handled by data object\",");
@@ -382,7 +374,7 @@ extends AbstractClassMapper {
         ReferenceDef referenceDef, 
         boolean delegate
     ) throws ServiceException {
-        if(getFormat() == Format.JMI1) return;
+        if(this.format.isJMI1()) return;
         this.trace("Instance/ReferenceGet0_nWithQualifier");
         printLine("  /**");
         MapperUtils.wrapText(
@@ -409,7 +401,7 @@ extends AbstractClassMapper {
         	"("
         );
         printLine("    ", getInterfaceType(referenceDef.getQualifiedQualifierTypeName()), " ", referenceDef.getQualifierName());
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             printLine("  ){");
             printLine("    throw new java.lang.UnsupportedOperationException(\"Not yet implemented\");"); // TODO
             printLine("  }");
@@ -432,7 +424,7 @@ extends AbstractClassMapper {
         ) : "java.util.Set";
 
         final ClassMetaData classMetaData;
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             classMetaData = (ClassMetaData) getClassDef(referenceDef.getQualifiedTypeName()).getClassMetaData();
             if(classMetaData.isRequiresExtent()) {
                 if (referenceDef.isComposition()) {
@@ -458,7 +450,7 @@ extends AbstractClassMapper {
             classMetaData = null;
         }
         this.trace("Instance/ReferenceGet0_nWithQuery");
-        if(getFormat() == Format.JMI1) {
+        if(this.format.isJMI1()) {
             String qualifiedQueryName = getQueryType(
                 referenceDef.getQualifiedTypeName(), 
                 getNamespace(
@@ -487,7 +479,7 @@ extends AbstractClassMapper {
             printLine("   */");
             printLine(
             	"  public <T extends ",
-            	this.getType(referenceDef.getQualifiedTypeName(), getFormat(), false),
+            	this.getType(referenceDef.getQualifiedTypeName(), this.format, false),
             	"> java.util.List<T> ",
             	this.getMethodName(referenceDef.getBeanGetterName()),
             	"("
@@ -510,7 +502,7 @@ extends AbstractClassMapper {
             String cast = this.printAnnotationAndReturnCast(referenceDef, collectionType);
             String methodName = this.getMethodName(referenceDef.getBeanGetterName());
             printLine("  public ", getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER, null), " ", methodName, "(");
-            if(getFormat() == Format.JPA3) {
+            if(this.format.isJPA3()) {
                 printLine("  ){");
                 if(referenceDef.isComposition()) {
                     printLine("    throw new javax.jdo.JDOFatalUserException(");
@@ -551,7 +543,7 @@ extends AbstractClassMapper {
         ReferenceDef referenceDef, 
         boolean delegate
     ) throws ServiceException {
-        if(this.getFormat() == Format.JMI1) return;
+        if(this.format.isJMI1()) return;
         String referenceName = getFeatureName(referenceDef);
         String qualifierType = referenceDef.getQualifiedQualifierTypeName();
         if(qualifierType != null) qualifierType = qualifierType.intern();
@@ -560,7 +552,7 @@ extends AbstractClassMapper {
                 "java.util.Set" :
                 "java.util.List";
             String methodName = this.getMethodName(referenceDef.getBeanGetterName());
-            if(getFormat() == Format.JPA3 && !delegate) {
+            if(this.format.isJPA3() && !delegate) {
                 this.sliced.put(referenceName, referenceDef.getQualifiedTypeName());
             }
             this.trace("Instance/ReferenceGet0_nNoQuery");
@@ -575,7 +567,7 @@ extends AbstractClassMapper {
             printLine("   * @return The {@code Collection} of referenced objects.");
             printLine("   */");
             printLine("  public ", this.getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER, null), " ", methodName, "(");
-            if(getFormat() == Format.JPA3) {
+            if(this.format.isJPA3()) {
                 printLine("  ){");
                 printLine("    throw new javax.jdo.JDOFatalUserException(");
                 printLine("      \"This signature is not handled by data object\",");
@@ -604,9 +596,9 @@ extends AbstractClassMapper {
         } 
         else if(PrimitiveTypes.STRING == qualifierType) {
             ClassDef classDef = getClassDef(referenceDef.getQualifiedTypeName());
-            String referenceType = getClassType(classDef).getType(classDef, getFormat(), TypeMode.INTERFACE);
+            String referenceType = getClassType(classDef).getType(classDef, this.format, TypeMode.INTERFACE);
             String methodName = this.getMethodName(referenceDef.getBeanGetterName());
-            if(getFormat() == Format.JPA3 && !delegate) {
+            if(this.format.isJPA3() && !delegate) {
                 this.trace("Instance/ReferenceDeclarationMap");
                 newLine();
                 printLine("  /**");
@@ -629,7 +621,7 @@ extends AbstractClassMapper {
             printLine("   * @return The {@code Map} of referenced objects.");
             printLine("   */");
             printLine("  public ", this.getMapType(referenceDef, java.lang.String.class, Boolean.TRUE), " ", methodName, "(");
-            if(getFormat() == Format.JPA3) {
+            if(this.format.isJPA3()) {
                 printLine("  ){");
                 printLine("    throw new javax.jdo.JDOFatalUserException(");
                 printLine("      \"References of type map not handled by data object\",");
@@ -648,8 +640,8 @@ extends AbstractClassMapper {
     public void mapReferenceGet0_1WithQualifier(
         ReferenceDef referenceDef
     ) throws ServiceException {
-        Format format = getFormat();
-        if(format == Format.JMI1) {
+        JavaExportFormat format = this.format;
+        if(format.isJMI1()) {
             ClassDef classDef = getClassDef(referenceDef.getQualifiedTypeName());
             String accessorType = getClassType(classDef).getType(classDef, format, TypeMode.RESULT); 
             String qualifierPersistencyArgumentName = referenceDef.getQualifierName() + PERSISTENCY_SUFFIX;
@@ -687,7 +679,7 @@ extends AbstractClassMapper {
                 if(i == 0) {
                     printLine("    boolean ", qualifierPersistencyArgumentName, ",");
                 }
-                printLine("    ", this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false), " ", referenceDef.getQualifierName());
+                printLine("    ", this.getType(referenceDef.getQualifiedQualifierTypeName(), this.format, false), " ", referenceDef.getQualifierName());
                 printLine("  );");
                 newLine();
             }
@@ -725,11 +717,11 @@ extends AbstractClassMapper {
             );
             printLine(
             	"    ",
-            	this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false),
+            	this.getType(referenceDef.getQualifiedQualifierTypeName(), this.format, false),
             	" ",
             	referenceDef.getQualifierName()
             );
-            if(getFormat() == Format.JPA3) {
+            if(this.format.isJPA3()) {
                 printLine("  ){");
                 printLine("    throw new java.lang.UnsupportedOperationException(\"Qualified object retrieval not yet supported by persistence layer\");");
                 printLine("  }");
@@ -772,7 +764,7 @@ extends AbstractClassMapper {
                 ii++;
             }
         }
-        if(getFormat() == Format.JPA3) { 
+        if(this.format.isJPA3()) {
             printLine(" ){");
             printLine("    throw new javax.jdo.JDOFatalUserException(");
             printLine("      \"Behavioural features not handled by data object\",");
@@ -811,7 +803,7 @@ extends AbstractClassMapper {
     ) throws ServiceException {
         this.trace("Instance/End");
         newLine();
-        if(getFormat() == Format.JPA3) { 
+        if(this.format.isJPA3()) {
             this.mapSingleValuedFields();
             this.mapMultivaluedFields();
         }
@@ -824,7 +816,7 @@ extends AbstractClassMapper {
                         false // referencedEnd
                     );
                 }
-                if(this.getFormat() == Format.JPA3) {        
+                if(this.format.isJPA3()) {
                     this.mapReferenceSetNoQualifier(
                         this.directCompositeReference, 
                         false, // optional
@@ -842,7 +834,7 @@ extends AbstractClassMapper {
 
     private void mapAuthority(
     ){
-        switch(getFormat()) {
+        switch(this.format) {
             case CCI2: {
                 printLine("  /**");
                 printLine("   * Object Identity");
@@ -879,13 +871,13 @@ extends AbstractClassMapper {
         String qualifiedReferenceType = this.directCompositeReference.getExposedEndQualifiedTypeName();
         ClassDef classDef = getClassDef(qualifiedReferenceType);
         String qualifiedQualifierType = this.directCompositeReference.getQualifiedQualifierTypeName();
-        String qualifierArgumentType = getType(qualifiedQualifierType, getFormat(), false);
+        String qualifierArgumentType = getType(qualifiedQualifierType, this.format, false);
         String qualifierValueName = Identifier.ATTRIBUTE_NAME.toIdentifier(qualifierName);
         String objectValueName = Identifier.ATTRIBUTE_NAME.toIdentifier(objectName);
         if(objectValueName.equals(qualifierValueName)) {
             objectValueName = '_' + objectValueName;
         }
-        switch(getFormat()) {
+        switch(this.format) {
             case CCI2: 
                 String qualifierTypeAccessorName = Identifier.OPERATION_NAME.toIdentifier(
                     qualifierName, 
@@ -1048,9 +1040,14 @@ extends AbstractClassMapper {
                 classDef.getName() + "}'s multivalued attributes", this.pwSlice::println
             );
             this.pwSlice.println(" */");
-            String superClassName = this.isSliceHolder() || this.extendsClassDef == null ? (
-                this.classMetaData != null && this.classMetaData.getBaseClass() != null ? this.classMetaData.getBaseClass() + SLICE_CLASS_NAME : null 
-            ) : this.getType(this.extendsClassDef.getQualifiedName(), getFormat(), false) + SLICE_CLASS_NAME;
+            String superClassName;
+            if (this.isSliceHolder() || this.extendsClassDef == null) {
+                superClassName = (
+                    this.classMetaData != null && this.classMetaData.getBaseClass() != null ? this.classMetaData.getBaseClass() + SLICE_CLASS_NAME : null
+                );
+            } else {
+                superClassName = this.getType(this.extendsClassDef.getQualifiedName(), this.format, false) + SLICE_CLASS_NAME;
+            }
             mapGeneratedAnnotation(pwSlice::println);
             this.pwSlice.println("@SuppressWarnings(\"serial\")");            
             this.pwSlice.print("public class " + this.className + SLICE_CLASS_NAME + " ");
@@ -1062,7 +1059,7 @@ extends AbstractClassMapper {
                     this.model.isPrimitiveType(qualifiedName) ||
                     this.model.isStructureType(qualifiedName)
                 ) {
-                    String typeName = getType(qualifiedName, getFormat(), true);
+                    String typeName = getType(qualifiedName, this.format, true);
                     this.mapDeclareValue(
                         this.pwSlice, 
                         "  ", 
@@ -1218,12 +1215,15 @@ extends AbstractClassMapper {
         }
         printLine(" */");
         this.mapGeneratedAnnotation();
-        if(getFormat() == Format.JPA3) {
-            String superClassName = this.isBaseClass() ? 
-                this.classMetaData.getBaseClass() != null ?
-                    this.classMetaData.getBaseClass() :                
-                    QUALIFIED_ABSTRACT_OBJECT_CLASS_NAME :
-                this.getType(this.extendsClassDef.getQualifiedName(), getFormat(), false);
+        if(this.format.isJPA3()) {
+            String superClassName;
+            if (this.isBaseClass()) {
+                superClassName = this.classMetaData.getBaseClass() != null ?
+                    this.classMetaData.getBaseClass() :
+                    QUALIFIED_ABSTRACT_OBJECT_CLASS_NAME;
+            } else {
+                superClassName = this.getType(this.extendsClassDef.getQualifiedName(), this.format, false);
+            }
             printLine("@SuppressWarnings(\"serial\")");
             print("public class " + this.className); 
             printLine("  extends ", superClassName);
@@ -1239,7 +1239,7 @@ extends AbstractClassMapper {
         } else {
             printLine("public interface ", this.className);
             String separator = "  extends ";
-            if(getFormat() == Format.JMI1) {
+            if(this.format.isJMI1()) {
                 print(
                     separator + this.interfaceType(
                         this.classDef, 
@@ -1250,7 +1250,7 @@ extends AbstractClassMapper {
                 separator = ",\n    ";
             }
             if (this.classDef.getSupertypes().isEmpty()) {
-                if(getFormat() == Format.JMI1) {
+                if(this.format.isJMI1()) {
                     print(separator + REF_OBJECT_INTERFACE_NAME);
                     separator = ",\n    ";
                 }
@@ -1260,13 +1260,13 @@ extends AbstractClassMapper {
                     i.hasNext(); 
                     separator = ",\n    "
                 ){
-                    print(separator + this.getType(i.next().getQualifiedName(), getFormat(), false));
+                    print(separator + this.getType(i.next().getQualifiedName(), this.format, false));
                 }
             }
         }
         printLine("{");
         newLine();
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             printLine("  /**");
             printLine("   * Constructor");
             printLine("   */");
@@ -1340,7 +1340,7 @@ extends AbstractClassMapper {
         String newValue = getFeatureName(attributeDef);
         String modelType = attributeDef.getQualifiedTypeName();
         if (PrimitiveTypes.BINARY.equals(modelType)) {
-            if(getFormat() == Format.JMI1) {
+            if(this.format.isJMI1()) {
                 printLine("  /**");
                 MapperUtils
                     .wrapText(
@@ -1367,7 +1367,7 @@ extends AbstractClassMapper {
                 printLine("   */");
                 printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
                 printLine("    org.w3c.cci2.BinaryLargeObject ", newValue);
-                if(getFormat() == Format.JPA3) {
+                if(this.format.isJPA3()) {
                     printLine("  ){");
                     printLine("    this.", newValue, " = openmdxjdoToArray(", newValue, ");");
                     printLine("  }");
@@ -1377,7 +1377,7 @@ extends AbstractClassMapper {
                 newLine();
             }
         } else if (PrimitiveTypes.STRING.equals(modelType)) {
-            if(getFormat() == Format.JMI1) {
+            if(this.format.isJMI1()) {
                 printLine("  /**");
                 printLine("   * Sets a new character large object value for the attribute {@code ", attributeDef.getName(), "}.");
                 if (attributeDef.getAnnotation() != null) {
@@ -1401,7 +1401,7 @@ extends AbstractClassMapper {
                 printLine("   */");
                 printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
                 printLine("    org.w3c.cci2.CharacterLargeObject ", newValue);
-                if(getFormat() == Format.JPA3) {
+                if(this.format.isJPA3()) {
                     printLine("  ){");
                     printLine("    this.", newValue, " = openmdxjdoToArray(", newValue, ");");
                     printLine("  }");
@@ -1416,13 +1416,13 @@ extends AbstractClassMapper {
     public void mapAttributeSet1_1(
         AttributeDef attributeDef
     ) throws ServiceException {
-        Format format = getFormat();
-        if(format == Format.JMI1) return;
+        JavaExportFormat format = this.format;
+        if(format.isJMI1()) return;
         this.trace("Instance/AttributeSet1_1");
         String attributeName = getFeatureName(attributeDef);
         String modelType = attributeDef.getQualifiedTypeName();
         boolean primitiveType = this.model.isPrimitiveType(modelType);
-        String attributeType = this.getType(modelType, format == Format.JPA3 && primitiveType ? Format.CCI2 : format, false);
+        String attributeType = this.getType(modelType, format.isJPA3() && primitiveType ? JavaExportFormat.CCI2 : format, false);
         printLine("  /**");
         printLine("   * Sets a new value for the attribute {@code ", attributeDef.getName(), "}.");
         if (!attributeDef.isChangeable()) {
@@ -1437,13 +1437,13 @@ extends AbstractClassMapper {
         printLine("   */");
         printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
         printLine("    " + attributeType + ' ' + attributeName);
-        if(format == Format.JPA3) {
+        if(format.isJPA3()) {
             printLine("  ){");
             printLine("    super.openmdxjdoMakeDirty();");                        
             print("    this." + attributeName + " = ");
             if(this.mapValueType(modelType)) {
                 String source = primitiveType ? attributeName : '(' + getType(modelType, format, true) + ')' + attributeName;
-                print(getMappingExpression(modelType, Format.CCI2, Format.JPA3, source));
+                print(getMappingExpression(modelType, JavaExportFormat.CCI2, JavaExportFormat.JPA3, source));
             } else if (primitiveType){
                 print(attributeName);
             } else {
@@ -1461,13 +1461,13 @@ extends AbstractClassMapper {
     public void mapAttributeSet0_1(
         AttributeDef attributeDef
     ) throws ServiceException {
-        Format format = getFormat();
-        if(format == Format.JMI1) return;
+        JavaExportFormat format = this.format;
+        if(format.isJMI1()) return;
         this.trace("Instance/AttributeSet0_1");
         String attributeName = getFeatureName(attributeDef);
         String modelType = attributeDef.getQualifiedTypeName();
         boolean primitiveType = this.model.isPrimitiveType(modelType);
-        String attributeType = this.getType(modelType, format == Format.JPA3 && primitiveType ? Format.CCI2 : format, true);
+        String attributeType = this.getType(modelType, format.isJPA3() && primitiveType ? JavaExportFormat.CCI2 : format, true);
         newLine();
         printLine("  /**");
         printLine("   * Sets a new value for the attribute {@code ", attributeDef.getName(), "}.");
@@ -1479,13 +1479,13 @@ extends AbstractClassMapper {
         printLine("   */");
         printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
         printLine("    ", attributeType, " ", attributeName);
-        if(format == Format.JPA3) {
+        if(format.isJPA3()) {
             printLine("  ){");           
             printLine("    super.openmdxjdoMakeDirty();");                        
             printLine("    this.", attributeName, " = ");
             if(this.mapValueType(modelType)) {
                 String source = primitiveType ? attributeName : '(' + getType(modelType, format, true) + ')' + attributeName;
-                print(getMappingExpression(modelType, Format.CCI2, Format.JPA3, source));
+                print(getMappingExpression(modelType, JavaExportFormat.CCI2, JavaExportFormat.JPA3, source));
             } else if (primitiveType){
                 print(attributeName);
             } else {
@@ -1508,7 +1508,7 @@ extends AbstractClassMapper {
         String newValue = getFeatureName(attributeDef);
 
         if (PrimitiveTypes.BINARY.equals(attributeDef.getQualifiedTypeName())) {
-            if(getFormat() != Format.JMI1) {
+            if(!this.format.isJMI1()) {
                 printLine("  /**");
                 printLine("   * Retrieves a binary large object value for the attribute {@code ", attributeDef.getName(), "}.");
                 if (attributeDef.getAnnotation() != null) {
@@ -1517,7 +1517,7 @@ extends AbstractClassMapper {
                 }
                 printLine("   */");
                 printLine("  public org.w3c.cci2.BinaryLargeObject ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
-                if(getFormat() == Format.JPA3) {
+                if(this.format.isJPA3()) {
                     printLine("  ){");
                     printLine("    return org.w3c.cci2.BinaryLargeObjects.valueOf(this.", newValue, ");");
                     printLine("  }");
@@ -1528,7 +1528,7 @@ extends AbstractClassMapper {
                 newLine();
             }
         } else if (PrimitiveTypes.STRING.equals(attributeDef.getQualifiedTypeName())) {
-            if(getFormat() != Format.JMI1) {
+            if(!this.format.isJMI1()) {
                 printLine("  /**");
                 printLine("   * Retrieves a character large object value for the attribute {@code ", attributeDef.getName(), "}.");
                 if (attributeDef.getAnnotation() != null) {
@@ -1537,7 +1537,7 @@ extends AbstractClassMapper {
                 }
                 printLine("   */");
                 printLine("  public org.w3c.cci2.CharacterLargeObject ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
-                if(getFormat() == Format.JPA3) {
+                if(this.format.isJPA3()) {
                     printLine("  ){");
                     printLine("    return org.w3c.cci2.CharacterLargeObjects.valueOf(this.", newValue, ");");
                     printLine("  }");
@@ -1554,7 +1554,7 @@ extends AbstractClassMapper {
         AttributeDef attributeDef
     ) throws ServiceException {
         String attributeName = getFeatureName(attributeDef);
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             this.sliced.put(attributeName, attributeDef.getQualifiedTypeName());
         }
         this.trace("Instance/AttributeGetSparseArray");
@@ -1569,7 +1569,7 @@ extends AbstractClassMapper {
         }
         printLine("   * @return A SparseArray containing all elements for this attribute.");
         printLine("   */");
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             printLine(
             	"  public ",
             	getType(attributeDef, "org.w3c.cci2.SparseArray", null, TypeMode.MEMBER, null),
@@ -1605,7 +1605,7 @@ extends AbstractClassMapper {
         String attributeName = getFeatureName(attributeDef);
         Integer embedded = null;
         String embeddedSet = null;
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             FieldMetaData fieldMetaData = getFieldMetaData(attributeDef.getQualifiedName()); 
             if(fieldMetaData != null) {
                 embedded = fieldMetaData.getEmbedded();
@@ -1614,7 +1614,7 @@ extends AbstractClassMapper {
                 this.sliced.put(attributeName, attributeDef.getQualifiedTypeName());
             } 
             else {
-                String fieldType = getType(attributeDef.getQualifiedTypeName(), getFormat(), true);
+                String fieldType = getType(attributeDef.getQualifiedTypeName(), this.format, true);
                 for(
                     int i = 0;
                     i < embedded;
@@ -1636,7 +1636,7 @@ extends AbstractClassMapper {
         }
         printLine("   * @return A set containing all elements for this attribute.");
         printLine("   */");
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             printLine(
             	"  public ",
             	getType(attributeDef, "java.util.Set", null, TypeMode.MEMBER, null),
@@ -1731,9 +1731,9 @@ extends AbstractClassMapper {
     public void mapAttributeGetMap(
         AttributeDef attributeDef
     ) throws ServiceException {
-        if(getFormat() == Format.JMI1) return;
+        if(this.format.isJMI1()) return;
         String attributeName = getFeatureName(attributeDef);
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             this.trace("Instance/AttributeDeclarationMap");
             newLine();
             printLine("  /**");
@@ -1762,7 +1762,7 @@ extends AbstractClassMapper {
         	this.getMethodName(attributeDef.getBeanGetterName()),
         	"("
         );
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             printLine("  ){");
             printLine("    return ", cast, "this.", attributeName, ";");
             printLine("  }");
@@ -1777,8 +1777,8 @@ extends AbstractClassMapper {
     ) throws ServiceException {
         this.trace("Instance/AttributeSetList");
         String attributeName = getFeatureName(attributeDef);
-        Format format = getFormat();
-        if(format == Format.JMI1) {
+        JavaExportFormat format = this.format;
+        if(format.isJMI1()) {
             printLine("  /**");
             MapperUtils
                 .wrapText(
@@ -1811,7 +1811,7 @@ extends AbstractClassMapper {
             newLine();            
         } else {
             String qualifiedTypeName = attributeDef.getQualifiedTypeName();
-            String elementType = this.getType(qualifiedTypeName, format == Format.JPA3 && this.model.isPrimitiveType(qualifiedTypeName) ? Format.CCI2 : format, false);
+            String elementType = this.getType(qualifiedTypeName, format.isJPA3() && this.model.isPrimitiveType(qualifiedTypeName) ? JavaExportFormat.CCI2 : format, false);
             printLine("  /**");
             MapperUtils
                 .wrapText(
@@ -1832,7 +1832,7 @@ extends AbstractClassMapper {
             printLine("   */");
             printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
             printLine("    ", elementType, "... ", attributeName);
-            if(format == Format.JPA3) {
+            if(format.isJPA3()) {
                 printLine("  ){");
                 printLine("    openmdxjdoSetCollection(");
                 printLine("      ", this.getMethodName(attributeDef.getBeanGetterName()), "(),");
@@ -1851,8 +1851,8 @@ extends AbstractClassMapper {
     ) throws ServiceException {
         this.trace("Instance/AttributeSetSet");
         String attributeName = getFeatureName(attributeDef);
-        Format format = getFormat();
-        if(format == Format.JMI1) {
+        JavaExportFormat format = this.format;
+        if(format.isJMI1()) {
             printLine("  /**");
             MapperUtils
                 .wrapText(
@@ -1880,7 +1880,7 @@ extends AbstractClassMapper {
             newLine();
         } else {
             String qualifiedTypeName = attributeDef.getQualifiedTypeName();
-            String elementType = this.getType(qualifiedTypeName, format == Format.JPA3 && this.model.isPrimitiveType(qualifiedTypeName) ? Format.CCI2 : format, false);
+            String elementType = this.getType(qualifiedTypeName, format.isJPA3() && this.model.isPrimitiveType(qualifiedTypeName) ? JavaExportFormat.CCI2 : format, false);
             printLine("  /**");
             MapperUtils
                 .wrapText(
@@ -1901,7 +1901,7 @@ extends AbstractClassMapper {
             printLine("   */");
             printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
             printLine("    ", elementType, "... ", attributeName);
-            if(format == Format.JPA3) {
+            if(format.isJPA3()) {
                 printLine("  ){");
                 printLine("    openmdxjdoSetCollection(");
                 printLine("      ", this.getMethodName(attributeDef.getBeanGetterName()), "(),");
@@ -1920,7 +1920,7 @@ extends AbstractClassMapper {
     ) throws ServiceException {
         this.trace("Instance/AttributeSetSparseArray");
         String attributeName = getFeatureName(attributeDef);
-        if(getFormat() != Format.JMI1) {
+        if(!this.format.isJMI1()) {
             printLine("  /**");
             MapperUtils
                 .wrapText(
@@ -1939,7 +1939,7 @@ extends AbstractClassMapper {
             printLine("   */");
             printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
             printLine("    ", this.getMapType(attributeDef, Integer.class, Boolean.FALSE), " ", attributeName);
-            if(getFormat() == Format.JPA3) {
+            if(this.format.isJPA3()) {
                 printLine("  ){");
                 printLine("    openmdxjdoSetArray(");
                 printLine("      ", this.getMethodName(attributeDef.getBeanGetterName()), "(),");
@@ -1982,7 +1982,7 @@ extends AbstractClassMapper {
         printLine("   * @param newValue An array containing all the new elements for this reference.");
         printLine("   */");
         printLine("  public void ", this.getMethodName(referenceDef.getBeanSetterName()), "(");
-        printLine("    ", this.getType(referenceDef.getQualifiedTypeName(), getFormat(), false), "[] newValue");
+        printLine("    ", this.getType(referenceDef.getQualifiedTypeName(), this.format, false), "[] newValue");
         printLine("  );");
         newLine();
     }
@@ -2001,11 +2001,10 @@ extends AbstractClassMapper {
             valueClass = "java.lang.String";
             mapType = sliceClass + "<java.lang.String," + this.className + SLICE_CLASS_NAME + '>';
         } else {
-            Format format = getFormat();
-            valueClass = getType(modelClass, format == Format.JPA3 && this.model.isPrimitiveType(modelClass) ? Format.CCI2 : format, true);
+            JavaExportFormat format = this.format;
+            valueClass = getType(modelClass, format.isJPA3() && this.model.isPrimitiveType(modelClass) ? JavaExportFormat.CCI2 : format, true);
             mapType = getMapType(featureDef, sliceClass, Boolean.FALSE, TypeMode.MEMBER, this.className + SLICE_CLASS_NAME);
             if(mapType.indexOf('?') > 0){
-                System.err.println(featureDef);
                 throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.ASSERTION_FAILURE, "?");
             }            
         }
@@ -2015,14 +2014,14 @@ extends AbstractClassMapper {
         printLine(
         	prefix, 
         	" return ", 
-        	mapValueType ? getMappingExpression(modelClass, Format.JPA3, Format.CCI2, "slice." + featureDef.getBeanGetterName() + "()") : "slice." + featureDef.getBeanGetterName() + "()",
+        	mapValueType ? getMappingExpression(modelClass, JavaExportFormat.JPA3, JavaExportFormat.CCI2, "slice." + featureDef.getBeanGetterName() + "()") : "slice." + featureDef.getBeanGetterName() + "()",
         	";"
         );
         printLine(prefix + "}");
         printLine(prefix + "@Override");
         printLine(prefix + "protected void setValue(" + this.className + SLICE_CLASS_NAME + " slice, " + valueClass + " value) {");
         printLine(prefix + "  openmdxjdoMakeDirty();");
-        printLine(prefix + "  slice." + featureDef.getBeanSetterName() + "(" + (mapValueType ? getMappingExpression(modelClass, Format.CCI2, Format.JPA3, "value") : "value") + ");");
+        printLine(prefix + "  slice." + featureDef.getBeanSetterName() + "(" + (mapValueType ? getMappingExpression(modelClass, JavaExportFormat.CCI2, JavaExportFormat.JPA3, "value") : "value") + ");");
         printLine(prefix + "}");
         printLine(prefix + "@Override");
         printLine(prefix + "protected " + this.className + SLICE_CLASS_NAME + " newSlice(int index) {");
@@ -2045,7 +2044,7 @@ extends AbstractClassMapper {
         String attributeName = getFeatureName(attributeDef);
         Integer embedded = null;
         String embeddedList = null;
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             FieldMetaData fieldMetaData = getFieldMetaData(attributeDef.getQualifiedName()); 
             if(fieldMetaData != null) {
                 embedded = fieldMetaData.getEmbedded();
@@ -2053,7 +2052,7 @@ extends AbstractClassMapper {
             if(embedded == null) {
                 this.sliced.put(attributeName, attributeDef.getQualifiedTypeName());
             } else {
-                String fieldType = getType(attributeDef.getQualifiedTypeName(), getFormat(), true);
+                String fieldType = getType(attributeDef.getQualifiedTypeName(), this.format, true);
                 for(
                     int i = 0;
                     i < embedded;
@@ -2076,7 +2075,7 @@ extends AbstractClassMapper {
         }
         printLine("   * @return A list containing all elements for this attribute.");
         printLine("   */");
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             printLine(
             	"  public ", 
             	this.getType(attributeDef, "java.util.List", null, TypeMode.MEMBER, null),
@@ -2155,12 +2154,12 @@ extends AbstractClassMapper {
     public void mapAttributeGet1_1(
         AttributeDef attributeDef
     ) throws ServiceException {
-        Format format = getFormat();
-        if(format == Format.JMI1) return;
+        JavaExportFormat format = this.format;
+        if(format.isJMI1()) return;
         String attributeName = getFeatureName(attributeDef);
         boolean objectIdentity = SystemAttributes.OBJECT_IDENTITY.equals(attributeName);
         String modelType = attributeDef.getQualifiedTypeName();
-        if(format == Format.JPA3) {
+        if(format.isJPA3()) {
             mapDeclareValue(
                 "  ", 
                 this.getType(modelType, format, false),
@@ -2182,11 +2181,11 @@ extends AbstractClassMapper {
             QUALIFIED_IDENTITY_FEATURE_CLASS_NAME :
             this.getType(attributeDef, null, Boolean.TRUE, TypeMode.MEMBER, Boolean.FALSE);        
         printLine("  public ", featureType, " ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
-        if(format == Format.JPA3) {
+        if(format.isJPA3()) {
             printLine("  ){");
             print("    return ");
             if(this.mapValueType(modelType)) {
-                print(getMappingExpression(modelType, Format.JPA3, Format.CCI2, "this." + attributeName));                    
+                print(getMappingExpression(modelType, JavaExportFormat.JPA3, JavaExportFormat.CCI2, "this." + attributeName));
             } else {
                 print(cast + "this." + attributeName);                    
             }
@@ -2201,13 +2200,13 @@ extends AbstractClassMapper {
     public void mapAttributeGet0_1(
         AttributeDef attributeDef
     ) throws ServiceException {
-        if(getFormat() == Format.JMI1) return;
+        if(this.format.isJMI1()) return;
         String attributeName = getFeatureName(attributeDef);
         String modelType = attributeDef.getQualifiedTypeName();
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             mapDeclareValue(
                 "  ", 
-                this.getType(modelType, this.getFormat(), true),
+                this.getType(modelType, this.format, true),
                 attributeName, 
                 attributeDef.isDerived() ? "public" : null
             );
@@ -2227,11 +2226,11 @@ extends AbstractClassMapper {
         String cast =  printAnnotationAndReturnCast(attributeDef, null);
         String featureType = this.getType(attributeDef, null, Boolean.TRUE, TypeMode.MEMBER, Boolean.TRUE);        
         printLine("  public ", featureType, " ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
-        if(getFormat() == Format.JPA3) {
+        if(this.format.isJPA3()) {
             printLine("  ){");
             print("    return ");
             if(this.mapValueType(modelType)) {
-                print(getMappingExpression(modelType, Format.JPA3, Format.CCI2, "this." + attributeName));                    
+                print(getMappingExpression(modelType, JavaExportFormat.JPA3, JavaExportFormat.CCI2, "this." + attributeName));
             } else {
                 print(cast + "this." + attributeName);                    
             }
@@ -2246,8 +2245,8 @@ extends AbstractClassMapper {
     protected boolean mapValueType(
         String qualifiedTypeName
     ) throws ServiceException {
-        String cci2Type = this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, Format.CCI2, false, this.chronoFlavour.isClassic());
-        String jpa3Type = this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, Format.JPA3, false, this.chronoFlavour.isClassic());
+        String cci2Type = this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, JavaExportFormat.CCI2, false, configuration.chronoFlavour.isClassic());
+        String jpa3Type = this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, JavaExportFormat.JPA3, false, configuration.chronoFlavour.isClassic());
         return !cci2Type.equals(jpa3Type);
     }
 

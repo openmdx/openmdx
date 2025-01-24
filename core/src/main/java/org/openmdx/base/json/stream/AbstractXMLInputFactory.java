@@ -76,63 +76,54 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
     private int bufSize = INPUT_BUF_SIZE;
     
     protected AbstractXMLInputFactory() {
-    	
+
     }
     
     protected AbstractXMLInputFactory(int bufSize) {
     	this.bufSize = bufSize;
     }
     
-    public XMLEventReader createFilteredReader(XMLEventReader arg0, EventFilter arg1) throws XMLStreamException {
-        // TODO Auto-generated method stub
+    public XMLEventReader createFilteredReader(XMLEventReader arg0, EventFilter arg1) {
         return null;
     }
 
     
-    public XMLStreamReader createFilteredReader(XMLStreamReader arg0, StreamFilter arg1) throws XMLStreamException {
-        // TODO Auto-generated method stub
+    public XMLStreamReader createFilteredReader(XMLStreamReader arg0, StreamFilter arg1) {
         return null;
     }
 
     
-    public XMLEventReader createXMLEventReader(InputStream arg0, String encoding) throws XMLStreamException {
-        // TODO Auto-generated method stub
+    public XMLEventReader createXMLEventReader(InputStream arg0, String encoding) {
         return null;
     }
 
     
-    public XMLEventReader createXMLEventReader(InputStream arg0) throws XMLStreamException {
-        // TODO Auto-generated method stub
+    public XMLEventReader createXMLEventReader(InputStream arg0) {
         return null;
     }
 
     
-    public XMLEventReader createXMLEventReader(Reader arg0) throws XMLStreamException {
-        // TODO Auto-generated method stub
+    public XMLEventReader createXMLEventReader(Reader arg0) {
         return null;
     }
 
     
-    public XMLEventReader createXMLEventReader(Source arg0) throws XMLStreamException {
-        // TODO Auto-generated method stub
+    public XMLEventReader createXMLEventReader(Source arg0) {
         return null;
     }
 
     
-    public XMLEventReader createXMLEventReader(String systemId, InputStream arg1) throws XMLStreamException {
-        // TODO Auto-generated method stub
+    public XMLEventReader createXMLEventReader(String systemId, InputStream arg1)  {
         return null;
     }
 
     
-    public XMLEventReader createXMLEventReader(String systemId, Reader arg1) throws XMLStreamException {
-        // TODO Auto-generated method stub
+    public XMLEventReader createXMLEventReader(String systemId, Reader arg1) {
         return null;
     }
 
     
-    public XMLEventReader createXMLEventReader(XMLStreamReader arg0) throws XMLStreamException {
-        // TODO Auto-generated method stub
+    public XMLEventReader createXMLEventReader(XMLStreamReader arg0) {
         return null;
     }
 
@@ -272,7 +263,7 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
 
     
     public XMLEventAllocator getEventAllocator() {
-        // TODO Auto-generated method stub
+
         return null;
     }
 
@@ -299,7 +290,7 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
 
     
     public void setEventAllocator(XMLEventAllocator arg0) {
-        // TODO Auto-generated method stub
+
         
     }
 
@@ -311,13 +302,13 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
 
     
     public void setXMLReporter(XMLReporter arg0) {
-        // TODO Auto-generated method stub
+
         
     }
 
     
     public void setXMLResolver(XMLResolver arg0) {
-        // TODO Auto-generated method stub
+
         
     }
 

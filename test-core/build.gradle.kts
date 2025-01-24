@@ -172,11 +172,10 @@ tasks.register<org.openmdx.gradle.GenerateModelsTask>("generate-model") {
 		"--xmi=emf",
 		"--out=" + project.layout.buildDirectory.file("generated/sources/model/openmdx-${project.name}-models.zip").get().asFile,
 		"--openmdxjdo=" + File(project.projectDir, "src/main/resources"),
-		"--dataproviderVersion=2",
 		"--format=xmi1",
-	    "--format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(cci2)",
-	    "--format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(jmi1)",
-	    "--format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(jpa3)",
+	    "--format=test.openmdx.application.mof.mapping.java.MyMapper(cci2)",
+	    "--format=test.openmdx.application.mof.mapping.java.MyMapper(jmi1)",
+	    "--format=test.openmdx.application.mof.mapping.java.MyMapper(jpa3)",
 		"--format=mof1",            
 		"%"
 	)

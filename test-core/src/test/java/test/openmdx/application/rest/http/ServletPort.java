@@ -55,6 +55,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
@@ -143,9 +144,6 @@ public class ServletPort
 {
     /**
      * Constructor 
-     *
-     * @param initParameters
-     * @throws ServletException
      */
     public ServletPort(
         final Map<String,String> initParameters
@@ -197,7 +195,7 @@ public class ServletPort
      */
     public Interaction getInteraction(
         RestConnection connection
-    ) throws ResourceException {
+    ) {
         return new ServletInteraction(connection);
     }
     //------------------------------------------------------------------------
@@ -212,14 +210,10 @@ public class ServletPort
         protected static final String CONTEXT_PATH = "/ServletPort";
         /**
          * Constructor 
-         *
-         * @param connection
-         * 
-         * @throws ServletException 
          */
         protected ServletInteraction(
             RestConnection connection
-        ) throws ResourceException {
+        ) {
             super(
                 connection,
                 "http://test.openmdx.org" + CONTEXT_PATH
@@ -256,7 +250,7 @@ public class ServletPort
             long accessed = -1;
             long created = System.currentTimeMillis();
             String id = UUIDs.newUUID().toString();
-            private final Map<String,Object> attributes = new HashMap<String,Object>();
+            private final Map<String,Object> attributes = new HashMap<>();
             private void validate(){
                 if(created < 0) {
                     throw new IllegalStateException("The sesson is invalidated");
@@ -382,8 +376,6 @@ public class ServletPort
         class ServletTarget extends RestTarget {
             /**
              * Constructor 
-             *
-             * @param contextURL
              */
             protected ServletTarget(
                 String contextURL
@@ -419,9 +411,6 @@ public class ServletPort
         class ServletMessage implements Message {
             /**
              * Interaction Message Constructor
-             *
-             * @param interactionSpec
-             * @param xri
              */
             ServletMessage(
                 RestInteractionSpec interactionSpec,
@@ -454,9 +443,7 @@ public class ServletPort
                     this.outputTarget.close();
                     ServletPort.this.servlet.service(this.request, this.response);
                     this.response.commit();
-                } catch (ServletException exception) {
-                	throw ResourceExceptions.toResourceException(exception);
-                } catch (IOException exception) {
+                } catch (ServletException | IOException exception) {
                 	throw ResourceExceptions.toResourceException(exception);
                 } finally {
                     ServletInteraction.this.session.accessed = System.currentTimeMillis();
@@ -473,7 +460,7 @@ public class ServletPort
              * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#getResponseBody()
              */
             public RestSource getResponseBody(
-            ) throws ResourceException {
+            ) {
                 InputSource source = this.response.body.getInputSource();
                 return new RestSource(
                     ServletInteraction.this.contextURL,
@@ -495,8 +482,8 @@ public class ServletPort
                 this.request.headers.put(key.toLowerCase(), value);
             }
             class EmbeddedRequest implements HttpServletRequest {
-                private final Map<String,String> headers = new HashMap<String,String>();
-                private final Map<String,String[]> parameters = new HashMap<String,String[]>();
+                private final Map<String,String> headers = new HashMap<>();
+                private final Map<String,String[]> parameters = new HashMap<>();
                 
                 @Override
                 public String getAuthType() {
@@ -662,7 +649,7 @@ public class ServletPort
                 }
                 @Override
                 public ServletInputStream getInputStream(
-                ) throws IOException {
+                ) {
                     return ServletMessage.this.outputTarget.body.getBinarySource();
                 }
                 @Override
@@ -709,7 +696,7 @@ public class ServletPort
                 }
                 @Override
                 public BufferedReader getReader(
-                ) throws IOException {
+                ) {
                     return new BufferedReader(
                         ServletMessage.this.outputTarget.body.getCharacterSource()
                     );
@@ -777,7 +764,7 @@ public class ServletPort
                 @Override
                 public void setCharacterEncoding(
                     String env
-                ) throws UnsupportedEncodingException {
+                ) {
                     throw new UnsupportedOperationException();
                 }
                 /* (non-Javadoc)
@@ -837,40 +824,35 @@ public class ServletPort
                  * @see javax.servlet.http.HttpServletRequest#authenticate(javax.servlet.http.HttpServletResponse)
                  */
                 @Override
-                public boolean authenticate(HttpServletResponse arg0)
-                    throws IOException, ServletException {
+                public boolean authenticate(HttpServletResponse arg0) {
                     throw new UnsupportedOperationException();
                 }
                 /* (non-Javadoc)
                  * @see javax.servlet.http.HttpServletRequest#getPart(java.lang.String)
                  */
                 @Override
-                public Part getPart(String arg0)
-                    throws IOException, ServletException {
+                public Part getPart(String arg0) {
                     throw new UnsupportedOperationException();
                 }
                 /* (non-Javadoc)
                  * @see javax.servlet.http.HttpServletRequest#getParts()
                  */
                 @Override
-                public Collection<Part> getParts()
-                    throws IOException, ServletException {
+                public Collection<Part> getParts() {
                     throw new UnsupportedOperationException();
                 }
                 /* (non-Javadoc)
                  * @see javax.servlet.http.HttpServletRequest#login(java.lang.String, java.lang.String)
                  */
                 @Override
-                public void login(String arg0, String arg1)
-                    throws ServletException {
+                public void login(String arg0, String arg1) {
                     throw new UnsupportedOperationException();
                 }
                 /* (non-Javadoc)
                  * @see javax.servlet.http.HttpServletRequest#logout()
                  */
                 @Override
-                public void logout()
-                    throws ServletException {
+                public void logout() {
                     throw new UnsupportedOperationException();
                 }
                 /* (non-Javadoc)
@@ -891,9 +873,7 @@ public class ServletPort
                  * @see javax.servlet.http.HttpServletRequest#upgrade(java.lang.Class)
                  */
                 @Override
-                public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass)
-                    throws IOException,
-                    ServletException {
+                public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) {
                     throw new UnsupportedOperationException();
                 }
                 #if JAVA_8 #else
@@ -912,7 +892,7 @@ public class ServletPort
 				#endif
             }
             class EmbeddedResponse implements HttpServletResponse {
-                protected final Map<String,String> headers = new HashMap<String,String>();
+                protected final Map<String,String> headers = new HashMap<>();
                 boolean committed = false;
                 int status = HttpServletResponse.SC_OK;
                 protected final EmbeddedBody body = new EmbeddedBody();
@@ -975,8 +955,7 @@ public class ServletPort
                 ) throws IOException {
                     sendError(sc);
                 }
-                public void sendRedirect(String location)
-                    throws IOException {
+                public void sendRedirect(String location) {
                     throw new UnsupportedOperationException();
                 }
                 public void setDateHeader(String name, long date) {
@@ -1015,7 +994,7 @@ public class ServletPort
                     return this.locale;
                 }
                 public ServletOutputStream getOutputStream(
-                ) throws IOException {
+                ) {
                     if(this.characterSink != null) throw new IllegalStateException(
                         "Use either a binary sink or a caharcter sink but not both"
                     );
@@ -1028,32 +1007,19 @@ public class ServletPort
                             ) throws IOException {
                                 this.delegate.write(b);
                             }
-                            /**
-                             * @throws IOException
-                             * @see java.io.OutputStream#flush()
-                             */
+
                             @Override
                             public void flush(
                             ) throws IOException {
                                 this.delegate.flush();
                             }
-                            /**
-                             * @param b
-                             * @param off
-                             * @param len
-                             * @throws IOException
-                             * @see java.io.OutputStream#write(byte[], int, int)
-                             */
+
                             @Override
                             public void write(byte[] b, int off, int len)
                                 throws IOException {
                                 this.delegate.write(b, off, len);
                             }
-                            /**
-                             * @param b
-                             * @throws IOException
-                             * @see java.io.OutputStream#write(byte[])
-                             */
+
                             @Override
                             public void write(byte[] b)
                                 throws IOException {
@@ -1061,13 +1027,10 @@ public class ServletPort
                             }
                             @Override
                             public boolean isReady() {
-                                // TODO Auto-generated method stub
                                 return false;
                             }
                             @Override
                             public void setWriteListener(WriteListener writeListener) {
-                                // TODO Auto-generated method stub
-                                
                             }
                         };
                     }
@@ -1144,7 +1107,7 @@ public class ServletPort
                  */
                 @Override
                 public void setContentLengthLong(long len) {
-                    // TODO Auto-generated method stub
+
                     
                 }
             }
@@ -1190,11 +1153,9 @@ public class ServletPort
             try {
                 CharacterLargeObjects.streamCopy(
                     getCharacterSource(),
-                    0l,
-                    new OutputStreamWriter(buffer, "UTF-8")
+                    0L,
+                    new OutputStreamWriter(buffer, StandardCharsets.UTF_8)
                 );
-            } catch (UnsupportedEncodingException exception) {
-                throw new RuntimeServiceException(exception);
             } catch (IOException exception) {
                 throw new RuntimeServiceException(exception);
             }
@@ -1217,13 +1178,13 @@ public class ServletPort
 
                 @Override
                 public int read(
-                ) throws IOException {
+                ) {
                     return this.isReady() ? this.data[this.cursor++] & 0xff : -1;
                 }
 
                 @Override
                 public int available(
-                ) throws IOException {
+                ) {
                     return this.count - this.cursor;
                 }
 
@@ -1243,7 +1204,7 @@ public class ServletPort
                     byte[] data,
                     int offset,
                     int length
-                ) throws IOException {
+                ) {
                     int count = Math.min(this.count - this.cursor, length);
                     System.arraycopy(this.data, this.cursor, data, offset, count);
                     return count;
@@ -1251,14 +1212,14 @@ public class ServletPort
 
                 @Override
                 public synchronized void reset(
-                ) throws IOException {
+                ) {
                     this.cursor = this.mark;
                 }
 
                 @Override
                 public long skip(
                     long n
-                ) throws IOException {
+                )  {
                     long count = Math.min(this.count - this.cursor, n);
                     this.cursor += count;
                     return count;
@@ -1304,7 +1265,7 @@ public class ServletPort
                      */
                     @Override
                     public boolean ready(
-                    ) throws IOException {
+                    ) {
                         return this.cursor < this.count;
                     }
                     /* (non-Javadoc)
@@ -1312,7 +1273,7 @@ public class ServletPort
                      */
                     @Override
                     public void close(
-                    ) throws IOException {
+                    ) {
                         // Nothing to do
                     }
                     /* (non-Javadoc)
@@ -1323,7 +1284,7 @@ public class ServletPort
                         char[] data,
                         int offset,
                         int length
-                    ) throws IOException {
+                    ) {
                         int count = Math.min(length, this.count - this.cursor);
                         this.data.getChars(this.cursor, this.cursor + count, data, offset);
                         this.cursor += count;
@@ -1335,7 +1296,7 @@ public class ServletPort
                     @Override
                     public void mark(
                         int readAheadLimit
-                    ) throws IOException {
+                    ) {
                         this.mark = this.cursor;
                     }
                     /* (non-Javadoc)
@@ -1351,7 +1312,7 @@ public class ServletPort
                      */
                     @Override
                     public int read(
-                    ) throws IOException {
+                    ) {
                         return this.cursor < this.count ? this.data.charAt(this.cursor++) : -1;
                     }
                     /* (non-Javadoc)
@@ -1360,7 +1321,7 @@ public class ServletPort
                     @Override
                     public long skip(
                         long n
-                    ) throws IOException {
+                    )  {
                         long count = Math.min(this.count - this.cursor, n);
                         this.cursor += count;
                         return count;
@@ -1370,7 +1331,7 @@ public class ServletPort
                      */
                     @Override
                     public void reset(
-                    ) throws IOException {
+                    ) {
                         this.cursor = this.mark;
                     }
                 };

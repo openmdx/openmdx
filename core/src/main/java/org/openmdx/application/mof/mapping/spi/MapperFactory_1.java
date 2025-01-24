@@ -45,15 +45,16 @@
 package org.openmdx.application.mof.mapping.spi;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
 import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
 import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationScope;
 import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
-import org.openmdx.application.mof.mapping.cci.MappingTypes;
+import org.openmdx.application.mof.mapping.java.JavaExportFormat;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.loading.Classes;
@@ -66,105 +67,69 @@ public class MapperFactory_1 implements Iterable<Mapper_1_0> {
 	/**
 	 * Constructor
 	 * 
-	 * @param extendedFormats the formats, optionally including {@code "--markdown-annotations"} flag)
-	 * 
-	 * @see MappingTypes#MARKDOWN
+	 * @param extendedFormats flags and parameterized formats
 	 */
 	public MapperFactory_1(
 		List<String> extendedFormats
 	) {
-		this.formats = new ArrayList<>(extendedFormats);
-		this.annotationFlavour = AnnotationFlavour.fromExtendedFormats(formats);
-		this.jakartaFlavour = JakartaFlavour.fromExtendedFormats(formats);
-		this.chronoFlavour = ChronoFlavour.fromExtendedFormats(formats);
-		this.includeProvidedPackages = formats.remove(MappingTypes.INCLUDE_PROVIDED_PACKAGES);
+		List<String> parameterizedFormats = new ArrayList<>(extendedFormats);
+        this.configuration = new ExternalizationConfiguration(
+			AnnotationFlavour.fromExtendedFormats(parameterizedFormats),
+			JakartaFlavour.fromExtendedFormats(parameterizedFormats),
+			ChronoFlavour.fromExtendedFormats(parameterizedFormats),
+			ExternalizationScope.fromExtendedFormats(parameterizedFormats)
+		);
+		this.parameterizedFormats = Collections.unmodifiableList(parameterizedFormats);
 	}
 
 	/**
-	 * The requested formats
+	 * Provides a set of configuration elements
 	 */
-	private final List<String> formats;
-	
-	/**
-	 * Tells whether annotations are in markdpown format
-	 */
-	private final AnnotationFlavour annotationFlavour;
+	private final ExternalizationConfiguration configuration;
 
 	/**
-	 * Tells whether to use Jakarta 8 or a contemprary flavour
+	 * The parameterized formats (without flags)
 	 */
-	private final JakartaFlavour jakartaFlavour;
-
-	/**
-	 * Tells whether to use classic or a contemprary flavour
-	 */
-	private final ChronoFlavour chronoFlavour;
-
-	private final boolean includeProvidedPackages;
-	
-	private static final List<String> JAVA_FORMATS = Arrays.asList(
-        MappingTypes.CCI2,
-        MappingTypes.JMI1,
-        MappingTypes.JPA3
-	);
+	private final List<String> parameterizedFormats;
 	
     /**
      * Create a mapper instance
      * 
-     * @param format the format, either predefined or as class name
+     * @param parametrizedFormat the format, either predefined or as class name
      * 
-     * @return the mapper instance specified by {@code format}
+     * @return the mapper instance implied by {@code parametrizedFormat}
      */
     private Mapper_1_0 newMapper(
-        String format
+        String parametrizedFormat
     ) throws ServiceException {
-    	final MappingFormatParser parser = new MappingFormatParser(format);
-        if(JAVA_FORMATS.contains(parser.getId())) {
-            return new org.openmdx.application.mof.mapping.java.Mapper_1(
-                format,
-                annotationFlavour,
-                jakartaFlavour,
-				chronoFlavour,
-                parser.getId(), 
-                "java",
-				includeProvidedPackages
-			);
-        } else if (MappingTypes.XMI1.equals(format)) {
-            return new org.openmdx.application.mof.mapping.xmi.XMIMapper_1();
-        } else if (MappingTypes.MOF1.equals(format)) {
-            return new org.openmdx.application.mof.mapping.java.mof.ModelNameConstantsMapper(annotationFlavour, jakartaFlavour, chronoFlavour);
-        } else if (MappingTypes.PIMDOC.equals(parser.getId())) {
-          return parser.getArguments().length == 0 ? new org.openmdx.application.mof.mapping.pimdoc.PIMDocMapper(
-        	  annotationFlavour
-          ) : new org.openmdx.application.mof.mapping.pimdoc.PIMDocMapper(
-        	  annotationFlavour, 
-        	  parser.getArguments()[0]
-          );
-        } else {
-            try {
-            	List<Object> arguments = new ArrayList<>(
-            		Arrays.asList(annotationFlavour, jakartaFlavour, chronoFlavour)
-            	);
-            	arguments.addAll(
-            		Arrays.asList((Object[])parser.getArguments())
-            	);
-                return Classes.newApplicationInstance(
-                	Mapper_1_0.class, 
-                	parser.getId(), 
-                	arguments.toArray(new Object[arguments.size()])
-                );
-            } catch (Exception exception) {
-                throw new ServiceException(exception);
-            }
-        }
+    	final MappingFormatParser parser = new MappingFormatParser(parametrizedFormat);
+		final String id = parser.getId();
+		if(JavaExportFormat.supports(id)) {
+			return JavaExportFormat.fromId(id).createMapper(configuration);
+		} else if (ModelExportFormat.supports(id)) {
+			return ModelExportFormat.fromId(id).createMapper(configuration, parser.getArguments());
+		} else {
+			return createMapperPlugIn(id, parser.getAmendedArguments(configuration));
+		}
     }
+
+	private Mapper_1_0 createMapperPlugIn(
+		String qualifiedClassName,
+		Object[] arguments
+	) throws ServiceException {
+		try {
+			return Classes.newApplicationInstance(Mapper_1_0.class, qualifiedClassName, arguments);
+		} catch (Exception exception) {
+			throw new ServiceException(exception);
+		}
+	}
 
 	@Override
 	public Iterator<Mapper_1_0> iterator() {
 		
 		return new Iterator<Mapper_1_0>() {
 			
-			final Iterator<String> delegate = formats.iterator();
+			final Iterator<String> delegate = parameterizedFormats.iterator();
 
 			@Override
 			public boolean hasNext() {
@@ -183,6 +148,5 @@ public class MapperFactory_1 implements Iterable<Mapper_1_0> {
 		};
 		
 	}
-
     
 }

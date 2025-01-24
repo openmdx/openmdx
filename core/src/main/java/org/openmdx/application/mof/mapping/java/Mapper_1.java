@@ -59,14 +59,11 @@ import org.omg.mof.cci.VisibilityKind;
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
+import org.openmdx.application.mof.externalizer.spi.*;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.ClassifierDef;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_1;
-import org.openmdx.application.mof.mapping.cci.MappingTypes;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.OperationDef;
 import org.openmdx.application.mof.mapping.cci.ReferenceDef;
@@ -96,40 +93,17 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
     /**
      * Constructor.
      *
-     * @param mappingFormat           mapping format defined MapperFactory_1.
-     * @param annotationFlavour       tells whether annotations use markdown
-     * @param jakartaFlavour          tells which jakartaFlavour to use
-     * @param chronoFlavour           tells whether XML datatype or java.time chrono types shall be used
-     * @param packageSuffix           The suffix for the package to be generated in (without leading
-     *                                dot), e.g. 'cci'.
-     * @param fileExtension           The file extension (without leading point), e.g. 'java'.
-     * @param includeProvidedPackages Tells whether provided packages shall be included or excluded (default)
+     * @param externalizationConfiguration the mapping configuration
+     * @param format the Java mapping format
      */
     public Mapper_1(
-        String mappingFormat,
-        AnnotationFlavour annotationFlavour,
-        JakartaFlavour jakartaFlavour, 
-        ChronoFlavour chronoFlavour,
-        String packageSuffix, 
-        String fileExtension,
-        boolean includeProvidedPackages
+        ExternalizationConfiguration externalizationConfiguration,
+        JavaExportFormat format
     ) {
-        super(annotationFlavour, jakartaFlavour, chronoFlavour, packageSuffix);
-        this.includeProvidedPackages = includeProvidedPackages;
-        this.fileExtension = fileExtension;
-        if (mappingFormat.startsWith(MappingTypes.JPA3 + ':')) {
-            this.format = Format.JPA3;
-        } else {
-            this.format =
-                MappingTypes.CCI2.equals(mappingFormat) ? Format.CCI2 :
-                MappingTypes.JMI1.equals(mappingFormat) ? Format.JMI1 :
-                MappingTypes.JPA3.equals(mappingFormat) ? Format.JPA3 :
-                null;
-        }
+        super(externalizationConfiguration, format.getPackageSuffix());
+        this.format = format;
         this.primitiveTypeMapper = newPrimitiveTypeMapper();
     }
-
-    private final boolean includeProvidedPackages;
 
     /**
      * Packages not to be processed
@@ -143,11 +117,11 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
 
     private MetaData_1_0 metaData;
 
-    private final String fileExtension;
+    private static final String FILE_EXTENSION = "java";
 
     private List<ModelElement_1_0> processedAttributes = null;
 
-    private final Format format;
+    private final JavaExportFormat format;
 
     private final PrimitiveTypeMapper primitiveTypeMapper;
     
@@ -162,8 +136,8 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         QueryMapper queryMapper,
         InstanceMapper instanceMapper,
         AbstractMetaDataMapper ormMetaDataMapper,
-        AbstractMetaDataMapper ormSliceMetaDataMapper)
-        throws ServiceException {
+        AbstractMetaDataMapper ormSliceMetaDataMapper
+    ) throws ServiceException {
 
         SysLog.trace("attribute", attributeDef.jdoGetObjectId());
         Multiplicity multiplicity = ModelHelper.toMultiplicity(attributeDef.getMultiplicity());
@@ -171,7 +145,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         // required for ...Class.create...() operations
         this.processedAttributes.add(attributeDef);
         try {
-            if ((this.format == Format.JPA3)
+            if ((this.format.isJPA3())
                 || VisibilityKind.PUBLIC_VIS.equals(attributeDef
                     .objGetValue("visibility"))) {
                 AttributeDef mAttributeDef =
@@ -180,7 +154,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                     new ClassDef(classDef, this.model, this.metaData);
                 // setter/getter interface only if modelAttribute.container == modelClass.
                 // Otherwise inherit from super interfaces.
-                if (((this.format == Format.JPA3) && (((ClassMetaData) mClassDef
+                if (((this.format.isJPA3()) && (((ClassMetaData) mClassDef
                     .getClassMetaData()).getBaseClass() == null))
                     || attributeDef.getContainer().equals(
                         classDef.jdoGetObjectId())) {
@@ -201,9 +175,9 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                         if (instanceMapper != null) {
                             instanceMapper.mapAttributeGetList(mAttributeDef);
                         }
-	                    if (this.format == Format.CCI2) {
+	                    if (this.format.isCCI2()) {
 	                    	ormMetaDataMapper.mapAttribute(mAttributeDef);
-	                    } else if (this.format == Format.JPA3) {
+	                    } else if (this.format.isJPA3()) {
                             ormSliceMetaDataMapper.mapAttribute(mAttributeDef);
                             ormMetaDataMapper.mapSize(mAttributeDef);
                         }
@@ -216,7 +190,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
 	                            if (instanceMapper != null) {
 	                                instanceMapper.mapAttributeGet0_1(mAttributeDef);
 	                            }	
-	                            if (this.format == Format.JPA3 || this.format == Format.CCI2) {
+	                            if (this.format.isJPA3() || this.format.isCCI2()) {
 	                                ormMetaDataMapper.mapAttribute(mAttributeDef);
 	                            }
 	                            if (!isDerived) {
@@ -233,7 +207,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
 	                            if (instanceMapper != null) {
 	                                instanceMapper.mapAttributeGet1_1(mAttributeDef);
 	                            }
-	                            if (this.format == Format.JPA3  || this.format == Format.CCI2) {
+	                            if (this.format.isJPA3()  || this.format.isCCI2()) {
 	                                ormMetaDataMapper.mapAttribute(mAttributeDef);
 	                            }
 	                            if (!isDerived) {
@@ -250,11 +224,11 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
 	                            if (instanceMapper != null) {
 	                                instanceMapper.mapAttributeGetList(mAttributeDef);
 	                            }
-	                            if (this.format == Format.JPA3 || this.format == Format.CCI2) {
+	                            if (this.format.isJPA3() || this.format.isCCI2()) {
 	                                FieldMetaData fieldMetaData = instanceMapper.getFieldMetaData(
 	                                	mAttributeDef.getQualifiedName()
 	                                );
-	                                if(this.format == Format.CCI2) {
+	                                if(this.format.isCCI2()) {
 	                                	ormMetaDataMapper.mapAttribute(mAttributeDef);
 	                                } else { 
 	                                    Integer embedded = fieldMetaData == null ? null : fieldMetaData.getEmbedded();
@@ -283,11 +257,11 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
 	                            if (instanceMapper != null) {
 	                                instanceMapper.mapAttributeGetSet(mAttributeDef);
 	                            }
-	                            if (this.format == Format.JPA3 || this.format == Format.CCI2) {
+	                            if (this.format.isJPA3() || this.format.isCCI2()) {
 	                                FieldMetaData fieldMetaData = instanceMapper.getFieldMetaData(
 	                                	mAttributeDef.getQualifiedName()
 	                                );
-	                                if(this.format == Format.CCI2) {
+	                                if(this.format.isCCI2()) {
 	                                	ormMetaDataMapper.mapAttribute(mAttributeDef);
 	                                } else { 
 	                                    Integer embedded = fieldMetaData == null ? null : fieldMetaData.getEmbedded();
@@ -315,9 +289,9 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
 	                            if (instanceMapper != null) {
 	                                instanceMapper.mapAttributeGetSparseArray(mAttributeDef);
 	                            }
-	                            if (this.format == Format.CCI2) {
+	                            if (this.format.isCCI2()) {
 	                            	ormMetaDataMapper.mapAttribute(mAttributeDef);
-	                            } else if (this.format == Format.JPA3) {
+	                            } else if (this.format.isJPA3()) {
 	                                ormSliceMetaDataMapper.mapAttribute(mAttributeDef);
 	                                ormMetaDataMapper.mapSize(mAttributeDef);
 	                            }
@@ -378,7 +352,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         // setter/getter interface only if modelAttribute.container == modelClass.
         // Otherwise inherit from super interfaces.
         boolean includeInClass =
-            ((this.format == Format.JPA3) && (((ClassMetaData) mClassDef
+            ((this.format.isJPA3()) && (((ClassMetaData) mClassDef
                 .getClassMetaData()).getBaseClass() == null))
                 || referenceDef.getContainer().equals(
                     classDef.jdoGetObjectId());
@@ -388,7 +362,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         List<?> qualifierTypes = referencedEnd.objGetList("qualifierType");
         boolean isChangeable = referenceDef.isChangeable();
         boolean isDerived = association.isDerived();
-        boolean includeExtensions = this.format == Format.JMI1 && !inherited;
+        boolean includeExtensions = this.format.isJMI1() && !inherited;
         // Check whether this reference is stored as attribute
         // required for ...Class.create...() operations
         if (this.model.referenceIsStoredAsAttribute(referenceDef)) {
@@ -430,7 +404,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                     );
                 }
                 if(this.model.referenceIsStoredAsAttribute(referenceDef)) {
-                    if(includeInClass && (this.format == Format.JPA3)) {
+                    if(includeInClass && (this.format.isJPA3())) {
                         if (qualifierNames.isEmpty()) {
                         	if(multiplicity != null) {
                         		switch(multiplicity){
@@ -530,7 +504,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                     instanceMapper
                                         .mapReferenceGet1_1WithQualifier(mReferenceDef);
                                 }
-                                if (this.format == Format.JPA3) {
+                                if (this.format.isJPA3()) {
                                     ormMetaDataMapper
                                         .mapReference(mReferenceDef);
                                 }
@@ -549,7 +523,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             mReferenceDef,
                                             inherited);
                                 }
-                                if (this.format == Format.JPA3) {
+                                if (this.format.isJPA3()) {
                                     // TODO: feature not yet implemented for JPA3.
                                     // Do not generate meta data 
 //                                  ormMetaDataMapper.mapReference(mReferenceDef);
@@ -623,7 +597,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         throws ServiceException {
         SysLog.trace("operation", operationDef.jdoGetObjectId());
         boolean includeInClass =
-            this.format == Format.JPA3
+            this.format.isJPA3()
                 || operationDef.getContainer().equals(
                     classDef.jdoGetObjectId());
         if (VisibilityKind.PUBLIC_VIS.equals(operationDef
@@ -686,11 +660,11 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         SysLog.trace("class", classDef.jdoGetObjectId());
         boolean isAbstract = classDef.isAbstract();
         try {
-            if (this.format == Format.JMI1 && !isAbstract) {
+            if (this.format.isJMI1() && !isAbstract) {
                 classMapper.mapBegin();
             }
             instanceMapper.mapBegin();
-            if (this.format == Format.JPA3) {
+            if (this.format.isJPA3()) {
                 if (interfaceMapper != null) {
                     interfaceMapper.mapBegin();
                 }
@@ -779,7 +753,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         AbstractMetaDataMapper ormSliceMetaDataMapper)
         throws ServiceException {
 
-        if (this.format == Format.JMI1) {
+        if (this.format.isJMI1()) {
             // add additional template references to context
             List<StructuralFeatureDef> structuralFeatures = new ArrayList<>();
             List<OperationDef> operations = new ArrayList<>();
@@ -814,7 +788,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         }
         boolean classIsAbstract = classDef.isAbstract();
         try {
-            if (this.format == Format.JMI1 && !classIsAbstract) {
+            if (this.format.isJMI1() && !classIsAbstract) {
                 // standard creators
                 mapObjectCreator(classDef, null, classMapper);
                 // narrow creators
@@ -834,7 +808,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
             }
             // impl for non-abstract and abstract classes (JMI plugins)
             instanceMapper.mapEnd();
-            if (this.format == Format.JPA3) {
+            if (this.format.isJPA3()) {
                 if (interfaceMapper != null) {
                     interfaceMapper.mapEnd();
                 }
@@ -906,7 +880,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
             StructDef mStructDef = new StructDef(classDef, this.model);
             // getter interface only if modelAttribute.container = modelClass.
             // Otherwise inherit from super interfaces.
-            if (this.format == Format.JPA3
+            if (this.format.isJPA3()
                 || structureFieldDef.getContainer().equals(
                     classDef.jdoGetObjectId())) {
                 // query interface
@@ -1079,9 +1053,9 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         this.metaData = new MetaData_2(openmdxjdoMetadataDirectory);
         List<ModelElement_1_0> packagesToExport =
             this.getMatchingPackages(qualifiedPackageName);
-        final boolean jmi1 = this.format == Format.JMI1;
-        final boolean cci2 = this.format == Format.CCI2;
-        final boolean jpa3 = this.format == Format.JPA3;
+        final boolean jmi1 = this.format.isJMI1();
+        final boolean cci2 = this.format.isCCI2();
+        final boolean jpa3 = this.format.isJPA3();
 
         try {
             // allocate streams one time
@@ -1141,12 +1115,9 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                         packageMapper = new PackageMapper(
                                 packageWriter,
                                 getModel(),
+                                this.configuration,
                                 this.format,
-                                this.packageSuffix,
                                 this.metaData,
-                                annotationFlavour,
-                                jakartaFlavour,
-                                chronoFlavour,
                                 getPrimitiveTypeMapper()
                         );
                         // initialize package
@@ -1171,7 +1142,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                                 this.metaData);
                                 if (this.includeClass(classDef)
                                         && !this.excludeClass(classDef)) {
-                                    if ((this.format != Format.JPA3)
+                                    if ((!this.format.isJPA3())
                                             || !classDef.isMixIn()
                                             || (((ClassMetaData) classDef
                                             .getClassMetaData()).getTable() != null)) {
@@ -1201,61 +1172,48 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                                 element,
                                                 classWriter,
                                                 getModel(),
+                                                this.configuration,
                                                 this.format,
-                                                this.packageSuffix,
                                                 this.metaData,
-                                                annotationFlavour,
-                                                jakartaFlavour, chronoFlavour, getPrimitiveTypeMapper()
+                                                getPrimitiveTypeMapper()
                                         ) : null;
                                         InstanceMapper instanceMapper = new InstanceMapper(
                                                 element,
                                                 instanceWriter,
                                                 sliceInstanceWriter,
                                                 getModel(),
+                                                this.configuration,
                                                 this.format,
-                                                this.packageSuffix,
                                                 this.metaData,
-                                                this.annotationFlavour,
-                                                this.jakartaFlavour,
-                                                this.chronoFlavour,
                                                 getPrimitiveTypeMapper()
                                         );
                                         InterfaceMapper interfaceMapper = jpa3 && instanceMapper.hasSPI() ? new InterfaceMapper(
                                                 element,
                                                 interfaceWriter,
                                                 getModel(),
-                                                Format.SPI2,
-                                                Names.SPI2_PACKAGE_SUFFIX,
+                                                this.configuration,
+                                                JavaExportFormat.SPI2,
                                                 this.metaData,
-                                                this.annotationFlavour,
-                                                this.jakartaFlavour,
-                                                this.chronoFlavour,
                                                 getPrimitiveTypeMapper()
                                         ) : null;
                                         AbstractMetaDataMapper ormMetaDataMapper = jpa3 ? new StandardMetaDataMapper(
                                                 element,
                                                 ormMetaDataWriter,
                                                 getModel(),
+                                                this.configuration,
                                                 this.format,
-                                                this.packageSuffix,
                                                 null,
                                                 this.metaData,
-                                                annotationFlavour,
-                                                jakartaFlavour,
-                                                chronoFlavour,
                                                 getPrimitiveTypeMapper(),
                                                 geObjectRepositoryMetadataPlugin()
                                         ) : cci2 ? new NativeMetaDataMapper(
                                                 element,
                                                 ormMetaDataWriter,
                                                 getModel(),
+                                                this.configuration,
                                                 this.format,
-                                                this.packageSuffix,
                                                 null,
                                                 this.metaData,
-                                                annotationFlavour,
-                                                jakartaFlavour,
-                                                chronoFlavour,
                                                 getPrimitiveTypeMapper(),
                                                 geObjectRepositoryMetadataPlugin()
                                         ) : null;
@@ -1263,25 +1221,19 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                                 element,
                                                 ormSliceMetaDataWriter,
                                                 getModel(),
+                                                this.configuration,
                                                 this.format,
-                                                this.packageSuffix,
                                                 InstanceMapper.SLICE_CLASS_NAME,
                                                 this.metaData,
-                                                annotationFlavour,
-                                                jakartaFlavour,
-                                                chronoFlavour,
                                                 getPrimitiveTypeMapper(),
                                                 geObjectRepositoryMetadataPlugin()
                                         ) : null;
                                         QueryMapper queryMapper = cci2 ? new QueryMapper(
                                                 queryWriter,
                                                 getModel(),
+                                                this.configuration,
                                                 this.format,
-                                                this.packageSuffix,
                                                 this.metaData,
-                                                annotationFlavour,
-                                                jakartaFlavour,
-                                                chronoFlavour,
                                                 getPrimitiveTypeMapper()
                                         ) : null;
                                         this.mapBeginClass(
@@ -1343,7 +1295,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                                 instanceFile,
                                                 element,
                                                 elementName,
-                                                "." + this.fileExtension);
+                                                "." + FILE_EXTENSION);
                                         if (jpa3) {
                                             if (interfaceMapper != null) {
                                                 interfaceWriter.flush();
@@ -1352,7 +1304,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                                         interfaceFile,
                                                         element,
                                                         elementName,
-                                                        "." + this.fileExtension,
+                                                        "." + FILE_EXTENSION,
                                                         true,
                                                         Names.SPI2_PACKAGE_SUFFIX);
                                             }
@@ -1363,7 +1315,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                                     element,
                                                     elementName,
                                                     InstanceMapper.SLICE_CLASS_NAME
-                                                            + "." + this.fileExtension,
+                                                            + "." + FILE_EXTENSION,
                                                     true,
                                                     Names.JPA3_PACKAGE_SUFFIX);
                                         }
@@ -1374,7 +1326,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                                     queryFile,
                                                     element,
                                                     elementName,
-                                                    "Query." + this.fileExtension);
+                                                    "Query." + FILE_EXTENSION);
                                         }
                                         if (jmi1 && !classDef.isAbstract()) {
                                             classWriter.flush();
@@ -1383,7 +1335,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                                     classFile,
                                                     element,
                                                     elementName,
-                                                    "Class." + this.fileExtension);
+                                                    "Class." + FILE_EXTENSION);
                                         }
                                     }
                                 }
@@ -1413,23 +1365,17 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                         element,
                                         structWriter,
                                         getModel(),
+                                        this.configuration,
                                         this.format,
-                                        this.packageSuffix,
                                         this.metaData,
-                                        annotationFlavour,
-                                        jakartaFlavour,
-                                        chronoFlavour,
                                         getPrimitiveTypeMapper()
                                 );
                                 QueryMapper queryMapper = cci2 ? new QueryMapper(
                                         queryWriter,
                                         getModel(),
+                                        this.configuration,
                                         this.format,
-                                        this.packageSuffix,
                                         this.metaData,
-                                        annotationFlavour,
-                                        jakartaFlavour,
-                                        chronoFlavour,
                                         getPrimitiveTypeMapper()
                                 ) : null;
                                 if (structureMapper != null) {
@@ -1463,7 +1409,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             structFile,
                                             element,
                                             elementName,
-                                            "." + this.fileExtension);
+                                            "." + FILE_EXTENSION);
                                 }
                                 if (cci2) {
                                     queryWriter.flush();
@@ -1472,7 +1418,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             queryFile,
                                             element,
                                             elementName,
-                                            "Query." + this.fileExtension);
+                                            "Query." + FILE_EXTENSION);
                                 }
                             }
                             // org:omg:model1:Exception
@@ -1486,12 +1432,9 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             element,
                                             exceptionWriter,
                                             getModel(),
+                                            this.configuration,
                                             this.format,
-                                            packageSuffix,
                                             this.metaData,
-                                            annotationFlavour,
-                                            jakartaFlavour,
-                                            chronoFlavour,
                                             getPrimitiveTypeMapper()
                                     );
                                     this.mapException(element, exceptionMapper);
@@ -1508,7 +1451,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             exceptionFile,
                                             element,
                                             elementName,
-                                            "." + this.fileExtension
+                                            "." + FILE_EXTENSION
                                     );
                                 }
                             }
@@ -1523,12 +1466,9 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                             element,
                                             associationWriter,
                                             getModel(),
+                                            this.configuration,
                                             this.format,
-                                            this.packageSuffix,
                                             this.metaData,
-                                            annotationFlavour,
-                                            jakartaFlavour,
-                                            chronoFlavour,
                                             getPrimitiveTypeMapper()
                                     );
                                     if (mapAssociation(
@@ -1540,7 +1480,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                                 associationFile,
                                                 element,
                                                 associationMapper.associationName,
-                                                "." + this.fileExtension
+                                                "." + FILE_EXTENSION
                                         );
                                     }
                                 }
@@ -1568,7 +1508,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                                         new StringBuffer(),
                                                         currentPackage.getName()
                                                 ).toString(),
-                                        '.' + this.fileExtension);
+                                        '.' + FILE_EXTENSION);
                     }
                 }
             }
@@ -1596,7 +1536,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         InstanceMapper instanceMapper,
         boolean inherited
     ) {
-        return inherited || format == Format.JPA3 ? instanceMapper.getFeatures(
+        return inherited || format.isJPA3() ? instanceMapper.getFeatures(
             inherited).values() : classDef.objGetList("feature");
     }
 
@@ -1611,7 +1551,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
     private boolean excludePackage(String packageName) {
         if (EXCLUDED_PACKAGES.contains(packageName)) {
             return true;
-        } else if(includeProvidedPackages) {
+        } else if(configuration.externalizationScope.includeProvidedPackages()) {
             return false;
         } else {
             String[] components = packageName.split(":");
@@ -1650,7 +1590,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
     }
 
     private boolean includeClass(ClassDef classDef) {
-        return (this.format != Format.JPA3) || !classDef.isAbstract()
+        return (!this.format.isJPA3()) || !classDef.isAbstract()
             || classDef.getSuperClassDef(true) == null;
     }
     

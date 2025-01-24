@@ -46,8 +46,7 @@ package org.openmdx.application.mof.externalizer.spi;
 
 import java.util.Collection;
 
-import org.openmdx.application.mof.mapping.cci.MappingTypes;
-import org.openmdx.kernel.log.SysLog;
+import org.openmdx.application.mof.mapping.cci.ExtendedFormatOptions;
 
 public enum JakartaFlavour {
 	
@@ -85,8 +84,9 @@ public enum JakartaFlavour {
 		
 	};
 	
-	private static final String EXTENDED_FORMAT = MappingTypes.JAKARTA_8;
-	
+	private static final String EXTENDED_FORMAT = ExtendedFormatOptions.JAKARTA_8;
+	public static final JakartaFlavour DEFAULT = VERSION_8;
+
 	public abstract String getGeneratedAnnotation();
 	public abstract void applyExtendedFormat(Collection<String> extendedFormats);
 	

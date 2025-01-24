@@ -79,27 +79,21 @@ public class ValidatingDocumentBuilder {
     
     /**
      * Constructor 
-     * 
-     * @throws ParserConfigurationException 
      */
     protected ValidatingDocumentBuilder(
-    ) throws ParserConfigurationException {
+    ){
         this.dtdDocumentBuilderFactory = newDocumentBuilderFactory(null);
         this.xsdDocumentBuilderFactory = newDocumentBuilderFactory("http://www.w3.org/2001/XMLSchema");
     }
 
     /**
      * Create a validating document builder factory for DTD of schema based documents.
-     * 
-     * @param schemaBased whether the documents are DTD or schmea based
-     * 
+     *
      * @return a new document builder factory
-     * 
-     * @throws ParserConfigurationException
      */
     private static DocumentBuilderFactory newDocumentBuilderFactory(
         String schemaLanguage
-    ) throws ParserConfigurationException {
+    ) {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setValidating(true);
         if(schemaLanguage != null) { 
@@ -116,8 +110,6 @@ public class ValidatingDocumentBuilder {
      * Create a validating document builder instance.
      * 
      * @return a new validating document builder instance
-     * 
-     * @throws ParserConfigurationException
      */
     public static ValidatingDocumentBuilder newInstance(
     ) throws ParserConfigurationException{
@@ -130,10 +122,6 @@ public class ValidatingDocumentBuilder {
      * @param url the document's url
      * 
      * @return the document
-     * 
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
      */
     public Document parse(
         URL url
@@ -161,8 +149,6 @@ public class ValidatingDocumentBuilder {
      *
      * @return the namespace in case of schema based documents,
      * {@code null} in case of dtd based documents
-     * 
-     * @throws IOException 
      */
     protected String xmlNamespace(
         URL url
@@ -174,7 +160,7 @@ public class ValidatingDocumentBuilder {
                 true, // byteOrderMarkAware 
                 true, // xmlDeclarationAware
                 true // popagateClode
-            );
+            )
         ) {
             char[] charArray = new char[READ_AHEAD_LIMIT];
             int l = in.read(charArray);
@@ -204,12 +190,12 @@ public class ValidatingDocumentBuilder {
     /**
      * Schema Document Builder Factory 
      */
-    private DocumentBuilderFactory xsdDocumentBuilderFactory;
+    private final DocumentBuilderFactory xsdDocumentBuilderFactory;
 
     /**
      * DTD Document Builder Factory
      */
-    private DocumentBuilderFactory dtdDocumentBuilderFactory;
+    private final DocumentBuilderFactory dtdDocumentBuilderFactory;
     
     /**
      * How far to look for the element start.
@@ -243,8 +229,6 @@ public class ValidatingDocumentBuilder {
 
         /**
          * Constructor 
-         *
-         * @param documentURL
          */
         DocumentErrorHandler(
             URL documentURL
@@ -273,7 +257,7 @@ public class ValidatingDocumentBuilder {
          */
         public void fatalError(
             SAXParseException exception
-        ) throws SAXException {
+        ){
             String message = newMessage(exception, "fatal error");
             SysLog.log(Level.SEVERE, message);
             System.err.println(message);
@@ -292,10 +276,7 @@ public class ValidatingDocumentBuilder {
 
         /**
          * Build the message
-         * 
-         * @param exception
-         * @param level
-         * 
+         *
          * @return the complete exception message
          */
         private String newMessage(

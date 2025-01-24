@@ -51,10 +51,7 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -71,48 +68,34 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
   /**
    * Constructor
    * 
-   * @param annotationFlavour tells whether annotations use markdown
-   * @param jakartaFlavour tells whether Jakarta 8 or a contemporary flavour shall be used
-   * @param chronoFlavour tells whether the classic or the contemporary JMI API shall be used
-   * @param packageSuffix the (optional) package suffix
+   * @param configuration
+   *  the externalization configuration
+   * @param packageSuffix
+   *  The suffix for the package to be generated in (without leading dot), e.g. 'cci'
    */
   protected AbstractMapper_1(
-    AnnotationFlavour annotationFlavour, 
-    JakartaFlavour jakartaFlavour, 
-    ChronoFlavour chronoFlavour,
+    ExternalizationConfiguration configuration,
     String packageSuffix
   ) {
-    this.annotationFlavour = annotationFlavour;
-    this.jakartaFlavour = jakartaFlavour;
-    this.chronoFlavour = chronoFlavour;
+    this.configuration = configuration;
     this.packageSuffix = packageSuffix;
   }
-  
+
   /**
-   * 
+   * The externalization configuration
    */
-  protected Model_1_0 model = null;
-  
+  protected final ExternalizationConfiguration configuration;
+
   /**
-   * 
+   * The last element of the package name
    */
   protected final String packageSuffix;
-  
-  /**
-   * Tells whether annotations use markdown.
-   */
-  protected final AnnotationFlavour annotationFlavour;
-  
-  /**
-   * Tells whether Jakarta 8 or a contemporary flavour shall be used
-   */
-  protected final JakartaFlavour jakartaFlavour;
-  
-  /**
-   * Tells whether the classic or the contemporary JMI API shall be used
-   */
-  protected final ChronoFlavour chronoFlavour;
 
+  /**
+   * The (lazily) initialized model
+   */
+  protected Model_1_0 model;
+  
   protected void addToZip(
     ZipOutputStream zip,
     ByteArrayOutputStream os,
@@ -122,7 +105,6 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
     boolean dereferenceType, 
     String packageSuffix
   ) throws ServiceException {
-
     try {
       final String zipEntryName;
       if(element == null) {
@@ -208,7 +190,7 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
         element,
         element.getName(),
         suffix,
-        dereferenceType, 
+        dereferenceType,
         this.packageSuffix
     );
   }

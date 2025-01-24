@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.openmdx.application.mof.mapping.cci.MappingTypes;
+import org.openmdx.application.mof.mapping.cci.ExtendedFormatOptions;
 import org.openmdx.application.mof.mapping.java.StandardAnnotationRenderer;
 import org.openmdx.application.mof.mapping.spi.MarkdownRendererFactory;
 
@@ -47,7 +47,8 @@ public enum AnnotationFlavour {
 		
 	};
 
-	private static final String EXTENDED_FORMAT = MappingTypes.MARKDOWN;
+	public static final AnnotationFlavour DEFAULT = STANDARD;
+	private static final String EXTENDED_FORMAT = ExtendedFormatOptions.MARKDOWN;
 	
 	public abstract void applyExtendedFormat(Collection<String> extendedFormats);
 	public abstract Function<String, String> createRenderer();

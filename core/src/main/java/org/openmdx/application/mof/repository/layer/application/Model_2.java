@@ -71,8 +71,8 @@ import jakarta.resource.spi.IllegalStateException;
 import org.openmdx.application.mof.cci.ModelExceptions;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_1;
-import org.openmdx.application.mof.mapping.cci.MappingTypes;
 import org.openmdx.application.mof.mapping.spi.MapperFactory_1;
+import org.openmdx.application.mof.mapping.spi.ModelExportFormat;
 import org.openmdx.application.mof.repository.accessor.ModelBuilder_1;
 import org.openmdx.application.mof.repository.utils.ModelUtils;
 import org.openmdx.base.dataprovider.cci.Channel;
@@ -115,7 +115,7 @@ public class Model_2 extends AbstractRestPort {
     
     protected static final Path PROVIDER_ROOT_PATH = new Path("xri://@openmdx*org.omg.model1/provider/Mof");
 
-    protected static final List<String> DEFAULT_FORMAT = Collections.singletonList(MappingTypes.XMI1);
+    protected static final List<String> DEFAULT_FORMAT = Collections.singletonList(ModelExportFormat.XMI1.getId());
 
     @Override
     public Interaction getInteraction(
@@ -168,10 +168,6 @@ public class Model_2 extends AbstractRestPort {
 
     	/**
     	 * Constructor
-    	 * 
-    	 * @param connection
-    	 * 
-    	 * @throws ResourceException 
     	 */
         protected RestInteraction(
 			RestConnection connection
@@ -247,7 +243,7 @@ public class Model_2 extends AbstractRestPort {
 	    ) throws ResourceException { 
 	    	long startedAt = System.currentTimeMillis();    
 
-	        Map<Path,ObjectRecord> classifiers = new HashMap<Path,ObjectRecord>();
+	        Map<Path,ObjectRecord> classifiers = new HashMap<>();
 	        for(ObjectRecord element : elements.values()){
 	            // collect classifier
 	            if(isClassifier(element)) {
@@ -352,7 +348,7 @@ public class Model_2 extends AbstractRestPort {
 	        List<ObjectRecord> content = this.getNamespaceContent(
 	            namespace
 	        );
-	        List<Path> contentAsPaths = new ArrayList<Path>();
+	        List<Path> contentAsPaths = new ArrayList<>();
 	        for(ObjectRecord object : content) {
 	            contentAsPaths.add(object.getResourceIdentifier());
 	        }
@@ -366,7 +362,7 @@ public class Model_2 extends AbstractRestPort {
 	        ObjectRecord classifier,
 	        Map<Path,ObjectRecord> elements
 	    ) throws ResourceException {
-	        Set<Path> allSupertype = new TreeSet<Path>();
+	        Set<Path> allSupertype = new TreeSet<>();
 	        List<Path> supertypes = (List<Path>) classifier.getValue().get("supertype");
 	        if(supertypes != null){
 	        	for(Path supertypeId : supertypes) {
@@ -398,7 +394,6 @@ public class Model_2 extends AbstractRestPort {
 
 	    /**
 	     * Set feature 'subtype' of classifiers
-	     * @throws ResourceException 
 	     */
 	    private void setSubtype(
 	        Map<Path,ObjectRecord> classifiers
@@ -430,11 +425,10 @@ public class Model_2 extends AbstractRestPort {
 
 	    /**
 	     * Set feature 'content' of namespaces
-	     * @throws ResourceException 
 	     */
 	    private void setContent(
 	        Map<Path,ObjectRecord> elements
-	    ) throws ResourceException {    
+	    ){
 	        clearContentOfNamespaces(elements);
 	        calculateContentOfNamespaces(elements);
 
@@ -486,13 +480,12 @@ public class Model_2 extends AbstractRestPort {
 	     * When object is of type ModelClass completes the features allOperations,
 	     * allAttributes and allReferences. Precondition: allSupertype and content
 	     * must be set.
-	     * @throws ResourceException 
 	     */
 	    private IndexedRecord getFeatures(
     		ObjectRecord classifier,
 	        Map<Path,ObjectRecord> elements
 	    ) throws ResourceException {
-	        final Set<Path> features = new TreeSet<Path>(); 
+	        final Set<Path> features = new TreeSet<>();
 	        final List<?> supertypeIds = (List<?>) classifier.getValue().get("allSupertype");
 	        for(Object supertypeId : supertypeIds){
 	        	final ObjectRecord supertype = elements.get(supertypeId);
@@ -518,7 +511,7 @@ public class Model_2 extends AbstractRestPort {
 	        ObjectRecord classifier,
 	        Map<Path,ObjectRecord> elements
 	    ) throws ResourceException {
-	        Set<Path> allSubtypes = new TreeSet<Path>();
+	        Set<Path> allSubtypes = new TreeSet<>();
 	        List<?> subytpeIds = (List<?>) classifier.getValue().get("subtype");
 	        for(Object subtypeId : subytpeIds){
 	        	ObjectRecord subtype = elements.get(subtypeId);
@@ -583,7 +576,6 @@ public class Model_2 extends AbstractRestPort {
 
         /**
          * complete derived attributes
-         * @throws ResourceException 
          */
         void completeObject(
             QueryRecord request,
@@ -799,7 +791,7 @@ public class Model_2 extends AbstractRestPort {
 			List<ObjectRecord> segments = channel.addFindRequest(
 			    PROVIDER_ROOT_PATH.getChild("segment")
 			);
-			Map<Path,ObjectRecord> completedElements = new HashMap<Path,ObjectRecord>();
+			Map<Path,ObjectRecord> completedElements = new HashMap<>();
 			for(ObjectRecord segment : segments) {
 			    List<ObjectRecord> elements = channel.addFindRequest(
 			        segment.getResourceIdentifier().getChild("element")
@@ -819,7 +811,7 @@ public class Model_2 extends AbstractRestPort {
 			        element
 			    );
 			}
-			SysLog.trace("completed elements", Integer.valueOf(completedElements.size()));
+			SysLog.trace("completed elements", completedElements.size());
 			// Void reply  
 			output.setBody(null);
 			Model_2.this.importing = false;
@@ -852,7 +844,7 @@ public class Model_2 extends AbstractRestPort {
    
 			    // only test for existence if not wildcard export
 			    if(
-			        (qualifiedPackageName.indexOf("%") < 0) &&
+			        (!qualifiedPackageName.contains("%")) &&
 			        (model.findElement(modelPackagePath) == null)
 			    ) {
 			    	throw ResourceExceptions.initHolder(
@@ -898,12 +890,10 @@ public class Model_2 extends AbstractRestPort {
     			    body.put("packageAsJar", bs.toByteArray());
                 }
 			    return true;
-			} catch (ServiceException exception) {
+			} catch (ServiceException | IOException exception) {
 				throw ResourceExceptions.toResourceException(exception);
-			} catch(IOException e) {
-			    throw ResourceExceptions.toResourceException(e);
 			}
-		}
+        }
 
 		/**
 		 * Seems to do nothing
@@ -928,8 +918,8 @@ public class Model_2 extends AbstractRestPort {
 			);
 			// search elements with matching types
 			String ofType = (String) input.getBody().get("ofType");
-			boolean includeSubtypes = ((Boolean)input.getBody().get("includeSubtypes")).booleanValue();
-			List<Path> result = new ArrayList<Path>();
+			boolean includeSubtypes = ((Boolean)input.getBody().get("includeSubtypes"));
+			List<Path> result = new ArrayList<>();
 			
 			for(ObjectRecord content : contents) {
 			    if(includeSubtypes) {
@@ -948,11 +938,6 @@ public class Model_2 extends AbstractRestPort {
 			return true;
 		}
 
-		/**
-         * @param content
-         * @param subtype
-         * @return
-         */
         private boolean isInstanceOf(ObjectRecord content, String subtype) {
             throw new UnsupportedOperationException("Is " + content.getValue().getRecordName() + " an instance of " + subtype);
         }
@@ -970,7 +955,7 @@ public class Model_2 extends AbstractRestPort {
 			    input.getResourceIdentifier().getPrefix(input.getResourceIdentifier().size()-2)
 			);  
 			final Object qualifiedName = input.getBody().get("qualifiedName");
-			List<Path> result = new ArrayList<Path>();
+			List<Path> result = new ArrayList<>();
 			for(ObjectRecord content : contents){
 			    if(content.getValue().get("qualifiedName").equals(qualifiedName)) {
 			    	result.add(content.getResourceIdentifier());
@@ -1007,7 +992,7 @@ public class Model_2 extends AbstractRestPort {
 			    input.getResourceIdentifier().getPrefix(input.getResourceIdentifier().size()-2)
 			);  
 			final Object name = input.getBody().get("name");
-			List<Path> result = new ArrayList<Path>();
+			List<Path> result = new ArrayList<>();
 			for(ObjectRecord content : contents){
 				if(content.getValue().get("name").equals(name)) {
 				    result.add(content.getResourceIdentifier());

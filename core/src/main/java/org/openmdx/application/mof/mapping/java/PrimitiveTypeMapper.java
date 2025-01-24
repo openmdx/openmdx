@@ -62,7 +62,7 @@ public interface PrimitiveTypeMapper {
      */
     String getFeatureType(
         String qualifiedTypeName, 
-        Format format, 
+        JavaExportFormat format,
         boolean asObject,
         boolean classicChronoTypes
     ) throws ServiceException;
@@ -71,12 +71,13 @@ public interface PrimitiveTypeMapper {
      * Determines the Java predicate for a given primitive type
      *
      * @param qualifiedTypeName  the qualified model class name
-     * @param classicChronoTypes
+     * @param classicChronoTypes tells whether XML datatypes or jmi.time shall be used
      * @return the Java predicate for the given primitive type
      */
     String getPredicateType(
         String qualifiedTypeName,
-        boolean classicChronoTypes) throws ServiceException;
+        boolean classicChronoTypes
+    ) throws ServiceException;
 
     /**
      * Provide the Java pattern to parse a given expression represented by the EXPRESSION_PLACE_HOLDER.
@@ -90,7 +91,7 @@ public interface PrimitiveTypeMapper {
      */
     String getParsePattern(
         String qualifiedTypeName, 
-        Format format, 
+        JavaExportFormat format,
         boolean asObject,
         boolean classicChronoTypes
     ) throws ServiceException;
@@ -109,8 +110,8 @@ public interface PrimitiveTypeMapper {
      */
     String getMappingPattern(
         String qualifiedTypeName, 
-        Format from, 
-        Format to
+        JavaExportFormat from,
+        JavaExportFormat to
     ) throws ServiceException;
     
     /**

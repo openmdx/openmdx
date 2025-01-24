@@ -1,7 +1,7 @@
 /*
  * ====================================================================
- * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Model Dumper 
+ * Project:     openmdx, http://www.openmdx.org/
+ * Description: Format 
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,74 +42,85 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.base.mof.spi;
 
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+package org.openmdx.application.mof.mapping.spi;
 
+import java.util.List;
 import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
+import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
+import org.openmdx.application.mof.mapping.pimdoc.PIMDocMapper;
 import org.openmdx.application.mof.mapping.xmi.XMIMapper_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.kernel.exception.Throwables;
 
 /**
- * Model Dumper
+ * Model Export Format
  */
-public class Model_1Dumper {
+public enum ModelExportFormat {
+    
+    PIMDOC {
 
-    /**
-     * Dump the model repository content to an output stream
-     * 
-     * @param target
-     *            the destination
-     * @param mimeType
-     *            the MIME type defines the output format
-     * @param model
-     *            the model to be dumped
-     */
-    public static void save(
-        OutputStream target,
-        String mimeType,
-        Model_1_0 model
-    ) throws ServiceException {
-        final ExternalizationConfiguration defaultConfiguration = new ExternalizationConfiguration();
-        final XMIMapper_1 xmiMapper = new XMIMapper_1(defaultConfiguration);
-        xmiMapper.externalizeRepository(
-            model,
-            target,
-            mimeType
-        );
+        @Override
+        public Mapper_1_0 createMapper(
+            ExternalizationConfiguration configuration,
+            List<String> arguments
+        ) throws ServiceException {
+            return arguments.isEmpty() ? new PIMDocMapper(
+                    configuration
+            ) : new PIMDocMapper(
+                    configuration,
+                    arguments.get(0)
+            );
+        }
+    },
+    XMI1 {
+
+        @Override
+        public Mapper_1_0 createMapper(
+            ExternalizationConfiguration configuration,
+            List<String> arguments
+        ){
+            return new XMIMapper_1(configuration);
+        }
+
+    };
+
+    boolean isXMI1(){
+        return this == XMI1;
+    }
+    boolean isPIMDoc(){
+        return this == PIMDOC;
     }
 
+    public abstract Mapper_1_0 createMapper(
+        ExternalizationConfiguration configuration,
+        List<String> arguments
+    ) throws ServiceException;
+
     /**
-     * Dumps the content of the model repository to the file specified by the
-     * (single) argument.
-     * 
-     * @param arguments<ol>
-     * <li>the target file name</li>
-     * <li>the (optional) mime type</li>
-     * </ol>
+     * Determine the canonical name of the format
+     *
+     * @return the canonical name of the format
      */
-    public static void main(
-        String... arguments
-    ) {
-        if (arguments == null || arguments.length < 1 || arguments.length > 2) {
-            System.err.println("Usage: java " + Model_1Dumper.class.getName() + " <©> [<mimeType>]");
-        } else {
-            final String targetFileName = arguments[0];
-            final String mimeType = arguments.length > 1 ? arguments[1] : "application/vnd.openmdx-xmi.wbxml";
-            try {
-                System.out.println("Saving the model repository to " + targetFileName + "…");
-                final Model_1_0 model = Model_1Factory.getModel();
-                try (final FileOutputStream target = new FileOutputStream(targetFileName)) {
-                    save(target, mimeType, model);
-                }
-            } catch (Exception exception) {
-                Throwables.log(exception);
-                System.exit(-1);
+    public String getId(){
+        return name().toLowerCase();
+    }
+
+    public static ModelExportFormat fromId(String id) {
+        for(ModelExportFormat format : ModelExportFormat.values()) {
+            if (format.getId().equals(id)) {
+                return format;
             }
         }
+        throw new IllegalArgumentException("Unknown format: " + id);
+    }
+
+    public static boolean supports(String id) {
+        for(ModelExportFormat format : ModelExportFormat.values()) {
+            if (format.getId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -54,9 +54,7 @@ import java.util.List;
 
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
-import org.openmdx.application.mof.externalizer.spi.ChronoFlavour;
-import org.openmdx.application.mof.externalizer.spi.JakartaFlavour;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
@@ -84,30 +82,24 @@ import org.w3c.format.DateTimeFormat;
 public class StandardMetaDataMapper extends AbstractMetaDataMapper {
 
     public StandardMetaDataMapper(
-        ModelElement_1_0 classDef, 
-        Writer writer,
-		Model_1_0 model, 
-        Format format, 
-        String packageSuffix,
-		String sliceClassName, 
-        MetaData_1_0 metaData, 
-        AnnotationFlavour annotationFlavour, 
-        JakartaFlavour jakartaFlavour, 
-        ChronoFlavour chronoFlavour,
-        PrimitiveTypeMapper primitiveTypeMapper, 
-        ObjectRepositoryMetadataPlugin plugin
+            ModelElement_1_0 classDef,
+            Writer writer,
+            Model_1_0 model,
+            ExternalizationConfiguration configuration,
+            JavaExportFormat format,
+            String sliceClassName,
+            MetaData_1_0 metaData,
+            PrimitiveTypeMapper primitiveTypeMapper,
+            ObjectRepositoryMetadataPlugin plugin
     ) throws ServiceException {
         super(
             classDef,
             writer, 
             model,
-            format, 
-            packageSuffix, 
+            configuration,
+            format,
             sliceClassName,
-            annotationFlavour,
-            jakartaFlavour,
-            chronoFlavour,
-            metaData, 
+            metaData,
             primitiveTypeMapper, 
             plugin
         );

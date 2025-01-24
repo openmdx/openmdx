@@ -74,7 +74,7 @@ public class StructuresTest {
         test.openmdx.app1.cci2.PersonFormatNameAsResult structure
     ){
         Assertions.assertEquals("Von und zu Gutenberg", structure.getFormattedName());
-		// TODO Auto-generated method stub
+
         {
             List<String> value = structure.getFormattedNameAsList();
             Assertions.assertNotNull(value);

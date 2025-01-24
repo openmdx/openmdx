@@ -65,10 +65,6 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
 
     /**
      * Constructor 
-     * 
-     * @param viewObject
-     * 
-     * @throws ServiceException
      */
     public DateTimeState_1(
         ObjectView_1_0 self, 
@@ -252,8 +248,8 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
      */
     @Override
     protected void reduceStates(
-    ) throws ServiceException {
-        // TODO Auto-generated method stub
+    ){
+
     }
 
 }

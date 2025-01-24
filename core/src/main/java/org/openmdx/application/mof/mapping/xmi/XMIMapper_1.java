@@ -50,14 +50,13 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipOutputStream;
 
 import org.omg.mof.cci.VisibilityKind;
 import org.omg.mof.spi.Names;
-import org.openmdx.application.mof.externalizer.spi.AnnotationFlavour;
+import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
 import org.openmdx.application.mof.mapping.spi.AbstractMapper_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
@@ -78,8 +77,9 @@ public class XMIMapper_1 extends AbstractMapper_1 {
      * Constructor 
      */
     public XMIMapper_1(
+        ExternalizationConfiguration configuration
     ) {
-        super(AnnotationFlavour.STANDARD, null, null, Names.XMI_PACKAGE_SUFFIX);
+        super(configuration, Names.XMI_PACKAGE_SUFFIX);
     }
 
     /**
@@ -148,11 +148,6 @@ public class XMIMapper_1 extends AbstractMapper_1 {
 
     /**
      * Externalize the model repository
-     * 
-     * @param model
-     * @param bs
-     * @param mimeType
-     * @throws ServiceException
      */
     public void externalizeRepository(
         Model_1_0 model, 
@@ -161,7 +156,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
     ) throws ServiceException {
         SysLog.trace("> Externalize Repository");
         this.model = model;
-        List<String> packagesToExport = new ArrayList<String>();
+        List<String> packagesToExport = new ArrayList<>();
         for(ModelElement_1_0 packageToExport :  this.getMatchingPackages("%")) {
             packagesToExport.add(
                 packageToExport.getQualifiedName()
@@ -177,11 +172,6 @@ public class XMIMapper_1 extends AbstractMapper_1 {
     
     /**
      * Create an XMI Schema
-     * 
-     * @param packageName
-     * @param outputStream
-     * @param allFeatures
-     * @throws ServiceException
      */
     private void createXMISchema(
         String packageName,
@@ -191,19 +181,15 @@ public class XMIMapper_1 extends AbstractMapper_1 {
 
         Map allCompositeAssociationEnds = new HashMap();
 
-        for(
-            Iterator<ModelElement_1_0> i = this.model.getContent().iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 modelElement = i.next();
+        for (ModelElement_1_0 modelElement : this.model.getContent()) {
             // Collect AssociationEnds of with containment='composite' for performance reasons.
             // The collection is used to determine the qualifiers of classes.
-            if(modelElement.isAssociationEndType()) {
-                if(AggregationKind.COMPOSITE.equals(modelElement.getAggregation())) {
+            if (modelElement.isAssociationEndType()) {
+                if (AggregationKind.COMPOSITE.equals(modelElement.getAggregation())) {
                     allCompositeAssociationEnds.put(
-                        modelElement.getType(), 
-                        modelElement
-                    );        
+                            modelElement.getType(),
+                            modelElement
+                    );
                 }
             }
         }
@@ -216,98 +202,90 @@ public class XMIMapper_1 extends AbstractMapper_1 {
       XMISchemaWriter.writeSchemaHeader();
 
         // all model elements
-        for(
-                Iterator iterator = this.model.getContent().iterator();
-                iterator.hasNext();
-        ) {
-            ModelElement_1_0 elementDef = (ModelElement_1_0)iterator.next();
+        for (ModelElement_1_0 elementDef : this.model.getContent()) {
             SysLog.trace("elementDef", elementDef.getQualifiedName());
 
             // PrimitiveType
-            if(elementDef.isPrimitiveType()) {
+            if (elementDef.isPrimitiveType()) {
                 XMISchemaWriter.writePrimitiveType(elementDef);
             }
             // Class
-            else if(
-                elementDef.isClassType() ||
-                elementDef.isStructureType()
+            else if (
+                    elementDef.isClassType() ||
+                            elementDef.isStructureType()
             ) {
                 XMISchemaWriter.writeComplexTypeHeader(elementDef);
                 int compositeReferenceCount = 0;
-                /**
-                 * Write all class features
-                 * phase 0: attributes and references stored as attributes
-                 * phase 1: composite references
-                 */
-                for(
-                    int featureType = 0;
-                    featureType < 2;
-                    featureType++
+                //
+                // Write all class features
+                // phase 0: attributes and references stored as attributes
+                // phase 1: composite references
+                //
+                for (
+                        int featureType = 0;
+                        featureType < 2;
+                        featureType++
                 ) {
-                    if(featureType == 0) {
+                    if (featureType == 0) {
                         XMISchemaWriter.writeAttributeFeatureHeader(elementDef);
                     }
 
                     // iterate features
-                    for(
-                        Iterator i = elementDef.objGetList("feature").iterator();
-                        i.hasNext();
-                    ) {
-                        ModelElement_1_0 featureDef = this.model.getElement(i.next());
+                    for (Object o : elementDef.objGetList("feature")) {
+                        ModelElement_1_0 featureDef = this.model.getElement(o);
                         SysLog.trace("processing feature", featureDef.getQualifiedName());
                         boolean isPublic = VisibilityKind.PUBLIC_VIS.equals(featureDef.objGetValue("visibility"));
 
                         // Attribute
-                        if(this.model.isAttributeType(featureDef)) {  
-                            boolean isChangeable = featureDef.isChangeable().booleanValue();
-                            if(
-                                    isPublic && 
-                                    (isChangeable || allFeatures) 
+                        if (this.model.isAttributeType(featureDef)) {
+                            boolean isChangeable = featureDef.isChangeable();
+                            if (
+                                    isPublic &&
+                                            (isChangeable || allFeatures)
                             ) {
-                                if(featureType == 0) {
+                                if (featureType == 0) {
                                     XMISchemaWriter.writeAttribute(
-                                        featureDef,
-                                        this.model.getElementType(
-                                            featureDef
-                                        ).isClassType()
+                                            featureDef,
+                                            this.model.getElementType(
+                                                    featureDef
+                                            ).isClassType()
                                     );
                                 }
                             }
                         }
 
                         // Reference
-                        else if(this.model.isReferenceType(featureDef)) {  
+                        else if (this.model.isReferenceType(featureDef)) {
                             ModelElement_1_0 referencedEnd = this.model.getElement(featureDef.getReferencedEnd());
-                            boolean isNavigable = ((Boolean)referencedEnd.objGetValue("isNavigable")).booleanValue();
-                            boolean isChangeable = 
-                                featureDef.isChangeable().booleanValue() ||
-                                //
-                                // CR0004024
-                                //
-                                "org:openmdx:base:AuthorityHasProvider:provider".equals(referencedEnd.jdoGetObjectId().getLastSegment().toClassicRepresentation());
-                            if(isPublic && isNavigable && (isChangeable || allFeatures)) {
-                                if(this.model.referenceIsStoredAsAttribute(featureDef)) {
-                                    if(featureType == 0) {
+                            boolean isNavigable = ((Boolean) referencedEnd.objGetValue("isNavigable"));
+                            boolean isChangeable =
+                                    featureDef.isChangeable() ||
+                                            //
+                                            // CR0004024
+                                            //
+                                            "org:openmdx:base:AuthorityHasProvider:provider".equals(referencedEnd.jdoGetObjectId().getLastSegment().toClassicRepresentation());
+                            if (isPublic && isNavigable && (isChangeable || allFeatures)) {
+                                if (this.model.referenceIsStoredAsAttribute(featureDef)) {
+                                    if (featureType == 0) {
                                         XMISchemaWriter.writeReferenceStoredAsAttribute(
-                                            featureDef
+                                                featureDef
                                         );
                                     }
-                                }
-                                else if(!AggregationKind.NONE.equals(referencedEnd.getAggregation())) {
-                                    if(featureType == 1) {
-                                        if(compositeReferenceCount++ == 0) {
+                                } else if (!AggregationKind.NONE.equals(referencedEnd.getAggregation())) {
+                                    if (featureType == 1) {
+                                        if (compositeReferenceCount++ == 0) {
                                             XMISchemaWriter.writeCompositeReferenceFeatureHeader(elementDef);
                                         }
                                         XMISchemaWriter.writeReference(
-                                            featureDef,
-                                            elementDef
+                                                featureDef,
+                                                elementDef
                                         );
                                     }
                                 }
                             }
                         }
                     }
-                    if(featureType == 0) {
+                    if (featureType == 0) {
                         XMISchemaWriter.writeAttributeFeatureFooter(elementDef);
                     }
                 }
@@ -317,25 +295,22 @@ public class XMIMapper_1 extends AbstractMapper_1 {
                 // Qualifiers        
                 // Either the elementDef (which is a class) itself or one of its supertypes must 
                 // have a composite AssocationEnd with a qualifier.
-                for(
-                        Iterator i = elementDef.objGetList("allSupertype").iterator();
-                        i.hasNext();
-                ) {
-                    ModelElement_1_0 supertype = this.model.getDereferencedType(i.next());
-                    ModelElement_1_0 modelAssociationEnd = null;
-                    if((modelAssociationEnd = (ModelElement_1_0)allCompositeAssociationEnds.get(supertype.jdoGetObjectId())) != null) {
-                        for(
-                            int j = 0; 
-                            j < modelAssociationEnd.objGetList("qualifierName").size(); 
-                            j++
+                for (Object o : elementDef.objGetList("allSupertype")) {
+                    ModelElement_1_0 supertype = this.model.getDereferencedType(o);
+                    ModelElement_1_0 modelAssociationEnd;
+                    if ((modelAssociationEnd = (ModelElement_1_0) allCompositeAssociationEnds.get(supertype.jdoGetObjectId())) != null) {
+                        for (
+                                int j = 0;
+                                j < modelAssociationEnd.objGetList("qualifierName").size();
+                                j++
                         ) {
-                            String qualifierName = (String)modelAssociationEnd.objGetList("qualifierName").get(j);
+                            String qualifierName = (String) modelAssociationEnd.objGetList("qualifierName").get(j);
                             ModelElement_1_0 qualifierType = this.model.getDereferencedType(modelAssociationEnd.objGetList("qualifierType").get(j));
                             XMISchemaWriter.writeQualifierAttributes(
-                                qualifierName, 
-                                qualifierType.getQualifiedName(),
-                                this.model.isPrimitiveType(qualifierType)
-                            );    
+                                    qualifierName,
+                                    qualifierType.getQualifiedName(),
+                                    this.model.isPrimitiveType(qualifierType)
+                            );
                         }
                     }
                 }
@@ -343,26 +318,23 @@ public class XMIMapper_1 extends AbstractMapper_1 {
             }
 
             // StructureType
-            else if(
-                elementDef.isStructureType()
+            else if (
+                    elementDef.isStructureType()
             ) {
                 XMISchemaWriter.writeComplexTypeHeader(elementDef);
                 XMISchemaWriter.writeStructureFieldHeader(elementDef);
 
                 // all class features
-                for(
-                    Iterator i = elementDef.objGetList("feature").iterator();
-                    i.hasNext();
-                ) {
-                    ModelElement_1_0 featureDef = this.model.getElement(i.next());
+                for (Object o : elementDef.objGetList("feature")) {
+                    ModelElement_1_0 featureDef = this.model.getElement(o);
 
                     // StructureField
-                    if(featureDef.isStructureFieldType()) {
+                    if (featureDef.isStructureFieldType()) {
                         XMISchemaWriter.writeStructureField(
-                            featureDef,
-                            this.model.getElementType(
-                                featureDef
-                            ).isClassType()
+                                featureDef,
+                                this.model.getElementType(
+                                        featureDef
+                                ).isClassType()
                         );
                     }
                 }
@@ -375,10 +347,6 @@ public class XMIMapper_1 extends AbstractMapper_1 {
 
     /**
      * Externalize a single model element
-     * 
-     * @param XMIModelWriter
-     * @param elementDef
-     * @throws ServiceException
      */
     private void writeElement(
         XMIModelMapper XMIModelWriter,
@@ -424,10 +392,6 @@ public class XMIMapper_1 extends AbstractMapper_1 {
 
     /**
      * Externalize a single model package
-     * 
-     * @param forPackage
-     * @param XMIModelWriter
-     * @throws ServiceException
      */
     private void writePackage(String forPackage, XMIModelMapper XMIModelWriter)
         throws ServiceException {
@@ -445,12 +409,6 @@ public class XMIMapper_1 extends AbstractMapper_1 {
 
     /**
      * Externalize a single model package
-     * 
-     * @param forPackage
-     * @param out
-     * @param mimeType
-     * 
-     * @throws ServiceException
      */
     private void createXMIModel(
         String forPackage,
@@ -468,22 +426,18 @@ public class XMIMapper_1 extends AbstractMapper_1 {
     
     /**
      * Determine the provider name
-     * 
-     * @param forPackages
-     * @return
-     * @throws ServiceException
      */
     private String getProviderName(
         List<String> forPackages
-    ) throws ServiceException {
+    ) {
         return DEFAULT_PROVIDER_NAME;
     }
     
     private void populateStringTable(
         StringTable target,
         List<String> source
-    ) throws ServiceException{
-        List<String> segmentNames = new ArrayList<String>();
+    ) {
+        List<String> segmentNames = new ArrayList<>();
         for(String packageName : source) {
             String segmentName = packageName.substring(0, packageName.lastIndexOf(':'));
             target.addString(segmentName);
@@ -499,13 +453,6 @@ public class XMIMapper_1 extends AbstractMapper_1 {
     
     /**
      * Externalize a set of model packages
-     * 
-     * @param forPackages
-     * @param out
-     * @param mimeType
-     * @param allFeatures
-     * 
-     * @throws ServiceException
      */
     private void createXMIModel(
         List<String> forPackages,
@@ -534,4 +481,3 @@ public class XMIMapper_1 extends AbstractMapper_1 {
     }
 
 }
-

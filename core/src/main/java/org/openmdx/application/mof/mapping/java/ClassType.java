@@ -44,7 +44,6 @@
  */
 package org.openmdx.application.mof.mapping.java;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.omg.mof.spi.Identifier;
@@ -66,11 +65,11 @@ public enum ClassType {
         @Override
         public String getType(
             ClassDef classDef,
-            Format format,
+            JavaExportFormat format,
             TypeMode featureUsage
         ){
             if(featureUsage == TypeMode.PARAMETER) {
-                if(format == Format.JMI1) { 
+                if(format.isJMI1()) {
                     return getType(
                         classDef.getQualifiedName(), 
                         Names.JMI1_PACKAGE_SUFFIX
@@ -84,7 +83,7 @@ public enum ClassType {
                 }
             }
             else if(featureUsage == TypeMode.RESULT) {
-                if(format == Format.JMI1) { 
+                if(format.isJMI1()) {
                     return getType(
                         classDef.getQualifiedName(), 
                         Names.JMI1_PACKAGE_SUFFIX
@@ -98,13 +97,13 @@ public enum ClassType {
                 }
             }
             else if(featureUsage == TypeMode.MEMBER) {
-                if(format == Format.JPA3) {
+                if(format.isJPA3()) {
                     return getType(
                         classDef.getQualifiedName(), 
                         Names.JPA3_PACKAGE_SUFFIX
                     );
                 }
-                else if(format == Format.JMI1) { 
+                else if(format.isJMI1()) {
                     return getType(
                         classDef.getQualifiedName(), 
                         Names.JMI1_PACKAGE_SUFFIX
@@ -139,11 +138,11 @@ public enum ClassType {
         @Override
         public String getType(
             ClassDef classDef,
-            Format format,
+            JavaExportFormat format,
             TypeMode featureUsage
         ){
             if(featureUsage == TypeMode.PARAMETER) {
-                if(format == Format.JMI1) { 
+                if(format.isJMI1()) {
                     return getType(
                         classDef.getQualifiedName(), 
                         Names.JMI1_PACKAGE_SUFFIX
@@ -157,7 +156,7 @@ public enum ClassType {
                 }
             }
             else if(featureUsage == TypeMode.RESULT) {
-                if(format == Format.JMI1) { 
+                if(format.isJMI1()) {
                     return getType(
                         classDef.getQualifiedName(), 
                         Names.JMI1_PACKAGE_SUFFIX
@@ -206,11 +205,11 @@ public enum ClassType {
         @Override
         public String getType(
             ClassDef classDef,
-            Format format,
+            JavaExportFormat format,
             TypeMode featureUsage
         ){
             if(featureUsage == TypeMode.PARAMETER) {
-                if(format == Format.JMI1) { 
+                if(format.isJMI1()) {
                     return getType(
                         classDef.getQualifiedName(), 
                         Names.JMI1_PACKAGE_SUFFIX
@@ -224,7 +223,7 @@ public enum ClassType {
                 }
             }
             else if(featureUsage == TypeMode.RESULT) {
-                if(format == Format.JMI1) { 
+                if(format.isJMI1()) {
                     return getType(
                         classDef.getQualifiedName(), 
                         Names.JMI1_PACKAGE_SUFFIX
@@ -263,21 +262,18 @@ public enum ClassType {
      */
     public abstract String getType(
         ClassDef classDef,
-        Format format,
+        JavaExportFormat format,
         TypeMode featureUsage
     );
         
     static ClassDef getSuperClassDef(
         ClassDef classDef
     ){
-        for(
-            Iterator<?> i = classDef.getSupertypes().iterator();
-            i.hasNext();
-         ){
-             ClassDef c = (ClassDef) i.next();
-             if(!c.getStereotype().contains(Stereotypes.ROOT)) {
-                 return c;
-             }
+        for (Object o : classDef.getSupertypes()) {
+            ClassDef c = (ClassDef) o;
+            if (!c.getStereotype().contains(Stereotypes.ROOT)) {
+                return c;
+            }
         }
         return null;
     }

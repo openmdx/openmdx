@@ -143,16 +143,8 @@ fun getVersionClass(packageName: String): String {
             public static void main(
                 String arguments[]
             ) {
-                System.out.println(
-                    new StringBuilder(
-                        Version.class.getName()
-                    ).append(
-                        '='
-                    ).append(
-                        Version.getImplementationVersion()
-                    )
-                );
-            }
+                System.out.println(String.format("%s=%s", Version.class.getName(), getImplementationVersion()));
+			}
         }
         """.trimIndent()
 }

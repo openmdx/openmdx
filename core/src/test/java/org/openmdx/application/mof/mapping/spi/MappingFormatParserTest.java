@@ -44,9 +44,11 @@
  */
 package org.openmdx.application.mof.mapping.spi;
 
+import java.util.Arrays;
+import java.util.Collections;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.openmdx.application.mof.mapping.cci.MappingTypes;
+import org.openmdx.application.mof.mapping.java.JavaExportFormat;
 
 /**
  * Mapping Format Parser
@@ -58,7 +60,7 @@ public class MappingFormatParserTest {
 		//
 		// Arrange
 		//
-		final String format = MappingTypes.JMI1;
+        final String format = JavaExportFormat.JMI1.getId();
 		//
 		// Act
 		//
@@ -66,8 +68,8 @@ public class MappingFormatParserTest {
 		//
 		// Assert
 		//
-		Assertions.assertEquals(MappingTypes.JMI1, testee.getId());
-		Assertions.assertArrayEquals(new String[0], testee.getArguments());
+		Assertions.assertEquals(JavaExportFormat.JMI1.getId(), testee.getId());
+		Assertions.assertTrue(testee.getArguments().isEmpty());
 	}
 	
 	@Test
@@ -84,7 +86,7 @@ public class MappingFormatParserTest {
 		// Assert
 		//
 		Assertions.assertEquals("com.example.TheMapper", testee.getId());
-		Assertions.assertArrayEquals(new String[] {"left","right"}, testee.getArguments());
+		Assertions.assertEquals(Arrays.asList("left","right"), testee.getArguments());
 	}
 
 	@Test
@@ -100,8 +102,8 @@ public class MappingFormatParserTest {
 		//
 		// Assert
 		//
-		Assertions.assertEquals(MappingTypes.PIMDOC, testee.getId());
-		Assertions.assertArrayEquals(new String[] {"~/mypimdoc.properties"}, testee.getArguments());
+		Assertions.assertEquals(ModelExportFormat.PIMDOC.getId(), testee.getId());
+		Assertions.assertEquals(Collections.singletonList("~/mypimdoc.properties"), testee.getArguments());
 	}
 	
 }
