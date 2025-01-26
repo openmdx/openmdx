@@ -70,11 +70,19 @@ edge[
 // UML Classes
 // ------------------
 .uml_class[
-] 
+]
 .uml_alias[
 ]
+.uml_note[
+  shape="record"
+  style="filled"
+  fillcolor="#D8F2FA"
+  color="#063e4f",
+  fontname="Arial"
+  fontsize="8px"
+]
 .uml_association[
-	constraint="true"
+  constraint="true"
 ]
 .uml_cluster[
 	fillcolor="lightcyan"
@@ -87,6 +95,12 @@ edge[
 .uml_field[
 ]
 .uml_instance_of[
+]
+.uml_note_link[
+  minlen="1"
+  style="dashed"
+  color="#063e4f"
+
 ]
 .uml_package[
 	fillcolor="gold"
@@ -102,22 +116,22 @@ edge[
 // Diagram Classes
 // ------------------
 .declared_class[
- 	compartments="true" 
+ 	compartments="true"
  	width="3"
 	fillcolor="#FFFFCB"
 ]
 .declared_alias[
- 	compartments="true" 
+ 	compartments="true"
  	width="3"
 	fillcolor="sandybrown"
 ]
 .declared_exception[
- 	compartments="true" 
+ 	compartments="true"
  	width="3"
  	fillcolor="orange1"
 ]
 .declared_primitive[
- 	compartments="true" 
+ 	compartments="true"
  	width="3"
  	fillcolor="powderblue"
 ]
