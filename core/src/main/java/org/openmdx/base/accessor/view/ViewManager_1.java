@@ -1371,12 +1371,10 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    #if JAVA_8 #else
-    @Override	
+    @Override
     public <T> javax.jdo.JDOQLTypedQuery<T> newJDOQLTypedQuery(Class<T> aClass) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+        return getPersistenceManagerFactory().getPersistenceManager().newJDOQLTypedQuery(aClass);
     }
-    #endif
 
     /*
      * (non-Javadoc)

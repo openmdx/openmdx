@@ -1498,12 +1498,10 @@ public class RefRootPackage_1
             }
         }
 
-        #if JAVA_8 #else
-        @Override	
+        @Override
         public <T> javax.jdo.JDOQLTypedQuery<T> newJDOQLTypedQuery(Class<T> aClass) {
-            throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
+            return getPersistenceManagerFactory().getPersistenceManager().newJDOQLTypedQuery(aClass);
         }
-        #endif
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class)
