@@ -139,7 +139,7 @@ public class MapperUtils {
   //--------------------------------------------------------------------------------
 
    /**
-     * A (maybe multiline) input text is split into lines and 
+     * A (possibly multiline) input text is split into lines and
      * send to the sink line by line with the given indent.
      * 
      * @param indent The indentation to be used for text output.
@@ -166,7 +166,7 @@ public class MapperUtils {
   /**
    * Evaluate t he XRI of a given model package
    * 
-   * @param  name components of the MOF package
+   * @param  nameComponents Components of the MOF package
    *  
    * @return an XRI which may be used to look up the Authority the gven 
    *         package belongs to"
