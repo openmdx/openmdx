@@ -49,6 +49,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.function.Function;
 
+import org.openmdx.application.mof.mapping.cci.ElementDef;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -58,7 +59,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
  * Mapper Template
  */
 public abstract class MapperTemplate {
-    
+
     protected MapperTemplate(
         Writer writer,
         Model_1_0 model, 
@@ -72,6 +73,7 @@ public abstract class MapperTemplate {
     protected final PrintWriter pw;
     protected final Model_1_0 model;
     protected final Function<String, String> annotationRenderer;
+	protected final String JAVA_LANG_DEPRECATED_ANNOTATION = "@java.lang.Deprecated";
 
     /**
      * Renders the annotation 
@@ -82,6 +84,17 @@ public abstract class MapperTemplate {
      */
 	protected String renderAnnotation(final String annotation) {
 		return annotationRenderer.apply(annotation);
+	}
+
+	// TODO: DKAJ mdx-41
+	protected void possiblyOutputJavaLangDeprecatedAnnotation(ElementDef elementDef, boolean isClassLevelAnnotation) {
+		if (elementDef.isDeprecatedAnnotation()) {
+			MapperUtils.wrapText(
+					isClassLevelAnnotation ? "" : "  ",
+					JAVA_LANG_DEPRECATED_ANNOTATION,
+					this::printLine
+			);
+		}
 	}
 
 	protected void print(CharSequence text) {

@@ -749,6 +749,8 @@ extends AbstractClassMapper {
             }
         }
         printLine("   */");
+        // TODO: DKAJ mdx-41 (mapOperation)
+        possiblyOutputJavaLangDeprecatedAnnotation(operationDef, false);
         printLine("  public ", this.getReturnType(operationDef), " ", this.getMethodName(operationDef.getName()), "(");
         int ii = 0;
         for(StructuralFeatureDef param: operationDef.getParameters()) {
@@ -1215,6 +1217,8 @@ extends AbstractClassMapper {
         }
         printLine(" */");
         this.mapGeneratedAnnotation();
+        // TODO: DKAJ mdx-41 class/interface level
+        possiblyOutputJavaLangDeprecatedAnnotation(classDef, true);
         if(this.format.isJPA3()) {
             String superClassName;
             if (this.isBaseClass()) {
@@ -1800,6 +1804,8 @@ extends AbstractClassMapper {
             }
             printLine("   * @param ", attributeName, " collection to be copied.");
             printLine("   */");
+            // TODO: DKAJ mdx-41 (InstanceMapper - mapAttributeSetList)
+            possiblyOutputJavaLangDeprecatedAnnotation(attributeDef, false);
             printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
             printLine(
             	"    ", 
@@ -2075,6 +2081,8 @@ extends AbstractClassMapper {
         }
         printLine("   * @return A list containing all elements for this attribute.");
         printLine("   */");
+        // TODO: DKAJ mdx-41 (InstanceMapper - mapAttributeGetList)
+        possiblyOutputJavaLangDeprecatedAnnotation(attributeDef, false);
         if(this.format.isJPA3()) {
             printLine(
             	"  public ", 

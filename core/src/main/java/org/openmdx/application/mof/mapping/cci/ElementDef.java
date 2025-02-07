@@ -53,17 +53,18 @@ public abstract class ElementDef {
 
   //-------------------------------------------------------------------------
   public ElementDef(
-    String name,
-    String qualifiedName,
-    String annotation,
-    Set stereotype
+          String name,
+          String qualifiedName,
+          String annotation,
+          Set stereotype
   ) {
     this.name = name;
     this.qualifiedName = qualifiedName;
     this.annotation = annotation;
     this.stereotype = stereotype;
+    this.isDeprecatedAnnotation = this.annotation != null && this.annotation.contains("@deprecated");
   }
-  
+
   //-------------------------------------------------------------------------
   public String getName(
   ) {
@@ -104,6 +105,11 @@ public abstract class ElementDef {
   }
 
   //-------------------------------------------------------------------------
+  public boolean isDeprecatedAnnotation() {
+    return this.isDeprecatedAnnotation;
+  }
+
+  //-------------------------------------------------------------------------
   @Override
   public String toString(
   ) {
@@ -117,5 +123,6 @@ public abstract class ElementDef {
   private final String qualifiedName;
   private final String annotation;
   private Set stereotype = null;
-  
+  private final boolean isDeprecatedAnnotation;
+
 }
