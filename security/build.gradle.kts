@@ -79,7 +79,13 @@ dependencies {
     implementation(project(":core"))
 	implementation(platform(project(projectPlatform)))
     implementation("jakarta.platform:jakarta.jakartaee-api")
-    implementation("javax.jdo:jdo-api")
+	if(runtimeCompatibility.isJava8()) {
+		implementation(group= "javax.jdo", name = "jdo-api")
+	} else {
+		implementation(group= "javax.jdo", name = "jdo-api"){
+			exclude(group = "javax.transaction", module = "transaction-api")
+		}
+	}
     implementation("org.apache.directory.api:apache-ldap-api")
     // Test
     implementation("org.junit.jupiter:junit-jupiter-api")

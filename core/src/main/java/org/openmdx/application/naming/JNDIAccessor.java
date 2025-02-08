@@ -56,8 +56,6 @@ import org.openmdx.kernel.loading.Factory;
  * This class is instantiated reflectively, e.g. by
  * <li>AbstractPersistenceManagerFactory.getConnectionFactoryByName()
  * </ul>
- * 
- * @see org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory.getConnectionFactoryByName(String)
  */
 public class JNDIAccessor<T> implements Factory<T> {
 
@@ -69,9 +67,6 @@ public class JNDIAccessor<T> implements Factory<T> {
      *
      * @param jndiName the object's JNDI name
      * @param type the expected class
-     * 
-     * 
-     * @see org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory.getConnectionFactoryByName(String)
      */
     public JNDIAccessor(
         String jndiName,

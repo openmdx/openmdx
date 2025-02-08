@@ -97,6 +97,7 @@ import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.persistence.spi.UnitOfWork;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.janitor.Finalizer;
 import org.openmdx.kernel.jdo.JDOPersistenceManagerFactory;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.cci.StateContext;
@@ -150,7 +151,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
             }
 
         } : unitOfWork;
-        this.registry = new WeakRegistry<DataObject_1_0, ObjectView_1>(connection.getPersistenceManagerFactory().getMultithreaded());
+        this.registry = new WeakRegistry<>(connection.getPersistenceManagerFactory().getMultithreaded());
         this.instanceLifecycleListener = new MarshallingInstanceLifecycleListener(
             this.registry,
             this.interactionSpec == null ? this : null
@@ -163,10 +164,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
 
     /**
      * Constructor
-     *
-     * @param factory
-     * @param connection
-     * @param plugIns
      */
     ViewManager_1(
         JDOPersistenceManagerFactory factory,
@@ -177,7 +174,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
             factory,
             connection,
             plugIns,
-            Maps.<InteractionSpec, ViewManager_1>newMap(factory.getMultithreaded()), // objectFactories
+            Maps.newMap(factory.getMultithreaded()), // objectFactories
             null, // interactionSpec
             null // transaction
         );
@@ -238,22 +235,13 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
      */
     private final WeakRegistry<DataObject_1_0, ObjectView_1> registry;
 
-    /**
-     * Unregister an object view
-     * 
-     * @param key
-     */
-    void unregister(
-        DataObject_1_0 key
-    ) {
-        this.registry.remove(key);
+    @Override
+    public void registerForFinalization(Finalizer finalizer) {
+        // Nothing to do
     }
 
     /**
      * Register an object view
-     * 
-     * @param key
-     * @param value
      */
     @Override
     public void register(
@@ -329,21 +317,11 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
     // Implements PersistenceManager_1_0
     //------------------------------------------------------------------------
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#lock(java.security.PrivilegedExceptionAction)
-     */
     @Override
     public <T> T lock(PrivilegedExceptionAction<T> action) {
         throw new UnsupportedOperationException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getFeatureReplacingObjectById(java.lang.Object, java.lang.String)
-     */
     @Override
     public Object getFeatureReplacingObjectById(
         UUID transientObjectId,
@@ -416,10 +394,10 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
                     Path childId = source.jdoGetObjectId();
                     return childId.getPrefix(childId.size() - 2);
                 } else {
-                    return new MarshallingMap<String, DataObject_1_0>(
-                        ObjectIdMarshaller.INSTANCE,
-                        source.objGetContainer(cciFeatureName),
-                        Unmarshalling.RELUCTANT
+                    return new MarshallingMap<>(
+                            ObjectIdMarshaller.INSTANCE,
+                            source.objGetContainer(cciFeatureName),
+                            Unmarshalling.RELUCTANT
                     );
                 }
             }
@@ -454,11 +432,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#isLoaded(java.util.UUID, java.lang.String)
-     */
     @Override
     public boolean isLoaded(
         UUID transientObjectId,
@@ -501,10 +474,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         return this.connection == null;
     }
 
-    /**
-     * 
-     * @throws ServiceException
-     */
     private void validateState()
         throws ServiceException {
         if (isClosed())
@@ -515,21 +484,11 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
             );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object)
-     */
     @Override
     public Object getObjectById(Object oid) {
         return getObjectById(oid, true);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object, boolean)
-     */
     @Override
     public Object getObjectById(
         Object oid,
@@ -582,21 +541,11 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
             );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.base.accessor.cci.DataObjectManager_1_0#getOptimalFetchSize(int)
-     */
     @Override
     public int getOptimalFetchSize() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.base.accessor.cci.DataObjectManager_1_0#getCacheThreshold()
-     */
     @Override
     public int getCacheThreshold() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
@@ -614,31 +563,16 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#checkConsistency()
-     */
     @Override
     public void checkConsistency() {
         // Nothing to do
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#currentUnitOfWork()
-     */
     @Override
     public UnitOfWork currentUnitOfWork() {
         return this.unitOfWork;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#currentTransaction()
-     */
     @Override
     public Transaction currentTransaction() {
         if (this.transaction == null) {
@@ -647,11 +581,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         return this.transaction;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#deletePersistent(java.lang.Object)
-     */
     @Override
     public void deletePersistent(
         Object pc
@@ -667,11 +596,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#deletePersistentAll(java.lang.Object[])
-     */
     @Override
     public void deletePersistentAll(Object... pcs) {
         for (Object pc : pcs) {
@@ -679,11 +603,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#deletePersistentAll(java.util.Collection)
-     */
     @Override
     public void deletePersistentAll(Collection pcs) {
         for (Object pc : pcs) {
@@ -691,82 +610,42 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#detachCopy(java.lang.Object)
-     */
     @Override
     public <T> T detachCopy(T pc) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#detachCopyAll(java.util.Collection)
-     */
     @Override
     public <T> Collection<T> detachCopyAll(Collection<T> pcs) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#detachCopyAll(java.lang.Object[])
-     */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T[] detachCopyAll(T... pcs) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#evict(java.lang.Object)
-     */
     @Override
     public void evict(Object pc) {
         getConnection().evict(toDataObject(pc));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#evictAll(java.lang.Object[])
-     */
     @Override
     public void evictAll(Object... pcs) {
         getConnection().evictAll(toDataObjects(pcs));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#evictAll(java.util.Collection)
-     */
     @Override
     public void evictAll(Collection pcs) {
         getConnection().evictAll(toDataObjects(pcs));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#flush()
-     */
     @Override
     public void flush() {
         getConnection().flush();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#evictAll(boolean, java.lang.Class)
-     */
     @Override
     public void evictAll(
         boolean subclasses,
@@ -775,21 +654,11 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getCopyOnAttach()
-     */
     @Override
     public boolean getCopyOnAttach() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getFetchGroup(java.lang.Class, java.lang.String)
-     */
     @Override
     public FetchGroup getFetchGroup(
         Class type,
@@ -798,21 +667,11 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         return getConnection().getFetchGroup(type, name);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getManagedObjects()
-     */
     @Override
     public Set<?> getManagedObjects() {
         return this.registry.values();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet)
-     */
     @Override
     public Set<?> getManagedObjects(EnumSet<ObjectState> states) {
         if (this.interactionSpec == null) {
@@ -827,20 +686,10 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getManagedObjects(java.lang.Class[])
-     */
     public Set getManagedObjects(Class... classes) {
         throw new UnsupportedOperationException("Unsupported because all objects are instances of the ViewObject_1_0");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet, java.lang.Class[])
-     */
     @Override
     public Set getManagedObjects(
         EnumSet<ObjectState> states,
@@ -849,11 +698,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported because all objects are instances of the ViewObject_1_0");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getObjectsById(boolean, java.lang.Object[])
-     */
     @Override
     public Object[] getObjectsById(
         boolean validate,
@@ -862,21 +706,11 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getServerDate()
-     */
     @Override
     public Date getServerDate() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makeTransientAll(boolean, java.lang.Object[])
-     */
     @Override
     public void makeTransientAll(
         boolean useFetchPlan,
@@ -887,11 +721,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#retrieveAll(boolean, java.lang.Object[])
-     */
     @Override
     public void retrieveAll(
         boolean useFetchPlan,
@@ -900,51 +729,26 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#setCopyOnAttach(boolean)
-     */
     @Override
     public void setCopyOnAttach(boolean flag) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getDataStoreConnection()
-     */
     @Override
     public JDOConnection getDataStoreConnection() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getDetachAllOnCommit()
-     */
     @Override
     public boolean getDetachAllOnCommit() {
         return this.connection.getDetachAllOnCommit();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getExtent(java.lang.Class)
-     */
     @Override
     public <T> Extent<T> getExtent(Class<T> persistenceCapableClass) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getExtent(java.lang.Class, boolean)
-     */
     @Override
     public <T> Extent<T> getExtent(
         Class<T> persistenceCapableClass,
@@ -953,31 +757,16 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getFetchPlan()
-     */
     @Override
     public FetchPlan getFetchPlan() {
         return this.connection.getFetchPlan();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getIgnoreCache()
-     */
     @Override
     public boolean getIgnoreCache() {
         return connection.getIgnoreCache();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Class, java.lang.Object)
-     */
     @Override
     public <T> T getObjectById(
         Class<T> cls,
@@ -986,51 +775,26 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getObjectId(java.lang.Object)
-     */
     @Override
     public Object getObjectId(Object pc) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getObjectIdClass(java.lang.Class)
-     */
     @Override
     public Class getObjectIdClass(Class cls) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getObjectsById(java.util.Collection)
-     */
     @Override
     public Collection getObjectsById(Collection oids) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getObjectsById(java.lang.Object[])
-     */
     @Override
     public Object[] getObjectsById(Object... oids) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getObjectsById(java.util.Collection, boolean)
-     */
     @Override
     public Collection getObjectsById(
         Collection oids,
@@ -1039,14 +803,8 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getObjectsById(java.lang.Object[], boolean)
-     *
-     * @deprecated with JDO 2.1
-     * removed with JDO 3.2
-     */
+    @Deprecated
+    @Override
     public Object[] getObjectsById(
         Object[] oids,
         boolean validate
@@ -1054,11 +812,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getPersistenceManagerFactory()
-     */
     @Override
     public JDOPersistenceManagerFactory getPersistenceManagerFactory() {
         if (this.interactionSpec == null) {
@@ -1071,152 +824,78 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getSequence(java.lang.String)
-     */
     @Override
     public Sequence getSequence(String name) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getTransactionalObjectId(java.lang.Object)
-     */
     @Override
     public Object getTransactionalObjectId(Object pc) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getUserObject()
-     */
     @Override
     public Object getUserObject() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#getUserObject(java.lang.Object)
-     */
     @Override
     public Object getUserObject(Object key) {
         return this.connection.getUserObject(key);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makeNontransactional(java.lang.Object)
-     */
     @Override
     public void makeNontransactional(Object pc) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makeNontransactionalAll(java.lang.Object[])
-     */
     @Override
     public void makeNontransactionalAll(Object... pcs) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makeNontransactionalAll(java.util.Collection)
-     */
     @Override
     public void makeNontransactionalAll(Collection pcs) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makePersistent(java.lang.Object)
-     */
     @Override
     public <T> T makePersistent(T pc) {
         return this.connection.makePersistent(pc);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makePersistentAll(java.lang.Object[])
-     */
+
     @SuppressWarnings("unchecked")
     @Override
     public <T> T[] makePersistentAll(T... pcs) {
         return this.connection.makePersistentAll(pcs);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makePersistentAll(java.util.Collection)
-     */
     @Override
     public <T> Collection<T> makePersistentAll(Collection<T> pcs) {
         return this.connection.makePersistentAll(pcs);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makeTransactional(java.lang.Object)
-     */
     @Override
     public void makeTransactional(Object pc) {
         getConnection().makeTransactional(toDataObject(pc));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makeTransactionalAll(java.lang.Object[])
-     */
     @Override
     public void makeTransactionalAll(Object... pcs) {
         getConnection().makeTransactionalAll(toDataObjects(pcs));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makeTransactionalAll(java.util.Collection)
-     */
     @Override
     public void makeTransactionalAll(Collection pcs) {
         getConnection().makeTransactionalAll(toDataObjects(pcs));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makeTransient(java.lang.Object)
-     */
     @Override
     public void makeTransient(Object pc) {
         getConnection().makeTransient(toDataObject(pc));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makeTransient(java.lang.Object, boolean)
-     */
     @Override
     public void makeTransient(
         Object pc,
@@ -1225,34 +904,18 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         getConnection().makeTransient(toDataObject(pc), useFetchPlan);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[])
-     */
     @Override
     public void makeTransientAll(Object... pcs) {
         getConnection().makeTransientAll(toDataObjects(pcs));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makeTransientAll(java.util.Collection)
-     */
     @Override
     public void makeTransientAll(Collection pcs) {
         getConnection().makeTransientAll(toDataObjects(pcs));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[], boolean)
-     *
-     * @deprecated with JDO 2.1
-     * removed with JDO 3.2
-     */
+    @Override
+    @Deprecated
     public void makeTransientAll(
         Object[] pcs,
         boolean useFetchPlan
@@ -1260,11 +923,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         getConnection().makeTransientAll(useFetchPlan, toDataObjects(pcs));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#makeTransientAll(java.util.Collection, boolean)
-     */
     @Override
     public void makeTransientAll(
         Collection pcs,
@@ -1273,21 +931,11 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         getConnection().makeTransientAll(toDataObjects(pcs), useFetchPlan);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#newInstance(java.lang.Class)
-     */
     @Override
     public <T> T newInstance(Class<T> pcClass) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#newNamedQuery(java.lang.Class, java.lang.String)
-     */
     @Override
     public Query newNamedQuery(
         Class cls,
@@ -1296,11 +944,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#newObjectIdInstance(java.lang.Class, java.lang.Object)
-     */
+    @Override
     public Object newObjectIdInstance(
         Class pcClass,
         Object key
@@ -1308,61 +952,31 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#newQuery()
-     */
     @Override
     public Query newQuery() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#newQuery(java.lang.Object)
-     */
     @Override
     public Query newQuery(Object compiled) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#newQuery(java.lang.String)
-     */
     @Override
     public Query newQuery(String query) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class)
-     */
     @Override
     public Query newQuery(Class cls) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#newQuery(javax.jdo.Extent)
-     */
     @Override
     public Query newQuery(Extent cln) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#newQuery(java.lang.String, java.lang.Object)
-     */
     @Override
     public Query newQuery(
         String language,
@@ -1371,18 +985,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    #if JAVA_8 #else
-    @Override	
-    public <T> javax.jdo.JDOQLTypedQuery<T> newJDOQLTypedQuery(Class<T> aClass) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-    #endif
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.util.Collection)
-     */
     @Override
     public Query newQuery(
         Class cls,
@@ -1391,11 +993,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.lang.String)
-     */
     @Override
     public Query newQuery(
         Class cls,
@@ -1404,11 +1001,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#newQuery(javax.jdo.Extent, java.lang.String)
-     */
     @Override
     public Query newQuery(
         Extent cln,
@@ -1417,11 +1009,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.util.Collection, java.lang.String)
-     */
     @Override
     public Query newQuery(
         Class cls,
@@ -1431,11 +1018,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#putUserObject(java.lang.Object, java.lang.Object)
-     */
     @Override
     public Object putUserObject(
         Object key,
@@ -1444,11 +1026,6 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#refresh(java.lang.Object)
-     */
     @Override
     public void refresh(
         Object pc
@@ -1466,51 +1043,26 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#refreshAll()
-     */
     @Override
     public void refreshAll() {
         getConnection().refreshAll();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#refreshAll(java.lang.Object[])
-     */
     @Override
     public void refreshAll(Object... pcs) {
         getConnection().refreshAll(toDataObjects(pcs));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#refreshAll(java.util.Collection)
-     */
     @Override
     public void refreshAll(Collection pcs) {
         getConnection().refreshAll(toDataObjects(pcs));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#refreshAll(javax.jdo.JDOException)
-     */
     @Override
     public void refreshAll(JDOException jdoe) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#removeInstanceLifecycleListener(javax.jdo.listener.InstanceLifecycleListener)
-     */
     @Override
     public void removeInstanceLifecycleListener(
         InstanceLifecycleListener listener
@@ -1518,31 +1070,16 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         this.instanceLifecycleListener.removeInstanceLifecycleListener(listener);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#removeUserObject(java.lang.Object)
-     */
     @Override
     public Object removeUserObject(Object key) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#retrieve(java.lang.Object)
-     */
     @Override
     public void retrieve(Object pc) {
         retrieve(pc, false);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#retrieve(java.lang.Object, boolean)
-     */
     @Override
     public void retrieve(
         Object pc,
@@ -1551,31 +1088,16 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         getConnection().retrieve(toDataObject(pc), useFetchPlan);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#retrieveAll(java.util.Collection)
-     */
     @Override
     public void retrieveAll(Collection pcs) {
         retrieveAll(pcs, false);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#retrieveAll(java.lang.Object[])
-     */
     @Override
     public void retrieveAll(Object... pcs) {
         retrieveAll(false, pcs);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#retrieveAll(java.util.Collection, boolean)
-     */
     @Override
     public void retrieveAll(
         Collection pcs,
@@ -1584,14 +1106,8 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         getConnection().retrieveAll(toDataObjects(pcs), useFetchPlan);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#retrieveAll(java.lang.Object[], boolean)
-     *
-     * @deprecated with JDO 2.1
-     * removed with JDO 3.2
-     */
+    @Override
+    @Deprecated
     public void retrieveAll(
         Object[] pcs,
         boolean useFetchPlan
@@ -1599,41 +1115,21 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         getConnection().retrieveAll(useFetchPlan, toDataObjects(pcs));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#setDetachAllOnCommit(boolean)
-     */
     @Override
     public void setDetachAllOnCommit(boolean flag) {
         this.connection.setDetachAllOnCommit(flag);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#setIgnoreCache(boolean)
-     */
     @Override
     public void setIgnoreCache(boolean flag) {
         this.connection.setIgnoreCache(flag);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#setMultithreaded(boolean)
-     */
     @Override
     public void setMultithreaded(boolean flag) {
         this.connection.setMultithreaded(flag);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManager#setUserObject(java.lang.Object)
-     */
     @Override
     public void setUserObject(Object o) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
@@ -1673,21 +1169,11 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         return this.connection.getMultithreaded();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.base.accessor.generic.cci.ObjectFactory_1_3#evict()
-     */
     @Override
     public void evictAll() {
         this.connection.evictAll();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getLastXRISegment(java.lang.Object)
-     */
     @Override
     public String getLastXRISegment(
         Object pc
@@ -1695,15 +1181,20 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         return pc instanceof ObjectView_1 ? this.connection.getLastXRISegment(((ObjectView_1) pc).objGetDelegate()) : null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getTransientIdOfTheObjectsContainer(java.lang.Object)
-     */
     @Override
     public TransientContainerId getContainerId(Object pc) {
         return pc instanceof ObjectView_1 ? this.connection.getContainerId(((ObjectView_1) pc).objGetDelegate()) : null;
     }
+
+    //------------------------------------------------------------------------
+    // Extends CachingMarshaller
+    //------------------------------------------------------------------------
+
+    @Override
+    public void cleanUp() {
+        // Nothing to do
+    }
+
 
     //------------------------------------------------------------------------
     // Extends CachingMarshaller
@@ -1730,9 +1221,9 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
             return source;
         } else if (source instanceof DataObject_1_0) {
             DataObject_1_0 dataObject = (DataObject_1_0) source;
-            boolean filterStates;
-            Date existsAt = null;
-            ViewKind viewKind;
+            final boolean filterStates;
+            final Date existsAt;
+            final ViewKind viewKind;
             if (this.getInteractionSpec() instanceof StateContext<?>) {
                 StateContext<?> context = ((StateContext<?>) this.getInteractionSpec());
                 Model_1_0 model = Model_1Factory.getModel();
@@ -1744,6 +1235,8 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
                         if (existsAt != null && dataObject.jdoIsNew()) {
                             return null;
                         }
+                    } else {
+                        existsAt = null;
                     }
                     if (model.isInstanceof(dataObject, "org:openmdx:state2:BasicState")) {
                         DataObject_1_0 core = (DataObject_1_0) dataObject.objGetValue(SystemAttributes.CORE);
@@ -1751,18 +1244,17 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
                             dataObject = core;
                         }
                     }
+                } else {
+                    existsAt = null;
                 }
             } else {
-                viewKind = null;
+                existsAt = null;
                 filterStates = false;
             }
-            ObjectView_1 target = this.registry.get(dataObject);
-            if (target == null) {
-                target = this.registry.putUnlessPresent(
-                    dataObject,
-                    target = new ObjectView_1(this, dataObject)
-                );
-            }
+            final ObjectView_1 target = this.registry.computeIfAbsent(
+                dataObject,
+                d -> new ObjectView_1(this, d)
+            );
             if (filterStates && existsAt == null && target.isInitialized() && target.jdoIsDeleted()) {
                 return null;
             } else {
@@ -1821,7 +1313,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
     }
 
     private static Collection<Object> toDataObjects(Collection<?> pcs) {
-        Collection<Object> dos = new ArrayList<Object>();
+        Collection<Object> dos = new ArrayList<>();
         for (Object pc : pcs) {
             dos.add(toDataObject(pc));
         }
@@ -1836,6 +1328,45 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         }
         return dos;
     }
+
+    @Override
+    public void setDatastoreReadTimeoutMillis(Integer interval) {
+        this.connection.setDatastoreReadTimeoutMillis(interval);
+    }
+
+    @Override
+    public Integer getDatastoreReadTimeoutMillis() {
+        return this.connection.getDatastoreReadTimeoutMillis();
+    }
+
+    @Override
+    public void setDatastoreWriteTimeoutMillis(Integer interval) {
+        this.connection.setDatastoreWriteTimeoutMillis(interval);
+    }
+
+    @Override
+    public Integer getDatastoreWriteTimeoutMillis() {
+        return this.connection.getDatastoreWriteTimeoutMillis();
+    }
+
+    @Override
+    public void setProperty(
+        String propertyName,
+        Object value
+    ) {
+        this.connection.setProperty(propertyName, value);
+    }
+
+    @Override
+    public Map<String, Object> getProperties() {
+        return this.connection.getProperties();
+    }
+
+    @Override
+    public Set<String> getSupportedProperties() {
+        return this.connection.getSupportedProperties();
+    }
+
 
     // -----------------------------------------------------------------------
     // Class ObjectIdMarshaller
@@ -1858,29 +1389,17 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
          */
         static final Marshaller INSTANCE = new ObjectIdMarshaller();
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.openmdx.base.marshalling.Marshaller#marshal(java.lang.Object)
-         */
         @Override
         public Object marshal(
             Object source
-        )
-            throws ServiceException {
+        ) throws ServiceException {
             return ReducedJDOHelper.getObjectId(source);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.openmdx.base.marshalling.Marshaller#unmarshal(java.lang.Object)
-         */
         @Override
-    public Object unmarshal(
+        public Object unmarshal(
             Object source
-        )
-            throws ServiceException {
+        ) throws ServiceException {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
@@ -1889,66 +1408,5 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         }
 
     }
-
-    /**
-     * @param interval
-     * @see javax.jdo.PersistenceManager#setDatastoreReadTimeoutMillis(java.lang.Integer)
-     */
-    public void setDatastoreReadTimeoutMillis(Integer interval) {
-        this.connection.setDatastoreReadTimeoutMillis(interval);
-    }
-
-    /**
-     * @return
-     * @see javax.jdo.PersistenceManager#getDatastoreReadTimeoutMillis()
-     */
-    public Integer getDatastoreReadTimeoutMillis() {
-        return this.connection.getDatastoreReadTimeoutMillis();
-    }
-
-    /**
-     * @param interval
-     * @see javax.jdo.PersistenceManager#setDatastoreWriteTimeoutMillis(java.lang.Integer)
-     */
-    public void setDatastoreWriteTimeoutMillis(Integer interval) {
-        this.connection.setDatastoreWriteTimeoutMillis(interval);
-    }
-
-    /**
-     * @return
-     * @see javax.jdo.PersistenceManager#getDatastoreWriteTimeoutMillis()
-     */
-    public Integer getDatastoreWriteTimeoutMillis() {
-        return this.connection.getDatastoreWriteTimeoutMillis();
-    }
-
-    /**
-     * @param propertyName
-     * @param value
-     * @see javax.jdo.PersistenceManager#setProperty(java.lang.String, java.lang.Object)
-     */
-    public void setProperty(
-        String propertyName,
-        Object value
-    ) {
-        this.connection.setProperty(propertyName, value);
-    }
-
-    /**
-     * @return
-     * @see javax.jdo.PersistenceManager#getProperties()
-     */
-    public Map<String, Object> getProperties() {
-        return this.connection.getProperties();
-    }
-
-    /**
-     * @return
-     * @see javax.jdo.PersistenceManager#getSupportedProperties()
-     */
-    public Set<String> getSupportedProperties() {
-        return this.connection.getSupportedProperties();
-    }
-
 
 }

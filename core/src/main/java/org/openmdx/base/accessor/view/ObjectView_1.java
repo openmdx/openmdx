@@ -86,17 +86,11 @@ class ObjectView_1
         
     /**
      * Constructor 
-     * 
-     * @param marshaller
-     * @param dataObject
-     * @param interactionSpec 
-     * 
-     * @throws ServiceException
      */
     ObjectView_1(
         ViewManager_1_0 marshaller,
         DataObject_1_0 dataObject
-    ) throws ServiceException{
+    ){
         super(
             null, 
             marshaller

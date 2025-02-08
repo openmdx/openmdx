@@ -25,8 +25,6 @@
  */
 package org.openmdx.uses.org.apache.commons.fileupload.disk;
 
-import static java.lang.String.format;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -39,17 +37,21 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.ref.Reference;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.openmdx.uses.org.apache.commons.io.IOUtils;
-import org.openmdx.uses.org.apache.commons.io.output.DeferredFileOutputStream;
+import org.openmdx.kernel.janitor.Finalizable;
+import org.openmdx.kernel.janitor.Finalizer;
 import org.openmdx.uses.org.apache.commons.fileupload.FileItem;
 import org.openmdx.uses.org.apache.commons.fileupload.FileItemHeaders;
 import org.openmdx.uses.org.apache.commons.fileupload.FileUploadException;
 import org.openmdx.uses.org.apache.commons.fileupload.ParameterParser;
 import org.openmdx.uses.org.apache.commons.fileupload.util.Streams;
+import org.openmdx.uses.org.apache.commons.io.IOUtils;
+import org.openmdx.uses.org.apache.commons.io.output.DeferredFileOutputStream;
+
+import static java.lang.String.format;
 
 /**
  * <p> The default implementation of the
@@ -82,8 +84,7 @@ import org.openmdx.uses.org.apache.commons.fileupload.util.Streams;
  *
  * @version $Id: DiskFileItem.java 1565192 2014-02-06 12:14:16Z markt $
  */
-public class DiskFileItem
-    implements FileItem {
+public class DiskFileItem implements FileItem, Finalizable {
 
     // ----------------------------------------------------- Manifest constants
 
@@ -176,6 +177,17 @@ public class DiskFileItem
      */
     private FileItemHeaders headers;
 
+    /**
+     * The phantom reference for clean-up
+     */
+    private final Reference<Finalizable> phantomReference;
+
+    /**
+     * Thr finalizer clean-Up
+     */
+    private static final Finalizer FINALIZER = Finalizer.getInstance();
+
+
     // ----------------------------------------------------------- Constructors
 
     /**
@@ -195,15 +207,21 @@ public class DiskFileItem
      *                      which files will be created, should the item size
      *                      exceed the threshold.
      */
-    public DiskFileItem(String fieldName,
-            String contentType, boolean isFormField, String fileName,
-            int sizeThreshold, File repository) {
+    public DiskFileItem(
+            String fieldName,
+            String contentType,
+            boolean isFormField,
+            String fileName,
+            int sizeThreshold,
+            File repository
+    ) {
         this.fieldName = fieldName;
         this.contentType = contentType;
         this.isFormField = isFormField;
         this.fileName = fileName;
         this.sizeThreshold = sizeThreshold;
         this.repository = repository;
+        this.phantomReference = FINALIZER.register(this);
     }
 
     // ------------------------------- Methods from javax.activation.DataSource
@@ -347,7 +365,7 @@ public class DiskFileItem
      * Returns the contents of the file as a String, using the default
      * character encoding.  This method uses {@link #get()} to retrieve the
      * contents of the file.
-     *
+     * <p/>
      * <b>TODO</b> Consider making this method throw UnsupportedEncodingException.
      *
      * @return The contents of the file, as a string.
@@ -537,9 +555,8 @@ public class DiskFileItem
      * Removes the file contents from the temporary storage.
      */
     @Override
-    protected void finalize() {
+    public void cleanUp() {
         File outputFile = dfos.getFile();
-
         if (outputFile != null && outputFile.exists()) {
             outputFile.delete();
         }
@@ -596,8 +613,8 @@ public class DiskFileItem
     @Override
     public String toString() {
         return format("name=%s, StoreLocation=%s, size=%s bytes, isFormField=%s, FieldName=%s",
-                      getName(), getStoreLocation(), Long.valueOf(getSize()),
-                      Boolean.valueOf(isFormField()), getFieldName());
+                getName(), getStoreLocation(), getSize(),
+                isFormField(), getFieldName());
     }
 
     // -------------------------------------------------- Serialization methods

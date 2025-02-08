@@ -113,7 +113,7 @@ class GraphvizNoteNode extends GraphvizNode {
     private List<String> getAnnotations(
         ModelElement_1_0 element
     ) {
-        final String value = (String) element.objGetValue("value");
+        final String value = (String) element.objGetValue("annotation");
         final List<String> annotations;
         if (isEmpty(value)) {
             annotations = Collections.emptyList();
