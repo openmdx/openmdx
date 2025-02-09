@@ -110,7 +110,7 @@ sourceSets {
 }
 
 val openmdxCatalinaIncludes = listOf(
-    "org/openmdx/catalina/*/**"
+    "org/openmdx/catalina/**"
 )
 
 val openmdxCatalinaExcludes = listOf<String>( )

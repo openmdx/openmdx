@@ -167,7 +167,7 @@ class AbstractHandler extends DefaultHandler implements LargeObjectWriter {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.stream.LargeObjectWriter#writeBinaryData(byte[], int, int)
      */
-//  @Override
+    @Override
     public void writeBinaryData(
         byte[] data, 
         int offset, 
@@ -179,7 +179,7 @@ class AbstractHandler extends DefaultHandler implements LargeObjectWriter {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.stream.LargeObjectWriter#writeBinaryData(org.w3c.cci2.BinaryLargeObject)
      */
-//  @Override
+    @Override
     public void writeBinaryData(
         BinaryLargeObject data
     ){
@@ -189,7 +189,7 @@ class AbstractHandler extends DefaultHandler implements LargeObjectWriter {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.stream.LargeObjectWriter#writeCharacterData(org.w3c.cci2.CharacterLargeObject)
      */
-//  @Override
+    @Override
     public void writeCharacterData(
         CharacterLargeObject data
     ){

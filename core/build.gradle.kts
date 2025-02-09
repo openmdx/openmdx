@@ -244,7 +244,7 @@ tasks {
 		"org/ietf/*/IetfPackage*",
 		"org/iso/*/IsoPackage*",
 		"org/oasisopen/**",
-		"org/omg/*/**",
+		"org/omg/**",
 		"org/openmdx/*/OpenmdxPackage*",
 		"org/openmdx/*1/**",
 		"org/openmdx/*2/**",

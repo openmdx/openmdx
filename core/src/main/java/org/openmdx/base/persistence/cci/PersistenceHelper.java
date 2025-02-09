@@ -46,7 +46,6 @@ package org.openmdx.base.persistence.cci;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
@@ -179,8 +178,7 @@ public class PersistenceHelper {
      * A way to avoid fetching an object just to retrieve its object id
      * 
      * @param pc a persistence capable object
-     * @param featureName
-     * 
+     *
      * @return the value where each object is replaced by its id
      */
     public static Object getFeatureReplacingObjectById(
@@ -198,7 +196,7 @@ public class PersistenceHelper {
      * Retrieve a candidate collection
      * 
      * @param extent the extent
-     * @param pattern the object id pattern either as a Path or XRI string representation
+     * @param xriPattern the object id pattern either as a Path or XRI string representation
      * 
      * @return the candidate collection
      */
@@ -287,9 +285,9 @@ public class PersistenceHelper {
         Extent<E> extent,
         Path xriPattern
     ){
-        return new ExtentCollection<E>(
-            extent, 
-            xriPattern
+        return new ExtentCollection<>(
+                extent,
+                xriPattern
         );
     }
     
@@ -308,15 +306,15 @@ public class PersistenceHelper {
         AnyTypePredicate predicate
     ){
         if (predicate instanceof RefQuery_1_0) {
-            return new FilterCollection<E>(((RefQuery_1_0)predicate).refGetFilter());
+            return new FilterCollection<>(((RefQuery_1_0) predicate).refGetFilter());
         } else if(predicate instanceof Filter) {
-            return new FilterCollection<E>((Filter)predicate);
+            return new FilterCollection<>((Filter) predicate);
         } else if(predicate == null) {
             throw new NullPointerException("The predicate must not be null");
         } else {
             throw BasicException.initHolder(
                 new IllegalArgumentException(
-                    "The given argument is inapprpriate for creating a filter collection",
+                    "The given argument is inappropriate for creating a filter collection",
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN, 
                         BasicException.Code.BAD_PARAMETER, 
@@ -328,7 +326,7 @@ public class PersistenceHelper {
         }
     }
     
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static void setClasses(
         AnyTypePredicate query,
         Class<? extends RefObject>... classes 
@@ -354,9 +352,7 @@ public class PersistenceHelper {
     
     /**
      * Retrieve all descendants of a given object
-     * 
-     * @param pc
-     * 
+     *
      * @exception NullPointerException if the argument is {@code null}
      * @exception IllegalArgumentException if the argument is not a {@code javax.jmi.reflect.RefObject} instance
      */
@@ -458,9 +454,7 @@ public class PersistenceHelper {
     
     /**
      * Provide the persistence manager's current unit of work
-     * 
-     * @param persistenceManager
-     * 
+     *
      * @return the persistence manager's current unit of work
      */
     public static UnitOfWork currentUnitOfWork(

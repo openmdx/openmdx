@@ -56,8 +56,8 @@ public class SegmentImpl extends AbstractObject<test.openmdx.app1.jmi1.Segment,t
     /**
      * Constructor 
      *
-     * @param same
-     * @param next
+     * @param same the same layer JMI API
+     * @param next the next layer CCI API
      */
     public SegmentImpl(
         test.openmdx.app1.jmi1.Segment same,

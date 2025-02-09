@@ -197,7 +197,7 @@ public class ManagedPreferencesFactory implements PreferencesFactory {
     /* (non-Javadoc);
      * @see java.util.prefs.PreferencesFactory#systemRoot()
      */    
-//  @Override
+    @Override
     public Preferences systemRoot(
     ) {
         return new ManagedPreferences(
@@ -208,7 +208,7 @@ public class ManagedPreferencesFactory implements PreferencesFactory {
     /* (non-Javadoc)
      * @see java.util.prefs.PreferencesFactory#userRoot()
      */
-//  @Override
+    @Override
     public Preferences userRoot(
     ) {
         return new ManagedPreferences(

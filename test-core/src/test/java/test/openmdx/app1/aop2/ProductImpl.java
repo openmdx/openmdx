@@ -59,8 +59,8 @@ public class ProductImpl extends AbstractObject<test.openmdx.app1.jmi1.Product,t
     /**
      * Constructor 
      *
-     * @param same
-     * @param next
+     * @param same the same layer JMI API
+     * @param next the next layer CCI API
      */
     public ProductImpl(
         test.openmdx.app1.jmi1.Product same,

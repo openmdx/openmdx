@@ -291,8 +291,8 @@ tasks {
 	}
 
 	val openmdxPortalIncludes = listOf(
-		"org/openmdx/portal/*/**",
-		"org/openmdx/ui1/*/**",
+		"org/openmdx/portal/**",
+		"org/openmdx/ui1/**",
 		"META-INF/orm.xml",
 		"META-INF/openmdxmof.properties"
 	)
