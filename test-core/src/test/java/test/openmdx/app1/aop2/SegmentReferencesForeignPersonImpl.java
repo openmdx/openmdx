@@ -73,7 +73,7 @@ public class SegmentReferencesForeignPersonImpl
     /**
      * Constructor 
      *
-     * @param delegate
+     * @param segment the {@code Segment}'s same layer JMI API
      */
     SegmentReferencesForeignPersonImpl(
         Segment segment
@@ -83,8 +83,7 @@ public class SegmentReferencesForeignPersonImpl
     
     private final Segment segment;
     
-    private static final String UNMODIFIABLE = 
-        "This implementation shall make the shared assoication unmodifiable";
+    private static final String UNMODIFIABLE =  "This implementation shall make the shared assoication unmodifiable";
     
     
     /* (non-Javadoc)

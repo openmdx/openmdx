@@ -113,34 +113,35 @@ tasks {
         "org/openmdx/**/jpa3",
         "org/openmdx/**/jpa3/*",
         "org/openmdx/application/airsync/**",
-        "org/openmdx/application/dataprovider/layer/persistence/jdbc/*/**",
-        "org/openmdx/application/mof/externalizer/*/**",
-        "org/openmdx/application/naming/*/**",
-        "org/openmdx/application/dataprovider/kernel/*/**",
-        "org/openmdx/application/rest/adapter/*/**",
-        "org/openmdx/application/rest/ejb/*/**",
-        "org/openmdx/application/rest/http/servlet/*/**",
-        "org/openmdx/application/transaction/*/**",
-        "org/openmdx/kernel/ejb/*/**",
-        "org/openmdx/kernel/lightweight/*/**",
-        "org/openmdx/kernel/naming/*/**",
-        "org/openmdx/kernel/servlet/*/**",
-        "org/openmdx/kernel/sql/*/**",
-        "org/openmdx/uses/org/apache/commons/*/**",
+        "org/openmdx/application/dataprovider/layer/persistence/jdbc**",
+        "org/openmdx/application/mof/externalizer/**",
+        "org/openmdx/application/naming/**",
+        "org/openmdx/application/dataprovider/kernel/**",
+        "org/openmdx/application/rest/adapter/**",
+        "org/openmdx/application/rest/ejb/**",
+        "org/openmdx/application/rest/http/servlet/**",
+        "org/openmdx/application/transaction/**",
+        "org/openmdx/kernel/ejb/**",
+        "org/openmdx/kernel/lightweight/**",
+        "org/openmdx/kernel/naming/**",
+        "org/openmdx/kernel/servlet/**",
+        "org/openmdx/kernel/sql/**",
+        "org/openmdx/uses/org/apache/commons/**",
         "org/openmdx/application/rest/http/RestServlet_*",
         "org/openmdx/application/rest/http/RemoteUserLoginModule*",
         "org/openmdx/application/rest/http/RequestCallbackHandler*",
         "org/openmdx/application/rest/http/TrustingLoginModule*",
-        "org/openmdx/base/resource/adapter/*/**"
+        "org/openmdx/base/resource/adapter/**"
     )
     val openmdxClientIncludes = listOf<String>()
     val openmdxClientExcludes = listOf(
-        "org/ietf/jgss/*/**", "org/openmdx/dalvik/*/**"
+        "org/ietf/jgss/**",
+        "org/openmdx/dalvik/**"
     )
     val openmdxDalvikIncludes = listOf<String>()
     val openmdxDalvikExcludes = listOf(
-        "META-INF/*/**",
-        "javax/transaction/*/**",
+        "META-INF/**",
+        "javax/transaction/**",
         "org/openmdx/kernel/platform/platform.properties",
         "org/openmdx/base/**/stream",
         "org/openmdx/base/**/stream/*",
@@ -341,7 +342,7 @@ tasks {
                 from(
                     File(buildDirAsFile, "classes/main/java"), File(buildDirAsFile, "resources/main"), "src/main/dalvik"
                 ).exclude(
-                    "META-INF/*/**"
+                    "META-INF/**"
                 )
             }
         )

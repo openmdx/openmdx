@@ -46,8 +46,6 @@ package org.openmdx.application.mof.mapping.spi;
 
 import java.util.Collections;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.vladsch.flexmark.html.AttributeProvider;
 import com.vladsch.flexmark.html.AttributeProviderFactory;
 import com.vladsch.flexmark.html.HtmlRenderer;
@@ -84,12 +82,12 @@ class FlexmarkExtensions {
 		private final String linkTarget;
 		
 	    @Override
-	    public void rendererOptions(@NotNull final MutableDataHolder options) {
+	    public void rendererOptions(final MutableDataHolder options) {
 	        // add any configuration settings to options you want to apply to everything, here
 	    }
 
 	    @Override
-	    public void extend(final HtmlRenderer.Builder rendererBuilder, @NotNull final String rendererType) {
+	    public void extend(final HtmlRenderer.Builder rendererBuilder, final String rendererType) {
 	        rendererBuilder.attributeProviderFactory(createAttributeProviderFactory());
 	    }
 		
@@ -97,7 +95,7 @@ class FlexmarkExtensions {
 	        return new IndependentAttributeProviderFactory() {
 
 				@Override
-				public @NotNull AttributeProvider apply(@NotNull LinkResolverContext context) {
+				public  AttributeProvider apply( LinkResolverContext context) {
 	                return new LinkTargetAttributeProvider();
 				}
 	        };
@@ -109,8 +107,8 @@ class FlexmarkExtensions {
 		class LinkTargetAttributeProvider implements AttributeProvider {
 			
 			@Override
-			public void setAttributes(@NotNull Node node, @NotNull AttributablePart part,
-					@NotNull MutableAttributes attributes) {
+			public void setAttributes( Node node,  AttributablePart part,
+					 MutableAttributes attributes) {
 		        if (part == AttributablePart.LINK) {
 		            attributes.replaceValue(Attribute.TARGET_ATTR, linkTarget);
 		        }

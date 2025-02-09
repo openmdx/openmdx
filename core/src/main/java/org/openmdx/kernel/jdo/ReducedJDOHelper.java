@@ -38,17 +38,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.jdo.Constants;
 import javax.jdo.JDOEnhancer;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalInternalException;
 import javax.jdo.JDOFatalUserException;
-import #if JAVA_8 org.openmdx.uses.javax.jdo.LegacyJava #else javax.jdo.LegacyJava #endif;
 import javax.jdo.ObjectState;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
@@ -61,8 +58,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.openmdx.kernel.loading.Resources;
+import org.openmdx.uses.javax.jdo.LegacyJava;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -326,8 +323,8 @@ public class ReducedJDOHelper implements Constants {
      */
     public static Collection<Object> getObjectIds(Collection<?> pcs) {
         ArrayList<Object> result = new ArrayList<>();
-        for (Iterator<?> it = pcs.iterator(); it.hasNext(); ) {
-            result.add(getObjectId(it.next()));
+        for (Object pc : pcs) {
+            result.add(getObjectId(pc));
         }
         return result;
     }
@@ -1018,13 +1015,10 @@ public class ReducedJDOHelper implements Constants {
      * @since JDO 2.1
      */
     protected static String getClassNameFromURL(URL url) throws IOException {
-        InputStream is = openStream(url);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        String line = null;
-        try {
-            while ((line = reader.readLine()) != null) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(openStream(url)))) {
+            for(String line = reader.readLine(); line != null; line = reader.readLine()) {
                 line = line.trim();
-                if (line.length() == 0 || line.startsWith("#")) {
+                if (line.isEmpty() || line.startsWith("#")) {
                     continue;
                 }
                 // else assume first line of text is the PMF class name
@@ -1038,12 +1032,6 @@ public class ReducedJDOHelper implements Constants {
                 return pmfClassName.substring(0, indexOfComment);
             }
             return null;
-        } finally {
-            try {
-                reader.close();
-            } catch (IOException x) {
-                // gulp
-            }
         }
     }
 
@@ -1055,30 +1043,23 @@ public class ReducedJDOHelper implements Constants {
      * @return a Properties instance or null if no resource is found
      */
     protected static Map<Object, Object> loadPropertiesFromResource(
-            ClassLoader resourceLoader, String name) {
-        InputStream in = null;
-        Properties props = null;
+        ClassLoader resourceLoader,
+        String name
+    ) {
         // try to load resources from properties file
-        try {
-            in = getResourceAsStream(resourceLoader, name);
-            if (in != null) {
+        try ( InputStream in = getResourceAsStream(resourceLoader, name)) {
+            if (in == null) {
+                return null;
+            } else {
                 // then some kind of resource was found by the given name;
                 // assume that it's a properties file
-                props = new Properties();
+                Properties props = new Properties();
                 props.load(in);
+                return props;
             }
         } catch (IOException ioe) {
             throw new JDOFatalUserException(MSG.msg(EXC_GET_PMF_IOEXCEPTION_RSRC, name), ioe); // NOI18N
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException ioe) {
-                    // this code block is deliberately left empty
-                }
-            }
         }
-        return props;
     }
 
     /**
@@ -1209,7 +1190,7 @@ public class ReducedJDOHelper implements Constants {
                 throw exception;
             }
 
-            public void warning(SAXParseException exception) throws SAXException {
+            public void warning(SAXParseException exception){
                 // gulp:  ignore warnings
             }
         };
@@ -1226,16 +1207,15 @@ public class ReducedJDOHelper implements Constants {
      *     persistence unit, the value of the String key is the empty string, "".
      */
     protected static Map<String, Map<Object, Object>> readNamedPMFProperties(
-            URL url, String requestedPMFName, DocumentBuilderFactory factory) {
+            URL url,
+            String requestedPMFName,
+            DocumentBuilderFactory factory
+    ) {
         requestedPMFName = requestedPMFName == null ? "" : requestedPMFName.trim();
-
         Map<String, Map<Object, Object>> propertiesByName = new HashMap<>();
-        InputStream in = null;
-        try {
+        try (final InputStream in  = url.openStream()) {
             DocumentBuilder builder = factory.newDocumentBuilder();
             builder.setErrorHandler(getErrorHandler());
-
-            in = openStream(url);
             Document doc = builder.parse(in);
 
             Element root = doc.getDocumentElement();
@@ -1257,7 +1237,7 @@ public class ReducedJDOHelper implements Constants {
                 String pmfNameFromAtts = pmfPropertiesFromAttributes.getProperty(Constants.PROPERTY_NAME);
                 String pmfNameFromElem = pmfPropertiesFromElements.getProperty(Constants.PROPERTY_NAME);
 
-                String pmfName = null;
+                String pmfName;
                 if (isNullOrBlank(pmfNameFromAtts)) {
                     // no PMF name attribute given
                     if (!isNullOrBlank(pmfNameFromElem)) {
@@ -1324,20 +1304,10 @@ public class ReducedJDOHelper implements Constants {
                             e.getLineNumber(),
                             e.getColumnNumber()),
                     e);
-        } catch (SAXException e) {
-            throw new JDOFatalUserException(MSG.msg("EXC_SAXException", url.toExternalForm()), e);
         } catch (JDOException e) {
             throw e;
-        } catch (RuntimeException e) {
+        } catch (SAXException|RuntimeException e) {
             throw new JDOFatalUserException(MSG.msg("EXC_SAXException", url.toExternalForm()), e);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException ioe) {
-                    /* gulp */
-                }
-            }
         }
     }
 
@@ -1384,7 +1354,7 @@ public class ReducedJDOHelper implements Constants {
                     throw new JDOFatalUserException(MSG.msg("EXC_PropertyElementHasNoNameAttribute", url));
                 }
                 String name = nameAtt.getNodeValue().trim();
-                if ("".equals(name)) {
+                if (name.isEmpty()) {
                     throw new JDOFatalUserException(
                             MSG.msg("EXC_PropertyElementNameAttributeHasNoValue", name, url));
                 }
@@ -1416,7 +1386,7 @@ public class ReducedJDOHelper implements Constants {
                     throw new JDOFatalUserException(MSG.msg("EXC_MissingListenerAttribute", url));
                 }
                 String listener = listenerAtt.getNodeValue().trim();
-                if ("".equals(listener)) {
+                if (listener.isEmpty()) {
                     throw new JDOFatalUserException(MSG.msg("EXC_MissingListenerAttributeValue", url));
                 }
 
@@ -1436,7 +1406,7 @@ public class ReducedJDOHelper implements Constants {
     }
 
     protected static boolean isNullOrBlank(String s) {
-        return s == null || "".equals(s.trim());
+        return s == null || s.trim().isEmpty();
     }
 
     /**
@@ -1467,21 +1437,15 @@ public class ReducedJDOHelper implements Constants {
     public static JDOPersistenceManagerFactory getPersistenceManagerFactory(
             File propsFile, ClassLoader loader) {
         if (propsFile == null) throw new JDOFatalUserException(MSG.msg("EXC_GetPMFNullFile")); // NOI18N
-
-        InputStream in = null;
-        try {
-            in = new FileInputStream(propsFile);
-            return getPersistenceManagerFactory(in, loader);
-        } catch (FileNotFoundException fnfe) {
-            throw new JDOFatalUserException(MSG.msg("EXC_GetPMFNoFile", propsFile), fnfe); // NOI18N
-        } finally {
-            if (in != null)
-                try {
-                    in.close();
-                } catch (IOException ioe) {
-                    // this code block is deliberately left empty,
-                }
+        JDOPersistenceManagerFactory persistenceManagerFactory = null;
+        try (InputStream in = new FileInputStream(propsFile)) {
+            persistenceManagerFactory = getPersistenceManagerFactory(in, loader);
+        } catch (FileNotFoundException fileNotFoundException) {
+            throw new JDOFatalUserException(MSG.msg("EXC_GetPMFNoFile", propsFile), fileNotFoundException); // NOI18N
+        } catch (IOException closeEexception) {
+            // this code block is deliberately left empty,
         }
+        return persistenceManagerFactory;
     }
 
     /**
@@ -1575,7 +1539,7 @@ public class ReducedJDOHelper implements Constants {
                 try {
                     String enhancerClassName = getClassNameFromURL(urls.nextElement());
                     Class<?> enhancerClass = forName(enhancerClassName, true, ctrLoader);
-                    return (JDOEnhancer) enhancerClass.newInstance();
+                    return (JDOEnhancer) enhancerClass.getConstructor().newInstance();
                 } catch (Throwable ex) {
                     // remember exceptions from failed enhancer invocations
                     exceptions.add(ex);
@@ -1689,12 +1653,11 @@ public class ReducedJDOHelper implements Constants {
     /**
      * Open an input stream on the url. Perform this operation in a doPrivileged block.
      *
-     * @param url
      * @return the input stream
      */
     private static InputStream openStream(final URL url) throws IOException {
         try {
-            return doPrivileged((PrivilegedExceptionAction<InputStream>) () -> url.openStream());
+            return doPrivileged((PrivilegedExceptionAction<InputStream>) url::openStream);
         } catch (PrivilegedActionException ex) {
             throw (IOException) ex.getException();
         }

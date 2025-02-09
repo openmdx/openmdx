@@ -52,18 +52,18 @@ import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.
 
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.persistence.spi.UnitOfWork;
+import org.openmdx.kernel.janitor.Finalizable;
+import org.openmdx.kernel.janitor.Finalizer;
 import org.openmdx.kernel.jdo.JDOPersistenceManager;
 
 /**
  * Persistence Manager Interface 1.0
  */
-public interface PersistenceManager_1_0 extends JDOPersistenceManager {
+public interface PersistenceManager_1_0 extends Finalizable, JDOPersistenceManager {
 
     /**
      * Retrieve an {@code InteractionSpec} specific persistence manager
-     * 
-     * @param interactionSpec
-     * 
+     *
      * @return the maybe newly created persistence manager
      */
     PersistenceManager_1_0 getPersistenceManager(
@@ -72,10 +72,7 @@ public interface PersistenceManager_1_0 extends JDOPersistenceManager {
 
     /**
      * A way to avoid fetching an object just to retrieve its object id
-     * 
-     * @param transientObjectId
-     * @param featureName
-     * 
+     *
      * @return the value where each object is replaced by its id
      * 
      * @see org.openmdx.base.persistence.cci.PersistenceHelper#getFeatureReplacingObjectById(Object, String)
@@ -103,9 +100,9 @@ public interface PersistenceManager_1_0 extends JDOPersistenceManager {
     /**
      * Lock the persistence manager while the action is performed
      * 
-     * @param action
+     * @param action the action to be performed
      * 
-     * @throws the exception propagated from the action
+     * @throws Exception the exception propagated from the action
      */
     <T> T lock(
         PrivilegedExceptionAction<T> action
@@ -140,5 +137,12 @@ public interface PersistenceManager_1_0 extends JDOPersistenceManager {
      * @return the persistence manager's unit of work
      */
     UnitOfWork currentUnitOfWork();
+
+    /**
+     * Invoked if open persistence managers shall be closed during finalization
+     *
+     * @param finalizer the finalizer closing open persistence managers during finalization
+     */
+    void registerForFinalization(Finalizer finalizer);
 
 }

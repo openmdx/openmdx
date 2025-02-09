@@ -99,7 +99,7 @@ public class HttpHeaderFieldValue implements Iterable<HttpHeaderFieldContent>{
     /* (non-Javadoc)
      * @see java.lang.Iterable#iterator()
      */
-//  @Override
+    @Override
     public Iterator<HttpHeaderFieldContent> iterator() {
         return this.content.iterator();
     }

@@ -101,7 +101,7 @@ public class StateAccessor
      * 
      * @return  the detached object's XRI
      */
-//  @Override
+    @Override
     public Path getTransactionalObjectId(Object pc) {
         return toTransactionalObjectId(getObjectId(pc));
     }

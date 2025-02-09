@@ -66,8 +66,8 @@ public class InvoicePositionImpl
     /**
      * Constructor 
      *
-     * @param same
-     * @param next
+     * @param same the same layer JMI API
+     * @param next the next layer CCI API
      */
     public InvoicePositionImpl(
         test.openmdx.app1.jmi1.InvoicePosition same,

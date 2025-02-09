@@ -45,6 +45,7 @@
 package org.openmdx.base.collection;
 
 import java.util.Set;
+import java.util.function.Function;
 
 /**
 * Registry interface
@@ -66,6 +67,24 @@ public interface Registry<K,V> {
     V putUnlessPresent(
         K key,
         V value
+    );
+
+    /**
+     * If the specified key is not already associated with a value,
+     * computes its value using the given mapping function and enters it into this map
+     *
+     * @param   key
+     *          the key
+     * @param   mappingFunction
+     *          provides a new value
+     *
+     * @return  either the old value if it was present or the new one if it was absent
+     *
+     * @throws IllegalStateException if the registry is already closed
+     */
+    V computeIfAbsent(
+        K key,
+        Function<? super K,? extends V> mappingFunction
     );
 
     /**

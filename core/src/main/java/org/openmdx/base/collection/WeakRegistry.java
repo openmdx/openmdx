@@ -44,7 +44,6 @@
  */
 package org.openmdx.base.collection;
 
-import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.AbstractSet;
@@ -52,6 +51,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.function.Function;
 
 
 /**
@@ -86,14 +86,14 @@ public class WeakRegistry<K,V> implements Registry<K, V> {
      */
     private final Set<V> values = new AbstractSet<V>() {
 
-        /* (non-Javadoc)
+        /* (non-Javadoc)D
          * @see java.util.AbstractCollection#iterator()
          */
         @Override
         public Iterator<V> iterator(
         ) {
-            return new ValueIterator<V>(
-                getDelegate().values().iterator()
+            return new ValueIterator<>(
+                    getDelegate().values().iterator()
             );
         }
 
@@ -104,7 +104,7 @@ public class WeakRegistry<K,V> implements Registry<K, V> {
         public int size() {
             return getDelegate().size();
         }
-        
+
     };
 
     /**
@@ -146,16 +146,8 @@ public class WeakRegistry<K,V> implements Registry<K, V> {
      * Get rid of stale entries
      */
     private synchronized void evictStaleEntries() {
-        for(
-            Iterator<? extends Reference<V>> i = this.delegate.values().iterator();
-            i.hasNext();
-        ){
-            if(i.next().get() == null) {
-                i.remove();
-            }
-        }
+        this.delegate.values().removeIf(reference -> reference.get() == null);
     }
-
 
     /**
      * Clear the reference queue
@@ -220,12 +212,24 @@ public class WeakRegistry<K,V> implements Registry<K, V> {
         return v == null ? null : v.get();
     }
 
+    @Override
+    public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+        final Map<K,WeakReference<V>> delegate = getDelegate();
+        final WeakReference<V> r = delegate.get(key);
+        V v = r == null ? null : r.get();
+        if(v == null) {
+            v = mappingFunction.apply(key);
+            delegate.put(key, new WeakReference<>(v, this.queue));
+        }
+        return v;
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.Cache#putIfAbsent(java.lang.Object, java.lang.Object)
      */
     @Override
     public V putUnlessPresent(K key, V value) {
-        WeakReference<V> v = new WeakReference<V>(value, this.queue);
+        WeakReference<V> v = new WeakReference<>(value, this.queue);
         Map<K,WeakReference<V>> delegate = getDelegate();
         WeakReference<V> c = delegate.putIfAbsent(key, v);
         if(c == null) {
@@ -246,7 +250,7 @@ public class WeakRegistry<K,V> implements Registry<K, V> {
      */
     @Override
     public V put(K key, V value) {
-        WeakReference<V> v = new WeakReference<V>(value, this.queue);
+        WeakReference<V> v = new WeakReference<>(value, this.queue);
         WeakReference<V> c = getDelegate().put(key, v);
         return c == null ? null : c.get();
     }
@@ -278,8 +282,6 @@ public class WeakRegistry<K,V> implements Registry<K, V> {
         
         /**
          * Constructor 
-         *
-         * @param delegate
          */
         public ValueIterator(
             Iterator<WeakReference<V>> delegate

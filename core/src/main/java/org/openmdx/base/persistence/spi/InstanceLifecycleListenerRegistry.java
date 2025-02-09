@@ -72,7 +72,7 @@ public class InstanceLifecycleListenerRegistry implements
     /**
      * 
      */
-    private Collection<Entry> entries = new ConcurrentLinkedQueue<Entry>();
+    private Collection<Entry> entries = new ConcurrentLinkedQueue<>();
     
     /**
      * Close the registry
@@ -143,10 +143,7 @@ public class InstanceLifecycleListenerRegistry implements
      
     /**
      * Tests whether a listener is interested in a given event
-     * 
-     * @param event
-     * @param classes
-     * 
+     *
      * @return {@code true} if a listener is interested in a given event
      */
     private boolean isInterested(
@@ -184,10 +181,7 @@ public class InstanceLifecycleListenerRegistry implements
     // Implements CreateLifecycleListener
     //------------------------------------------------------------------------
     
-    /* (non-Javadoc)
-     * @see javax.jdo.listener.CreateLifecycleListener#postCreate(javax.jdo.listener.InstanceLifecycleEvent)
-     */
-//  @Override
+    @Override
     public void postCreate(InstanceLifecycleEvent event) {
         for(Entry entry : this.entries) {
             if(entry.listener instanceof CreateLifecycleListener && isInterested(event, entry.classes)) {
@@ -196,10 +190,7 @@ public class InstanceLifecycleListenerRegistry implements
         }
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.listener.LoadLifecycleListener#postLoad(javax.jdo.listener.InstanceLifecycleEvent)
-     */
-//  @Override
+    @Override
     public void postLoad(InstanceLifecycleEvent event) {
         for(Entry entry : this.entries) {
             if(entry.listener instanceof LoadLifecycleListener && isInterested(event, entry.classes)) {
@@ -213,10 +204,7 @@ public class InstanceLifecycleListenerRegistry implements
     // Implements StoreLifecycleListener
     //------------------------------------------------------------------------
     
-    /* (non-Javadoc)
-     * @see javax.jdo.listener.StoreLifecycleListener#postStore(javax.jdo.listener.InstanceLifecycleEvent)
-     */
-//  @Override
+    @Override
     public void postStore(InstanceLifecycleEvent event) {
         for(Entry entry : this.entries) {
             if(entry.listener instanceof StoreLifecycleListener && isInterested(event, entry.classes)) {
@@ -225,10 +213,7 @@ public class InstanceLifecycleListenerRegistry implements
         }
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.listener.StoreLifecycleListener#preStore(javax.jdo.listener.InstanceLifecycleEvent)
-     */
-//  @Override
+    @Override
     public void preStore(InstanceLifecycleEvent event) {
         for(Entry entry : this.entries) {
             if(entry.listener instanceof StoreLifecycleListener && isInterested(event, entry.classes)) {
@@ -242,10 +227,7 @@ public class InstanceLifecycleListenerRegistry implements
     // Implements ClearLifecycleListener
     //------------------------------------------------------------------------
     
-    /* (non-Javadoc)
-     * @see javax.jdo.listener.ClearLifecycleListener#postClear(javax.jdo.listener.InstanceLifecycleEvent)
-     */
-//  @Override
+    @Override
     public void postClear(InstanceLifecycleEvent event) {
         for(Entry entry : this.entries) {
             if(entry.listener instanceof ClearLifecycleListener && isInterested(event, entry.classes)) {
@@ -254,10 +236,7 @@ public class InstanceLifecycleListenerRegistry implements
         }
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.listener.ClearLifecycleListener#preClear(javax.jdo.listener.InstanceLifecycleEvent)
-     */
-//  @Override
+    @Override
     public void preClear(InstanceLifecycleEvent event) {
         for(Entry entry : this.entries) {
             if(entry.listener instanceof ClearLifecycleListener && isInterested(event, entry.classes)) {
@@ -271,10 +250,7 @@ public class InstanceLifecycleListenerRegistry implements
     // Implements DeleteLifecycleListener
     //------------------------------------------------------------------------
     
-    /* (non-Javadoc)
-     * @see javax.jdo.listener.DeleteLifecycleListener#postDelete(javax.jdo.listener.InstanceLifecycleEvent)
-     */
-//  @Override
+    @Override
     public void postDelete(InstanceLifecycleEvent event) {
         for(Entry entry : this.entries) {
             if(entry.listener instanceof DeleteLifecycleListener && isInterested(event, entry.classes)) {
@@ -283,10 +259,7 @@ public class InstanceLifecycleListenerRegistry implements
         }
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.listener.DeleteLifecycleListener#preDelete(javax.jdo.listener.InstanceLifecycleEvent)
-     */
-//  @Override
+    @Override
     public void preDelete(InstanceLifecycleEvent event) {
         for(Entry entry : this.entries) {
             if(entry.listener instanceof DeleteLifecycleListener && isInterested(event, entry.classes)) {
@@ -299,9 +272,6 @@ public class InstanceLifecycleListenerRegistry implements
     // Implements AttachLifecycleListener
     //------------------------------------------------------------------------
     
-//  /* (non-Javadoc)
-//   * @see javax.jdo.listener.AttachLifecycleListener#postAttach(javax.jdo.listener.InstanceLifecycleEvent)
-//   */
 //  @Override
 //  public void postAttach(InstanceLifecycleEvent event) {
 //  for(Entry entry : this.entries) {
@@ -310,10 +280,7 @@ public class InstanceLifecycleListenerRegistry implements
 //          }
 //      }
 //  }
-//
-//  /* (non-Javadoc)
-//   * @see javax.jdo.listener.AttachLifecycleListener#preAttach(javax.jdo.listener.InstanceLifecycleEvent)
-//   */
+
 //  @Override
 //  public void preAttach(InstanceLifecycleEvent event) {
 //      for(Entry entry : this.entries) {
@@ -328,10 +295,7 @@ public class InstanceLifecycleListenerRegistry implements
     // Implements DirtyLifecycleListener
     //------------------------------------------------------------------------
     
-    /* (non-Javadoc)
-     * @see javax.jdo.listener.DirtyLifecycleListener#postDirty(javax.jdo.listener.InstanceLifecycleEvent)
-     */
-//  @Override
+    @Override
     public void postDirty(InstanceLifecycleEvent event) {
         for(Entry entry : this.entries) {
             if(entry.listener instanceof DirtyLifecycleListener && isInterested(event, entry.classes)) {
@@ -340,10 +304,7 @@ public class InstanceLifecycleListenerRegistry implements
         }
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.listener.DirtyLifecycleListener#preDirty(javax.jdo.listener.InstanceLifecycleEvent)
-     */
-//  @Override
+    @Override
     public void preDirty(InstanceLifecycleEvent event) {
         for(Entry entry : this.entries) {
             if(entry.listener instanceof DirtyLifecycleListener && isInterested(event, entry.classes)) {
@@ -357,9 +318,6 @@ public class InstanceLifecycleListenerRegistry implements
     // Implements DetachLifecycleListener
     //------------------------------------------------------------------------
     
-//  /* (non-Javadoc)
-//   * @see javax.jdo.listener.DetachLifecycleListener#postDetach(javax.jdo.listener.InstanceLifecycleEvent)
-//   */
 //  @Override
 //  public void postDetach(InstanceLifecycleEvent event) {
 //      for(Entry entry : this.entries) {
@@ -368,10 +326,7 @@ public class InstanceLifecycleListenerRegistry implements
 //          }
 //      }
 //  }
-//
-//  /* (non-Javadoc)
-//   * @see javax.jdo.listener.DetachLifecycleListener#preDetach(javax.jdo.listener.InstanceLifecycleEvent)
-//   */
+
 //  @Override
 //  public void preDetach(InstanceLifecycleEvent event) {
 //      for(Entry entry : this.entries) {
@@ -394,8 +349,7 @@ public class InstanceLifecycleListenerRegistry implements
         /**
          * Constructor 
          *
-         * @param listener
-         * @param classes the classes the listener is interested in 
+         * @param classes the classes the listener is interested in
          */
         Entry(
             InstanceLifecycleListener listener,

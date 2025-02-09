@@ -343,7 +343,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
-//  @Override
+    @Override
     public PersistenceManager jdoGetPersistenceManager(
     ){
         throw new UnsupportedOperationException("This method is not yet supported");
@@ -352,7 +352,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetContainerId()
      */
-//  @Override
+    @Override
     public Object jdoGetObjectId(
     ) {
         return ReducedJDOHelper.getObjectId(this.list);
@@ -361,7 +361,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetTransientContainerId()
      */
-//  @Override
+    @Override
     public Object jdoGetTransactionalObjectId(
     ) {
         return ReducedJDOHelper.getTransactionalObjectId(this.list);
@@ -370,7 +370,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoIsPersistent()
      */
-//  @Override
+    @Override
     public boolean jdoIsPersistent(
     ) {
         return ReducedJDOHelper.isPersistent(this.list);
@@ -379,7 +379,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
      */
-//  @Override
+    @Override
     public void jdoReplaceStateManager(
         StateManager sm
     ) throws SecurityException {
@@ -389,7 +389,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideField(int)
      */
-//  @Override
+    @Override
     public void jdoProvideField(int fieldNumber) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -397,7 +397,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideFields(int[])
      */
-//  @Override
+    @Override
     public void jdoProvideFields(int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -405,7 +405,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceField(int)
      */
-//  @Override
+    @Override
     public void jdoReplaceField(int fieldNumber) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -413,7 +413,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFields(int[])
      */
-//  @Override
+    @Override
     public void jdoReplaceFields(int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -421,7 +421,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFlags()
      */
-//  @Override
+    @Override
     public void jdoReplaceFlags() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -429,7 +429,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object, int[])
      */
-//  @Override
+    @Override
     public void jdoCopyFields(Object other, int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -437,7 +437,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoMakeDirty(java.lang.String)
      */
-//  @Override
+    @Override
     public void jdoMakeDirty(String fieldName) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -445,7 +445,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
      */
-//  @Override
+    @Override
     public Object jdoGetVersion() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -453,7 +453,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDirty()
      */
-//  @Override
+    @Override
     public boolean jdoIsDirty() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -461,7 +461,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsTransactional()
      */
-//  @Override
+    @Override
     public boolean jdoIsTransactional() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -469,7 +469,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsNew()
      */
-//  @Override
+    @Override
     public boolean jdoIsNew() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -477,7 +477,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDeleted()
      */
-//  @Override
+    @Override
     public boolean jdoIsDeleted() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -485,7 +485,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDetached()
      */
-//  @Override
+    @Override
     public boolean jdoIsDetached() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -493,7 +493,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager)
      */
-//  @Override
+    @Override
     public PersistenceCapable jdoNewInstance(StateManager sm) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -501,7 +501,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager, java.lang.Object)
      */
-//  @Override
+    @Override
     public PersistenceCapable jdoNewInstance(StateManager sm, Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -509,7 +509,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance()
      */
-//  @Override
+    @Override
     public Object jdoNewObjectIdInstance() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -517,7 +517,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object jdoNewObjectIdInstance(Object o) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -525,7 +525,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsToObjectId(Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -533,7 +533,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier, java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsToObjectId(ObjectIdFieldSupplier fm, Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -541,7 +541,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer, java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsFromObjectId(
         ObjectIdFieldConsumer fm,
         Object oid
@@ -557,7 +557,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoEvict(boolean)
      */
-//  @Override
+    @Override
     public void openmdxjdoEvict(
         boolean allMembers, 
         boolean allSubSets
@@ -572,7 +572,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetPersistenceManager()
      */
-//  @Override
+    @Override
     public PersistenceManager openmdxjdoGetDataObjectManager() {
         if(this.list instanceof PersistenceCapableCollection){
             return ((PersistenceCapableCollection)this.list).openmdxjdoGetDataObjectManager();
@@ -584,7 +584,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoRefresh()
      */
-//  @Override
+    @Override
     public void openmdxjdoRefresh() {
         if(this.list instanceof PersistenceCapableCollection){
             ((PersistenceCapableCollection)this.list).openmdxjdoRefresh();
@@ -596,7 +596,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoRetrieve(javax.jdo.FetchPlan)
      */
-//  @Override
+    @Override
     public void openmdxjdoRetrieve(
         FetchPlan fetchPlan
     ) {

@@ -79,7 +79,13 @@ dependencies {
     implementation(project(":core"))
 	implementation(platform(project(projectPlatform)))
     implementation("jakarta.platform:jakarta.jakartaee-api")
-    implementation("javax.jdo:jdo-api")
+	if(runtimeCompatibility.isJava8()) {
+		implementation(group= "javax.jdo", name = "jdo-api")
+	} else {
+		implementation(group= "javax.jdo", name = "jdo-api"){
+			exclude(group = "javax.transaction", module = "transaction-api")
+		}
+	}
     implementation("org.apache.directory.api:apache-ldap-api")
     // Test
     implementation("org.junit.jupiter:junit-jupiter-api")
@@ -197,16 +203,16 @@ tasks {
 	named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 
 	val openmdxSecurityIncludes = listOf(
-		"org/openmdx/security/*/**",
+		"org/openmdx/security/**",
 		"org/openmdx/uses/layout/*",
 		"META-INF/orm.xml",
 		"META-INF/openmdxmof.properties"
 	)
 
 	val openmdxSecurityExcludes = listOf(
-		"org/openmdx/security/auth/callback/*/**",
-		"org/openmdx/security/auth/passcode/*/**",
-		"org/openmdx/security/radius/*/**"
+		"org/openmdx/security/auth/callback/**",
+		"org/openmdx/security/auth/passcode/**",
+		"org/openmdx/security/radius/**"
 	)
 
 	register<org.openmdx.gradle.ArchiveTask>("openmdx-security.jar") {
@@ -259,8 +265,8 @@ tasks {
 	}
 
 	val openmdxAuthenticationIncludes = listOf(
-		"org/openmdx/security/auth/callback/*/**",
-		"org/openmdx/security/auth/passcode/*/**"
+		"org/openmdx/security/auth/callback/**",
+		"org/openmdx/security/auth/passcode/**"
 	)
 
 	val openmdxAuthenticationExcludes = listOf<String>( )
@@ -312,13 +318,13 @@ tasks {
 	}
 
 	val openmdxRadiusIncludes = listOf(
-		"org/openmdx/kernel/collection/*/**",
-		"org/openmdx/kernel/text/*/**",
-		"org/openmdx/resource/radius/*/**",
-		"org/openmdx/security/radius/*/**",
-		"org/openmdx/uses/net/sourceforge/jradiusclient/*/**",
-		"org/openmdx/uses/org/apache/commons/collections/*/**",
-		"org/openmdx/uses/org/apache/commons/pool/*/**"
+		"org/openmdx/kernel/collection/**",
+		"org/openmdx/kernel/text/**",
+		"org/openmdx/resource/radius/**",
+		"org/openmdx/security/radius/**",
+		"org/openmdx/uses/net/sourceforge/jradiusclient/**",
+		"org/openmdx/uses/org/apache/commons/collections/**",
+		"org/openmdx/uses/org/apache/commons/pool/**"
 	)
 
 	val openmdxRadiusExcludes = listOf<String>( )
@@ -371,7 +377,7 @@ tasks {
 	}
 
 	val openmdxLdapIncludes = listOf(
-		"org/openmdx/resource/ldap/*/**"
+		"org/openmdx/resource/ldap/**"
 	)
 	val openmdxLdapExcludes = listOf<String>( )
 
@@ -421,7 +427,7 @@ tasks {
 	}
 
 	val openmdxPkiIncludes = listOf(
-		"org/openmdx/resource/pki/*/**"
+		"org/openmdx/resource/pki/**"
 	)
 
 	val openmdxPkiExcludes = listOf<String>( )
@@ -472,8 +478,8 @@ tasks {
 	}
 
 	val openmdxResourceIncludes = listOf(
-		"org/openmdx/resource/cci/*/**",
-		"org/openmdx/resource/spi/*/**"
+		"org/openmdx/resource/cci/**",
+		"org/openmdx/resource/spi/**"
 	)
 	val openmdxResourceExcludes = listOf<String>( )
 

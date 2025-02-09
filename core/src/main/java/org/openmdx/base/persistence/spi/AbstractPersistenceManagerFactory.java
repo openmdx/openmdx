@@ -44,7 +44,6 @@
  */
 package org.openmdx.base.persistence.spi;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -68,6 +67,7 @@ import javax.jdo.metadata.JDOMetadata;
 import javax.jdo.metadata.TypeMetadata;
 
 import org.openmdx.base.Version;
+import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.collection.MapBackedSet;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
@@ -76,6 +76,7 @@ import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.kernel.configuration.Configurations;
 import org.openmdx.kernel.configuration.cci.Configuration;
 import org.openmdx.kernel.configuration.cci.ConfigurationProvider;
+import org.openmdx.kernel.janitor.Finalizer;
 import org.openmdx.kernel.jdo.JDOPersistenceManager;
 import org.openmdx.kernel.jdo.JDOPersistenceManagerFactory;
 import org.openmdx.kernel.loading.Classes;
@@ -88,7 +89,7 @@ import org.openmdx.kernel.resource.spi.CloseCallback;
  * @since openMDX 2.0
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistenceManager>
+public abstract class AbstractPersistenceManagerFactory<P extends PersistenceManager_1_0>
     implements JDOPersistenceManagerFactory, CloseCallback {
 
     /**
@@ -100,7 +101,6 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
      *            the configuration properties
      * @param defaults
      *            for missing configuration and override properties
-     * @throws IOException
      */
     protected AbstractPersistenceManagerFactory(
         Map<?, ?> overrides,
@@ -125,17 +125,18 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         setCopyOnAttach(getFlag(ConfigurableProperty.CopyOnAttach));
         setContainerManaged(getFlag(ConfigurableProperty.ContainerManaged));
         setIsolateThreads(getFlag(ConfigurableProperty.IsolateThreads));
-        getString(ConfigurableProperty.ConnectionUserName).ifPresent(value -> setConnectionUserName(value));
-        getString(ConfigurableProperty.ConnectionPassword).ifPresent(value -> setConnectionPassword(value));
-        getString(ConfigurableProperty.ConnectionURL).ifPresent(value -> setConnectionURL(value));
-        getString(ConfigurableProperty.ConnectionFactoryName).ifPresent(value -> setConnectionFactoryName(value));
-        getString(ConfigurableProperty.ConnectionFactory2Name).ifPresent(value -> setConnectionFactory2Name(value));
-        getString(ConfigurableProperty.Mapping).ifPresent(value -> setMapping(value));
-        getObject(ConfigurableProperty.ConnectionFactory).ifPresent(value -> setConnectionFactory(value));
-        getObject(ConfigurableProperty.ConnectionFactory2).ifPresent(value -> setConnectionFactory2(value));
-        getString(ConfigurableProperty.TransactionType).ifPresent(value -> setTransactionType(value));
-        getString(ConfigurableProperty.TransactionIsolationLevel).ifPresent(value -> setTransactionIsolationLevel(value));
-        getString(ConfigurableProperty.ConnectionDriverName).ifPresent(value -> setConnectionDriverName(value));
+        setFinalizePersistenceManagers(getFlag(ConfigurableProperty.FinalizePersistenceManagers));
+        getString(ConfigurableProperty.ConnectionUserName).ifPresent(this::setConnectionUserName);
+        getString(ConfigurableProperty.ConnectionPassword).ifPresent(this::setConnectionPassword);
+        getString(ConfigurableProperty.ConnectionURL).ifPresent(this::setConnectionURL);
+        getString(ConfigurableProperty.ConnectionFactoryName).ifPresent(this::setConnectionFactoryName);
+        getString(ConfigurableProperty.ConnectionFactory2Name).ifPresent(this::setConnectionFactory2Name);
+        getString(ConfigurableProperty.Mapping).ifPresent(this::setMapping);
+        getObject(ConfigurableProperty.ConnectionFactory).ifPresent(this::setConnectionFactory);
+        getObject(ConfigurableProperty.ConnectionFactory2).ifPresent(this::setConnectionFactory2);
+        getString(ConfigurableProperty.TransactionType).ifPresent(this::setTransactionType);
+        getString(ConfigurableProperty.TransactionIsolationLevel).ifPresent(this::setTransactionIsolationLevel);
+        getString(ConfigurableProperty.ConnectionDriverName).ifPresent(this::setConnectionDriverName);
     }
 
     /**
@@ -152,7 +153,12 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
      * A {@code PersistenceManagerFactory}'s configuration is its
      * {@code PersistenceManager}s' default configuration.
      */
-    private Map<ConfigurableProperty, Object> configurableProperties = new HashMap<ConfigurableProperty, Object>();
+    private Map<ConfigurableProperty, Object> configurableProperties = new HashMap<>();
+
+    /**
+     * The {@code Finalizer} if {@code ConfigurableProerty.FinalizePersistenceManagers} is {@code TRUE}
+     */
+    private Finalizer finalizer;
 
     /**
      * {@code PersistentManager} book keeping.
@@ -164,7 +170,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
     /**
      * The persistence manager factory scoped fetch groups
      */
-    private final Set<FetchGroup> fetchGroups = new HashSet<FetchGroup>();
+    private final Set<FetchGroup> fetchGroups = new HashSet<>();
 
     /**
      * The listeners to be propagated to the children
@@ -179,7 +185,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
     /**
      * The default configuration
      */
-    private static final Map<String, Object> DEFAULT_CONFIGURATION = new HashMap<String, Object>();
+    private static final Map<String, Object> DEFAULT_CONFIGURATION = new HashMap<>();
 
     /**
      * The {@code PersistenceManagerFactory}'s properties.
@@ -197,7 +203,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
      * 
      * @param option
      *            the option
-     * @param defaulValue
+     * @param defaultValue
      *            tells whether the flag is by default on or off
      * 
      * @return {@code true} if the flag is on (explicitly or by default)
@@ -210,8 +216,8 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
             option.qualifiedName(),
             Boolean.class
         ).orElse(
-            Boolean.valueOf(defaultValue)
-        ).booleanValue();
+            defaultValue
+        );
     }
 
     /**
@@ -255,6 +261,9 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
             );
         if (!this.isFrozen()) {
             this.configurableProperties = Collections.unmodifiableMap(this.configurableProperties);
+            if(this.getFinalizePersistenceManagers()) {
+                this.finalizer = Finalizer.getInstance();
+            }
         }
     }
 
@@ -315,11 +324,6 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
     // Implements CloseCallback
     //------------------------------------------------------------------------
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.kernel.callback.CloseCallback#postClose(java.lang.Object)
-     */
     @Override
     public synchronized void postClose(Object closed) {
         if (!isClosed()) {
@@ -331,41 +335,34 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
     // Implements PersistenceManagerFactory
     //------------------------------------------------------------------------
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#close()
-     */
     @Override
     public synchronized void close() {
         if (!this.isClosed()) {
-            List<JDOUserException> exceptions = new ArrayList<JDOUserException>();
+            List<JDOUserException> exceptions = new ArrayList<>();
             for (PersistenceManager p : this.persistenceManagers) {
-                if (PersistenceHelper.currentUnitOfWork(p).isActive())
+                if (PersistenceHelper.currentUnitOfWork(p).isActive()) {
                     exceptions.add(
                         new JDOUserException("PersistenceManager has active transaction", p)
                     );
+                }
             }
-            if (!exceptions.isEmpty())
+            if (exceptions.isEmpty()) {
+                Set<PersistenceManager> persistenceManagers = this.persistenceManagers;
+                this.persistenceManagers = null;
+                for (PersistenceManager p : persistenceManagers) {
+                    p.close();
+                }
+            } else {
                 throw new JDOUserException(
                     "PersistenceManager with active transaction prevents close",
                     exceptions.toArray(
                         new JDOUserException[exceptions.size()]
                     )
                 );
-            Set<PersistenceManager> persistenceManagers = this.persistenceManagers;
-            this.persistenceManagers = null;
-            for (PersistenceManager p : persistenceManagers) {
-                p.close();
             }
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#isClosed()
-     */
     @Override
     public boolean isClosed() {
         return this.persistenceManagers == null;
@@ -382,10 +379,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
 
     /**
      * The sub-class specific factory method
-     * 
-     * @param userid
-     * @param password
-     * 
+     *
      * @return a new {@code PersistenceManager}
      */
     protected abstract P newPersistenceManager(
@@ -400,11 +394,6 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
      */
     protected abstract P newPersistenceManager();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getPersistenceManager()
-     */
     @Override
     public final P getPersistenceManager() {
         this.freeze();
@@ -413,11 +402,6 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         return persistenceManager;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getPersistenceManager(java.lang.String, java.lang.String)
-     */
     @Override
     public final P getPersistenceManager(
         String userid,
@@ -434,20 +418,16 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
 
     /**
      * Initialize a newly created persistence manager
-     * 
-     * @param persistenceManager
      */
     protected void initialize(
-        PersistenceManager persistenceManager
+        PersistenceManager_1_0 persistenceManager
     ) {
         this.instanceLifecycleListenerRegistry.propagateTo(persistenceManager);
+        if(this.getFinalizePersistenceManagers()){
+            persistenceManager.registerForFinalization(this.finalizer);
+        }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getDetachAllOnCommit()
-     */
     @Override
     public boolean getDetachAllOnCommit() {
         return Boolean.TRUE.equals(
@@ -455,24 +435,14 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setDetachAllOnCommit(boolean)
-     */
     @Override
     public void setDetachAllOnCommit(boolean flag) {
         this.setProperty(
             ConfigurableProperty.DetachAllOnCommit,
-            Boolean.valueOf(flag)
+            flag
         );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setConnectionUserName(java.lang.String)
-     */
     @Override
     public void setConnectionUserName(String userName) {
         this.setProperty(
@@ -481,21 +451,11 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getConnectionUserName()
-     */
     @Override
     public String getConnectionUserName() {
         return (String) this.configurableProperties.get(ConfigurableProperty.ConnectionUserName);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setConnectionPassword(java.lang.String)
-     */
     @Override
     public void setConnectionPassword(String password) {
         this.setProperty(ConfigurableProperty.ConnectionPassword, password);
@@ -505,171 +465,86 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         return (String) this.configurableProperties.get(ConfigurableProperty.ConnectionPassword);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setConnectionURL(java.lang.String)
-     */
     @Override
     public void setConnectionURL(String URL) {
         this.setProperty(ConfigurableProperty.ConnectionURL, URL);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getConnectionURL()
-     */
     @Override
     public String getConnectionURL() {
         return (String) this.configurableProperties.get(ConfigurableProperty.ConnectionURL);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setConnectionDriverName(java.lang.String)
-     */
     @Override
     public void setConnectionDriverName(String driverName) {
         this.setProperty(ConfigurableProperty.ConnectionDriverName, driverName);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getConnectionDriverName()
-     */
     @Override
     public String getConnectionDriverName() {
         return (String) this.configurableProperties.get(ConfigurableProperty.ConnectionDriverName);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setConnectionFactoryName(java.lang.String)
-     */
     @Override
     public void setConnectionFactoryName(String connectionFactoryName) {
         this.setProperty(ConfigurableProperty.ConnectionFactoryName, connectionFactoryName);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getConnectionFactoryName()
-     */
     @Override
     public String getConnectionFactoryName() {
         return (String) this.configurableProperties.get(ConfigurableProperty.ConnectionFactoryName);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setConnectionFactory(java.lang.Object)
-     */
     @Override
     public void setConnectionFactory(Object connectionFactory) {
         this.setProperty(ConfigurableProperty.ConnectionFactory, connectionFactory);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getConnectionFactory()
-     */
     @Override
     public Object getConnectionFactory() {
         return this.configurableProperties.get(ConfigurableProperty.ConnectionFactory);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setConnectionFactory2Name(java.lang.String)
-     */
     @Override
     public void setConnectionFactory2Name(String connectionFactoryName) {
         this.setProperty(ConfigurableProperty.ConnectionFactory2Name, connectionFactoryName);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getConnectionFactory2Name()
-     */
     @Override
     public String getConnectionFactory2Name() {
         return (String) this.configurableProperties.get(ConfigurableProperty.ConnectionFactory2Name);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setConnectionFactory2(java.lang.Object)
-     */
     @Override
     public void setConnectionFactory2(Object connectionFactory) {
         this.setProperty(ConfigurableProperty.ConnectionFactory2, connectionFactory);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getConnectionFactory2()
-     */
     @Override
     public Object getConnectionFactory2() {
         return this.configurableProperties.get(ConfigurableProperty.ConnectionFactory2);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setMultithreaded(boolean)
-     */
     @Override
     public void setMultithreaded(boolean flag) {
-        this.setProperty(ConfigurableProperty.Multithreaded, Boolean.valueOf(flag));
+        this.setProperty(ConfigurableProperty.Multithreaded, flag);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getMultithreaded()
-     */
     @Override
     public boolean getMultithreaded() {
         return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.Multithreaded));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setMapping(java.lang.String)
-     */
     @Override
     public void setMapping(String mapping) {
         this.setProperty(ConfigurableProperty.Mapping, mapping);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getMapping()
-     */
     @Override
     public String getMapping() {
         return (String) this.configurableProperties.get(ConfigurableProperty.Mapping);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#addFetchGroups(javax.jdo.FetchGroup[])
-     */
     @Override
     public void addFetchGroups(FetchGroup... fetchGroups) {
         synchronized (this.fetchGroups) {
@@ -680,11 +555,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getFetchGroup(java.lang.Class, java.lang.String)
-     */
+    @Override
     public FetchGroup getFetchGroup(
         Class type,
         String name
@@ -692,13 +563,9 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         return new StandardFetchGroup(type, name);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getFetchGroups()
-     */
+    @Override
     public Set getFetchGroups() {
-        Set<FetchGroup> fetchGroups = new HashSet<FetchGroup>();
+        Set<FetchGroup> fetchGroups = new HashSet<>();
         synchronized (this.fetchGroups) {
             for (FetchGroup fetchGroup : this.fetchGroups) {
                 fetchGroups.add(new StandardFetchGroup(fetchGroup));
@@ -707,41 +574,21 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         return fetchGroups;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getPersistenceManagerProxy()
-     */
     @Override
     public JDOPersistenceManager getPersistenceManagerProxy() {
         throw new UnsupportedOperationException("Persistence Manager Proxy instances are not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getReadOnly()
-     */
     @Override
     public boolean getReadOnly() {
         return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.ReadOnly));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getTransactionIsolationLevel()
-     */
     @Override
     public String getTransactionIsolationLevel() {
         return (String) this.configurableProperties.get(ConfigurableProperty.TransactionIsolationLevel);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#removeAllFetchGroups()
-     */
     @Override
     public void removeAllFetchGroups() {
         synchronized (this.fetchGroups) {
@@ -749,11 +596,6 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#removeFetchGroups(javax.jdo.FetchGroup[])
-     */
     @Override
     public void removeFetchGroups(FetchGroup... fetchGroups) {
         synchronized (this.fetchGroups) {
@@ -763,141 +605,71 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setReadOnly(boolean)
-     */
     @Override
     public void setReadOnly(boolean arg0) {
-        this.setProperty(ConfigurableProperty.ReadOnly, Boolean.valueOf(arg0));
+        this.setProperty(ConfigurableProperty.ReadOnly, arg0);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setTransactionIsolationLevel(java.lang.String)
-     */
     @Override
     public void setTransactionIsolationLevel(String transactionIsolationLevel) {
         this.setProperty(ConfigurableProperty.TransactionIsolationLevel, transactionIsolationLevel);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setOptimistic(boolean)
-     */
     @Override
     public void setOptimistic(boolean flag) {
-        this.setProperty(ConfigurableProperty.Optimistic, Boolean.valueOf(flag));
+        this.setProperty(ConfigurableProperty.Optimistic, flag);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getOptimistic()
-     */
     @Override
     public boolean getOptimistic() {
         return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.Optimistic));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setRetainValues(boolean)
-     */
     @Override
     public void setRetainValues(boolean flag) {
-        this.setProperty(ConfigurableProperty.RetainValues, Boolean.valueOf(flag));
+        this.setProperty(ConfigurableProperty.RetainValues, flag);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getRetainValues()
-     */
     @Override
     public boolean getRetainValues() {
         return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.RetainValues));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setRestoreValues(boolean)
-     */
     @Override
     public void setRestoreValues(boolean restoreValues) {
-        this.setProperty(ConfigurableProperty.RestoreValues, Boolean.valueOf(restoreValues));
+        this.setProperty(ConfigurableProperty.RestoreValues, restoreValues);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getRestoreValues()
-     */
     @Override
     public boolean getRestoreValues() {
         return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.RestoreValues));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setNontransactionalRead(boolean)
-     */
     @Override
     public void setNontransactionalRead(boolean flag) {
-        this.setProperty(ConfigurableProperty.NontransactionalRead, Boolean.valueOf(flag));
+        this.setProperty(ConfigurableProperty.NontransactionalRead, flag);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getNontransactionalRead()
-     */
     @Override
     public boolean getNontransactionalRead() {
         return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.NontransactionalRead));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setNontransactionalWrite(boolean)
-     */
     @Override
     public void setNontransactionalWrite(boolean flag) {
-        this.setProperty(ConfigurableProperty.NontransactionalWrite, Boolean.valueOf(flag));
+        this.setProperty(ConfigurableProperty.NontransactionalWrite, flag);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getNontransactionalWrite()
-     */
     @Override
     public boolean getNontransactionalWrite() {
         return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.NontransactionalWrite));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setIgnoreCache(boolean)
-     */
     @Override
     public void setIgnoreCache(boolean flag) {
-        this.setProperty(ConfigurableProperty.IgnoreCache, Boolean.valueOf(flag));
+        this.setProperty(ConfigurableProperty.IgnoreCache, flag);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getIgnoreCache()
-     */
     @Override
     public boolean getIgnoreCache() {
         return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.IgnoreCache));
@@ -910,7 +682,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
      *            the container managed transaction flag
      */
     public void setContainerManaged(boolean flag) {
-        this.setProperty(ConfigurableProperty.ContainerManaged, Boolean.valueOf(flag));
+        this.setProperty(ConfigurableProperty.ContainerManaged, flag);
     }
 
     /**
@@ -929,7 +701,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
      *            the isolate threads flag
      */
     public void setIsolateThreads(boolean flag) {
-        this.setProperty(ConfigurableProperty.IsolateThreads, Boolean.valueOf(flag));
+        this.setProperty(ConfigurableProperty.IsolateThreads, flag);
     }
 
     /**
@@ -939,32 +711,34 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.IsolateThreads));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getProperties()
+    /**
+     * Defines, whether open persistence managers shall be closed during garbage collection
+     *
+     * @param flag
+     *            the finalize persistence managers flag
      */
+    public void setFinalizePersistenceManagers(boolean flag) {
+        this.setProperty(ConfigurableProperty.FinalizePersistenceManagers, flag);
+    }
+
+    /**
+     * Tells, whether open persistence managers shall be closed during garbage collection
+     */
+    public boolean getFinalizePersistenceManagers() {
+        return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.FinalizePersistenceManagers));
+    }
+
     @Override
     public Properties getProperties() {
         return new Properties(AbstractPersistenceManagerFactory.NON_CONFIGURABLE_PROPERTIES);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#supportedOptions()
-     */
     @Override
     public Collection<String> supportedOptions() {
         return PersistenceManagers.getSupportedProperties();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#addInstanceLifecycleListener(javax.jdo.listener.InstanceLifecycleListener,
-     * java.lang.Class[])
-     */
+    @Override
     public void addInstanceLifecycleListener(
         InstanceLifecycleListener listener,
         Class[] classes
@@ -976,11 +750,6 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#removeInstanceLifecycleListener(javax.jdo.listener.InstanceLifecycleListener)
-     */
     @Override
     public void removeInstanceLifecycleListener(
         InstanceLifecycleListener listener
@@ -992,44 +761,24 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getCopyOnAttach()
-     */
     @Override
     public boolean getCopyOnAttach() {
         return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.CopyOnAttach));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setCopyOnAttach(boolean)
-     */
     @Override
     public void setCopyOnAttach(boolean flag) {
         this.configurableProperties.put(
             ConfigurableProperty.CopyOnAttach,
-            Boolean.valueOf(flag)
+                flag
         );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getName()
-     */
     @Override
     public String getName() {
         return (String) this.configurableProperties.get(ConfigurableProperty.Name);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setName(java.lang.String)
-     */
     @Override
     public void setName(String name) {
         this.configurableProperties.put(
@@ -1038,21 +787,11 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getPersistenceUnitName()
-     */
     @Override
     public String getPersistenceUnitName() {
         return (String) this.configurableProperties.get(ConfigurableProperty.PersistenceUnitName);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setPersistenceUnitName(java.lang.String)
-     */
     @Override
     public void setPersistenceUnitName(String name) {
         this.configurableProperties.put(
@@ -1061,21 +800,11 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getServerTimeZoneID()
-     */
     @Override
     public String getServerTimeZoneID() {
         return (String) this.configurableProperties.get(ConfigurableProperty.ServerTimeZoneID);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setServerTimeZoneID(java.lang.String)
-     */
     @Override
     public void setServerTimeZoneID(String timezoneid) {
         this.configurableProperties.put(
@@ -1084,21 +813,11 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getTransactionType()
-     */
     @Override
     public String getTransactionType() {
         return (String) this.configurableProperties.get(ConfigurableProperty.TransactionType);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setTransactionType(java.lang.String)
-     */
     @Override
     public void setTransactionType(
         String name
@@ -1141,6 +860,68 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
         }
     }
 
+    @Override
+    public void setDatastoreReadTimeoutMillis(Integer interval) {
+        this.configurableProperties.put(
+            ConfigurableProperty.DatastoreReadTimeoutMillis,
+            interval
+        );
+    }
+
+    @Override
+    public Integer getDatastoreReadTimeoutMillis() {
+        return (Integer) this.configurableProperties.get(ConfigurableProperty.DatastoreReadTimeoutMillis);
+    }
+
+    @Override
+    public void setDatastoreWriteTimeoutMillis(Integer interval) {
+        this.configurableProperties.put(
+            ConfigurableProperty.DatastoreWriteTimeoutMillis,
+            interval
+        );
+    }
+
+    @Override
+    public Integer getDatastoreWriteTimeoutMillis() {
+        return (Integer) this.configurableProperties.get(ConfigurableProperty.DatastoreWriteTimeoutMillis);
+    }
+
+    @Override
+    public void registerMetadata(JDOMetadata metadata) {
+        throw new JDOFatalDataStoreException(
+            "openMDX doesn't support JDO's native meta data API yet"
+        );
+    }
+
+    @Override
+    public JDOMetadata newMetadata() {
+        throw new JDOFatalDataStoreException(
+            "openMDX doesn't support JDO's native meta data API yet"
+        );
+    }
+
+    @Override
+    public TypeMetadata getMetadata(String className) {
+        throw new JDOFatalDataStoreException(
+            "openMDX doesn't support JDO's native meta data API yet"
+        );
+    }
+
+    @Override
+    public Collection<Class> getManagedClasses() {
+        throw new JDOFatalDataStoreException(
+            "openMDX doesn't support JDO's native meta data API yet"
+        );
+    }
+
+    protected static Map<String, Object> createDefaultConfiguration(
+        Map<String, ?> amendments
+    ) {
+        final Map<String, Object> configuration = new HashMap<>(DEFAULT_CONFIGURATION);
+        configuration.putAll(amendments);
+        return Collections.unmodifiableMap(configuration);
+    }
+
     static {
         AbstractPersistenceManagerFactory.NON_CONFIGURABLE_PROPERTIES.setProperty(
             NonConfigurableProperty.VendorName.qualifiedName(),
@@ -1163,6 +944,10 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
             Boolean.FALSE.toString()
         );
         AbstractPersistenceManagerFactory.DEFAULT_CONFIGURATION.put(
+            ConfigurableProperty.FinalizePersistenceManagers.qualifiedName(),
+            Boolean.FALSE.toString()
+        );
+        AbstractPersistenceManagerFactory.DEFAULT_CONFIGURATION.put(
             ConfigurableProperty.CopyOnAttach.qualifiedName(),
             Boolean.TRUE.toString()
         );
@@ -1181,108 +966,6 @@ public abstract class AbstractPersistenceManagerFactory<P extends JDOPersistence
                 DEFAULT_CONFIGURATION.put(qualifiedName, value);
             }
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setDatastoreReadTimeoutMillis(java.lang.Integer)
-     */
-    @Override
-    public void setDatastoreReadTimeoutMillis(Integer interval) {
-        this.configurableProperties.put(
-            ConfigurableProperty.DatastoreReadTimeoutMillis,
-            interval
-        );
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getDatastoreReadTimeoutMillis()
-     */
-    @Override
-    public Integer getDatastoreReadTimeoutMillis() {
-        return (Integer) this.configurableProperties.get(ConfigurableProperty.DatastoreReadTimeoutMillis);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#setDatastoreWriteTimeoutMillis(java.lang.Integer)
-     */
-    @Override
-    public void setDatastoreWriteTimeoutMillis(Integer interval) {
-        this.configurableProperties.put(
-            ConfigurableProperty.DatastoreWriteTimeoutMillis,
-            interval
-        );
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getDatastoreWriteTimeoutMillis()
-     */
-    @Override
-    public Integer getDatastoreWriteTimeoutMillis() {
-        return (Integer) this.configurableProperties.get(ConfigurableProperty.DatastoreWriteTimeoutMillis);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#registerMetadata(javax.jdo.metadata.JDOMetadata)
-     */
-    @Override
-    public void registerMetadata(JDOMetadata metadata) {
-        throw new JDOFatalDataStoreException(
-            "openMDX doesn't support JDO's native meta data API yet"
-        );
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#newMetadata()
-     */
-    @Override
-    public JDOMetadata newMetadata() {
-        throw new JDOFatalDataStoreException(
-            "openMDX doesn't support JDO's native meta data API yet"
-        );
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getMetadata(java.lang.String)
-     */
-    @Override
-    public TypeMetadata getMetadata(String className) {
-        throw new JDOFatalDataStoreException(
-            "openMDX doesn't support JDO's native meta data API yet"
-        );
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.PersistenceManagerFactory#getManagedClasses()
-     */
-    @Override
-    public Collection<Class> getManagedClasses() {
-        throw new JDOFatalDataStoreException(
-            "openMDX doesn't support JDO's native meta data API yet"
-        );
-    }
-
-    protected static Map<String, Object> createDefaultConfiguration(
-        Map<String, ?> amendments
-    ) {
-        final Map<String, Object> configuration = new HashMap<>(DEFAULT_CONFIGURATION);
-        configuration.putAll(amendments);
-        return Collections.unmodifiableMap(configuration);
     }
 
 }

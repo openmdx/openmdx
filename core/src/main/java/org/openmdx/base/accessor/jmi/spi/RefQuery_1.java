@@ -1526,7 +1526,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    //  @Override
+        @Override
     public void refAddValue(
         ModelElement_1_0 featureDef,
         Quantifier quantifier,

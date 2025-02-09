@@ -106,7 +106,7 @@ class ProxyPlugIn_1 implements PlugIn_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#callbackOnCascadedDeletes()
      */
-//  @Override
+    @Override
     public boolean requiresCallbackOnCascadedDelete(DataObject_1 object) {
         return false;
     }
@@ -114,7 +114,7 @@ class ProxyPlugIn_1 implements PlugIn_1_0 {
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.aop0.PlugIn_1_0#isExemptFromValidation(org.openmdx.base.mof.cci.ModelElement_1_0)
 	 */
-//  @Override
+    @Override
 	public boolean isExemptFromValidation(DataObject_1 object, ModelElement_1_0 feature)
 			throws ServiceException {
 		return false;
@@ -123,7 +123,7 @@ class ProxyPlugIn_1 implements PlugIn_1_0 {
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.aop0.PlugIn_1_0#isAspect(org.openmdx.base.accessor.rest.DataObject_1)
 	 */
-//  @Override
+    @Override
 	public Boolean isAspect(DataObject_1 object) {
 		return null;
 	}

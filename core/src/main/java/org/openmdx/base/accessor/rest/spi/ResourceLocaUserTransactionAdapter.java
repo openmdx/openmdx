@@ -114,7 +114,7 @@ class ResourceLocaUserTransactionAdapter implements LocalUserTransaction {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.UserTransaction_2_0#setRollbackOnly()
      */
-//  @Override
+    @Override
     public void setRollbackOnly(
     ) throws ResourceException {
         throw new NotSupportedException(
@@ -125,7 +125,7 @@ class ResourceLocaUserTransactionAdapter implements LocalUserTransaction {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.UserTransaction_2_0#isRollbackOnly()
      */
-//  @Override
+    @Override
     public boolean isRollbackOnly(
     ) throws ResourceException {
         throw new NotSupportedException(

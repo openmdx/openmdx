@@ -112,7 +112,7 @@ public class MapperUtils {
   public static List<String> getNameComponents(
     String qualifiedName
   ) {
-    List<String> nameComponents = new ArrayList<String>();
+    List<String> nameComponents = new ArrayList<>();
     StringTokenizer tokenizer = new StringTokenizer(qualifiedName, ":");
     while(tokenizer.hasMoreTokens()) {
       nameComponents.add(tokenizer.nextToken());
@@ -129,7 +129,7 @@ public class MapperUtils {
   public static String capitalize(
     String text
   ) {
-    StringBuffer buf = new StringBuffer(text.substring(0,1).toUpperCase());
+    StringBuilder buf = new StringBuilder(text.substring(0,1).toUpperCase());
     if (text.length() > 1) {
       buf.append(text.substring(1));
     }
@@ -139,7 +139,7 @@ public class MapperUtils {
   //--------------------------------------------------------------------------------
 
    /**
-     * A (maybe multiline) input text is split into lines and 
+     * A (possibly multiline) input text is split into lines and
      * send to the sink line by line with the given indent.
      * 
      * @param indent The indentation to be used for text output.
@@ -166,7 +166,7 @@ public class MapperUtils {
   /**
    * Evaluate t he XRI of a given model package
    * 
-   * @param  name components of the MOF package
+   * @param  nameComponents Components of the MOF package
    *  
    * @return an XRI which may be used to look up the Authority the gven 
    *         package belongs to"
@@ -174,7 +174,7 @@ public class MapperUtils {
   public static String getAuthorityId(
     List<String> nameComponents
   ){
-    StringBuffer id = new StringBuffer(XRI_2Protocols.OPENMDX_PREFIX);
+    StringBuilder id = new StringBuilder(XRI_2Protocols.OPENMDX_PREFIX);
     char delimiter = '*';
     for(
         Iterator<String> i = nameComponents.iterator();

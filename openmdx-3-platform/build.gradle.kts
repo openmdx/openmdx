@@ -54,11 +54,11 @@ dependencies {
     constraints {
     	
 		val atomikosVersion = "6.0.0"
-		val bootstrapVersion = "2.19.1" // 3.19.1 ccan't be created during development!
+		val bootstrapVersion = "2.19.2" // 3.19.2 ccan't be created during development!
 		val cacheVersion = "1.1.1"
 		val flexmarkVersion = "0.62.2"
 		val groovyVersion = "3.0.+"
-		val jdoVersion = "3.1" // TODO to  be changed to 3.2.1 for MDX-1
+		val jdoVersion = "3.1"
 		val jakartaVersion = "8.0.+"
 		val junitVersion = "5.11.3"
 		val ldapVersion = "2.1.+"

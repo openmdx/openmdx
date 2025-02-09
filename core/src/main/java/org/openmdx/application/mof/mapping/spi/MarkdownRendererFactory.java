@@ -57,7 +57,7 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
 public class MarkdownRendererFactory implements Supplier<Function<String, String>> {
 
 	/**
-	 * Cosnstructor using the default link target {@code "_self"}
+	 * Constructor using the default link target {@code "_self"}
 	 */
 	public MarkdownRendererFactory() {
 		this("_self");

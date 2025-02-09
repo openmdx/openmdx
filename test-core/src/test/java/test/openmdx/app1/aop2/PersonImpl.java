@@ -84,8 +84,8 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
     /**
      * Constructor 
      *
-     * @param same
-     * @param next
+     * @param same the same layer JMI API
+     * @param next the next layer CCI API
      */
     public PersonImpl(
         S same,
@@ -283,7 +283,7 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
     /* (non-Javadoc)
      * @see test.openmdx.app1.aop2.NaturalPerson#isRetired()
      */
-//  @Override
+    @Override
     public boolean isRetired() {
         return false;
     }

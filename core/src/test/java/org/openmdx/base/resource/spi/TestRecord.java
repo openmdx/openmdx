@@ -48,12 +48,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
 import javax.jdo.identity.IntIdentity;
 #if JAVA_8
 	import javax.resource.cci.IndexedRecord; 
@@ -68,17 +69,21 @@ import javax.jdo.identity.IntIdentity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openmdx.base.Version;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
 import org.openmdx.base.resource.cci.SparseArrayRecord;
 
-public class TestRecord {
+class TestRecord {
 
-	private static boolean REFLECTIVE_EQUALITY = Boolean.FALSE; // to avoid dead code warning
+	/**
+	 * Non-static to avoid dead code warning
+	 */
+	private static boolean REFLECTIVE_EQUALITY = Boolean.FALSE;
 
 	/**
 	 * This rare use case would require predictable hash codes.
+	 * <p/>
+	 * Non-static to avoid dead code warning
 	 */
 	private static boolean USE_RECORDS_AS_KEYS = Boolean.FALSE; // to avoid dead code warning
 
@@ -87,14 +92,14 @@ public class TestRecord {
 	@BeforeEach
 	protected void setUp() throws Exception {
 		this.factory = Records.getRecordFactory();
-		this.map2 = new TreeMap<String, String>();
+		this.map2 = new TreeMap<>();
 		this.map2.put("A", "a");
 		this.map2.put("C", "c");
-		this.map3 = new TreeMap<String, String>(map2);
+		this.map3 = new TreeMap<>(map2);
 		this.map3.put("B", "b");
-		this.map23 = new TreeMap<Integer, Map<String, String>>();
-		this.map23.put(Integer.valueOf(2), this.map2);
-		this.map23.put(Integer.valueOf(3), this.map3);
+		this.map23 = new TreeMap<>();
+		this.map23.put(2, this.map2);
+		this.map23.put(3, this.map3);
 		this.array2 = new String[] { "a", "c" };
 		this.array3 = new String[] { "a", "b", "c" };
 		this.array23 = new String[][] { this.array2, this.array3 };
@@ -104,14 +109,14 @@ public class TestRecord {
 		this.array0 = new Integer[0];
 		this.array1 = new Integer[] { 99 };
 		this.array01 = new Integer[][] { this.array0, this.array1 };
-		this.list0 = Arrays.asList(new Integer[0]);
-		this.list1 = Arrays.asList(new Integer[] { createIntegerInstance(99) });
+		this.list0 = Collections.emptyList();
+		this.list1 = Collections.singletonList(createIntegerInstance(99));
 		this.list01 = Arrays.asList(this.list0, this.list1);
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testPreInitializedMappedRecord() throws Throwable {
+	void testPreInitializedMappedRecord() throws Throwable {
 
 		// VariableSizeMappedRecord without description
 		MappedRecord r2m = factory.createMappedRecord("r2");
@@ -124,8 +129,8 @@ public class TestRecord {
 		Assertions.assertNull(r2m.get("B"), "r2.B");
 		Assertions.assertEquals("c", r2m.get("C"), "r2.C");
 		Assertions.assertEquals( 2,  r2m.size(), "r2m.size()");
-		Assertions.assertTrue(map2.equals(r2m), "map2.equals(r2m)");
-		Assertions.assertFalse(r2m.equals(map2), "r2m.equals(map2)");
+		Assertions.assertEquals(map2, r2m, "map2.equals(r2m)");
+		Assertions.assertNotEquals(r2m, map2, "r2m.equals(map2)");
 		if (USE_RECORDS_AS_KEYS)
 			Assertions.assertEquals( map2.hashCode(),  r2m.hashCode(), "map2.hashCode()==r2m.hashCode()");
 
@@ -138,24 +143,24 @@ public class TestRecord {
 		Assertions.assertTrue(r2mds.equals("r2 (Record 2): {\n" + "\tA = \"a\"\n" + "\tC = \"c\"\n" + "}")
 						|| r2mds.equals("r2 (Record 2): {\n" + "\tC = \"c\"\n" + "\tA = \"a\"\n" + "}"), "r2md");
 		
-		Assertions.assertTrue(map2.equals(r2md), "map2.equals(r2md)");
+		Assertions.assertEquals(map2, r2md, "map2.equals(r2md)");
 		
-		Assertions.assertFalse(r2md.equals(map2), "r2md.equals(map2)");
+		Assertions.assertNotEquals(r2md, map2, "r2md.equals(map2)");
 		
 		if (USE_RECORDS_AS_KEYS)
 			Assertions.assertEquals( map2.hashCode(),  r2md.hashCode(), "map2.hashCode()==r2md.hashCode()");
-		Assertions.assertTrue(r2md.equals(r2m), "r2md.equals(r2m)");
+		Assertions.assertEquals(r2md, r2m, "r2md.equals(r2m)");
 		
-		Assertions.assertTrue(r2m.equals(r2md), "r2m.equals(r2md)");
+		Assertions.assertEquals(r2m, r2md, "r2m.equals(r2md)");
 		
 		Assertions.assertEquals( r2md.hashCode(),  r2m.hashCode(), "r2md.hashCode()==r2m.hashCode()");
 
 		// Nested VariableSizeMappedRecords
-		Map<Integer, Map<String, String>> m23 = new TreeMap<Integer, Map<String, String>>();
-		m23.put(Integer.valueOf(2), r2md);
+		Map<Integer, Map<String, String>> m23 = new TreeMap<>();
+		m23.put(2, r2md);
 		MappedRecord r3 = factory.createMappedRecord("r3");
 		r3.putAll(map3);
-		m23.put(Integer.valueOf(3), r3);
+		m23.put(3, r3);
 		MappedRecord r23 = factory.createMappedRecord(SparseArrayRecord.NAME);
 		try {
 			r23.setRecordShortDescription("Nested Utilities");
@@ -167,19 +172,19 @@ public class TestRecord {
 		Assertions.assertEquals("sparsearray: {\n" + "\t2 = r2 (Record 2): {\n" + "\t\tA = \"a\"\n" + "\t\tC = \"c\"\n" + "\t}\n"
 		+ "\t3 = r3: {\n" + "\t\tA = \"a\"\n" + "\t\tB = \"b\"\n" + "\t\tC = \"c\"\n" + "\t}\n"
 		+ "}", r23.toString(), "r23");
-		Assertions.assertTrue(map23.equals(r23), "map23.equals(r23)");
+		Assertions.assertEquals(map23, r23, "map23.equals(r23)");
 		
-		Assertions.assertFalse(r23.equals(map23), "r23.equals(map23)");
+		Assertions.assertNotEquals(r23, map23, "r23.equals(map23)");
 		
-		Assertions.assertTrue(m23.equals(r23), "m23.equals(r23)");
+		Assertions.assertEquals(m23, r23, "m23.equals(r23)");
 		
-		Assertions.assertFalse(r23.equals(m23), "r23.equals(m23)");
+		Assertions.assertNotEquals(r23, m23, "r23.equals(m23)");
 		
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testVariableSizeMappedRecord() throws Throwable {
+	void testVariableSizeMappedRecord() throws Throwable {
 
 		// VariableSizeMappedRecord without description
 		MappedRecord r2m = factory.createMappedRecord("r2");
@@ -193,9 +198,9 @@ public class TestRecord {
 		Assertions.assertNull(r2m.get("B"), "r2.B");
 		Assertions.assertEquals("c", r2m.get("C"), "r2.C");
 		Assertions.assertEquals( 2,  r2m.size(), "r2m.size()");
-		Assertions.assertTrue(map2.equals(r2m), "map2.equals(r2m)");
-		
-		Assertions.assertFalse(r2m.equals(map2), "r2m.equals(map2)");
+        Assertions.assertEquals(map2, r2m, "map2.equals(r2m)");
+
+        Assertions.assertNotEquals(r2m, map2, "r2m.equals(map2)");
 		
 		if (USE_RECORDS_AS_KEYS)
 			Assertions.assertEquals( map2.hashCode(),  r2m.hashCode(), "map2.hashCode()==r2m.hashCode()");
@@ -208,16 +213,16 @@ public class TestRecord {
 		String r2mds = r2md.toString();
 		Assertions.assertTrue(r2mds.equals("r2 (Record 2): {\n" + "\tA = \"a\"\n" + "\tC = \"c\"\n" + "}")
 						|| r2mds.equals("r2 (Record 2): {\n" + "\tC = \"c\"\n" + "\tA = \"a\"\n" + "}"), "r2md");
-		
-		Assertions.assertTrue(map2.equals(r2md), "map2.equals(r2md)");
-		
-		Assertions.assertFalse(r2md.equals(map2), "r2md.equals(map2)");
+
+        Assertions.assertEquals(map2, r2md, "map2.equals(r2md)");
+
+        Assertions.assertNotEquals(r2md, map2, "r2md.equals(map2)");
 		
 		if (USE_RECORDS_AS_KEYS)
 			Assertions.assertEquals( map2.hashCode(),  r2md.hashCode(), "map2.hashCode()==r2md.hashCode()");
-		Assertions.assertTrue(r2md.equals(r2m), "r2md.equals(r2m)");
-		
-		Assertions.assertTrue(r2m.equals(r2md), "r2m.equals(r2md)");
+        Assertions.assertEquals(r2md, r2m, "r2md.equals(r2m)");
+
+        Assertions.assertEquals(r2m, r2md, "r2m.equals(r2md)");
 		
 		Assertions.assertEquals( r2m.hashCode(),  r2md.hashCode(), "r2m.hashCode()==r2md.hashCode()");
 
@@ -236,15 +241,15 @@ public class TestRecord {
 		Assertions.assertEquals("sparsearray: {\n" + "\t2 = r2 (Record 2): {\n" + "\t\tA = \"a\"\n" + "\t\tC = \"c\"\n" + "\t}\n"
 		+ "\t3 = r3: {\n" + "\t\tA = \"a\"\n" + "\t\tB = \"b\"\n" + "\t\tC = \"c\"\n" + "\t}\n"
 		+ "}", r23.toString(), "r23");
-		Assertions.assertTrue(map23.equals(r23), "map23.equals(r23)");
-		
-		Assertions.assertFalse(r23.equals(map23), "r23.equals(map23)");
+        Assertions.assertEquals(map23, r23, "map23.equals(r23)");
+
+        Assertions.assertNotEquals(r23, map23, "r23.equals(map23)");
 		
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testPreInitializedIndexedRecord() throws Throwable {
+	void testPreInitializedIndexedRecord() throws Throwable {
 
 		// VariableSizeIndexedRecord without description
 		IndexedRecord r2i = factory.createIndexedRecord("r2");
@@ -254,10 +259,10 @@ public class TestRecord {
 		Assertions.assertEquals("a", r2i.get(0), "r2i[0]");
 		Assertions.assertEquals("c", r2i.get(1), "r2i[1]");
 		Assertions.assertEquals( 2,  r2i.size(), "r2i.size()");
-		Assertions.assertTrue(list2.equals(r2i), "list2.equals(r2i)");
+        Assertions.assertEquals(list2, r2i, "list2.equals(r2i)");
 		
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r2i.equals(list2), "r2i.equals(list2)");
+            Assertions.assertEquals(r2i, list2, "r2i.equals(list2)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list2.hashCode(),  r2i.hashCode(), "list2.hashCode()==r2i.hashCode()");
@@ -268,16 +273,16 @@ public class TestRecord {
 		r2id.addAll(list2);
 		Assertions.assertEquals("org.openmdx.base.resource.spi.VariableSizeIndexedRecord", r2id.getClass().getName(), "r2id");
 		Assertions.assertEquals("r2 (Record 2): [\n" + "\t0: \"a\"\n" + "\t1: \"c\"\n" + "]", r2id.toString(), "r2id");
-		Assertions.assertTrue(list2.equals(r2id), "list2.equals(r2id)");
+        Assertions.assertEquals(list2, r2id, "list2.equals(r2id)");
 		
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r2id.equals(list2), "r2id.equals(list2)");
+            Assertions.assertEquals(r2id, list2, "r2id.equals(list2)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list2.hashCode(),  r2id.hashCode(), "list2.hashCode()==r2id.hashCode()");
-		Assertions.assertTrue(r2id.equals(r2i), "r2id.equals(r2i)");
-		
-		Assertions.assertTrue(r2i.equals(r2id), "r2i.equals(r2id)");
+        Assertions.assertEquals(r2id, r2i, "r2id.equals(r2i)");
+
+        Assertions.assertEquals(r2i, r2id, "r2i.equals(r2id)");
 		
 		Assertions.assertEquals( r2id.hashCode(),  r2i.hashCode(), "r2id.hashCode()==r2i.hashCode()");
 
@@ -293,19 +298,19 @@ public class TestRecord {
 		Assertions.assertEquals("r23 (Nested Utilities): [\n" + "\t0: r2 (Record 2): [\n" + "\t\t0: \"a\"\n" + "\t\t1: \"c\"\n"
 		+ "\t]\n" + "\t1: r3: [\n" + "\t\t0: \"a\"\n" + "\t\t1: \"b\"\n" + "\t\t2: \"c\"\n" + "\t]\n"
 		+ "]", r23.toString(), "r23");
-		Assertions.assertTrue(list23.equals(r23), "list23.equals(r23)");
+        Assertions.assertEquals(list23, r23, "list23.equals(r23)");
 		
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r23.equals(list23), "r23.equals(list23)");
+            Assertions.assertEquals(r23, list23, "r23.equals(list23)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
-		Assertions.assertTrue(l23.equals(r23), "l23.equals(r23)");
+        Assertions.assertEquals(l23, r23, "l23.equals(r23)");
 		
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r23.equals(l23), "r23.equals(l23)");
+            Assertions.assertEquals(r23, l23, "r23.equals(l23)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( l23.hashCode(),  r23.hashCode(), "l23.hashCode()==r23.hashCode()");
@@ -313,7 +318,7 @@ public class TestRecord {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testVariableSizeIndexedRecord() throws Throwable {
+	void testVariableSizeIndexedRecord() throws Throwable {
 
 		// VariableSizeIndexedRecord without description
 		IndexedRecord r2i = factory.createIndexedRecord("r2");
@@ -324,10 +329,10 @@ public class TestRecord {
 		Assertions.assertEquals("c", r2i.get(1), "r2i[1]");
 		Assertions.assertEquals( 2,  r2i.size(), "r2i.size()");
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(list2.equals(r2i), "list2.equals(r2i)");
+            Assertions.assertEquals(list2, r2i, "list2.equals(r2i)");
 			
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r2i.equals(list2), "r2i.equals(list2)");
+            Assertions.assertEquals(r2i, list2, "r2i.equals(list2)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list2.hashCode(),  r2i.hashCode(), "list2.hashCode()==r2i.hashCode()");
@@ -338,16 +343,16 @@ public class TestRecord {
 		r2id.addAll(list2);
 		Assertions.assertEquals("org.openmdx.base.resource.spi.VariableSizeIndexedRecord", r2id.getClass().getName(), "r2id");
 		Assertions.assertEquals("r2 (Record 2): [\n" + "\t0: \"a\"\n" + "\t1: \"c\"\n" + "]", r2id.toString(), "r2id");
-		Assertions.assertTrue(list2.equals(r2id), "list2.equals(r2id)");
+        Assertions.assertEquals(list2, r2id, "list2.equals(r2id)");
 		
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r2id.equals(list2), "r2id.equals(list2)");
+            Assertions.assertEquals(r2id, list2, "r2id.equals(list2)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list2.hashCode(),  r2id.hashCode(), "list2.hashCode()==r2id.hashCode()");
-		Assertions.assertTrue(r2id.equals(r2i), "r2id.equals(r2i)");
-		
-		Assertions.assertTrue(r2i.equals(r2id), "r2i.equals(r2id)");
+        Assertions.assertEquals(r2id, r2i, "r2id.equals(r2i)");
+
+        Assertions.assertEquals(r2i, r2id, "r2i.equals(r2id)");
 		
 		Assertions.assertEquals( r2id.hashCode(),  r2i.hashCode(), "r2id.hashCode()==r2i.hashCode()");
 
@@ -362,26 +367,26 @@ public class TestRecord {
 		Assertions.assertEquals("r23 (Nested Utilities): [\n" + "\t0: r2 (Record 2): [\n" + "\t\t0: \"a\"\n" + "\t\t1: \"c\"\n"
 		+ "\t]\n" + "\t1: r3: [\n" + "\t\t0: \"a\"\n" + "\t\t1: \"b\"\n" + "\t\t2: \"c\"\n" + "\t]\n"
 		+ "]", r23.toString(), "r23");
-		Assertions.assertTrue(list23.equals(r23), "list23.equals(r23)");
+        Assertions.assertEquals(list23, r23, "list23.equals(r23)");
 		
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r23.equals(list23), "r23.equals(list23)");
+            Assertions.assertEquals(r23, list23, "r23.equals(list23)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
-		Assertions.assertTrue(l23.equals(r23), "l23.equals(r23)");
+        Assertions.assertEquals(l23, r23, "l23.equals(r23)");
 		
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r23.equals(l23), "r23.equals(l23)");
+            Assertions.assertEquals(r23, l23, "r23.equals(l23)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( l23.hashCode(),  r23.hashCode(), "l23.hashCode()==r23.hashCode()");
 	}
 
 	@Test
-	public void testObjectArrayIndexedRecord() throws Throwable {
+	void testObjectArrayIndexedRecord() throws Throwable {
 
 		// FixedSizeIndexedRecord without description
 		IndexedRecord r2i = factory.asIndexedRecord("r2", null, array2);
@@ -389,15 +394,15 @@ public class TestRecord {
 		Assertions.assertEquals("r2: [\n" + "\t0: \"a\"\n" + "\t1: \"c\"\n" + "]", r2i.toString(), "r2i");
 		Object a2i = Records.nDimensionalArray(r2i);
 		Assertions.assertEquals("[Ljava.lang.String;", a2i.getClass().getName(), "a2i");
-		Assertions.assertTrue(Arrays.equals(array2, (Object[]) a2i), "Arrays.equals(array2,a2i)");
+        Assertions.assertArrayEquals(array2, (Object[]) a2i, "Arrays.equals(array2,a2i)");
 		
 		Assertions.assertEquals("a", r2i.get(0), "r2i[0]");
 		Assertions.assertEquals("c", r2i.get(1), "r2i[1]");
 		Assertions.assertEquals( 2,  r2i.size(), "r2i.size()");
-		Assertions.assertTrue(list2.equals(r2i), "list.equals(r2i)");
+        Assertions.assertEquals(list2, r2i, "list.equals(r2i)");
 		
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r2i.equals(list2), "r2i.equals(list2)");
+            Assertions.assertEquals(r2i, list2, "r2i.equals(list2)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list2.hashCode(),  r2i.hashCode(), "list2.hashCode()==r2i.hashCode()");
@@ -407,19 +412,19 @@ public class TestRecord {
 		Assertions.assertEquals("org.openmdx.base.resource.spi.FixedSizeIndexedRecord", r2id.getClass().getName(), "r2id");
 		Object a2id = Records.nDimensionalArray(r2id);
 		Assertions.assertEquals("[Ljava.lang.String;", a2id.getClass().getName(), "a2id");
-		Assertions.assertTrue(Arrays.equals(array2, (Object[]) a2id), "Arrays.equals(array2,a2id)");
+        Assertions.assertArrayEquals(array2, (Object[]) a2id, "Arrays.equals(array2,a2id)");
 		
 		Assertions.assertEquals("r2 (Record 2): [\n" + "\t0: \"a\"\n" + "\t1: \"c\"\n" + "]", r2id.toString(), "r2id");
-		Assertions.assertTrue(list2.equals(r2id), "list2.equals(r2id)");
+        Assertions.assertEquals(list2, r2id, "list2.equals(r2id)");
 		
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r2id.equals(list2), "r2id.equals(list2)");
+            Assertions.assertEquals(r2id, list2, "r2id.equals(list2)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list2.hashCode(),  r2id.hashCode(), "list2.hashCode()==r2id.hashCode()");
-		Assertions.assertTrue(r2id.equals(r2i), "r2id.equals(r2i)");
-		
-		Assertions.assertTrue(r2i.equals(r2id), "r2i.equals(r2id)");
+        Assertions.assertEquals(r2id, r2i, "r2id.equals(r2i)");
+
+        Assertions.assertEquals(r2i, r2id, "r2i.equals(r2id)");
 		
 		Assertions.assertEquals( r2id.hashCode(),  r2i.hashCode(), "r2id.hashCode()==r2i.hashCode()");
 
@@ -431,16 +436,16 @@ public class TestRecord {
 		Assertions.assertEquals("[[Ljava.lang.String;", a23.getClass().getName(), "a23");
 		Assertions.assertEquals( array23.length,  ((Object[]) a23).length, "array23.length==r23.length");
 		for (int i = 0; i < array23.length; i++) {
-			Assertions.assertTrue(Arrays.equals(array23[i], ((Object[][]) a23)[i]), "Arrays.equals(array23[" + i + "],a23[" + i + "])");
+            Assertions.assertArrayEquals(array23[i], ((Object[][]) a23)[i], "Arrays.equals(array23[" + i + "],a23[" + i + "])");
 			
 		}
 		Assertions.assertEquals("r23 (Nested Utilities): [\n" + "\t0: r2 (Record 2): [\n" + "\t\t0: \"a\"\n" + "\t\t1: \"c\"\n"
 		+ "\t]\n" + "\t1: r3: [\n" + "\t\t0: \"a\"\n" + "\t\t1: \"b\"\n" + "\t\t2: \"c\"\n" + "\t]\n"
 		+ "]", r23.toString(), "r23");
-		Assertions.assertTrue(list23.equals(r23), "list23.equals(r23)");
+        Assertions.assertEquals(list23, r23, "list23.equals(r23)");
 		
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r23.equals(list23), "r23.equals(list23)");
+            Assertions.assertEquals(r23, list23, "r23.equals(list23)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list23.hashCode(),  r23.hashCode(), "list23.hashCode()==r23.hashCode()");
@@ -455,13 +460,13 @@ public class TestRecord {
 		Assertions.assertEquals("r0: []", r0i.toString(), "r0i");
 		Object a0i = Records.nDimensionalArray(r0i);
 		Assertions.assertEquals("[Ljava.lang.Integer;", a0i.getClass().getName(), "a01");
-		Assertions.assertTrue(Arrays.equals(array0, (Integer[]) a0i), "Arrays.equals(array0,a0i)");
+        Assertions.assertArrayEquals(array0, (Integer[]) a0i, "Arrays.equals(array0,a0i)");
 		
 		Assertions.assertEquals( 0,  r0i.size(), "r0i.size()");
-		Assertions.assertTrue(list0.equals(r0i), "list0.equals(r0i)");
+        Assertions.assertEquals(list0, r0i, "list0.equals(r0i)");
 		
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r0i.equals(list0), "r0i.equals(list0)");
+            Assertions.assertEquals(r0i, list0, "r0i.equals(list0)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list0.hashCode(),  r0i.hashCode(), "list0.hashCode()==r0i.hashCode()");
@@ -471,13 +476,13 @@ public class TestRecord {
 		Assertions.assertEquals("org.openmdx.base.resource.spi.FixedSizeIndexedRecord", r1id.getClass().getName(), "r1id");
 		Object a1id = Records.nDimensionalArray(r1id);
 		Assertions.assertEquals("[Ljava.lang.Integer;", a1id.getClass().getName(), "a1id");
-		Assertions.assertTrue(Arrays.equals(array1, (Integer[]) a1id), "Arrays.equals(array1,a1id)");
+        Assertions.assertArrayEquals(array1, (Integer[]) a1id, "Arrays.equals(array1,a1id)");
 		
 		Assertions.assertEquals("r1 (Record 1): [\n" + "\t0: 99\n" + "]", r1id.toString(), "r1id");
-		Assertions.assertTrue(list1.equals(r1id), "list1.equals(r1id)");
+        Assertions.assertEquals(list1, r1id, "list1.equals(r1id)");
 		
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r1id.equals(list1), "r1id.equals(list1)");
+            Assertions.assertEquals(r1id, list1, "r1id.equals(list1)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list1.hashCode(),  r1id.hashCode(), "list1.hashCode()==r1id.hashCode()");
@@ -489,22 +494,22 @@ public class TestRecord {
 		Assertions.assertEquals("[[Ljava.lang.Integer;", a01.getClass().getName(), "a01");
 		Assertions.assertEquals( array01.length,  ((Object[]) a01).length, "array01.length==r01.length");
 		for (int i = 0; i < array01.length; i++) {
-			Assertions.assertTrue(Arrays.equals(array01[i], ((Integer[][]) a01)[i]), "Arrays.equals(array01[" + i + "],a01[" + i + "])");
+            Assertions.assertArrayEquals(array01[i], ((Integer[][]) a01)[i], "Arrays.equals(array01[" + i + "],a01[" + i + "])");
 			
 		}
 		Assertions.assertEquals("r01 (Nested Utilities): [\n" + "\t0: r0: []\n" + "\t1: r1 (Record 1): [\n" + "\t\t0: 99\n"
 		+ "\t]\n" + "]", r01.toString(), "r01");
-		Assertions.assertTrue(list01.equals(r01), "list01.equals(r01)");
+        Assertions.assertEquals(list01, r01, "list01.equals(r01)");
 		
 		if (REFLECTIVE_EQUALITY)
-			Assertions.assertTrue(r01.equals(list01), "r01.equals(list01)");
+            Assertions.assertEquals(r01, list01, "r01.equals(list01)");
 			
 		if (REFLECTIVE_EQUALITY)
 			Assertions.assertEquals( list01.hashCode(),  r01.hashCode(), "list01.hashCode()==r01.hashCode()");
 	}
 
 	@Test
-	public void testStringInternalization() {
+	void testStringInternalization() {
 		String s0 = "s";
 		s0 += "4711";
 		Assertions.assertNotSame(S4711, s0, "String internalization");
@@ -512,7 +517,7 @@ public class TestRecord {
 	}
 
 	@Test
-	public void testNewString() {
+	void testNewString() {
 		String s0 = "s";
 		s0 += "4711";
 		String s1 = new String(s0);
@@ -521,7 +526,7 @@ public class TestRecord {
 
 	@Test
  	@SuppressWarnings("unchecked")
-	public void testVariableSizedMappedRecordDeserialization() throws Throwable {
+	void testVariableSizedMappedRecordDeserialization() throws Throwable {
 		MappedRecord original = Records.getRecordFactory().createMappedRecord("tbs");
 		String key1 = "k";
 		key1 += "1";
@@ -534,14 +539,8 @@ public class TestRecord {
 		}
 		{
 			Object key = getKey(original, "v2");
-			if(isJava8Flavour()) {
-				// Java 8
-				Assertions.assertNotSame(key2, key);
-			} else {
-				// Java 21
-				Assertions.assertSame(key2, key);
-			}
- 			Assertions.assertSame(Integer.valueOf(17), key);
+			Assertions.assertNotSame(key2, key);
+ 			Assertions.assertSame(17, key);
 		}
 		ByteArrayOutputStream out0 = new ByteArrayOutputStream();
 		ObjectOutputStream out1 = new ObjectOutputStream(out0);
@@ -558,18 +557,11 @@ public class TestRecord {
 		}
 		{
 			Object key = getKey(copy, "v2");
-			if(isJava8Flavour()) {
-				// Java 8
-				Assertions.assertNotSame(key2, key);
-			} else {
-				// Java 21
-				Assertions.assertSame(key2, key);
-			}
-			Assertions.assertSame(Integer.valueOf(17), key);
+			Assertions.assertNotSame(key2, key);
+			Assertions.assertSame(17, key);
 		}
 	}
 
-	@Test
 	@SuppressWarnings("unchecked")
 	private static Object getKey(MappedRecord map, Object value) {
 		for (Map.Entry<?, ?> entry : (Set<Map.Entry<?, ?>>) map.entrySet()) {
@@ -583,11 +575,6 @@ public class TestRecord {
 	private Integer createIntegerInstance(int value) {
 		IntIdentity intIdentity = new IntIdentity(Void.class, value);
 		return (Integer) intIdentity.getKeyAsObject();
-	}
-
-	private boolean isJava8Flavour() {
-		String flavourVersion = Version.getFlavourVersion();
-		return "2".equals(flavourVersion) || "3".equals(flavourVersion);
 	}
 
 	// --------------------------------------------------------------------------
