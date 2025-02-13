@@ -60,33 +60,68 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
     /**
      * Adds an object to the container
      * 
-     * @param arguments there is always an odd number of arguments:
-     * ((REASSIGNABLE|PERSISTENT) identifier)+ value
+     * @param qualifierType
+     * @param object
+     * @param refObject
      */
     void refAdd(
-        Object... arguments 
+        QualifierType qualifierType,
+        Object object,
+        E refObject
+    );
+
+    /**
+     * Adds an object to the container
+     *
+     * @param qualifierList
+     */
+    void refAdd(
+        List<RefQualifier> qualifierList,
+        E refObject
     );
     
     /**
      * Retrieves an object from the container
      * 
-     * @param arguments there is always an even number of arguments:
-     * (({@link #REASSIGNABLE}|{@link #PERSISTENT}) identifier)+
-     * 
+     * @param qualifierType
+     * @param object
+     *
      * @return the object
      */
     E refGet(
-        Object... arguments 
+        QualifierType qualifierType,
+        Object object
+    );
+
+    /**
+     * Retrieves an object from the container
+     *
+     * @param qualifierList
+     *
+     * @return the object
+     */
+    E refGet(
+        List<RefQualifier> qualifierList
     );
 
     /**
      * Removes an object from the container
      * 
-     * @param arguments there is always an even number of arguments:
-     * (({@link #REASSIGNABLE}|{@link #PERSISTENT}) identifier)+
+     * @param qualifierType
+     * @param object
      */
     void refRemove(
-        Object... arguments 
+        QualifierType qualifierType,
+        Object object
+    );
+
+    /**
+     * Removes an object from the container
+     *
+     * @param qualifierList
+     */
+    void refRemove(
+        List<RefQualifier> qualifierList
     );
 
     /**
@@ -107,7 +142,7 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
     /**
      * Executes a query 
      * 
-     * @param query
+     * @param query the query to be executed
      * 
      * @return the result
      */
@@ -118,7 +153,7 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
     /**
      * Executes a query 
      * 
-     * @param query
+     * @param query the query to be executed
      * 
      * @return the result
      */

@@ -1,28 +1,28 @@
 /*
- * ==================================================================== 
+ * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
  * Description: RefObject_1 class
- * Owner:       the original authors. 
+ * Owner:       the original authors.
  * ====================================================================
- * 
+ *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,9 +36,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
@@ -79,6 +79,7 @@ import jakarta.resource.ResourceException;
 import jakarta.resource.cci.InteractionSpec;
 #endif
 
+import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.accessor.cci.Container_1_0;
@@ -134,13 +135,13 @@ class RefObject_1
 {
 
     /**
-     * Constructor 
+     * Constructor
      *
      * @param object
      * @param refClass
      */
     public RefObject_1(
-        ObjectView_1_0 object, 
+        ObjectView_1_0 object,
         RefClass refClass
     ) {
         try {
@@ -177,13 +178,13 @@ class RefObject_1
         "org.openmdx.kernel.exception.BasicException",
         "javax.resource.ResourceException"
     );
-    
+
     private transient RefObject metaObject = null;
     private transient ModelElement_1_0 refClassDef = null;
 
     private static final byte[] EMPTY_LARGE_OBJECT = new byte[] {};
     private static final Path ROOT_PATH = new Path(new String[] {});
-    
+
     /**
      * @serial
      */
@@ -195,7 +196,7 @@ class RefObject_1
     private RefClass refClass;
 
     /**
-     * Accessing a mandatory but uninitialized value leads to a 
+     * Accessing a mandatory but uninitialized value leads to a
      * {@code NullPointerException} in case of the following types:
      */
     private static final List<String> NULL_AVERSE_TYPES = Arrays.asList(
@@ -204,18 +205,18 @@ class RefObject_1
     	PrimitiveTypes.INTEGER,
     	PrimitiveTypes.LONG
     );
-    
+
     // -------------------------------------------------------------------------
     final private void assertStructuralFeature(
         ModelElement_1_0 elementDef
     ) throws ServiceException {
-        if (!this.object.getModel().isStructuralFeatureType(elementDef)) { 
+        if (!this.object.getModel().isStructuralFeatureType(elementDef)) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
                 "model element not of type " + ModelAttributes.STRUCTURAL_FEATURE,
                 new BasicException.Parameter("model element", elementDef)
-            ); 
+            );
         }
     }
 
@@ -224,9 +225,9 @@ class RefObject_1
         ModelElement_1_0 elementDef
     ) throws ServiceException {
         Model_1_0 model = this.object.getModel();
-        return 
-        !model.isOperationType(elementDef) && 
-        (model.isAttributeType(elementDef) || 
+        return
+        !model.isOperationType(elementDef) &&
+        (model.isAttributeType(elementDef) ||
             model.referenceIsStoredAsAttribute(elementDef));
     }
 
@@ -234,13 +235,13 @@ class RefObject_1
     final private void assertOperation(
         ModelElement_1_0 elementDef
     ) throws ServiceException {
-        if (!this.object.getModel().isOperationType(elementDef)) { 
+        if (!this.object.getModel().isOperationType(elementDef)) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
                 "model element not of type " + ModelAttributes.OPERATION,
                 new BasicException.Parameter("model element", elementDef)
-            ); 
+            );
         }
     }
 
@@ -273,26 +274,26 @@ class RefObject_1
                 featureName,
                 false
             );
-            if(feature == null) { 
+            if(feature == null) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_FOUND,
                     "feature not found",
                     new BasicException.Parameter("class name", this.refClass().refMofId()),
                     new BasicException.Parameter("feature", featureName)
-                ); 
+                );
             }
             return feature;
         }
     }
 
     // -------------------------------------------------------------------------
-    
+
     /**
-     * Remove the optional "Container" suffix from the qualifier name 
-     * 
+     * Remove the optional "Container" suffix from the qualifier name
+     *
      * @param qualifierName
-     * 
+     *
      * @return the qualifier name without "Container" suffix
      */
     private String removeContainerSuffix(
@@ -302,24 +303,24 @@ class RefObject_1
             qualifierName.substring(0, qualifierName.length() - "Container".length()) :
             qualifierName;
     }
-    
+
     private final Object getValue(
         ModelElement_1_0 featureDef,
         Object qualifier
     ) throws ServiceException {
-        
+
         Model_1_0 model = featureDef.getModel();
         boolean isReference = model.isReferenceType(featureDef);
         boolean isAttribute = model.isAttributeType(featureDef);
         boolean isReferenceStoredAsAttribute = isReference && model.referenceIsStoredAsAttribute(featureDef);
 
-        if (!isAttribute && !isReference) { 
+        if (!isAttribute && !isReference) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
                 "model element not of type " + ModelAttributes.STRUCTURAL_FEATURE,
                 new BasicException.Parameter("model element", featureDef)
-            ); 
+            );
         }
 
         ModelElement_1_0 type = this.getType(featureDef);
@@ -332,14 +333,14 @@ class RefObject_1
          * to get the required element from the collection.
          */
         if (isAttribute || isReferenceStoredAsAttribute) {
-            if (qualifier != null) { 
+            if (qualifier != null) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
                     "qualifier must be null in case of attributes and references stored as attribute",
                     new BasicException.Parameter("feature", featureDef),
                     new BasicException.Parameter("qualifier", qualifier)
-                ); 
+                );
             }
             Multiplicity multiplicity = ModelHelper.getMultiplicity(featureDef);
             Marshaller marshaller = this.refOutermostPackage().getMarshaller(qualifiedTypeName);
@@ -351,7 +352,7 @@ class RefObject_1
 							new NullPointerException(
 								"The primitive type's value is not yet set and returning null is not possible"
 							),
-							null, // cause 
+							null, // cause
 							BasicException.Code.DEFAULT_DOMAIN,
 							BasicException.Code.ILLEGAL_STATE,
 							new BasicException.Parameter("interaction-spec", this.object.getInteractionSpec()),
@@ -367,7 +368,7 @@ class RefObject_1
                 }
                 case OPTIONAL:
                     return marshaller.marshal(this.object.objGetValue(featureName));
-                case STREAM: 
+                case STREAM:
                     return this.object.objGetValue(featureName);
                 case LIST:
                     return new MarshallingList(marshaller, this.object.objGetList(featureName));
@@ -400,7 +401,7 @@ class RefObject_1
 
                 /**
                  * TODO multi-valued qualifier support 
-                 * 
+                 *
                  * Get qualifier of exposing association end. This qualifier is
                  * used to construct the reference filter:
                  */
@@ -425,7 +426,7 @@ class RefObject_1
                     )
                 );
                 return new RefContainer_1(
-                    this.refOutermostPackage(), 
+                    this.refOutermostPackage(),
                     container
                 );
             } else {
@@ -439,16 +440,16 @@ class RefObject_1
                 ) {
                     TransientContainerId containerId = rootPkg.refPersistenceManager().getContainerId(this);
                     return containerId == null ? null : rootPkg.refPersistenceManager().getObjectById(containerId.getParent());
-                } 
+                }
                 else {
                     if(
-                        (qualifier instanceof String) && 
+                        (qualifier instanceof String) &&
                         (((String) qualifier).indexOf(';') >= 0)
                     ) {
                         return rootPkg.marshal(
                             ((DataObjectManager_1_0) rootPkg.refDelegate()).getObjectById(
                                 this.refGetPath().getDescendant(
-                                    featureDef.getName(), 
+                                    featureDef.getName(),
                                     (String) qualifier
                                 )
                             )
@@ -457,7 +458,7 @@ class RefObject_1
                         Container_1_0 container = this.object.objGetContainer(featureName);
                         try {
                             return qualifier == null ? new RefContainer_1(
-                                rootPkg, 
+                                rootPkg,
                                 container
                              ) : rootPkg.marshal(
                                  container.get(qualifier.toString())
@@ -467,10 +468,10 @@ class RefObject_1
                             // in case of 0..1 multiplicity allow null as return value
                             //
                             if(
-                                e.getExceptionCode() != BasicException.Code.NOT_FOUND || 
+                                e.getExceptionCode() != BasicException.Code.NOT_FOUND ||
                                 !Multiplicity.OPTIONAL.code().equals(featureDef.getMultiplicity())
-                            ) { 
-                                throw new JmiServiceException(e, this); 
+                            ) {
+                                throw new JmiServiceException(e, this);
                             }
                         }
                     }
@@ -482,23 +483,23 @@ class RefObject_1
 
     // -------------------------------------------------------------------------
     final long getValue(
-        ModelElement_1_0 featureDef, 
-        Object value, 
+        ModelElement_1_0 featureDef,
+        Object value,
         long position
     ) throws ServiceException {
         boolean isAttribute = this.object.getModel().isAttributeType(featureDef);
-        if (!isAttribute) { 
+        if (!isAttribute) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
                 "model element not of type " + ModelAttributes.STRUCTURAL_FEATURE,
                 new BasicException.Parameter("model element", featureDef)
-            ); 
+            );
         }
         ModelElement_1_0 type = this.getType(featureDef);
         String qualifiedTypeName = type.getQualifiedName();
         String featureName = featureDef.getName();
-        
+
         // STREAM
         if (ModelHelper.getMultiplicity(featureDef).isStreamValued()) {
             try {
@@ -535,11 +536,11 @@ class RefObject_1
 
     // -------------------------------------------------------------------------
     final private void setValue(
-        ModelElement_1_0 featureDef, 
+        ModelElement_1_0 featureDef,
         Object value
     ) throws ServiceException {
         this.assertStructuralFeature(featureDef);
-        
+
         ModelElement_1_0 type = this.getType(featureDef);
         String qualifiedTypeName = type.getQualifiedName();
         String featureName = featureDef.getName();
@@ -552,13 +553,13 @@ class RefObject_1
             if (multiplicity.isSingleValued() || multiplicity.isStreamValued()) {
                 if (this.object.getModel().isClassType(type) && "org:openmdx:base:Aspect:core".equals(featureDef.getQualifiedName())){
                     this.object.objSetValue(
-                        featureName, 
+                        featureName,
                         this.refOutermostPackage().unmarshalUnchecked(value)
                     );
                 } else {
                     Marshaller marshaller = this.refOutermostPackage().getMarshaller(qualifiedTypeName);
                     this.object.objSetValue(
-                        featureName, 
+                        featureName,
                         marshaller.unmarshal(value)
                     );
                 }
@@ -570,20 +571,20 @@ class RefObject_1
             else {
                 Object newValue = null;
                 if (
-                        (value != null) && 
+                        (value != null) &&
                         (value.getClass().isArray())
                 ) {
                     newValue = new ArrayList<>();
                     for (int i = 0; i < Array.getLength(value); i++) {
-                        final Object element = 
-                            (value instanceof short[]) ?  Short.valueOf(((short[]) value)[i]) : 
-                            (value instanceof int[]) ? Integer.valueOf(((int[]) value)[i]) : 
-                            (value instanceof long[]) ? Long.valueOf(((long[]) value)[i]) : 
-                            (value instanceof boolean[])  ? Boolean.valueOf(((boolean[]) value)[i]) : 
+                        final Object element =
+                            (value instanceof short[]) ?  Short.valueOf(((short[]) value)[i]) :
+                            (value instanceof int[]) ? Integer.valueOf(((int[]) value)[i]) :
+                            (value instanceof long[]) ? Long.valueOf(((long[]) value)[i]) :
+                            (value instanceof boolean[])  ? Boolean.valueOf(((boolean[]) value)[i]) :
                             ((Object[]) value)[i];
                         ((List) newValue).add(element);
                     }
-                } 
+                }
                 else {
                     newValue = value;
                 }
@@ -595,15 +596,15 @@ class RefObject_1
                             if (newValue instanceof Collection) {
                                 int i = 0;
                                 for(
-                                        Iterator j = ((Collection) newValue).iterator(); 
+                                        Iterator j = ((Collection) newValue).iterator();
                                         j.hasNext();
                                 ) {
                                     ((SortedMap) values).put(
-                                        Integer.valueOf(i++), 
+                                        Integer.valueOf(i++),
                                         j.next()
                                     );
                                 }
-                            } 
+                            }
                             else {
                                 ((SortedMap) values).putAll((SortedMap) newValue);
                             }
@@ -613,7 +614,7 @@ class RefObject_1
                             target.clear();
                             target.addAll((Collection) newValue);
                         } break;
-                        default: 
+                        default:
                             throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.ASSERTION_FAILURE,
@@ -647,17 +648,17 @@ class RefObject_1
         long length
     ) throws ServiceException {
         boolean isAttribute = this.object.getModel().isAttributeType(featureDef);
-        if (!isAttribute) { 
+        if (!isAttribute) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
                 "model element not of type " + ModelAttributes.STRUCTURAL_FEATURE,
                 new BasicException.Parameter("model element", featureDef)
-            ); 
+            );
         }
 
         ModelElement_1_0 type = this.getType(featureDef);
-        
+
         // STREAM
         if (ModelHelper.getMultiplicity(featureDef).isStreamValued()) {
             String qualifiedTypeName = type.getQualifiedName();
@@ -666,7 +667,7 @@ class RefObject_1
                 this.object.objSetValue(
                     featureName,
                     CharacterLargeObjects.valueOf(
-                        (java.io.Reader)newValue, 
+                        (java.io.Reader)newValue,
                         CharacterLargeObjects.asLength(length)
                     )
                 );
@@ -674,7 +675,7 @@ class RefObject_1
                 this.object.objSetValue(
                     featureName,
                     BinaryLargeObjects.valueOf(
-                        (java.io.InputStream) newValue, 
+                        (java.io.InputStream) newValue,
                         BinaryLargeObjects.asLength(length)
                     )
                 );
@@ -687,7 +688,7 @@ class RefObject_1
                     new BasicException.Parameter("type", type)
                 );
             }
-        } 
+        }
         else {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -704,7 +705,7 @@ class RefObject_1
      * args contains one element which is of type RefStruct
      */
     final private Object invokeOperation(
-        ModelElement_1_0 featureDef, 
+        ModelElement_1_0 featureDef,
         List<?> args
     ) throws ServiceException {
         SysLog.log(Level.FINEST, "Sys|refMofId={0},featureDef={1}|args={2}", this.object.jdoGetObjectId(), featureDef, args);
@@ -714,41 +715,41 @@ class RefObject_1
         String qualifiedNameResultType = null;
         String qualifiedNameInParamType = null;
         for (
-            Iterator<?> i = featureDef.objGetList("content").iterator(); 
+            Iterator<?> i = featureDef.objGetList("content").iterator();
             i.hasNext();
         ) {
             ModelElement_1_0 paramDef = this.object.getModel().getElement(i.next());
             ModelElement_1_0 paramDefType = this.getType(paramDef);
             if ("in".equals(paramDef.getName())) {
                 qualifiedNameInParamType = paramDefType.getQualifiedName();
-            } 
+            }
             else if ("result".equals(paramDef.getName())) {
                 qualifiedNameResultType = paramDefType.getQualifiedName();
             }
         }
-        if (qualifiedNameInParamType == null) { 
+        if (qualifiedNameInParamType == null) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
                 "no parameter with name \"in\" defined for operation",
                 new BasicException.Parameter("operation", featureDef)
-            ); 
+            );
         }
-        if (qualifiedNameResultType == null) { 
+        if (qualifiedNameResultType == null) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
                 "no parameter with name \"result\" defined for operation",
                 new BasicException.Parameter("operation", featureDef)
-            ); 
+            );
         }
         RefPackage_1_0 refPackage = this.refOutermostPackage();
         RefStruct_1_0 input = (RefStruct_1_0) (
             args.size() == 1 && args.get(0) instanceof RefStruct_1_0 ? args.get(0) :
             this.refOutermostPackage().refCreateStruct(qualifiedNameInParamType,args)
-        );   
+        );
         RefStruct_1_0 output = (RefStruct_1_0) refPackage.refCreateStruct(
-            qualifiedNameResultType, 
+            qualifiedNameResultType,
             (List<?>)null // output record will be updated by method invocation
         );
         try {
@@ -768,16 +769,16 @@ class RefObject_1
 
     /**
      * Tells, whether an operation must be invoked immediately or not
-     * 
+     *
      * @return {@code SYNC_SEND_RECEIVE} if an operation must be invoked immediately
-     * 
+     *
      * @see InteractionSpec.SYNC_SEND_RECEIVE
      * @see InteractionSpec.SYNC_SEND
      */
     private int getInteractionVerb(
         boolean query
     ) {
-        return !query && this.jdoGetPersistenceManager().currentUnitOfWork().getOptimistic() ? 
+        return !query && this.jdoGetPersistenceManager().currentUnitOfWork().getOptimistic() ?
             InteractionSpec.SYNC_SEND :
             InteractionSpec.SYNC_SEND_RECEIVE;
     }
@@ -792,7 +793,7 @@ class RefObject_1
      * feature must be attribute or reference stored as attribute
      */
     final private Object refGetValue(
-        String featureName, 
+        String featureName,
         int index
     ) {
         Object value = null;
@@ -804,10 +805,10 @@ class RefObject_1
         if (value instanceof Collection) {
             if (value instanceof List) {
                 return ((List<?>) value).get(index);
-            } 
+            }
             else if (value instanceof SortedMap) {
                 return ((SortedMap<Integer,?>) value).get(Integer.valueOf(index));
-            } 
+            }
             else {
                 throw new JmiServiceException(
                     this,
@@ -839,7 +840,7 @@ class RefObject_1
 
     // -------------------------------------------------------------------------
     final private Object refGetValue(
-        String featureName, 
+        String featureName,
         String qualifier
     ) {
         try {
@@ -850,9 +851,9 @@ class RefObject_1
             if (map instanceof RefContainer<?>){
                 RefContainer<?> container = (RefContainer<?>)map;
                 return
-                    qualifier.startsWith("!") ? container.refGet(RefContainer.PERSISTENT, qualifier.substring(1)) :
-                    qualifier.startsWith("*") ? container.refGet(RefContainer.REASSIGNABLE, qualifier.substring(1)) :
-                    container.refGet(RefContainer.REASSIGNABLE, qualifier); 
+                    qualifier.startsWith("!") ? container.refGet(QualifierType.PERSISTENT, qualifier.substring(1)) :
+                    qualifier.startsWith("*") ? container.refGet(QualifierType.REASSIGNABLE, qualifier.substring(1)) :
+                    container.refGet(QualifierType.REASSIGNABLE, qualifier);
             }
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -871,7 +872,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     @Override
     final public Object refGetValue(
-        String featureName, 
+        String featureName,
         Object qualifier
     ) {
         try {
@@ -879,7 +880,7 @@ class RefObject_1
             ModelElement_1_0 featureDef = this.getFeature(featureName);
             Object value = null;
             if (
-                    model.isAttributeType(featureDef) || 
+                    model.isAttributeType(featureDef) ||
                     model.referenceIsStoredAsAttribute(featureDef)
             ) {
                 // TODO: check modeled qualifier type instead of qualifier class
@@ -893,15 +894,15 @@ class RefObject_1
                         ((Integer) IntegerMarshaller.NORMALIZE.unmarshal(qualifier)).intValue()
                     );
                 }
-            } 
+            }
             else {
                 value = this.getValue(featureDef, qualifier);
             }
             return value;
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
-        } 
+        }
         catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -916,10 +917,10 @@ class RefObject_1
         try {
             ModelElement_1_0 featureDef = this.getFeature(featureName);
             return this.getValue(featureDef, value, position);
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
-        } 
+        }
         catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -927,8 +928,8 @@ class RefObject_1
 
     // -------------------------------------------------------------------------
     final protected void refSetValue(
-        String featureName, 
-        int index, 
+        String featureName,
+        int index,
         Object value
     ) {
         try {
@@ -942,14 +943,14 @@ class RefObject_1
                     List<Object> valuesAsList = (List<Object>) values;
                     if (valuesAsList.size() == index) {
                         valuesAsList.add(value);
-                    } 
+                    }
                     else {
                         valuesAsList.set(index, value);
                     }
-                } 
+                }
                 else if (values instanceof SortedMap) {
                     ((SortedMap<Integer,Object>) values).put(Integer.valueOf(index), value);
-                } 
+                }
                 else {
                     throw new JmiServiceException(
                         this,
@@ -977,10 +978,10 @@ class RefObject_1
                     new BasicException.Parameter("values", values)
                 );
             }
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
-        } 
+        }
         catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -995,10 +996,10 @@ class RefObject_1
         try {
             ModelElement_1_0 featureDef = this.getFeature(featureName);
             this.setValue(featureDef, newValue, length);
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
-        } 
+        }
         catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -1006,14 +1007,14 @@ class RefObject_1
 
     // -------------------------------------------------------------------------
     final protected void refAddValue(
-        String featureName, 
-        int index, 
+        String featureName,
+        int index,
         Object value
     ) {
         Object values = null;
         try {
             values = this.getValue(this.getFeature(featureName), null);
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -1034,28 +1035,32 @@ class RefObject_1
     @SuppressWarnings({
     })
     final protected void refAddValue(
-        String featureName, 
+        String featureName,
         Object value
     ) {
         Object values = null;
         try {
             values = this.getValue(this.getFeature(featureName), null);
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
         }
         if (values instanceof List || values instanceof Set) {
             ((Collection<Object>) values).add(value);
-        } 
+        }
         else if (value instanceof SortedMap) {
             ((SortedMap<Integer,Object>) values).put(
                 Integer.valueOf(((Integer) ((SortedMap<?,?>) values).lastKey()).intValue() + 1),
                 value
             );
-        } 
+        }
         else if (values instanceof RefContainer && value instanceof RefObject_1_0) {
-            ((RefContainer)values).refAdd(RefContainer.REASSIGNABLE, org.openmdx.base.naming.TransactionalSegment.getClassicRepresentationOfNewInstance(), value);
-        } 
+            ((RefContainer)values).refAdd(
+                    QualifierType.REASSIGNABLE,
+                    org.openmdx.base.naming.TransactionalSegment.getClassicRepresentationOfNewInstance(),
+                    (RefObject) value
+            );
+        }
         else {
             throw new JmiServiceException(
                 this,
@@ -1071,22 +1076,22 @@ class RefObject_1
     // -------------------------------------------------------------------------
     @SuppressWarnings({})
     final protected void refRemoveValue(
-        String featureName, 
+        String featureName,
         int index
     ) {
         Object values = null;
         try {
             values = this.getValue(this.getFeature(featureName), null);
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
         }
         if (values instanceof List) {
             ((List<Object>) values).remove(index);
-        } 
+        }
         else if (values instanceof SortedMap) {
             ((SortedMap<Integer,Object>) values).remove(Integer.valueOf(index));
-        } 
+        }
         else {
             throw new JmiServiceException(
                 this,
@@ -1109,19 +1114,19 @@ class RefObject_1
         boolean considerSubtypes
     ) {
         try {
-            if (!this.object.getModel().isClassType(objType)) { 
+            if (!this.object.getModel().isClassType(objType)) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
                     "objType must be a class type",
                     new BasicException.Parameter("objType", objType)
-                ); 
+                );
             }
             return this.object.getModel().isInstanceof(this.object, objType);
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
-        } 
+        }
         catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -1139,8 +1144,8 @@ class RefObject_1
     final public RefFeatured refImmediateComposite(
     ) {
         Path path = this.refGetPath();
-        return path == null || path.size() == 1 ? 
-            null : 
+        return path == null || path.size() == 1 ?
+            null :
             this.refOutermostPackage().refObject(path.getPrefix(path.size() - 2));
     }
 
@@ -1159,7 +1164,7 @@ class RefObject_1
             ReducedJDOHelper.getPersistenceManager(this.object).deletePersistent(this.object);
         } catch(RuntimeException exception) {
             throw new JmiServiceException(exception);
-        } 
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -1174,10 +1179,10 @@ class RefObject_1
         try {
             Object value = this.getValue(((RefMetaObject_1) feature).getElementDef(), null);
             return value;
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
-        } 
+        }
         catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -1190,10 +1195,10 @@ class RefObject_1
     ) {
         try {
             return this.getValue(this.getFeature(featureName), null);
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
-        } 
+        }
         catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -1202,15 +1207,15 @@ class RefObject_1
     // -------------------------------------------------------------------------
     @Override
     final public void refSetValue(
-        RefObject feature, 
+        RefObject feature,
         Object value
     ) {
         try {
             this.setValue(((RefMetaObject_1) feature).getElementDef(), value);
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
-        } 
+        }
         catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -1219,7 +1224,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     @Override
     final public void refSetValue(
-        String featureName, 
+        String featureName,
         Object value
     ) {
         try {
@@ -1241,10 +1246,10 @@ class RefObject_1
                 (ModelElement_1_0) requestedOperation,
                 args
             );
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
-        } 
+        }
         catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -1253,11 +1258,11 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /**
      * Convert a ServiceException to a RefException
-     * 
+     *
      * @param exception
-     * 
+     *
      * @return the corresponding RefException
-     * 
+     *
      * @exception JmiServiceException in case of conversion failure
      */
     private RefException toRefException(
@@ -1281,7 +1286,7 @@ class RefObject_1
             // Try to map to a user-defined exception.
             //
             return this.refOutermostPackage().refMapping().getExceptionConstructor(
-                exceptionType, 
+                exceptionType,
                 this.refImmediatePackage().refMofId()
             ).newInstance(
                 new ServiceException(cursor)
@@ -1295,14 +1300,14 @@ class RefObject_1
             throw new JmiServiceException(exceptionStack, this);
         }
     }
-    
+
     final public Object refInvokeOperation(
-        String operationName, 
+        String operationName,
         List args
     ) throws RefException {
         try {
             return this.invokeOperation(
-                this.getFeature(operationName), 
+                this.getFeature(operationName),
                 args
             );
         } catch (ServiceException exception) {
@@ -1327,7 +1332,7 @@ class RefObject_1
                 );
             }
             return this.metaObject;
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -1368,17 +1373,17 @@ class RefObject_1
         );
         if (violationSource == null) {
             return null;
-        } 
+        }
         else {
             String thisElement = this.object.jdoGetObjectId().toString();
             JmiException[] violationTarget = new JmiException[violationSource.size()];
             Iterator<ServiceException> violationIterator = violationSource.iterator();
             for (int i = 0; i < violationTarget.length; i++) {
                 ServiceException serviceException = violationIterator.next();
-                boolean thisElementInError = 
-                    thisElement != null && 
+                boolean thisElementInError =
+                    thisElement != null &&
                     thisElement.equals(this.getElementInError(serviceException));
-                violationTarget[i] = thisElementInError 
+                violationTarget[i] = thisElementInError
                 ? new JmiServiceException(serviceException, this)
                 : new JmiServiceException(serviceException);
             }
@@ -1429,7 +1434,7 @@ class RefObject_1
                 false).keySet()
             );
             return fetchGroup;
-        } 
+        }
         catch (ServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -1439,13 +1444,13 @@ class RefObject_1
     @Override
     final public void refInitialize(
         boolean setRequiredToNull,
-        boolean setOptionalToNull, 
+        boolean setOptionalToNull,
         boolean emptyMultivalued
     ) {
         try {
             ModelElement_1_0 elementDef = ((RefMetaObject_1)this.refMetaObject()).getElementDef();
             for (
-                Iterator<ModelElement_1_0> i = elementDef.objGetMap("allFeature").values().iterator(); 
+                Iterator<ModelElement_1_0> i = elementDef.objGetMap("allFeature").values().iterator();
                 i.hasNext();
             ) {
                 ModelElement_1_0 featureDef = i.next();
@@ -1473,20 +1478,20 @@ class RefObject_1
                                         this.setValue(featureDef, Boolean.FALSE);
                                     } else if (PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
                                         this.setValue(
-                                            featureDef, 
+                                            featureDef,
                                             DateTimeMarshaller.NORMALIZE.marshal
                                             (org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(new Date()))
                                         );
                                     } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
                                         this.setValue(
-                                            featureDef, 
+                                            featureDef,
                                             DateMarshaller.NORMALIZE.marshal("20000101")
                                         );
                                     } else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
                                         this.setValue(featureDef, URI.create("xri://+null"));
                                     } else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
                                         this.setValue(
-                                            featureDef, 
+                                            featureDef,
                                             DurationMarshaller.NORMALIZE.marshal("P0M")
                                         );
                                     } else if (PrimitiveTypes.SHORT .equals(qualifiedTypeName)) {
@@ -1508,7 +1513,7 @@ class RefObject_1
                                     } else if(
                                         "org:omg:model1:PrimitiveType".equals(qualifiedTypeName)
                                     ) {
-                                        SysLog.detail("Initialization of user defined primitive types not supported", featureDef);  
+                                        SysLog.detail("Initialization of user defined primitive types not supported", featureDef);
                                     } else {
                                         throw new UnsupportedOperationException(
                                             "unsupported type " + type
@@ -1529,13 +1534,13 @@ class RefObject_1
                                 values.clear();
                             }
                         } break;
-                        case SPARSEARRAY: { 
+                        case SPARSEARRAY: {
                             final SortedMap<Integer, Object> values = this.object.objGetSparseArray(featureDef.getName());
                             if(emptyMultivalued) {
                                 values.clear();
                             }
                         } break;
-                        case MAP: { 
+                        case MAP: {
                             final Map values = this.object.objGetMap(featureDef.getName());
                             if(emptyMultivalued) {
                                 values.clear();
@@ -1561,23 +1566,23 @@ class RefObject_1
         try {
             if (qualifier == null) {
                 this.refAddValue(featureName, value);
-            } 
+            }
             else {
                 Object container = this.getValue(
                     this.getFeature(featureName),
                     null
                 );
                 if (
-                        (container instanceof List) && 
+                        (container instanceof List) &&
                         (qualifier instanceof Number)
                 ) {
                     ((List<Object>) container).add(
                         ((Number) qualifier).intValue(),
                         value
                     );
-                } 
+                }
                 else if (
-                        (container instanceof RefContainer_1) && 
+                        (container instanceof RefContainer_1) &&
                         (value instanceof RefObject_1_0)
                 ) {
                     RefContainer_1 refContainer = (RefContainer_1) container;
@@ -1604,7 +1609,7 @@ class RefObject_1
             }
         } catch (ServiceException e) {
             throw new JmiServiceException(e, this);
-        } 
+        }
         catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -1619,13 +1624,13 @@ class RefObject_1
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_1#refSetOutermostPackage(javax.jmi.reflect.RefPackage)
      */
     private void refSetOutermostPackage(
         RefPackage newPackage
     ) {
-        RefRootPackage_1 oldPackage = this.refOutermostPackage(); 
+        RefRootPackage_1 oldPackage = this.refOutermostPackage();
         if (oldPackage != newPackage) {
             oldPackage.unregister(this.object);
             this.refClass = newPackage.refClass(
@@ -1635,7 +1640,7 @@ class RefObject_1
                 ((Marshaller)newPackage).marshal(this.object);
             }  catch (ServiceException exception) {
                 throw new JmiServiceException(exception);
-            }            
+            }
         }
     }
 
@@ -1647,7 +1652,7 @@ class RefObject_1
     /**
      * Save the data of the <tt>Object_1_0</tt> instance to a stream (that is,
      * serialize it).
-     * 
+     *
      * @serialData The objects data
      */
     private synchronized void writeObject(
@@ -1687,8 +1692,8 @@ class RefObject_1
     public boolean equals(
         Object that
     ) {
-        return 
-        that instanceof RefObject_1_0 && 
+        return
+        that instanceof RefObject_1_0 &&
         this.object.equals(((RefObject_1_0) that).refDelegate());
     }
 
@@ -1710,13 +1715,13 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object,
      *      int[])
      */
     @Override
     public void jdoCopyFields(
-        Object other, 
+        Object other,
         int[] fieldNumbers
     ) {
         throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
@@ -1725,7 +1730,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer,
      *      java.lang.Object)
      */
@@ -1740,7 +1745,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(java.lang.Object)
      */
     @Override
@@ -1753,13 +1758,13 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier,
      *      java.lang.Object)
      */
     @Override
     public void jdoCopyKeyFieldsToObjectId(
-        ObjectIdFieldSupplier fm, 
+        ObjectIdFieldSupplier fm,
         Object oid
     ) {
         throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
@@ -1768,7 +1773,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoGetObjectId()
      */
     @Override
@@ -1780,7 +1785,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoGetPersistenceManager()
      */
     @Override
@@ -1792,7 +1797,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoGetTransactionalObjectId()
      */
     @Override
@@ -1804,7 +1809,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
      */
     @Override
@@ -1816,7 +1821,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDeleted()
      */
     @Override
@@ -1828,7 +1833,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDetached()
      */
     @Override
@@ -1840,7 +1845,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDirty()
      */
     @Override
@@ -1852,7 +1857,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoIsNew()
      */
     @Override
@@ -1864,7 +1869,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoIsPersistent()
      */
     @Override
@@ -1876,7 +1881,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoIsTransactional()
      */
     @Override
@@ -1888,7 +1893,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoMakeDirty(java.lang.String)
      */
     @Override
@@ -1901,13 +1906,13 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager,
      *      java.lang.Object)
      */
     @Override
     public PersistenceCapable jdoNewInstance(
-        StateManager sm, 
+        StateManager sm,
         Object oid
     ) {
         throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
@@ -1916,7 +1921,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager)
      */
     @Override
@@ -1929,7 +1934,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance()
      */
     @Override
@@ -1941,7 +1946,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance(java.lang.Object)
      */
     @Override
@@ -1954,7 +1959,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideField(int)
      */
     @Override
@@ -1967,7 +1972,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideFields(int[])
      */
     @Override
@@ -1980,7 +1985,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceField(int)
      */
     @Override
@@ -1993,7 +1998,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFields(int[])
      */
     @Override
@@ -2006,7 +2011,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFlags()
      */
     @Override
@@ -2018,7 +2023,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
      */
     @Override
@@ -2051,5 +2056,5 @@ class RefObject_1
             );
         }
     }
-    
+
 }

@@ -53,6 +53,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
+import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.collection.MarshallingConsumer;
@@ -99,22 +100,20 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
             // This typed association end interface has been prepended 
             // by the Jmi1ObjectInvocationHandler
             //
-            if("add".equals(methodName)) {
-                this.refDelegate.refAdd(
-                    (Object[]) this.marshaller.unmarshal(args)
-                );
-                return null;
-            } else if("get".equals(methodName)) {
-                return this.marshaller.marshal(
-                    this.refDelegate.refGet(
-                        (Object[]) this.marshaller.unmarshal(args)
-                    )
-                );
-            } else if("remove".equals(methodName)) {
-                this.refDelegate.refRemove(
-                    (Object[]) this.marshaller.unmarshal(args)
-                );
-                return null;
+            switch (methodName) {
+                case "add" -> {
+                    this.refDelegate.refAdd((QualifierType) args[0], args[1], null);
+                    return null;
+                }
+                case "get" -> {
+                    return this.marshaller.marshal(
+                            this.refDelegate.refGet((QualifierType) args[0], args[1])
+                    );
+                }
+                case "remove" -> {
+                    this.refDelegate.refRemove((QualifierType) args[0], args[1]);
+                    return null;
+                }
             }
         } 
         else if (declaringClass == Container.class) {
