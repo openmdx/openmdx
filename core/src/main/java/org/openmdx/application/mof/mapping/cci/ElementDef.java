@@ -62,7 +62,6 @@ public abstract class ElementDef {
     this.qualifiedName = qualifiedName;
     this.annotation = annotation;
     this.stereotype = stereotype;
-    this.isDeprecatedAnnotation = this.annotation != null && this.annotation.contains("@deprecated");
   }
 
   //-------------------------------------------------------------------------
@@ -106,7 +105,7 @@ public abstract class ElementDef {
 
   //-------------------------------------------------------------------------
   public boolean isDeprecatedAnnotation() {
-    return this.isDeprecatedAnnotation;
+    return this.annotation != null && this.annotation.contains("@deprecated");
   }
 
   //-------------------------------------------------------------------------
@@ -123,6 +122,4 @@ public abstract class ElementDef {
   private final String qualifiedName;
   private final String annotation;
   private Set stereotype = null;
-  private final boolean isDeprecatedAnnotation;
-
 }

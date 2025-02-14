@@ -78,9 +78,7 @@ allprojects {
     tasks.withType<JavaCompile> {
         sourceCompatibility = runtimeCompatibility.majorVersion
         targetCompatibility = runtimeCompatibility.majorVersion
-        if (!runtimeCompatibility.isJava8) {
-            options.release = runtimeCompatibility.majorVersion.toInt()
-        }
+        options.release = runtimeCompatibility.majorVersion.toInt()
         options.generatedSourceOutputDirectory = layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main").get().asFile
         options.annotationProcessorPath = configurations.annotationProcessor.get()
         options.compilerArgs.add("-Xplugin:Manifold")
