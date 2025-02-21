@@ -78,6 +78,7 @@ import org.openmdx.base.collection.MarshallingSpliterator;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.naming.TransactionalSegment;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
@@ -620,14 +621,7 @@ public class RefContainer_1
      */
     @Override
     public void refAdd(List<RefQualifier> qualifierList, RefObject_1_0 refObject) {
-        final RefQualifier qualifier = qualifierList.get(0);
-        // TODO: KJDD temp
-        final Object[] arguments = {qualifier.qualifierType, qualifier.qualifierValue};
-        int objectIndex = arguments.length - 1;
-        add(
-                RefContainer_1.toQualifier(objectIndex, arguments),
-                (RefObject_1_0) arguments[objectIndex]
-        );
+        add(RefContainer_1.toQualifier(qualifierList), refObject);
     }
 
     /* (non-Javadoc)
@@ -647,16 +641,7 @@ public class RefContainer_1
      */
     @Override
     public RefObject_1_0 refGet(List<RefQualifier> qualifierList) {
-        final RefQualifier qualifier = qualifierList.get(0);
-        return get(
-                RefContainer_1.toQualifier(
-                        2,
-                        new Object[] {
-                                qualifier.qualifierType,
-                                qualifier.qualifierValue
-                        }
-                )
-        );
+        return get(RefContainer_1.toQualifier(qualifierList));
     }
 
     /* (non-Javadoc)
@@ -684,16 +669,7 @@ public class RefContainer_1
      */
     @Override
     public void refRemove(List<RefQualifier> qualifierList) {
-//        RefObject_1_0 object = this.get(RefContainer_1.toQualifier(arguments.length, arguments));
-        final RefQualifier qualifier = qualifierList.get(0);
-        RefObject_1_0 object = this.get(RefContainer_1.toQualifier(
-                2,
-                new Object[] {
-                        qualifier.qualifierType,
-                        qualifier.qualifierValue
-                }
-            )
-        );
+        RefObject_1_0 object = refGet(qualifierList);
         if(object != null) {
             if(JDOHelper.isPersistent(object)) {
                 object.refDelete();
@@ -701,8 +677,6 @@ public class RefContainer_1
                 this.remove(object);
             }
         }
-
-
     }
 
     /* (non-Javadoc)
@@ -721,14 +695,12 @@ public class RefContainer_1
     /**
      * Create a qualifier from its sub-segment specification array
      *
-     * @param size
-     * @param arguments
+     * @param qualifierList the list of `RefQualifier`s to convert to its string representation
      *
      * @return the corresponding qualifier
      */
     static String toQualifier(
-        int size,
-        Object[] arguments
+        List<RefQualifier> qualifierList
     ){
         switch(size) {
             case 0:
@@ -760,6 +732,29 @@ public class RefContainer_1
                 return qualifier.toString();
             }
         }
+        if (qualifierList.isEmpty())
+            return null;
+
+        final Iterator<RefQualifier> iterator = qualifierList.iterator();
+        final RefQualifier firstQualifier = iterator.next();
+
+        StringBuilder qualifier = new StringBuilder(
+                firstQualifier.qualifierType == PERSISTENT ? "!" : ""
+        ).append(
+                firstQualifier.qualifierValue == null ?
+                        TransactionalSegment.getClassicRepresentationOfNewInstance() :
+                        String.valueOf(firstQualifier.qualifierValue)
+        );
+
+        if (iterator.hasNext()) {
+            final RefQualifier next = iterator.next();
+            qualifier.append(
+                    next.qualifierType == PERSISTENT ? '!' : '*'
+            ).append(
+                    next.qualifierValue
+            );
+        }
+        return qualifier.toString();
     }
 
     private QueryComponents toQueryComponents (
