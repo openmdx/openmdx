@@ -100,20 +100,30 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
             // This typed association end interface has been prepended 
             // by the Jmi1ObjectInvocationHandler
             //
+            final Object[] arguments = (Object[]) this.marshaller.unmarshal(args);
             switch (methodName) {
                 case "add" -> {
                     this.refDelegate.refAdd((QualifierType) args[0], args[1], null);
                     return null;
                 }
                 case "get" -> {
+                        this.refDelegate.refAdd(
+                                AbstractJmi1ContainerInvocationHandler.getQualifierList(arguments),
+                                arguments[arguments.length - 1]
+                        );
                     return this.marshaller.marshal(
-                            this.refDelegate.refGet((QualifierType) args[0], args[1])
+                            this.refDelegate.refGet(
+                                    AbstractJmi1ContainerInvocationHandler.getQualifierList(arguments)
+                            )
                     );
                 }
                 case "remove" -> {
                     this.refDelegate.refRemove((QualifierType) args[0], args[1]);
                     return null;
                 }
+                        this.refDelegate.refRemove(
+                                AbstractJmi1ContainerInvocationHandler.getQualifierList(arguments)
+                        );
             }
         } 
         else if (declaringClass == Container.class) {

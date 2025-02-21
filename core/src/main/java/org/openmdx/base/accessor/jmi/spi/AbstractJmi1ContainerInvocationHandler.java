@@ -47,9 +47,13 @@ package org.openmdx.base.accessor.jmi.spi;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.jmi.reflect.InvalidCallException;
 
+import org.oasisopen.cci2.QualifierType;
+import org.oasisopen.jmi1.RefQualifier;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
