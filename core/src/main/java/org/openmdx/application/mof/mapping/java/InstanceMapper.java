@@ -144,6 +144,7 @@ extends AbstractClassMapper {
         }
         printLine("   * @param newValue The element to be appended.");
         printLine("   */");
+        this.mapDeprecatedAnnotation(referenceDef);
         printLine("  public void ", this.getMethodName("add" + referenceDef.getBeanGenericName()), " (");
         printLine("    ", referenceType, " newValue");
         printLine("  );");
@@ -185,6 +186,7 @@ extends AbstractClassMapper {
                 printLine("   * @param ", qualifierName, " The qualifier attribute value that qualifies the reference to get the element to be appended.");
                 printLine("   * @param ", valueHolder, " The element to be appended.");
                 printLine("   */");
+                this.mapDeprecatedAnnotation(referenceDef);
                 printLine("  public void ", this.getMethodName("add" + referenceDef.getBeanGenericName()), " (");
                 printLine("    boolean ", qualifierName, PERSISTENCY_SUFFIX, ",");
                 printLine("    ", this.getType(referenceDef.getQualifiedQualifierTypeName(), this.format, false), " ", qualifierName, ",");
@@ -209,6 +211,7 @@ extends AbstractClassMapper {
                 printLine("   * @param ", qualifierName, " The qualifier attribute value that qualifies the reference to get the element to be appended.");
                 printLine("   * @param ", valueHolder, " The element to be appended.");
                 printLine("   */");
+                this.mapDeprecatedAnnotation(referenceDef);
                 printLine("  public void ", this.getMethodName("add" + referenceDef.getBeanGenericName()), " (");
                 printLine("    ", this.getType(referenceDef.getQualifiedQualifierTypeName(), this.format, false), " ", qualifierName, ",");
                 printLine("    ", referenceType, " ", valueHolder);        
@@ -231,6 +234,7 @@ extends AbstractClassMapper {
                 }
                 printLine("   * @param ", valueHolder, " The element to be appended.");
                 printLine("   */");
+                this.mapDeprecatedAnnotation(referenceDef);
                 printLine("  public void ", this.getMethodName("add" + referenceDef.getBeanGenericName()), " (");
                 printLine("    ", referenceType, " ", valueHolder);        
                 printLine("  );");
@@ -298,6 +302,7 @@ extends AbstractClassMapper {
             "value for this reference."
         );
         printLine("   */");
+        this.mapDeprecatedAnnotation(referenceDef);
         printLine("  public void ", methodName, "(");
         printLine("    ", argumentType, " ", referenceName);
         if(this.format.isJPA3()) {
@@ -348,6 +353,7 @@ extends AbstractClassMapper {
             printLine("   */");
             String accessorType = classType.getType(classDef, this.format, TypeMode.RESULT);
             String methodName = this.getMethodName(referenceDef.getBeanGetterName());
+            this.mapDeprecatedAnnotation(referenceDef);
             printLine("  public ", accessorType, " ", methodName, "(");
             if(this.format.isJPA3()) {
                 printLine("  ) {");
@@ -393,6 +399,7 @@ extends AbstractClassMapper {
         printLine("   * @param ", referenceDef.getQualifierName(), " The container of the objects to be retrieved.");
         printLine("   * @return The members referencing ths object via {@code ", referenceDef.getName(), "}.");
         printLine("   */");
+        this.mapDeprecatedAnnotation(referenceDef);
         printLine(
         	"  public ", 
         	this.getType(referenceDef, "java.util.Collection", Boolean.TRUE, TypeMode.MEMBER, null), 
@@ -477,6 +484,7 @@ extends AbstractClassMapper {
             printLine("   * @param query predicate which is applied to the set of referenced objects.");
             printLine("   * @return The objects for which the predicate evaluates to {@code true}.");
             printLine("   */");
+            this.mapDeprecatedAnnotation(referenceDef);
             printLine(
             	"  public <T extends ",
             	this.getType(referenceDef.getQualifiedTypeName(), this.format, false),
@@ -499,6 +507,7 @@ extends AbstractClassMapper {
             }
             printLine("   * @return A set containing all the elements for this reference.");
             printLine("   */");
+            this.mapDeprecatedAnnotation(referenceDef);
             String cast = this.printAnnotationAndReturnCast(referenceDef, collectionType);
             String methodName = this.getMethodName(referenceDef.getBeanGetterName());
             printLine("  public ", getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER, null), " ", methodName, "(");
@@ -566,6 +575,7 @@ extends AbstractClassMapper {
             }
             printLine("   * @return The {@code Collection} of referenced objects.");
             printLine("   */");
+            this.mapDeprecatedAnnotation(referenceDef);
             printLine("  public ", this.getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER, null), " ", methodName, "(");
             if(this.format.isJPA3()) {
                 printLine("  ){");
@@ -620,6 +630,7 @@ extends AbstractClassMapper {
             }
             printLine("   * @return The {@code Map} of referenced objects.");
             printLine("   */");
+            this.mapDeprecatedAnnotation(referenceDef);
             printLine("  public ", this.getMapType(referenceDef, java.lang.String.class, Boolean.TRUE), " ", methodName, "(");
             if(this.format.isJPA3()) {
                 printLine("  ){");
@@ -675,6 +686,7 @@ extends AbstractClassMapper {
                 printLine("   * @param ", referenceDef.getQualifierName(), " The value for the qualifier attribute that qualifies this reference.");
                 printLine("   * @return The possibly null value for this qualifier");
                 printLine("   */");
+                this.mapDeprecatedAnnotation(referenceDef);
                 printLine("  public ", accessorType, " ", methodName, "(");
                 if(i == 0) {
                     printLine("    boolean ", qualifierPersistencyArgumentName, ",");
@@ -708,6 +720,7 @@ extends AbstractClassMapper {
             printLine("   * @param ", referenceDef.getQualifierName(), " The value for the qualifier attribute that qualifies this reference.");
             printLine("   * @return The non-null value for this reference.");
             printLine("   */");
+            this.mapDeprecatedAnnotation(referenceDef);
             printLine(
             	"  public ",
             	this.getType(referenceDef, null, Boolean.TRUE, TypeMode.MEMBER, null),
@@ -1354,6 +1367,7 @@ extends AbstractClassMapper {
                 }
                 printLine("   * @param ", newValue, " A {@code BinaryLargeObject} containing the binary value for this attribute.");
                 printLine("   */");
+                this.mapDeprecatedAnnotation(attributeDef);
                 printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
                 printLine("    org.w3c.cci2.BinaryLargeObject ", newValue);
                 printLine("  );");
@@ -1367,6 +1381,7 @@ extends AbstractClassMapper {
                 }
                 printLine("   * @param ", newValue, " A {@code BinaryLargeObject} containing the value for this attribute.");
                 printLine("   */");
+                this.mapDeprecatedAnnotation(attributeDef);
                 printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
                 printLine("    org.w3c.cci2.BinaryLargeObject ", newValue);
                 if(this.format.isJPA3()) {
@@ -1388,6 +1403,7 @@ extends AbstractClassMapper {
                 }
                 printLine("   * @param ", newValue, " A {@code CharacterLargeObject} containing the value for this attribute.");
                 printLine("   */");
+                this.mapDeprecatedAnnotation(attributeDef);
                 printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
                 printLine("     org.w3c.cci2.CharacterLargeObject ", newValue);
                 printLine("  );");
@@ -1401,6 +1417,7 @@ extends AbstractClassMapper {
                 }
                 printLine("   * @param ", newValue, " A {@code CharacterLargeObject} containing the value for this attribute.");
                 printLine("   */");
+                this.mapDeprecatedAnnotation(attributeDef);
                 printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
                 printLine("    org.w3c.cci2.CharacterLargeObject ", newValue);
                 if(this.format.isJPA3()) {
@@ -1437,6 +1454,7 @@ extends AbstractClassMapper {
         }
         printLine("   * @param ", attributeName, " The non-{@code null} new value for attribute {@code ", attributeDef.getName(), "}.");
         printLine("   */");
+        this.mapDeprecatedAnnotation(attributeDef);
         printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
         printLine("    " + attributeType + ' ' + attributeName);
         if(format.isJPA3()) {
@@ -1479,6 +1497,7 @@ extends AbstractClassMapper {
         }
         printLine("   * @param ", attributeName, " The possibly null new value for attribute {@code ", attributeDef.getName(), "}.");
         printLine("   */");
+        this.mapDeprecatedAnnotation(attributeDef);
         printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
         printLine("    ", attributeType, " ", attributeName);
         if(format.isJPA3()) {
@@ -1518,6 +1537,7 @@ extends AbstractClassMapper {
                     MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
                 }
                 printLine("   */");
+                this.mapDeprecatedAnnotation(attributeDef);
                 printLine("  public org.w3c.cci2.BinaryLargeObject ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
                 if(this.format.isJPA3()) {
                     printLine("  ){");
@@ -1538,6 +1558,7 @@ extends AbstractClassMapper {
                     MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
                 }
                 printLine("   */");
+                this.mapDeprecatedAnnotation(attributeDef);
                 printLine("  public org.w3c.cci2.CharacterLargeObject ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
                 if(this.format.isJPA3()) {
                     printLine("  ){");
@@ -1571,6 +1592,7 @@ extends AbstractClassMapper {
         }
         printLine("   * @return A SparseArray containing all elements for this attribute.");
         printLine("   */");
+        this.mapDeprecatedAnnotation(attributeDef);
         if(this.format.isJPA3()) {
             printLine(
             	"  public ",
@@ -1589,6 +1611,7 @@ extends AbstractClassMapper {
             printLine("  }");
         } 
         else {
+            this.mapDeprecatedAnnotation(attributeDef);
             printLine(
             	"  public ",
             	getType(attributeDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER, null),
@@ -1638,6 +1661,7 @@ extends AbstractClassMapper {
         }
         printLine("   * @return A set containing all elements for this attribute.");
         printLine("   */");
+        this.mapDeprecatedAnnotation(attributeDef);
         if(this.format.isJPA3()) {
             printLine(
             	"  public ",
@@ -1756,6 +1780,7 @@ extends AbstractClassMapper {
         }
         printLine("   * @return A map containing all elements for this attribute.");
         printLine("   */");
+        this.mapDeprecatedAnnotation(attributeDef);
         String cast = printAnnotationAndReturnMapCast(attributeDef, java.lang.String.class);
         printLine(
         	"  public ",
@@ -1833,6 +1858,7 @@ extends AbstractClassMapper {
             }
             printLine("   * @param ", attributeName, " value(s) to be added to {@code ", attributeDef.getName(), "}");
             printLine("   */");
+            this.mapDeprecatedAnnotation(attributeDef);
             printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
             printLine("    ", elementType, "... ", attributeName);
             if(format.isJPA3()) {
@@ -1877,6 +1903,7 @@ extends AbstractClassMapper {
             }
             printLine("   * @param ", attributeName, " collection to be copied.");
             printLine("   */");
+            this.mapDeprecatedAnnotation(attributeDef);
             printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
             printLine("    ", this.getType(attributeDef, "java.util.Set", Boolean.FALSE, TypeMode.MEMBER, null), " ", attributeName);
             printLine("  );");
@@ -1902,6 +1929,7 @@ extends AbstractClassMapper {
             }
             printLine("   * @param ", attributeName, " value(s) to be added to {@code ", attributeDef.getName(), "}");
             printLine("   */");
+            this.mapDeprecatedAnnotation(attributeDef);
             printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
             printLine("    ", elementType, "... ", attributeName);
             if(format.isJPA3()) {
@@ -1940,6 +1968,7 @@ extends AbstractClassMapper {
             }
             printLine("   * @param ", attributeName, " value(s) to be added to {@code ", attributeDef.getName(), "}");
             printLine("   */");
+            mapDeprecatedAnnotation(attributeDef);
             printLine("  public void ", this.getMethodName(attributeDef.getBeanSetterName()), "(");
             printLine("    ", this.getMapType(attributeDef, Integer.class, Boolean.FALSE), " ", attributeName);
             if(this.format.isJPA3()) {
@@ -1970,6 +1999,7 @@ extends AbstractClassMapper {
         }
         printLine("   * @param newValue A list containing all the new elements for this reference.");
         printLine("   */");
+        this.mapDeprecatedAnnotation(referenceDef);
         printLine("  public void ", this.getMethodName(referenceDef.getBeanSetterName()), "(");
         printLine("    ", this.getType(referenceDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER, null), " newValue");
         printLine("  );");
@@ -1984,6 +2014,7 @@ extends AbstractClassMapper {
         }
         printLine("   * @param newValue An array containing all the new elements for this reference.");
         printLine("   */");
+        this.mapDeprecatedAnnotation(referenceDef);
         printLine("  public void ", this.getMethodName(referenceDef.getBeanSetterName()), "(");
         printLine("    ", this.getType(referenceDef.getQualifiedTypeName(), this.format, false), "[] newValue");
         printLine("  );");
@@ -2180,6 +2211,7 @@ extends AbstractClassMapper {
         }
         printLine("   * @return The non-null value for attribute {@code ", attributeDef.getName(), "}.");
         printLine("   */");
+        this.mapDeprecatedAnnotation(attributeDef);
         String cast =  printAnnotationAndReturnCast(attributeDef, null);
         String featureType = objectIdentity ?
             QUALIFIED_IDENTITY_FEATURE_CLASS_NAME :
@@ -2227,6 +2259,7 @@ extends AbstractClassMapper {
         }
         printLine("   * @return The possibly null value for attribute {@code ", attributeDef.getName(), "}.");
         printLine("   */");
+        this.mapDeprecatedAnnotation(attributeDef);
         String cast =  printAnnotationAndReturnCast(attributeDef, null);
         String featureType = this.getType(attributeDef, null, Boolean.TRUE, TypeMode.MEMBER, Boolean.TRUE);        
         printLine("  public ", featureType, " ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
