@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.3/notation" xmlns:style="http://www.eclipse.org/papyrus/infra/gmfdiag/style" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML">
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:style="http://www.eclipse.org/papyrus/infra/gmfdiag/style" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML">
   <notation:Diagram xmi:id="_LGmgALPSEeKHbKe7r26usQ" type="PapyrusUMLClassDiagram" name="test.openmdx.base-Main" measurementUnit="Pixel">
     <children xmi:type="notation:Shape" xmi:id="_UJJekLPSEeKHbKe7r26usQ" type="Class_Shape">
       <children xmi:type="notation:DecorationNode" xmi:id="_UJKssLPSEeKHbKe7r26usQ" type="Class_NameLabel"/>
@@ -117,36 +117,6 @@
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.base.uml#_0ZWB8IPSEd2nyID2xZmdGQ"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_WvZvIbPSEeKHbKe7r26usQ" x="72" y="36" width="270"/>
-    </children>
-    <children xmi:type="notation:Shape" xmi:id="_O6MOoOqlEe-0d5wazOylVQ" type="Class_Shape">
-      <children xmi:type="notation:DecorationNode" xmi:id="_O6PR8OqlEe-0d5wazOylVQ" type="Class_NameLabel"/>
-      <children xmi:type="notation:DecorationNode" xmi:id="_O6PR8eqlEe-0d5wazOylVQ" type="Class_FloatingNameLabel">
-        <layoutConstraint xmi:type="notation:Location" xmi:id="_O6PR8uqlEe-0d5wazOylVQ" y="15"/>
-      </children>
-      <children xmi:type="notation:BasicCompartment" xmi:id="_O6PR8-qlEe-0d5wazOylVQ" type="Class_AttributeCompartment">
-        <styles xmi:type="notation:TitleStyle" xmi:id="_O6PR9OqlEe-0d5wazOylVQ"/>
-        <styles xmi:type="notation:SortingStyle" xmi:id="_O6PR9eqlEe-0d5wazOylVQ"/>
-        <styles xmi:type="notation:FilteringStyle" xmi:id="_O6PR9uqlEe-0d5wazOylVQ"/>
-        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_O6PR9-qlEe-0d5wazOylVQ"/>
-      </children>
-      <children xmi:type="notation:BasicCompartment" xmi:id="_O6PR-OqlEe-0d5wazOylVQ" type="Class_OperationCompartment">
-        <children xmi:type="notation:Shape" xmi:id="_HuKQUOqmEe-0d5wazOylVQ" type="Operation_ClassOperationLabel">
-          <element xmi:type="uml:Operation" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3EE126A7003B"/>
-          <layoutConstraint xmi:type="notation:Location" xmi:id="_HuKQUeqmEe-0d5wazOylVQ"/>
-        </children>
-        <styles xmi:type="notation:TitleStyle" xmi:id="_O6PR-eqlEe-0d5wazOylVQ"/>
-        <styles xmi:type="notation:SortingStyle" xmi:id="_O6PR-uqlEe-0d5wazOylVQ"/>
-        <styles xmi:type="notation:FilteringStyle" xmi:id="_O6PR--qlEe-0d5wazOylVQ"/>
-        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_O6PR_OqlEe-0d5wazOylVQ"/>
-      </children>
-      <children xmi:type="notation:BasicCompartment" xmi:id="_O6PR_eqlEe-0d5wazOylVQ" type="Class_NestedClassifierCompartment">
-        <styles xmi:type="notation:TitleStyle" xmi:id="_O6PR_uqlEe-0d5wazOylVQ"/>
-        <styles xmi:type="notation:SortingStyle" xmi:id="_O6PR_-qlEe-0d5wazOylVQ"/>
-        <styles xmi:type="notation:FilteringStyle" xmi:id="_O6PSAOqlEe-0d5wazOylVQ"/>
-        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_O6PSAeqlEe-0d5wazOylVQ"/>
-      </children>
-      <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87BA90087"/>
-      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_O6MOoeqlEe-0d5wazOylVQ" x="480" y="240"/>
     </children>
     <styles xmi:type="notation:DiagramStyle" xmi:id="_LGmgAbPSEeKHbKe7r26usQ"/>
     <styles xmi:type="style:PapyrusDiagramStyle" xmi:id="_GdKlgBZ5EemGMr2sON_HWQ" diagramKindId="org.eclipse.papyrus.uml.diagram.class">
@@ -2243,46 +2213,6 @@
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3FB2C1B30348"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_KsSIQbPiEeKHbKe7r26usQ" x="54" y="1008" width="415"/>
-    </children>
-    <children xmi:type="notation:Shape" xmi:id="_E0CB4OrwEe-0d5wazOylVQ" type="Class_Shape">
-      <children xmi:type="notation:DecorationNode" xmi:id="_E0CB4urwEe-0d5wazOylVQ" type="Class_NameLabel"/>
-      <children xmi:type="notation:DecorationNode" xmi:id="_E0CB4-rwEe-0d5wazOylVQ" type="Class_FloatingNameLabel">
-        <layoutConstraint xmi:type="notation:Location" xmi:id="_E0CB5OrwEe-0d5wazOylVQ" y="15"/>
-      </children>
-      <children xmi:type="notation:BasicCompartment" xmi:id="_E0CB5erwEe-0d5wazOylVQ" type="Class_AttributeCompartment">
-        <styles xmi:type="notation:TitleStyle" xmi:id="_E0CB5urwEe-0d5wazOylVQ"/>
-        <styles xmi:type="notation:SortingStyle" xmi:id="_E0CB5-rwEe-0d5wazOylVQ"/>
-        <styles xmi:type="notation:FilteringStyle" xmi:id="_E0CB6OrwEe-0d5wazOylVQ"/>
-        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_E0CB6erwEe-0d5wazOylVQ"/>
-      </children>
-      <children xmi:type="notation:BasicCompartment" xmi:id="_E0CB6urwEe-0d5wazOylVQ" type="Class_OperationCompartment">
-        <children xmi:type="notation:Shape" xmi:id="_GmO_UOrwEe-0d5wazOylVQ" type="Operation_ClassOperationLabel">
-          <element xmi:type="uml:Operation" href="platform:/resource/openMDX%202%20~%20Test%20Core%20(EMF)/test.openmdx.app1.uml#_3C7B8A60016D3EE126A7003B"/>
-          <layoutConstraint xmi:type="notation:Location" xmi:id="_GmO_UerwEe-0d5wazOylVQ"/>
-        </children>
-        <styles xmi:type="notation:TitleStyle" xmi:id="_E0CB6-rwEe-0d5wazOylVQ"/>
-        <styles xmi:type="notation:SortingStyle" xmi:id="_E0CB7OrwEe-0d5wazOylVQ"/>
-        <styles xmi:type="notation:FilteringStyle" xmi:id="_E0CB7erwEe-0d5wazOylVQ"/>
-        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_E0CB7urwEe-0d5wazOylVQ"/>
-      </children>
-      <children xmi:type="notation:BasicCompartment" xmi:id="_E0CB7-rwEe-0d5wazOylVQ" type="Class_NestedClassifierCompartment">
-        <styles xmi:type="notation:TitleStyle" xmi:id="_E0CB8OrwEe-0d5wazOylVQ"/>
-        <styles xmi:type="notation:SortingStyle" xmi:id="_E0CB8erwEe-0d5wazOylVQ"/>
-        <styles xmi:type="notation:FilteringStyle" xmi:id="_E0CB8urwEe-0d5wazOylVQ"/>
-        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_E0CB8-rwEe-0d5wazOylVQ"/>
-      </children>
-      <element xmi:type="uml:Class" href="platform:/resource/openMDX%202%20~%20Test%20Core%20(EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87BA90087"/>
-      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_E0CB4erwEe-0d5wazOylVQ" x="684" y="887"/>
-    </children>
-    <children xmi:type="notation:Shape" xmi:id="_y4MR8OrwEe-0d5wazOylVQ" type="Comment_Shape">
-      <children xmi:type="notation:DecorationNode" xmi:id="_y4MR8urwEe-0d5wazOylVQ" type="Comment_BodyLabel"/>
-      <element xmi:type="uml:Comment" href="platform:/resource/openMDX%202%20~%20Test%20Core%20(EMF)/test.openmdx.app1.uml#_xxkBEOrwEe-0d5wazOylVQ"/>
-      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_y4MR8erwEe-0d5wazOylVQ" x="1200" y="923"/>
-    </children>
-    <children xmi:type="notation:Shape" xmi:id="_5Viv4OrwEe-0d5wazOylVQ" type="Comment_Shape">
-      <children xmi:type="notation:DecorationNode" xmi:id="_5Viv4urwEe-0d5wazOylVQ" type="Comment_BodyLabel"/>
-      <element xmi:type="uml:Comment" href="platform:/resource/openMDX%202%20~%20Test%20Core%20(EMF)/test.openmdx.app1.uml#_492BkOrwEe-0d5wazOylVQ"/>
-      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_5Viv4erwEe-0d5wazOylVQ" x="1461" y="930"/>
     </children>
     <styles xmi:type="notation:DiagramStyle" xmi:id="_81kskbPgEeKHbKe7r26usQ"/>
     <styles xmi:type="style:PapyrusDiagramStyle" xmi:id="_Ge2nkBZ5EemGMr2sON_HWQ" diagramKindId="org.eclipse.papyrus.uml.diagram.class">
