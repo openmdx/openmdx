@@ -57,8 +57,8 @@ public class InternationalPostalAddressImpl extends PostalAddressImpl<test.openm
     /**
      * Constructor 
      *
-     * @param same
-     * @param next
+     * @param same the same layer JMI API
+     * @param next the next layer CCI API
      */
     public InternationalPostalAddressImpl(
         test.openmdx.app1.jmi1.InternationalPostalAddress same,

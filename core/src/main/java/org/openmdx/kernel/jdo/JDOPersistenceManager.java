@@ -49,7 +49,7 @@ import javax.jdo.PersistenceManager;
 
 
 /**
- * Auto-Closeable Persistence Manager
+ * Auto-Closeable Persistence Manager for JDO 3.1
  */
 public interface JDOPersistenceManager extends PersistenceManager, AutoCloseable {
 

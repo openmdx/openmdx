@@ -110,7 +110,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
     }
     
     //-------------------------------------------------------------------------
-//  @Override
+    @Override
     public String refMofId(
     ) throws JmiException {
         return this.qualifiedClassName;
@@ -287,7 +287,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
     /**
      * The call is delegated to the refImmediatePackage().
      */
-//  @Override
+    @Override
     public final RefEnum refGetEnum(
     RefObject enumType,
         String literalName
@@ -302,7 +302,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
     /**
      * The call is delegated to the refImmediatePackage().
      */
-//  @Override
+    @Override
     public final RefEnum refGetEnum(
         String enumName,
         String literalName
@@ -322,7 +322,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not support class-level features. This operation
      * is not supported.
      */
-//  @Override
+    @Override
     public void refSetValue(
         RefObject feature,
         Object value
@@ -335,7 +335,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not support class-level features. This operation
      * is not supported.
      */
-//  @Override
+    @Override
     public void refSetValue(
         String featureName,
         Object value
@@ -348,7 +348,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not support class-level features. This operation
      * is not supported.
      */
-//  @Override
+    @Override
     public Object refGetValue(
         RefObject feature
     ) throws JmiException {
@@ -360,7 +360,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not support class-level features. This operation
      * is not supported.
      */
-//  @Override
+    @Override
     public Object refGetValue(
         String featureName
     ) throws JmiException {
@@ -399,7 +399,7 @@ public Object refInvokeOperation(
     /**
      * Returns the ModelElement_1_0 of this class.
      */
-//  @Override
+    @Override
     public RefObject refMetaObject(
     ) {
         try {
@@ -414,14 +414,14 @@ public Object refInvokeOperation(
     }
 
     //-------------------------------------------------------------------------
-//  @Override
+    @Override
     public final RefPackage refImmediatePackage(
     ) {
         return this.immediatePackage;
     }
 
     //-------------------------------------------------------------------------
-//  @Override
+    @Override
     public final RefRootPackage_1 refOutermostPackage(
     ) {
         return (RefRootPackage_1) this.immediatePackage.refOutermostPackage();
@@ -445,7 +445,7 @@ public Object refInvokeOperation(
      * 
      * @throws JDOFatalUserException 
      */
-//  @Override
+    @Override
     public Class<?> getDelegateClass (
     ) {
         return this.mapping.getInstanceInterface();
@@ -455,14 +455,14 @@ public Object refInvokeOperation(
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.Jmi1Class#hasLegacyDelegate()
      */
-//  @Override
+    @Override
     public boolean isTerminal(
     ) {
         return this.immediatePackage.isTerminal();
     }
 
     //------------------------------------------------------------------------
-//  @Override
+    @Override
     public StandardMarshaller getMarshaller(
     ) {
     	return this.refOutermostPackage().standardMarshaller;

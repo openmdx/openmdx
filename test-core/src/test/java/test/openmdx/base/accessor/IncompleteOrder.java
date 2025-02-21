@@ -76,7 +76,7 @@ public class IncompleteOrder implements Comparator<DataObject_1_0> {
         return IncompleteOrder.instance;
     }
     
-//  @Override
+    @Override
     public int compare(
         DataObject_1_0 o1, 
         DataObject_1_0 o2

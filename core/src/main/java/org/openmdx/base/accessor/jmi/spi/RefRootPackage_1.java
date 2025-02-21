@@ -45,6 +45,7 @@
 package org.openmdx.base.accessor.jmi.spi;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -59,7 +60,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.UUID;
-
 import javax.jdo.Extent;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
@@ -93,7 +93,6 @@ import jakarta.resource.cci.InteractionSpec;
 import jakarta.resource.cci.Record;
 #endif
 import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.AbstractNames;
@@ -165,13 +164,6 @@ public class RefRootPackage_1
 
     /**
      * Constructor 
-     *
-     * @param viewManager
-     * @param interactionSpec
-     * @param delegate
-     * @param implementationMapper
-     * @param userObjects
-     * @param persistenceManagerFactory
      */
     private RefRootPackage_1(
         Map<InteractionSpec,RefRootPackage_1> viewManager,
@@ -232,11 +224,6 @@ public class RefRootPackage_1
      * <li>EntityManagerFactory_1
      * </ul> 
      *
-     * @param persistenceManagerFactory
-     * @param standardDelegate
-     * @param mapping
-     * @param userObjects
-     * 
      * @see LayerManagerFactory_2
      * @see EntityManagerFactory_1
      */
@@ -325,10 +312,6 @@ public class RefRootPackage_1
     
     /**
      * Build an InvalidObjectException from a given cause
-     * 
-     * @param source
-     * 
-     * @return
      */
     protected InvalidObjectException toInvalidObjectException (
         Exception source
@@ -343,20 +326,17 @@ public class RefRootPackage_1
      */
     @Override
     public void exceptionThrown(Exception cause) {
-        
         throw this.toInvalidObjectException(cause);
     }
 
     /**
      * Determines an object's interaction spec
-     * 
-     * @param object
-     * 
+     *
      * @return an object's interaction spec
      */
     private static InteractionSpec getInteractionsSpec(
         Object object
-    ) throws ServiceException {
+    ){
         return 
             object instanceof RefObject ? ((RefRootPackage_1) ((RefObject)object).refOutermostPackage()).refInteractionSpec() :
             object instanceof ObjectView_1_0 ? ((ObjectView_1_0)object).getInteractionSpec() :
@@ -365,9 +345,7 @@ public class RefRootPackage_1
 
     /**
      * Avoid outermost RefPackage validation
-     * 
-     * @param source
-     * 
+     *
      * @return the unmarshaled object
      */
     @Override
@@ -382,9 +360,7 @@ public class RefRootPackage_1
 
     /**
      * Unmarshal the object independently of its interaction specification
-     * 
-     * @param source
-     * 
+     *
      * @return the object with the same transient object id in the delegate environment
      */
     Object unmarshalLenient(
@@ -505,11 +481,7 @@ public class RefRootPackage_1
                     this.refDelegate().getObjectById(resourceIdentifier, false)
                 );
             }
-        } catch(ServiceException e) {
-            throw new JmiServiceException(e);
-        } catch(RuntimeServiceException e) {
-            throw new JmiServiceException(e);
-        } catch(JDOException e) {
+        } catch(ServiceException|RuntimeServiceException|JDOException e) {
             throw new JmiServiceException(e);
         }
     }
@@ -537,11 +509,7 @@ public class RefRootPackage_1
             ).refGetValue(
                 resourceIdentifier.getLastSegment().toClassicRepresentation()
             );
-        } catch(RuntimeServiceException exception) {
-            throw new JmiServiceException(exception);
-        } catch(JDOException exception) {
-            throw new JmiServiceException(exception);
-        }  catch (ServiceException exception) {
+        } catch(RuntimeServiceException|JDOException|ServiceException exception) {
             throw new JmiServiceException(exception);
         }
     }
@@ -624,12 +592,12 @@ public class RefRootPackage_1
     /**
      * Retrieve a context specific RefPackage
      * 
-     * @param viewContext
+     * @param interactionSpec the view context
      * 
      * @return a context specific RefPackage
      * 
      * @exception JDOFatalUserException if the persistence manager is closed
-     * @exception JMIServiceException if the requested package can't be created
+     * @exception JmiServiceException if the requested package can't be created
      */
     @Override
     public RefRootPackage_1 refPackage(
@@ -826,8 +794,6 @@ public class RefRootPackage_1
 
         /**
          * Constructor 
-         *
-         * @param e
          */
         InaccessibleObject(
             Exception e
@@ -939,7 +905,7 @@ public class RefRootPackage_1
         public Object refInvokeOperation(
             RefObject requestedOperation, 
             List args
-        ) throws RefException {
+        ){
             throw this.cause;
         }
 
@@ -950,7 +916,7 @@ public class RefRootPackage_1
         public Object refInvokeOperation(
             String requestedOperation, 
             List args
-        ) throws RefException {
+        ){
             throw this.cause;
         }
 
@@ -1027,12 +993,9 @@ public class RefRootPackage_1
 
         /**
          * Constructor 
-         *
-         * @param factory
-         * @param listener
          */
         StandardPersistenceManager_1(
-            JDOPersistenceManagerFactory factory, 
+            JDOPersistenceManagerFactory factory,
             MarshallingInstanceLifecycleListener listener
         ) {
             super(
@@ -1055,7 +1018,7 @@ public class RefRootPackage_1
 
             @Override
             protected UnitOfWork getDelegate() {
-                return isClosed() ? null : (UnitOfWork)RefRootPackage_1.this.refDelegate().currentUnitOfWork();
+                return isClosed() ? null : RefRootPackage_1.this.refDelegate().currentUnitOfWork();
             }
 
             public PersistenceManager getPersistenceManager() {
@@ -1210,9 +1173,7 @@ public class RefRootPackage_1
         ) {
             return Sets.subSet(
                 this.getManagedObjects(),
-                new Selector (){
-
-                    public boolean accept(Object candidate) {
+                    candidate -> {
                         for(Class superClass : classes) {
                             if(superClass.isInstance(candidate)) {
                                 return true;
@@ -1220,8 +1181,6 @@ public class RefRootPackage_1
                         }
                         return false;
                     }
-                    
-                }
             );
         }
 
@@ -1235,9 +1194,7 @@ public class RefRootPackage_1
         ) {
             return Sets.subSet(
                 this.getManagedObjects(states),
-                new Selector (){
-
-                    public boolean accept(Object candidate) {
+                    candidate -> {
                         for(Class superClass : classes) {
                             if(superClass.isInstance(candidate)) {
                                 return true;
@@ -1245,8 +1202,6 @@ public class RefRootPackage_1
                         }
                         return false;
                     }
-                    
-                }
             );
         }
 
@@ -1341,38 +1296,32 @@ public class RefRootPackage_1
         /**
          * Decode URI parameters
          * 
-         * @param uriQuery
+         * @param uriQuery the URI Query
          * 
          * @return a modifiable parameter map owned by the caller
-         * 
-         * @throws ServiceException
          */
         private Map<String, ?> parseQuery(
         	String uriQuery
         ) throws ServiceException {
         	Map<String, Object> parameter = new HashMap<>();
         	try {
-	        	for(String nvp : uriQuery.split("&")) {
-	        		int e  = nvp.indexOf('=');
-					parameter.put(
-						nvp.substring(0, e), 
-						URLDecoder.decode(nvp.substring(e + 1), "UTF-8")
-					);
-	        	}
+                for(String nvp : uriQuery.split("&")) {
+                    int e  = nvp.indexOf('=');
+                    parameter.put(
+                        nvp.substring(0, e),
+                            URLDecoder.decode(nvp.substring(e + 1), "UTF-8")
+                    );
+                }
         	} catch (UnsupportedEncodingException exception) {
         		throw new ServiceException(exception);
         	}
-        	return parameter;
+            return parameter;
         }
 
         /**
          * Decode URI 
-         * 
-         * @param uri
-         * 
+         *
          * @return a modifiable parameter map owned by the caller
-         * 
-         * @throws ServiceException
          */
         private Map<String, ?> parseURI(
         	String uri	
@@ -1393,12 +1342,8 @@ public class RefRootPackage_1
 
         /**
          * Decode URI 
-         * 
-         * @param uri
-         * 
+         *
          * @return a modifiable parameter map owned by the caller
-         * 
-         * @throws ServiceException
          */
         private Map<String, ?> parseURI(
         	URI uri	
@@ -1419,8 +1364,7 @@ public class RefRootPackage_1
         private QueryRecord newQueryRecord(
         ) throws ServiceException {
         	try {
-	        	QueryRecord queryRecord = Records.getRecordFactory().createMappedRecord(QueryRecord.class);
-	        	return queryRecord;
+                return Records.getRecordFactory().createMappedRecord(QueryRecord.class);
         	} catch (ResourceException exception) {
         		throw new ServiceException(exception);
 			}
@@ -1496,11 +1440,6 @@ public class RefRootPackage_1
             		exception
             	);
             }
-        }
-
-        @Override
-        public <T> javax.jdo.JDOQLTypedQuery<T> newJDOQLTypedQuery(Class<T> aClass) {
-            return getPersistenceManagerFactory().getPersistenceManager().newJDOQLTypedQuery(aClass);
         }
 
         /* (non-Javadoc)
@@ -1593,7 +1532,7 @@ public class RefRootPackage_1
             Class<T> persistenceCapableClass,
             boolean subclasses
         ) {
-            return new Extent_1<T>(this, persistenceCapableClass, subclasses);            
+            return new Extent_1<>(this, persistenceCapableClass, subclasses);
         }
 
         /* (non-Javadoc)
@@ -1943,6 +1882,7 @@ public class RefRootPackage_1
                     ).getClassMapping(
                         jmiObject.refClass().refMofId()
                     ).getInstanceClass(
+                    ).getConstructor(
                     ).newInstance(
                     );
                     copy(
@@ -1956,13 +1896,7 @@ public class RefRootPackage_1
                         ReducedJDOHelper.getVersion(pc)
                     );
                     return (T) jpaObject;
-                } catch (InstantiationException exception) {
-                    throw new JDOFatalUserException(
-                        "Unable to instantiate the corresponding JPA class",
-                        exception,
-                        pc
-                    );
-                } catch (IllegalAccessException exception) {
+                } catch (InstantiationException|IllegalAccessException|InvocationTargetException|NoSuchMethodException exception) {
                     throw new JDOFatalUserException(
                         "Unable to instantiate the corresponding JPA class",
                         exception,
@@ -2054,11 +1988,7 @@ public class RefRootPackage_1
         /**
          * Copy the objects' values
          * 
-         * @param jmiObject
-         * @param jpaObject
          * @param detach {@code true} in case of detach, {@code false} in case of attach
-         * 
-         * @throws ServiceException 
          */
         private void copy(
             RefObject jmiObject,
@@ -2315,7 +2245,7 @@ public class RefRootPackage_1
          * Constructor 
          *
          * @param factory this manager's factory
-         * @param listener
+         * @param listener the marshalling instance life cycle listener
          * @param entityManager <true> in case of the <em>leading</em> manager in respect to unit of work management
          */
         ContainerManagedPersistenceManager_1(
@@ -2345,12 +2275,9 @@ public class RefRootPackage_1
          */
         private final boolean entityManager;
         
-        /* (non-Javadoc)
-         * @see org.openmdx.base.persistence.spi.AbstractPersistenceManager#finalize()
-         */
         @Override
-        protected void finalize(
-        ) throws Throwable {
+        public void cleanUp(
+        ){
             synchronized(this.lock) {
                 if(this.entityManager) {
                     currentUnitOfWork().clear();

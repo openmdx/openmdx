@@ -186,7 +186,7 @@ public final class HttpHeaderFieldContent implements Comparable<HttpHeaderFieldC
     /* (non-Javadoc)
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
-//  @Override
+    @Override
     public int compareTo(
         HttpHeaderFieldContent that
     ) {

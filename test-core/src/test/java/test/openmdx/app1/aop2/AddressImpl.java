@@ -63,8 +63,8 @@ public class AddressImpl<S extends test.openmdx.app1.jmi1.Address,N extends test
     /**
      * Constructor 
      *
-     * @param same
-     * @param next
+     * @param same the same layer JMI API
+     * @param next the next layer CCI API
      */
     public AddressImpl(
         S same,

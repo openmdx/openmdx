@@ -287,7 +287,7 @@ class ManagedPreferences extends AbstractPreferences implements Retrievable {
     /* (non-Javadoc)
      * @see org.openmdx.preferences2.prefs.Retrievable#retrieve()
      */
-//  @Override
+    @Override
     public void retrieveAll() {
         PersistenceHelper.retrieveAllDescendants(
             ReducedJDOHelper.getPersistenceManager(

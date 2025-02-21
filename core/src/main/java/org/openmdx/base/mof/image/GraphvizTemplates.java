@@ -50,8 +50,8 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.PIMDocFileType;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.uses.org.apache.commons.io.output.StringBuilderWriter;
 
+import org.openmdx.uses.org.apache.commons.io.output.StringBuilderWriter;
 import org.w3c.cci2.CharacterLargeObjects;
 
 import java.io.BufferedReader;

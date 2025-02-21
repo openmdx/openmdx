@@ -336,7 +336,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#close()
      */
-//  @Override
+    @Override
     public void close(
     ) throws XMLStreamException {
         try {
@@ -350,7 +350,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#flush()
      */
-//  @Override
+    @Override
     public void flush(
     ) throws XMLStreamException {
         try {
@@ -363,7 +363,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeAttribute(java.lang.String, java.lang.String)
      */
-//  @Override
+    @Override
     public void writeAttribute(
         String name,
         String value
@@ -387,7 +387,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.stream.AbstractXMLStreamWriter#writeAttribute(java.lang.String, java.lang.String, java.lang.String)
      */
-//  @Override
+    @Override
     public void writeAttribute(
         String namespaceURI,
         String localName,
@@ -406,7 +406,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.stream.AbstractXMLStreamWriter#writeAttribute(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
      */
-//  @Override
+    @Override
     public void writeAttribute(
         String prefix,
         String namespaceURI,
@@ -420,7 +420,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeCData(java.lang.String)
      */
-//  @Override
+    @Override
     public void writeCData(
         String data
     ) throws XMLStreamException {
@@ -435,7 +435,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeCharacters(java.lang.String)
      */
-//  @Override
+    @Override
     public void writeCharacters(
         String data
     ) throws XMLStreamException {
@@ -450,7 +450,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeCharacters(char[], int, int)
      */
-//  @Override
+    @Override
     public void writeCharacters(
         char[] data,
         int offset,
@@ -467,7 +467,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.stream.BinaryDataWriter#writeBinaryData(org.w3c.cci2.BinaryLargeObject)
      */
-//  @Override
+    @Override
     public void writeBinaryData(
         BinaryLargeObject data
     ) throws XMLStreamException {
@@ -516,7 +516,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.stream.LargeObjectWriter#writeBinaryData(byte[], int, int)
      */
-//  @Override
+    @Override
     public void writeBinaryData(
         byte[] data,
         int offset,
@@ -535,7 +535,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.stream.ExtendedXMLStreamWriter#writeCharacterData(org.w3c.cci2.CharacterLargeObject)
      */
-//  @Override
+    @Override
     public void writeCharacterData(
         CharacterLargeObject data
     ) throws XMLStreamException {
@@ -557,7 +557,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeComment(java.lang.String)
      */
-//  @Override
+    @Override
     public void writeComment(
         String comment
     ) throws XMLStreamException {
@@ -567,7 +567,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeEmptyElement(java.lang.String)
      */
-//  @Override
+    @Override
     public void writeEmptyElement(
         String name
     ) throws XMLStreamException {
@@ -580,7 +580,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.stream.AbstractXMLStreamWriter#writeEmptyElement(java.lang.String, java.lang.String)
      */
-//  @Override
+    @Override
     public void writeEmptyElement(
         String localName,
         String namespaceURI
@@ -609,7 +609,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.stream.AbstractXMLStreamWriter#writeEmptyElement(java.lang.String, java.lang.String, java.lang.String)
      */
-//  @Override
+    @Override
     public void writeEmptyElement(
         String prefix,
         String localName,
@@ -622,7 +622,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeEndDocument()
      */
-//  @Override
+    @Override
     public void writeEndDocument(
     ) throws XMLStreamException {
         // nothing to do
@@ -642,7 +642,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeEndElement()
      */
-//  @Override
+    @Override
     public void writeEndElement(
     ) throws XMLStreamException {
         appendEndElement();
@@ -655,7 +655,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
      * As opposed to the WBXML specification this method does not replace
      * encodable entities by their character representation
      */
-//  @Override
+    @Override
     public void writeEntityRef(
         String name
     ) throws XMLStreamException {
@@ -682,7 +682,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeStartDocument(java.lang.String, java.lang.String)
      */
-//  @Override
+    @Override
     public void writeStartDocument(
         String encoding,
         String version
@@ -809,7 +809,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeStartElement(java.lang.String)
      */
-//  @Override
+    @Override
     public void writeStartElement(
         String name
     ) throws XMLStreamException {
@@ -830,7 +830,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.stream.AbstractXMLStreamWriter#writeStartElement(java.lang.String, java.lang.String, java.lang.String)
      */
-//  @Override
+    @Override
     public void writeStartElement(
         String localName,
         String namespaceURI
@@ -847,7 +847,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.stream.AbstractXMLStreamWriter#writeStartElement(java.lang.String, java.lang.String, java.lang.String)
      */
-//  @Override
+    @Override
     public void writeStartElement(
         String prefix,
         String localName,
@@ -860,7 +860,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeProcessingInstruction(java.lang.String)
      */
-//  @Override
+    @Override
     public void writeProcessingInstruction(
         String target
     ) throws XMLStreamException {
@@ -875,7 +875,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeProcessingInstruction(java.lang.String, java.lang.String)
      */
-//  @Override
+    @Override
     public void writeProcessingInstruction(
         String target,
         String value
@@ -903,7 +903,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.stream.AbstractXMLStreamWriter#writeNamespace(java.lang.String, java.lang.String)
      */
-//  @Override
+    @Override
     public void writeNamespace(
         String prefix,
         String uri
@@ -914,7 +914,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeDefaultNamespace(java.lang.String)
      */
-//  @Override
+    @Override
     public void writeDefaultNamespace(
         String uri
     ) throws XMLStreamException {

@@ -116,14 +116,15 @@ public enum ConfigurableProperty {
     ConnectionFactory("org.openmdx.jdo.ConnectionFactory"),
     ConnectionFactory2("org.openmdx.jdo.ConnectionFactory2"),
     ContainerManaged("org.openmdx.jdo.option.ContainerManaged"),
-    IsolateThreads("org.openmdx.jdo.option.IsolateThreads");
+    IsolateThreads("org.openmdx.jdo.option.IsolateThreads"),
+    FinalizePersistenceManagers("org.openmdx.jdo.option.FinalizePersistenceManagers");
 
     /**
      * Constructor
      * 
      * @param qualifiedName the property's qualifiedName
      */
-    private ConfigurableProperty(
+    ConfigurableProperty(
         String qualifiedName
     ){
         this.qualifiedName = qualifiedName;

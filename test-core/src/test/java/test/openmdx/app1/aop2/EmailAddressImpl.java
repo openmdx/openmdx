@@ -63,8 +63,8 @@ public class EmailAddressImpl extends AddressImpl<test.openmdx.app1.jmi1.EmailAd
     /**
      * Constructor 
      *
-     * @param same
-     * @param next
+     * @param same the same layer JMI API
+     * @param next the next layer CCI API
      */
     public EmailAddressImpl(
         test.openmdx.app1.jmi1.EmailAddress same,

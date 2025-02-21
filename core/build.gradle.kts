@@ -163,13 +163,16 @@ dependencies {
     // implementation
     implementation(platform(project(projectPlatform)))
 	implementation("jakarta.platform:jakarta.jakartaee-api")
-    implementation("javax.jdo:jdo-api")
     implementation("javax.cache:cache-api")
 	implementation("com.vladsch.flexmark:flexmark")
 	if(runtimeCompatibility.isJava8()) {
+		implementation(group= "javax.jdo", name = "jdo-api")
 		implementation(group = "com.atomikos", name = "transactions-jta")
 		implementation(group = "com.atomikos", name = "transactions-jdbc")
 	} else {
+		implementation(group= "javax.jdo", name = "jdo-api") {
+			exclude(group = "javax.transaction", module = "transaction-api")
+		}
 		implementation(group = "com.atomikos", name = "transactions-jta", classifier = "jakarta")
 		implementation(group = "com.atomikos", name = "transactions-jdbc", classifier = "jakarta")
 	}
@@ -193,7 +196,13 @@ dependencies {
     annotationProcessor("systems.manifold:manifold-preprocessor")
     // jdo-api
     jdoApi(platform(project(projectPlatform)))
-    jdoApi("javax.jdo:jdo-api")
+	if(runtimeCompatibility.isJava8()) {
+		jdoApi(group= "javax.jdo", name = "jdo-api")
+	} else {
+		jdoApi(group= "javax.jdo", name = "jdo-api") {
+			exclude(group = "javax.transaction", module = "transaction-api")
+		}
+	}
     // cache-api
     cacheApi(platform(project(projectPlatform)))
     cacheApi("javax.cache:cache-api")
@@ -203,6 +212,7 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
+			srcDir("src/main/openmdx-${projectFlavour}/java")
             srcDir(layout.buildDirectory.dir("generated/sources/java/main"))
 			srcDir(layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main"))
         }
@@ -224,48 +234,49 @@ sourceSets {
 tasks {
 
 	val openmdxBaseIncludes = listOf(
-		"javax/cache/*/**",
-		"javax/jdo/*/**",
-		"javax/jmi/*/**",
+		"javax/cache/**",
+		"javax/jdo/**",
+		"javax/jmi/**",
+		"javax/transaction/**",
 		"net/*/NetPackage*",
 		"net/rfc/*/RfcPackage*",
 		"org/*/OrgPackage*",
 		"org/ietf/*/IetfPackage*",
 		"org/iso/*/IsoPackage*",
-		"org/oasisopen/*/**",
-		"org/omg/*/**",
+		"org/oasisopen/**",
+		"org/omg/**",
 		"org/openmdx/*/OpenmdxPackage*",
 		"org/openmdx/*1/**",
 		"org/openmdx/*2/**",
-		"org/openmdx/application/*/**",
-		"org/openmdx/base/*/**",
-		"org/openmdx/dalvik/uses/*/**",
-		"org/openmdx/exception/*/**",
-		"org/openmdx/kernel/*/**",
-		"org/openmdx/jdo/*/**",
-		"org/openmdx/uses/gnu/*/**",
-		"org/openmdx/uses/javax/*/**",
-		"org/openmdx/uses/org/apache/commons/collections/*/**",
-		"org/openmdx/uses/org/apache/commons/fileupload/*/**",
-		"org/openmdx/uses/org/apache/commons/io/*/**",
-		"org/openmdx/uses/org/apache/commons/pool/*/**",
-		"org/openmdx/uses/org/apache/commons/pool2/*/**",
+		"org/openmdx/application/**",
+		"org/openmdx/base/**",
+		"org/openmdx/dalvik/uses/**",
+		"org/openmdx/exception/**",
+		"org/openmdx/kernel/**",
+		"org/openmdx/jdo/**",
+		"org/openmdx/uses/gnu/**",
+		"org/openmdx/uses/javax/**",
+		"org/openmdx/uses/org/apache/commons/collections/**",
+		"org/openmdx/uses/org/apache/commons/fileupload/**",
+		"org/openmdx/uses/org/apache/commons/io/**",
+		"org/openmdx/uses/org/apache/commons/pool/**",
+		"org/openmdx/uses/org/apache/commons/pool2/**",
 		"org/un/*/UnPackage*",
-		"org/w3c/*/**",
-		"org/xmi/*",
+		"org/w3c/**",
+		"org/xmi/**",
 		"META-INF/orm.xml",
 		"META-INF/openmdx*.properties"
 	)
 	val openmdxBaseExcludes = listOf(
-		"org/openmdx/compatibility/kernel/url/protocol/*/**",
-		"org/openmdx/kernel/url/protocol/*/**"
+		"org/openmdx/compatibility/kernel/url/protocol/**",
+		"org/openmdx/kernel/url/protocol/**"
 	)
 	val openmdxSystemIncludes = listOf(
-		"org/openmdx/compatibility/kernel/url/protocol/*/**",
-		"org/openmdx/kernel/logging/*/**",
-		"org/openmdx/kernel/url/protocol/*/**",
-		"org/openmdx/kernel/xri/*",
-		"org/openmdx/system/*/**"
+		"org/openmdx/compatibility/kernel/url/protocol/**",
+		"org/openmdx/kernel/logging/**",
+		"org/openmdx/kernel/url/protocol/**",
+		"org/openmdx/kernel/xri/**",
+		"org/openmdx/system/**"
 	)
 	val openmdxSystemExcludes = listOf<String>( )
 

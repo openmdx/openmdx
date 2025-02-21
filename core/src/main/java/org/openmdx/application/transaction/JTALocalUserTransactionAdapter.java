@@ -99,7 +99,7 @@ public class JTALocalUserTransactionAdapter implements LocalUserTransaction {
      * @throws ResourceException
      * @see javax.resource.spi.LocalTransaction#begin()
      */
-//  @Override
+    @Override
     public void begin(
     ) throws ResourceException {
         try {
@@ -121,7 +121,7 @@ public class JTALocalUserTransactionAdapter implements LocalUserTransaction {
      * @throws ResourceException
      * @see javax.resource.spi.LocalTransaction#commit()
      */
-//  @Override
+    @Override
     public void commit(
     ) throws ResourceException {
         try {
@@ -163,7 +163,7 @@ public class JTALocalUserTransactionAdapter implements LocalUserTransaction {
      * @throws ResourceException
      * @see javax.resource.spi.LocalTransaction#rollback()
      */
-//  @Override
+    @Override
     public void rollback(
     ) throws ResourceException {
         try {
@@ -189,7 +189,7 @@ public class JTALocalUserTransactionAdapter implements LocalUserTransaction {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.UserTransaction_2_0#setRollbackOnly()
      */
-//  @Override
+    @Override
     public void setRollbackOnly() {
         try {
             this.delegate.setRollbackOnly();
@@ -217,7 +217,7 @@ public class JTALocalUserTransactionAdapter implements LocalUserTransaction {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.UserTransaction_2_0#isRollbackOnly()
      */
-//  @Override
+    @Override
     public boolean isRollbackOnly(
     ) {
         try {
