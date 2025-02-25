@@ -134,6 +134,29 @@ abstract class AbstractJmi1ContainerInvocationHandler
         Method method,
         Object[] args
     ) throws IllegalAccessException, InvocationTargetException, ServiceException;
-    
 
+    /**
+     * Convert the given arguments to a list of qualifiers
+     *
+     * @param args the arguments
+     * @return the qualifiers
+     */
+    protected static List<RefQualifier> getQualifierList(Object[] args) {
+
+        if (args == null) {
+            throw new IllegalArgumentException("Arguments array cannot be null.");
+        }
+
+        if (args.length % 2 != 0) {
+            throw new IllegalArgumentException("Arguments array must have an even number of elements.");
+        }
+
+        List<RefQualifier> qualifiers = new ArrayList<>();
+
+        for (int i = 0; i < args.length; i += 2) {
+            qualifiers.add(new RefQualifier((QualifierType) args[i], args[i + 1]));
+        }
+
+        return qualifiers;
+    }
 }

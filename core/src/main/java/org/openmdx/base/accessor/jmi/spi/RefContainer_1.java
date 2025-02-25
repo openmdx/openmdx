@@ -702,36 +702,6 @@ public class RefContainer_1
     static String toQualifier(
         List<RefQualifier> qualifierList
     ){
-        switch(size) {
-            case 0:
-                return null;
-            case 1:
-                return String.valueOf(arguments[0]);
-            default: {
-                if((size & 1) == 1) throw new IllegalArgumentException(
-                    "The ref-method was invoked with an odd number of arguments greater than one: " + arguments.length
-                );
-                StringBuilder qualifier = new StringBuilder(
-                    arguments[0] == PERSISTENT ? "!" : ""
-                ).append(
-                    arguments[1] == null ?
-                        org.openmdx.base.naming.TransactionalSegment.getClassicRepresentationOfNewInstance() :
-                        String.valueOf(arguments[1])
-                );
-                for(
-                    int i = 2;
-                    i < size;
-                    i++
-                ){
-                    qualifier.append(
-                        arguments[i] == PERSISTENT ? '!' : '*'
-                    ).append(
-                        arguments[++i]
-                    );
-                }
-                return qualifier.toString();
-            }
-        }
         if (qualifierList.isEmpty())
             return null;
 
