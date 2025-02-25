@@ -101,22 +101,20 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
             //
             final Object[] arguments = (Object[]) this.marshaller.unmarshal(args);
             switch (methodName) {
-                case "add" -> // TODO: dirty-harry
-                        this.refDelegate.refAdd(
-                                AbstractJmi1ContainerInvocationHandler.getQualifierList(arguments),
-                                arguments[arguments.length - 1]
-                        );
-                case "get" -> { // TODO: dirty-harry
+                case "add" -> ((RefContainer_1) this.refDelegate).refAdd(
+                        AbstractJmi1ContainerInvocationHandler.getQualifierList(arguments),
+                        (RefObject_1_0) arguments[arguments.length - 1]
+                );
+                case "get" -> {
                     return this.marshaller.marshal(
                             this.refDelegate.refGet(
                                     AbstractJmi1ContainerInvocationHandler.getQualifierList(arguments)
                             )
                     );
                 }
-                case "remove" -> // TODO: dirty-harry
-                        this.refDelegate.refRemove(
-                                AbstractJmi1ContainerInvocationHandler.getQualifierList(arguments)
-                        );
+                case "remove" -> this.refDelegate.refRemove(
+                        AbstractJmi1ContainerInvocationHandler.getQualifierList(arguments)
+                );
             }
         } else if (declaringClass == Container.class) {
             // 
