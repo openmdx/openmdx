@@ -115,6 +115,7 @@ public class ClassMapper
         );
         printLine(" */");
         this.mapGeneratedAnnotation();
+        this.mapDeprecatedAnnotation(this.classDef);
         printLine("public interface ", this.classDef.getName(), "Class {");
         newLine();
         printLine("    /**");
