@@ -129,7 +129,7 @@ public class ImportHelper {
             setFeature(reader, "http://apache.org/xml/features/validation/schema", xmlValidation);
             // XML eXternal Entity injection (XXE)
             // See https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
-            setFeature(reader, "http://apache.org/xml/features/disallow-doctype-decl", false);
+            setFeature(reader, "http://apache.org/xml/features/disallow-doctype-decl", true);
             // Handlers
             reader.setContentHandler(importHandler);
             reader.setDTDHandler(importHandler);
