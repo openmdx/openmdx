@@ -1158,7 +1158,7 @@ public class ReducedJDOHelper implements Constants {
     protected static DocumentBuilderFactory getDefaultDocumentBuilderFactory() {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try {
-            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
         } catch (ParserConfigurationException e) {
             throw new JDOFatalUserException(e.getMessage());
         }

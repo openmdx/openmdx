@@ -129,21 +129,14 @@ public class ImportHelper {
             setFeature(reader, "http://apache.org/xml/features/validation/schema", xmlValidation);
             // XML eXternal Entity injection (XXE)
             // See https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
-            setFeature(reader, "http://apache.org/xml/features/disallow-doctype-decl", true);
+            setFeature(reader, "http://apache.org/xml/features/disallow-doctype-decl", false);
             // Handlers
             reader.setContentHandler(importHandler);
             reader.setDTDHandler(importHandler);
             reader.setErrorHandler(errorHandler == null ? importHandler : errorHandler);
             reader.setEntityResolver(importHandler);
             return reader;
-        } catch (ParserConfigurationException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                "Unable to acquire a SAX Parser"
-            );
-        } catch (SAXException exception) {
+        } catch (ParserConfigurationException | SAXException exception) {
             throw new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,

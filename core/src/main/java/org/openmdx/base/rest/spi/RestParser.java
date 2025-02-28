@@ -159,7 +159,7 @@ public class RestParser {
                 try {
                     // Prevent XML eXternal Entity injection (XXE)
                     // See https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
-                    reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+                    reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
                 } catch(SAXException e) {
                     SysLog.info("Unable to set SAXReader feature", e.getMessage());
                 }
