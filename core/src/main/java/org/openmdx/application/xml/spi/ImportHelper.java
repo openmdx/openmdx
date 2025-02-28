@@ -136,14 +136,7 @@ public class ImportHelper {
             reader.setErrorHandler(errorHandler == null ? importHandler : errorHandler);
             reader.setEntityResolver(importHandler);
             return reader;
-        } catch (ParserConfigurationException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                "Unable to acquire a SAX Parser"
-            );
-        } catch (SAXException exception) {
+        } catch (ParserConfigurationException | SAXException exception) {
             throw new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,

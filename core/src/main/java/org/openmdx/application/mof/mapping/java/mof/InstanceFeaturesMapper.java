@@ -149,6 +149,7 @@ public class InstanceFeaturesMapper extends FeaturesMapper {
         MapperUtils.wrapText(" * ", "Features of class " + this.classDef.getName(), this::printLine);
         printLine(" */");
         this.mapGeneratedAnnotation();
+        this.mapDeprecatedAnnotation(this.classDef);
         print("public interface " + this.classDef.getName() + FEATURES_INTERFACE_SUFFIX);
         if (!this.classDef.getSupertypes().isEmpty()) {
             String separator = " extends "; 

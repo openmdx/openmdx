@@ -122,6 +122,7 @@ public class ClassMapper extends AbstractClassMapper {
         );
         newLine();
         this.mapGeneratedAnnotation();
+        this.mapDeprecatedAnnotation(this.classDef);
         printLine("public interface ", this.className, "Class ");
         if(this.format.isJMI1()) printLine("  extends javax.jmi.reflect.RefClass");
         printLine("{");
@@ -134,6 +135,7 @@ public class ClassMapper extends AbstractClassMapper {
             this::printLine
         );
         printLine("   */");
+        this.mapDeprecatedAnnotation(this.classDef);
         printLine("  public ", this.className, " create", this.className, "(");
         printLine("  );");
         newLine();
@@ -154,6 +156,7 @@ public class ClassMapper extends AbstractClassMapper {
             this::printLine
         );
         printLine("   */");
+        this.mapDeprecatedAnnotation(this.classDef);
         printLine("  public ", this.className, " get", this.className, "(");
         printLine("    Object object");
         printLine("  );");

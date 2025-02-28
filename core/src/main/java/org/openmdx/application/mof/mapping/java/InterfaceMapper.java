@@ -116,6 +116,7 @@ extends AbstractClassMapper {
         mapAnnotation(" * ", this.classDef);
         printLine(" */");
         this.mapGeneratedAnnotation();
+        this.mapDeprecatedAnnotation(this.classDef);
         printLine("public interface ", this.className, " extends ", this.interfaceType(this.classDef, Visibility.CCI, false), " {"); 
     }
 
