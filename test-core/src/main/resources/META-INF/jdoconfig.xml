@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<jdoconfig 
-	xmlns="http://xmlns.jcp.org/xml/ns/jdo/jdoconfig"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/jdo/jdoconfig http://xmlns.jcp.org/xml/ns/jdo/jdoconfig_3_0.xsd"
+<jdoconfig xmlns="http://java.sun.com/xml/ns/jdo/jdoconfig"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://java.sun.com/xml/ns/jdo/jdoconfig xri://+resource/javax/jdo/jdoconfig_3_1.xsd"
 >
+
 	<!-- Clock -->
     <persistence-manager-factory 
     	name="test-Clock-EntityManagerFactory"
