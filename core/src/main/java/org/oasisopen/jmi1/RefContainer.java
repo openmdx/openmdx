@@ -57,17 +57,28 @@ import org.w3c.cci2.Container;
  */
 public interface RefContainer<E extends RefObject> extends Container<E>, RefBaseObject {
 
+    #if CLASSIC_CHRONO_TYPES
+        /**
+     * Adds an object to the container
+     *
+     * @param arguments there is always an odd number of arguments:
+     * ((REASSIGNABLE|PERSISTENT) identifier)+ value
+     */
+    void refAdd(
+        Object... arguments
+    );
+    #else
     /**
      * Adds an object to the container
-     * 
+     *
      * @param qualifierType
      * @param object
      * @param refObject
      */
     void refAdd(
-        QualifierType qualifierType,
-        Object object,
-        E refObject
+            QualifierType qualifierType,
+            Object object,
+            E refObject
     );
 
     /**
@@ -76,21 +87,35 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
      * @param qualifierList
      */
     void refAdd(
-        List<RefQualifier> qualifierList,
-        E refObject
+            List<RefQualifier> qualifierList,
+            E refObject
     );
-    
+    #endif
+
+    #if CLASSIC_CHRONO_TYPES
     /**
      * Retrieves an object from the container
-     * 
+     *
+     * @param arguments there is always an even number of arguments:
+     * (({@link #REASSIGNABLE}|{@link #PERSISTENT}) identifier)+
+     *
+     * @return the object
+     */
+    E refGet(
+        Object... arguments
+    );
+    #else
+    /**
+     * Retrieves an object from the container
+     *
      * @param qualifierType
      * @param object
      *
      * @return the object
      */
     E refGet(
-        QualifierType qualifierType,
-        Object object
+            QualifierType qualifierType,
+            Object object
     );
 
     /**
@@ -101,18 +126,30 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
      * @return the object
      */
     E refGet(
-        List<RefQualifier> qualifierList
+            List<RefQualifier> qualifierList
     );
+    #endif
 
+    #if CLASSIC_CHRONO_TYPES
     /**
      * Removes an object from the container
-     * 
+     *
+     * @param arguments there is always an even number of arguments:
+     * (({@link #REASSIGNABLE}|{@link #PERSISTENT}) identifier)+
+     */
+    void refRemove(
+            Object... arguments
+    );
+    #else
+    /**
+     * Removes an object from the container
+     *
      * @param qualifierType
      * @param object
      */
     void refRemove(
-        QualifierType qualifierType,
-        Object object
+            QualifierType qualifierType,
+            Object object
     );
 
     /**
@@ -121,8 +158,9 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
      * @param qualifierList
      */
     void refRemove(
-        List<RefQualifier> qualifierList
+            List<RefQualifier> qualifierList
     );
+    #endif
 
     /**
      * Precedes a persistent sub-segment.

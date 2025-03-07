@@ -1108,8 +1108,9 @@ public class RestInteraction extends AbstractRestInteraction {
                     SysLog.warning("Optimistic write lock expects a byte[] version", writeLock.getClass().getName());
                 }
                 if (LockAssertions.isReadLockAssertion(readLock)) {
-                    java.util.Date transactionTime = LockAssertions.getTransactionTime(readLock);
-                    java.util.Date modifiedAt = (java.util.Date) obj.getValue().get(SystemAttributes.MODIFIED_AT);
+                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime = LockAssertions.getTransactionTime(readLock);
+                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif modifiedAt
+                            = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif ) obj.getValue().get(SystemAttributes.MODIFIED_AT);
                     if (modifiedAt == null) {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
@@ -1118,7 +1119,7 @@ public class RestInteraction extends AbstractRestInteraction {
                             new BasicException.Parameter(BasicException.Parameter.XRI, object.getResourceIdentifier()),
                             new BasicException.Parameter("expected", readLock),
                             new BasicException.Parameter("actual"));
-                    } else if (transactionTime.before(modifiedAt)) {
+                    } else if (transactionTime.#if CLASSIC_CHRONO_TYPES before #else isBefore #endif(modifiedAt)) {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.CONCURRENT_ACCESS_FAILURE,

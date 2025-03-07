@@ -72,7 +72,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1705,7 +1704,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											mappedNewValue = valueHolder.isOptionalValued() || mappedNewValue != null
 												? mappedNewValue 
 												: PrimitiveTypes.DATE.equals(featureTypeName) 
-													? new Date(0) 
+													? new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(0)
 													: DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendar(1, 1, 1, 0, 0, 0, 0, 0);
 											if(valueHolder.isOptionalValued()) {
 												if(target instanceof RefObject) {
@@ -1734,7 +1733,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											}
 										} else {
 											String newValue = (String)newValues.get(0);
-											Date mappedNewValue = null;
+											#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mappedNewValue = null;
 											try {
 												mappedNewValue = dateTimeParser.parse(newValue);
 											} catch(ParseException e) {
@@ -1852,7 +1851,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 									for(Iterator<String> j = newValues.iterator(); j.hasNext(); ) {
 										try {
 											String newValue = (String)j.next();
-											Date dateTime = null;
+											#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTime = null;
 											try {
 												dateTime = dateTimeParser.parse(newValue);
 											} catch(ParseException e) {

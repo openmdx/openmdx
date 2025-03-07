@@ -97,7 +97,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -250,7 +249,7 @@ public class ObjectInspectorServlet extends HttpServlet {
             throw new ServletException("can not get persistence manager factory", e);
         }
         // Info
-        String messagePrefix = new Date() + "  ";
+        String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
         System.out.println();
         System.out.println();
         System.out.println(messagePrefix + "Starting web application \"" + conf.getServletContext().getContextPath() + "\"");

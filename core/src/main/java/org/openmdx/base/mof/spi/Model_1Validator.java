@@ -52,7 +52,6 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -269,13 +268,13 @@ public class Model_1Validator {
                     );
                 }
             } else if (PrimitiveTypes.DATETIME.equals(type)) {
-                if(!(value instanceof Date)) {
+                if(!(value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.VALIDATION_FAILURE,
                         "Invalid value class",
                         new BasicException.Parameter("type", type),
-                        new BasicException.Parameter("expected", Date.class.getName()),
+                        new BasicException.Parameter("expected", #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class.getName()),
                         new BasicException.Parameter("actual", value.getClass().getName())
                     );
                 }

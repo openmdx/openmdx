@@ -46,9 +46,9 @@ package org.w3c.format;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -222,7 +222,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
      * @return	the formatted time string.
      */	
     public String format(
-    	Date date
+    	#if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif date
     ){
     	return get().format(date);
     }
@@ -237,7 +237,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
      * @exception	ParseException
      *				If the given string cannot be parsed as a date.
      */
-    public Date parse(
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif parse(
     	String text
     ) throws ParseException {
         if(this.rejectE) {
@@ -247,7 +247,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
                 e            
             );
         }
-    	return get().parse(text);
+    	return get().parse(text)#if !CLASSIC_CHRONO_TYPES .toInstant()#endif;
     }
             
     
@@ -345,7 +345,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
         /**
          * Convert to millisecond accuracy
          * 
-         * @param text
+         * @param rawText the value to be adjusted
          * 
          * @return a normalized value (with maybe trailing zeroes, as opposed to W3's XML schema recommendation
          * 
@@ -377,14 +377,14 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
             //
             return text.length() >= this.defaultValue.length() ? 
                 text.substring(0, this.defaultValue.length() -1) + "Z" :
-                text + defaultValue.substring(text.length(), defaultValue.length());
+                text + defaultValue.substring(text.length());
         }
         
         /* (non-Javadoc)
          * @see org.openmdx.base.text.format.DateFormat#parse(java.lang.String)
          */
         @Override
-        public Date parse(
+        public #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif parse(
             String text
         ) throws ParseException {
             return super.parse(

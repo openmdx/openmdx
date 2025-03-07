@@ -51,7 +51,6 @@ package org.openmdx.portal.servlet.loader;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -85,7 +84,7 @@ public class LayoutLoader
       String[] locale,
       Model_1_0 model
   ) throws ServiceException {
-	  String messagePrefix = new Date() + "  ";
+	  String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
     System.out.println(messagePrefix + "Loading layouts");
     SysLog.info("Loading layouts");
     // 2-dim list: first index=locale, second index = layout file name

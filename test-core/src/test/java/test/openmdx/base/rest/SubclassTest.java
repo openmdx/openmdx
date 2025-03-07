@@ -56,9 +56,9 @@ public class SubclassTest {
     public void testX() {
         XInterface x = new XImplementation(System.currentTimeMillis());
         java.util.Date dX = x.getList().get(0); 
-        Assertions.assertEquals(java.util.Date.class, dX.getClass(), "dX");
+        Assertions.assertEquals(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, dX.getClass(), "dX");
         dX = x.list().get(0);
-        Assertions.assertEquals(java.util.Date.class, dX.getClass(), "dX");
+        Assertions.assertEquals(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, dX.getClass(), "dX");
     }
 
     @Test

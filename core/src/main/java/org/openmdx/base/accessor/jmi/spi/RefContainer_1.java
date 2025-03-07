@@ -48,7 +48,7 @@ import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+#if !CLASSIC_CHRONO_TYPES import java.util.Collections;#endif
 import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterator;
@@ -61,9 +61,9 @@ import javax.jdo.spi.StateManager;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
-import org.oasisopen.cci2.QualifierType;
+#if !CLASSIC_CHRONO_TYPES import org.oasisopen.cci2.QualifierType;#endif
 import org.oasisopen.jmi1.RefContainer;
-import org.oasisopen.jmi1.RefQualifier;
+#if !CLASSIC_CHRONO_TYPES import org.oasisopen.jmi1.RefQualifier;#endif
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
@@ -78,7 +78,7 @@ import org.openmdx.base.collection.MarshallingSpliterator;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.naming.TransactionalSegment;
+#if !CLASSIC_CHRONO_TYPES import org.openmdx.base.naming.TransactionalSegment;#endif
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
@@ -603,6 +603,19 @@ public class RefContainer_1
     // Implements RefContainer
     //------------------------------------------------------------------------
 
+    #if CLASSIC_CHRONO_TYPES
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refAdd(java.lang.Object[])
+     */
+    @Override
+    public void refAdd(Object... arguments) {
+        int objectIndex = arguments.length - 1;
+        add(
+            RefContainer_1.toQualifier(objectIndex, arguments),
+            (RefObject_1_0) arguments[objectIndex]
+        );
+    }
+    #else
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refAdd(org.oasisopen.cci2.QualifierType, java.lang.Object, RefObject_1_0)
      */
@@ -623,7 +636,19 @@ public class RefContainer_1
     public void refAdd(List<RefQualifier> qualifierList, RefObject_1_0 refObject) {
         add(RefContainer_1.toQualifier(qualifierList), refObject);
     }
+    #endif
 
+    #if CLASSIC_CHRONO_TYPES
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refGet(java.lang.Object[])
+     */
+    @Override
+    public RefObject_1_0 refGet(Object... arguments) {
+        return get(
+            RefContainer_1.toQualifier(arguments.length, arguments)
+        );
+    }
+    #else
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refGet(org.oasisopen.cci2.QualifierType, java.lang.Object)
      */
@@ -643,6 +668,7 @@ public class RefContainer_1
     public RefObject_1_0 refGet(List<RefQualifier> qualifierList) {
         return get(RefContainer_1.toQualifier(qualifierList));
     }
+    #endif
 
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refGetAll(java.lang.Object)
@@ -656,6 +682,22 @@ public class RefContainer_1
         );
     }
 
+    #if CLASSIC_CHRONO_TYPES
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refRemove(java.lang.Object[])
+     */
+    @Override
+    public void refRemove(Object... arguments) {
+        RefObject_1_0 object = this.get(RefContainer_1.toQualifier(arguments.length, arguments));
+        if(object != null) {
+            if(JDOHelper.isPersistent(object)) {
+                object.refDelete();
+            } else {
+                this.remove(object);
+            }
+        }
+    }
+    #else
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refRemove(org.oasisopen.cci2.QualifierType, java.lang.Object)
      */
@@ -678,6 +720,7 @@ public class RefContainer_1
             }
         }
     }
+    #endif
 
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refRemoveAll(java.lang.Object)
@@ -692,6 +735,51 @@ public class RefContainer_1
         return removed;
     }
 
+    #if CLASSIC_CHRONO_TYPES
+    /**
+     * Create a qualifier from its sub-segment specification array
+     *
+     * @param size
+     * @param arguments
+     *
+     * @return the corresponding qualifier
+     */
+    static String toQualifier(
+        int size,
+        Object[] arguments
+    ){
+        switch(size) {
+            case 0:
+                return null;
+            case 1:
+                return String.valueOf(arguments[0]);
+            default: {
+                if((size & 1) == 1) throw new IllegalArgumentException(
+                    "The ref-method was invoked with an odd number of arguments greater than one: " + arguments.length
+                );
+                StringBuilder qualifier = new StringBuilder(
+                    arguments[0] == PERSISTENT ? "!" : ""
+                ).append(
+                    arguments[1] == null ?
+                        org.openmdx.base.naming.TransactionalSegment.getClassicRepresentationOfNewInstance() :
+                        String.valueOf(arguments[1])
+                );
+                for(
+                    int i = 2;
+                    i < size;
+                    i++
+                ){
+                    qualifier.append(
+                        arguments[i] == PERSISTENT ? '!' : '*'
+                    ).append(
+                        arguments[++i]
+                    );
+                }
+                return qualifier.toString();
+            }
+        }
+    }
+    #else
     /**
      * Create a qualifier from its sub-segment specification array
      *
@@ -726,6 +814,8 @@ public class RefContainer_1
         }
         return qualifier.toString();
     }
+    #endif
+
 
     private QueryComponents toQueryComponents (
         Object rawQuery

@@ -44,7 +44,7 @@
  */
 package org.openmdx.state2.spi;
 
-import java.util.Date;
+
 
 import org.openmdx.state2.cci.DateTimeStateContext;
 import org.openmdx.state2.cci.ViewKind;
@@ -52,11 +52,13 @@ import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
 
+import java.time.Instant;
+
 /**
  * Date State View Context
  */
 public class DateTimeStateViewContext 
-    extends StateViewContext<Date>
+    extends StateViewContext<#if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif>
     implements DateTimeStateContext 
 {
 
@@ -65,17 +67,17 @@ public class DateTimeStateViewContext
      * 
      * @param datatypeFactory the immutable datatype factory
      * @param validFrom the begin of the time range, or {@code null} for an unconstrained lower bound
-     * @param validTo the end of the time range, or {@code null} for an unconstrained upper bound
+     * @param invalidFrom the end of the time range, or {@code null} for an unconstrained upper bound
      * @param validFor the view's valid time point, or {@code null} for time range views
      * @param validAt the view's transaction time point, or {@code null} for time range views
      */
     private DateTimeStateViewContext(
         ImmutableDatatypeFactory datatypeFactory,
         ViewKind viewKind,
-        Date validFor,
-        Date validAt,
-        Date validFrom, 
-        Date invalidFrom
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validFor,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validAt,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validFrom,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif invalidFrom
     ) {
         super(
             viewKind,
@@ -99,8 +101,8 @@ public class DateTimeStateViewContext
      * @param validAt the view's transaction time point
      */
     public static DateTimeStateViewContext newTimePointViewContext(
-        Date validFor,
-        Date validAt
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validFor,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validAt
     ){
         return new DateTimeStateViewContext(
             DatatypeFactories.immutableDatatypeFactory(),
@@ -119,8 +121,8 @@ public class DateTimeStateViewContext
      * @param validTo the end of the time range, or {@code null} for an unconstrained upper bound
      */
     public static DateTimeStateViewContext newTimeRangeViewContext(
-        Date validFrom,
-        Date validTo
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validFrom,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validTo
     ){
         return new DateTimeStateViewContext(
             DatatypeFactories.immutableDatatypeFactory(),
@@ -142,7 +144,7 @@ public class DateTimeStateViewContext
      *
      * @return the time range view's upper bound.
      */
-    public final Date getInvalidFrom(
+    public final #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif getInvalidFrom(
     ) {
         return super.getUpperBound();
     }
@@ -157,7 +159,7 @@ public class DateTimeStateViewContext
      */
     @Override
     protected String toString(
-        Date timePoint
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif timePoint
     ) {
         return DateTimeFormat.BASIC_UTC_FORMAT.format(timePoint);
     }
@@ -166,8 +168,8 @@ public class DateTimeStateViewContext
      * @see org.openmdx.state2.spi.StateViewContext#now()
      */
     @Override
-    protected Date newValidAt() {
-        return new Date();
+    protected #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif newValidAt() {
+        return #if CLASSIC_CHRONO_TYPES new java.util.Date() #else Instant.now() #endif;
     }
 
 }

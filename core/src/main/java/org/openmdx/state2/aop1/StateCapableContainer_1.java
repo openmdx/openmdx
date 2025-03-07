@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -296,7 +295,7 @@ public class StateCapableContainer_1
                             )
                         );
                 	}
-                	Date existsAt = stateContext.getExistsAt();
+                	#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt = stateContext.getExistsAt();
                 	if(existsAt == null) {
                 		filter.add(
                             new IsInCondition(

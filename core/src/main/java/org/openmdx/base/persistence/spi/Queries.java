@@ -49,7 +49,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +107,7 @@ public class Queries {
     	} else if("date".equals(name)) {
     		return XMLGregorianCalendar.class;
     	} else if("datetime".equalsIgnoreCase(name)) {
-    		return Date.class;
+    		return #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class;
     	} else if("short".equalsIgnoreCase(name)) {
     		return Short.class;
     	} else  if("int".equalsIgnoreCase(name) || "integer".equalsIgnoreCase(name)) {

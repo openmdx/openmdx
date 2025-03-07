@@ -45,7 +45,6 @@
 package org.openmdx.base.query;
 
 import java.util.Comparator;
-import java.util.Date;
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
@@ -147,13 +146,13 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
                 left.compare(right)
             );
         }
-        if (first instanceof Date){
-            Date left = (Date) first;
-            Date right;
-            if(second instanceof Date) {
-                right = (Date) second;
+        if (first instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif){
+            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif left = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) first;
+            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif right;
+            if(second instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) {
+                right = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) second;
             } else if (second instanceof CharSequence){
-                right = Datatypes.create(Date.class, second.toString());
+                right = Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, second.toString());
             } else throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,

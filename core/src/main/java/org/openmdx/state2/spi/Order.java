@@ -45,7 +45,7 @@
 
 package org.openmdx.state2.spi;
 
-import java.util.Date;
+
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
@@ -240,8 +240,8 @@ public class Order {
      * @throws IllegalArgumentException if invalidFrom is less than or equal to validFrom 
      */
     public static void assertTimeRange(
-        Date validFrom,
-        Date invalidFrom
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFrom,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif invalidFrom
     ){
         if(validFrom != null && invalidFrom != null) {
             if(invalidFrom.compareTo(validFrom) <= 0) {
@@ -271,8 +271,8 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareValidFrom(
-        Date d1,
-        Date d2
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d1,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d2
     ){
         return d1 == null ? (
             d2 == null ? 0 : -1
@@ -292,8 +292,8 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareInvalidFrom(
-        Date d1,
-        Date d2
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d1,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d2
     ){
         return d1 == null ? (
             d2 == null ? 0 : 1
@@ -314,8 +314,8 @@ public class Order {
      * is less than, equal to, or greater than {@code to}. 
      */
     public static int compareValidFromToValidTo(
-        Date from,
-        Date to
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to
     ){
         return from == null || to == null ? -1 : from.compareTo(to);
     }
@@ -336,8 +336,8 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareRemovedAt(
-        Date d1,
-        Date d2
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d1,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d2
     ){
         return d1 == null ? (
             d2 == null ? 0 : 1

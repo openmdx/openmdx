@@ -56,7 +56,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1660,13 +1659,13 @@ public abstract class UiGrid extends Grid implements Serializable {
 						(condition instanceof IsBetweenCondition) &&
 						(values.size() < 2)
 					) {
-						Date day;
+						#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif day;
 						if(values.isEmpty()) {
-							day = new Date();
+							day = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif;
 						} else try {
-							day = (Date)values.get(0);
+							day = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)values.get(0);
 						} catch(IllegalArgumentException e) {
-							day = new Date();
+							day = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif;
 						}
 						Calendar nextDay = new GregorianCalendar();
 						nextDay.setTime(day);

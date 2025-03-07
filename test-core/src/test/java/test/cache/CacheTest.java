@@ -44,7 +44,6 @@
  */
 package test.cache;
 
-import java.util.Date;
 
 import javax.cache.Cache;
 import javax.cache.CacheException;
@@ -85,9 +84,9 @@ public class CacheTest {
                 }
 
                 @Override
-                public Class<Date> getValueType(
+                public Class<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> getValueType(
                 ) {
-                    return Date.class;
+                    return #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class;
                 }
 
                 @Override
@@ -96,11 +95,12 @@ public class CacheTest {
                     return false;
                 }
             };
-            Date now = new Date();
-            Cache<String,Date> cache1 = cacheManager.createCache("testCache", configuration);
+            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif now = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif;
+            Cache<String,#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> cache1 = cacheManager.createCache("testCache", configuration);
             cache1.put("created", now);
-            now = new Date(now.getTime() + 1000);
-            Cache<String,Date> cache2 = cacheManager.createCache("testCache", configuration);
+            #if CLASSIC_CHRONO_TYPES now = new java.util.Date(now.getTime() + 1000) #else now = now.plusMillis(1000) #endif;
+//            now = new Date(now.getTime() + 1000);
+            Cache<String,#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> cache2 = cacheManager.createCache("testCache", configuration);
             cache2.put("created", now);
             System.out.println(cache1.getClass().getName() + '@' + System.identityHashCode(cache1) + " created at " + cache1.get("created"));
             System.out.println(cache2.getClass().getName() + '@' + System.identityHashCode(cache2) + " created at " + cache2.get("created"));

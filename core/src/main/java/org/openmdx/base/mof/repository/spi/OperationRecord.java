@@ -45,7 +45,6 @@
 package org.openmdx.base.mof.repository.spi;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.Set;
 
 import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
@@ -133,7 +132,7 @@ public class OperationRecord
                  setIdentity(value);
                  break;
              case modifiedAt:
-                 setModifiedAt((Date)value);
+                 setModifiedAt((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
                  break;
              case createdBy:
                  setCreatedBy((Collection<?>)value);
@@ -142,7 +141,7 @@ public class OperationRecord
                  setStereotype((Collection<?>)value);
                  break;
              case createdAt:
-                 setCreatedAt((Date)value);
+                 setCreatedAt((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
                  break;
              case modifiedBy:
                  setModifiedBy((Collection<?>)value);

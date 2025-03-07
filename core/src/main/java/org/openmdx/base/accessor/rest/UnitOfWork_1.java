@@ -47,7 +47,6 @@ package org.openmdx.base.accessor.rest;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -203,7 +202,7 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
     /**
      * Defines when the unit of work did start.
      */
-    private Date transactionTime = null;
+    private #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime = null;
 
     /**
      * A unit-of-work id is assigned when the unit of work is activated.
@@ -524,7 +523,7 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
      * 
      * @return the transaction time
      */
-    public Date getTransactionTime() {
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getTransactionTime() {
         return this.transactionTime;
     }
 
@@ -1257,9 +1256,9 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
          * 
          * @see UserObjects#setTransactionTime(PersistenceManager, Factory<Date>)
          */
-        Date newTransactionTime() {
-            Factory<Date> transactionTime = getAccessor().getTransactionTime();
-            return transactionTime == null ? new Date() : transactionTime.instantiate();
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newTransactionTime() {
+            Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> transactionTime = getAccessor().getTransactionTime();
+            return transactionTime == null ? #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif : transactionTime.instantiate();
         }
 
     }

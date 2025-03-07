@@ -48,7 +48,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Date;
 
 #if JAVA_8
 import javax.resource.ResourceException;
@@ -204,7 +203,7 @@ public class JavaClock_2 extends AbstractRestPort {
                         super.newResponseId(input.getResourceIdentifier()));
                     final MappedRecord body = Records.getRecordFactory().createMappedRecord(
                         "test:openmdx:clock1:Time");
-                    body.put("utc", new Date());
+                    body.put("utc", #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif);
                     output.setBody(body);
                     return true;
                 } else if("setDateAndTime".equals(operationName)) {

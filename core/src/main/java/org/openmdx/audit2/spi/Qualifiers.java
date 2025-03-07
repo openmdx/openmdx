@@ -45,7 +45,6 @@
 package org.openmdx.audit2.spi;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -79,7 +78,7 @@ public class Qualifiers {
      */
     public static String toAudit2AfterImageQualifier(
         String qualifier,
-        Date version
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif version
     ){
         return qualifier + '*' + (version == null ? "%" : DateTimeFormat.BASIC_UTC_FORMAT.format(version));
     }
@@ -178,7 +177,7 @@ public class Qualifiers {
     public static Path getAudit2AfterImageId(
         Configuration configuration, 
         Path objectId, 
-        Date modifiedAt
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif modifiedAt
     ) throws ServiceException{
         for (Map.Entry<Path, Path> entry : configuration.getMapping().entrySet()) {
             if (objectId.startsWith(entry.getKey())) {

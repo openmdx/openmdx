@@ -45,18 +45,15 @@
 package org.w3c.cci2;
 
 import java.io.ObjectStreamException;
-import java.util.Date;
+import java.io.Serializable;
 
 import org.w3c.format.DateTimeFormat;
-
 
 /**
  * Unmodifiable Date-Time
  */
-public final class ImmutableDateTime
-    extends Date
-    implements ImmutableDatatype<Date>
-{
+public final class ImmutableDateTime #if CLASSIC_CHRONO_TYPES extends java.util.Date #endif
+        implements ImmutableDatatype<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif>, Serializable {
 
     /**
      * Constructor 
@@ -66,7 +63,7 @@ public final class ImmutableDateTime
     public ImmutableDateTime(
         long date
     ) {
-        super(date);
+        super(#if CLASSIC_CHRONO_TYPES date#endif);
     }
 
     /**
@@ -88,10 +85,11 @@ public final class ImmutableDateTime
      * 
      */
     private static final String READONLY = 
-        "This " + Date.class.getName() + 
+        "This " + #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class.getName() +
         " instance is read-only, use clone() to get a modifiable copy.";
     
-    
+    #if CLASSIC_CHRONO_TYPES
+
     /* (non-Javadoc)
      * @see java.util.Date#setDate(int)
      */
@@ -147,14 +145,17 @@ public final class ImmutableDateTime
     public void setYear(int year) {
         throw new UnsupportedOperationException(READONLY);
     }
+    #endif
 
 	/**
 	 * Create a mutable counterpart
 	 * 
 	 * @return the mutable counterpart
 	 */
-	private Date toMutableDateTime() {
-		return new Date(this.getTime());
+	private #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif toMutableDateTime() {
+		return #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(
+                #if CLASSIC_CHRONO_TYPES this.getTime() #else this.toMutableDateTime().toEpochMilli()#endif
+        );
 	}
 
 	
@@ -182,7 +183,7 @@ public final class ImmutableDateTime
      * @see java.util.Date#clone()
      */
     @Override
-    public Date clone(
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif clone(
     ) {
         return toMutableDateTime();
     }
@@ -197,7 +198,7 @@ public final class ImmutableDateTime
      */
     public String toBasicFormat() {
         if(this.basicValue == null){
-            this.basicValue = DateTimeFormat.BASIC_UTC_FORMAT.format(this);
+            this.basicValue = DateTimeFormat.BASIC_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES this #else this.toMutableDateTime() #endif);
         }
         return this.basicValue;
     }
@@ -207,7 +208,7 @@ public final class ImmutableDateTime
      */
     public String toXMLFormat() {
         if(this.extendedValue == null) {
-            this.extendedValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(this);
+            this.extendedValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES this #else this.toMutableDateTime() #endif);
         }
         return this.extendedValue;
     }

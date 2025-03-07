@@ -53,7 +53,6 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -466,9 +465,9 @@ public class StandardRestFormatter implements RestFormatter {
 	                    writer.writeCharacters(xri.toXRI());
 	                } else if (value instanceof String) {
 	                    writer.writeCData((String) value);
-	                } else if (value instanceof Date) {
+	                } else if (value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) {
 	                    writer.writeCharacters(
-	                        DateTimeFormat.EXTENDED_UTC_FORMAT.format((Date) value)
+	                        DateTimeFormat.EXTENDED_UTC_FORMAT.format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) value)
 	                    );
 	                } else if (value instanceof char[]) {
 	                    char[] text = (char[]) value;
@@ -560,7 +559,7 @@ public class StandardRestFormatter implements RestFormatter {
     		value instanceof BigDecimal ? PrimitiveTypes.DECIMAL :
     		value instanceof Boolean ? PrimitiveTypes.BOOLEAN :
     		value instanceof Path ? PrimitiveTypes.OBJECT_ID :
-    		value instanceof Date ? PrimitiveTypes.DATETIME :
+    		value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif ? PrimitiveTypes.DATETIME :
     		value instanceof XMLGregorianCalendar ? PrimitiveTypes.DATE :
     		value instanceof URI ? PrimitiveTypes.ANYURI :
     		value instanceof byte[] ? PrimitiveTypes.BINARY :
@@ -589,7 +588,7 @@ public class StandardRestFormatter implements RestFormatter {
                 writer.writeStartElement("element");
                 writer.writeAttribute("exceptionDomain", entry.getExceptionDomain());
                 writer.writeAttribute("exceptionCode", String.valueOf(entry.getExceptionCode()));
-                Date exceptionTime = entry.getTimestamp();
+                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif exceptionTime = entry.getTimestamp();
                 if (exceptionTime != null) {
                     writer.writeAttribute(
                         "exceptionTime",

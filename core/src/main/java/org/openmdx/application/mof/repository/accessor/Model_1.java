@@ -50,7 +50,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -429,7 +428,7 @@ public class Model_1 implements Model_1_0 {
                 return;
             }
             else if(
-                (value instanceof Date) && 
+                (value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) &&
                 PrimitiveTypes.DATETIME.equals(typeName)
             ) {
                 return;
@@ -439,7 +438,7 @@ public class Model_1 implements Model_1_0 {
                 PrimitiveTypes.DATETIME.equals(typeName)
             ) {
                 try {
-                    Datatypes.create(Date.class, (String)value);
+                    Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, (String)value);
                 } catch(IllegalArgumentException e) {
                     throw new ServiceException(e);
                 }

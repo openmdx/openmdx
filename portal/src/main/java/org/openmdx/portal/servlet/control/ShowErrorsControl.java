@@ -52,7 +52,6 @@ package org.openmdx.portal.servlet.control;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
@@ -105,7 +104,7 @@ public class ShowErrorsControl extends Control implements Serializable {
                true, 
                app
            );
-           String formattedDateTime = dateTimeFormat.format(new Date());
+           String formattedDateTime = dateTimeFormat.format(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
            String separator = " | ";
            p.write("  <tr>");
            p.write("    <td>");

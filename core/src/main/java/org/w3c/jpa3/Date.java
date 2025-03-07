@@ -82,7 +82,7 @@ public class Date {
      * 
      * @return the corresponding org::w3c::date value
      */
-    public static final  #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif toCCI (
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif toCCI (
         java.sql.Date jdoDate
     ){
         String value = jdoDate == null ? null : jdoDate.toString();

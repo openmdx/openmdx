@@ -47,7 +47,6 @@ package org.openmdx.base.mof.repository.spi;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import org.openmdx.base.marshalling.TypeSafeMarshaller;
@@ -151,7 +150,7 @@ public class ReferenceRecord
                  setIdentity(value);
                  break;
              case modifiedAt:
-                 setModifiedAt((Date)value);
+                 setModifiedAt((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
                  break;
              case createdBy:
                  setCreatedBy((Collection<?>)value);
@@ -160,7 +159,7 @@ public class ReferenceRecord
                  setStereotype((Collection<?>)value);
                  break;
              case createdAt:
-                 setCreatedAt((Date)value);
+                 setCreatedAt((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
                  break;
              case modifiedBy:
                  setModifiedBy((Collection<?>)value);

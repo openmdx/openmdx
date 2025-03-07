@@ -45,6 +45,7 @@
 package org.openmdx.base.accessor.jmi.spi;
 
 import org.oasisopen.jmi1.RefContainer;
+import org.oasisopen.jmi1.RefQualifier;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.collection.MarshallingConsumer;
 import org.openmdx.base.collection.MarshallingSpliterator;
@@ -58,6 +59,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
@@ -99,23 +101,45 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
             // This typed association end interface has been prepended 
             // by the Jmi1ObjectInvocationHandler
             //
-            final Object[] arguments = (Object[]) this.marshaller.unmarshal(args);
-            switch (methodName) {
-                case "add" -> ((RefContainer_1) this.refDelegate).refAdd(
-                        AbstractJmi1ContainerInvocationHandler.getQualifierList(arguments),
-                        (RefObject_1_0) arguments[arguments.length - 1]
+            #if CLASSIC_CHRONO_TYPES
+            if("add".equals(methodName)) {
+                this.refDelegate.refAdd(
+                    (Object[]) this.marshaller.unmarshal(args)
                 );
-                case "get" -> {
-                    return this.marshaller.marshal(
-                            this.refDelegate.refGet(
-                                    AbstractJmi1ContainerInvocationHandler.getQualifierList(arguments)
-                            )
-                    );
-                }
-                case "remove" -> this.refDelegate.refRemove(
-                        AbstractJmi1ContainerInvocationHandler.getQualifierList(arguments)
+                return null;
+            } else if("get".equals(methodName)) {
+                return this.marshaller.marshal(
+                    this.refDelegate.refGet(
+                        (Object[]) this.marshaller.unmarshal(args)
+                    )
                 );
+            } else if("remove".equals(methodName)) {
+                this.refDelegate.refRemove(
+                    (Object[]) this.marshaller.unmarshal(args)
+                );
+                return null;
             }
+            #else
+            final Object[] arguments = (Object[]) this.marshaller.unmarshal(args);
+            List<RefQualifier> qualifiers = AbstractJmi1ContainerInvocationHandler.getQualifierList(arguments);
+            switch (methodName) {
+                case "add":
+                    ((RefContainer_1) this.refDelegate).refAdd(
+                            qualifiers,
+                            (RefObject_1_0) arguments[arguments.length - 1]
+                    );
+                    break;
+                case "get":
+                    return this.marshaller.marshal(
+                            this.refDelegate.refGet(qualifiers)
+                    );
+                case "remove":
+                    this.refDelegate.refRemove(qualifiers);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Method not supported: " + methodName);
+            }
+            #endif
         } else if (declaringClass == Container.class) {
             // 
             // This interfaces is extended by the typed association end 

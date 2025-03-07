@@ -45,7 +45,6 @@
 package org.openmdx.base.mof.repository.spi;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -153,7 +152,7 @@ public class ClassRecord
                  setIdentity(value);
                  break;
              case modifiedAt:
-                 setModifiedAt((Date)value);
+                 setModifiedAt((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
                  break;
              case createdBy:
                  setCreatedBy((Collection<?>)value);
@@ -162,7 +161,7 @@ public class ClassRecord
                  setStereotype((Collection<?>)value);
                  break;
              case createdAt:
-                 setCreatedAt((Date)value);
+                 setCreatedAt((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
                  break;
              case modifiedBy:
                  setModifiedBy((Collection<?>)value);

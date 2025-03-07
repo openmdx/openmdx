@@ -46,7 +46,6 @@ package test.openmdx.app1;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.Date;
 
 import javax.jdo.PersistenceManager;
 import javax.xml.datatype.Duration;

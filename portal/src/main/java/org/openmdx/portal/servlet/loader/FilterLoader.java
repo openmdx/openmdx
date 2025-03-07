@@ -52,7 +52,6 @@ package org.openmdx.portal.servlet.loader;
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -118,7 +117,7 @@ public class FilterLoader
         UiContext uiContext,
         Model_1_0 model
     ) throws ServiceException {
-    	String consolePrefix = new Date() + "  ";
+    	String consolePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
         Filters filters = (Filters)filterMap.get(
             qualifiedReferenceName
         );
@@ -225,7 +224,7 @@ public class FilterLoader
         UiContext uiContext,
         Map<String,Filters> filterStore
     ) throws ServiceException {
-    	String messagePrefix = new Date() + "  ";
+    	String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
         boolean resetSession = false;
         long crc = this.getCRCForResourcePath(
             this.context,

@@ -45,7 +45,6 @@
 
 package org.openmdx.base.dataprovider.layer.persistence.jdbc;
 
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
@@ -96,7 +95,7 @@ public class DateTimeValuesTest {
         // Act
         DateTimeValues.normalizeDateTimeValues(object);
         // Assert
-        Assertions.assertTrue(object.getValue().get("now") instanceof Date);
+        Assertions.assertTrue(object.getValue().get("now") instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif);
     }
 
     @SuppressWarnings("unchecked")
@@ -113,7 +112,7 @@ public class DateTimeValuesTest {
         DateTimeValues.normalizeDateTimeValues(object);
         // Assert
         Assertions.assertTrue(list.get(0) instanceof XMLGregorianCalendar);
-        Assertions.assertTrue(list.get(1) instanceof Date);
+        Assertions.assertTrue(list.get(1) instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif);
     }
 
     @SuppressWarnings("unchecked")
@@ -130,7 +129,7 @@ public class DateTimeValuesTest {
         DateTimeValues.normalizeDateTimeValues(object);
         // Assert
         Assertions.assertTrue(map.get(2) instanceof XMLGregorianCalendar);
-        Assertions.assertTrue(map.get(4) instanceof Date);
+        Assertions.assertTrue(map.get(4) instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif);
     }
         
 }

@@ -51,9 +51,9 @@ package test.openmdx.base.rest;
  */
 public interface XInterface {
 
-    <T extends java.util.Date> java.util.List<T> getList();
+    <T extends #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif> java.util.List<T> getList();
 
-    <T extends java.util.Date> java.util.List<T> list();
+    <T extends #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif> java.util.List<T> list();
 
     void operation() throws Exception;
     

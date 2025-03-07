@@ -45,6 +45,7 @@ package org.openmdx.base.net;
 
 import java.net.URI;
 import java.text.ParseException;
+import java.time.Instant;
 
 import org.w3c.format.DateTimeFormat;
 
@@ -99,7 +100,7 @@ public class HttpCookie implements Comparable<HttpCookie> {
                this.discard = true;
             } else if ("expires".equals(key)) {
                try {
-                  this.expiresAt = netscapeDateFormat.parse(argument).getTime();
+                  this.expiresAt = netscapeDateFormat.parse(argument)#if CLASSIC_CHRONO_TYPES .getTime() #else .toEpochMilli()#endif;
                } catch (ParseException exception) {
                   throw new IllegalArgumentException("Invalid 'expires' value: " + argument, exception);
                }

@@ -51,7 +51,6 @@ package org.openmdx.portal.servlet.loader;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -181,7 +180,7 @@ public class UiLoader
     public List<Path> load(
         String[] locale
     ) throws ServiceException {
-    	String messagePrefix = new Date() + "  ";
+    	String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
     	System.out.println(messagePrefix + "Loading ui configuration...");
     	SysLog.info("Loading ui configuration");
         Map<String,Path> loadedUiSegments = new TreeMap<String,Path>();

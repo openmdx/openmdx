@@ -48,7 +48,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
-import java.util.Date;
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
@@ -101,7 +100,7 @@ public class AlternateJavaBeanTransformer implements BeanTransformer {
                     pathPersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    Date.class, 
+                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
                     datePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
@@ -314,9 +313,9 @@ public class AlternateJavaBeanTransformer implements BeanTransformer {
         ) {
             return new Expression(
                 oldInstance,
-                Date.class,
+                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
                 "new", 
-                new Object[]{((Date)oldInstance).getTime()}
+                new Object[]{((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)oldInstance).getTime()}
             );
         }
     }    
@@ -367,8 +366,8 @@ public class AlternateJavaBeanTransformer implements BeanTransformer {
                 Datatypes.class,
                 "create", 
                 new Object[]{
-                    Date.class, 
-                    DateTimeFormat.BASIC_UTC_FORMAT.format((Date)oldInstance)
+                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
+                    DateTimeFormat.BASIC_UTC_FORMAT.format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)oldInstance)
                 }
             );
         }

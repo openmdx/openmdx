@@ -3310,7 +3310,7 @@ public class Database_2
         if(value instanceof java.util.Date) {
             normalizedValue = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(
                 DateTimeFormat.EXTENDED_UTC_FORMAT
-                    .format((java.util.Date) value)
+                    .format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) value)
             );
         } else {
             normalizedValue = value;

@@ -45,7 +45,6 @@
 package org.openmdx.base.text.parsing;
 
 import java.text.ParseException;
-import java.util.Date;
 
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -98,7 +97,7 @@ public class ImmutablePrimitiveTypeParserTest {
 		// Arrange
 		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
 		// Act
-		final Date value = testee.parse(Date.class, "2000-04-01T05:06:07.890Z");
+		final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif value = testee.parse(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "2000-04-01T05:06:07.890Z");
 		// Assert
 		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDateTime("20000401T050607.890Z"), value);
 	}

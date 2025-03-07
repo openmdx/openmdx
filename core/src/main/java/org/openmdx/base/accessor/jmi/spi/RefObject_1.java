@@ -207,8 +207,8 @@ class RefObject_1
     );
 
     // -------------------------------------------------------------------------
-    final private void assertStructuralFeature(
-        ModelElement_1_0 elementDef
+    private void assertStructuralFeature(
+            ModelElement_1_0 elementDef
     ) throws ServiceException {
         if (!this.object.getModel().isStructuralFeatureType(elementDef)) {
             throw new ServiceException(
@@ -221,8 +221,8 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    final private boolean isAttributeOrReferenceStoredAsAttribute(
-        ModelElement_1_0 elementDef
+    private boolean isAttributeOrReferenceStoredAsAttribute(
+            ModelElement_1_0 elementDef
     ) throws ServiceException {
         Model_1_0 model = this.object.getModel();
         return
@@ -232,8 +232,8 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    final private void assertOperation(
-        ModelElement_1_0 elementDef
+    private void assertOperation(
+            ModelElement_1_0 elementDef
     ) throws ServiceException {
         if (!this.object.getModel().isOperationType(elementDef)) {
             throw new ServiceException(
@@ -246,8 +246,8 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    final private ModelElement_1_0 getType(
-        ModelElement_1_0 elementDef
+    private ModelElement_1_0 getType(
+            ModelElement_1_0 elementDef
     ) throws ServiceException {
         return this.object.getModel().getElementType(
             elementDef
@@ -255,8 +255,8 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    final private ModelElement_1_0 getFeature(
-        String featureName
+    private ModelElement_1_0 getFeature(
+            String featureName
     ) throws ServiceException {
         Model_1_0 model = this.object.getModel();
 
@@ -304,9 +304,9 @@ class RefObject_1
             qualifierName;
     }
 
-    private final Object getValue(
-        ModelElement_1_0 featureDef,
-        Object qualifier
+    private Object getValue(
+            ModelElement_1_0 featureDef,
+            Object qualifier
     ) throws ServiceException {
 
         Model_1_0 model = featureDef.getModel();
@@ -535,9 +535,9 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    final private void setValue(
-        ModelElement_1_0 featureDef,
-        Object value
+    private void setValue(
+            ModelElement_1_0 featureDef,
+            Object value
     ) throws ServiceException {
         this.assertStructuralFeature(featureDef);
 
@@ -704,9 +704,9 @@ class RefObject_1
     /**
      * args contains one element which is of type RefStruct
      */
-    final private Object invokeOperation(
-        ModelElement_1_0 featureDef,
-        List<?> args
+    private Object invokeOperation(
+            ModelElement_1_0 featureDef,
+            List<?> args
     ) throws ServiceException {
         SysLog.log(Level.FINEST, "Sys|refMofId={0},featureDef={1}|args={2}", this.object.jdoGetObjectId(), featureDef, args);
         this.assertOperation(featureDef);
@@ -792,9 +792,9 @@ class RefObject_1
     /**
      * feature must be attribute or reference stored as attribute
      */
-    final private Object refGetValue(
-        String featureName,
-        int index
+    private Object refGetValue(
+            String featureName,
+            int index
     ) {
         Object value = null;
         try {
@@ -839,9 +839,9 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    final private Object refGetValue(
-        String featureName,
-        String qualifier
+    private Object refGetValue(
+            String featureName,
+            String qualifier
     ) {
         try {
             Object map = this.getValue(this.getFeature(featureName), null);
@@ -849,11 +849,21 @@ class RefObject_1
                 return ((Map<?,?>) map).get(qualifier);
             }
             if (map instanceof RefContainer<?>){
+
                 RefContainer<?> container = (RefContainer<?>)map;
+
+                #if CLASSIC_CHRONO_TYPES
+                final Object persistent = RefContainer.PERSISTENT;
+                final Object reassignable = RefContainer.REASSIGNABLE;
+                #else
+                final QualifierType persistent = QualifierType.PERSISTENT;
+                final QualifierType reassignable = QualifierType.REASSIGNABLE;
+                #endif
+
                 return
-                    qualifier.startsWith("!") ? container.refGet(QualifierType.PERSISTENT, qualifier.substring(1)) :
-                    qualifier.startsWith("*") ? container.refGet(QualifierType.REASSIGNABLE, qualifier.substring(1)) :
-                    container.refGet(QualifierType.REASSIGNABLE, qualifier);
+                    qualifier.startsWith("!") ? container.refGet(persistent, qualifier.substring(1)) :
+                    qualifier.startsWith("*") ? container.refGet(reassignable, qualifier.substring(1)) :
+                    container.refGet(reassignable, qualifier);
             }
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -862,9 +872,7 @@ class RefObject_1
                 new BasicException.Parameter("feature", featureName),
                 new BasicException.Parameter("value", map)
             );
-        } catch (RuntimeServiceException exception) {
-            throw new JmiServiceException(exception, this);
-        }  catch (ServiceException exception) {
+        } catch (RuntimeServiceException | ServiceException exception) {
             throw new JmiServiceException(exception, this);
         }
     }
@@ -1055,8 +1063,15 @@ class RefObject_1
             );
         }
         else if (values instanceof RefContainer && value instanceof RefObject_1_0) {
+
+            #if CLASSIC_CHRONO_TYPES
+            Object qualifier = RefContainer.REASSIGNABLE;
+            #else
+            QualifierType qualifier = QualifierType.REASSIGNABLE;
+            #endif
+
             ((RefContainer)values).refAdd(
-                    QualifierType.REASSIGNABLE,
+                    qualifier,
                     org.openmdx.base.naming.TransactionalSegment.getClassicRepresentationOfNewInstance(),
                     (RefObject) value
             );
@@ -1480,7 +1495,7 @@ class RefObject_1
                                         this.setValue(
                                             featureDef,
                                             DateTimeMarshaller.NORMALIZE.marshal
-                                            (org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(new Date()))
+                                            (org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif))
                                         );
                                     } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
                                         this.setValue(

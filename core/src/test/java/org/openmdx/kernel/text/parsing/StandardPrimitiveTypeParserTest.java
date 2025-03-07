@@ -47,7 +47,6 @@ package org.openmdx.kernel.text.parsing;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
-import java.util.Date;
 
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
@@ -176,7 +175,7 @@ public class StandardPrimitiveTypeParserTest {
 		final Parser testee = StandardPrimitiveTypeParser.getInstance(); 
 		try {
 			// Act
-			testee.parse(Date.class, "20000401T000000.000Z");
+			testee.parse(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "20000401T000000.000Z");
 			Assertions.fail("IllegalArgumentException expected");
 		} catch (IllegalArgumentException expected) {
 			// Assert

@@ -45,7 +45,6 @@
 package org.openmdx.state2.spi;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConstants;
@@ -72,7 +71,7 @@ public class DateStateViewContext
      */
     private DateStateViewContext(
         XMLGregorianCalendar validFor,
-        Date validAt
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ) {
         super(
             ViewKind.TIME_POINT_VIEW,
@@ -120,7 +119,7 @@ public class DateStateViewContext
         ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
         return new DateStateViewContext(
             datatypeFactory.toDate(validFor),
-            (Date)null
+            (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)null
         );
     }
 
@@ -132,7 +131,7 @@ public class DateStateViewContext
      */
     public static DateStateViewContext newTimePointViewContext(
         XMLGregorianCalendar validFor,
-        Date validAt
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ){
         ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
         return new DateStateViewContext(

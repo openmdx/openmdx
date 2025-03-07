@@ -46,7 +46,6 @@ package org.openmdx.state2.aop1;
 
 import java.io.Serializable;
 import java.util.Comparator;
-import java.util.Date;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -102,8 +101,8 @@ public class StateComparator
                 return validFrom;
             }
             int removedAt = Order.compareRemovedAt(
-                (Date)o1.objGetValue(SystemAttributes.REMOVED_AT),
-                (Date)o2.objGetValue(SystemAttributes.REMOVED_AT)
+                (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)o1.objGetValue(SystemAttributes.REMOVED_AT),
+                (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)o2.objGetValue(SystemAttributes.REMOVED_AT)
             );  
             return removedAt;
         } catch (ServiceException exception) {

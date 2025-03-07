@@ -56,7 +56,6 @@ import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -245,7 +244,7 @@ public class Filter extends QueryFilterRecord {
                                     );
                                 } else if (QUERY_EXTENSION_DATETIME_PARAM.equals(piggyBackFeature)) {
                                     extension.setDateTimeParam(
-                                        Filter.getValues(Date.class, condition)
+                                        Filter.getValues(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, condition)
                                     );
                                 } else if (QUERY_EXTENSION_DECIMAL_PARAM.equals(piggyBackFeature)) {
                                     extension.setDecimalParam(

@@ -44,7 +44,7 @@
  */
 package org.openmdx.state2.spi;
 
-import java.util.Date;
+
 
 import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
 
@@ -72,7 +72,7 @@ public abstract class StateViewContext<V>
     protected StateViewContext(
         ViewKind viewKind, 
         V validAt,
-        Date existsAt,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt,
         V lowerBound,
         V upperBound,
         boolean includeUpperBound
@@ -136,7 +136,7 @@ public abstract class StateViewContext<V>
     /**
      * 
      */
-    private final Date existsAt;
+    private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt;
 
     /**
      * validFrom
@@ -168,13 +168,13 @@ public abstract class StateViewContext<V>
      * @return {@code true} if the entry exists at the given transaction time
      */
     public static boolean compareTransactionTime(
-        Date existsAt,
-        Date createdAt,
-        Date removedAt
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif createdAt,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif removedAt
     ){
         return existsAt == null ? removedAt == null : (
-             (createdAt != null && !existsAt.before(createdAt)) &&
-             (removedAt == null || existsAt.before(removedAt))
+             (createdAt != null && !existsAt.#if CLASSIC_CHRONO_TYPES before #else isBefore #endif(createdAt)) &&
+             (removedAt == null || existsAt.#if CLASSIC_CHRONO_TYPES before #else isBefore #endif(removedAt))
         );
             
     }
@@ -195,7 +195,7 @@ public abstract class StateViewContext<V>
     /* (non-Javadoc)
      * @see org.openmdx.state2.cci.StateContext#getExistsAt()
      */
-    public Date getExistsAt() {
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getExistsAt() {
         return this.existsAt;
     }
 

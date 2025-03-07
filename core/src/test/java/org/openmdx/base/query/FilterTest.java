@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Date;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -196,7 +195,7 @@ public class FilterTest {
                 "2000-02-29"
             )
         );
-        extension.setDateTimeParam(new Date());
+        extension.setDateTimeParam(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
         extension.setDecimalParam(BigDecimal.ONE, BigDecimal.TEN);
         extension.setStringParam("String parameter 0", "String parameter 1");
         String xml = JavaBeans.toXML(filter);

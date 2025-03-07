@@ -1,28 +1,28 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Standard Java Beans Transformer 
+ * Description: Standard Java Beans Transformer
  * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,9 +36,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URI;
-import java.util.Date;
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
@@ -84,7 +83,7 @@ public class StandardBeanTransformer implements BeanTransformer {
 
     private static Object xstream = null;
     private static Method xstreamFromXML = null;
-    
+
     {
         try {
             xstream = Classes.getApplicationClass("com.thoughtworks.xstream.XStream").newInstance();
@@ -94,7 +93,7 @@ public class StandardBeanTransformer implements BeanTransformer {
         	// no-op
         }
     }
-	
+
     /* (non-Javadoc)
      * @see org.openmdx.base.text.conversion.spi.JavaBeanTransformer#encode(java.lang.Object, org.openmdx.base.exception.ExceptionListener)
      */
@@ -111,39 +110,39 @@ public class StandardBeanTransformer implements BeanTransformer {
                     );
                 }
                 encoder.setPersistenceDelegate(
-                    BigDecimal.class, 
+                    BigDecimal.class,
                     bigDecimalPersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    Path.class, 
+                    Path.class,
                     pathPersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    Date.class, 
+                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
                     datePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    xmlGregorianCalendarClass, 
+                    xmlGregorianCalendarClass,
                     immutableDatePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    ImmutableDate.class, 
+                    ImmutableDate.class,
                     immutableDatePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    ImmutableDateTime.class, 
+                    ImmutableDateTime.class,
                     dateTimePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    Duration.class, 
+                    Duration.class,
                     durationPersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    Quantifier.class, 
+                    Quantifier.class,
                     quantifierPersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    URI.class, 
+                    URI.class,
                     uriPersistenceDelegate
                 );
                 encoder.writeObject(javaBean);
@@ -205,10 +204,10 @@ public class StandardBeanTransformer implements BeanTransformer {
         protected DefaultPersistenceDelegate(){
             super();
         }
-        
+
         @Override
         protected boolean mutatesTo(
-            Object oldInstance, 
+            Object oldInstance,
             Object newInstance
         ) {
             return newInstance != null && oldInstance.equals(newInstance);
@@ -226,13 +225,13 @@ public class StandardBeanTransformer implements BeanTransformer {
         ) {
             // Object is completely initialized by the constructor
         }
-        
+
     }
 
     private static class ExceptionListenerAdapter implements java.beans.ExceptionListener {
-        
+
         /**
-         * Constructor 
+         * Constructor
          *
          * @param delegate
          */
@@ -249,9 +248,9 @@ public class StandardBeanTransformer implements BeanTransformer {
         public void exceptionThrown(Exception exception) {
             this.delegate.exceptionThrown(exception);
         }
-        
+
     }
-    
+
     private static class BigDecimalPersistenceDelegate extends PersistenceDelegate {
 
         public BigDecimalPersistenceDelegate() {
@@ -260,19 +259,19 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected Expression instantiate(
-            Object oldInstance, 
+            Object oldInstance,
             Encoder out
         ) {
             return new Expression(
                 oldInstance,
                 oldInstance.getClass(),
-                "new", 
+                "new",
                 new Object[]{oldInstance.toString()}
             );
         }
 
     }
-    
+
     private static class PathPersistenceDelegate extends PersistenceDelegate {
 
         public PathPersistenceDelegate() {
@@ -281,17 +280,17 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected Expression instantiate(
-            Object oldInstance, 
+            Object oldInstance,
             Encoder out
         ) {
             return new Expression(
                 oldInstance,
                 oldInstance.getClass(),
-                "new", 
+                "new",
                 new Object[]{((Path)oldInstance).toXRI()}
             );
         }
-        
+
     }
 
     private static class ImmutableDatePersistenceDelegate extends DefaultPersistenceDelegate {
@@ -302,33 +301,33 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected boolean mutatesTo(
-            Object oldInstance, 
+            Object oldInstance,
             Object newInstance
         ) {
-            return newInstance != null && ( 
+            return newInstance != null && (
                 oldInstance.getClass() == newInstance.getClass() ? oldInstance.equals(newInstance) : oldInstance.toString().equals(newInstance.toString())
             );
         }
 
         @Override
         protected Expression instantiate(
-            Object oldInstance, 
+            Object oldInstance,
             Encoder out
         ) {
             return new Expression(
                 oldInstance,
                 Datatypes.class,
-                "create", 
+                "create",
                 new Object[]{XMLGregorianCalendar.class,oldInstance.toString()}
             );
         }
-        
-    }    
+
+    }
 
     private static class DurationPersistenceDelegate extends DefaultPersistenceDelegate {
 
         /**
-         * Constructor 
+         * Constructor
          */
         public DurationPersistenceDelegate() {
             super();
@@ -336,7 +335,7 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected boolean mutatesTo(
-            Object oldInstance, 
+            Object oldInstance,
             Object newInstance
         ) {
             return newInstance != null && oldInstance.equals(newInstance);
@@ -344,49 +343,54 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected Expression instantiate(
-            Object oldInstance, 
+            Object oldInstance,
             Encoder out
         ) {
             return new Expression(
                 oldInstance,
                 Datatypes.class,
-                "create", 
+                "create",
                 new Object[]{Duration.class,((Duration)oldInstance).toString()}
             );
         }
-        
-    }    
+
+    }
 
     private static class DatePersistenceDelegate extends DefaultPersistenceDelegate {
 
         public DatePersistenceDelegate(
-        ) {            
+        ) {
             super();
         }
-        
+
         @Override
         protected Expression instantiate(
-            Object oldInstance, 
+            Object oldInstance,
             Encoder out
         ) {
             return new Expression(
                 oldInstance,
-                Date.class,
-                "new", 
-                new Object[]{Long.valueOf(((Date)oldInstance).getTime())}
+                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
+                "new",
+                new Object[]{
+                        Long.valueOf(
+                                String.valueOf(((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)
+                                        oldInstance).#if CLASSIC_CHRONO_TYPES getTime() #else now() #endif)
+                        )
+                }
             );
         }
-    }    
+    }
 
     private static class QuantifierPersistenceDelegate extends DefaultPersistenceDelegate {
 
         public QuantifierPersistenceDelegate(
-        ) {            
+        ) {
         }
-        
+
         @Override
         protected boolean mutatesTo(
-            Object oldInstance, 
+            Object oldInstance,
             Object newInstance
         ) {
             return oldInstance == newInstance;
@@ -394,69 +398,69 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected Expression instantiate(
-            Object oldInstance, 
+            Object oldInstance,
             Encoder out
         ) {
             return new Expression(
                 oldInstance,
                 Quantifier.class,
-                "valueOf", 
+                "valueOf",
                 new Object[]{((Quantifier)oldInstance).name()}
             );
         }
 
-    }    
-    
+    }
+
     private static class DateTimePersistenceDelegate extends DefaultPersistenceDelegate {
 
         public DateTimePersistenceDelegate(
-        ) {            
+        ) {
             super();
         }
-        
+
         @Override
         protected Expression instantiate(
-            Object oldInstance, 
+            Object oldInstance,
             Encoder out
         ) {
             return new Expression(
                 oldInstance,
                 Datatypes.class,
-                "create", 
+                "create",
                 new Object[]{
-                    Date.class, 
-                    DateTimeFormat.BASIC_UTC_FORMAT.format((Date)oldInstance)
+                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
+                    DateTimeFormat.BASIC_UTC_FORMAT.format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)oldInstance)
                 }
             );
         }
-        
-    }    
-    
+
+    }
+
     private static class URIPersistenceDelegate extends DefaultPersistenceDelegate {
 
         public URIPersistenceDelegate(
-        ) {            
+        ) {
             super();
         }
-        
+
         @Override
         protected Expression instantiate(
-            Object oldInstance, 
+            Object oldInstance,
             Encoder out
         ) {
             return new Expression(
                 oldInstance,
                 Datatypes.class,
-                "create", 
+                "create",
                 new Object[]{
-                    URI.class, 
+                    URI.class,
                     oldInstance.toString()
                 }
             );
         }
-        
-    }    
-    
+
+    }
+
     private static final PersistenceDelegate bigDecimalPersistenceDelegate = new BigDecimalPersistenceDelegate();
     private static final PersistenceDelegate pathPersistenceDelegate = new PathPersistenceDelegate();
     private static final PersistenceDelegate datePersistenceDelegate = new DatePersistenceDelegate();
@@ -466,5 +470,5 @@ public class StandardBeanTransformer implements BeanTransformer {
     private static final PersistenceDelegate quantifierPersistenceDelegate = new QuantifierPersistenceDelegate();
     private static final PersistenceDelegate uriPersistenceDelegate = new URIPersistenceDelegate();
     private static final Class<? extends XMLGregorianCalendar> xmlGregorianCalendarClass = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED).getClass();
-    
+
 }

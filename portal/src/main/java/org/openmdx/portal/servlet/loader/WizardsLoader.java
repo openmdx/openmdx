@@ -51,7 +51,6 @@ package org.openmdx.portal.servlet.loader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +96,7 @@ public class WizardsLoader extends Loader {
         String[] locale,
         Model_1_0 model
     ) throws ServiceException {
-    	String messagePrefix = new Date() + "  ";
+    	String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
     	System.out.println(messagePrefix + "Loading wizards");
     	SysLog.info("Loading wizards");    	
         Map<String,List<WizardDefinition>> wizardDefinitions = new HashMap<String,List<WizardDefinition>>();

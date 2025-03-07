@@ -45,7 +45,6 @@
 package org.openmdx.base.accessor.rest.spi;
 
 import java.text.ParseException;
-import java.util.Date;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
@@ -92,7 +91,7 @@ public class LockAssertions {
 	 * @return the read lock assertion for the given transaction time
 	 */
 	public static Object newReadLockAssertion(
-		Date transactionTime
+		#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime
 	){
 		return READ_LOCK_PREFIX + DateTimeFormat.EXTENDED_UTC_FORMAT.format(transactionTime);
 	}
@@ -106,7 +105,7 @@ public class LockAssertions {
 	 * 
 	 * @throws ServiceException
 	 */
-	public static Date getTransactionTime(
+	public static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getTransactionTime(
 		Object readLockAssertion
 	) throws ServiceException {
 		try {

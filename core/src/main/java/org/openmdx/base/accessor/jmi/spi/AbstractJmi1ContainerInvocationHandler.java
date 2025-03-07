@@ -47,13 +47,17 @@ package org.openmdx.base.accessor.jmi.spi;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+#if !CLASSIC_CHRONO_TYPES
 import java.util.ArrayList;
 import java.util.List;
+#endif
 
 import javax.jmi.reflect.InvalidCallException;
 
+#if !CLASSIC_CHRONO_TYPES
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefQualifier;
+#endif
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -135,6 +139,7 @@ abstract class AbstractJmi1ContainerInvocationHandler
         Object[] args
     ) throws IllegalAccessException, InvocationTargetException, ServiceException;
 
+    #if !CLASSIC_CHRONO_TYPES
     /**
      * Convert the given arguments to a list of qualifiers
      *
@@ -159,4 +164,5 @@ abstract class AbstractJmi1ContainerInvocationHandler
 
         return qualifiers;
     }
+    #endif
 }

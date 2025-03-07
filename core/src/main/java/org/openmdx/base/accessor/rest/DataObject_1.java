@@ -60,7 +60,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -2173,12 +2172,12 @@ public class DataObject_1
      */
     private void assertReadLock(
         DataObject_1_0 beforeImage,
-        Date lockValue
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif lockValue
     )
         throws ServiceException {
-        Date currentValue = (Date) beforeImage.objGetValue(SystemAttributes.MODIFIED_AT);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) beforeImage.objGetValue(SystemAttributes.MODIFIED_AT);
         if (currentValue != null) {
-            if (currentValue.after(lockValue)) {
+            if (currentValue.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(lockValue)) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.CONCURRENT_ACCESS_FAILURE,
@@ -2208,9 +2207,9 @@ public class DataObject_1
         if (lockMatcher.matches())
             try {
                 String lockFeature = lockMatcher.group(1);
-                Date currentValue = (Date) beforeImage.objGetValue(lockFeature);
+                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) beforeImage.objGetValue(lockFeature);
                 if (currentValue != null) {
-                    Date lockValue = DateTimeFormat.EXTENDED_UTC_FORMAT.parse(lockMatcher.group(2) + "Z");
+                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif lockValue = DateTimeFormat.EXTENDED_UTC_FORMAT.parse(lockMatcher.group(2) + "Z");
                     if (!lockValue.equals(currentValue)) {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,

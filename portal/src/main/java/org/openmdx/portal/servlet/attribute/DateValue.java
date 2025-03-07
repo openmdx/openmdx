@@ -51,7 +51,6 @@ package org.openmdx.portal.servlet.attribute;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -121,7 +120,7 @@ public class DateValue
             application
         );
         try {
-            this.defaultValue = Datatypes.create(Date.class, fieldDef.defaultValue);
+            this.defaultValue = Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, fieldDef.defaultValue);
         } catch(IllegalArgumentException e) {
         	// ignore
         }
@@ -246,7 +245,7 @@ public class DateValue
     ) {
         SimpleDateFormat dateFormatter = this.getLocalizedDateFormatter(useEditStyle);
         SimpleDateFormat dateTimeFormatter = this.getLocalizedDateTimeFormatter(useEditStyle);
-        if(value instanceof Date) {
+        if(value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) {
             return this.isDate() ? 
             	dateFormatter.format(value) : 
             		dateTimeFormatter.format(value);
@@ -488,7 +487,7 @@ public class DateValue
             return new HashMap<String,SimpleDateFormat>();
         }
     };
-    private Date defaultValue = null;
+    private #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif defaultValue = null;
 
 }
 

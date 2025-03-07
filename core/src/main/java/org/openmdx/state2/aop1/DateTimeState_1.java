@@ -45,7 +45,6 @@
 package org.openmdx.state2.aop1;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
@@ -174,11 +173,11 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
         DateTimeStateContext context = getContext();
         return BoundaryCrossing.valueOf(
             Order.compareValidFrom(
-                (Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
+                (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
                 context.getValidFrom() 
             ) < 0,
             Order.compareInvalidFrom(
-                (Date) candidate.objGetValue(TechnicalAttributes.STATE_INVALID_FROM),
+                (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) candidate.objGetValue(TechnicalAttributes.STATE_INVALID_FROM),
                 context.getInvalidFrom() 
             ) > 0
         );
@@ -193,8 +192,8 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
     ) throws ServiceException {
         DateTimeStateContext context = getContext();
         return 
-            Order.compareValidFromToValidTo(context.getValidFrom(), (Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_TO)) < 0 &&
-            Order.compareValidFromToValidTo((Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM), context.getInvalidFrom()) < 0;
+            Order.compareValidFromToValidTo(context.getValidFrom(), (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) candidate.objGetValue(TechnicalAttributes.STATE_VALID_TO)) < 0 &&
+            Order.compareValidFromToValidTo((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM), context.getInvalidFrom()) < 0;
     }
 
     
@@ -214,27 +213,27 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
             switch(context.getViewKind()) {
                 case TIME_POINT_VIEW:
                     return Order.compareValidFrom(
-                        (Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
+                        (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
                         context.getValidAt()
                     ) <= 0 && Order.compareInvalidFrom(
                         context.getValidAt(),
-                        (Date) candidate.objGetValue(TechnicalAttributes.STATE_INVALID_FROM)
+                        (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) candidate.objGetValue(TechnicalAttributes.STATE_INVALID_FROM)
                     ) <= 0;
                 case TIME_RANGE_VIEW:
                 	return accessMode == AccessMode.UNDERLYING_STATE ? (
                         Order.compareValidFrom(
                             context.getValidFrom(), 
-                            (Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM)
+                            (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM)
                         ) >= 0 && Order.compareInvalidFrom(
-                            (Date) candidate.objGetValue(TechnicalAttributes.STATE_INVALID_FROM),
+                            (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) candidate.objGetValue(TechnicalAttributes.STATE_INVALID_FROM),
                             context.getInvalidFrom()
                         ) >= 0 
                     ) : (
                 		Order.compareValidFromToValidTo(
 	                        context.getValidFrom(), 
-	                        (Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_TO)
+	                        (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) candidate.objGetValue(TechnicalAttributes.STATE_VALID_TO)
 	                    ) <= 0 && Order.compareValidFromToValidTo(
-	                        (Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
+	                        (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
 	                        context.getInvalidFrom()
 	                    ) <= 0 
                     );

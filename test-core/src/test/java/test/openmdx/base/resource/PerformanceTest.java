@@ -52,7 +52,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Date;
 import java.util.UUID;
 
 #if JAVA_8
@@ -283,7 +282,7 @@ public class PerformanceTest {
 				entry.put("value5", value5);
 				UUID value6 = UUIDs.newUUID();
 				entry.put("value6", value6.toString());
-				entry.put("value7", new Date(value4));
+				entry.put("value7", #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(value4));
 				entry.put("value8", today);
 				entry.put("value9", UUIDConversion.toURI(value6));
 				BigInteger value10 = BigInteger.valueOf(1000000 * i);
@@ -302,7 +301,7 @@ public class PerformanceTest {
 				by.add("group1Principal");
 				by.add("group2Principal");
 				by.add("group3Principal");
-				Date at = new Date();
+				#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif at = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif;
 				entry.put(SystemAttributes.CREATED_AT, at);
 				entry.put(SystemAttributes.CREATED_BY, by);
 				entry.put(SystemAttributes.MODIFIED_AT, at);

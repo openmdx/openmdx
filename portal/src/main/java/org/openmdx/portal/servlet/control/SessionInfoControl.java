@@ -52,7 +52,6 @@ package org.openmdx.portal.servlet.control;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.openmdx.kernel.exception.Throwables;
@@ -247,7 +246,7 @@ public class SessionInfoControl extends Control implements Serializable {
                 true, 
                 app
             );
-            String formattedDateTime = dateTimeFormat.format(new Date());
+            String formattedDateTime = dateTimeFormat.format(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
             p.write(
                 formattedDateTime.replace(" ", separator), 
                 separator, 

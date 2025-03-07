@@ -48,7 +48,6 @@ package test.mock.clock1;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
@@ -101,7 +100,7 @@ public class Segments {
     static void validateChangedTimePoint(Segment segment) {
         final Transaction transaction = JDOHelper.getPersistenceManager(segment).currentTransaction();
         transaction.begin();
-        final Date expected = tryToChangeDateAndTime(segment);
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif expected = tryToChangeDateAndTime(segment);
         Assertions.assertEquals(expected,  segment.currentDateAndTime().getUtc(), "Time set back");
         transaction.commit();	
     }
@@ -109,25 +108,25 @@ public class Segments {
     static void validateChangedTimePointReflectively(Segment segment) throws RefException {
         final Transaction transaction = JDOHelper.getPersistenceManager(segment).currentTransaction();
         transaction.begin();
-        final Date expected = tryToChangeDateAndTimeReflectively(segment);
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif expected = tryToChangeDateAndTimeReflectively(segment);
         Assertions.assertEquals(expected,  segment.currentDateAndTime().getUtc(), "Time set back");
         transaction.commit();
     }
     
-    private static Date tryToChangeDateAndTime(
+    private static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif tryToChangeDateAndTime(
         Segment segment
     ) {
         final Clock1Package clock1Package = (Clock1Package) segment.refImmediatePackage();
-        final Date mockTimePoint = new Date(System.currentTimeMillis() - ONE_AND_HALF_AN_HOUR);
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mockTimePoint = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(System.currentTimeMillis() - ONE_AND_HALF_AN_HOUR);
         final Time value = clock1Package.createTime(mockTimePoint);
         segment.setDateAndTime(value);
         return mockTimePoint;
     }
 
-    private static Date tryToChangeDateAndTimeReflectively(
+    private static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif tryToChangeDateAndTimeReflectively(
         Segment segment
     ) throws RefException {
-        final Date mockTimePoint = new Date(System.currentTimeMillis() - ONE_AND_HALF_AN_HOUR);
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mockTimePoint = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(System.currentTimeMillis() - ONE_AND_HALF_AN_HOUR);
         final RefStruct param = segment.refImmediatePackage().refCreateStruct(
             "test:openmdx:clock1:Time", 
             Collections.singletonList(mockTimePoint)
@@ -150,19 +149,19 @@ public class Segments {
     static void validateMockedTimePoint(
         Segment segment
     ) throws ParseException {
-        Date utc = getTimePoint(segment);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = getTimePoint(segment);
         validateMockedTimePoint(utc, "");
     }
 
     static void validateMockedTimePointReflectively(
         Segment segment
     ) throws ParseException, RefException {
-        Date utc = getTimePointReflectively(segment);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = getTimePointReflectively(segment);
         validateMockedTimePoint(utc, "-reflectively");
     }
     
     private static void validateMockedTimePoint(
-        Date utc,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc,
         String mode
     ) throws ParseException {
         Assertions.assertEquals(DateTimeFormat.BASIC_UTC_FORMAT.parse("20000401T120000.000Z"),  utc, "High Noon");
@@ -201,17 +200,17 @@ public class Segments {
     static void validateNormalTimePoint(
         final Segment segment
     ) {
-        Date utc = getTimePoint(segment);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = getTimePoint(segment);
         validateNormalTimePoint(utc, "");
     }
 
-    private static Date getTimePoint(
+    private static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getTimePoint(
         final Segment segment
     ) {
         return segment.currentDateAndTime().getUtc();
     }
 
-    private static Date getTimePointReflectively(
+    private static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getTimePointReflectively(
         final Segment segment
     ) throws RefException {
         final RefStruct param = segment.refImmediatePackage().refCreateStruct(
@@ -222,19 +221,19 @@ public class Segments {
             "currentDateAndTime", 
             Arrays.asList(param)
         );
-        final Date utc = (Date) result.refGetValue("utc");
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) result.refGetValue("utc");
         return utc;
     }
     
     static void validateNormalTimePointReflectively(
         final Segment segment
     ) throws RefException {
-        Date utc = getTimePointReflectively(segment);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = getTimePointReflectively(segment);
         validateNormalTimePoint(utc, "-reflectively");
     }
     
     private static void validateNormalTimePoint(
-        Date utc, 
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc,
         String mode
     ) {
         long now = System.currentTimeMillis();

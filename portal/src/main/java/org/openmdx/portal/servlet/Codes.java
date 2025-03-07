@@ -53,7 +53,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -112,8 +111,8 @@ public final class Codes implements Serializable {
 			String iconKey,
 			String color,
 			String backColor,
-			Date validFrom,
-			Date validTo
+			#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFrom,
+			#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validTo
 		) {
 			this.id = id;
 			this.shortText = shortText;
@@ -150,11 +149,11 @@ public final class Codes implements Serializable {
 	        return this.backColor;
 		}	        
 
-		public Date getValidFrom() {
+		public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getValidFrom() {
 	        return this.validFrom;
 		}
 
-		public Date getValidTo() {
+		public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getValidTo() {
 	        return this.validTo;
 		}
 		
@@ -164,8 +163,8 @@ public final class Codes implements Serializable {
 		private final String iconKey;
 		private final String color;
 		private final String backColor;
-		private final Date validFrom;
-		private final Date validTo;
+		private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFrom;
+		private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validTo;
 	}
 	
 	/**
@@ -257,8 +256,8 @@ public final class Codes implements Serializable {
 	    					(String)entry.refGetValue("iconKey"),
 	    					(String)entry.refGetValue("color"),
 	    					(String)entry.refGetValue("backColor"),        					
-	    			        (Date)entry.refGetValue("validFrom"),
-	    			        (Date)entry.refGetValue("validTo")
+	    			        (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)entry.refGetValue("validFrom"),
+	    			        (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)entry.refGetValue("validTo")
 	    			    )
 	    			);
 	    		}
@@ -420,7 +419,7 @@ public final class Codes implements Serializable {
     	PersistenceManager pm,
     	Map<Path,ObjectRecord> codes
     	) throws ServiceException {
-    	String messagePrefix = new Date() + "  ";
+    	String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
     	SysLog.info("Storing " + codes.size() + " code entries");
     	System.out.println(messagePrefix + "Storing " + codes.size() + " code entries");
     	// Load objects in multiple runs in order to resolve object dependencies.
@@ -601,9 +600,9 @@ public final class Codes implements Serializable {
     private static boolean entryIsValid(
         CodeEntry codeEntry
     ) {
-        Date validFrom = codeEntry.getValidFrom();
-        Date validTo = codeEntry.getValidTo();
-        Date current = new Date();
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFrom = codeEntry.getValidFrom();
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validTo = codeEntry.getValidTo();
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif current = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif;
         return 
 	        ((validFrom == null) || validFrom.before(current)) &&
 	        ((validTo == null) || validTo.after(current));

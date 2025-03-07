@@ -47,7 +47,6 @@ package org.openmdx.application.dataprovider.cci;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -128,8 +127,8 @@ public class JmiHelper {
                     );
                 }
             } else if(PrimitiveTypes.DATETIME.equals(this.typeName)) {
-                return source instanceof Date ? source : Datatypes.create(
-                    Date.class, 
+                return source instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif ? source : Datatypes.create(
+                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
                     (String)source
                 );
             } else if(PrimitiveTypes.DATE.equals(this.typeName)) {                

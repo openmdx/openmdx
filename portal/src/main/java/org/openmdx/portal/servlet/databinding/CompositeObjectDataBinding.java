@@ -53,7 +53,6 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -173,7 +172,7 @@ public class CompositeObjectDataBinding extends DataBinding {
             valueClass = XMLGregorianCalendar.class;
         }
         else if("datetime".equalsIgnoreCase(type)) {
-            valueClass = Date.class;
+            valueClass = #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class;
         }
         else if("short".equalsIgnoreCase(type)) {
             valueClass = Short.class;

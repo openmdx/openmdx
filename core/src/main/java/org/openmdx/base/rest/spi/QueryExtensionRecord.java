@@ -45,7 +45,6 @@
 package org.openmdx.base.rest.spi;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
@@ -184,7 +183,7 @@ public class QueryExtensionRecord
      */
 	@SuppressWarnings("unchecked")
     @Override
-    public List<Date> getDateTimeParam() {
+    public List<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> getDateTimeParam() {
     	if(this.dateTimeParam == null) {
     		this.dateTimeParam = newList();
     	}
@@ -279,12 +278,12 @@ public class QueryExtensionRecord
      * @see org.openmdx.base.query.Extension#setDateTimeParam(java.util.Date[])
      */
     @Override
-    public void setDateTimeParam(Date... dateTimeParam) {
+    public void setDateTimeParam(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif... dateTimeParam) {
     	replaceValues(getDateTimeParam(), dateTimeParam);
     }
 
 	@Override
-	public void setDateTimeParam(List<Date> dateTimeParam) {
+	public void setDateTimeParam(List<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> dateTimeParam) {
 		replaceValues(getDateTimeParam(), dateTimeParam);
 	}
 

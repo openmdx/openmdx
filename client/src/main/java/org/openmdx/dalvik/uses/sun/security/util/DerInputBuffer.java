@@ -28,7 +28,6 @@ package org.openmdx.dalvik.uses.sun.security.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Date;
 import org.openmdx.dalvik.uses.sun.util.calendar.CalendarDate;
 import org.openmdx.dalvik.uses.sun.util.calendar.CalendarSystem;
 
@@ -264,7 +263,7 @@ class DerInputBuffer extends ByteArrayInputStream implements Cloneable {
      * of bytes in this buffer.
      * @param len the number of bytes to use
      */
-    public Date getUTCTime(int len) throws IOException {
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getUTCTime(int len) throws IOException {
         if (len > available())
             throw new IOException("short read of DER UTC Time");
 
@@ -279,7 +278,7 @@ class DerInputBuffer extends ByteArrayInputStream implements Cloneable {
      * number of bytes in this buffer.
      * @param len the number of bytes to use
      */
-    public Date getGeneralizedTime(int len) throws IOException {
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getGeneralizedTime(int len) throws IOException {
         if (len > available())
             throw new IOException("short read of DER Generalized Time");
 
@@ -296,7 +295,7 @@ class DerInputBuffer extends ByteArrayInputStream implements Cloneable {
      * @param generalized true if Generalized Time is to be read, false
      * if UTC Time is to be read.
      */
-    private Date getTime(int len, boolean generalized) throws IOException {
+    private #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getTime(int len, boolean generalized) throws IOException {
 
         /*
          * UTC time encoded as ASCII chars:
@@ -467,7 +466,7 @@ class DerInputBuffer extends ByteArrayInputStream implements Cloneable {
         default:
             throw new IOException("Parse " + type + " time, garbage offset");
         }
-        return new Date(time);
+        return new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(time);
     }
 
     /**

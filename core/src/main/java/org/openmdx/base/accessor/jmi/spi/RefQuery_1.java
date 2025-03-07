@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -1905,7 +1904,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     qualifiedName) : PrimitiveTypes.STRING.equals(typeName) ? new RefStringTypePredicate(
                         quantifier,
                         qualifiedName)
-                        : PrimitiveTypes.DATETIME.equals(typeName) ? new RefComparableTypePredicate<Date>(
+                        : PrimitiveTypes.DATETIME.equals(typeName) ? new RefComparableTypePredicate<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif>(
                             quantifier,
                             qualifiedName)
                             : PrimitiveTypes.DECIMAL.equals(typeName) ? new RefComparableTypePredicate<BigDecimal>(

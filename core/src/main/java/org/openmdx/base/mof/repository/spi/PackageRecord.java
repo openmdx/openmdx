@@ -45,7 +45,6 @@
 package org.openmdx.base.mof.repository.spi;
 
 import java.util.Collection;
-import java.util.Date;
 
 import org.openmdx.base.naming.Path;
 
@@ -127,7 +126,7 @@ public class PackageRecord
                  setIdentity(value);
                  break;
              case modifiedAt:
-                 setModifiedAt((Date)value);
+                 setModifiedAt((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
                  break;
              case createdBy:
                  setCreatedBy((Collection<?>)value);
@@ -136,7 +135,7 @@ public class PackageRecord
                  setStereotype((Collection<?>)value);
                  break;
              case createdAt:
-                 setCreatedAt((Date)value);
+                 setCreatedAt((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
                  break;
              case modifiedBy:
                  setModifiedBy((Collection<?>)value);

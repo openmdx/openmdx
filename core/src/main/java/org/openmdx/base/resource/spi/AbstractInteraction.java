@@ -44,7 +44,7 @@
  */
 package org.openmdx.base.resource.spi;
 
-import java.util.Date;
+
 import java.util.List;
 
 #if JAVA_8
@@ -131,7 +131,8 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     /**
      * The interaction time
      */
-    private final Date interactionTime = new ImmutableDateTime(System.currentTimeMillis());
+    private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif interactionTime
+            = #if CLASSIC_CHRONO_TYPES new ImmutableDateTime(System.currentTimeMillis()) #else java.time.Instant.now() #endif;
 
     protected final boolean hasDelegate(){
     	return this.delegate != null;
@@ -323,7 +324,7 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
      * 
      * @return the interaction time
      */
-    protected Date getInteractionTime(){
+    protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getInteractionTime(){
     	return this.interactionTime;
     }
     

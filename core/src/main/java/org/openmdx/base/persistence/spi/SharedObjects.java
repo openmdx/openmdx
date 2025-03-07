@@ -44,7 +44,7 @@
  */
 package org.openmdx.base.persistence.spi;
 
-import java.util.Date;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -258,7 +258,7 @@ public class SharedObjects {
          * @param transactionTime
          */
         void setTransactionTime(
-            Factory<Date> transactionTime
+            Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> transactionTime
         );
         
         /**
@@ -266,7 +266,7 @@ public class SharedObjects {
          * 
          * @return the transaction time factory
          */
-        Factory<Date> getTransactionTime();
+        Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> getTransactionTime();
         
     }
 

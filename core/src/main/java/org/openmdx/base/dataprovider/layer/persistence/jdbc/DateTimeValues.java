@@ -45,7 +45,6 @@
 
 package org.openmdx.base.dataprovider.layer.persistence.jdbc;
 
-import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -118,9 +117,14 @@ class DateTimeValues {
         return value;
     }
 
-    private static Date toDate(XMLGregorianCalendar datatypeValue) {
+    private static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif toDate(XMLGregorianCalendar datatypeValue) {
         final TimeZone timeZone = TimeZones.toTimeZone(datatypeValue.getTimezone());
-        return datatypeValue.toGregorianCalendar(timeZone, null, null).getTime(); 
+        return datatypeValue
+                .toGregorianCalendar(timeZone, null, null)
+                .getTime()
+                #if !CLASSIC_CHRONO_TYPES
+                .toInstant()
+                #endif;
     }
     
 }

@@ -44,7 +44,7 @@
  */
 package org.w3c.spi;
 
-import java.util.Date;
+
 
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -68,7 +68,7 @@ public interface ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value can't be parse
      */
-    Date newDateTime(
+    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newDateTime(
         String value
     );
     
@@ -115,8 +115,8 @@ public interface ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value is not an org::w3c::dateTime instance
      */
-    Date toDateTime(
-        Date value
+    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif toDateTime(
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif value
     );
     
     /**

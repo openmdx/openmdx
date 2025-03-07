@@ -50,7 +50,6 @@
 package org.openmdx.portal.servlet.loader;
 
 import java.net.MalformedURLException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -99,7 +98,7 @@ public class DataLoader
     synchronized public void loadData(
         String location
     ) throws ServiceException {
-    	String messagePrefix = new Date() + "  ";
+    	String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
         System.out.println(messagePrefix + "Loading data");
         SysLog.info("Loading data");
         List<String> dirs = this.getDirectories("/WEB-INF/config/" + location + "/");

@@ -31,7 +31,6 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -561,7 +560,7 @@ public class FileFilterUtils {
      * @see AgeFileFilter
      * @since Commons I/O 1.2
      */
-    public static IOFileFilter ageFileFilter(final Date cutoffDate) {
+    public static IOFileFilter ageFileFilter(final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif cutoffDate) {
         return new AgeFileFilter(cutoffDate);
     }
 
@@ -574,7 +573,7 @@ public class FileFilterUtils {
      * @see AgeFileFilter
      * @since Commons I/O 1.2
      */
-    public static IOFileFilter ageFileFilter(final Date cutoffDate, final boolean acceptOlder) {
+    public static IOFileFilter ageFileFilter(final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif cutoffDate, final boolean acceptOlder) {
         return new AgeFileFilter(cutoffDate, acceptOlder);
     }
 

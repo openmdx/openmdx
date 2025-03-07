@@ -50,7 +50,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.TimeZone;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -84,7 +83,7 @@ public abstract class AbstractFormatter
     /**
      * Formatter input
      */
-    private Date timespamp = null; // lazily initialized
+    private #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif timestamp = null; // lazily initialized
 
     /**
      * 
@@ -211,12 +210,12 @@ public abstract class AbstractFormatter
         long timestamp = record.getMillis();
         if(this.timestampFormatter == null) {
             this.timestampFormatter = newTimestampFormat();
-            this.timespamp = new Date(timestamp);
+            this.timestamp = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(timestamp);
         } else {
-            this.timespamp.setTime(timestamp);
+            this.timestamp#if CLASSIC_CHRONO_TYPES .setTime(timestamp) #else = java.time.Instant.ofEpochMilli(timestamp)#endif;
         }
         this.appendable.append(
-            this.timestampFormatter.format(timespamp)
+            this.timestampFormatter.format(timestamp)
         );
     }
 

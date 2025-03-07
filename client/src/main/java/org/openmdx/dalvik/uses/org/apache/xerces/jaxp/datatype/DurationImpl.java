@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConstants;
@@ -1356,7 +1355,7 @@ class DurationImpl
      *
      * @see #getTimeInMillis(Calendar)
      */
-    public long getTimeInMillis(final Date startInstant) {
+    public long getTimeInMillis(final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif startInstant) {
         Calendar cal = new GregorianCalendar();
         cal.setTime(startInstant);
         this.addTo(cal);
@@ -1943,7 +1942,7 @@ class DurationImpl
      * @throws NullPointerException
      *      if the date parameter is null.
      */
-    public void addTo(Date date) {
+    public void addTo(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif date) {
         Calendar cal = new GregorianCalendar();
         cal.setTime(date); // this will throw NPE if date==null
         this.addTo(cal);

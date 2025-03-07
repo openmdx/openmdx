@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -265,7 +264,8 @@ class XMLGregorianCalendarImpl
      *   <p>Obtain a pure Gregorian Calendar by calling
      *   GregorianCalendar.setChange(PURE_GREGORIAN_CHANGE). </p>
      */
-    private static final Date PURE_GREGORIAN_CHANGE = new Date(Long.MIN_VALUE);
+    private static final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif PURE_GREGORIAN_CHANGE
+            = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif(Long.MIN_VALUE);
 
     /**
      * Year index for MIN_ and MAX_FIELD_VALUES.

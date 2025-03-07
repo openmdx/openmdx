@@ -45,7 +45,6 @@
 package org.openmdx.kernel.id.spi;
 
 import java.security.SecureRandom;
-import java.util.Date;
 import java.util.logging.Level;
 
 import org.openmdx.kernel.exception.BasicException;
@@ -234,10 +233,16 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
      ) {
         int clockSequence = (TimeBasedIdGenerator.clockSequence + 1) & 0x3FFF;
         SysLog.log(
-            Level.WARNING, 
-            "Sys|Clock has been set back from {0} to {1}|Clock sequence will be changed from {2} to {3}",
-            DateTimeFormat.EXTENDED_UTC_FORMAT.format(new Date(lastReservation)), DateTimeFormat.EXTENDED_UTC_FORMAT.format(new Date(nextReservation)), 
-            Long.valueOf(TimeBasedIdGenerator.clockSequence), Long.valueOf(clockSequence)
+                Level.WARNING,
+                "Sys|Clock has been set back from {0} to {1}|Clock sequence will be changed from {2} to {3}",
+                DateTimeFormat.EXTENDED_UTC_FORMAT.format(
+                        #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(lastReservation)
+                ),
+                DateTimeFormat.EXTENDED_UTC_FORMAT.format(
+                        #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(nextReservation)
+                ),
+                (long) TimeBasedIdGenerator.clockSequence,
+                (long) clockSequence
         );
         TimeBasedIdGenerator.clockSequence = clockSequence;
     }
@@ -277,7 +282,7 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
     }
     
     /**
-     * @return
+     * @return a random clock sequence
      */
     private static int createClockSequence() {
         int clockSequence = getRandom().nextInt(0x4000);
@@ -335,7 +340,8 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
          */
         @Override
         public String toString() {
-            return DateTimeFormat.EXTENDED_UTC_FORMAT.format(new Date(millisecond)) + "/P0.001S";
+            return DateTimeFormat.EXTENDED_UTC_FORMAT.format(
+                    #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(millisecond)) + "/P0.001S";
         }
         
     }

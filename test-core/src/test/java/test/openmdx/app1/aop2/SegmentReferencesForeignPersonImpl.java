@@ -45,7 +45,6 @@
 package test.openmdx.app1.aop2;
 
 import java.util.AbstractCollection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -110,7 +109,7 @@ public class SegmentReferencesForeignPersonImpl
             	//
             	// CR20019630
             	//
-                Date date = PlugInContexts.uncheckedGetPlugInContext(person, PersonImpl.class);
+                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif date = PlugInContexts.uncheckedGetPlugInContext(person, PersonImpl.class);
                 System.out.println(
                     "The context of the person with the foreign id '" + foreignId + "' has been established at " + date
                 );

@@ -45,7 +45,6 @@
 package org.openmdx.audit2.aop1;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -277,16 +276,16 @@ public class Involvement_1 extends Interceptor_1 {
                 )
             )
         );
-        Date expected = (Date) getUnitOfWork().objGetValue(SystemAttributes.CREATED_AT);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif expected = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) getUnitOfWork().objGetValue(SystemAttributes.CREATED_AT);
         for(DataObject_1_0 involvement : involvements.values()) {
             DataObject_1_0 beforeImage = (DataObject_1_0) involvement.objGetValue("beforeImage");
-            if(equal(beforeImage.jdoGetObjectId(),expected,(Date)beforeImage.objGetValue(SystemAttributes.MODIFIED_AT))) {
+            if(equal(beforeImage.jdoGetObjectId(),expected,(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)beforeImage.objGetValue(SystemAttributes.MODIFIED_AT))) {
                 return (ObjectView_1_0) beforeImage;
             }
         }
         try {
             ObjectView_1_0 afterImage = (ObjectView_1_0) self.jdoGetPersistenceManager().getObjectById(xri);
-            if(afterImage.jdoIsDeleted() || !equal(xri,expected,(Date)afterImage.objGetValue(SystemAttributes.MODIFIED_AT))){
+            if(afterImage.jdoIsDeleted() || !equal(xri,expected,(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)afterImage.objGetValue(SystemAttributes.MODIFIED_AT))){
                 return null;
             } else {
                 return afterImage;
@@ -296,7 +295,7 @@ public class Involvement_1 extends Interceptor_1 {
         }
     }
     
-    private static boolean equal(Path xri, Date left, Date right){
+    private static boolean equal(Path xri, #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif left, #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif right){
         return left == null ? right == null : left.equals(right);
     }
     

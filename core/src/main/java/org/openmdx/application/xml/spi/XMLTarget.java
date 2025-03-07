@@ -48,7 +48,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -242,7 +241,7 @@ public class XMLTarget implements ExportTarget {
     ) throws ServiceException {
         final String stringValue;
         if(PrimitiveTypes.DATETIME.equals(typeName)) {
-            stringValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format((Date) value);
+            stringValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) value);
         } else if(PrimitiveTypes.DATE.equals(typeName)) {
             stringValue = ((XMLGregorianCalendar) value).toXMLFormat();
         } else if(PrimitiveTypes.LONG.equals(typeName) || PrimitiveTypes.INTEGER.equals(typeName) || PrimitiveTypes.SHORT.equals(typeName)) {

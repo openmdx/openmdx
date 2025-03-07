@@ -47,7 +47,6 @@ package test.openmdx.app1.aop2;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import javax.jdo.listener.StoreCallback;
@@ -277,7 +276,7 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
     @Override
     @SuppressWarnings("unchecked")
     protected C newContext() {
-        return (C) new Date();
+        return (C) #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif;
     }
 
     /* (non-Javadoc)
