@@ -49,7 +49,6 @@ import static org.w3c.spi.DatatypeFactories.immutableDatatypeFactory;
 import static org.w3c.spi.DatatypeFactories.xmlDatatypeFactory;
 
 import java.text.ParseException;
-import java.util.Date;
 
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -75,8 +74,8 @@ public class ImmutableDatatypesTest {
     static Duration oneHour;
     XMLGregorianCalendar mutableDate02;
     XMLGregorianCalendar mutableDate03;
-    Date mutableDateTime02;
-    Date mutableDateTime03;
+    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mutableDateTime02;
+    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mutableDateTime03;
 
     @BeforeAll
     public static void immutableValues(){

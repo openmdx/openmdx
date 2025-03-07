@@ -564,8 +564,7 @@ public final class ImmutableDate
      *   <p>Obtain a pure Gregorian Calendar by calling
      *   GregorianCalendar.setChange(PURE_GREGORIAN_CHANGE). </p>
      */
-    private static final java.util.Date PURE_GREGORIAN_CHANGE = new java.util.Date(
-        Long.MIN_VALUE
-    );
+    private static final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif PURE_GREGORIAN_CHANGE
+            = #if CLASSIC_CHRONO_TYPES new java.util.Date #else Instant.ofEpochMilli#endif(Long.MIN_VALUE);
 
 }

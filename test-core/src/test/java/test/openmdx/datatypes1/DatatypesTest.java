@@ -59,7 +59,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -265,15 +264,15 @@ public class DatatypesTest  {
           55, // minute
           00 // second
         );
-        Date fiveToTwelve = new Date(calendar.getTimeInMillis()); 
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif fiveToTwelve = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(calendar.getTimeInMillis());
         Assertions.assertEquals("19950101T115500.000Z",  DateTimeFormat.BASIC_UTC_FORMAT.format(fiveToTwelve), "Basic Format");
         Assertions.assertEquals("1995-01-01T11:55:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(fiveToTwelve), "Extended Format");
-        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Date.class, "19950101T115500.000Z"), "Basic parser");
-        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Date.class, "1995-01-01T11:55:00.000Z"), "Extended parser");
-        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Date.class, "19950101T1155-00"), "Basic parser accepting reduced accuracy and alternative UTC identifier");
-        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Date.class, "1995-01-01T11:55:00,000000Z"), "Extended parser accepting comma and extended accuracy");
-        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Date.class, "95-01-01T11:55-00"), "Extended parser accepting two digit year");
-        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Date.class, "950101T1155-00"), "Basic parser accepting two digit year");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19950101T115500.000Z"), "Basic parser");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "1995-01-01T11:55:00.000Z"), "Extended parser");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19950101T1155-00"), "Basic parser accepting reduced accuracy and alternative UTC identifier");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "1995-01-01T11:55:00,000000Z"), "Extended parser accepting comma and extended accuracy");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "95-01-01T11:55-00"), "Extended parser accepting two digit year");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "950101T1155-00"), "Basic parser accepting two digit year");
     }
     
     @Test
@@ -477,9 +476,9 @@ public class DatatypesTest  {
     protected void storeBulk(
         String providerName, 
         String segmentName, 
-        Date begin, 
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif begin,
         long step, 
-        Date end,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif end,
         XMLGregorianCalendar... dates
     ) throws Exception {
         System.out.println("Acquire persistence manager...");
@@ -512,9 +511,9 @@ public class DatatypesTest  {
         unitOfWork.begin();
         int i = 0;
         for(
-            Date d =  begin;
+            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d =  begin;
             d.compareTo(end) <= 0;
-            d = new Date(d.getTime() + step)
+            d = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(d.getTime() + step)
         ){
             NonStated nonStated = datatypes1Package.getNonStated().createNonStated();
             setData(nonStated, this.values[0]);
@@ -545,8 +544,8 @@ public class DatatypesTest  {
     protected void validateBulk(
         String providerName, 
         String segmentName,
-        Date dateTimeLowerBound,
-        Date dateTimeUpperBound,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTimeLowerBound,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTimeUpperBound,
         XMLGregorianCalendar dateLowerBound,
         XMLGregorianCalendar dateUpperBound,
         int expectedCount,
@@ -565,7 +564,7 @@ public class DatatypesTest  {
         if(fetchSize == null) {
             actualCount = 0;
             for(NonStated nonStated : segment.<NonStated>getNonStated()) {
-                Date value7 = nonStated.getValue7();
+                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif value7 = nonStated.getValue7();
                 XMLGregorianCalendar value8 = nonStated.getValue8();
                 if(
                     Order.compareValidFrom(value7, dateTimeLowerBound) >= 0 && Order.compareInvalidFrom(value7, dateTimeUpperBound) <= 0 &&

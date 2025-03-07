@@ -54,7 +54,6 @@ import java.io.InputStreamReader;
 import java.io.SequenceInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -164,7 +163,7 @@ public class TextsLoader extends Loader {
 	synchronized public void loadTexts(
 		String[] locale
 	) throws ServiceException {
-		String messagePrefix = new Date() + "  ";
+		String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
 		System.out.println(messagePrefix + "Loading texts");
 		SysLog.info("Loading texts");
 		List<ResourceBundle> textBundles = getDefaultTextsBundles(

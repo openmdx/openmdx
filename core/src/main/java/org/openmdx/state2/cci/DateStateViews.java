@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -207,7 +206,7 @@ public class DateStateViews {
     public static PersistenceManager getPersistenceManager(
         final PersistenceManager persistenceManager,
         final XMLGregorianCalendar validFor,
-        final Date validAt
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ) {
         return DateStateViews.getPersistenceManager(
             persistenceManager,
@@ -341,7 +340,7 @@ public class DateStateViews {
     public static PersistenceManager getPersistenceManager(
         final RefBaseObject refContext,
         final XMLGregorianCalendar validFor,
-        final Date validAt
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ) {
         return DateStateViews.getPersistenceManager(
             refContext,
@@ -361,7 +360,7 @@ public class DateStateViews {
      */
     private static DateStateViewContext createTimePointContext(
         XMLGregorianCalendar validFor,
-        final Date validAt
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ) {
     	if(validFor == null) {
     		validFor = DateStateViews.today();
@@ -423,7 +422,7 @@ public class DateStateViews {
      *             core object is not context free
      */
     @SuppressWarnings("unchecked")
-    public static <T extends org.openmdx.state2.jmi1.StateCapable> void addCoreToContainer(
+    public static <T extends StateCapable> void addCoreToContainer(
         Container<? super T> container,
         String qualifier,
         T core
@@ -676,7 +675,7 @@ public class DateStateViews {
             return state;
         } else if (state.getRemovedAt() == null) {
             getCore(state); // heal if necessary
-            return DateStateViews.<T, T>getViewForTimeRange(
+            return DateStateViews.getViewForTimeRange(
                 state,
                 state.getStateValidFrom(),
                 state.getStateValidTo()
@@ -687,7 +686,7 @@ public class DateStateViews {
                 validFor = state.getStateValidTo();
             if (validFor == null)
                 validFor = DateStateViews.DEFAULT_VALID_FOR;
-            return DateStateViews.<T, T>getViewForTimePoint(
+            return DateStateViews.getViewForTimePoint(
                 state,
                 validFor,
                 state.getCreatedAt()
@@ -768,8 +767,8 @@ public class DateStateViews {
     }
 
     private static boolean equals(
-        Date left,
-        Date right
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif left,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif right
     ) {
         if (left == right) {
             return true;
@@ -878,7 +877,7 @@ public class DateStateViews {
     public static <T extends RefObject, V extends T> V getViewForTimePoint(
         T object,
         XMLGregorianCalendar validFor,
-        Date validAt
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ) {
         if (object == null)
             return null;
@@ -927,7 +926,7 @@ public class DateStateViews {
     public static <T extends Container<?>> T getViewForTimePoint(
         T container,
         XMLGregorianCalendar validFor,
-        Date validAt
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ) {
         RefContainer<?> source = asRefContainer(container);
         DateStateContext context = DateStateViews.getContext(source);
@@ -1003,7 +1002,7 @@ public class DateStateViews {
      * and stateValidTo. Attribute modification operations are propagated to
      * all included states. Holes remain untouched.
      * 
-     * @param refObject
+     * @param object
      *            a plain JMI object or a date state view
      * @param validFrom
      *            exclude all states not valid at or after the given
@@ -1054,7 +1053,7 @@ public class DateStateViews {
      * and stateValidTo. Attribute modification operations are propagated to
      * all included states. Holes remain untouched.
      * 
-     * @param refObject
+     * @param container
      *            a plain JMI object or a date state view
      * @param validFrom
      *            exclude all states not valid at or after the given
@@ -1645,7 +1644,7 @@ public class DateStateViews {
                     QualifierType.PERSISTENT,
                     qualifier.substring(1)
                 ) : contextFreeContainer.refGet(
-                    QualifierType.REASSIGNABLE,
+                    REASSIGNABLE,
                     qualifier
                 )
             ) : containerId.getChild(
@@ -1704,13 +1703,6 @@ public class DateStateViews {
      *            include all states ending at validFrom or later
      * @param validTo
      *            include all states beginning at validTo or earlier
-     * @param invalidated
-     *            tells whether valid or invalid states excluded
-     *            <ul>
-     *            <li>{@code null}: Neither valid nor invalid states are excluded
-     *            <li>{@code TRUE}: Valid states are excluded
-     *            <li>{@code FALSE}: Invalid states are excluded
-     *            </ul>
      * @param existsAt
      *            an (optional) time in history
      * @return a collection of DateState instance
@@ -1724,7 +1716,7 @@ public class DateStateViews {
     	StateCapable stateCapable, 
     	XMLGregorianCalendar validFrom, 
    		XMLGregorianCalendar validTo, 
-   		Date existsAt
+   		#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt
     ) {
         return getStates(
         	stateCapable, 
@@ -1846,7 +1838,7 @@ public class DateStateViews {
         XMLGregorianCalendar validFrom,
         XMLGregorianCalendar validTo,
         Boolean invalidated,
-        Date existsAt,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt,
         AccessMode mode
     ) {
         Order.assertTimeRange(validFrom, validTo);
@@ -2080,7 +2072,7 @@ public class DateStateViews {
     /**
      * Tests whether the view represents a single state
      * 
-     * @param refObject
+     * @param state
      * 
      * @return {@code true} if the view refers to a single state
      * 
@@ -2185,7 +2177,7 @@ public class DateStateViews {
             state = involved.get(0);
         }
         return (UUID) JDOHelper.getTransactionalObjectId(
-            ((org.openmdx.base.persistence.spi.Cloneable<?>) state).openmdxjdoClone(
+            ((Cloneable<?>) state).openmdxjdoClone(
                 exclude
             )
         );
@@ -2247,7 +2239,7 @@ public class DateStateViews {
                     );
                     break;
                 case TIME_POINT_VIEW:
-                    Date existsAt = stateContext.getExistsAt();
+                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt = stateContext.getExistsAt();
                     XMLGregorianCalendar validAt = stateContext.getValidAt();
                     if (validAt == null) {
                         validAt = DateStateViewContext.today();
@@ -2303,7 +2295,7 @@ public class DateStateViews {
     /**
      * Provides a container's core objects and the validities of their states.
      * 
-     * @param refContainer
+     * @param jmiContainer
      *            the container
      * @param periodFactory
      *            the factory for the application specific periods
@@ -2467,7 +2459,7 @@ public class DateStateViews {
 
         /**
          * @param o
-         * @see java.util.ListIterator#add(java.lang.Object)
+         * @see ListIterator#add(Object)
          */
         public void add(
             E o
@@ -2477,7 +2469,7 @@ public class DateStateViews {
 
         /**
          * @return
-         * @see java.util.ListIterator#hasNext()
+         * @see ListIterator#hasNext()
          */
         public boolean hasNext() {
             return this.delegate.hasNext();
@@ -2485,7 +2477,7 @@ public class DateStateViews {
 
         /**
          * @return
-         * @see java.util.ListIterator#hasPrevious()
+         * @see ListIterator#hasPrevious()
          */
         public boolean hasPrevious() {
             return this.delegate.hasPrevious();
@@ -2493,7 +2485,7 @@ public class DateStateViews {
 
         /**
          * @return
-         * @see java.util.ListIterator#next()
+         * @see ListIterator#next()
          */
         public E next() {
             return getViewForState(
@@ -2503,7 +2495,7 @@ public class DateStateViews {
 
         /**
          * @return
-         * @see java.util.ListIterator#nextIndex()
+         * @see ListIterator#nextIndex()
          */
         public int nextIndex() {
             return this.delegate.nextIndex();
@@ -2511,7 +2503,7 @@ public class DateStateViews {
 
         /**
          * @return
-         * @see java.util.ListIterator#previous()
+         * @see ListIterator#previous()
          */
         public E previous() {
             return DateStateViews.getViewForState(
@@ -2521,7 +2513,7 @@ public class DateStateViews {
 
         /**
          * @return
-         * @see java.util.ListIterator#previousIndex()
+         * @see ListIterator#previousIndex()
          */
         public int previousIndex() {
             return this.delegate.previousIndex();
@@ -2529,7 +2521,7 @@ public class DateStateViews {
 
         /**
          * 
-         * @see java.util.ListIterator#remove()
+         * @see ListIterator#remove()
          */
         public void remove() {
             throw new UnsupportedOperationException();
@@ -2537,7 +2529,7 @@ public class DateStateViews {
 
         /**
          * @param o
-         * @see java.util.ListIterator#set(java.lang.Object)
+         * @see ListIterator#set(Object)
          */
         public void set(
             E o
@@ -2602,7 +2594,7 @@ public class DateStateViews {
             XMLGregorianCalendar validFrom,
             XMLGregorianCalendar validTo,
             Boolean invalidated,
-            Date existsAt,
+            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt,
             AccessMode mode
         ) {
             this.dateStates = dateStates;
@@ -2652,7 +2644,7 @@ public class DateStateViews {
         private final XMLGregorianCalendar validFrom;
         private final XMLGregorianCalendar validTo;
         private final Boolean invalidated;
-        private final Date existsAt;
+        private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt;
         private final AccessMode mode;
 
         /**
