@@ -27,6 +27,7 @@ package org.openmdx.dalvik.uses.sun.security.util;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.util.Date;
 import org.openmdx.dalvik.uses.sun.misc.IOUtils;
 
 /**
@@ -767,7 +768,7 @@ public class DerValue {
      *
      * @return the Date held in this DER value
      */
-    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getUTCTime() throws IOException {
+    public Date getUTCTime() throws IOException {
         if (tag != tag_UtcTime) {
             throw new IOException("DerValue.getUTCTime, not a UtcTime: " + tag);
         }
@@ -779,7 +780,7 @@ public class DerValue {
      *
      * @return the Date held in this DER value
      */
-    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getGeneralizedTime() throws IOException {
+    public Date getGeneralizedTime() throws IOException {
         if (tag != tag_GeneralizedTime) {
             throw new IOException(
                 "DerValue.getGeneralizedTime, not a GeneralizedTime: " + tag);

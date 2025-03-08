@@ -29,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.Comparator;
 import java.util.Arrays;
@@ -471,7 +472,7 @@ extends ByteArrayOutputStream implements DerEncoder {
      * <P>YYMMDDhhmmss{Z|+hhmm|-hhmm} ... emits only using Zulu time
      * and with seconds (even if seconds=0) as per RFC 5280.
      */
-    public void putUTCTime(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d) throws IOException {
+    public void putUTCTime(Date d) throws IOException {
         putTime(d, DerValue.tag_UtcTime);
     }
 
@@ -481,7 +482,7 @@ extends ByteArrayOutputStream implements DerEncoder {
      * <P>YYYYMMDDhhmmss{Z|+hhmm|-hhmm} ... emits only using Zulu time
      * and with seconds (even if seconds=0) as per RFC 5280.
      */
-    public void putGeneralizedTime(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d) throws IOException {
+    public void putGeneralizedTime(Date d) throws IOException {
         putTime(d, DerValue.tag_GeneralizedTime);
     }
 
@@ -492,7 +493,7 @@ extends ByteArrayOutputStream implements DerEncoder {
      * @param d the date to be marshalled
      * @param tag the tag for UTC Time or Generalized Time
      */
-    private void putTime(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d, byte tag) throws IOException {
+    private void putTime(Date d, byte tag) throws IOException {
 
         /*
          * Format the date.

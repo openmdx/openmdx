@@ -70,27 +70,27 @@ public class Gregorian extends BaseCalendar {
         return "gregorian";
     }
 
-    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif getCalendarDate() {
+    public Date getCalendarDate() {
         return getCalendarDate(System.currentTimeMillis(), newCalendarDate());
     }
 
-    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif getCalendarDate(long millis) {
+    public Date getCalendarDate(long millis) {
         return getCalendarDate(millis, newCalendarDate());
     }
 
-    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif getCalendarDate(long millis, CalendarDate date) {
+    public Date getCalendarDate(long millis, CalendarDate date) {
         return (Date) super.getCalendarDate(millis, date);
     }
 
-    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif getCalendarDate(long millis, TimeZone zone) {
+    public Date getCalendarDate(long millis, TimeZone zone) {
         return getCalendarDate(millis, newCalendarDate(zone));
     }
 
-    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif newCalendarDate() {
-        return #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif
+    public Date newCalendarDate() {
+        return new Date();
     }
 
     public Date newCalendarDate(TimeZone zone) {
-        return #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(zone);
+        return new Date(zone);
     }
 }

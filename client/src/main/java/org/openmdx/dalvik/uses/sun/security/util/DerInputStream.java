@@ -28,6 +28,7 @@ package org.openmdx.dalvik.uses.sun.security.util;
 import java.io.InputStream;
 import java.io.IOException;
 // import java.io.EOFException;
+import java.util.Date;
 import java.util.Vector;
 import java.math.BigInteger;
 import java.io.DataInputStream;
@@ -540,7 +541,7 @@ public class DerInputStream {
     /**
      * Get a UTC encoded time value from the input stream.
      */
-    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getUTCTime() throws IOException {
+    public Date getUTCTime() throws IOException {
         if (buffer.read() != DerValue.tag_UtcTime)
             throw new IOException("DER input, UTCtime tag invalid ");
         return buffer.getUTCTime(getDefiniteLength(buffer));
@@ -549,7 +550,7 @@ public class DerInputStream {
     /**
      * Get a Generalized encoded time value from the input stream.
      */
-    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getGeneralizedTime() throws IOException {
+    public Date getGeneralizedTime() throws IOException {
         if (buffer.read() != DerValue.tag_GeneralizedTime)
             throw new IOException("DER input, GeneralizedTime tag invalid ");
         return buffer.getGeneralizedTime(getDefiniteLength(buffer));
