@@ -69,7 +69,7 @@ public class DateStateViewContext
      * @param validAt the view's transaction time point, or {@code null} for an up-to-date view
      */
     private DateStateViewContext(
-        XMLGregorianCalendar validFor,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFor,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ) {
         super(
@@ -89,8 +89,8 @@ public class DateStateViewContext
      * @param validTo the end of the time range, or {@code null} for an unconstrained upper bound
      */
     private DateStateViewContext(
-        XMLGregorianCalendar validFrom,
-        XMLGregorianCalendar validTo
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo
     ) {
         super(
             ViewKind.TIME_RANGE_VIEW,
@@ -113,7 +113,7 @@ public class DateStateViewContext
      * @param validFor the view's valid time point
      */
     public static DateStateViewContext newTimePointViewContext(
-        XMLGregorianCalendar validFor
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFor
     ){
         ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
         return new DateStateViewContext(
@@ -129,7 +129,7 @@ public class DateStateViewContext
      * @param validAt the view's transaction time point
      */
     public static DateStateViewContext newTimePointViewContext(
-        XMLGregorianCalendar validFor,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFor,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ){
         ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
@@ -148,12 +148,12 @@ public class DateStateViewContext
      * @throws IllegalArgumentException if validTo is less than validFrom 
      */
     public static DateStateViewContext newTimeRangeViewContext(
-        XMLGregorianCalendar validFrom,
-        XMLGregorianCalendar validTo
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo
     ){
         ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
-        XMLGregorianCalendar immutableValidFrom = datatypeFactory.toDate(validFrom);
-        XMLGregorianCalendar immutableValidTo = datatypeFactory.toDate(validTo);
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif immutableValidFrom = datatypeFactory.toDate(validFrom);
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif immutableValidTo = datatypeFactory.toDate(validTo);
         Order.assertTimeRange(immutableValidFrom, immutableValidTo);
         return new DateStateViewContext(immutableValidFrom, immutableValidTo);
     }
@@ -163,7 +163,7 @@ public class DateStateViewContext
      * 
      * @return the current date
      */
-    public static XMLGregorianCalendar today(
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif today(
     ){
         GregorianCalendar calendar = new GregorianCalendar();
         return DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
@@ -184,7 +184,7 @@ public class DateStateViewContext
      *
      * @return Returns the validTo.
      */
-    public final XMLGregorianCalendar getValidTo(
+    public final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif getValidTo(
     ) {
         return super.getUpperBound();
     }
@@ -199,7 +199,7 @@ public class DateStateViewContext
      */
     @Override
     protected String toString(
-        XMLGregorianCalendar timePoint
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif timePoint
     ) {
         String xmlFormat = timePoint.toXMLFormat();
         return new StringBuilder(8).append(
@@ -215,7 +215,7 @@ public class DateStateViewContext
      * @see org.openmdx.state2.spi.StateViewContext#now()
      */
     @Override
-    protected XMLGregorianCalendar newValidAt() {
+    protected #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif newValidAt() {
         return DateStateViewContext.today();
     }
 

@@ -2069,7 +2069,7 @@ public class RefRootPackage_1
                         }
                     } else if (ModelHelper.isDerived(attributeDef)){
                         Object value = 
-                            PrimitiveTypes.DATE.equals(typeName) ? org.w3c.jpa3.Date.toJDO((XMLGregorianCalendar) source) :
+                            PrimitiveTypes.DATE.equals(typeName) ? org.w3c.jpa3.Date.toJDO((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) source) :
                             PrimitiveTypes.DATETIME.equals(typeName) ? DateTime.toJDO((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) source) :
                             source;
                         try {

@@ -31,6 +31,7 @@ import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Durati
 import javax.xml.namespace.QName;
 
 import org.openmdx.dalvik.uses.org.apache.xerces.util.DatatypeMessageFormatter;
+import org.w3c.spi2.Datatypes;
 import org.w3c.time.TimeZones;
 
 /** 
@@ -362,7 +363,7 @@ class XMLGregorianCalendarImpl
      * 
      * @see #toGregorianCalendar(TimeZone, Locale, XMLGregorianCalendar)
      */
-    public static final XMLGregorianCalendar LEAP_YEAR_DEFAULT =
+    public static final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif LEAP_YEAR_DEFAULT =
         createDateTime(
                 400,  //year
                 DatatypeConstants.JANUARY,  //month
@@ -761,7 +762,7 @@ class XMLGregorianCalendarImpl
      * constraints for the field as specified in 
      * <a href="#datetimefieldmapping">date/time field mapping table</a>.
      */
-	public static XMLGregorianCalendar createDateTime(
+	public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif createDateTime(
 	        BigInteger year,
 	        int month,
 	        int day,
@@ -799,7 +800,7 @@ class XMLGregorianCalendarImpl
      * 
      * @see DatatypeConstants#FIELD_UNDEFINED
      */
-    public static XMLGregorianCalendar createDateTime(
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif createDateTime(
             int year,
             int month,
             int day,
@@ -839,7 +840,7 @@ class XMLGregorianCalendarImpl
      * 
      * @see DatatypeConstants#FIELD_UNDEFINED
      */
-    public static XMLGregorianCalendar createDateTime(
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif createDateTime(
             int year,
             int month,
             int day,
@@ -880,7 +881,7 @@ class XMLGregorianCalendarImpl
      * constraints for the field as specified in 
      * <a href="#datetimefieldmapping">date/time field mapping table</a>.
      */
-    public static XMLGregorianCalendar createDate(
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif createDate(
             int year,
             int month,
             int day,
@@ -912,7 +913,7 @@ class XMLGregorianCalendarImpl
      * constraints for the field as specified in 
      * <a href="#datetimefieldmapping">date/time field mapping table</a>.
      */
-    public static XMLGregorianCalendar createTime(
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif createTime(
             int hours,
             int minutes,
             int seconds,
@@ -946,7 +947,7 @@ class XMLGregorianCalendarImpl
      * constraints for the field as specified in 
      * <a href="#datetimefieldmapping">date/time field mapping table</a>.
      */
-    public static XMLGregorianCalendar createTime(
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif createTime(
             int hours,
             int minutes,
             int seconds,
@@ -981,7 +982,7 @@ class XMLGregorianCalendarImpl
      * constraints for the field as specified in 
      * <a href="#datetimefieldmapping">date/time field mapping table</a>.
      */
-    public static XMLGregorianCalendar createTime(
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif createTime(
             int hours,
             int minutes,
             int seconds,
@@ -1468,13 +1469,13 @@ class XMLGregorianCalendarImpl
      * @throws NullPointerException if {@code lhs} or {@code rhs} 
      * parameters are null. 
      */
-    public int compare(XMLGregorianCalendar rhs) {
+    public int compare(#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif rhs) {
 
         //MLGregorianCalendar lhs = this;
 
         int result = DatatypeConstants.INDETERMINATE;
-        XMLGregorianCalendar P = this;
-        XMLGregorianCalendar Q = rhs;
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif P = this;
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif Q = rhs;
 
         if (P.getTimezone() == Q.getTimezone()) {
             // Optimization: 
@@ -1500,14 +1501,14 @@ class XMLGregorianCalendarImpl
             }
 
             // C. step 1
-            XMLGregorianCalendar MinQ = normalizeToTimezone(Q, DatatypeConstants.MIN_TIMEZONE_OFFSET);
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif MinQ = normalizeToTimezone(Q, DatatypeConstants.MIN_TIMEZONE_OFFSET);
             result = internalCompare(P, MinQ);
             if (result == DatatypeConstants.LESSER) {
                 return result;
             } 
 
             // C. step 2
-            XMLGregorianCalendar MaxQ = normalizeToTimezone(Q, DatatypeConstants.MAX_TIMEZONE_OFFSET);
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif MaxQ = normalizeToTimezone(Q, DatatypeConstants.MAX_TIMEZONE_OFFSET);
             result = internalCompare(P, MaxQ);
             if (result == DatatypeConstants.GREATER) {
                 return result;
@@ -1524,14 +1525,14 @@ class XMLGregorianCalendarImpl
             }
 
             // D. step 1
-            XMLGregorianCalendar MaxP = normalizeToTimezone(P, DatatypeConstants.MAX_TIMEZONE_OFFSET);
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif MaxP = normalizeToTimezone(P, DatatypeConstants.MAX_TIMEZONE_OFFSET);
             result = internalCompare(MaxP, Q);
             if (result == DatatypeConstants.LESSER) {
                 return result;
             } 
 
             // D. step 2
-            XMLGregorianCalendar MinP = normalizeToTimezone(P, DatatypeConstants.MIN_TIMEZONE_OFFSET);
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif MinP = normalizeToTimezone(P, DatatypeConstants.MIN_TIMEZONE_OFFSET);
             result = internalCompare(MinP, Q);
             if (result == DatatypeConstants.GREATER) {
                 return result;
@@ -1549,7 +1550,7 @@ class XMLGregorianCalendarImpl
      * <p>2000-03-04T23:00:00+03:00 normalizes to 2000-03-04T20:00:00Z</p>
      * <p>Implements W3C XML Schema Part 2, Section 3.2.7.3 (A).</p>
      */
-    public XMLGregorianCalendar normalize() {
+    public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif normalize() {
 
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif normalized = normalizeToTimezone(this, timezone);
         
@@ -2599,7 +2600,7 @@ class XMLGregorianCalendarImpl
      */
     public GregorianCalendar toGregorianCalendar(java.util.TimeZone timezone, 
             java.util.Locale aLocale,
-            XMLGregorianCalendar defaults) {
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif defaults) {
         GregorianCalendar result = null;
         TimeZone tz = timezone;
         if (tz == null) {

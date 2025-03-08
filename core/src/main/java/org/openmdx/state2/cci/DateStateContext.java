@@ -44,8 +44,6 @@
  */
 package org.openmdx.state2.cci;
 
-import javax.xml.datatype.#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif;
-
 /**
  * Date State Context
  */

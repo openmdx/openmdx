@@ -244,7 +244,7 @@ public class StateCapableContainer_1
 	        );
             switch(stateContext.getViewKind()) {
                 case TIME_RANGE_VIEW:
-                	XMLGregorianCalendar validTo = stateContext.getValidTo();
+                	#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo = stateContext.getValidTo();
                 	if(validTo != null) {
                 		filter.add(
                             new IsGreaterCondition(
@@ -255,7 +255,7 @@ public class StateCapableContainer_1
                             )
                 		);
                 	}
-                	XMLGregorianCalendar validFrom = stateContext.getValidFrom();
+                	#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom = stateContext.getValidFrom();
                 	if(validFrom != null) {
                 		filter.add(
                             new IsGreaterOrEqualCondition(
@@ -275,7 +275,7 @@ public class StateCapableContainer_1
                     );
             		break;
                 case TIME_POINT_VIEW:
-                	XMLGregorianCalendar validAt = stateContext.getValidAt();
+                	#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validAt = stateContext.getValidAt();
                 	if(validAt != null) {
                 		filter.add(
                             new IsGreaterCondition(

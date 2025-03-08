@@ -106,7 +106,7 @@ public class DateState_1
     /**
      * 
      */
-    private static final XMLGregorianCalendar NULL = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar();
+    private static final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif NULL = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar();
 
     private static final List<String> IGNORABLE_ATTRIBUTES = Arrays.asList(
         STATE_VALID_FROM, STATE_VALID_TO,
@@ -184,8 +184,8 @@ public class DateState_1
     ) throws ServiceException {
         Collection<DataObject_1_0> states = getStates();
         DateStateContext context = getContext();
-        XMLGregorianCalendar validFrom;
-        XMLGregorianCalendar validTo;
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom;
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo;
         for(Map.Entry<DataObject_1_0,BoundaryCrossing> e : pending.entrySet()) {
             DataObject_1_0 source = e.getKey();
             BoundaryCrossing boundaryCrossing = e.getValue();
@@ -475,7 +475,7 @@ public class DateState_1
     private SortedMap<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif,DataObject_1_0> getActiveStates(
         final Collection<DataObject_1_0> states
     ) throws ServiceException {
-        final SortedMap<XMLGregorianCalendar,DataObject_1_0> activeStates = new TreeMap<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif,DataObject_1_0>(VALID_FROM_COMPARATOR);
+        final SortedMap<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif,DataObject_1_0> activeStates = new TreeMap<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif,DataObject_1_0>(VALID_FROM_COMPARATOR);
         for(DataObject_1_0 state : states){
             if(isActive(state)) {
                 activeStates.put((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)state.objGetValue(STATE_VALID_FROM), state);

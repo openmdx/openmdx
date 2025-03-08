@@ -393,7 +393,7 @@ public class XMLGregorianCalendarMarshaller {
      * @return the SQL date time representation
      */
     private String sqlDateTime(
-        XMLGregorianCalendar xmlDateTime,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif xmlDateTime,
         boolean withTimeZone
     ){
     	final long millisecondsSince1970 = xmlDateTime.toGregorianCalendar().getTimeInMillis();
@@ -454,7 +454,7 @@ public class XMLGregorianCalendarMarshaller {
             long milliseconds = value.getTime();
             java.util.GregorianCalendar calendar = new GregorianCalendar(UTC);
             calendar.setTimeInMillis(milliseconds);
-            XMLGregorianCalendar target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar); 
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
             switch(this.dateTimePrecision){
                 case NANOSECONDS:
                     //

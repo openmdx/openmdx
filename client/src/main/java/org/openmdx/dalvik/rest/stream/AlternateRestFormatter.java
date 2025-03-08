@@ -92,6 +92,7 @@ import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
+import org.w3c.spi2.Datatypes;
 import org.w3c.format.DateTimeFormat;
 
 /**
@@ -528,7 +529,7 @@ public class AlternateRestFormatter implements RestFormatter {
     		value instanceof Boolean ? PrimitiveTypes.BOOLEAN :
     		value instanceof Path ? PrimitiveTypes.OBJECT_ID :
             Datatypes.DATE_TIME_CLASS.isInstance(value) ? PrimitiveTypes.DATETIME :
-    		value instanceof XMLGregorianCalendar ? PrimitiveTypes.DATE :
+            Datatypes.DATE_CLASS.isInstance(value) ? PrimitiveTypes.DATE :
     		value instanceof URI ? PrimitiveTypes.ANYURI :
     		value instanceof byte[] ? PrimitiveTypes.BINARY :
     		value instanceof UUID ? PrimitiveTypes.UUID :

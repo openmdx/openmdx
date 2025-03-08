@@ -1750,7 +1750,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												}
 												// date
 												if(PrimitiveTypes.DATE.equals(featureTypeName)) {
-													XMLGregorianCalendar mappedNewValueDate = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+													#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif mappedNewValueDate = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
 														cal.get(Calendar.YEAR),
 														cal.get(Calendar.MONTH) + 1,
 														cal.get(Calendar.DAY_OF_MONTH),
@@ -1859,7 +1859,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											if(dateTime != null) {
 												cal.setTime(dateTime);
 												if(PrimitiveTypes.DATE.equals(featureTypeName)) {
-													XMLGregorianCalendar date = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+													#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif date = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
 														cal.get(Calendar.YEAR),
 														cal.get(Calendar.MONTH) + 1,
 														cal.get(Calendar.DAY_OF_MONTH),

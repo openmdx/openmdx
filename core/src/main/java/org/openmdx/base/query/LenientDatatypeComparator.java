@@ -145,7 +145,7 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
                 left.compare(right)
             );
         }
-        if (Datatypes.DATE_TIME_CLASS.isInstance(first))){
+        if (Datatypes.DATE_TIME_CLASS.isInstance(first)){
             #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif left = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) first;
             #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif right;
             if(Datatypes.DATE_TIME_CLASS.isInstance(second)) {

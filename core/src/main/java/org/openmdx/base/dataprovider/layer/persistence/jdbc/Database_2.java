@@ -3359,7 +3359,7 @@ public class Database_2
             } else {
                 ps.setObject(position, sqlValue);
             }
-        } else if(normalizedValue instanceof XMLGregorianCalendar) {
+        } else if(Datatypes.DATE_CLASS.isInstance(normalizedValue)) {
             Object sqlValue = this.getCalendarMarshaller().marshal(normalizedValue, conn);
             if (sqlValue instanceof Time) {
                 ps.setTime(position, (Time) sqlValue);

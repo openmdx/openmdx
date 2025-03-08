@@ -718,8 +718,8 @@ public class ObjectAndValidStateComparator {
 		 * @param validTo
 		 */
 		Interval(
-			XMLGregorianCalendar validFrom, 
-			XMLGregorianCalendar validTo
+			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom,
+			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo
 		) {
 			this.validFrom = validFrom;
 			this.validTo = validTo;
@@ -728,12 +728,12 @@ public class ObjectAndValidStateComparator {
 		/**
 		 * The (modifiable) start date
 		 */
-		XMLGregorianCalendar validFrom;
+		#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom;
 		
 		/**
 		 * The (modifiable) end date
 		 */
-		XMLGregorianCalendar validTo;
+		#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo;
 	
 		@Override
 		public String toString(

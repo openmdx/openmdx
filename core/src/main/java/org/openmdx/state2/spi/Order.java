@@ -155,8 +155,8 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareValidTo(
-        XMLGregorianCalendar d1,
-        XMLGregorianCalendar d2
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d1,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d2
     ){
         return d1 == null ? (
             d2 == null ? 0 : 1
@@ -177,14 +177,14 @@ public class Order {
      * is less than, equal to, or greater than {@code to}. 
      */
     public static int compareValidFromToValidTo(
-        XMLGregorianCalendar from,
-        XMLGregorianCalendar to
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif from,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif to
     ){
         return from == null || to == null ? -1 : compare(from,to);
     }
 
     /**
-     * Compare two (mutable or immutable) {@code XMLGregorianCalendar} values
+     * Compare two (mutable or immutable) {@code #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif} values
      * 
      * @param d1
      * @param d2
