@@ -91,7 +91,6 @@ import jakarta.resource.ResourceException;
 import jakarta.resource.cci.InteractionSpec;
 import jakarta.resource.cci.Record;
 #endif
-import javax.xml.datatype.XMLGregorianCalendar;
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.AbstractNames;

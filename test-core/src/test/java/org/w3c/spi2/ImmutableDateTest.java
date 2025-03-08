@@ -47,7 +47,7 @@ package org.w3c.spi2;
 
 import java.util.GregorianCalendar;
 
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -63,7 +63,7 @@ public class ImmutableDateTest {
 	 */
 	@Test
 	public void testConversionToGregorianCalendar(){ 
-		ImmutableDate firstOfApril = (ImmutableDate) Datatypes.create(XMLGregorianCalendar.class, "20000401"); 
+		ImmutableDate firstOfApril = (ImmutableDate) Datatypes.create(Datatypes.DATE_CLASS, "20000401");
 		GregorianCalendar calendar = firstOfApril.toGregorianCalendar();
 		Assertions.assertEquals(2000, calendar.get(GregorianCalendar.YEAR), "Year 2000");
 		Assertions.assertEquals(GregorianCalendar.APRIL, calendar.get(GregorianCalendar.MONTH), "April");

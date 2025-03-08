@@ -47,8 +47,7 @@ package org.w3c.cci2;
 import org.w3c.time.TimeZones;
 
 import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 import javax.xml.namespace.QName;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
@@ -70,8 +69,8 @@ import static javax.xml.datatype.DatatypeConstants.INDETERMINATE;
  * An unmodifiable XMLGregorianCalendar implementation representing a date
  */
 public final class ImmutableDate
-        extends XMLGregorianCalendar
-        implements Serializable, ImmutableDatatype<XMLGregorianCalendar>, Comparable<XMLGregorianCalendar> {
+        extends #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif
+        implements Serializable, ImmutableDatatype<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif>, Comparable<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> {
 
     /**
      * Constructor
@@ -108,7 +107,7 @@ public final class ImmutableDate
      *
      * @return the mutable equivalent
      */
-    private XMLGregorianCalendar toMutableDate() {
+    private #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif toMutableDate() {
         final DatatypeFactory datatypeFactory = MutableDatatypeFactory.xmlDatatypeFactory();
         return getEon().signum() == 0 ? datatypeFactory.newXMLGregorianCalendarDate(
                 getYear(),
@@ -131,7 +130,7 @@ public final class ImmutableDate
      * @see javax.xml.datatype.XMLGregorianCalendar#clone()
      */
     @Override
-    public XMLGregorianCalendar clone(
+    public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif clone(
     ) {
         return toMutableDate();
     }
@@ -140,7 +139,7 @@ public final class ImmutableDate
      * @see javax.xml.datatype.XMLGregorianCalendar#compare(javax.xml.datatype.XMLGregorianCalendar)
      */
     @Override
-    public int compare(XMLGregorianCalendar that) {
+    public int compare(#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif that) {
         return that instanceof ImmutableDate ?
                 compareTo((ImmutableDate) that) :
                 toMutableDate().compare(that);
@@ -283,7 +282,7 @@ public final class ImmutableDate
      * @see javax.xml.datatype.XMLGregorianCalendar#normalize()
      */
     @Override
-    public XMLGregorianCalendar normalize() {
+    public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif normalize() {
         return this;
     }
 
@@ -415,7 +414,7 @@ public final class ImmutableDate
     public GregorianCalendar toGregorianCalendar(
             TimeZone timezone,
             Locale locale,
-            XMLGregorianCalendar defaults
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif defaults
     ) {
         GregorianCalendar result = toGregorianCalendar(timezone, locale);
         if (defaults != null) {
@@ -471,7 +470,7 @@ public final class ImmutableDate
     /* (non-Javadoc)
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
-    public int compareTo(XMLGregorianCalendar that) {
+    public int compareTo(#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif that) {
         if (that instanceof ImmutableDate) {
             return compareTo((ImmutableDate) that);
         } else {
@@ -556,9 +555,8 @@ public final class ImmutableDate
      *
      */
     private static final String READONLY =
-            "This " + XMLGregorianCalendar.class.getName() +
+            "This " + #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class.getName() +
                     " instance is read-only, use clone() to get a modifiable copy.";
-
     /**
      * <p>Obtain a pure Gregorian Calendar by calling
      * GregorianCalendar.setChange(PURE_GREGORIAN_CHANGE). </p>

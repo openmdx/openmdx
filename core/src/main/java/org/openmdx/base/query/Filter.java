@@ -58,8 +58,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.persistence.spi.QueryExtension;
 import org.openmdx.base.rest.cci.ConditionRecord;
@@ -240,7 +238,7 @@ public class Filter extends QueryFilterRecord {
                                     );
                                 } else if (QUERY_EXTENSION_DATE_PARAM.equals(piggyBackFeature)) {
                                     extension.setDateParam(
-                                        Filter.getValues(XMLGregorianCalendar.class, condition)
+                                        Filter.getValues(#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class, condition)
                                     );
                                 } else if (QUERY_EXTENSION_DATETIME_PARAM.equals(piggyBackFeature)) {
                                     extension.setDateTimeParam(

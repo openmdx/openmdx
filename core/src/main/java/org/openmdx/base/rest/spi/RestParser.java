@@ -70,7 +70,6 @@ import jakarta.resource.cci.MappedRecord;
 import jakarta.resource.cci.Record;
 #endif
 
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -601,7 +600,7 @@ public class RestParser {
                         PrimitiveTypes.BOOLEAN.equals(featureType) ? Datatypes.create(Boolean.class, text.trim()) : 
                         PrimitiveTypes.OBJECT_ID.equals(featureType) ? Datatypes.create(Path.class, text.trim()) :
                         PrimitiveTypes.DATETIME.equals(featureType) ? Datatypes.create(Datatypes.DATE_TIME_CLASS,text.trim()) :
-                        PrimitiveTypes.DATE.equals(featureType) ? Datatypes.create(XMLGregorianCalendar.class, text.trim()) : 
+                        PrimitiveTypes.DATE.equals(featureType) ? Datatypes.create(Datatypes.DATE_CLASS, text.trim()) :
                         PrimitiveTypes.ANYURI.equals(featureType) ? Datatypes.create(URI.class, text.trim()) : 
                         PrimitiveTypes.BINARY.equals(featureType) ? Base64.decode(text.trim()) : 
                         featureType != null && isClassType() ? new Path(text.trim()) : text;

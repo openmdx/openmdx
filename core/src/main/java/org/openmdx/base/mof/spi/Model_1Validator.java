@@ -57,8 +57,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -252,7 +250,7 @@ public class Model_1Validator {
                         BasicException.Code.VALIDATION_FAILURE,
                         "Invalid value class",
                         new BasicException.Parameter("type", type),
-                        new BasicException.Parameter("expected", XMLGregorianCalendar.class.getName()),
+                        new BasicException.Parameter("expected", #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class.getName()),
                         new BasicException.Parameter("actual", value.getClass().getName())
                     );
                 }

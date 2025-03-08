@@ -47,8 +47,7 @@ package org.openmdx.base.text.parsing;
 import java.util.Arrays;
 import java.util.Collection;
 
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.text.parsing.AbstractParser;
@@ -78,7 +77,7 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
     private static final Collection<Class<?>> SUPPORTED_TYPES = Arrays.asList(
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
         Duration.class,
-        XMLGregorianCalendar.class,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class,
         Path.class
     );
     
@@ -116,7 +115,7 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
 		return 
     		valueClass == #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class ? DatatypeFactories.immutableDatatypeFactory().newDateTime(externalRepresentation) :
     		valueClass == Duration.class ? DatatypeFactories.immutableDatatypeFactory().newDuration(externalRepresentation) :
-    		valueClass == XMLGregorianCalendar.class ? DatatypeFactories.immutableDatatypeFactory().newDate(externalRepresentation) :
+    		valueClass == #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class ? DatatypeFactories.immutableDatatypeFactory().newDate(externalRepresentation) :
     		valueClass == Path.class ? new Path(externalRepresentation) :
     		super.parseAs(externalRepresentation, valueClass);
 	}

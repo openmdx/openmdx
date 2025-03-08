@@ -48,7 +48,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.ViewKind;
@@ -59,7 +58,7 @@ import org.w3c.spi.ImmutableDatatypeFactory;
  * Date State View Context
  */
 public class DateStateViewContext 
-    extends StateViewContext<XMLGregorianCalendar>
+    extends StateViewContext<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif>
     implements DateStateContext 
 {
 

@@ -25,8 +25,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.dalvik.uses.org.apache.xerces.util.DatatypeMessageFormatter;
 
@@ -662,7 +661,7 @@ class DurationImpl
     /**
      * <p>Four constants defined for the comparison of durations.</p>
      */
-    private static final XMLGregorianCalendar[] TEST_POINTS = new XMLGregorianCalendar[] {
+    private static final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif[] TEST_POINTS = new #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif[] {
         XMLGregorianCalendarImpl.parse("1696-09-01T00:00:00Z"),
         XMLGregorianCalendarImpl.parse("1697-02-01T00:00:00Z"),
         XMLGregorianCalendarImpl.parse("1903-03-01T00:00:00Z"),
@@ -891,8 +890,8 @@ class DurationImpl
         int resultA = DatatypeConstants.INDETERMINATE; 
         int resultB = DatatypeConstants.INDETERMINATE;
         
-        XMLGregorianCalendar tempA = (XMLGregorianCalendar)TEST_POINTS[0].clone();
-        XMLGregorianCalendar tempB = (XMLGregorianCalendar)TEST_POINTS[0].clone();
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif tempA = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)TEST_POINTS[0].clone();
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif tempB = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)TEST_POINTS[0].clone();
         
         //long comparison algorithm is required
         tempA.add(duration1);
@@ -902,8 +901,8 @@ class DurationImpl
             return DatatypeConstants.INDETERMINATE;
         }
 
-        tempA = (XMLGregorianCalendar)TEST_POINTS[1].clone();
-        tempB = (XMLGregorianCalendar)TEST_POINTS[1].clone();
+        tempA = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)TEST_POINTS[1].clone();
+        tempB = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)TEST_POINTS[1].clone();
         
         tempA.add(duration1);
         tempB.add(duration2);
@@ -913,8 +912,8 @@ class DurationImpl
             return DatatypeConstants.INDETERMINATE;
         }
 
-        tempA = (XMLGregorianCalendar)TEST_POINTS[2].clone();
-        tempB = (XMLGregorianCalendar)TEST_POINTS[2].clone();
+        tempA = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)TEST_POINTS[2].clone();
+        tempB = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)TEST_POINTS[2].clone();
         
         tempA.add(duration1);
         tempB.add(duration2);
@@ -924,8 +923,8 @@ class DurationImpl
             return DatatypeConstants.INDETERMINATE;
         }
 
-        tempA = (XMLGregorianCalendar)TEST_POINTS[3].clone();
-        tempB = (XMLGregorianCalendar)TEST_POINTS[3].clone();
+        tempA = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)TEST_POINTS[3].clone();
+        tempB = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)TEST_POINTS[3].clone();
         
         tempA.add(duration1);
         tempB.add(duration2);

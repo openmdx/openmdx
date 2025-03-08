@@ -104,8 +104,7 @@ import jakarta.resource.spi.CommException;
 import jakarta.servlet.ServletException;
 import jakarta.transaction.UserTransaction;
 #endif
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -826,7 +825,7 @@ public class TestMain {
 				invoice = invoiceClass.createInvoice();
 				invoice.setDescription("this is an invoice for PG0");
 				invoice.setProductGroupId("PG0");
-				invoice.setPaymentPeriod(Datatypes.create(Duration.class, "P30D")); // CR20020068
+				invoice.setPaymentPeriod(Datatypes.create(Datatypes.DURATION_CLASS, "P30D")); // CR20020068
 				assertNull(ReducedJDOHelper.getObjectId(invoice), "CR0003551");
 				@SuppressWarnings("unchecked")
 				RefContainer<Invoice> refInvoices = (RefContainer<Invoice>) segment.<Invoice>getInvoice();
@@ -2067,7 +2066,7 @@ public class TestMain {
 				this.begin();
 				person = personClass.createPerson();
 				assertEquals( (this instanceof AbstractLocalConnectionTest),   (person instanceof NaturalPerson), "Mix-in");
-				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1963-01-01"));
+				person.setBirthdate(Datatypes.create(Datatypes.DATE_CLASS, "1963-01-01"));
 				person.setLastName("Rossi");
 				person.setSalutation("Signor");
 				person.getGivenName().add("Alfonso");
@@ -2088,7 +2087,7 @@ public class TestMain {
 				this.begin();
 				person = personClass.createPerson();
 				person.setForeignId("YF");
-				XMLGregorianCalendar birthDate = DatatypeFactories.xmlDatatypeFactory()
+				#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif birthDate = DatatypeFactories.xmlDatatypeFactory()
 						.newXMLGregorianCalendar("1960-01-01");
 				birthDate.setTimezone(-1);
 				person.setBirthdate(birthDate);
@@ -2180,7 +2179,7 @@ public class TestMain {
 				this.begin();
 				person = personClass.createPerson();
 				person.setForeignId("YF");
-				XMLGregorianCalendar birthDate = Datatypes.create(XMLGregorianCalendar.class, "1960-01-01");
+				#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif birthDate = Datatypes.create(Datatypes.DATE_CLASS, "1960-01-01");
 				person.setBirthdate(birthDate);
 				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
 				assertEquals("1960-01-01T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()), "Born at noon");
@@ -3000,7 +2999,7 @@ public class TestMain {
 			}
 			// create and remove in same unit of work
 			person = personClass.createPerson();
-			person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
+			person.setBirthdate(Datatypes.create(Datatypes.DATE_CLASS, "1960-01-01"));
 			person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
 			person.setForeignId("YF");
 			person.setLastName("MusterX");
@@ -3027,7 +3026,7 @@ public class TestMain {
 				for (int i = 0; i < SMALL_N_PERSONS; i++) {
 					person = personClass.createPerson();
 					person.setForeignId("F" + i);
-					person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
+					person.setBirthdate(Datatypes.create(Datatypes.DATE_CLASS, "1960-01-01"));
 					person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
 					person.setLastName("Muster" + i);
 					person.setSalutation("Herr");
@@ -3046,7 +3045,7 @@ public class TestMain {
 					super.taskId = "CR20019192";
 					person = personClass.createPerson();
 					person.setForeignId("F" + SMALL_N_PERSONS);
-					person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
+					person.setBirthdate(Datatypes.create(Datatypes.DATE_CLASS, "1960-01-01"));
 					person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
 					person.setLastName("Muster" + SMALL_N_PERSONS);
 					person.setSalutation("Herr");
@@ -3455,7 +3454,7 @@ public class TestMain {
 				person.setGivenName("Heiri");
 				person.setLastName("Imhof");
 				person.setForeignId("HI");
-				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "20000401"));
+				person.setBirthdate(Datatypes.create(Datatypes.DATE_CLASS, "20000401"));
 				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "20000401T120000.000Z"));
 				person.setSalutation("Herr");
 				this.commit();
@@ -3635,7 +3634,7 @@ public class TestMain {
 			// Test for non-query operation with result
 			this.begin();
 			#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTimeNow = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif;
-			XMLGregorianCalendar dateIn = Datatypes.create(XMLGregorianCalendar.class,
+			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif dateIn = Datatypes.create(Datatypes.DATE_CLASS,
 					DateTimeFormat.BASIC_UTC_FORMAT.format(dateTimeNow).substring(0, 8));
 			PersonDateOpParams personDateOpParams;
 			switch (nextStructureCreation()) {
@@ -3715,7 +3714,7 @@ public class TestMain {
 				this.begin();
 				person = personClass.createPerson();
 				person.setForeignId("X1");
-				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1961-11-11"));
+				person.setBirthdate(Datatypes.create(Datatypes.DATE_CLASS, "1961-11-11"));
 				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19611111T120000.000Z"));
 				person.setLastName("Muster1");
 				person.setSalutation("Herr");
@@ -3739,7 +3738,7 @@ public class TestMain {
 				this.begin();
 				person = personClass.createPerson();
 				person.setForeignId("X2");
-				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1961-11-11"));
+				person.setBirthdate(Datatypes.create(Datatypes.DATE_CLASS, "1961-11-11"));
 				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19611111T120000.000Z"));
 				person.setLastName("Muster1");
 				person.setSalutation("Herr");
@@ -4800,7 +4799,7 @@ public class TestMain {
 				this.begin();
 				Person person = personClass.createPerson();
 				person.setForeignId("F" + i);
-				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
+				person.setBirthdate(Datatypes.create(Datatypes.DATE_CLASS, "1960-01-01"));
 				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
 				person.setLastName("Muster" + i);
 				person.setSalutation("Herr");

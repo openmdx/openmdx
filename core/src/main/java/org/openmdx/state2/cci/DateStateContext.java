@@ -44,13 +44,13 @@
  */
 package org.openmdx.state2.cci;
 
-import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.datatype.#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif;
 
 /**
  * Date State Context
  */
 public interface DateStateContext 
-    extends StateContext<XMLGregorianCalendar> 
+    extends StateContext<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif>
 {
 
     //------------------------------------------------------------------------
@@ -62,14 +62,14 @@ public interface DateStateContext
      * 
      * @return the beginning of the application-time
      */
-    public XMLGregorianCalendar getValidFrom();
+    public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif getValidFrom();
 
     /**
      * Tells up to which application-time point the information is valid
      * 
      * @return the end of the application-time
      */
-    public XMLGregorianCalendar getValidTo();
+    public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif getValidTo();
 
     
 }

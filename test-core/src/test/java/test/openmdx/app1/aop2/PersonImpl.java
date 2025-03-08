@@ -51,7 +51,6 @@ import java.util.List;
 
 import javax.jdo.listener.StoreCallback;
 import javax.jmi.reflect.RefObject;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.aop2.AbstractObject;

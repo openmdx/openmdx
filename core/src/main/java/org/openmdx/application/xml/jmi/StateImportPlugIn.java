@@ -54,7 +54,6 @@ import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefObject;
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
@@ -154,8 +153,8 @@ public class StateImportPlugIn implements ImportPlugIn {
             } else if (facade.attributeValue(SystemAttributes.REMOVED_AT) != null){
             	return null;
             } else {
-                XMLGregorianCalendar validFrom =  (XMLGregorianCalendar) facade.attributeValue(TechnicalAttributes.STATE_VALID_FROM);
-                XMLGregorianCalendar validTo = (XMLGregorianCalendar) facade.attributeValue(TechnicalAttributes.STATE_VALID_TO);
+                #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom =  (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) facade.attributeValue(TechnicalAttributes.STATE_VALID_FROM);
+                #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) facade.attributeValue(TechnicalAttributes.STATE_VALID_TO);
                 Path objectId = (Path)facade.attributeValue(SystemAttributes.CORE);
                 if(objectId == null) {
                     throw new ServiceException(

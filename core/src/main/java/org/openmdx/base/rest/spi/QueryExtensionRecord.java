@@ -48,7 +48,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Query Extension
@@ -171,7 +170,7 @@ public class QueryExtensionRecord
      */
 	@SuppressWarnings("unchecked")
     @Override
-    public List<XMLGregorianCalendar> getDateParam() {
+    public List<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> getDateParam() {
     	if(this.dateParam == null) {
     		this.dateParam = newList();
     	}
@@ -265,12 +264,12 @@ public class QueryExtensionRecord
      * @see org.openmdx.base.query.Extension#setDateParam(javax.xml.datatype.XMLGregorianCalendar[])
      */
     @Override
-    public void setDateParam(XMLGregorianCalendar... dateParam) {
+    public void setDateParam(#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif... dateParam) {
     	replaceValues(getDateParam(), dateParam);
     }
 
 	@Override
-	public void setDateParam(List<XMLGregorianCalendar> dateParam) {
+	public void setDateParam(List<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> dateParam) {
 		replaceValues(getDateParam(), dateParam);
 	}
 

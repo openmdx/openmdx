@@ -50,7 +50,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Arrays;
 
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -191,7 +191,7 @@ public class FilterTest {
         );
         extension.setDateParam(
             Datatypes.create(
-                XMLGregorianCalendar.class, 
+                #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class,
                 "2000-02-29"
             )
         );

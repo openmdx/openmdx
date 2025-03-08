@@ -65,8 +65,7 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.openmdx.base.exception.ServiceException;
@@ -1014,7 +1013,7 @@ public class ImportHandler extends DefaultHandler {
                 if (v.length() > 0) {
                     try {
                         return Datatypes.create(
-                            XMLGregorianCalendar.class,
+                            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class,
                             v
                         );
                     } catch (IllegalArgumentException e) {
@@ -1022,7 +1021,7 @@ public class ImportHandler extends DefaultHandler {
                     }
                 }
             } else if ("org.openmdx.base.duration".equals(attributeType)) {
-                return Datatypes.create(Duration.class, this.currentAttributeValue.toString().trim());
+                return Datatypes.create(Datatypes.DURATION_CLASS, this.currentAttributeValue.toString().trim());
             } else if ("org.openmdx.base.anyURI".equals(attributeType)) {
                 return Datatypes.create(URI.class, this.currentAttributeValue.toString().trim());
             } else if ("org.openmdx.base.ObjectId".equals(attributeType)) {

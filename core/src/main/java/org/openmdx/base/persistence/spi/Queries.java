@@ -54,8 +54,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jdo.Query;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.accessor.jmi.spi.Jmi1ObjectPredicateInvocationHandler;
 import org.openmdx.base.exception.ServiceException;
@@ -105,7 +104,7 @@ public class Queries {
     	if("string".equalsIgnoreCase(name)) {
     		return String.class;
     	} else if("date".equals(name)) {
-    		return XMLGregorianCalendar.class;
+    		return #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class;
     	} else if("datetime".equalsIgnoreCase(name)) {
     		return #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class;
     	} else if("short".equalsIgnoreCase(name)) {

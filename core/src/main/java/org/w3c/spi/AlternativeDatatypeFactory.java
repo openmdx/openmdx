@@ -50,7 +50,7 @@ import java.text.ParseException;
 import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.Duration;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.kernel.exception.BasicException;
@@ -220,7 +220,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * if the value is not an org::w3c::date instance
      */
     public ImmutableDate toDate(
-        XMLGregorianCalendar value
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif value
     ){
         return 
             value == null ? null :

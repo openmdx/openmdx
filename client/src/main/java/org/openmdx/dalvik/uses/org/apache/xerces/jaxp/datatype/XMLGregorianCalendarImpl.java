@@ -27,8 +27,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 import javax.xml.namespace.QName;
 
 import org.openmdx.dalvik.uses.org.apache.xerces.util.DatatypeMessageFormatter;
@@ -186,7 +185,7 @@ import org.w3c.time.TimeZones;
  * @author openMDX Team
  */
 class XMLGregorianCalendarImpl
-	extends XMLGregorianCalendar
+	extends #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif
 	implements Serializable, Cloneable {
     
     /**
@@ -1552,7 +1551,7 @@ class XMLGregorianCalendarImpl
      */
     public XMLGregorianCalendar normalize() {
 
-        XMLGregorianCalendar normalized = normalizeToTimezone(this, timezone);
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif normalized = normalizeToTimezone(this, timezone);
         
         // if timezone was undefined, leave it undefined
         if (getTimezone() == DatatypeConstants.FIELD_UNDEFINED) {
@@ -1573,10 +1572,10 @@ class XMLGregorianCalendarImpl
 	 * <p>2000-03-04T23:00:00+03:00 normalizes to 2000-03-04T20:00:00Z</p>
 	 * <p>Implements W3C XML Schema Part 2, Section 3.2.7.3 (A).</p>
 	 */
-    private XMLGregorianCalendar normalizeToTimezone(XMLGregorianCalendar cal, int timezone) {
+    private #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif normalizeToTimezone(#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif cal, int timezone) {
 
         int minutes = timezone;    	
-        XMLGregorianCalendar result = (XMLGregorianCalendar) cal.clone();
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif result = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) cal.clone();
 
         // normalizing to UTC time negates the timezone offset before 
         // addition.
@@ -1610,8 +1609,8 @@ class XMLGregorianCalendarImpl
      *   {@link DatatypeConstants#GREATER} or 
      *   {@link DatatypeConstants#INDETERMINATE}.
      */
-	private static int internalCompare(XMLGregorianCalendar P,
-	        XMLGregorianCalendar Q) {
+	private static int internalCompare(#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif P,
+	        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif Q) {
 
 	    int result;
 
@@ -1719,8 +1718,8 @@ class XMLGregorianCalendarImpl
         if (obj == this) {
             return true;
         }
-        if (obj instanceof XMLGregorianCalendar) {
-            return compare((XMLGregorianCalendar) obj) == DatatypeConstants.EQUAL;
+        if (obj instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) {
+            return compare((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) obj) == DatatypeConstants.EQUAL;
         }
         return false;
     }
@@ -1741,7 +1740,7 @@ class XMLGregorianCalendarImpl
         if (timezone == DatatypeConstants.FIELD_UNDEFINED) {
             timezone = 0;
         }
-        XMLGregorianCalendar gc = this;
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif gc = this;
         if (timezone != 0) {
             gc = normalizeToTimezone(this, getTimezone());
         }
@@ -1780,8 +1779,7 @@ class XMLGregorianCalendarImpl
      * @throws NullPointerException
      *      If the given string is null.
      */
-    public static XMLGregorianCalendar parse(String lexicalRepresentation) {
-    	
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif parse(String lexicalRepresentation) {
 		return new XMLGregorianCalendarImpl(lexicalRepresentation);
     }
 

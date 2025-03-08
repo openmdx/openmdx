@@ -50,8 +50,7 @@ import static org.w3c.spi.DatatypeFactories.xmlDatatypeFactory;
 
 import java.text.ParseException;
 
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -65,7 +64,7 @@ import org.w3c.format.DateTimeFormat;
  */
 public class ImmutableDatatypesTest {
 
-    static XMLGregorianCalendar immutableDate02; // 2000-02-29 
+    static XMLGregorianCalendar immutableDate02; // 2000-02-29
     static XMLGregorianCalendar immutableDate03; // 2000-03-01
     static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif immutableDateTime02; // 2000-02-29T12:00Z
     static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif immutableDateTime03; // 2000-03-01T12:00Z
@@ -115,18 +114,18 @@ public class ImmutableDatatypesTest {
         Assertions.assertEquals(mutableDate03,  immutableDate03.clone(), "mutableDate03.equals(immutableDate03)");
         Assertions.assertEquals(-1,  mutableDate02.compare(mutableDate03), "mutableDate02.compare(mutableDate03)");
         Assertions.assertEquals(+1,  mutableDate03.compare(mutableDate02), "mutableDate03.compare(mutableDate02)");
-        Assertions.assertEquals(-1,  mutableDate02.compare((XMLGregorianCalendar)immutableDate03.clone()), "mutableDate02.compare(immutableDate03)");
-        Assertions.assertEquals(0,  mutableDate02.compare((XMLGregorianCalendar)immutableDate02.clone()), "mutableDate02.compare(immutableDate02)");
-        Assertions.assertEquals(+1,  mutableDate03.compare((XMLGregorianCalendar)immutableDate02.clone()), "mutableDate02.compare(immutableDate02)");
+        Assertions.assertEquals(-1,  mutableDate02.compare((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)immutableDate03.clone()), "mutableDate02.compare(immutableDate03)");
+        Assertions.assertEquals(0,  mutableDate02.compare((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)immutableDate02.clone()), "mutableDate02.compare(immutableDate02)");
+        Assertions.assertEquals(+1,  mutableDate03.compare((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)immutableDate02.clone()), "mutableDate02.compare(immutableDate02)");
         Assertions.assertEquals(-1,  immutableDate02.compare(mutableDate03), "immutableDate02.compare(mutableDate03)");
         Assertions.assertEquals(0,  immutableDate02.compare(mutableDate02), "immutableDate02.compare(mutableDate02)");
         Assertions.assertEquals(+1,  immutableDate03.compare(mutableDate02), "immutableDate03.compare(mutableDate02)");
         Assertions.assertEquals(0,  immutableDate02.compare(immutableDate02), "immutableDate02.compare(immutableDate02)");
-        Assertions.assertEquals(0,  ((Comparable<XMLGregorianCalendar>)immutableDate02).compareTo(immutableDate02), "immutableDate02.compareTo(immutableDate02)");
+        Assertions.assertEquals(0,  ((Comparable<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif>)immutableDate02).compareTo(immutableDate02), "immutableDate02.compareTo(immutableDate02)");
         Assertions.assertEquals(-1,  immutableDate02.compare(immutableDate03), "immutableDate02.compare(immutableDate03)");
-        Assertions.assertEquals(-1,  ((Comparable<XMLGregorianCalendar>)immutableDate02).compareTo(immutableDate03), "immutableDate02.compareTo(immutableDate03)");
+        Assertions.assertEquals(-1,  ((Comparable<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif>)immutableDate02).compareTo(immutableDate03), "immutableDate02.compareTo(immutableDate03)");
         Assertions.assertEquals(+1,  immutableDate03.compare(immutableDate02), "immutableDate03.compare(immutableDate02)");
-        Assertions.assertEquals(+1,  ((Comparable<XMLGregorianCalendar>)immutableDate03).compareTo(immutableDate02), "immutableDate03.compareTo(immutableDate02)");
+        Assertions.assertEquals(+1,  ((Comparable<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif>)immutableDate03).compareTo(immutableDate02), "immutableDate03.compareTo(immutableDate02)");
         Assertions.assertEquals("2000-02-29",  mutableDate02.toXMLFormat(), "mutableDate02.toXMLFormat()");
         Assertions.assertEquals("2000-02-29",  immutableDate02.toXMLFormat(), "immutableDate02.toXMLFormat()");
         Assertions.assertEquals("20000229",  ((ImmutableDatatype<?>)immutableDate02).toBasicFormat(), "immutableDate02.toBasicFormat()");

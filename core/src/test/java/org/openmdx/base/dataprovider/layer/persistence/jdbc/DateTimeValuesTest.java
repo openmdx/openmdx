@@ -50,7 +50,6 @@ import java.util.GregorianCalendar;
 import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
 import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,7 +89,7 @@ public class DateTimeValuesTest {
 	@Test
     public void whenNowThenConvertToDate() throws ResourceException{
         // Arrange
-        final XMLGregorianCalendar now = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
+        final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif now = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
         object.getValue().put("now", now);
         // Act
         DateTimeValues.normalizeDateTimeValues(object);
@@ -102,8 +101,8 @@ public class DateTimeValuesTest {
 	@Test
     public void convertInListWhereNecessary() throws ResourceException{
         // Arrange
-        final XMLGregorianCalendar today = DateStateViews.today();
-        final XMLGregorianCalendar now = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
+        final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif today = DateStateViews.today();
+        final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif now = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
         final IndexedRecord list = Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.code());
         list.add(today);
         list.add(now);
@@ -111,7 +110,7 @@ public class DateTimeValuesTest {
         // Act
         DateTimeValues.normalizeDateTimeValues(object);
         // Assert
-        Assertions.assertTrue(list.get(0) instanceof XMLGregorianCalendar);
+        Assertions.assertTrue(list.get(0) instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif);
         Assertions.assertTrue(list.get(1) instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif);
     }
 
@@ -119,8 +118,8 @@ public class DateTimeValuesTest {
 	@Test
     public void convertInMapWhereNecessary() throws ResourceException{
         // Arrange
-        final XMLGregorianCalendar today = DateStateViews.today();
-        final XMLGregorianCalendar now = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
+        final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif today = DateStateViews.today();
+        final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif now = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
         final MappedRecord map = Records.getRecordFactory().createMappedRecord(Multiplicity.SPARSEARRAY.code());
         map.put(Integer.valueOf(4), now);
         map.put(Integer.valueOf(2), today);
@@ -128,7 +127,7 @@ public class DateTimeValuesTest {
         // Act
         DateTimeValues.normalizeDateTimeValues(object);
         // Assert
-        Assertions.assertTrue(map.get(2) instanceof XMLGregorianCalendar);
+        Assertions.assertTrue(map.get(2) instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif);
         Assertions.assertTrue(map.get(4) instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif);
     }
         

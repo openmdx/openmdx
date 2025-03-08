@@ -70,7 +70,7 @@ public class Date {
      * @return a corresponding SQL date instance
      */
     public static final java.sql.Date toJDO (
-        javax.xml.datatype.XMLGregorianCalendar cciDate
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif cciDate
     ){
         return cciDate == null ? null : java.sql.Date.valueOf(cciDate.toXMLFormat());
     }

@@ -47,8 +47,7 @@ package org.openmdx.base.query;
 import java.util.Comparator;
 
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.exception.BasicException;
@@ -89,7 +88,7 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
             if(second instanceof Duration) {
                 right = (Duration) second;
             } else if (second instanceof CharSequence){
-                right = Datatypes.create(Duration.class, second.toString());
+                right = Datatypes.create(Datatypes.DURATION_CLASS, second.toString());
             } else throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
@@ -111,20 +110,20 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
                 left.compare(right)
             );
         }
-        if (first instanceof XMLGregorianCalendar) {
-            XMLGregorianCalendar left;
-            XMLGregorianCalendar right;
-            if(second instanceof XMLGregorianCalendar) {
+        if (first instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) {
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif left;
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif right;
+            if(second instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) {
                 if(first.getClass() == second.getClass()) {
-                    left = (XMLGregorianCalendar) first;
-                    right = (XMLGregorianCalendar) second;
+                    left = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) first;
+                    right = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) second;
                 } else {
-                    left = first instanceof ImmutableDate ? ((ImmutableDate)first).clone() : (XMLGregorianCalendar)first;
-                    right = second instanceof ImmutableDate ? ((ImmutableDate)second).clone() : (XMLGregorianCalendar)second;
+                    left = first instanceof ImmutableDate ? ((ImmutableDate)first).clone() : (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)first;
+                    right = second instanceof ImmutableDate ? ((ImmutableDate)second).clone() : (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)second;
                 }
             } else if (second instanceof CharSequence){
-                left = (XMLGregorianCalendar) first;
-                right = Datatypes.create(XMLGregorianCalendar.class, second.toString());
+                left = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) first;
+                right = Datatypes.create(Datatypes.DATE_CLASS, second.toString());
             } else throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,

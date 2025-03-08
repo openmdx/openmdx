@@ -58,8 +58,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 import javax.xml.namespace.QName;
 
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
@@ -259,8 +258,6 @@ public class XMLGregorianCalendarMarshaller {
      * 
      * @param source
      * @param connection
-     * @param sqlProperties 
-     * 
      * @return
      * 
      * @throws ServiceException
@@ -269,8 +266,8 @@ public class XMLGregorianCalendarMarshaller {
         Object source, 
         Connection connection
     ) throws ServiceException {
-        if(source instanceof XMLGregorianCalendar) {
-            XMLGregorianCalendar value = (XMLGregorianCalendar) source;
+        if(source instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) {
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif value = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) source;
             QName schemaType = value.getXMLSchemaType();
             if(DatatypeConstants.TIME.equals(schemaType)) {
                 String timeType = sqlDataTypes.getTimeType(connection).intern();
@@ -479,7 +476,7 @@ public class XMLGregorianCalendarMarshaller {
         } else if(source instanceof java.time.LocalDateTime) {
         	java.time.LocalDateTime value = (java.time.LocalDateTime)source;
             java.util.GregorianCalendar calendar = GregorianCalendar.from(ZonedDateTime.of(value, ZoneOffset.UTC));
-            XMLGregorianCalendar target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
             switch(this.dateTimePrecision) {
                 case NANOSECONDS:
                     //
@@ -505,7 +502,7 @@ public class XMLGregorianCalendarMarshaller {
             long milliseconds = value.movePointRight(3).longValue();
             java.util.GregorianCalendar calendar = new GregorianCalendar(UTC);
             calendar.setTimeInMillis(milliseconds);
-            XMLGregorianCalendar target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar); 
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
             target.setFractionalSecond(
                 value.subtract(BigDecimal.valueOf(milliseconds / 1000))
             );
@@ -526,8 +523,8 @@ public class XMLGregorianCalendarMarshaller {
         String value
     ){
         return 
-            value.startsWith("P") || value.startsWith("-P") ? Datatypes.create(Duration.class, value) : 
-            value.indexOf('T') < 0 ? Datatypes.create(XMLGregorianCalendar.class, value) : 
+            value.startsWith("P") || value.startsWith("-P") ? Datatypes.create(Datatypes.DURATION_CLASS, value) :
+            value.indexOf('T') < 0 ? Datatypes.create(Datatypes.DATE_CLASS, value) :
             Datatypes.create(Datatypes.DATE_TIME_CLASS, value);
     }
        

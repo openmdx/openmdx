@@ -46,6 +46,7 @@ package org.openmdx.state2.cci;
 
 import static org.oasisopen.cci2.QualifierType.REASSIGNABLE;
 
+import java.time.LocalDate;
 import java.util.AbstractSequentialList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,7 +72,6 @@ import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
@@ -90,6 +90,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.persistence.spi.Cloneable;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
@@ -132,7 +133,7 @@ public class DateStateViews {
     /**
      * Used in views for invalidated states open at both sides
      */
-    private static XMLGregorianCalendar DEFAULT_VALID_FOR = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+    private static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif DEFAULT_VALID_FOR = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
         2000,
         1, // January
         1, // 1st
@@ -159,7 +160,7 @@ public class DateStateViews {
      */
     public static PersistenceManager getPersistenceManager(
         PersistenceManager persistenceManager,
-        StateViewContext<XMLGregorianCalendar> viewContext
+        StateViewContext<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif> viewContext
     ) {
         RefPackage_1_0 refPackageFactory = (RefPackage_1_0) persistenceManager.getUserObject(RefPackage.class);
         return refPackageFactory.refPackage(viewContext).refPersistenceManager();
@@ -182,8 +183,8 @@ public class DateStateViews {
      */
     public static PersistenceManager getPersistenceManager(
         PersistenceManager persistenceManager,
-        XMLGregorianCalendar validFrom,
-        XMLGregorianCalendar validTo
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif validFrom,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif validTo
     ) {
         return DateStateViews.getPersistenceManager(
             persistenceManager,
@@ -205,7 +206,7 @@ public class DateStateViews {
      */
     public static PersistenceManager getPersistenceManager(
         final PersistenceManager persistenceManager,
-        final XMLGregorianCalendar validFor,
+        final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif validFor,
         final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ) {
         return DateStateViews.getPersistenceManager(
@@ -226,7 +227,7 @@ public class DateStateViews {
      */
     public static PersistenceManager getPersistenceManager(
         final PersistenceManager persistenceManager,
-        final XMLGregorianCalendar validFor
+        final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif validFor
     ) {
         return DateStateViews.getPersistenceManager(
             persistenceManager,
@@ -277,7 +278,7 @@ public class DateStateViews {
      */
     private static RefPackage_1_0 getPackageForContext(
         RefBaseObject refContext,
-        StateViewContext<XMLGregorianCalendar> viewContext
+        StateViewContext<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif> viewContext
     ) {
         RefPackage_1_0 refPackageFactory = (RefPackage_1_0) refContext.refOutermostPackage();
         return refPackageFactory.refPackage(viewContext);
@@ -294,7 +295,7 @@ public class DateStateViews {
      */
     public static PersistenceManager getPersistenceManager(
         RefBaseObject refContext,
-        StateViewContext<XMLGregorianCalendar> viewContext
+        StateViewContext<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif> viewContext
     ) {
         return DateStateViews.getPackageForContext(refContext, viewContext).refPersistenceManager();
     }
@@ -316,8 +317,8 @@ public class DateStateViews {
      */
     public static PersistenceManager getPersistenceManager(
         RefBaseObject refContext,
-        XMLGregorianCalendar validFrom,
-        XMLGregorianCalendar validTo
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif validFrom,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif validTo
     ) {
         return DateStateViews.getPersistenceManager(
             refContext,
@@ -1956,8 +1957,8 @@ public class DateStateViews {
     ) {
         return dateState == null ? null : DateStateViews.<T>getValidStates(
             dateState,
-            (XMLGregorianCalendar) null,
-            (XMLGregorianCalendar) null
+            (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif) null,
+            (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif) null
         );
     }
 
@@ -2322,8 +2323,8 @@ public class DateStateViews {
                     final DataObject_1_0 core = (DataObject_1_0) dataObject.objGetValue(SystemAttributes.CORE);
                     Set<P> periods = getPeriods(jmiManager, result, core);
                     if (dataObject.objGetValue(SystemAttributes.REMOVED_AT) == null) {
-                        final XMLGregorianCalendar stateValidFrom = (XMLGregorianCalendar) dataObject.objGetValue(TechnicalAttributes.STATE_VALID_FROM);
-                        final XMLGregorianCalendar stateValidTo = (XMLGregorianCalendar) dataObject.objGetValue(TechnicalAttributes.STATE_VALID_TO);
+                        final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif stateValidFrom = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif) dataObject.objGetValue(TechnicalAttributes.STATE_VALID_FROM);
+                        final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif stateValidTo = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif) dataObject.objGetValue(TechnicalAttributes.STATE_VALID_TO);
                         periods.add(periodFactory.newPeriod(stateValidFrom, stateValidTo));
                     }
                 } else {
@@ -2339,7 +2340,7 @@ public class DateStateViews {
     /**
      * Populates the cache
      * 
-     * @param container
+     * @param jmiContainer
      *            the container
      */
     public static <T extends StateCapable> void retrieveAll(

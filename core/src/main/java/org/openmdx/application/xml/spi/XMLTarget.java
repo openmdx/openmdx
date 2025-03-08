@@ -55,7 +55,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.jmi.reflect.RefObject;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -243,7 +242,7 @@ public class XMLTarget implements ExportTarget {
         if(PrimitiveTypes.DATETIME.equals(typeName)) {
             stringValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) value);
         } else if(PrimitiveTypes.DATE.equals(typeName)) {
-            stringValue = ((XMLGregorianCalendar) value).toXMLFormat();
+            stringValue = ((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) value).toXMLFormat();
         } else if(PrimitiveTypes.LONG.equals(typeName) || PrimitiveTypes.INTEGER.equals(typeName) || PrimitiveTypes.SHORT.equals(typeName)) {
             stringValue = String.valueOf(((Number) value).longValue());
         } else if(PrimitiveTypes.BINARY.equals(typeName)) {

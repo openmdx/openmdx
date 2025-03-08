@@ -63,7 +63,6 @@ import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.Resour
 import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 import #if JAVA_8 javax.resource.spi.ResourceAllocationException #else jakarta.resource.spi.ResourceAllocationException #endif;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.ietf.jgss.Oid;
 import org.openmdx.base.accessor.rest.spi.ControlObjects_2;

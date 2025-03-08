@@ -61,8 +61,7 @@ import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jmi.reflect.RefObject;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
@@ -169,7 +168,7 @@ public class CompositeObjectDataBinding extends DataBinding {
             valueClass = String.class;
         }
         else if("date".equals(type)) {
-            valueClass = XMLGregorianCalendar.class;
+            valueClass = #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class;
         }
         else if("datetime".equalsIgnoreCase(type)) {
             valueClass = #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class;

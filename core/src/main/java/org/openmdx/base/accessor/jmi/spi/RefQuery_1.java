@@ -67,8 +67,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefObject;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.mof.cci.ModelAttributes;
@@ -1920,7 +1919,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                                             quantifier,
                                             qualifiedName)
                                             : PrimitiveTypes.DATE.equals(typeName)
-                                                ? new RefPartiallyOrderedTypePredicate<XMLGregorianCalendar>(
+                                                ? new RefPartiallyOrderedTypePredicate<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif>(
                                                     quantifier,
                                                     qualifiedName)
                                                 : PrimitiveTypes.ANYURI.equals(typeName)

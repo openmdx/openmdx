@@ -48,7 +48,7 @@ import java.sql.Connection;
 import java.text.ParseException;
 import java.util.concurrent.TimeUnit;
 
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -79,7 +79,7 @@ public class TestXMLGregorianCalendarMarshaller {
    public void whenInCentralEuropeanSummerTimeThenInDaylightSavingsTime() throws ParseException, ServiceException {
       // Arrange
       final String lexicalRepresentation = "2013-10-26T00:30:00.000Z";
-      final XMLGregorianCalendar xmlGregorianCalendar = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(lexicalRepresentation);
+      final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif xmlGregorianCalendar = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(lexicalRepresentation);
       // Act
       final Object sqlValue = marshaller.marshal(xmlGregorianCalendar, null);
       // Assert
@@ -90,7 +90,7 @@ public class TestXMLGregorianCalendarMarshaller {
    public void whenInLastHourOfCentralEuropeanSummerTimeThenInDaylightSavingsTime() throws ParseException, ServiceException {
       // Arrange
       final String lexicalRepresentation = "2013-10-27T00:30:00.000Z";
-      final XMLGregorianCalendar xmlGregorianCalendar = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(lexicalRepresentation);
+      final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif xmlGregorianCalendar = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(lexicalRepresentation);
       // Act
       final Object sqlValue = marshaller.marshal(xmlGregorianCalendar, null);
       // Assert
@@ -101,7 +101,7 @@ public class TestXMLGregorianCalendarMarshaller {
    public void whenInFirstHourOfCentralEuropeanTimeThenNotInDaylightSavingsTime() throws ParseException, ServiceException {
       // Arrange
       final String lexicalRepresentation = "2013-10-27T01:30:00.000Z";
-      final XMLGregorianCalendar xmlGregorianCalendar = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(lexicalRepresentation);
+      final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif xmlGregorianCalendar = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(lexicalRepresentation);
       // Act
       final Object sqlValue = marshaller.marshal(xmlGregorianCalendar, null);
       // Assert
@@ -112,7 +112,7 @@ public class TestXMLGregorianCalendarMarshaller {
    public void whenInCentralEuropeanTimeThenNotInDaylightSavingsTime() throws ParseException, ServiceException {
       // Arrange
       final String lexicalRepresentation = "2013-10-28T01:30:00.000Z";
-      final XMLGregorianCalendar xmlGregorianCalendar = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(lexicalRepresentation);
+      final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif xmlGregorianCalendar = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(lexicalRepresentation);
       // Act
       final Object sqlValue = marshaller.marshal(xmlGregorianCalendar, null);
       // Assert

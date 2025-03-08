@@ -56,7 +56,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -249,8 +249,8 @@ public class DateValue
             return this.isDate() ? 
             	dateFormatter.format(value) : 
             		dateTimeFormatter.format(value);
-        } else if(value instanceof XMLGregorianCalendar) {
-            GregorianCalendar calendar = ((XMLGregorianCalendar)value).toGregorianCalendar(
+        } else if(value instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) {
+            GregorianCalendar calendar = ((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)value).toGregorianCalendar(
                 TimeZone.getTimeZone(app.getCurrentTimeZone()),
                 this.app.getCurrentLocale(),
                 null

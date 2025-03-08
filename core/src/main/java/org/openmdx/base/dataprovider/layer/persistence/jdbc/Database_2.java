@@ -106,8 +106,7 @@ import jakarta.resource.cci.MappedRecord;
 
 import javax.sql.DataSource;
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
 import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
@@ -2980,9 +2979,9 @@ public class Database_2
     )
         throws ServiceException {
         boolean dateTime = value instanceof java.util.Date
-            || value instanceof XMLGregorianCalendar
+            || value instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif
                 && DatatypeConstants.DATETIME
-                    .equals(((XMLGregorianCalendar) value).getXMLSchemaType());
+                    .equals(((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) value).getXMLSchemaType());
         boolean timestampWithTimezone = dateTime
             && LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE
                 .equals(getDateTimeType(connection));

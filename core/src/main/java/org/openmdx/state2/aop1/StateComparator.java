@@ -47,7 +47,7 @@ package org.openmdx.state2.aop1;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
@@ -94,8 +94,8 @@ public class StateComparator
         }
         try {
             int validFrom = Order.compareValidFrom(
-                (XMLGregorianCalendar)o1.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
-                (XMLGregorianCalendar)o2.objGetValue(TechnicalAttributes.STATE_VALID_FROM)
+                (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)o1.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
+                (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)o2.objGetValue(TechnicalAttributes.STATE_VALID_FROM)
             ); 
             if(validFrom != 0) {
                 return validFrom;

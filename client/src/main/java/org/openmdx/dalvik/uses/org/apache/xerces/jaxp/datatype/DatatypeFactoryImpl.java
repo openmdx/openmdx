@@ -24,8 +24,7 @@ import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 /**
  * <p>Factory that creates new {@code javax.xml.datatype} {@code Object}s that map XML to/from Java {@code Object}s.</p>
@@ -203,8 +202,7 @@ public class DatatypeFactoryImpl extends DatatypeFactory {
      * @return New {@code XMLGregorianCalendar} with all date/time datatype fields set to
      *   {@link DatatypeConstants#FIELD_UNDEFINED} or null.
      */
-    public XMLGregorianCalendar newXMLGregorianCalendar() {
-
+    public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif newXMLGregorianCalendar() {
         return new XMLGregorianCalendarImpl();
     }
 
@@ -233,7 +231,7 @@ public class DatatypeFactoryImpl extends DatatypeFactory {
      * @throws IllegalArgumentException If the {@code lexicalRepresentation} is not a valid {@code XMLGregorianCalendar}.
      * @throws NullPointerException If {@code lexicalRepresentation} is {@code null}.
      */
-    public XMLGregorianCalendar newXMLGregorianCalendar(final String lexicalRepresentation) {
+    public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif newXMLGregorianCalendar(final String lexicalRepresentation) {
 
         return new XMLGregorianCalendarImpl(lexicalRepresentation);
     }
@@ -300,8 +298,7 @@ public class DatatypeFactoryImpl extends DatatypeFactory {
      *  
      * @throws NullPointerException If {@code cal} is {@code null}.
      */
-    public XMLGregorianCalendar newXMLGregorianCalendar(final GregorianCalendar cal) {
-
+    public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif newXMLGregorianCalendar(final GregorianCalendar cal) {
         return new XMLGregorianCalendarImpl(cal);
     }
 
@@ -331,7 +328,7 @@ public class DatatypeFactoryImpl extends DatatypeFactory {
      *   or if the composite values constitute an invalid {@code XMLGregorianCalendar} instance
      *   as determined by {@link XMLGregorianCalendar#isValid()}.
      */
-    public XMLGregorianCalendar newXMLGregorianCalendar(
+    public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif newXMLGregorianCalendar(
             final int year,
             final int month,
             final int day,
@@ -376,7 +373,7 @@ public class DatatypeFactoryImpl extends DatatypeFactory {
      * @throws NullPointerException If any parameters are {@code null}.
      * 
      */
-    public XMLGregorianCalendar newXMLGregorianCalendar(
+    public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif newXMLGregorianCalendar(
             final BigInteger year,
             final int month,
             final int day,

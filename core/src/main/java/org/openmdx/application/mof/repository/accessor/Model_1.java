@@ -60,8 +60,7 @@ import java.util.TreeSet;
 import java.util.function.Predicate;
 
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
@@ -445,7 +444,7 @@ public class Model_1 implements Model_1_0 {
                 return;
             }
             else if(
-                (value instanceof XMLGregorianCalendar) && 
+                (value instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) &&
                 PrimitiveTypes.DATE.equals(typeName)
             ) {
                 return;
@@ -455,7 +454,7 @@ public class Model_1 implements Model_1_0 {
                 PrimitiveTypes.DATE.equals(typeName)
             ) {
                 try {
-                    Datatypes.create(XMLGregorianCalendar.class, (String)value);
+                    Datatypes.create(Datatypes.DATE_CLASS, (String)value);
                 } catch(IllegalArgumentException e) {
                     throw new ServiceException(e);
                 }
@@ -472,7 +471,7 @@ public class Model_1 implements Model_1_0 {
                 PrimitiveTypes.DURATION.equals(typeName)
             ) {
                 try {
-                    Datatypes.create(Duration.class, (String)value);
+                    Datatypes.create(Datatypes.DURATION_CLASS, (String)value);
                 } catch(IllegalArgumentException e) {
                     throw new ServiceException(e);
                 }

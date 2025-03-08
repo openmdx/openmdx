@@ -50,7 +50,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.Duration;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.postgresql.PGIntervalMarshaller;
@@ -303,7 +303,7 @@ public class DurationMarshaller {
 		} else {
 			switch (durationType) {
 			case CHARACTER:
-				return Datatypes.create(Duration.class, source.toString());
+				return Datatypes.create(Datatypes.DURATION_CLASS, source.toString());
 			case INTERVAL: {
 				if(PGIntervalMarshaller.isApplicableForDataType(source)) {
 					return PG_INTERVAL_MARSHALLER.unmarshal(source);
@@ -338,11 +338,11 @@ public class DurationMarshaller {
 							}
 							duration.append("S");
 						}
-						return Datatypes.create(Duration.class, duration.toString());
+						return Datatypes.create(Datatypes.DURATION_CLASS, duration.toString());
 					} else if ((matcher = YEAR_TO_MONTH.matcher(value)).matches()) {
 						StringBuilder duration = new StringBuilder().append(matcher.group(1)).append('P')
 								.append(matcher.group(2)).append("Y").append(matcher.group(3)).append("M");
-						return Datatypes.create(Duration.class, duration.toString());
+						return Datatypes.create(Datatypes.DURATION_CLASS, duration.toString());
 					} else
 						throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
 								BasicException.Code.TRANSFORMATION_FAILURE,
@@ -373,7 +373,7 @@ public class DurationMarshaller {
 
 	private Object toDuration(String prefix, Number infix, String suffix) {
 		String value = infix.toString();
-		return Datatypes.create(Duration.class, value.charAt(0) == '-' ? ("-P" + prefix + value.substring(1) + suffix)
+		return Datatypes.create(Datatypes.DURATION_CLASS, value.charAt(0) == '-' ? ("-P" + prefix + value.substring(1) + suffix)
 				: ("P" + prefix + value + suffix));
 	}
 

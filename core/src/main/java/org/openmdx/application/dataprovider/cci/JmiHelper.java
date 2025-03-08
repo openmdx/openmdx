@@ -56,8 +56,7 @@ import java.util.Set;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
@@ -132,8 +131,8 @@ public class JmiHelper {
                     (String)source
                 );
             } else if(PrimitiveTypes.DATE.equals(this.typeName)) {                
-                return source instanceof XMLGregorianCalendar ? source : Datatypes.create(
-                    XMLGregorianCalendar.class, 
+                return source instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif source : Datatypes.create(
+                    #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class,
                     (String)source
                 );
             } else if(PrimitiveTypes.DURATION.equals(this.typeName)) {                

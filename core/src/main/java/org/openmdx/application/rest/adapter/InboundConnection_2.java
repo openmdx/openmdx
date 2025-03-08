@@ -97,8 +97,7 @@ import jakarta.resource.cci.Record;
 import jakarta.resource.spi.EISSystemException;
 import jakarta.resource.spi.LocalTransactionException;
 #endif
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
@@ -729,9 +728,9 @@ public class InboundConnection_2 extends AbstractConnection {
                 } else if (jcaValue instanceof String && PrimitiveTypes.DATETIME.equals(featureType.getQualifiedName())) {
                     return Datatypes.create(Datatypes.DATE_TIME_CLASS, (String) jcaValue);
                 } else if (jcaValue instanceof String && PrimitiveTypes.DATE.equals(featureType.getQualifiedName())) {
-                    return Datatypes.create(XMLGregorianCalendar.class, (String) jcaValue);
+                    return Datatypes.create(Datatypes.DATE_CLASS, (String) jcaValue);
                 } else if (jcaValue instanceof String && PrimitiveTypes.DURATION.equals(featureType.getQualifiedName())) {
-                    return Datatypes.create(Duration.class, (String) jcaValue);
+                    return Datatypes.create(Datatypes.DURATION_CLASS, (String) jcaValue);
                 } else {
                     return featureDef.getModel().isReferenceType(featureDef) ? getObjectByResourceIdentifier(jcaValue) : jcaValue;
                 }

@@ -46,8 +46,7 @@ package org.w3c.spi;
 
 
 
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 /**
  * Immutable Datatype Factory
@@ -82,7 +81,7 @@ public interface ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value can't be parse
      */
-    XMLGregorianCalendar newDate(
+    #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif newDate(
         String value
     );
 
@@ -94,7 +93,7 @@ public interface ImmutableDatatypeFactory {
      * @return a corresponding date-time instance
      * 
      * @exception IllegalArgumentException
-     * if the value can't be parse
+     * if the value can't be parsed
      */
     Duration newDuration(
         String value
@@ -129,8 +128,8 @@ public interface ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value is not an org::w3c::date instance
      */
-    XMLGregorianCalendar toDate(
-        XMLGregorianCalendar value
+    #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif toDate(
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif value
     );
 
     /**

@@ -95,7 +95,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.cci.SystemAttributes;

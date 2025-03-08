@@ -48,8 +48,7 @@ package org.openmdx.state2.spi;
 
 
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.ImmutableDatatype;
@@ -104,8 +103,8 @@ public class Order {
      * @throws IllegalArgumentException if validTo is less than validFrom 
      */
     public static void assertTimeRange(
-        XMLGregorianCalendar validFrom,
-        XMLGregorianCalendar validTo
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo
     ){
         if(validFrom != null && validTo != null) {
             if(validTo.compare(validFrom) == DatatypeConstants.LESSER) {
@@ -135,8 +134,8 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareValidFrom(
-        XMLGregorianCalendar d1,
-        XMLGregorianCalendar d2
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d1,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d2
     ){
         return d1 == null ? (
             d2 == null ? 0 : -1
@@ -194,15 +193,15 @@ public class Order {
      * is less than, equal to, or greater than {@code to}. 
      */
     public static int compare(
-        XMLGregorianCalendar d1,
-        XMLGregorianCalendar d2
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d1,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d2
     ){
         boolean i1 = d1 instanceof ImmutableDatatype<?>;
         boolean i2 = d2 instanceof ImmutableDatatype<?>;
         return 
             i1 == i2 ? d1.compare(d2) :
-            i1 ? ((XMLGregorianCalendar)d1.clone()).compare(d2) :
-            d1.compare((XMLGregorianCalendar) d2.clone());
+            i1 ? ((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)d1.clone()).compare(d2) :
+            d1.compare((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) d2.clone());
     }
         
     /**
@@ -214,8 +213,8 @@ public class Order {
      * @return true if the two values are either equal or both {@code null}
      */
     public static boolean equal(
-        XMLGregorianCalendar d1,
-        XMLGregorianCalendar d2
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d1,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d2
     ){
         boolean i1 = d1 instanceof ImmutableDatatype<?>;
         boolean i2 = d2 instanceof ImmutableDatatype<?>;
@@ -358,10 +357,10 @@ public class Order {
      * 
      * @return the previous day
      */
-    public static XMLGregorianCalendar predecessor(
-        XMLGregorianCalendar date
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif predecessor(
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif date
     ){
-        XMLGregorianCalendar predecessor = (XMLGregorianCalendar) date.clone();
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif predecessor = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) date.clone();
         predecessor.add(MINUS_ONE_DAY);
         return predecessor;
     }
@@ -373,10 +372,10 @@ public class Order {
      * 
      * @return the next day
      */
-    public static XMLGregorianCalendar successor(
-        XMLGregorianCalendar date
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif successor(
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif date
     ){
-        XMLGregorianCalendar successor = (XMLGregorianCalendar) date.clone();
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif successor = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) date.clone();
         successor.add(ONE_DAY);
         return successor;
     }

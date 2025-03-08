@@ -49,7 +49,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.SortOrder;
@@ -105,12 +105,12 @@ class ObjectRecordComparator implements Comparator<ObjectRecord> {
             return right == null ? 0 : -1;
         } else if (right == null) {
             return +1;
-        } else if(left instanceof XMLGregorianCalendar) {
+        } else if(left instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) {
             if(left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>){
                 ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
-                return datatypeFactory.toDate((XMLGregorianCalendar) left).compare(datatypeFactory.toDate((XMLGregorianCalendar) right));
+                return datatypeFactory.toDate((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) left).compare(datatypeFactory.toDate((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) right));
             } else {
-                return ((XMLGregorianCalendar)left).compare((XMLGregorianCalendar) right);
+                return ((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)left).compare((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) right);
             }
         } else {
             return ((Comparable)left).compareTo(right);

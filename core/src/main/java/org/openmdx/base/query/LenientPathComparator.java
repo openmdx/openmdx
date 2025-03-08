@@ -46,8 +46,6 @@ package org.openmdx.base.query;
 
 import java.util.Comparator;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.openmdx.base.naming.Path;
 
 /**
@@ -89,7 +87,7 @@ public class LenientPathComparator extends LenientDatatypeComparator {
     public static boolean isComparable(
         Object candidate
     ){
-        return candidate instanceof Comparable<?> || candidate instanceof XMLGregorianCalendar;
+        return candidate instanceof Comparable<?> || candidate instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif;
     }
        
     

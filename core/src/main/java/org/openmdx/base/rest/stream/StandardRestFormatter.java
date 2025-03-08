@@ -70,7 +70,6 @@ import jakarta.resource.cci.IndexedRecord;
 import jakarta.resource.cci.MappedRecord;
 import jakarta.resource.spi.ResourceAllocationException;
 #endif
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -560,7 +559,7 @@ public class StandardRestFormatter implements RestFormatter {
     		value instanceof Boolean ? PrimitiveTypes.BOOLEAN :
     		value instanceof Path ? PrimitiveTypes.OBJECT_ID :
     		value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif ? PrimitiveTypes.DATETIME :
-    		value instanceof XMLGregorianCalendar ? PrimitiveTypes.DATE :
+    		value instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif ? PrimitiveTypes.DATE :
     		value instanceof URI ? PrimitiveTypes.ANYURI :
     		value instanceof byte[] ? PrimitiveTypes.BINARY :
     		value instanceof UUID ? PrimitiveTypes.UUID :
