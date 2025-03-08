@@ -191,7 +191,7 @@ public class FilterTest {
         );
         extension.setDateParam(
             Datatypes.create(
-                #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class,
+                Datatypes.DATE_CLASS,
                 "2000-02-29"
             )
         );

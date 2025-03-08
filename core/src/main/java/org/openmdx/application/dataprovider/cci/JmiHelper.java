@@ -132,12 +132,12 @@ public class JmiHelper {
                 );
             } else if(PrimitiveTypes.DATE.equals(this.typeName)) {                
                 return source instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif source : Datatypes.create(
-                    #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class,
+                    Datatypes.DATE_CLASS,
                     (String)source
                 );
             } else if(PrimitiveTypes.DURATION.equals(this.typeName)) {                
                 return source instanceof Duration ? source : Datatypes.create(
-                    Duration.class, 
+                    Datatypes.DURATION_CLASS,
                     (String)source
                 );
             } else if(PrimitiveTypes.ANYURI.equals(this.typeName)) {                

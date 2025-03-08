@@ -1013,7 +1013,7 @@ public class ImportHandler extends DefaultHandler {
                 if (v.length() > 0) {
                     try {
                         return Datatypes.create(
-                            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class,
+                            Datatypes.DATE_CLASS,
                             v
                         );
                     } catch (IllegalArgumentException e) {

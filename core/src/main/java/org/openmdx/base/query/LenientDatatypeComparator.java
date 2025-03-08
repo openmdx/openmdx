@@ -151,7 +151,7 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
             if(second instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) {
                 right = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) second;
             } else if (second instanceof CharSequence){
-                right = Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, second.toString());
+                right = Datatypes.create(Datatypes.DATE_TIME_CLASS, second.toString());
             } else throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
