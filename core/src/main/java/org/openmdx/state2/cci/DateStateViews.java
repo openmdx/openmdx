@@ -776,6 +776,8 @@ public class DateStateViews {
         if (left == null || right == null) {
             return false;
         }
+        // TODO: dirty-harry IntelliJ says: "Condition left instanceof ImmutableDatatype<?> is always false",
+        //  suggests removing "if"
         if (left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>) {
             ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
             return datatypeFactory.toDateTime(left).equals(datatypeFactory.toDateTime(right));
