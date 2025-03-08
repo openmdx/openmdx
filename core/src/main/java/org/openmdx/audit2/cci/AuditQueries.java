@@ -202,8 +202,8 @@ public class AuditQueries {
                     try {
                         UnitOfWork unitOfWork = involvement.getUnitOfWork();
                         if(
-                            (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                            (to == null || to.after(unitOfWork.getCreatedAt()))
+                            (from == null || !from.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(unitOfWork.getCreatedAt())) &&
+                            (to == null || to.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(unitOfWork.getCreatedAt()))
                         ){
                             unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
                         }
@@ -215,7 +215,7 @@ public class AuditQueries {
                 }
                 return unitsOfWork.values();
             }
-            default: 
+            default:
                 throw BasicException.initHolder(
                     new UnsupportedOperationException(
                         "Persistence modes other than EMBEDDED are not yet supported",
@@ -279,8 +279,8 @@ public class AuditQueries {
                         if(ReducedJDOHelper.isPersistent(involvement)) try {
                             UnitOfWork unitOfWork = involvement.getUnitOfWork();
                             if(
-                                (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                                (to == null || to.after(unitOfWork.getCreatedAt()))
+                                (from == null || !from.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(unitOfWork.getCreatedAt())) &&
+                                (to == null || to.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(unitOfWork.getCreatedAt()))
                             ){
                                 unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
                             }
@@ -292,7 +292,7 @@ public class AuditQueries {
                     }
                     return unitsOfWork.values();
                 }
-                default: 
+                default:
                     throw BasicException.initHolder(
                         new UnsupportedOperationException(
                             "Persistence modes other than EMBEDDED are not yet supported",

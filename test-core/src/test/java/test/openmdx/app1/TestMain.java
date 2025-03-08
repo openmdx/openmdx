@@ -936,7 +936,7 @@ public class TestMain {
 				{
 
 					ProductQuery productQuery = (ProductQuery) entityManager.newQuery(Product.class);
-					productQuery.createdAt().lessThanOrEqualTo(new Date());
+					productQuery.createdAt().lessThanOrEqualTo(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
 					InvoicePositionQuery invoicePositionQuery = (InvoicePositionQuery) entityManager
 							.newQuery(InvoicePosition.class);
 					invoicePositionQuery.product().elementOf(PersistenceHelper.asSubquery(productQuery));
@@ -2092,7 +2092,7 @@ public class TestMain {
 						.newXMLGregorianCalendar("1960-01-01");
 				birthDate.setTimezone(-1);
 				person.setBirthdate(birthDate);
-				person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
+				person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19600101T120000.000Z"));
 				assertEquals("1960-01-01T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()), "Born at noon");
 				person.setLastName("MusterX");
 				person.setSalutation("Herr");
@@ -2182,7 +2182,7 @@ public class TestMain {
 				person.setForeignId("YF");
 				XMLGregorianCalendar birthDate = Datatypes.create(XMLGregorianCalendar.class, "1960-01-01");
 				person.setBirthdate(birthDate);
-				person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
+				person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19600101T120000.000Z"));
 				assertEquals("1960-01-01T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()), "Born at noon");
 				person.setLastName("MusterX");
 				person.setSalutation("Herr");
@@ -2397,22 +2397,22 @@ public class TestMain {
                                 return transactionTime1;
                             }
 
-                            public Class<? extends Date> getInstanceClass() {
-                                return Date.class;
+                            public Class<? extends #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif> getInstanceClass() {
+                                return #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif .class;
                             }
                         });
 					}
 					PersistenceManager persistenceManager2 = super.entityManager.getPersistenceManagerFactory()
 							.getPersistenceManager();
 					{
-						final Date transactionTime2 = new Date(System.currentTimeMillis() - 10L);
-						UserObjects.setTransactionTime(persistenceManager2, new Factory<Date>() {
-                            public Date instantiate() {
+						final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime2 = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(System.currentTimeMillis() - 10L);
+						UserObjects.setTransactionTime(persistenceManager2, new Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif>() {
+                            public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif instantiate() {
                                 return transactionTime2;
                             }
 
-                            public Class<? extends Date> getInstanceClass() {
-                                return Date.class;
+                            public Class<? extends #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> getInstanceClass() {
+                                return #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class;
                             }
                         });
 					}
@@ -3001,7 +3001,7 @@ public class TestMain {
 			// create and remove in same unit of work
 			person = personClass.createPerson();
 			person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
-			person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
+			person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19600101T120000.000Z"));
 			person.setForeignId("YF");
 			person.setLastName("MusterX");
 			person.setSalutation("Herr");
@@ -3028,7 +3028,7 @@ public class TestMain {
 					person = personClass.createPerson();
 					person.setForeignId("F" + i);
 					person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
-					person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
+					person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19600101T120000.000Z"));
 					person.setLastName("Muster" + i);
 					person.setSalutation("Herr");
 					person.setSex((short) 0);
@@ -3047,7 +3047,7 @@ public class TestMain {
 					person = personClass.createPerson();
 					person.setForeignId("F" + SMALL_N_PERSONS);
 					person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
-					person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
+					person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19600101T120000.000Z"));
 					person.setLastName("Muster" + SMALL_N_PERSONS);
 					person.setSalutation("Herr");
 					person.setSex((short) 0);
@@ -3211,7 +3211,7 @@ public class TestMain {
 			// get persons with filter 1
 			PersonQuery personQuery = app1Package.createPersonQuery();
 			personQuery.lastName().like("Muster1.*");
-			personQuery.birthdateAsDateTime().lessThanOrEqualTo(new Date());
+			personQuery.birthdateAsDateTime().lessThanOrEqualTo(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
 			personQuery.orderByCreatedAt().ascending();
 			SegmentHasPerson.Person<Person> personCollection;
 			List<Person> personList;
@@ -3456,7 +3456,7 @@ public class TestMain {
 				person.setLastName("Imhof");
 				person.setForeignId("HI");
 				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "20000401"));
-				person.setBirthdateAsDateTime(Datatypes.create(Date.class, "20000401T120000.000Z"));
+				person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "20000401T120000.000Z"));
 				person.setSalutation("Herr");
 				this.commit();
 				assertEquals(Collections.singletonList("Heiri"),  person.getGivenName(), "givenName");
@@ -3716,7 +3716,7 @@ public class TestMain {
 				person = personClass.createPerson();
 				person.setForeignId("X1");
 				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1961-11-11"));
-				person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19611111T120000.000Z"));
+				person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19611111T120000.000Z"));
 				person.setLastName("Muster1");
 				person.setSalutation("Herr");
 				person.setSex((short) 0);
@@ -3740,7 +3740,7 @@ public class TestMain {
 				person = personClass.createPerson();
 				person.setForeignId("X2");
 				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1961-11-11"));
-				person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19611111T120000.000Z"));
+				person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19611111T120000.000Z"));
 				person.setLastName("Muster1");
 				person.setSalutation("Herr");
 				person.setSex((short) 0);
@@ -3880,7 +3880,7 @@ public class TestMain {
 			try {
 				super.taskId = "CR20019719";
 				personQuery = app1Package.createPersonQuery();
-				personQuery.createdAt().equalTo(new Date());
+				personQuery.createdAt().equalTo(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
 				List<Person> people = segment.<Person>getPerson().getAll(personQuery);
 				assertTrue(people.isEmpty());
 			} finally {
@@ -4189,7 +4189,7 @@ public class TestMain {
 					// Validate date-time values
 					//
 					person = (Person) super.entityManager.getObjectById(personId);
-					assertEquals(Datatypes.create(Date.class, "1960-01-01T12:00:00Z"),  person.getBirthdateAsDateTime(), "Birthdate as date/time");
+					assertEquals(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "1960-01-01T12:00:00Z"),  person.getBirthdateAsDateTime(), "Birthdate as date/time");
 				} finally {
 					super.taskId = null;
 				}
@@ -4652,7 +4652,7 @@ public class TestMain {
 			int create = SharedObjects.getPlugInObject(this.entityManager, Configuration.class)
 					.getPersistenceMode() == InvolvementPersistence.EMBEDDED ? 0 : 1;
 			String scope = scoped ? " (run " + run + ")" : " (run 1.." + run + ")";
-			Date from = scoped ? super.getStart() : null;
+			#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from = scoped ? super.getStart() : null;
 			Collection<UnitOfWork> task = AuditQueries.getUnitOfWorkInvolvingObject(from, null, invoice);
 			String id = "Involve InvoicePosition CR20019372.";
 			dumpTask(id + scope, task);
@@ -4675,7 +4675,7 @@ public class TestMain {
 			int create = SharedObjects.getPlugInObject(this.entityManager, Configuration.class)
 					.getPersistenceMode() == InvolvementPersistence.EMBEDDED ? 0 : 1;
 			String scope = scoped ? " (run " + run + ")" : " (run 1.." + run + ")";
-			Date from = scoped ? super.getStart() : null;
+			#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from = scoped ? super.getStart() : null;
 			Collection<UnitOfWork> task = AuditQueries.getUnitOfWorkInvolvingObject(from, null, person);
 			String id = "involve Person # ID500012";
 			dumpTask(id + scope, task);
@@ -4801,7 +4801,7 @@ public class TestMain {
 				Person person = personClass.createPerson();
 				person.setForeignId("F" + i);
 				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
-				person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
+				person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19600101T120000.000Z"));
 				person.setLastName("Muster" + i);
 				person.setSalutation("Herr");
 				person.setSex((short) 0);

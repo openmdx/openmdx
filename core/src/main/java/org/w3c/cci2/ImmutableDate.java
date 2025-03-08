@@ -1,28 +1,28 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Date 
+ * Description: Date
  * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,33 +36,33 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
 package org.w3c.cci2;
 
-import static javax.xml.datatype.DatatypeConstants.DATE;
-import static javax.xml.datatype.DatatypeConstants.FIELD_UNDEFINED;
-import static javax.xml.datatype.DatatypeConstants.INDETERMINATE;
-
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
+import org.w3c.time.TimeZones;
 
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.Instant;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
 
-import org.w3c.time.TimeZones;
+import static javax.xml.datatype.DatatypeConstants.DATE;
+import static javax.xml.datatype.DatatypeConstants.FIELD_UNDEFINED;
+import static javax.xml.datatype.DatatypeConstants.INDETERMINATE;
 
 /**
  * Date
@@ -70,12 +70,11 @@ import org.w3c.time.TimeZones;
  * An unmodifiable XMLGregorianCalendar implementation representing a date
  */
 public final class ImmutableDate
-    extends XMLGregorianCalendar
-    implements Serializable, ImmutableDatatype<XMLGregorianCalendar>, Comparable<XMLGregorianCalendar>
-{
+        extends XMLGregorianCalendar
+        implements Serializable, ImmutableDatatype<XMLGregorianCalendar>, Comparable<XMLGregorianCalendar> {
 
     /**
-     * Constructor 
+     * Constructor
      * <p>
      * <em>Note:<br>
      * The value is tested by the factory, not by the constructor
@@ -83,11 +82,11 @@ public final class ImmutableDate
      * @param basicValue value in ISO 8601:2000 basic format
      */
     public ImmutableDate(
-        String basicValue
-    ){
+            String basicValue
+    ) {
         this.basicValue = basicValue;
     }
-    
+
     /* (non-Javadoc)
      * @see javax.xml.datatype.XMLGregorianCalendar#add(javax.xml.datatype.Duration)
      */
@@ -106,18 +105,18 @@ public final class ImmutableDate
 
     /**
      * Retrieve the mutable equivalent
-     * 
+     *
      * @return the mutable equivalent
      */
-    private XMLGregorianCalendar toMutableDate(){
+    private XMLGregorianCalendar toMutableDate() {
         final DatatypeFactory datatypeFactory = MutableDatatypeFactory.xmlDatatypeFactory();
         return getEon().signum() == 0 ? datatypeFactory.newXMLGregorianCalendarDate(
-            getYear(),
-            getMonth(),
-            getDay(),
-            FIELD_UNDEFINED
+                getYear(),
+                getMonth(),
+                getDay(),
+                FIELD_UNDEFINED
         ) : datatypeFactory.newXMLGregorianCalendar(
-                getEonAndYear(), 
+                getEonAndYear(),
                 getMonth(),
                 getDay(),
                 FIELD_UNDEFINED, // hour
@@ -127,7 +126,7 @@ public final class ImmutableDate
                 FIELD_UNDEFINED // time-zone
         );
     }
-    
+
     /* (non-Javadoc)
      * @see javax.xml.datatype.XMLGregorianCalendar#clone()
      */
@@ -143,11 +142,11 @@ public final class ImmutableDate
     @Override
     public int compare(XMLGregorianCalendar that) {
         return that instanceof ImmutableDate ?
-            compareTo((ImmutableDate)that) :
-            toMutableDate().compare(that);
+                compareTo((ImmutableDate) that) :
+                toMutableDate().compare(that);
     }
 
-    
+
     /* (non-Javadoc)
      * @see javax.xml.datatype.XMLGregorianCalendar#getDay()
      */
@@ -155,9 +154,9 @@ public final class ImmutableDate
     public int getDay(
     ) {
         int i = this.basicValue.length() - 2;
-        return 
-            10 * Character.digit(this.basicValue.charAt(i++), 10) +
-            Character.digit(this.basicValue.charAt(i), 10);
+        return
+                10 * Character.digit(this.basicValue.charAt(i++), 10) +
+                        Character.digit(this.basicValue.charAt(i), 10);
     }
 
     /* (non-Javadoc)
@@ -165,11 +164,11 @@ public final class ImmutableDate
      */
     @Override
     public BigInteger getEon() {
-        if(this.eon == null) {
+        if (this.eon == null) {
             int i = this.basicValue.length();
-            this.eon = i > 13 ? 
-                new BigInteger(this.basicValue.substring(0, i - 13) + "000000000") :
-                BigInteger.ZERO;
+            this.eon = i > 13 ?
+                    new BigInteger(this.basicValue.substring(0, i - 13) + "000000000") :
+                    BigInteger.ZERO;
         }
         return this.eon;
     }
@@ -179,11 +178,11 @@ public final class ImmutableDate
      */
     @Override
     public BigInteger getEonAndYear() {
-        if(this.eonAndYear == null) {
+        if (this.eonAndYear == null) {
             int i = this.basicValue.length();
-            this.eonAndYear = i > 13 ? 
-                new BigInteger(this.basicValue.substring(0, i - 4)) :
-                BigInteger.valueOf(getYear());
+            this.eonAndYear = i > 13 ?
+                    new BigInteger(this.basicValue.substring(0, i - 4)) :
+                    BigInteger.valueOf(getYear());
         }
         return this.eonAndYear;
     }
@@ -218,9 +217,9 @@ public final class ImmutableDate
     @Override
     public int getMonth() {
         int i = this.basicValue.length() - 4;
-        return 
-            10 * Character.digit(this.basicValue.charAt(i++), 10) +
-            Character.digit(this.basicValue.charAt(i), 10);
+        return
+                10 * Character.digit(this.basicValue.charAt(i++), 10) +
+                        Character.digit(this.basicValue.charAt(i), 10);
     }
 
     /* (non-Javadoc)
@@ -261,13 +260,13 @@ public final class ImmutableDate
     @Override
     public int getYear() {
         int year = 0;
-        for(
-             int i = 0, iLimit = this.basicValue.length() - 4;
-             i < iLimit;
-             i++
-        ){
-             year *= 10;
-             year += Character.digit(this.basicValue.charAt(i), 10);
+        for (
+                int i = 0, iLimit = this.basicValue.length() - 4;
+                i < iLimit;
+                i++
+        ) {
+            year *= 10;
+            year += Character.digit(this.basicValue.charAt(i), 10);
         }
         return year;
     }
@@ -378,19 +377,18 @@ public final class ImmutableDate
 
     /**
      * Create a gregorian calendar without default values
-     * 
+     *
      * @param timezone
      * @param locale
-     * 
      * @return
      */
     private GregorianCalendar toGregorianCalendar(
-        TimeZone timezone,
-        Locale locale
+            TimeZone timezone,
+            Locale locale
     ) {
         GregorianCalendar result = new GregorianCalendar(
-            timezone == null ? TimeZone.getDefault() : timezone, 
-            locale == null ? Locale.getDefault() : locale
+                timezone == null ? TimeZone.getDefault() : timezone,
+                locale == null ? Locale.getDefault() : locale
         );
         result.clear();
         // TODO: dirty-harry Not sure if this is acceptable but I don't know another way?
@@ -415,14 +413,14 @@ public final class ImmutableDate
      */
     @Override
     public GregorianCalendar toGregorianCalendar(
-        TimeZone timezone,
-        Locale locale,
-        XMLGregorianCalendar defaults
+            TimeZone timezone,
+            Locale locale,
+            XMLGregorianCalendar defaults
     ) {
         GregorianCalendar result = toGregorianCalendar(timezone, locale);
-        if(defaults != null) {
+        if (defaults != null) {
             int h = defaults.getHour();
-            if(h != FIELD_UNDEFINED) {
+            if (h != FIELD_UNDEFINED) {
                 result.set(Calendar.HOUR_OF_DAY, h);
             }
             int m = defaults.getMinute();
@@ -446,20 +444,20 @@ public final class ImmutableDate
      */
     @Override
     public String toXMLFormat() {
-        if(this.extendedValue == null) {
+        if (this.extendedValue == null) {
             int i = this.basicValue.length();
             this.extendedValue = new StringBuilder(
-                i + 2
+                    i + 2
             ).append(
-                this.basicValue.substring(0, i - 4)
+                    this.basicValue.substring(0, i - 4)
             ).append(
-                '-'
+                    '-'
             ).append(
-                this.basicValue.substring(i - 4, i - 2)
+                    this.basicValue.substring(i - 4, i - 2)
             ).append(
-                '-'
+                    '-'
             ).append(
-                this.basicValue.substring(i - 2, i)
+                    this.basicValue.substring(i - 2, i)
             ).toString();
         }
         return this.extendedValue;
@@ -474,13 +472,13 @@ public final class ImmutableDate
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     public int compareTo(XMLGregorianCalendar that) {
-        if(that instanceof ImmutableDate) {
-            return compareTo((ImmutableDate)that);
+        if (that instanceof ImmutableDate) {
+            return compareTo((ImmutableDate) that);
         } else {
             int result = toMutableDate().compare(that);
-            if(result == INDETERMINATE) {
+            if (result == INDETERMINATE) {
                 throw new IllegalArgumentException(
-                    "Value not comparable to org::w3c::date: " + that.toXMLFormat()
+                        "Value not comparable to org::w3c::date: " + that.toXMLFormat()
                 );
             }
             return result;
@@ -489,22 +487,21 @@ public final class ImmutableDate
 
     /**
      * Compare to native instances
-     * 
+     *
      * @param that
-     * 
-     * @return 
+     * @return
      */
     private int compareTo(
-        ImmutableDate that
+            ImmutableDate that
     ) {
         int result = this.basicValue.length() - that.basicValue.length();
-        if(result == 0) {
+        if (result == 0) {
             result = this.basicValue.compareTo(that.basicValue);
         }
-        return result < 0 ? -1 : result == 0 ? 0 : +1;
+        return Integer.compare(result, 0);
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Datatype
     //------------------------------------------------------------------------
@@ -518,16 +515,15 @@ public final class ImmutableDate
 
     /**
      * There is no need for the deserialized object to be immutable
-     * 
+     *
      * @return a mutable counterpart of this object
-     * 
      * @throws ObjectStreamException
      */
     private Object writeReplace() throws ObjectStreamException {
         return toMutableDate();
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Members
     //------------------------------------------------------------------------
@@ -547,25 +543,25 @@ public final class ImmutableDate
     private transient String extendedValue;
 
     /**
-     * 
+     *
      */
     private transient BigInteger eonAndYear;
 
     /**
-     * 
+     *
      */
-    private transient BigInteger eon;    
-    
+    private transient BigInteger eon;
+
     /**
-     * 
+     *
      */
-    private static final String READONLY = 
-        "This " + XMLGregorianCalendar.class.getName() + 
-        " instance is read-only, use clone() to get a modifiable copy.";
-    
+    private static final String READONLY =
+            "This " + XMLGregorianCalendar.class.getName() +
+                    " instance is read-only, use clone() to get a modifiable copy.";
+
     /**
-     *   <p>Obtain a pure Gregorian Calendar by calling
-     *   GregorianCalendar.setChange(PURE_GREGORIAN_CHANGE). </p>
+     * <p>Obtain a pure Gregorian Calendar by calling
+     * GregorianCalendar.setChange(PURE_GREGORIAN_CHANGE). </p>
      */
     private static final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif PURE_GREGORIAN_CHANGE
             = #if CLASSIC_CHRONO_TYPES new java.util.Date #else Instant.ofEpochMilli#endif(Long.MIN_VALUE);

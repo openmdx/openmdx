@@ -51,6 +51,7 @@ import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.ImmutableDate;
@@ -201,12 +202,11 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * if the value is not an org::w3c::dateTime instance
      */
     public ImmutableDateTime toDateTime(
-        java.util.Date value
+            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif value
     ){
-        return 
-        value == null ? null :
-            value instanceof ImmutableDateTime ? (ImmutableDateTime)value :
-            new ImmutableDateTime(value.getTime());
+        return value == null ? null : value instanceof ImmutableDateTime
+                ? (ImmutableDateTime)value
+                : new ImmutableDateTime(value.#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli() #endif);
     }
     
     /**
@@ -220,7 +220,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * if the value is not an org::w3c::date instance
      */
     public ImmutableDate toDate(
-        javax.xml.datatype.XMLGregorianCalendar value
+        XMLGregorianCalendar value
     ){
         return 
             value == null ? null :

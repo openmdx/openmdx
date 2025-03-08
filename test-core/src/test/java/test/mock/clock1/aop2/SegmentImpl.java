@@ -46,7 +46,6 @@ package test.mock.clock1.aop2;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.text.ParseException;
-import java.util.Date;
 
 import org.openmdx.base.aop2.AbstractObject;
 import org.w3c.format.DateTimeFormat;
@@ -76,7 +75,7 @@ public class SegmentImpl extends AbstractObject<test.openmdx.clock1.jmi1.Segment
      * @see org.openmdx.base.aop2.AbstractObject#newContext()
      */
     @Override
-    protected Date newContext(
+    protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newContext(
     ) {
         try {
             return DateTimeFormat.BASIC_UTC_FORMAT.parse("20000401T120000.000Z");
@@ -94,8 +93,10 @@ public class SegmentImpl extends AbstractObject<test.openmdx.clock1.jmi1.Segment
     public org.openmdx.base.jmi1.Void setDateAndTime(
         test.openmdx.clock1.jmi1.Time in
     ){
-        final Date utc = in.getUtc();
-        thisContext().setTime(utc.getTime());
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = in.getUtc();
+        thisContext().#if CLASSIC_CHRONO_TYPES setTime #else ofEpochMilli#endif(
+                utc.#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli() #endif
+        );
         AsAdmin.notifyDateAndTimeChange(sameObject(), utc);
         return super.newVoid();
     }
