@@ -126,17 +126,17 @@ public class JmiHelper {
                     );
                 }
             } else if(PrimitiveTypes.DATETIME.equals(this.typeName)) {
-                return source instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif ? source : Datatypes.create(
+                return Datatypes.DATE_TIME_CLASS.isInstance(source) ? source : Datatypes.create(
                     Datatypes.DATE_TIME_CLASS,
                     (String)source
                 );
             } else if(PrimitiveTypes.DATE.equals(this.typeName)) {                
-                return source instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif source : Datatypes.create(
+                return Datatypes.DATE_CLASS.isInstance(source) ? source : Datatypes.create(
                     Datatypes.DATE_CLASS,
                     (String)source
                 );
             } else if(PrimitiveTypes.DURATION.equals(this.typeName)) {                
-                return source instanceof Duration ? source : Datatypes.create(
+                return Datatypes.DURATION_CLASS.isInstance(source) ? source : Datatypes.create(
                     Datatypes.DURATION_CLASS,
                     (String)source
                 );

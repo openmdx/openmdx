@@ -71,6 +71,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Model Validator
@@ -266,7 +267,7 @@ public class Model_1Validator {
                     );
                 }
             } else if (PrimitiveTypes.DATETIME.equals(type)) {
-                if(!(value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)) {
+                if(!(Datatypes.DATE_TIME_CLASS.isInstance(value))) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.VALIDATION_FAILURE,

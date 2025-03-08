@@ -52,6 +52,7 @@ import org.openmdx.base.resource.cci.Freezable;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Isolation
@@ -78,9 +79,9 @@ public class Isolation {
 	 * @return the given value or an immutable copy of it
 	 */
 	public static Object toImmutable(Object value) {
-		if(value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif && !(value instanceof ImmutableDatatype<?>)) {
+		if(Datatypes.DATE_TIME_CLASS.isInstance(value) && !(value instanceof ImmutableDatatype<?>)) {
 			return DatatypeFactories.immutableDatatypeFactory().toDateTime((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
-		} else if (value instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif && !(value instanceof ImmutableDatatype<?>)) {
+		} else if (Datatypes.DATE_CLASS.isInstance(value) && !(value instanceof ImmutableDatatype<?>)) {
 			return DatatypeFactories.immutableDatatypeFactory().toDate((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)value);
 		} else if (value instanceof Record) {
 			return toImmutable((Record)value);

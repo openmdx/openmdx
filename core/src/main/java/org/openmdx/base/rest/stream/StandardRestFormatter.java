@@ -100,6 +100,7 @@ import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Standard REST Formatter
@@ -464,7 +465,7 @@ public class StandardRestFormatter implements RestFormatter {
 	                    writer.writeCharacters(xri.toXRI());
 	                } else if (value instanceof String) {
 	                    writer.writeCData((String) value);
-	                } else if (value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) {
+	                } else if (Datatypes.DATE_TIME_CLASS.isInstance(value)) {
 	                    writer.writeCharacters(
 	                        DateTimeFormat.EXTENDED_UTC_FORMAT.format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) value)
 	                    );
@@ -558,8 +559,8 @@ public class StandardRestFormatter implements RestFormatter {
     		value instanceof BigDecimal ? PrimitiveTypes.DECIMAL :
     		value instanceof Boolean ? PrimitiveTypes.BOOLEAN :
     		value instanceof Path ? PrimitiveTypes.OBJECT_ID :
-    		value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif ? PrimitiveTypes.DATETIME :
-    		value instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif ? PrimitiveTypes.DATE :
+            Datatypes.DATE_TIME_CLASS.isInstance(value) ? PrimitiveTypes.DATETIME :
+            Datatypes.DATE_CLASS.isInstance(value) ? PrimitiveTypes.DATE :
     		value instanceof URI ? PrimitiveTypes.ANYURI :
     		value instanceof byte[] ? PrimitiveTypes.BINARY :
     		value instanceof UUID ? PrimitiveTypes.UUID :

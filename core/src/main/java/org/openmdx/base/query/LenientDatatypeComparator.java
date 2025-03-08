@@ -110,10 +110,10 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
                 left.compare(right)
             );
         }
-        if (first instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) {
+        if (Datatypes.DATE_CLASS.isInstance(first)) {
             #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif left;
             #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif right;
-            if(second instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) {
+            if(Datatypes.DATE_CLASS.isInstance(second)) {
                 if(first.getClass() == second.getClass()) {
                     left = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) first;
                     right = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) second;
@@ -145,10 +145,10 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
                 left.compare(right)
             );
         }
-        if (first instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif){
+        if (Datatypes.DATE_TIME_CLASS.isInstance(first))){
             #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif left = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) first;
             #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif right;
-            if(second instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) {
+            if(Datatypes.DATE_TIME_CLASS.isInstance(second)) {
                 right = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) second;
             } else if (second instanceof CharSequence){
                 right = Datatypes.create(Datatypes.DATE_TIME_CLASS, second.toString());

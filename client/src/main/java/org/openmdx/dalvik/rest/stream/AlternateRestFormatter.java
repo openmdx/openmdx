@@ -436,7 +436,7 @@ public class AlternateRestFormatter implements RestFormatter {
 	                    writer.writeCharacters(xri.toXRI());
 	                } else if (value instanceof String) {
 	                    writer.writeCData((String) value);
-	                } else if (value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) {
+	                } else if (Datatypes.DATE_TIME_CLASS.isInstance(value)) {
 	                    writer.writeCharacters(
 	                        DateTimeFormat.EXTENDED_UTC_FORMAT.format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) value)
 	                    );
@@ -527,7 +527,7 @@ public class AlternateRestFormatter implements RestFormatter {
     		value instanceof BigDecimal ? PrimitiveTypes.DECIMAL :
     		value instanceof Boolean ? PrimitiveTypes.BOOLEAN :
     		value instanceof Path ? PrimitiveTypes.OBJECT_ID :
-    		value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif ? PrimitiveTypes.DATETIME :
+            Datatypes.DATE_TIME_CLASS.isInstance(value) ? PrimitiveTypes.DATETIME :
     		value instanceof XMLGregorianCalendar ? PrimitiveTypes.DATE :
     		value instanceof URI ? PrimitiveTypes.ANYURI :
     		value instanceof byte[] ? PrimitiveTypes.BINARY :

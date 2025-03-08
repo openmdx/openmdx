@@ -47,6 +47,7 @@ package org.openmdx.base.query;
 import java.util.Comparator;
 
 import org.openmdx.base.naming.Path;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Allows comparison of not directly comparable classes
@@ -87,7 +88,7 @@ public class LenientPathComparator extends LenientDatatypeComparator {
     public static boolean isComparable(
         Object candidate
     ){
-        return candidate instanceof Comparable<?> || candidate instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif;
+        return candidate instanceof Comparable<?> || Datatypes.DATE_CLASS.isInstance(candidate);
     }
        
     

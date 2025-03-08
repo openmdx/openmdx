@@ -266,7 +266,7 @@ public class XMLGregorianCalendarMarshaller {
         Object source, 
         Connection connection
     ) throws ServiceException {
-        if(source instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) {
+        if(Datatypes.DATE_CLASS.isInstance(source)) {
             #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif value = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) source;
             QName schemaType = value.getXMLSchemaType();
             if(DatatypeConstants.TIME.equals(schemaType)) {
@@ -495,14 +495,15 @@ public class XMLGregorianCalendarMarshaller {
                     break;
             }
             return target;
-        } else if (source instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) {
+        } else if (Datatypes.DATE_TIME_CLASS.isInstance(source)) {
             return parse(source.toString());
         } else if (source instanceof BigDecimal) {
             BigDecimal value = (BigDecimal)source;
             long milliseconds = value.movePointRight(3).longValue();
             java.util.GregorianCalendar calendar = new GregorianCalendar(UTC);
             calendar.setTimeInMillis(milliseconds);
-            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif target
+                    = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
             target.setFractionalSecond(
                 value.subtract(BigDecimal.valueOf(milliseconds / 1000))
             );

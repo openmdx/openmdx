@@ -1718,7 +1718,7 @@ class XMLGregorianCalendarImpl
         if (obj == this) {
             return true;
         }
-        if (obj instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) {
+        if (Datatypes.DATE_CLASS.isInstance(obj)) {
             return compare((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) obj) == DatatypeConstants.EQUAL;
         }
         return false;

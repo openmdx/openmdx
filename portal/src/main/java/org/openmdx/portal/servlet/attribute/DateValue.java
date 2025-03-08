@@ -245,11 +245,11 @@ public class DateValue
     ) {
         SimpleDateFormat dateFormatter = this.getLocalizedDateFormatter(useEditStyle);
         SimpleDateFormat dateTimeFormatter = this.getLocalizedDateTimeFormatter(useEditStyle);
-        if(value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) {
+        if(Datatypes.DATE_TIME_CLASS.isInstance(value)) {
             return this.isDate() ? 
             	dateFormatter.format(value) : 
             		dateTimeFormatter.format(value);
-        } else if(value instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) {
+        } else if(Datatypes.DATE_CLASS.isInstance(value)) {
             GregorianCalendar calendar = ((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)value).toGregorianCalendar(
                 TimeZone.getTimeZone(app.getCurrentTimeZone()),
                 this.app.getCurrentLocale(),

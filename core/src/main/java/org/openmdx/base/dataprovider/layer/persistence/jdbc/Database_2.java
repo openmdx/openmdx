@@ -187,6 +187,7 @@ import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Database_2 implements a OO-to-Relational mapping and makes MappedRecords
@@ -2979,7 +2980,7 @@ public class Database_2
     )
         throws ServiceException {
         boolean dateTime = value instanceof java.util.Date
-            || value instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif
+            || Datatypes.DATE_CLASS.isInstance(value)
                 && DatatypeConstants.DATETIME
                     .equals(((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) value).getXMLSchemaType());
         boolean timestampWithTimezone = dateTime

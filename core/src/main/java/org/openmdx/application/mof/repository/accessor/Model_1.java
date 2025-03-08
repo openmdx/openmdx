@@ -427,7 +427,7 @@ public class Model_1 implements Model_1_0 {
                 return;
             }
             else if(
-                (value instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) &&
+                (Datatypes.DATE_TIME_CLASS.isInstance(value)) &&
                 PrimitiveTypes.DATETIME.equals(typeName)
             ) {
                 return;
@@ -444,7 +444,7 @@ public class Model_1 implements Model_1_0 {
                 return;
             }
             else if(
-                (value instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) &&
+                (Datatypes.DATE_CLASS.isInstance(value)) &&
                 PrimitiveTypes.DATE.equals(typeName)
             ) {
                 return;

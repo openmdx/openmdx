@@ -46,6 +46,7 @@
 package org.openmdx.base.dataprovider.layer.persistence.jdbc;
 
 import org.openmdx.base.rest.cci.ObjectRecord;
+import org.w3c.spi2.Datatypes;
 import org.w3c.time.TimeZones;
 
 import javax.xml.datatype.DatatypeConstants;
@@ -108,7 +109,7 @@ class DateTimeValues {
      * original value otherwise
      */
     private static Object normalizeDateTimeValue(Object value) {
-        if (value instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif){
+        if (Datatypes.DATE_CLASS.isInstance(value)){
             final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif datatypeValue = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) value;
             if (DatatypeConstants.DATETIME.equals(datatypeValue.getXMLSchemaType())) {
                 return toDate(datatypeValue);

@@ -59,6 +59,7 @@ import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.state2.cci.DateStateViews;
 import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Date Time Values Test
@@ -94,7 +95,7 @@ public class DateTimeValuesTest {
         // Act
         DateTimeValues.normalizeDateTimeValues(object);
         // Assert
-        Assertions.assertTrue(object.getValue().get("now") instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif);
+        Assertions.assertTrue(Datatypes.DATE_TIME_CLASS.isInstance(object.getValue().get("now")));
     }
 
     @SuppressWarnings("unchecked")
@@ -110,8 +111,8 @@ public class DateTimeValuesTest {
         // Act
         DateTimeValues.normalizeDateTimeValues(object);
         // Assert
-        Assertions.assertTrue(list.get(0) instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif);
-        Assertions.assertTrue(list.get(1) instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif);
+        Assertions.assertTrue(Datatypes.DATE_CLASS.isInstance(list.get(0)));
+        Assertions.assertTrue(Datatypes.DATE_TIME_CLASS.isInstance(list.get(1)));
     }
 
     @SuppressWarnings("unchecked")
@@ -127,8 +128,8 @@ public class DateTimeValuesTest {
         // Act
         DateTimeValues.normalizeDateTimeValues(object);
         // Assert
-        Assertions.assertTrue(map.get(2) instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif);
-        Assertions.assertTrue(map.get(4) instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif);
+        Assertions.assertTrue(Datatypes.DATE_CLASS.isInstance(map.get(2)));
+        Assertions.assertTrue(Datatypes.DATE_TIME_CLASS.isInstance(map.get(4)));
     }
         
 }

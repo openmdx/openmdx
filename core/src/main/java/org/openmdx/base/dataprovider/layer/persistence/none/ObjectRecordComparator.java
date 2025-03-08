@@ -58,6 +58,7 @@ import org.openmdx.base.rest.cci.ObjectRecord;
 import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Object Record Comparator
@@ -105,7 +106,7 @@ class ObjectRecordComparator implements Comparator<ObjectRecord> {
             return right == null ? 0 : -1;
         } else if (right == null) {
             return +1;
-        } else if(left instanceof #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) {
+        } else if(Datatypes.DATE_CLASS.isInstance(left)) {
             if(left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>){
                 ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
                 return datatypeFactory.toDate((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) left).compare(datatypeFactory.toDate((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) right));
