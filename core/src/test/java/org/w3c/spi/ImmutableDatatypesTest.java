@@ -67,8 +67,8 @@ public class ImmutableDatatypesTest {
 
     static XMLGregorianCalendar immutableDate02; // 2000-02-29 
     static XMLGregorianCalendar immutableDate03; // 2000-03-01
-    static Date immutableDateTime02; // 2000-02-29T12:00Z
-    static Date immutableDateTime03; // 2000-03-01T12:00Z
+    static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif immutableDateTime02; // 2000-02-29T12:00Z
+    static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif immutableDateTime03; // 2000-03-01T12:00Z
     static Duration oneDay;
     static Duration oneAndHalfAYear;
     static Duration oneHour;
@@ -182,7 +182,7 @@ public class ImmutableDatatypesTest {
                 mutableDateTime02#if CLASSIC_CHRONO_TYPES .getTime() #else .toEpochMilli() #endif + 1000L * 60 * 60 * 24);
         Assertions.assertEquals(immutableDateTime03,  mutableDateTime03, "mutableDateTime02 += P1D");
         try {
-            immutableDateTime02.setTime(System.currentTimeMillis());
+            immutableDateTime02.#if CLASSIC_CHRONO_TYPES setTime #else ofEpochMilli #endif(System.currentTimeMillis());
             Assertions.fail("immutableDateTime02");
         } catch (UnsupportedOperationException expected) {
         	// Unable to modify an immutable object

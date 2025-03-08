@@ -705,6 +705,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
+    // TODO: dirty-harry the PersistenceManager interface uses java.util.Date ?
     @Override
     public java.util.Date getServerDate() {
         throw new UnsupportedOperationException("Unsupported operation by manager");

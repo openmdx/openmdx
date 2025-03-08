@@ -975,7 +975,8 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     }
 
     @Override
-    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getServerDate() {
+    // TODO: dirty-harry the PersistenceManager interface uses java.util.Date ?
+    public java.util.Date getServerDate() {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 

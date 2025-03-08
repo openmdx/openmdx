@@ -393,7 +393,10 @@ public final class ImmutableDate
             locale == null ? Locale.getDefault() : locale
         );
         result.clear();
-        result.setGregorianChange(PURE_GREGORIAN_CHANGE);
+        // TODO: dirty-harry Not sure if this is acceptable but I don't know another way?
+        result.setGregorianChange(
+                #if CLASSIC_CHRONO_TYPES PURE_GREGORIAN_CHANGE #else java.util.Date.from(PURE_GREGORIAN_CHANGE) #endif
+        );
         result.set(Calendar.ERA, GregorianCalendar.AD);
         result.set(getYear(), getMonth() - 1, getDay());
         return result;

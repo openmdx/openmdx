@@ -95,7 +95,7 @@ public class HardWiredObjects_2 extends AccessControl_2 {
         //
         // hard-wired NameFormat
         //
-        this.nameFormats = new HashMap<String,MappedRecord>();
+        this.nameFormats = new HashMap<>();
         MappedRecord nameFormatStandard = Records.getRecordFactory().createMappedRecord(NAME_FORMAT_TYPE_NAME);
         nameFormatStandard.put("description","default name format");
         nameFormatStandard.put(SystemAttributes.CREATED_AT,timestamp);
@@ -107,7 +107,7 @@ public class HardWiredObjects_2 extends AccessControl_2 {
         //
         // hard-wired AddressFormat
         //
-        this.addressFormats = new HashMap<String,MappedRecord>();
+        this.addressFormats = new HashMap<>();
         MappedRecord addressFormatStandard = Records.getRecordFactory().createMappedRecord(ADDRESS_FORMAT_TYPE_NAME);
         addressFormatStandard.put("description","default address format");
         addressFormatStandard.put(SystemAttributes.CREATED_AT,timestamp);

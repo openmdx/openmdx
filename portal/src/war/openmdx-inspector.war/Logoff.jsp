@@ -116,7 +116,7 @@ request.setCharacterEncoding("UTF-8");
 	if(initialScale == null) {
 		initialScale = request.getSession().getAttribute(org.openmdx.portal.servlet.WebKeys.INITIAL_SCALE_KEY);
 	}
-	System.out.println(new Date() + ": Logoff: invalidate session. locale=" + locale + "; timezone=" + timezone);  
+	System.out.println(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif + ": Logoff: invalidate session. locale=" + locale + "; timezone=" + timezone);
 	session.invalidate();
   	if(wasAuthenticated) {
 		// NO session management beyond this point.

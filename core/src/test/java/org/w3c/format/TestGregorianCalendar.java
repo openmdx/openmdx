@@ -67,7 +67,7 @@ public class TestGregorianCalendar {
                 1, 
                 Calendar.JANUARY, 
                 1
-            ).getTime(); 
+            ).#if CLASSIC_CHRONO_TYPES getTime() #else toInstant() #endif;
             assertEquals(timeZone.getDisplayName(), "00011231T230000.000Z", DateTimeFormat.BASIC_UTC_FORMAT.format(minDate));
         }
         {
@@ -77,7 +77,7 @@ public class TestGregorianCalendar {
                 1, 
                 Calendar.JANUARY, 
                 1
-            ).getTime(); 
+            ).#if CLASSIC_CHRONO_TYPES getTime() #else toInstant() #endif;
             assertEquals(timeZone.getDisplayName(), "00010101T000000.000Z", DateTimeFormat.BASIC_UTC_FORMAT.format(minDate));
         }
         {
@@ -87,7 +87,7 @@ public class TestGregorianCalendar {
                 1, 
                 Calendar.JANUARY, 
                 1
-            ).getTime(); 
+            ).#if CLASSIC_CHRONO_TYPES getTime() #else toInstant() #endif;
             assertEquals(timeZone.getDisplayName(), "00010101T000000.000Z", DateTimeFormat.BASIC_UTC_FORMAT.format(minDate));
         }
     }
