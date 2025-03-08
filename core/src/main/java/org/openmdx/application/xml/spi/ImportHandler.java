@@ -1082,7 +1082,7 @@ public class ImportHandler extends DefaultHandler {
             // 
             for (String utcId : UTC_IDS) {
                 if (v.endsWith(utcId)) {
-                    return Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif.class, v);
+                    return Datatypes.create(Datatypes.DATE_TIME_CLASS, v);
                 }
             }
             //

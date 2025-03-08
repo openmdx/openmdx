@@ -128,7 +128,7 @@ public class JmiHelper {
                 }
             } else if(PrimitiveTypes.DATETIME.equals(this.typeName)) {
                 return source instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif ? source : Datatypes.create(
-                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
+                    Datatypes.DATE_TIME_CLASS,
                     (String)source
                 );
             } else if(PrimitiveTypes.DATE.equals(this.typeName)) {                

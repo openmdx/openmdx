@@ -264,15 +264,16 @@ public class DatatypesTest  {
           55, // minute
           00 // second
         );
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif fiveToTwelve = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(calendar.getTimeInMillis());
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif fiveToTwelve
+                = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(calendar.getTimeInMillis());
         Assertions.assertEquals("19950101T115500.000Z",  DateTimeFormat.BASIC_UTC_FORMAT.format(fiveToTwelve), "Basic Format");
         Assertions.assertEquals("1995-01-01T11:55:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(fiveToTwelve), "Extended Format");
-        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19950101T115500.000Z"), "Basic parser");
-        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "1995-01-01T11:55:00.000Z"), "Extended parser");
-        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19950101T1155-00"), "Basic parser accepting reduced accuracy and alternative UTC identifier");
-        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "1995-01-01T11:55:00,000000Z"), "Extended parser accepting comma and extended accuracy");
-        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "95-01-01T11:55-00"), "Extended parser accepting two digit year");
-        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "950101T1155-00"), "Basic parser accepting two digit year");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Datatypes.DATE_TIME_CLASS, "19950101T115500.000Z"), "Basic parser");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Datatypes.DATE_TIME_CLASS, "1995-01-01T11:55:00.000Z"), "Extended parser");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Datatypes.DATE_TIME_CLASS, "19950101T1155-00"), "Basic parser accepting reduced accuracy and alternative UTC identifier");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Datatypes.DATE_TIME_CLASS, "1995-01-01T11:55:00,000000Z"), "Extended parser accepting comma and extended accuracy");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Datatypes.DATE_TIME_CLASS, "95-01-01T11:55-00"), "Extended parser accepting two digit year");
+        Assertions.assertEquals(fiveToTwelve,  Datatypes.create(Datatypes.DATE_TIME_CLASS, "950101T1155-00"), "Basic parser accepting two digit year");
     }
     
     @Test

@@ -600,7 +600,7 @@ public class RestParser {
                         PrimitiveTypes.DECIMAL.equals(featureType) ? Datatypes.create(BigDecimal.class,text.trim()) : 
                         PrimitiveTypes.BOOLEAN.equals(featureType) ? Datatypes.create(Boolean.class, text.trim()) : 
                         PrimitiveTypes.OBJECT_ID.equals(featureType) ? Datatypes.create(Path.class, text.trim()) :
-                        PrimitiveTypes.DATETIME.equals(featureType) ? Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,text.trim()) :
+                        PrimitiveTypes.DATETIME.equals(featureType) ? Datatypes.create(Datatypes.DATE_TIME_CLASS,text.trim()) :
                         PrimitiveTypes.DATE.equals(featureType) ? Datatypes.create(XMLGregorianCalendar.class, text.trim()) : 
                         PrimitiveTypes.ANYURI.equals(featureType) ? Datatypes.create(URI.class, text.trim()) : 
                         PrimitiveTypes.BINARY.equals(featureType) ? Base64.decode(text.trim()) : 

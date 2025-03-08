@@ -55,7 +55,16 @@ import org.w3c.spi.PrimitiveTypeParsers;
  * Date
  */
 public class Datatypes {
-    
+
+    public static final Class<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> DATE_TIME_CLASS
+            = #if CLASSIC_CHRONO_TYPES java.util.Date.class #else java.time.Instant.class #endif;
+
+    public static final Class<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif> DATE_CLASS
+            = #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar.class #else java.time.LocalDate.class #endif;
+
+    public static final Class<#if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration> DURATION_CLASS
+            = #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration.class #else java.time.Duration.class #endif;
+
     /**
      * Constructor 
      */

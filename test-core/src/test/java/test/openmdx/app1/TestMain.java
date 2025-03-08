@@ -2092,7 +2092,7 @@ public class TestMain {
 						.newXMLGregorianCalendar("1960-01-01");
 				birthDate.setTimezone(-1);
 				person.setBirthdate(birthDate);
-				person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19600101T120000.000Z"));
+				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
 				assertEquals("1960-01-01T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()), "Born at noon");
 				person.setLastName("MusterX");
 				person.setSalutation("Herr");
@@ -2182,7 +2182,7 @@ public class TestMain {
 				person.setForeignId("YF");
 				XMLGregorianCalendar birthDate = Datatypes.create(XMLGregorianCalendar.class, "1960-01-01");
 				person.setBirthdate(birthDate);
-				person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19600101T120000.000Z"));
+				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
 				assertEquals("1960-01-01T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()), "Born at noon");
 				person.setLastName("MusterX");
 				person.setSalutation("Herr");
@@ -3001,7 +3001,7 @@ public class TestMain {
 			// create and remove in same unit of work
 			person = personClass.createPerson();
 			person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
-			person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19600101T120000.000Z"));
+			person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
 			person.setForeignId("YF");
 			person.setLastName("MusterX");
 			person.setSalutation("Herr");
@@ -3028,7 +3028,7 @@ public class TestMain {
 					person = personClass.createPerson();
 					person.setForeignId("F" + i);
 					person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
-					person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19600101T120000.000Z"));
+					person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
 					person.setLastName("Muster" + i);
 					person.setSalutation("Herr");
 					person.setSex((short) 0);
@@ -3047,7 +3047,7 @@ public class TestMain {
 					person = personClass.createPerson();
 					person.setForeignId("F" + SMALL_N_PERSONS);
 					person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
-					person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19600101T120000.000Z"));
+					person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
 					person.setLastName("Muster" + SMALL_N_PERSONS);
 					person.setSalutation("Herr");
 					person.setSex((short) 0);
@@ -3456,7 +3456,7 @@ public class TestMain {
 				person.setLastName("Imhof");
 				person.setForeignId("HI");
 				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "20000401"));
-				person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "20000401T120000.000Z"));
+				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "20000401T120000.000Z"));
 				person.setSalutation("Herr");
 				this.commit();
 				assertEquals(Collections.singletonList("Heiri"),  person.getGivenName(), "givenName");
@@ -3716,7 +3716,7 @@ public class TestMain {
 				person = personClass.createPerson();
 				person.setForeignId("X1");
 				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1961-11-11"));
-				person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19611111T120000.000Z"));
+				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19611111T120000.000Z"));
 				person.setLastName("Muster1");
 				person.setSalutation("Herr");
 				person.setSex((short) 0);
@@ -3740,7 +3740,7 @@ public class TestMain {
 				person = personClass.createPerson();
 				person.setForeignId("X2");
 				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1961-11-11"));
-				person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19611111T120000.000Z"));
+				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19611111T120000.000Z"));
 				person.setLastName("Muster1");
 				person.setSalutation("Herr");
 				person.setSex((short) 0);
@@ -4189,7 +4189,7 @@ public class TestMain {
 					// Validate date-time values
 					//
 					person = (Person) super.entityManager.getObjectById(personId);
-					assertEquals(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "1960-01-01T12:00:00Z"),  person.getBirthdateAsDateTime(), "Birthdate as date/time");
+					assertEquals(Datatypes.create(Datatypes.DATE_TIME_CLASS, "1960-01-01T12:00:00Z"),  person.getBirthdateAsDateTime(), "Birthdate as date/time");
 				} finally {
 					super.taskId = null;
 				}
@@ -4801,7 +4801,7 @@ public class TestMain {
 				Person person = personClass.createPerson();
 				person.setForeignId("F" + i);
 				person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
-				person.setBirthdateAsDateTime(Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "19600101T120000.000Z"));
+				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
 				person.setLastName("Muster" + i);
 				person.setSalutation("Herr");
 				person.setSex((short) 0);

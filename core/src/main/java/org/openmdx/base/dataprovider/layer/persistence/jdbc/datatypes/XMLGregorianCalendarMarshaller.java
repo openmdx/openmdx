@@ -528,7 +528,7 @@ public class XMLGregorianCalendarMarshaller {
         return 
             value.startsWith("P") || value.startsWith("-P") ? Datatypes.create(Duration.class, value) : 
             value.indexOf('T') < 0 ? Datatypes.create(XMLGregorianCalendar.class, value) : 
-            Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, value);
+            Datatypes.create(Datatypes.DATE_TIME_CLASS, value);
     }
        
 }

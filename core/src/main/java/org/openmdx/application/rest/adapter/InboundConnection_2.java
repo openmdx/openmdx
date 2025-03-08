@@ -727,7 +727,7 @@ public class InboundConnection_2 extends AbstractConnection {
                                     (InputStream) jcaValue
                                 ) : jcaValue;
                 } else if (jcaValue instanceof String && PrimitiveTypes.DATETIME.equals(featureType.getQualifiedName())) {
-                    return Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif.class, (String) jcaValue);
+                    return Datatypes.create(Datatypes.DATE_TIME_CLASS, (String) jcaValue);
                 } else if (jcaValue instanceof String && PrimitiveTypes.DATE.equals(featureType.getQualifiedName())) {
                     return Datatypes.create(XMLGregorianCalendar.class, (String) jcaValue);
                 } else if (jcaValue instanceof String && PrimitiveTypes.DURATION.equals(featureType.getQualifiedName())) {

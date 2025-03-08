@@ -120,7 +120,7 @@ public class DateValue
             application
         );
         try {
-            this.defaultValue = Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, fieldDef.defaultValue);
+            this.defaultValue = Datatypes.create(Datatypes.DATE_TIME_CLASS, fieldDef.defaultValue);
         } catch(IllegalArgumentException e) {
         	// ignore
         }

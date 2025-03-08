@@ -438,7 +438,7 @@ public class Model_1 implements Model_1_0 {
                 PrimitiveTypes.DATETIME.equals(typeName)
             ) {
                 try {
-                    Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, (String)value);
+                    Datatypes.create(Datatypes.DATE_TIME_CLASS, (String)value);
                 } catch(IllegalArgumentException e) {
                     throw new ServiceException(e);
                 }
