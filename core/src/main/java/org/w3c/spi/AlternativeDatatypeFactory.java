@@ -90,7 +90,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * @return a corresponding date-time instance
      * 
      * @exception IllegalArgumentException
-     * if the value can't be parse
+     * if the value can't be parsed
      */
     public ImmutableDateTime newDateTime(
         String value
@@ -125,7 +125,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
     /**
      * Create a date instance
      * 
-     * @param value the basic or extended representation
+     * @param rawValue the basic or extended representation
      * 
      * @return a corresponding date-time instance
      * 

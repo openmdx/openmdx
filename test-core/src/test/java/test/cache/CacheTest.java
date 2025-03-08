@@ -70,7 +70,7 @@ public class CacheTest {
         try {
             final CachingProvider cachingProvider = Caching.getCachingProvider();
             final CacheManager cacheManager = cachingProvider.getCacheManager();
-            final Configuration<String, Date> configuration = new Configuration<String, Date>() {
+            final Configuration<String, #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> configuration = new Configuration<>() {
 
                 /**
 				 * Implements {@code Serializable}

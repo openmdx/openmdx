@@ -47,7 +47,6 @@
 package test.openmdx.base.rest;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -64,21 +63,21 @@ public class XImplementation
      * @param date
      */
     protected XImplementation(long date) {
-        this.date = new java.util.Date(date);
+        this.date = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(date);
     }
 
     /**
      * 
      */
-    private final Date date;
+    private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif date;
     
     /* (non-Javadoc)
      */
-    public List<Date> getList() {
+    public List<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> getList() {
         return Collections.singletonList(this.date);
     }
 
-	public <T extends Date> List<T> list() {
+	public <T extends #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif> List<T> list() {
 		return (List<T>) getList();
 	}
 

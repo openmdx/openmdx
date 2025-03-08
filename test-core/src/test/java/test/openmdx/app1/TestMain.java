@@ -65,7 +65,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -321,7 +320,7 @@ public class TestMain {
 		protected Provider provider;
 		protected String taskId;
 		private final Object taskIdentifier;
-		private final Date start = new Date();
+		private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif start = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif;
 		protected PersistenceManagerFactory entityManagerFactory;
 
 		protected String getProviderName() {
@@ -397,7 +396,7 @@ public class TestMain {
 			PersistenceHelper.currentUnitOfWork(this.entityManager).rollback();
 		}
 
-		protected Date getStart() {
+		protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getStart() {
 			return this.start;
 		}
 
@@ -2392,9 +2391,9 @@ public class TestMain {
 					PersistenceManager persistenceManager1 = persistenceManagerFactory.getPersistenceManager();
 					assertEquals(Constants.TX_REPEATABLE_READ,  persistenceManagerFactory.getTransactionIsolationLevel(), "Transaction Isolation Level");
 					{
-						final Date transactionTime1 = new Date(System.currentTimeMillis() - 20L);
-						UserObjects.setTransactionTime(persistenceManager1, new Factory<Date>() {
-                            public Date instantiate() {
+						final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime1 = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(System.currentTimeMillis() - 20L);
+						UserObjects.setTransactionTime(persistenceManager1, new Factory<>() {
+                            public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif instantiate() {
                                 return transactionTime1;
                             }
 
@@ -3635,7 +3634,7 @@ public class TestMain {
 			// test dateOp (date and dateTime in operation parameter)
 			// Test for non-query operation with result
 			this.begin();
-			Date dateTimeNow = new Date();
+			#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTimeNow = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif;
 			XMLGregorianCalendar dateIn = Datatypes.create(XMLGregorianCalendar.class,
 					DateTimeFormat.BASIC_UTC_FORMAT.format(dateTimeNow).substring(0, 8));
 			PersonDateOpParams personDateOpParams;

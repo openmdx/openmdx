@@ -48,7 +48,6 @@ import java.io.Serializable;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -1222,7 +1221,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
         } else if (source instanceof DataObject_1_0) {
             DataObject_1_0 dataObject = (DataObject_1_0) source;
             final boolean filterStates;
-            final Date existsAt;
+            final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt;
             final ViewKind viewKind;
             if (this.getInteractionSpec() instanceof StateContext<?>) {
                 StateContext<?> context = ((StateContext<?>) this.getInteractionSpec());

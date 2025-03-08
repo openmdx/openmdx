@@ -237,7 +237,7 @@ public class Segments {
         String mode
     ) {
         long now = System.currentTimeMillis();
-        Assertions.assertTrue(Math.abs(now - utc.getTime()) < 1000, "Time window < 1 s");
+        Assertions.assertTrue(Math.abs(now - utc.#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli()#endif) < 1000, "Time window < 1 s");
         System.out.println(getNormalSegmentName() + mode + ": " + DateTimeFormat.BASIC_UTC_FORMAT.format(utc));
     }
 

@@ -173,7 +173,7 @@ public class TestOperationArguments {
                     Structures.create(
                         SimpleStructSet.class,
                         new Boolean[]{}, // booleanField
-                        new Date[]{}, // dateTimeField
+                        new java.time.Instant[]{}, // dateTimeField
                         new BigDecimal[]{}, // decimalField
                         new Duration[]{}, // durationField
                         new Integer[]{
@@ -189,7 +189,7 @@ public class TestOperationArguments {
                     Structures.create(
                         SimpleStructSet.class,
                         new Boolean[]{}, // booleanField
-                        new Date[]{}, // dateTimeField
+                        new java.time.Instant[]{}, // dateTimeField
                         new BigDecimal[]{}, // decimalField
                         new Duration[]{}, // durationField
                         new Integer[]{
@@ -261,7 +261,7 @@ public class TestOperationArguments {
                     Structures.create(
                         SimpleStructSet.class,
                         new Boolean[]{}, // booleanField
-                        new Date[]{}, // dateTimeField
+                        new java.time.Instant[]{}, // dateTimeField
                         new BigDecimal[]{}, // decimalField
                         new Duration[]{}, // durationField
                         new Integer[]{
@@ -277,7 +277,7 @@ public class TestOperationArguments {
                     Structures.create(
                         SimpleStructSet.class,
                         new Boolean[]{}, // booleanField
-                        new Date[]{}, // dateTimeField
+                        new java.time.Instant[]{}, // dateTimeField
                         new BigDecimal[]{}, // decimalField
                         new Duration[]{}, // durationField
                         new Integer[]{

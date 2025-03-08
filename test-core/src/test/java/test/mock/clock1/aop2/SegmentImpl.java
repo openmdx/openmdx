@@ -56,7 +56,7 @@ import test.openmdx.clock1.jmi1.Clock1Package;
 /**
  * AOP 2 Segment Plugin-In
  */
-public class SegmentImpl extends AbstractObject<test.openmdx.clock1.jmi1.Segment,test.openmdx.clock1.cci2.Segment,Date> {
+public class SegmentImpl extends AbstractObject<test.openmdx.clock1.jmi1.Segment,test.openmdx.clock1.cci2.Segment,#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif> {
 
     /**
      * Constructor 

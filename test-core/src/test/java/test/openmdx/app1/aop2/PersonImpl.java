@@ -75,7 +75,7 @@ import test.openmdx.app1.jmi1.PersonFormatNameAsResult;
 /**
  * Person
  */
-public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test.openmdx.app1.cci2.Person, C extends Date>  
+public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test.openmdx.app1.cci2.Person, C extends #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif>
     extends AbstractObject<S,N,C> 
     implements StoreCallback, NaturalPerson
 {

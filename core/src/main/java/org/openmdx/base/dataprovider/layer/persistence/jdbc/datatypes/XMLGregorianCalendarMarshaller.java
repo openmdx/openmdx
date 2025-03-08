@@ -421,7 +421,7 @@ public class XMLGregorianCalendarMarshaller {
                     part1 = "";
             }
         }
-        final Date dateTime = new Date(millisecondsSince1970);
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTime = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(millisecondsSince1970);
         final String part2 = withTimeZone ? (" " + getTimeZone(format.getTimeZone(), dateTime)) : ""; 
         final String part0 = format.format(dateTime);
         return part0 + part1 + part2;
@@ -432,7 +432,10 @@ public class XMLGregorianCalendarMarshaller {
 	 * 
 	 * @return the time zone region and including DST information
 	 */
-	private  String getTimeZone(TimeZone standardTimeZone, Date dateTime) {
+	private  String getTimeZone(
+            TimeZone standardTimeZone,
+            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTime
+    ) {
 		return standardTimeZone.inDaylightTime(dateTime) ? this.dateTimeDaylightSavingTimeZone : standardTimeZone.getID();
 	}
 
@@ -495,7 +498,7 @@ public class XMLGregorianCalendarMarshaller {
                     break;
             }
             return target;
-        } else if (source instanceof Date) {
+        } else if (source instanceof #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) {
             return parse(source.toString());
         } else if (source instanceof BigDecimal) {
             BigDecimal value = (BigDecimal)source;
@@ -525,7 +528,7 @@ public class XMLGregorianCalendarMarshaller {
         return 
             value.startsWith("P") || value.startsWith("-P") ? Datatypes.create(Duration.class, value) : 
             value.indexOf('T') < 0 ? Datatypes.create(XMLGregorianCalendar.class, value) : 
-            Datatypes.create(java.util.Date.class, value);
+            Datatypes.create(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, value);
     }
        
 }

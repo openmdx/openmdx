@@ -162,13 +162,13 @@ public class AuditQueries {
      * is {@code null} 
      * @param to later units of works are excluded unless {@code to}
      * is {@code null} 
-     * @param modifiable the objects which are involved in these units of work
+     * @param involvedObjects the objects which are involved in these units of work
      * 
      * @return the units of work any of the given objects is involved in
      */
     public static Collection<UnitOfWork> getUnitOfWorkInvolvingObject(
-        Date from,
-        Date to,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to,
         Modifiable... involvedObjects
     ){
         PersistenceManager persistenceManager = AuditQueries.getPersistenceManager(involvedObjects);
