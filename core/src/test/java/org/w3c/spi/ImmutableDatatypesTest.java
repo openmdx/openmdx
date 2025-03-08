@@ -178,7 +178,8 @@ public class ImmutableDatatypesTest {
         Assertions.assertEquals("2000-02-29T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(mutableDateTime02), "mutableDate02.toExtendedFormat()");
         Assertions.assertEquals("20000229T120000.000Z",  DateTimeFormat.BASIC_UTC_FORMAT.format(immutableDateTime02), "immutableDate02.toBasicFormat()");
         Assertions.assertEquals("20000229T120000.000Z",  DateTimeFormat.BASIC_UTC_FORMAT.format(mutableDateTime02), "mutableDate02.toBasicFormat()");
-        mutableDateTime03 = new Date(mutableDateTime02.getTime() + 1000L * 60 * 60 * 24);
+        mutableDateTime03 = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(
+                mutableDateTime02#if CLASSIC_CHRONO_TYPES .getTime() #else .toEpochMilli() #endif + 1000L * 60 * 60 * 24);
         Assertions.assertEquals(immutableDateTime03,  mutableDateTime03, "mutableDateTime02 += P1D");
         try {
             immutableDateTime02.setTime(System.currentTimeMillis());

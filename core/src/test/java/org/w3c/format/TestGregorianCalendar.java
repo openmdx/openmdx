@@ -45,7 +45,6 @@
 package org.w3c.format;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
@@ -63,7 +62,7 @@ public class TestGregorianCalendar {
         System.out.println("Calendar Time Zone: " + new GregorianCalendar().getTimeZone().getID());
         {
             TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin"); 
-            Date minDate = newGregorianCalendar(
+            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif minDate = newGregorianCalendar(
                 timeZone,
                 1, 
                 Calendar.JANUARY, 
@@ -73,7 +72,7 @@ public class TestGregorianCalendar {
         }
         {
             TimeZone timeZone = UTC; 
-            Date minDate = newGregorianCalendar(
+            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif minDate = newGregorianCalendar(
                 timeZone,
                 1, 
                 Calendar.JANUARY, 
@@ -83,7 +82,7 @@ public class TestGregorianCalendar {
         }
         {
             TimeZone timeZone = TimeZone.getTimeZone("GMT"); 
-            Date minDate = newGregorianCalendar(
+            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif minDate = newGregorianCalendar(
                 timeZone,
                 1, 
                 Calendar.JANUARY, 

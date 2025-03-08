@@ -52,7 +52,6 @@ import java.net.URLDecoder;
 import java.security.PrivilegedExceptionAction;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -1981,7 +1980,7 @@ public class RefRootPackage_1
          * @see javax.jdo.PersistenceManager#getServerDate()
          */
         @Override
-        public Date getServerDate() {
+        public java.util.Date getServerDate() {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");
         }
 
@@ -2071,7 +2070,7 @@ public class RefRootPackage_1
                     } else if (ModelHelper.isDerived(attributeDef)){
                         Object value = 
                             PrimitiveTypes.DATE.equals(typeName) ? org.w3c.jpa3.Date.toJDO((XMLGregorianCalendar) source) :
-                            PrimitiveTypes.DATETIME.equals(typeName) ? DateTime.toJDO((Date) source) :
+                            PrimitiveTypes.DATETIME.equals(typeName) ? DateTime.toJDO((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) source) :
                             source;
                         try {
                             jpaClass.getField(jpaFeature).set(jpaObject, value);

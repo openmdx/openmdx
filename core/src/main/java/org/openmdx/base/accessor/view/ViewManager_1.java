@@ -706,7 +706,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
     }
 
     @Override
-    public Date getServerDate() {
+    public java.util.Date getServerDate() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
