@@ -45,6 +45,8 @@
 package org.openmdx.base.resource.spi;
 
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -132,7 +134,10 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     /**
      * The interaction time
      */
-    private final java.util.Date interactionTime = new ImmutableDateTime(System.currentTimeMillis());
+    private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.LocalDate #endif interactionTime =
+            #if CLASSIC_CHRONO_TYPES new ImmutableDateTime(System.currentTimeMillis())
+            #else LocalDate.parse(Long.toString(System.currentTimeMillis()), DateTimeFormatter.ISO_LOCAL_DATE)
+            #endif;
 
     protected final boolean hasDelegate(){
     	return this.delegate != null;
