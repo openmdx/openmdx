@@ -48,7 +48,6 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.text.ParseException;
 
 import org.openmdx.base.aop2.AbstractObject;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 import test.openmdx.clock1.jmi1.Clock1Package;
 

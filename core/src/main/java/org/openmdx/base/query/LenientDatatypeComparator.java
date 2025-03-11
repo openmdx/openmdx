@@ -51,7 +51,7 @@ import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Durati
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.exception.BasicException;
-#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDate;#endif
+#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
 
@@ -107,7 +107,7 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
             return toComparatorReply(
                 first,
                 second,
-                left.compare(right)
+                left.#if CLASSIC_CHRONO_TYPES compare #else compareTo#endif(right)
             );
         }
         if (Datatypes.DATE_CLASS.isInstance(first)) {
@@ -118,8 +118,14 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
                     left = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) first;
                     right = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) second;
                 } else {
-                    left = first instanceof ImmutableDate ? ((ImmutableDate)first).clone() : (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)first;
-                    right = second instanceof ImmutableDate ? ((ImmutableDate)second).clone() : (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)second;
+
+                    left = first instanceof #if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif
+                            ? ((#if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif)first).clone()
+                            : (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)first;
+
+                    right = second instanceof #if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif
+                            ? ((#if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif)second).clone()
+                            : (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)second;
                 }
             } else if (second instanceof CharSequence){
                 left = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) first;
@@ -155,16 +161,16 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
             } else throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                "The second argument can't be compared to the the first date-time argument", 
+                "The second argument can't be compared to the the first date-time argument",
                 new BasicException.Parameter(
                     "values",
                     first,
-                    second    
+                    second
                 ),
                 new BasicException.Parameter(
                     "class",
                     first.getClass().getName(),
-                    second == null ? "<null>" : second.getClass().getName()   
+                    second == null ? "<null>" : second.getClass().getName()
                 )
             );
             //
@@ -185,8 +191,8 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
     /**
      * Convert result to either a comparator return value or an exception
      * 
-     * @param the first value to be compared
-     * @param the second value to be compared
+     * @param first the first value to be compared
+     * @param second the second value to be compared
      * @param datatypeResult the data type comparison result value
      * 
      * @return the comparator return value

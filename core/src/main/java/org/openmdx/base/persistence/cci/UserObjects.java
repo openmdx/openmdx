@@ -109,7 +109,7 @@ public class UserObjects extends SharedObjects {
      */
     public static void setTransactionTime(
         PersistenceManager persistenceManager,
-        Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif> transactionTime
+        Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> transactionTime
     ){
         SharedObjects.sharedObjects(persistenceManager).setTransactionTime(transactionTime);
     }

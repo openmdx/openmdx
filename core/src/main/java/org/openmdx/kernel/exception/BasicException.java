@@ -193,7 +193,7 @@ public final class BasicException extends Exception {
         String exceptionDomain,
         int exceptionCode,
         String exceptionClass,
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif exceptionTime,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif exceptionTime,
         String exceptionMethod,
         Integer exceptionLine,
         String description,
@@ -789,7 +789,7 @@ public final class BasicException extends Exception {
      *
      * @return the timestamp
      */
-    public #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif getTimestamp(
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getTimestamp(
     ){
         return this.timestamp == Long.MIN_VALUE ? null : #if CLASSIC_CHRONO_TYPES new java.util.Date #else Instant.ofEpochMilli#endif(this.timestamp);
     }
@@ -867,7 +867,7 @@ public final class BasicException extends Exception {
             out.append("\tDescription = ").append(description);
             out.println(); 
         }       
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif thrownAt = this.getTimestamp();
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif thrownAt = this.getTimestamp();
         if(thrownAt != null) synchronized(BasicException.dateFormat) {
             out.append("\tTimestamp = ").append(BasicException.dateFormat.format(thrownAt));
             out.println();

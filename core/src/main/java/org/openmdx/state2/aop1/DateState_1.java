@@ -65,7 +65,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import javax.jdo.JDOUserException;
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.view.Interceptor_1;
@@ -81,7 +80,10 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.ViewKind;
 import org.openmdx.state2.spi.Order;
+
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
+#endif
 
 /**
  * Date State Plug-In

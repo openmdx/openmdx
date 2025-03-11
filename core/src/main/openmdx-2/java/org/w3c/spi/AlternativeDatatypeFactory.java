@@ -47,15 +47,22 @@ package org.w3c.spi;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
+#if CLASSIC_CHRONO_TYPES
+import javax.xml.datatype.XMLGregorianCalendar;
+import org.w3c.format.DateTimeFormat;
+import org.w3c.cci2.ImmutableDate;
+import org.w3c.cci2.ImmutableDateTime;
+import org.w3c.spi.ImmutableDatatypeFactory;
+#endif
 
 import org.openmdx.kernel.exception.BasicException;
-#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDate;#endif
-#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDateTime;#endif
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Alternative Datatype Factory
@@ -90,9 +97,9 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * @return a corresponding date-time instance
      *
      * @exception IllegalArgumentException
-     * if the value can't be parse
+     * if the value can't be parsed
      */
-    public ImmutableDateTime newDateTime(
+    public #if CLASSIC_CHRONO_TYPES ImmutableDateTime #else java.time.LocalDate#endif newDateTime(
             String value
     ){
         if(value == null) {
@@ -106,7 +113,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
                     dateTimeFormat = DateTimeFormat.EXTENDED_UTC_FORMAT;
                 }
             }
-            return toDateTime(dateTimeFormat.parse(value));
+            return toDateTime(DateTimeFormat.parse(value));
         } catch (ParseException exception) {
             throw BasicException.initHolder(
                     new IllegalArgumentException(
@@ -125,14 +132,14 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
     /**
      * Create a date instance
      *
-     * @param value the basic or extended representation
+     * @param rawValue the basic or extended representation
      *
      * @return a corresponding date-time instance
      *
      * @exception IllegalArgumentException
      * if the value can't be parsed
      */
-    public ImmutableDate newDate(
+    public #if CLASSIC_CHRONO_TYPES ImmutableDate #else java.time.LocalDate#endif newDate(
             String rawValue
     ){
         if(rawValue == null) {
@@ -162,7 +169,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
                     )
             );
         }
-        return new ImmutableDate(value);
+        return #if CLASSIC_CHRONO_TYPES new org.w3c.cci2.ImmutableDate(value) #else LocalDate.parse(value, DateTimeFormatter.BASIC_ISO_DATE) #endif;
     }
 
     /**
@@ -200,8 +207,8 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value is not an org::w3c::dateTime instance
      */
-    public ImmutableDateTime toDateTime(
-            java.util.Date value
+    public #if CLASSIC_CHRONO_TYPES ImmutableDateTime #else java.time.Instant#endif toDateTime(
+            Date value
     ){
         return
                 value == null ? null :
@@ -219,8 +226,8 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value is not an org::w3c::date instance
      */
-    public ImmutableDate toDate(
-            javax.xml.datatype.XMLGregorianCalendar value
+    public #if CLASSIC_CHRONO_TYPES ImmutableDate #else java.time.Instant#endif toDate(
+            XMLGregorianCalendar value
     ){
         return
                 value == null ? null :

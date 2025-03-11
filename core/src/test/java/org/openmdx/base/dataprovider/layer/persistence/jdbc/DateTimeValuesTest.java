@@ -58,7 +58,7 @@ import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.state2.cci.DateStateViews;
-import org.w3c.spi.DatatypeFactories;
+#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
 /**

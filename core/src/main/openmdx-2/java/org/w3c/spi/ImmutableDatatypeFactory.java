@@ -66,7 +66,7 @@ public interface ImmutableDatatypeFactory {
      * @return a corresponding date-time instance
      *
      * @exception IllegalArgumentException
-     * if the value can't be parse
+     * if the value can't be parsed
      */
     Date newDateTime(
             String value
@@ -80,7 +80,7 @@ public interface ImmutableDatatypeFactory {
      * @return a corresponding date-time instance
      *
      * @exception IllegalArgumentException
-     * if the value can't be parse
+     * if the value can't be parsed
      */
     XMLGregorianCalendar newDate(
             String value
@@ -94,7 +94,7 @@ public interface ImmutableDatatypeFactory {
      * @return a corresponding date-time instance
      *
      * @exception IllegalArgumentException
-     * if the value can't be parse
+     * if the value can't be parsed
      */
     Duration newDuration(
             String value

@@ -58,14 +58,17 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.datatype.DatatypeConstants;
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 import javax.xml.namespace.QName;
 
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.DataTypes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi.ImmutableDatatypeFactory;
+#endif
+
 import org.w3c.spi2.Datatypes;
 
 /**

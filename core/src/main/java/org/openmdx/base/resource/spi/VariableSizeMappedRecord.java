@@ -60,7 +60,10 @@ import org.openmdx.kernel.collection.InternalizedKeyMap;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
-#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDatatype;#endif
+#if CLASSIC_CHRONO_TYPES
+import org.w3c.cci2.ImmutableDatatype;
+import org.w3c.spi.ImmutableDatatypeFactory;
+#endif
 
 /**
  * Java Connector Architecture:

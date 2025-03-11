@@ -245,7 +245,7 @@ public class Filter extends QueryFilterRecord {
                                     );
                                 } else if (QUERY_EXTENSION_DATETIME_PARAM.equals(piggyBackFeature)) {
                                     extension.setDateTimeParam(
-                                        Filter.getValues(#if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif.class, condition)
+                                        Filter.getValues(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, condition)
                                     );
                                 } else if (QUERY_EXTENSION_DECIMAL_PARAM.equals(piggyBackFeature)) {
                                     extension.setDecimalParam(

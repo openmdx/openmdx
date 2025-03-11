@@ -49,7 +49,6 @@ import java.util.Date;
 
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
-
 /**
  * Unmodifiable Date-Time
  */
@@ -197,7 +196,7 @@ public final class ImmutableDateTime
      */
     public String toBasicFormat() {
         if(this.basicValue == null){
-            this.basicValue = DateTimeFormat.BASIC_UTC_FORMAT.format(this);
+            #if CLASSIC_CHRONO_TYPES this.basicValue = DateTimeFormat.BASIC_UTC_FORMAT.format(this);#endif
         }
         return this.basicValue;
     }
@@ -207,7 +206,7 @@ public final class ImmutableDateTime
      */
     public String toXMLFormat() {
         if(this.extendedValue == null) {
-            this.extendedValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(this);
+            #if CLASSIC_CHRONO_TYPES this.extendedValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(this);#endif
         }
         return this.extendedValue;
     }

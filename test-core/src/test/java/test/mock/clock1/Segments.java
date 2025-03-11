@@ -59,7 +59,6 @@ import org.junit.jupiter.api.Assertions;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.rest.cci.VoidRecord;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 import test.openmdx.clock1.jmi1.Clock1Package;
 import test.openmdx.clock1.jmi1.Segment;

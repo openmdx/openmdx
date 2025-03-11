@@ -184,9 +184,8 @@ import org.w3c.cci2.Container;
 import org.w3c.cci2.RegularExpressionFlag;
 import org.w3c.cci2.SparseArray;
 import org.w3c.cci2.StringTypePredicate;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
-import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.StateAccessor;
+#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
 import test.openmdx.app1.aop2.NaturalPerson;

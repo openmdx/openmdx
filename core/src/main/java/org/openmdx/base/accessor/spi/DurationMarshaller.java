@@ -48,7 +48,9 @@ import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Durati
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
+#endif
 
 /**
  * Duration Marshaller

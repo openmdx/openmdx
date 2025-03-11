@@ -48,7 +48,6 @@ import java.text.ParseException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Test Removable

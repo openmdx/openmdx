@@ -99,7 +99,7 @@ public class HttpCookie implements Comparable<HttpCookie> {
                this.discard = true;
             } else if ("expires".equals(key)) {
                try {
-                  this.expiresAt = netscapeDateFormat.parse(argument)#if CLASSIC_CHRONO_TYPES .getTime() #else .toEpochMilli()#endif;
+                  this.expiresAt = netscapeDateFormat.parse(argument).#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli()#endif;
                } catch (ParseException exception) {
                   throw new IllegalArgumentException("Invalid 'expires' value: " + argument, exception);
                }

@@ -56,24 +56,21 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDatatype;#endif
-import org.w3c.cci2.ImmutableDatatype;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Immutable Datatypes Test
  */
 public class ImmutableDatatypesTest {
 
-    static XMLGregorianCalendar immutableDate02; // 2000-02-29
-    static XMLGregorianCalendar immutableDate03; // 2000-03-01
+    static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif immutableDate02; // 2000-02-29
+    static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif immutableDate03; // 2000-03-01
     static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif immutableDateTime02; // 2000-02-29T12:00Z
     static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif immutableDateTime03; // 2000-03-01T12:00Z
     static Duration oneDay;
     static Duration oneAndHalfAYear;
     static Duration oneHour;
-    XMLGregorianCalendar mutableDate02;
-    XMLGregorianCalendar mutableDate03;
+    #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif mutableDate02;
+    #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif mutableDate03;
     #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mutableDateTime02;
     #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mutableDateTime03;
 
@@ -129,7 +126,7 @@ public class ImmutableDatatypesTest {
         Assertions.assertEquals(+1,  ((Comparable<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif>)immutableDate03).compareTo(immutableDate02), "immutableDate03.compareTo(immutableDate02)");
         Assertions.assertEquals("2000-02-29",  mutableDate02.toXMLFormat(), "mutableDate02.toXMLFormat()");
         Assertions.assertEquals("2000-02-29",  immutableDate02.toXMLFormat(), "immutableDate02.toXMLFormat()");
-        Assertions.assertEquals("20000229",  ((ImmutableDatatype<?>)immutableDate02).toBasicFormat(), "immutableDate02.toBasicFormat()");
+        Assertions.assertEquals("20000229",  ((<?>)immutableDate02).toBasicFormat(), "immutableDate02.toBasicFormat()");
         mutableDate02.add(oneDay);
         Assertions.assertEquals(mutableDate02,  mutableDate03, "mutableDate02 += P1D");
         try {

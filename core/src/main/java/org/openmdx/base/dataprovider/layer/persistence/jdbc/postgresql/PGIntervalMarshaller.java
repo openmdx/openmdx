@@ -56,7 +56,10 @@ import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Durati
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
+
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
+#endif
 
 /**
  * PostgreSQL Interval Marshaller

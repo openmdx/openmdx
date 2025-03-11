@@ -44,11 +44,8 @@
  */
 package org.openmdx.base.accessor.spi;
 
-
-
 import org.openmdx.base.marshalling.Marshaller;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
-
 
 /**
  * Date/Time Marshaller

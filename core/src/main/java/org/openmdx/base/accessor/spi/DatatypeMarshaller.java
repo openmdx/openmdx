@@ -2,7 +2,10 @@ package org.openmdx.base.accessor.spi;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
-#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDatatype;#endif
+#if CLASSIC_CHRONO_TYPES
+import org.w3c.cci2.ImmutableDatatype;
+import org.w3c.spi.ImmutableDatatypeFactory;
+#endif
 import org.w3c.spi2.Datatypes;
 
 /**

@@ -73,7 +73,6 @@ import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.kernel.exception.BasicException;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Hard-wired Objects Layer

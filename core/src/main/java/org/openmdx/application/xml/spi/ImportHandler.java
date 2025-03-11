@@ -85,6 +85,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -1070,7 +1071,7 @@ public class ImportHandler extends DefaultHandler {
      * 
      * @throws ServiceException
      */
-    private #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif parseDateTime(
+    private #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif parseDateTime(
         String source
     )
         throws ServiceException {

@@ -46,6 +46,7 @@
 package org.openmdx.base.dataprovider.layer.persistence.jdbc;
 
 import org.openmdx.base.rest.cci.ObjectRecord;
+#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 import org.w3c.time.TimeZones;
 

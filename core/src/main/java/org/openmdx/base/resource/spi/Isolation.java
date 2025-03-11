@@ -44,14 +44,15 @@
  */
 package org.openmdx.base.resource.spi;
 
-
-
 import #if JAVA_8 javax.resource.cci.Record #else jakarta.resource.cci.Record #endif;
 
 import org.openmdx.base.resource.cci.Freezable;
 import org.openmdx.kernel.exception.BasicException;
-#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDatatype;#endif
+#if CLASSIC_CHRONO_TYPES
+import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi.ImmutableDatatypeFactory;
+#endif
 import org.w3c.spi2.Datatypes;
 
 /**

@@ -71,6 +71,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
+#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
 /**

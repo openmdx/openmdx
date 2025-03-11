@@ -46,17 +46,17 @@ package org.openmdx.state2.spi;
 
 import org.openmdx.state2.cci.DateTimeStateContext;
 import org.openmdx.state2.cci.ViewKind;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
+#if CLASSIC_CHRONO_TYPES
+import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.DatatypeFactories;
-#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
-
-import java.time.Instant;
+import org.w3c.spi.ImmutableDatatypeFactory;
+#endif
 
 /**
  * Date State View Context
  */
 public class DateTimeStateViewContext 
-    extends StateViewContext<#if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif>
+    extends StateViewContext<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif>
     implements DateTimeStateContext 
 {
 
@@ -72,10 +72,10 @@ public class DateTimeStateViewContext
     private DateTimeStateViewContext(
         ImmutableDatatypeFactory datatypeFactory,
         ViewKind viewKind,
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validFor,
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validAt,
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validFrom,
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif invalidFrom
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFor,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFrom,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif invalidFrom
     ) {
         super(
             viewKind,
@@ -99,8 +99,8 @@ public class DateTimeStateViewContext
      * @param validAt the view's transaction time point
      */
     public static DateTimeStateViewContext newTimePointViewContext(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validFor,
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validAt
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFor,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ){
         return new DateTimeStateViewContext(
             DatatypeFactories.immutableDatatypeFactory(),
@@ -119,8 +119,8 @@ public class DateTimeStateViewContext
      * @param validTo the end of the time range, or {@code null} for an unconstrained upper bound
      */
     public static DateTimeStateViewContext newTimeRangeViewContext(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validFrom,
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif validTo
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFrom,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validTo
     ){
         return new DateTimeStateViewContext(
             DatatypeFactories.immutableDatatypeFactory(),
@@ -142,7 +142,7 @@ public class DateTimeStateViewContext
      *
      * @return the time range view's upper bound.
      */
-    public final #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif getInvalidFrom(
+    public final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getInvalidFrom(
     ) {
         return super.getUpperBound();
     }
@@ -157,7 +157,7 @@ public class DateTimeStateViewContext
      */
     @Override
     protected String toString(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif timePoint
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif timePoint
     ) {
         return DateTimeFormat.BASIC_UTC_FORMAT.format(timePoint);
     }
@@ -166,8 +166,8 @@ public class DateTimeStateViewContext
      * @see org.openmdx.state2.spi.StateViewContext#now()
      */
     @Override
-    protected #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif newValidAt() {
-        return #if CLASSIC_CHRONO_TYPES new java.util.Date() #else Instant.now() #endif;
+    protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newValidAt() {
+        return #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif;
     }
 
 }

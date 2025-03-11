@@ -94,9 +94,7 @@ import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.state2.spi.Order;
-#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDatatype;#endif
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
-import org.w3c.spi.DatatypeFactories;
+#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -216,13 +214,13 @@ public class DatatypesTest  {
     @Test
     public void testCR20019941() throws IOException, ClassNotFoundException{
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif original = Datatypes.create(Datatypes.DATE_CLASS, "20000401");
-        Assertions.assertTrue(original instanceof ImmutableDatatype<?>, "Date is immutable");
+        Assertions.assertTrue(original instanceof <?>, "Date is immutable");
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif copy = copy(original);
         Assertions.assertNotSame(original.getClass(), copy.getClass(), "Immutable date gets mutable");
-        Assertions.assertFalse(copy instanceof ImmutableDatatype<?>, "A Date's copy is mutable");
+        Assertions.assertFalse(copy instanceof <?>, "A Date's copy is mutable");
         Assertions.assertEquals("2000-04-01", copy.toXMLFormat());
         original = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) original.clone();
-        Assertions.assertFalse(original instanceof ImmutableDatatype<?>, "A Date's clone is mutable");
+        Assertions.assertFalse(original instanceof <?>, "A Date's clone is mutable");
         copy = copy(original);
         Assertions.assertEquals("2000-04-01", copy.toXMLFormat());
         Assertions.assertSame(original.getClass(),  copy.getClass(), "Mutable date remains the mutable");
@@ -322,8 +320,8 @@ public class DatatypesTest  {
     public void testCR10009964() throws Exception{
         storeBulk(
             "Persistent", 
-            "Bulk", 
-            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-08T20:00:09.000Z"), 
+            "Bulk",
+                DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-08T20:00:09.000Z"),
             60000L, // 60 s
             DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-09T23:59:59.999Z"),
             Datatypes.create(Datatypes.DATE_CLASS, "2012-09-08"), // Tue Sep 08 2009
@@ -332,8 +330,8 @@ public class DatatypesTest  {
         );
         validateBulk(
             "Persistent", 
-            "Bulk", 
-            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-08T22:00:00.000Z"), // Wed Sep 09 00:00:00 CEST 2009 
+            "Bulk",
+            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-08T22:00:00.000Z"), // Wed Sep 09 00:00:00 CEST 2009
             DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-09T21:59:59.000Z"), // Wed Sep 09 23:59:59 CEST 2009
             Datatypes.create(Datatypes.DATE_CLASS, "2012-09-09"), // Wed Sep 09 2009
             Datatypes.create(Datatypes.DATE_CLASS, "2012-09-09"), // Wed Sep 09 2009

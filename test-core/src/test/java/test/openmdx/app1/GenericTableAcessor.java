@@ -55,7 +55,6 @@ import javax.sql.DataSource;
 
 import org.openmdx.kernel.collection.TreeSparseArray;
 import org.w3c.cci2.SparseArray;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Generic Table Accessor

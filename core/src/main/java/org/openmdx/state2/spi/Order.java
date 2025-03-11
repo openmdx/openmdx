@@ -51,8 +51,11 @@ import javax.xml.datatype.DatatypeConstants;
 import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.kernel.exception.BasicException;
-#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDatatype;#endif
+#if CLASSIC_CHRONO_TYPES
+import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi.ImmutableDatatypeFactory;
+#endif
 
 /**
  * Valid Times

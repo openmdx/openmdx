@@ -47,6 +47,7 @@ package org.openmdx.base.query;
 import java.util.Comparator;
 
 import org.openmdx.base.naming.Path;
+#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
 /**

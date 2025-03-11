@@ -62,7 +62,6 @@ import org.openmdx.base.query.IsGreaterCondition;
 import org.openmdx.base.query.IsGreaterOrEqualCondition;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.state2.spi.TechnicalAttributes;
-import org.w3c.spi.DatatypeFactories;
 
 /**
  * Test XMLGregorianCalendar's JavaBean XMLEncoding

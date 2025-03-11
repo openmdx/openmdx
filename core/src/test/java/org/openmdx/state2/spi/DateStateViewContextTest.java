@@ -49,7 +49,6 @@ import javax.xml.datatype.DatatypeConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openmdx.state2.cci.DateStateContext;
-import org.w3c.spi.DatatypeFactories;
 
 /**
  * Date State Context Test

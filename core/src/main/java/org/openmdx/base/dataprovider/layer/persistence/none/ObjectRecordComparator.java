@@ -53,9 +53,11 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.rest.cci.FeatureOrderRecord;
 import org.openmdx.base.rest.cci.ObjectRecord;
-#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDatatype;#endif
-#if CLASSIC_CHRONO_TYPES import org.w3c.spi.DatatypeFactories;#endif
-#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
+#if CLASSIC_CHRONO_TYPES
+import org.w3c.cci2.ImmutableDatatype;
+import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi.ImmutableDatatypeFactory;
+#endif
 import org.w3c.spi2.Datatypes;
 
 /**

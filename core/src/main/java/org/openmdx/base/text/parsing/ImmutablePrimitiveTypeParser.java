@@ -52,7 +52,9 @@ import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Durati
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.text.parsing.AbstractParser;
 import org.openmdx.kernel.text.spi.Parser;
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
+#endif
 
 /**
  * Immutable Primitive Type Parser

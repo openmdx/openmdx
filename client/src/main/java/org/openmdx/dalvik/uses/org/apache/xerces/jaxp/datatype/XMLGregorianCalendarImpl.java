@@ -31,6 +31,7 @@ import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Durati
 import javax.xml.namespace.QName;
 
 import org.openmdx.dalvik.uses.org.apache.xerces.util.DatatypeMessageFormatter;
+#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 import org.w3c.time.TimeZones;
 

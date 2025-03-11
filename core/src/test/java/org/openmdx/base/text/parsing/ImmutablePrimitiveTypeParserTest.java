@@ -54,7 +54,6 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.text.spi.Parser;
-import org.w3c.spi.DatatypeFactories;
 
 /**
  * Immutable Primitive Type Parser Test
