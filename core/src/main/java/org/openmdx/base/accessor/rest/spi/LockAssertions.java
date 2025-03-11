@@ -49,7 +49,7 @@ import java.text.ParseException;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Lock Assertions

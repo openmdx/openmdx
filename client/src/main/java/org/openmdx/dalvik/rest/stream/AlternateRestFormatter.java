@@ -93,7 +93,7 @@ import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.spi2.Datatypes;
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Standard REST Formatter

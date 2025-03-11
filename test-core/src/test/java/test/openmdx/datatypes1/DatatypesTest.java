@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import javax.jdo.FetchGroup;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
@@ -95,8 +94,8 @@ import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.state2.spi.Order;
-import org.w3c.cci2.ImmutableDatatype;
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDatatype;#endif
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 import org.xml.sax.InputSource;

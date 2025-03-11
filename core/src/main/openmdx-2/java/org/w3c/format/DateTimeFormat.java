@@ -6,23 +6,23 @@
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,9 +36,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
@@ -63,21 +63,21 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
      * Creates a DateFormat object for the specified pattern.
      */
     protected DateTimeFormat(
-    	String pattern,
-    	String timeZone,
-    	boolean lenient
+            String pattern,
+            String timeZone,
+            boolean lenient
     ){
-    	this.pattern = pattern;
+        this.pattern = pattern;
         this.rejectE = isPatternWithoutText(pattern);
         this.timeZone = timeZone == null ? null : TimeZone.getTimeZone(timeZone);
         this.lenient = lenient;
     }
- 
+
     /**
      * The pattern for this instance
      */
     final private String pattern;
-    
+
     /**
      * JAXP Issue 12 handling
      */
@@ -87,7 +87,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
      * The time zone to be used
      */
     final private TimeZone timeZone;
-    
+
     /**
      * Distinguish between lenient and strict parsers
      */
@@ -106,23 +106,23 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
     /**
      * Associates patterns with thread maps
      */
-    final static private ConcurrentMap<String, DateTimeFormat> patternMap = 
-        new ConcurrentHashMap<String, DateTimeFormat>();
-    
+    final static private ConcurrentMap<String, DateTimeFormat> patternMap =
+            new ConcurrentHashMap<String, DateTimeFormat>();
+
     /**
      * ISO 8601:2004 compliant extended format
      */
     protected final static String EXTENDED_UTC_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-        
+
     /**
      * ISO 8601:2004 compliant extended format
      */
     public final static DateTimeFormat EXTENDED_UTC_FORMAT = new Lenient(
-        EXTENDED_UTC_PATTERN,
-        "0000-01-01T00:00:00.000Z",
-        "Z", "+00:00", "-00:00", "+00", "-00"
+            EXTENDED_UTC_PATTERN,
+            "0000-01-01T00:00:00.000Z",
+            "Z", "+00:00", "-00:00", "+00", "-00"
     );
-    
+
     /**
      * ISO 8601:2004 compliant basic pattern
      */
@@ -132,87 +132,87 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
      * ISO 8601:2004 compliant basic format
      */
     public final static DateTimeFormat BASIC_UTC_FORMAT = new Lenient(
-        BASIC_UTC_PATTERN,
-        "00000101T000000.000Z",
-        "Z", "+0000", "-0000", "+00", "-00"
+            BASIC_UTC_PATTERN,
+            "00000101T000000.000Z",
+            "Z", "+0000", "-0000", "+00", "-00"
     );
 
     /**
      * (Not very smart) test do decide whether exponents can be detected and rejected.
-     * 
+     *
      * @param pattern the pattern
-     * 
+     *
      * @return {@code true} if exponents shall be detected and rejected
      */
     static final boolean isPatternWithoutText(
-        String pattern
+            String pattern
     ){
         for(
-           int i = 0;
-           i < pattern.length();
-           i++
+                int i = 0;
+                i < pattern.length();
+                i++
         ){
             char c = pattern.charAt(i);
             if(Character.isLetter(c) && BASIC_UTC_PATTERN.indexOf(c) < 0) {
                 return false;
             }
         }
-        return true;   
+        return true;
     }
-    
+
     /**
      * Returns a DateFormat object for the  given pattern.
-     * 
+     *
      * @param pattern
-     * 
+     *
      * @return a DateFormat object for the  given pattern
      */
     public static DateTimeFormat getInstance(
-        String pattern
+            String pattern
     ){
         return getInstance(pattern,"UTC",false);
     }
 
     /**
      * Returns a DateFormat object for the  given arguments
-     * 
+     *
      * @param pattern the pattern to be used
      * @param timeZone the time zone id, or {@code null} for local time zone
      * @param lenient tells whether parsing is lenient or strict
-     * 
+     *
      * @return the requested {@code DateTimeFormat}
      */
     public static DateTimeFormat getInstance(
-        String pattern,
-        String timeZone,
-        boolean lenient
+            String pattern,
+            String timeZone,
+            boolean lenient
     ){
         String id = pattern + '*' + (timeZone == null ? "LOCAL" : timeZone) + '*' + (lenient ? "LENIENT" : "STRICT");
         DateTimeFormat instance = patternMap.get(id);
         if(instance == null) {
             DateTimeFormat concurrent = patternMap.putIfAbsent(
-                id,
-                instance = new DateTimeFormat(pattern, timeZone, lenient)
+                    id,
+                    instance = new DateTimeFormat(pattern, timeZone, lenient)
             );
             return concurrent == null ? instance : concurrent;
         } else {
             return instance;
         }
     }
-    
-    
+
+
     /* (non-Javadoc)
      * @see java.lang.ThreadLocal#initialValue()
      */
     @Override
     protected SimpleDateFormat initialValue() {
-    	SimpleDateFormat formatter = new SimpleDateFormat(pattern);
-    	formatter.setLenient(this.lenient);
-    	if(this.timeZone != null) {
-        	formatter.setTimeZone(this.timeZone);
-    	}
-    	return formatter;
-    }	
+        SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+        formatter.setLenient(this.lenient);
+        if(this.timeZone != null) {
+            formatter.setTimeZone(this.timeZone);
+        }
+        return formatter;
+    }
 
     /**
      * Formats a Date into a date/time string.	
@@ -220,13 +220,13 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
      * @param	date	the time value to be formatted into a time string.
      *
      * @return	the formatted time string.
-     */	
+     */
     public String format(
     	#if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif date
     ){
-    	return get().format(date);
+        return get().format(date);
     }
-    
+
     /**
      * Parse a date/time string.
      *
@@ -238,41 +238,41 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
      *				If the given string cannot be parsed as a date.
      */
     public #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif parse(
-    	String text
+            String text
     ) throws ParseException {
         if(this.rejectE) {
-            int e = text.indexOf('E'); 
+            int e = text.indexOf('E');
             if(e > 0) throw new ParseException(
-                "Unparseable date: " + text + " (May be you are using the broken JAXP release 1.4.0?)",
-                e            
+                    "Unparseable date: " + text + " (May be you are using the broken JAXP release 1.4.0?)",
+                    e
             );
         }
-    	return get().parse(text)#if !CLASSIC_CHRONO_TYPES .toInstant()#endif;
+        return get().parse(text)#if !CLASSIC_CHRONO_TYPES .toInstant()#endif;
     }
-            
-    
+
+
     //------------------------------------------------------------------------
     // Class Lenient
     //------------------------------------------------------------------------
-    
+
     /**
      * Complete the century in case of a two digit year
      * <p>
      * The difference between the current year and the resulting year is not greater than fifty years.
-     * 
+     *
      * @param date
-     * 
+     *
      * @return a normalized value (with maybe trailing zeroes, as opposed to W3's XML schema recommendation
-     * 
+     *
      * @throws ParseException
      */
     public static String completeCentury(
-        String date
+            String date
     ) throws ParseException, NumberFormatException {
-        int firstHyphen = date.indexOf('-'); 
+        int firstHyphen = date.indexOf('-');
         if(
-            firstHyphen != 2 && 
-            (firstHyphen >= 0 || date.length() != 6)
+                firstHyphen != 2 &&
+                        (firstHyphen >= 0 || date.length() != 6)
         ) {
             return date;
         } else {
@@ -298,9 +298,9 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
          * @param utcTimezone UTC time zone representations
          */
         Lenient(
-            String pattern,
-            String defaultValue,
-            String... utcTimezone
+                String pattern,
+                String defaultValue,
+                String... utcTimezone
         ) {
             super(pattern, "UTC", false);
             this.defaultValue = defaultValue;
@@ -311,23 +311,23 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
          * Default value for missing characters 
          */
         private final String defaultValue;
-        
+
         /**
          * The UTC representations
          */
         private final String[] utcTimezone;
-        
+
         /**
          * Test and remove the time zone
-         * 
+         *
          * @param text
-         * 
+         *
          * @return the value without time zone
-         * 
+         *
          * @throws ParseException if the UTC time zone field is missing
          */
         private final String validateAndRemoveTimezone(
-            String text
+                String text
         ) throws ParseException {
             for(String utcTimezone : this.utcTimezone) {
                 if(text.endsWith(utcTimezone)) {
@@ -335,24 +335,24 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
                 }
             }
             throw new ParseException(
-                "Value does not end with UTC timezone field. " +
-                "value=" + text + "; " +
-                "acceptable=" +  Arrays.asList(this.utcTimezone),
-                text.length()
+                    "Value does not end with UTC timezone field. " +
+                            "value=" + text + "; " +
+                            "acceptable=" +  Arrays.asList(this.utcTimezone),
+                    text.length()
             );
         }
-        
+
         /**
          * Convert to millisecond accuracy
-         * 
+         *
          * @param rawText the value to be adjusted
-         * 
+         *
          * @return a normalized value (with maybe trailing zeroes, as opposed to W3's XML schema recommendation
-         * 
+         *
          * @throws ParseException
          */
         private final String adjustToMillisecondAccuracyAndAddTimezone(
-            String rawText
+                String rawText
         ) throws ParseException {
             //
             // Replace standard compliant fraction separator by canonical one
@@ -366,7 +366,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
             //
             // Add missing century in case of a two digit year
             //
-            int timeSeparator = text.indexOf('T'); 
+            int timeSeparator = text.indexOf('T');
             String oldDate = timeSeparator < 0 ? text : text.substring(0, timeSeparator);
             String newDate = completeCentury(oldDate);
             if(newDate.length() > oldDate.length()) {
@@ -375,23 +375,23 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
             //
             // Adjust accuracy
             //
-            return text.length() >= this.defaultValue.length() ? 
-                text.substring(0, this.defaultValue.length() -1) + "Z" :
-                text + defaultValue.substring(text.length());
+            return text.length() >= this.defaultValue.length() ?
+                    text.substring(0, this.defaultValue.length() -1) + "Z" :
+                    text + defaultValue.substring(text.length());
         }
-        
+
         /* (non-Javadoc)
          * @see org.openmdx.base.text.format.DateFormat#parse(java.lang.String)
          */
         @Override
         public #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif parse(
-            String text
+                String text
         ) throws ParseException {
             return super.parse(
-                adjustToMillisecondAccuracyAndAddTimezone(
-                    validateAndRemoveTimezone(text)
-                )
-            );        
+                    adjustToMillisecondAccuracyAndAddTimezone(
+                            validateAndRemoveTimezone(text)
+                    )
+            );
         }
 
     }

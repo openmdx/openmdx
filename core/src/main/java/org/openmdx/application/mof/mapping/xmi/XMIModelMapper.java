@@ -60,7 +60,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.wbxml.cci.StringTable;
 import org.openmdx.base.xml.stream.XMLOutputFactories;
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * XMI Model Mapper

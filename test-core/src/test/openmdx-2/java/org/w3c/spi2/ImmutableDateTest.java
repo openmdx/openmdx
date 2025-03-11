@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Date/Time Marshaller 
+ * Description: ImmutableDate Test
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,46 +42,30 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.base.accessor.spi;
 
+package org.w3c.spi2;
 
+import java.util.GregorianCalendar;
 
-import org.openmdx.base.marshalling.Marshaller;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
-
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDate;#endif
 
 /**
- * Date/Time Marshaller
+ * Test ImmutableDate
  */
-public class DateTimeMarshaller {
+public class ImmutableDateTest {
 
-    /**
-     * Constructor 
-     */
-    private DateTimeMarshaller(
-    ) {
-        // Avoid instantiation
-    }
-
-    /**
-     * Datatype Instance <-> ISO 8601 Basic String
-     */
-    public static final Marshaller BASIC_FORMAT_TO_DATATYPE = new DatatypeMarshaller(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif.class
-    ){
-
-        @Override
-        protected String toBasicFormat(Object datatype) {
-            return DateTimeFormat.BASIC_UTC_FORMAT.format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif)datatype);
-        }
-        
-    };
-
-    /**
-     * Normalizing marshaller
-     */
-    public static final Marshaller NORMALIZE = new NormalizingMarshaller(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class
-    );
-
+	/**
+	 * CR20019921
+	 */
+	@Test
+	public void testConversionToGregorianCalendar(){ 
+		ImmutableDate firstOfApril = (ImmutableDate) Datatypes.create(Datatypes.DATE_CLASS, "20000401");
+		GregorianCalendar calendar = firstOfApril.toGregorianCalendar();
+		Assertions.assertEquals(2000, calendar.get(GregorianCalendar.YEAR), "Year 2000");
+		Assertions.assertEquals(GregorianCalendar.APRIL, calendar.get(GregorianCalendar.MONTH), "April");
+		Assertions.assertEquals( 1, calendar.get(GregorianCalendar.DAY_OF_MONTH), "1st");
+	}
+	
 }

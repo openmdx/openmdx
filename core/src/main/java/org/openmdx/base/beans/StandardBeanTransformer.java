@@ -67,9 +67,9 @@ import org.openmdx.base.text.conversion.spi.BeanTransformer;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
-import org.w3c.cci2.ImmutableDate;
-import org.w3c.cci2.ImmutableDateTime;
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDate;#endif
+#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDateTime;#endif
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
@@ -468,6 +468,7 @@ public class StandardBeanTransformer implements BeanTransformer {
     private static final PersistenceDelegate immutableDatePersistenceDelegate = new ImmutableDatePersistenceDelegate();
     private static final PersistenceDelegate quantifierPersistenceDelegate = new QuantifierPersistenceDelegate();
     private static final PersistenceDelegate uriPersistenceDelegate = new URIPersistenceDelegate();
-    private static final Class<? extends #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> xmlGregorianCalendarClass = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED).getClass();
+    private static final Class<? extends #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> xmlGregorianCalendarClass
+            = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED).getClass();
 
 }

@@ -47,7 +47,6 @@ package org.openmdx.application.mof.mapping.java;
 
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Date;
 
 import org.openmdx.application.mof.externalizer.spi.ExternalizationConfiguration;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
@@ -59,7 +58,7 @@ import org.openmdx.application.mof.mapping.java.metadata.FieldPersistenceModifie
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * openMDX Meta Data Mapper

@@ -50,7 +50,7 @@ import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.
 
 import org.openmdx.state2.cci.StateContext;
 import org.openmdx.state2.cci.ViewKind;
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * AbstractStateContext

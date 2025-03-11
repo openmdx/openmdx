@@ -73,10 +73,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.jdo.Constants;
 import javax.jdo.FetchPlan;
@@ -104,7 +100,6 @@ import jakarta.resource.spi.CommException;
 import jakarta.servlet.ServletException;
 import jakarta.transaction.UserTransaction;
 #endif
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -189,7 +184,7 @@ import org.w3c.cci2.Container;
 import org.w3c.cci2.RegularExpressionFlag;
 import org.w3c.cci2.SparseArray;
 import org.w3c.cci2.StringTypePredicate;
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.StateAccessor;
 import org.w3c.spi2.Datatypes;

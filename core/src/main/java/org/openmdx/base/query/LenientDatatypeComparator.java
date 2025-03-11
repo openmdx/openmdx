@@ -51,7 +51,7 @@ import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Durati
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.exception.BasicException;
-import org.w3c.cci2.ImmutableDate;
+#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDate;#endif
 import org.w3c.spi2.Datatypes;
 
 
@@ -142,7 +142,7 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
             return toComparatorReply(
                 first,
                 second,
-                left.compare(right)
+                left.#if CLASSIC_CHRONO_TYPES compare #else compareTo#endif(right)
             );
         }
         if (Datatypes.DATE_TIME_CLASS.isInstance(first)){

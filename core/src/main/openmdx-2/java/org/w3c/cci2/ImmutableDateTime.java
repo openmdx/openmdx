@@ -1,28 +1,28 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Unmodifiable Date-Time 
+ * Description: Unmodifiable Date-Time
  * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,34 +36,37 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
 package org.w3c.cci2;
 
 import java.io.ObjectStreamException;
-import java.io.Serializable;
+import java.util.Date;
 
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
+
 
 /**
  * Unmodifiable Date-Time
  */
-public final class ImmutableDateTime #if CLASSIC_CHRONO_TYPES extends java.util.Date #endif
-        implements ImmutableDatatype<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif>, Serializable {
+public final class ImmutableDateTime
+        extends Date
+        implements ImmutableDatatype<Date>
+{
 
     /**
-     * Constructor 
+     * Constructor
      *
      * @param date
      */
     public ImmutableDateTime(
-        long date
+            long date
     ) {
-        super(#if CLASSIC_CHRONO_TYPES date#endif);
+        super(date);
     }
 
     /**
@@ -80,15 +83,14 @@ public final class ImmutableDateTime #if CLASSIC_CHRONO_TYPES extends java.util.
      * Value in SO8601:2000 Extended Format
      */
     private transient String extendedValue;
-    
+
     /**
-     * 
+     *
      */
-    private static final String READONLY = 
-        "This " + #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class.getName() +
-        " instance is read-only, use clone() to get a modifiable copy.";
-    
-    #if CLASSIC_CHRONO_TYPES
+    private static final String READONLY =
+            "This " + Date.class.getName() +
+                    " instance is read-only, use clone() to get a modifiable copy.";
+
 
     /* (non-Javadoc)
      * @see java.util.Date#setDate(int)
@@ -145,45 +147,42 @@ public final class ImmutableDateTime #if CLASSIC_CHRONO_TYPES extends java.util.
     public void setYear(int year) {
         throw new UnsupportedOperationException(READONLY);
     }
-    #endif
 
-	/**
-	 * Create a mutable counterpart
-	 * 
-	 * @return the mutable counterpart
-	 */
-	private #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif toMutableDateTime() {
-		return #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(
-                #if CLASSIC_CHRONO_TYPES this.getTime() #else this.toMutableDateTime().toEpochMilli()#endif
-        );
-	}
+    /**
+     * Create a mutable counterpart
+     *
+     * @return the mutable counterpart
+     */
+    private Date toMutableDateTime() {
+        return new Date(this.getTime());
+    }
 
-	
+
     //------------------------------------------------------------------------
     // Implements Serializable
     //------------------------------------------------------------------------
-    
+
     /**
      * There is no need for the deserialized object to be immutable
-     * 
+     *
      * @return a mutable counterpart of this object
-     * 
+     *
      * @throws ObjectStreamException
      */
     private Object writeReplace() throws ObjectStreamException {
         return toMutableDateTime();
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Cloneable
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see java.util.Date#clone()
      */
     @Override
-    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif clone(
+    public Date clone(
     ) {
         return toMutableDateTime();
     }
@@ -192,13 +191,13 @@ public final class ImmutableDateTime #if CLASSIC_CHRONO_TYPES extends java.util.
     //------------------------------------------------------------------------
     // Implements ImmutableDatatype
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see org.w3c.spi.ImmutableDatatype#toBasicFormat()
      */
     public String toBasicFormat() {
         if(this.basicValue == null){
-            this.basicValue = DateTimeFormat.BASIC_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES this #else this.toMutableDateTime() #endif);
+            this.basicValue = DateTimeFormat.BASIC_UTC_FORMAT.format(this);
         }
         return this.basicValue;
     }
@@ -208,9 +207,9 @@ public final class ImmutableDateTime #if CLASSIC_CHRONO_TYPES extends java.util.
      */
     public String toXMLFormat() {
         if(this.extendedValue == null) {
-            this.extendedValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES this #else this.toMutableDateTime() #endif);
+            this.extendedValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(this);
         }
         return this.extendedValue;
     }
-    
+
 }

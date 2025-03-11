@@ -50,7 +50,7 @@ import #if JAVA_8 javax.resource.cci.Record #else jakarta.resource.cci.Record #e
 
 import org.openmdx.base.resource.cci.Freezable;
 import org.openmdx.kernel.exception.BasicException;
-import org.w3c.cci2.ImmutableDatatype;
+#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDatatype;#endif
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 

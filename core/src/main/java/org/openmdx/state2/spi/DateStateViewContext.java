@@ -53,6 +53,7 @@ import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.ViewKind;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
+#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 
 /**
  * Date State View Context

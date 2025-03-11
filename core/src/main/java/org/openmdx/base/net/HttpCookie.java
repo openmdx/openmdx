@@ -45,9 +45,8 @@ package org.openmdx.base.net;
 
 import java.net.URI;
 import java.text.ParseException;
-import java.time.Instant;
 
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Basic Cookie

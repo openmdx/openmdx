@@ -55,9 +55,9 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.rest.cci.FeatureOrderRecord;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
-import org.w3c.cci2.ImmutableDatatype;
-import org.w3c.spi.DatatypeFactories;
-import org.w3c.spi.ImmutableDatatypeFactory;
+#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDatatype;#endif
+#if CLASSIC_CHRONO_TYPES import import org.w3c.spi.DatatypeFactories;#endif
+#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -107,9 +107,15 @@ final class DataObjectComparator implements Comparator<DataObject_1_0> {
         } else if(Datatypes.DATE_CLASS.isInstance(left)) {
             if(left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>){
                 ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
-                return datatypeFactory.toDate((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) left).compare(datatypeFactory.toDate((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) right));
+                return datatypeFactory.toDate((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) left)
+                        .#if CLASSIC_CHRONO_TYPES compare #else compareTo#endif(
+                                datatypeFactory.toDate((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) right)
+                        );
             } else {
-                return ((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)left).compare((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) right);
+                return ((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)left)
+                        .#if CLASSIC_CHRONO_TYPES compare #else compareTo#endif(
+                                (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) right
+                        );
             }
         } else {
             return ((Comparable)left).compareTo(right);

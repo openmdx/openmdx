@@ -116,6 +116,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.log.SysLog;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
@@ -1494,7 +1495,7 @@ class RefObject_1
                                         this.setValue(
                                             featureDef,
                                             DateTimeMarshaller.NORMALIZE.marshal
-                                            (org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif))
+                                            (DateTimeFormat.BASIC_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif))
                                         );
                                     } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
                                         this.setValue(

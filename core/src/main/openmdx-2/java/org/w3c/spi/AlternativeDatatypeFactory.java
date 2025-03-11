@@ -6,23 +6,23 @@
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,9 +36,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
@@ -50,13 +50,12 @@ import java.text.ParseException;
 import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConstants;
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.datatype.Duration;
 
 import org.openmdx.kernel.exception.BasicException;
-import org.w3c.cci2.ImmutableDate;
-import org.w3c.cci2.ImmutableDateTime;
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDate;#endif
+#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDateTime;#endif
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Alternative Datatype Factory
@@ -77,24 +76,24 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
     private static final BigDecimal SECONDS_PER_MINUTE = BigDecimal.valueOf(60);
     private static final BigInteger MINUTES_PER_HOUR = BigInteger.valueOf(60);
     private static final BigInteger HOURS_PER_DAY = BigInteger.valueOf(24);
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements DatatypeFactory
     //------------------------------------------------------------------------
-    
+
     /**
      * Create an UTC based immutable date-time instance
-     * 
+     *
      * @param value the basic or extended representation
-     * 
+     *
      * @return a corresponding date-time instance
-     * 
+     *
      * @exception IllegalArgumentException
-     * if the value can't be parsed
+     * if the value can't be parse
      */
     public ImmutableDateTime newDateTime(
-        String value
+            String value
     ){
         if(value == null) {
             return null;
@@ -109,32 +108,32 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
             }
             return toDateTime(dateTimeFormat.parse(value));
         } catch (ParseException exception) {
-        	throw BasicException.initHolder(
-        		new IllegalArgumentException(
-        		    "Could not parse as org::w3c::dateTime value",
-        		    BasicException.newEmbeddedExceptionStack(
-                        exception,
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        new BasicException.Parameter("value", value)
+            throw BasicException.initHolder(
+                    new IllegalArgumentException(
+                            "Could not parse as org::w3c::dateTime value",
+                            BasicException.newEmbeddedExceptionStack(
+                                    exception,
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.BAD_PARAMETER,
+                                    new BasicException.Parameter("value", value)
+                            )
                     )
-                )
             );
         }
     }
-    
+
     /**
      * Create a date instance
-     * 
-     * @param rawValue the basic or extended representation
-     * 
+     *
+     * @param value the basic or extended representation
+     *
      * @return a corresponding date-time instance
-     * 
+     *
      * @exception IllegalArgumentException
      * if the value can't be parsed
      */
     public ImmutableDate newDate(
-        String rawValue
+            String rawValue
     ){
         if(rawValue == null) {
             return null;
@@ -144,23 +143,23 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
             value = DateTimeFormat.completeCentury(rawValue);
         } catch (Exception exception) {
             throw new IllegalArgumentException(
-                "Century completion failure",
-                exception
+                    "Century completion failure",
+                    exception
             );
         }
         if(extendedDatePattern.matcher(value).matches()) {
             value = value.replaceAll("-", "");
         } else if (!basicDatePattern.matcher(value).matches()) {
             throw BasicException.initHolder(
-                new IllegalArgumentException(
-                    "The value does not match the org::w3c::date pattern",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        new BasicException.Parameter("pattern", "YYYY[...]-MM-DD"),
-                        new BasicException.Parameter("value", value)
+                    new IllegalArgumentException(
+                            "The value does not match the org::w3c::date pattern",
+                            BasicException.newEmbeddedExceptionStack(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.BAD_PARAMETER,
+                                    new BasicException.Parameter("pattern", "YYYY[...]-MM-DD"),
+                                    new BasicException.Parameter("value", value)
+                            )
                     )
-                )
             );
         }
         return new ImmutableDate(value);
@@ -168,84 +167,85 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
 
     /**
      * Create a duration instance
-     * 
+     *
      * @param value the representation with designators
-     * 
+     *
      * @return a corresponding Duration instance
-     * 
+     *
      * @exception IllegalArgumentException
      * if the value can't be parsed
      */
     public Duration newDuration(
-        String value
+            String value
     ){
         if(value == null) {
             return null;
         } else {
             boolean yearMonth = value.indexOf('Y') > 0 || value.indexOf('M') > 0;
-            boolean dayTime = value.indexOf('D') > 0 || value.indexOf('T') > 0;   
-            return 
-                yearMonth == dayTime ? DatatypeFactories.xmlDatatypeFactory().newDuration(value) :
-                yearMonth ? DatatypeFactories.xmlDatatypeFactory().newDurationYearMonth(value) :
-                DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value);
+            boolean dayTime = value.indexOf('D') > 0 || value.indexOf('T') > 0;
+            return
+                    yearMonth == dayTime ? DatatypeFactories.xmlDatatypeFactory().newDuration(value) :
+                            yearMonth ? DatatypeFactories.xmlDatatypeFactory().newDurationYearMonth(value) :
+                                    DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value);
         }
     }
 
     /**
      * Create a date-time instance
-     * 
+     *
      * @param value an internal representation
-     * 
+     *
      * @return a corresponding date-time instance
-     * 
+     *
      * @exception IllegalArgumentException
      * if the value is not an org::w3c::dateTime instance
      */
     public ImmutableDateTime toDateTime(
-            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif value
+            java.util.Date value
     ){
-        return value == null ? null : value instanceof ImmutableDateTime
-                ? (ImmutableDateTime)value
-                : new ImmutableDateTime(value.#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli() #endif);
+        return
+                value == null ? null :
+                        value instanceof ImmutableDateTime ? (ImmutableDateTime)value :
+                                new ImmutableDateTime(value.getTime());
     }
-    
+
     /**
      * Create a date instance
-     * 
+     *
      * @param value an internal representation
-     * 
+     *
      * @return a corresponding date-time instance
-     * 
+     *
      * @exception IllegalArgumentException
      * if the value is not an org::w3c::date instance
      */
     public ImmutableDate toDate(
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif value
+            javax.xml.datatype.XMLGregorianCalendar value
     ){
-        return 
-            value == null ? null :
-            value instanceof ImmutableDate ? (ImmutableDate)value :
-            newDate(value.toXMLFormat());
+        return
+                value == null ? null :
+                        value instanceof ImmutableDate ? (ImmutableDate)value :
+                                newDate(value.toXMLFormat());
     }
-    
+
     /* (non-Javadoc)
      * @see org.w3c.spi.ImmutableDatatypeFactory#normalizedDuration(javax.xml.datatype.Duration)
      */
     public Duration toNormalizedDuration(
-        Duration value
+            Duration value
     ) {
         BigInteger years = (BigInteger) value.getField(DatatypeConstants.YEARS);
         BigInteger months = (BigInteger) value.getField(DatatypeConstants.MONTHS);
         BigInteger days =  (BigInteger) value.getField(DatatypeConstants.DAYS);
         BigInteger hours =  (BigInteger) value.getField(DatatypeConstants.HOURS);
         BigInteger minutes =  (BigInteger) value.getField(DatatypeConstants.MINUTES);
-        BigDecimal seconds = (BigDecimal) value.getField(DatatypeConstants.SECONDS);            
+        BigDecimal seconds = (BigDecimal) value.getField(DatatypeConstants.SECONDS);
         boolean normalized = true;
         if(seconds != null && seconds.compareTo(SECONDS_PER_MINUTE) >= 0) {
             normalized = false;
             BigDecimal[] minutesAndSeconds = seconds.divideAndRemainder(SECONDS_PER_MINUTE);
             minutes = minutes == null ? minutesAndSeconds[0].toBigInteger() : minutes.add(
-                minutesAndSeconds[0].toBigInteger()
+                    minutesAndSeconds[0].toBigInteger()
             );
             seconds = minutesAndSeconds[1];
         }
@@ -253,7 +253,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
             normalized = false;
             BigInteger[] hoursAndMinutes = minutes.divideAndRemainder(MINUTES_PER_HOUR);
             hours = hours == null ? hoursAndMinutes[0] : hours.add(
-                hoursAndMinutes[0]
+                    hoursAndMinutes[0]
             );
             minutes = hoursAndMinutes[1];
         }
@@ -261,7 +261,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
             normalized = false;
             BigInteger[] daysAndHours = hours.divideAndRemainder(HOURS_PER_DAY);
             days = days == null ? daysAndHours[0] : days.add(
-                daysAndHours[0]
+                    daysAndHours[0]
             );
             hours = daysAndHours[1];
         }
@@ -269,20 +269,20 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
             normalized = false;
             BigInteger[] yearsAndMonths = months.divideAndRemainder(MONTHS_PER_YEAR);
             years = years == null ? yearsAndMonths[0] : years.add(
-                yearsAndMonths[0]
+                    yearsAndMonths[0]
             );
             months = yearsAndMonths[1];
         }
         return normalized ? value : DatatypeFactories.xmlDatatypeFactory().newDuration(
-            value.getSign() > 0, 
-            years, 
-            months, 
-            days, 
-            hours, 
-            minutes, 
-            seconds
+                value.getSign() > 0,
+                years,
+                months,
+                days,
+                hours,
+                minutes,
+                seconds
         );
     }
 
-    
+
 }

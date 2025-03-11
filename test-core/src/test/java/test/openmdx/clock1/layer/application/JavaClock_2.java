@@ -74,6 +74,7 @@ import org.openmdx.base.rest.spi.AbstractRestInteraction;
 import org.openmdx.base.rest.spi.AbstractRestPort;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.time.SystemClock;
 
 /**
  * Java Clock Provider
@@ -203,7 +204,7 @@ public class JavaClock_2 extends AbstractRestPort {
                         super.newResponseId(input.getResourceIdentifier()));
                     final MappedRecord body = Records.getRecordFactory().createMappedRecord(
                         "test:openmdx:clock1:Time");
-                    body.put("utc", #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif);
+                    body.put("utc", SystemClock.getInstance().now());
                     output.setBody(body);
                     return true;
                 } else if("setDateAndTime".equals(operationName)) {

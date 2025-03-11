@@ -1,28 +1,28 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Immutable Datatype Factory 
+ * Description: Immutable Datatype Factory
  * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,17 +36,18 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
 package org.w3c.spi;
 
+import java.util.Date;
 
-
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
+import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Immutable Datatype Factory
@@ -56,91 +57,91 @@ public interface ImmutableDatatypeFactory {
     //------------------------------------------------------------------------
     // From String Representation
     //------------------------------------------------------------------------
-    
+
     /**
      * Create an UTC based immutable date-time instance
-     * 
+     *
      * @param value the basic or extended representation
-     * 
+     *
      * @return a corresponding date-time instance
-     * 
+     *
      * @exception IllegalArgumentException
      * if the value can't be parse
      */
-    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newDateTime(
-        String value
+    Date newDateTime(
+            String value
     );
-    
+
     /**
      * Create a new immutable date instance
-     * 
+     *
      * @param value the basic or extended representation
-     * 
+     *
      * @return a corresponding date-time instance
-     * 
+     *
      * @exception IllegalArgumentException
      * if the value can't be parse
      */
-    #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif newDate(
-        String value
+    XMLGregorianCalendar newDate(
+            String value
     );
 
     /**
      * Create a new immutable duration instance
-     * 
+     *
      * @param value the representation with designators
-     * 
+     *
      * @return a corresponding date-time instance
-     * 
+     *
      * @exception IllegalArgumentException
-     * if the value can't be parsed
+     * if the value can't be parse
      */
     Duration newDuration(
-        String value
+            String value
     );
 
-    
+
     //------------------------------------------------------------------------
     // From Internal Representation
     //------------------------------------------------------------------------
-    
+
     /**
      * Retrieve an immutable date-time instance
-     * 
+     *
      * @param value an internal representation
-     * 
+     *
      * @return a corresponding date-time instance
-     * 
+     *
      * @exception IllegalArgumentException
      * if the value is not an org::w3c::dateTime instance
      */
-    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif toDateTime(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif value
+    Date toDateTime(
+            Date value
     );
-    
+
     /**
      * Retrieve an immutable date instance
-     * 
+     *
      * @param value an internal representation
-     * 
+     *
      * @return a corresponding date-time instance
-     * 
+     *
      * @exception IllegalArgumentException
      * if the value is not an org::w3c::date instance
      */
-    #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif toDate(
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif value
+    XMLGregorianCalendar toDate(
+            XMLGregorianCalendar value
     );
 
     /**
      * Retrieve a normalized duration instance
-     * 
+     *
      * @param value an internal representation
-     * 
+     *
      * @return a duration instance containing seconds and months only
      */
     Duration toNormalizedDuration(
-        Duration value
+            Duration value
     );
 
 }

@@ -56,8 +56,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDatatype;#endif
 import org.w3c.cci2.ImmutableDatatype;
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Immutable Datatypes Test
@@ -149,7 +150,7 @@ public class ImmutableDatatypesTest {
     public void durationValues(){
         Assertions.assertEquals("P1Y6M",  immutableDatatypeFactory().toNormalizedDuration(oneAndHalfAYear).toString(), "Normalize year/month duration");
         Assertions.assertEquals("PT1H0M0S",  immutableDatatypeFactory().toNormalizedDuration(oneHour).toString(), "Normalize day/time duration");
-        Duration d = oneAndHalfAYear.add(oneHour);
+        Duration d = oneAndHalfAYear.#if CLASSIC_CHRONO_TYPES add #else plus#endif(oneHour);
         if(isDurationNormalized()) {
             Assertions.assertEquals("P1Y6MT1H0M0S",  d.toString(), "Standard duration is normalized");
         } else {

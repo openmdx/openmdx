@@ -185,7 +185,7 @@ import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.cci2.RegularExpressionFlag;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 

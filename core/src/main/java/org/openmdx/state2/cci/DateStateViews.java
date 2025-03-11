@@ -114,9 +114,9 @@ import org.openmdx.state2.spi.StateViewContext;
 import org.openmdx.state2.spi.TechnicalAttributes;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.Container;
-import org.w3c.cci2.ImmutableDatatype;
+#if CLASSIC_CHRONO_TYPES import org.w3c.cci2.ImmutableDatatype;#endif
 import org.w3c.spi.DatatypeFactories;
-import org.w3c.spi.ImmutableDatatypeFactory;
+#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 
 /**
  * Date State Views

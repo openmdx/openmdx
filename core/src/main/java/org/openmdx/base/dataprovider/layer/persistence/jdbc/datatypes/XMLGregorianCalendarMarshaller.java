@@ -271,7 +271,7 @@ public class XMLGregorianCalendarMarshaller {
             QName schemaType = value.getXMLSchemaType();
             if(DatatypeConstants.TIME.equals(schemaType)) {
                 String timeType = sqlDataTypes.getTimeType(connection).intern();
-                if(timeType == LayerConfigurationEntries.TIME_TYPE_NUMERIC) {
+                if(timeType.equals(LayerConfigurationEntries.TIME_TYPE_NUMERIC)) {
                     long milliseconds = value.getMillisecond() + 1000L * (
                             value.getSecond() + 60L * (
                                     value.getMinute() + 60L * (
@@ -302,13 +302,13 @@ public class XMLGregorianCalendarMarshaller {
                         timestamp.setNanos(fractionalSeconds.scaleByPowerOfTen(9).intValue());
                     }
                     return timestamp;
-                } else if(dateTimeType == LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE) {
+                } else if(dateTimeType.equals(LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE)) {
                     return sqlDateTime(value, true);
-                } else if(dateTimeType == LayerConfigurationEntries.DATETIME_TYPE_NUMERIC) {
+                } else if(dateTimeType.equals(LayerConfigurationEntries.DATETIME_TYPE_NUMERIC)) {
                     return value.getFractionalSecond().add(
                         BigDecimal.valueOf(value.toGregorianCalendar().getTimeInMillis() / 1000)
                     );
-                } else if(dateTimeType == LayerConfigurationEntries.DATETIME_TYPE_CHARACTER) {
+                } else if(dateTimeType.equals(LayerConfigurationEntries.DATETIME_TYPE_CHARACTER)) {
                     return value.normalize().toXMLFormat().replaceAll("[:\\-]","");
                 } else {
                     return sqlDateTime(value, false);
@@ -316,7 +316,7 @@ public class XMLGregorianCalendarMarshaller {
             } else if (DatatypeConstants.DATE.equals(schemaType)) {
                 String dateType = sqlDataTypes.getDateType(connection).intern();
                 String date = value.toString();
-                if(dateType == LayerConfigurationEntries.DATE_TYPE_CHARACTER) {
+                if(dateType.equals(LayerConfigurationEntries.DATE_TYPE_CHARACTER)) {
                     return date.replaceAll("-", "");
                 } else try {
                     return Date.valueOf(date);    
@@ -454,7 +454,8 @@ public class XMLGregorianCalendarMarshaller {
             long milliseconds = value.getTime();
             java.util.GregorianCalendar calendar = new GregorianCalendar(UTC);
             calendar.setTimeInMillis(milliseconds);
-            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
+            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif target
+                    = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
             switch(this.dateTimePrecision){
                 case NANOSECONDS:
                     //

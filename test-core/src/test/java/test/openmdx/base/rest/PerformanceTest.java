@@ -75,7 +75,7 @@ import org.junit.jupiter.api.Test;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.w3c.cci2.MutableDatatypeFactory;
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Performance Test

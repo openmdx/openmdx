@@ -46,7 +46,6 @@ package test.openmdx.app1.layer.application;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +73,7 @@ import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.kernel.exception.BasicException;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Hard-wired Objects Layer
@@ -91,7 +91,7 @@ public class HardWiredObjects_2 extends AccessControl_2 {
         //
         // Creation time of the hard-wired objects
         //
-        String timestamp = org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
+        String timestamp = DateTimeFormat.BASIC_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
         //
         // hard-wired NameFormat
         //
