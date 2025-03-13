@@ -217,7 +217,7 @@ public class PersistenceHelper {
      * @return the new query extension 
      */
     public static QueryExtensionRecord newQueryExtension(
-        AnyTypePredicate query
+        AnyTypePredicate<Query> query
     ){
         QueryExtensionRecord queryExtension = new QueryExtension();
         ((RefQuery_1_0)query).refGetFilter().getExtension().add(queryExtension);
@@ -303,7 +303,7 @@ public class PersistenceHelper {
      * RefPRedicate_1_0.
      */
     public static <E> Collection<E> asSubquery(
-        AnyTypePredicate predicate
+        AnyTypePredicate<E> predicate
     ){
         if (predicate instanceof RefQuery_1_0) {
             return new FilterCollection<>(((RefQuery_1_0) predicate).refGetFilter());
@@ -328,7 +328,7 @@ public class PersistenceHelper {
     
     @SafeVarargs
     public static void setClasses(
-        AnyTypePredicate query,
+        AnyTypePredicate<Object> query,
         Class<? extends RefObject>... classes 
     ){
         ((RefQuery_1_0)query).refAddValue(

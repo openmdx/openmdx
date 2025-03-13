@@ -64,7 +64,7 @@ public interface Container<E>
      * @return all elements for which the predicate evaluates to true
      */
     List<E> getAll(
-        AnyTypePredicate predicate
+         AnyTypePredicate<E> predicate
     );
 
     /**
@@ -78,7 +78,7 @@ public interface Container<E>
      *            all matching elements are offered to the consumer
      */
     void processAll(
-        AnyTypePredicate predicate,
+        AnyTypePredicate<E> predicate,
         Consumer<E> consumer
     );
 
@@ -89,7 +89,7 @@ public interface Container<E>
      *            the predicate to be applied to the elements
      */
     void removeAll(
-        AnyTypePredicate predicate
+        AnyTypePredicate<E> predicate
     );
 
     /**

@@ -49,7 +49,7 @@ import java.util.Collection;
 /**
  * Any Type Predicate
  */
-public interface AnyTypePredicate {
+public interface AnyTypePredicate<V> {
 
     /**
      * &lsaquo;attribute value&rsaquo; = &lsaquo;operand&rsaquo;
@@ -59,7 +59,7 @@ public interface AnyTypePredicate {
      * @param operand the operand the attribute value is compared to
      */
     void equalTo(
-        Object operand
+        V operand
     );
 
     /**
@@ -70,7 +70,7 @@ public interface AnyTypePredicate {
      * @param operands the operands the attribute value is compared to
      */
     void elementOf(
-        Object... operands
+        V... operands
     );
 
     /**
@@ -92,7 +92,7 @@ public interface AnyTypePredicate {
      * @param operand the operand the attribute value is compared to
      */
     void notEqualTo(
-        Object operand
+        V operand
     );
 
     /**
@@ -103,7 +103,7 @@ public interface AnyTypePredicate {
      * @param operands the operand the attribute value is compared to
      */
     void notAnElementOf(
-        Object... operands
+        V... operands
     );
 
     /**

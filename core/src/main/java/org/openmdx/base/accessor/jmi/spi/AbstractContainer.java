@@ -75,7 +75,7 @@ abstract class AbstractContainer
      */
     @Override
     public void processAll(
-        AnyTypePredicate predicate, 
+        AnyTypePredicate<RefObject_1_0> predicate,
         Consumer<RefObject_1_0> consumer
     ){
         refProcessAll(
@@ -89,7 +89,7 @@ abstract class AbstractContainer
     }
 
     protected abstract void refProcessAll(
-        AnyTypePredicate predicate, 
+        AnyTypePredicate<RefObject_1_0> predicate,
         Consumer<DataObject_1_0> consumer
     );
         
