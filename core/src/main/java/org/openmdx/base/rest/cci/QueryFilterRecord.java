@@ -55,7 +55,7 @@ import org.w3c.cci2.Container;
 /**
  * {@code org::openmdx::kernel::QueryFilter}
  */
-public interface QueryFilterRecord extends MappedRecord, AnyTypePredicate<Object> {
+public interface QueryFilterRecord extends MappedRecord, AnyTypePredicate {
     
     /**
      * An object record's name

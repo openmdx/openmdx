@@ -70,7 +70,7 @@ public interface AnyTypePredicate<V> {
      * @param operands the operands the attribute value is compared to
      */
     void elementOf(
-        V... operands
+        Collection(? extends V) operands
     );
 
     /**
@@ -103,7 +103,7 @@ public interface AnyTypePredicate<V> {
      * @param operands the operand the attribute value is compared to
      */
     void notAnElementOf(
-        V... operands
+        Collection<? extends V> operands
     );
 
     /**

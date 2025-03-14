@@ -527,9 +527,9 @@ public class DateStateViews {
      * 
      * @return the state context aware predicate
      */
-    private static AnyTypePredicate<Object> getStatePredicate(
-        RefContainer<?> refContainer,
-        AnyTypePredicate<Object> predicate
+    private static <T extends DateState> AnyTypePredicate<T> getStatePredicate(
+        RefContainer<? super T> refContainer,
+        AnyTypePredicate<T> predicate
     ) {
         if (predicate == null)
             return null;
@@ -564,8 +564,8 @@ public class DateStateViews {
      * 
      * @return the valid state predicate
      */
-    private static AnyTypePredicate<Object> getValidStatePredicate(
-        AnyTypePredicate<Object> predicate
+    private static <T extends DateState> AnyTypePredicate<T> getValidStatePredicate(
+        AnyTypePredicate<T> predicate
     ) {
         Filter newFilter;
         if (predicate == null) {

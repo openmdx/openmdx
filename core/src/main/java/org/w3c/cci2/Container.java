@@ -63,8 +63,8 @@ public interface Container<E>
      * 
      * @return all elements for which the predicate evaluates to true
      */
-    List<E> getAll(
-         AnyTypePredicate<E> predicate
+    <T extends E> List<T> getAll(
+         AnyTypePredicate<T> predicate
     );
 
     /**
@@ -77,9 +77,9 @@ public interface Container<E>
      * @param consumer
      *            all matching elements are offered to the consumer
      */
-    void processAll(
-        AnyTypePredicate<E> predicate,
-        Consumer<E> consumer
+    <T extends E> void processAll(
+        AnyTypePredicate<T> predicate,
+        Consumer<T> consumer
     );
 
     /**
