@@ -97,13 +97,13 @@ request.setCharacterEncoding("UTF-8");
 
 	if(request.getSession().getAttribute("ObjectInspectorServlet.ApplicationContext") != null) {
 		wasAuthenticated = true;
-		System.out.println(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif + ": Logoff: removing application context");
+		System.out.println(SystemClock.getInstance().now() + ": Logoff: removing application context");
 		request.getSession().removeAttribute("ObjectInspectorServlet.ApplicationContext");
 	}
 	if(request.getSession().getAttribute("processingLogin") != null) {
 		request.getSession().setAttribute("processingLogin", "false");
 	}
-	System.out.println(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif + ": Logoff: requestURL=" + request.getRequestURL());
+	System.out.println(SystemClock.getInstance().now() + ": Logoff: requestURL=" + request.getRequestURL());
 	String locale = request.getParameter(org.openmdx.portal.servlet.WebKeys.LOCALE_KEY);
 	if(locale == null) {
 		locale = (String)request.getSession().getAttribute(org.openmdx.portal.servlet.WebKeys.LOCALE_KEY);  
@@ -116,7 +116,7 @@ request.setCharacterEncoding("UTF-8");
 	if(initialScale == null) {
 		initialScale = request.getSession().getAttribute(org.openmdx.portal.servlet.WebKeys.INITIAL_SCALE_KEY);
 	}
-	System.out.println(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif + ": Logoff: invalidate session. locale=" + locale + "; timezone=" + timezone);
+	System.out.println(SystemClock.getInstance().now() + ": Logoff: invalidate session. locale=" + locale + "; timezone=" + timezone);
 	session.invalidate();
   	if(wasAuthenticated) {
 		// NO session management beyond this point.

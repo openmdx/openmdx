@@ -55,6 +55,7 @@ import org.openmdx.state2.cci.ViewKind;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
+import org.w3c.time.SystemClock;
 
 /**
  * Date State View Context
@@ -167,13 +168,7 @@ public class DateStateViewContext
      */
     public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif today(
     ){
-        GregorianCalendar calendar = new GregorianCalendar();
-        return DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-            calendar.get(Calendar.YEAR), 
-            calendar.get(Calendar.MONTH) + 1, 
-            calendar.get(Calendar.DAY_OF_MONTH),
-            DatatypeConstants.FIELD_UNDEFINED
-        );
+        return SystemClock.getInstance().today();
     }
     
     
@@ -218,7 +213,7 @@ public class DateStateViewContext
      */
     @Override
     protected #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif newValidAt() {
-        return DateStateViewContext.today();
+        return SystemClock.getInstance().today();
     }
 
 }

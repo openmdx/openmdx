@@ -2725,7 +2725,7 @@ public class FileUtils {
         if (date == null) {
             throw new IllegalArgumentException("No specified date");
         }
-        return isFileNewer(file, #if CLASSIC_CHRONO_TYPES date.getTime() #else java.time.Instant.now()#endif);
+        return isFileNewer(file, date.#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli() #endif);
     }
 
     /**

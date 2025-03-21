@@ -175,7 +175,7 @@ public class StandardPrimitiveTypeParserTest {
 		final Parser testee = StandardPrimitiveTypeParser.getInstance(); 
 		try {
 			// Act
-			testee.parse(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "20000401T000000.000Z");
+			testee.parse(Datatypes.DATE_TIME_CLASS, "20000401T000000.000Z");
 			Assertions.fail("IllegalArgumentException expected");
 		} catch (IllegalArgumentException expected) {
 			// Assert

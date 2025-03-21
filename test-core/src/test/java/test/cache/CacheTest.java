@@ -86,7 +86,7 @@ public class CacheTest {
                 @Override
                 public Class<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> getValueType(
                 ) {
-                    return #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class;
+                    return Datatypes.DATE_TIME_CLASS;
                 }
 
                 @Override
@@ -95,7 +95,7 @@ public class CacheTest {
                     return false;
                 }
             };
-            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif now = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif;
+            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif now = SystemClock.getInstance().now();
             Cache<String,#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> cache1 = cacheManager.createCache("testCache", configuration);
             cache1.put("created", now);
             #if CLASSIC_CHRONO_TYPES now = new java.util.Date(now.getTime() + 1000) #else now = now.plusMillis(1000) #endif;

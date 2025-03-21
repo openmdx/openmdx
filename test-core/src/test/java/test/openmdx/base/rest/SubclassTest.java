@@ -46,6 +46,7 @@ package test.openmdx.base.rest;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Subclass Test
@@ -56,9 +57,9 @@ public class SubclassTest {
     public void testX() {
         XInterface x = new XImplementation(System.currentTimeMillis());
         java.util.Date dX = x.getList().get(0); 
-        Assertions.assertEquals(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, dX.getClass(), "dX");
+        Assertions.assertEquals(Datatypes.DATE_TIME_CLASS, dX.getClass(), "dX");
         dX = x.list().get(0);
-        Assertions.assertEquals(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, dX.getClass(), "dX");
+        Assertions.assertEquals(Datatypes.DATE_TIME_CLASS, dX.getClass(), "dX");
     }
 
     @Test

@@ -46,12 +46,7 @@ package org.openmdx.state2.spi;
 
 import org.openmdx.state2.cci.DateTimeStateContext;
 import org.openmdx.state2.cci.ViewKind;
-#if CLASSIC_CHRONO_TYPES
-import org.w3c.format.DateTimeFormat;
-import org.w3c.spi.DatatypeFactories;
-import org.w3c.spi.ImmutableDatatypeFactory;
-#endif
-
+import org.w3c.spi.SystemClock;
 /**
  * Date State View Context
  */
@@ -70,7 +65,7 @@ public class DateTimeStateViewContext
      * @param validAt the view's transaction time point, or {@code null} for time range views
      */
     private DateTimeStateViewContext(
-        ImmutableDatatypeFactory datatypeFactory,
+        org.w3c.spi.ImmutableDatatypeFactory datatypeFactory,
         ViewKind viewKind,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFor,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt,
@@ -103,7 +98,7 @@ public class DateTimeStateViewContext
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ){
         return new DateTimeStateViewContext(
-            DatatypeFactories.immutableDatatypeFactory(),
+            org.w3c.spi.DatatypeFactories.immutableDatatypeFactory(),
             ViewKind.TIME_POINT_VIEW,
             validFor,
             validAt, 
@@ -123,7 +118,7 @@ public class DateTimeStateViewContext
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validTo
     ){
         return new DateTimeStateViewContext(
-            DatatypeFactories.immutableDatatypeFactory(),
+            org.w3c.spi.DatatypeFactories.immutableDatatypeFactory(),
             ViewKind.TIME_RANGE_VIEW,
             null, // validFor
             null, // validAt
@@ -159,7 +154,7 @@ public class DateTimeStateViewContext
     protected String toString(
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif timePoint
     ) {
-        return DateTimeFormat.BASIC_UTC_FORMAT.format(timePoint);
+        return org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(timePoint);
     }
 
     /* (non-Javadoc)
@@ -167,7 +162,7 @@ public class DateTimeStateViewContext
      */
     @Override
     protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newValidAt() {
-        return #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif;
+        return SystemClock.getInstannce().now();
     }
 
 }

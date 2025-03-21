@@ -49,6 +49,8 @@ import #if JAVA_8 javax.resource.cci.Record #else jakarta.resource.cci.Record #e
 import org.openmdx.base.resource.cci.Freezable;
 import org.openmdx.kernel.exception.BasicException;
 #if CLASSIC_CHRONO_TYPES
+import java.util.Date;
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
@@ -79,17 +81,19 @@ public class Isolation {
 	 * 
 	 * @return the given value or an immutable copy of it
 	 */
+	#if CLASSIC_CHRONO_TYPES
 	public static Object toImmutable(Object value) {
-		if(Datatypes.DATE_TIME_CLASS.isInstance(value) && !(value instanceof ImmutableDatatype<?>)) {
-			return DatatypeFactories.immutableDatatypeFactory().toDateTime((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
-		} else if (Datatypes.DATE_CLASS.isInstance(value) && !(value instanceof ImmutableDatatype<?>)) {
-			return DatatypeFactories.immutableDatatypeFactory().toDate((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)value);
+		if(value instanceof Date && !(value instanceof ImmutableDatatype<?>)) {
+			return DatatypeFactories.immutableDatatypeFactory().toDateTime((Date)value);
+		} else if (value instanceof XMLGregorianCalendar && !(value instanceof ImmutableDatatype<?>)) {
+			return DatatypeFactories.immutableDatatypeFactory().toDate((XMLGregorianCalendar)value);
 		} else if (value instanceof Record) {
 			return toImmutable((Record)value);
 		} else {
 			return value;
 		}
 	}
+	#endif
 
 	/**
 	 * Make the object immutable or create a immutable copy for supported values<ul>

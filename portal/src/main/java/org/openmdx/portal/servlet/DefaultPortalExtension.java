@@ -1703,7 +1703,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											mappedNewValue = valueHolder.isOptionalValued() || mappedNewValue != null
 												? mappedNewValue 
 												: PrimitiveTypes.DATE.equals(featureTypeName) 
-													? new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(0)
+													? #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(0)
 													: DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendar(1, 1, 1, 0, 0, 0, 0, 0);
 											if(valueHolder.isOptionalValued()) {
 												if(target instanceof RefObject) {

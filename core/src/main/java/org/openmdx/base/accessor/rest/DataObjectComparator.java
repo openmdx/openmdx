@@ -56,6 +56,7 @@ import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.rest.cci.FeatureOrderRecord;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 #if CLASSIC_CHRONO_TYPES
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
@@ -107,19 +108,14 @@ final class DataObjectComparator implements Comparator<DataObject_1_0> {
             return right == null ? 0 : -1;
         } else if (right == null) {
             return +1;
-        } else if(Datatypes.DATE_CLASS.isInstance(left)) {
+        #if CLASSIC_CHRONO_TYPES } else if(left instanceof XMLGregorianCalendar) {
             if(left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>){
                 ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
-                return datatypeFactory.toDate((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) left)
-                        .#if CLASSIC_CHRONO_TYPES compare #else compareTo#endif(
-                                datatypeFactory.toDate((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) right)
-                        );
+                return datatypeFactory.toDate((XMLGregorianCalendar) left).compare(datatypeFactory.toDate((XMLGregorianCalendar) right));
             } else {
-                return ((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)left)
-                        .#if CLASSIC_CHRONO_TYPES compare #else compareTo#endif(
-                                (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) right
-                        );
+                return ((XMLGregorianCalendar)left).compare((XMLGregorianCalendar) right);
             }
+        #endif
         } else {
             return ((Comparable)left).compareTo(right);
         }

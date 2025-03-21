@@ -137,7 +137,7 @@ public class PerformanceTest {
             MappedRecord d = facade.getValue();
             m.put("identity", o.identity = facade.getPath().toXRI());
             d.put("identity", o.identity);
-            m.put("field1", o.field1 = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
+            m.put("field1", o.field1 = SystemClock.getInstance().now());
             d.put("field1", o.field1);
             m.put("field2", o.field2 = Collections.singleton("JUnit"));
             d.put("field2", o.field2);
@@ -722,12 +722,12 @@ public class PerformanceTest {
                         ValueObject v = new ValueObject();
                         this.valueObjects.put(new Path(p), v);
                         v.setIdentity(in.readUTF());
-                        v.setField1(new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(in.readLong()));
+                        v.setField1(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong()));
                         Set<String> f2 = new HashSet<String>();
                         v.setField2(f2);
                         for (int k = 0, l = in.readInt(); k < l; k++)
                             f2.add(in.readUTF());
-                        v.setField1(new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(in.readLong()));
+                        v.setField1(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong()));
                         Set<String> f4 = new HashSet<String>();
                         v.setField4(f4);
                         for (int k = 0, l = in.readInt(); k < l; k++)
@@ -798,11 +798,11 @@ public class PerformanceTest {
                             p[k] = in.readUTF();
                         this.valueObjects.put(new Path(p), v);
                         v.identity = in.readUTF();
-                        v.field1 = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(in.readLong());
+                        v.field1 = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong());
                         v.field2 = new HashSet<String>();
                         for (int k = 0, l = in.readInt(); k < l; k++)
                             v.field2.add(in.readUTF());
-                        v.field3 = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(in.readLong());
+                        v.field3 = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong());
                         v.field4 = new HashSet<String>();
                         for (int k = 0, l = in.readInt(); k < l; k++)
                             v.field4.add(in.readUTF());
@@ -883,12 +883,12 @@ public class PerformanceTest {
                         ValueObject v = new ValueObject();
                         this.valueObjects.put(new Path(p), v);
                         g0.set(v, in.readUTF());
-                        g1.set(v, new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(in.readLong()));
+                        g1.set(v, #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong()));
                         Set<String> f2 = new HashSet<String>();
                         g2.set(v, f2);
                         for (int k = 0, l = in.readInt(); k < l; k++)
                             f2.add(in.readUTF());
-                        g3.set(v, new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(in.readLong()));
+                        g3.set(v, #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong()));
                         Set<String> f4 = new HashSet<String>();
                         g4.set(v, f4);
                         for (int k = 0, l = in.readInt(); k < l; k++)
@@ -962,12 +962,12 @@ public class PerformanceTest {
                         Map<String, Object> v = new HashMap<String, Object>();
                         this.valueMaps.put(new Path(p), v);
                         v.put("identity", in.readUTF());
-                        v.put("field1", new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(in.readLong()));
+                        v.put("field1", #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong()));
                         Set<String> f2 = new HashSet<String>();
                         v.put("field2", f2);
                         for (int k = 0, l = in.readInt(); k < l; k++)
                             f2.add(in.readUTF());
-                        v.put("field3", new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(in.readLong()));
+                        v.put("field3", #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong()));
                         Set<String> f4 = new HashSet<String>();
                         v.put("field4", f4);
                         for (int k = 0, l = in.readInt(); k < l; k++)

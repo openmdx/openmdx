@@ -46,7 +46,7 @@ package org.w3c.format;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
+import #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.TimeZone;

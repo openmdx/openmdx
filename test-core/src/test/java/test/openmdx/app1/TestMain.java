@@ -313,7 +313,7 @@ public class TestMain {
 		protected Provider provider;
 		protected String taskId;
 		private final Object taskIdentifier;
-		private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif start = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif;
+		private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif start = SystemClock.getInstance().now();
 		protected PersistenceManagerFactory entityManagerFactory;
 
 		protected String getProviderName() {
@@ -929,7 +929,7 @@ public class TestMain {
 				{
 
 					ProductQuery productQuery = (ProductQuery) entityManager.newQuery(Product.class);
-					productQuery.createdAt().lessThanOrEqualTo(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
+					productQuery.createdAt().lessThanOrEqualTo(SysttemClock.getInstance().now());
 					InvoicePositionQuery invoicePositionQuery = (InvoicePositionQuery) entityManager
 							.newQuery(InvoicePosition.class);
 					invoicePositionQuery.product().elementOf(PersistenceHelper.asSubquery(productQuery));
@@ -2081,8 +2081,8 @@ public class TestMain {
 				this.begin();
 				person = personClass.createPerson();
 				person.setForeignId("YF");
-				#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif birthDate = DatatypeFactories.xmlDatatypeFactory()
-						.newXMLGregorianCalendar("1960-01-01");
+				#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif birthDate = 
+						Datatypes.create(Datatypes.DATE_CLASS, "1960-01-01");
 				birthDate.setTimezone(-1);
 				person.setBirthdate(birthDate);
 				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
@@ -2384,28 +2384,28 @@ public class TestMain {
 					PersistenceManager persistenceManager1 = persistenceManagerFactory.getPersistenceManager();
 					assertEquals(Constants.TX_REPEATABLE_READ,  persistenceManagerFactory.getTransactionIsolationLevel(), "Transaction Isolation Level");
 					{
-						final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime1 = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(System.currentTimeMillis() - 20L);
+						final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime1 = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(System.currentTimeMillis() - 20L);
 						UserObjects.setTransactionTime(persistenceManager1, new Factory<>() {
                             public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif instantiate() {
                                 return transactionTime1;
                             }
 
                             public Class<? extends #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif> getInstanceClass() {
-                                return #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif .class;
+                                return Datatypes.DATE_TIME_CLASS;
                             }
                         });
 					}
 					PersistenceManager persistenceManager2 = super.entityManager.getPersistenceManagerFactory()
 							.getPersistenceManager();
 					{
-						final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime2 = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(System.currentTimeMillis() - 10L);
+						final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime2 = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(System.currentTimeMillis() - 10L);
 						UserObjects.setTransactionTime(persistenceManager2, new Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif>() {
                             public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif instantiate() {
                                 return transactionTime2;
                             }
 
                             public Class<? extends #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> getInstanceClass() {
-                                return #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class;
+                                return Datatypes.DATE_TIME_CLASS;
                             }
                         });
 					}
@@ -3204,7 +3204,7 @@ public class TestMain {
 			// get persons with filter 1
 			PersonQuery personQuery = app1Package.createPersonQuery();
 			personQuery.lastName().like("Muster1.*");
-			personQuery.birthdateAsDateTime().lessThanOrEqualTo(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
+			personQuery.birthdateAsDateTime().lessThanOrEqualTo(SystemClock.getInstance().now());
 			personQuery.orderByCreatedAt().ascending();
 			SegmentHasPerson.Person<Person> personCollection;
 			List<Person> personList;
@@ -3627,7 +3627,7 @@ public class TestMain {
 			// test dateOp (date and dateTime in operation parameter)
 			// Test for non-query operation with result
 			this.begin();
-			#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTimeNow = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif;
+			#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTimeNow = SystemClock.getInstance().now();
 			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif dateIn = Datatypes.create(Datatypes.DATE_CLASS,
 					DateTimeFormat.BASIC_UTC_FORMAT.format(dateTimeNow).substring(0, 8));
 			PersonDateOpParams personDateOpParams;
@@ -3873,7 +3873,7 @@ public class TestMain {
 			try {
 				super.taskId = "CR20019719";
 				personQuery = app1Package.createPersonQuery();
-				personQuery.createdAt().equalTo(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
+				personQuery.createdAt().equalTo(SystemClock.getInstance().now());
 				List<Person> people = segment.<Person>getPerson().getAll(personQuery);
 				assertTrue(people.isEmpty());
 			} finally {

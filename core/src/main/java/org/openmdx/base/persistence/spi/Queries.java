@@ -105,9 +105,9 @@ public class Queries {
     	if("string".equalsIgnoreCase(name)) {
     		return String.class;
     	} else if("date".equals(name)) {
-    		return #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class;
+    		return Datatypes.DATE_CLASS;
     	} else if("datetime".equalsIgnoreCase(name)) {
-    		return #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class;
+    		return Datatypes.DATE_TIME_CLASS;
     	} else if("short".equalsIgnoreCase(name)) {
     		return Short.class;
     	} else  if("int".equalsIgnoreCase(name) || "integer".equalsIgnoreCase(name)) {

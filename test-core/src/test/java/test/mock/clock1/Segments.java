@@ -116,7 +116,7 @@ public class Segments {
         Segment segment
     ) {
         final Clock1Package clock1Package = (Clock1Package) segment.refImmediatePackage();
-        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mockTimePoint = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(System.currentTimeMillis() - ONE_AND_HALF_AN_HOUR);
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mockTimePoint =  #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(System.currentTimeMillis() - ONE_AND_HALF_AN_HOUR);
         final Time value = clock1Package.createTime(mockTimePoint);
         segment.setDateAndTime(value);
         return mockTimePoint;
@@ -125,7 +125,7 @@ public class Segments {
     private static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif tryToChangeDateAndTimeReflectively(
         Segment segment
     ) throws RefException {
-        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mockTimePoint = new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif(System.currentTimeMillis() - ONE_AND_HALF_AN_HOUR);
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mockTimePoint = #if CLASSIC_CHRONO_TYPES new ava.util.Date #else java.time.Instant.ofEpochMilli #endif(System.currentTimeMillis() - ONE_AND_HALF_AN_HOUR);
         final RefStruct param = segment.refImmediatePackage().refCreateStruct(
             "test:openmdx:clock1:Time", 
             Collections.singletonList(mockTimePoint)

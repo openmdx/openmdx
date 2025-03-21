@@ -81,7 +81,7 @@ javax.servlet.*
 		} catch(Exception e) {}
 	}
 	String loginFailed = request.getParameter("loginFailed");	
-	System.out.println(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif + ": Error: login failed; locale=" + locale + "; timezone=" + timezone + "; requestURL=" + request.getRequestURL());
+	System.out.println(SystemClock.getInstance().now() + ": Error: login failed; locale=" + locale + "; timezone=" + timezone + "; requestURL=" + request.getRequestURL());
 	// Invalidate sesion
 	try {
 		request.getSession().invalidate();

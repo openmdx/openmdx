@@ -330,7 +330,7 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
      * @return the interaction time
      */
     protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getInteractionTime(){
-    	return this.interactionTime#if !CLASSIC_CHRONO_TYPES .toInstant()#endif;
+    	return this.interactionTime;
     }
     
 }

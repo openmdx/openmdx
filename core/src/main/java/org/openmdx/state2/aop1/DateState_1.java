@@ -81,10 +81,6 @@ import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.ViewKind;
 import org.openmdx.state2.spi.Order;
 
-#if CLASSIC_CHRONO_TYPES
-import org.w3c.spi.DatatypeFactories;
-#endif
-
 /**
  * Date State Plug-In
  */
@@ -108,7 +104,9 @@ public class DateState_1
     /**
      * 
      */
-    private static final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif NULL = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar();
+    #if CLASSIC_CHRONO_TYPES
+    private static final javax.xml.datatype.XMLGregorianCalendar NULL = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar();
+    #endif
 
     private static final List<String> IGNORABLE_ATTRIBUTES = Arrays.asList(
         STATE_VALID_FROM, STATE_VALID_TO,
@@ -206,7 +204,7 @@ public class DateState_1
                     addState(states, predecessor);
                 }
             } else {
-                validFrom = NULL;
+                validFrom = #if CLASSIC_CHRONO_TYPES NULL #else java.time.LocalDate.MIN #endif;
             }
             //
             // Handle the period which is not longer involved
@@ -223,17 +221,17 @@ public class DateState_1
                     addState(states, successor);
                 }
             } else {
-                validTo = NULL;
+                validTo = #if CLASSIC_CHRONO_TYPES NULL #else java.time.LocalDate.MAX #endif;
                 
             }
             //
             // Handle the period which is involved
             //
             DataObject_1_0 target = PersistenceHelper.clone(source);
-            if(validFrom != NULL) {
+            if(validFrom != #if CLASSIC_CHRONO_TYPES NULL #else java.time.LocalDate.MIN #endif) {
                 target.objSetValue(STATE_VALID_FROM, validFrom);
             }
-            if(validTo != NULL) {
+            if(validTo != #if CLASSIC_CHRONO_TYPES NULL #else java.time.LocalDate.MAX #endif) {
                 target.objSetValue(STATE_VALID_TO, validTo);
             }
             if(!target.jdoIsNew()) {
@@ -369,9 +367,9 @@ public class DateState_1
     protected void reduceStates(
     ) throws ServiceException {
         final Collection<DataObject_1_0> states = getStates();
-        reduceStatesToBeRemoved(states); // before merging
-        if(reduceActiveStates(states)) { // merge
-            reduceStatesToBeRemoved(states); // after merging
+        reduceStatesToBeRemoved(states); // before merging
+        if(reduceActiveStates(states)) { // merge
+            reduceStatesToBeRemoved(states); // after merging
         }
     }
 
@@ -445,7 +443,7 @@ public class DateState_1
         final SortedMap<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif, DataObject_1_0> toBeRemoved = getStatesToBeRemoved(states);
         if(!toBeRemoved.isEmpty()) {
             final SortedMap<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif, DataObject_1_0> newStates = getNewStates(states);
-            if(!newStates.isEmpty()) { // Accessing the unmodifiable empty map would result in a ClassCastExcept
+            if(!newStates.isEmpty()) { // Accessing the unmodifiable empty map would result in a ClassCastExcept
                 for(Map.Entry<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif, DataObject_1_0> e : toBeRemoved.entrySet()) {
                     final DataObject_1_0 newState = newStates.get(e.getKey());
                     if(newState != null) {

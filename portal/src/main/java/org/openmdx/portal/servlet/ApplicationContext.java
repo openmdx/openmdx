@@ -1097,7 +1097,7 @@ public final class ApplicationContext implements Serializable {
         } catch(Exception ignore) {
 			SysLog.trace("Exception ignored", ignore);
         }
-        this.pmDataReloadedAt = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif;
+        this.pmDataReloadedAt = SystemClock.getInstance().now();
     }
 
     /**
@@ -1113,7 +1113,7 @@ public final class ApplicationContext implements Serializable {
             this.getPmfData(),
             this.currentUserRole
         );
-        this.pmDataReloadedAt = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif;
+        this.pmDataReloadedAt = SystemClock.getInstance().now();
         return this.pmData;
     }
 

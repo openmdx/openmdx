@@ -95,7 +95,7 @@ public class ImmutablePrimitiveTypeParserTest {
 		// Arrange
 		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
 		// Act
-		final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif value = testee.parse(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, "2000-04-01T05:06:07.890Z");
+		final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif value = testee.parse(Datatypes.DATE_TIME_CLASS, "2000-04-01T05:06:07.890Z");
 		// Assert
 		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDateTime("20000401T050607.890Z"), value);
 	}
@@ -107,7 +107,7 @@ public class ImmutablePrimitiveTypeParserTest {
 		// Arrange
 		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
 		// Act
-		final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif value = testee.parse(#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class, "2000-04-01");
+		final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif value = testee.parse(Datatypes.DATE_TIME_CLASS, "2000-04-01");
 		// Assert
 		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDate("20000401"), value);
 	}
