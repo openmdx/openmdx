@@ -52,7 +52,6 @@ import org.w3c.time.TimeZones;
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;

@@ -54,13 +54,11 @@ import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
-#if CLASSIC_CHRONO_TYPES
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.cci2.ImmutableDate;
 import org.w3c.cci2.ImmutableDateTime;
 import org.w3c.spi.ImmutableDatatypeFactory;
-#endif
 
 import org.openmdx.kernel.exception.BasicException;
 
@@ -99,7 +97,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value can't be parsed
      */
-    public #if CLASSIC_CHRONO_TYPES ImmutableDateTime #else java.time.LocalDate#endif newDateTime(
+    public ImmutableDateTime newDateTime(
             String value
     ){
         if(value == null) {
@@ -113,7 +111,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
                     dateTimeFormat = DateTimeFormat.EXTENDED_UTC_FORMAT;
                 }
             }
-            return toDateTime(DateTimeFormat.parse(value));
+            return toDateTime(dateTimeFormat.parse(value));
         } catch (ParseException exception) {
             throw BasicException.initHolder(
                     new IllegalArgumentException(
@@ -139,7 +137,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value can't be parsed
      */
-    public #if CLASSIC_CHRONO_TYPES ImmutableDate #else java.time.LocalDate#endif newDate(
+    public ImmutableDate newDate(
             String rawValue
     ){
         if(rawValue == null) {
@@ -169,7 +167,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
                     )
             );
         }
-        return #if CLASSIC_CHRONO_TYPES new org.w3c.cci2.ImmutableDate(value) #else LocalDate.parse(value, DateTimeFormatter.BASIC_ISO_DATE) #endif;
+        return new ImmutableDate(value);
     }
 
     /**

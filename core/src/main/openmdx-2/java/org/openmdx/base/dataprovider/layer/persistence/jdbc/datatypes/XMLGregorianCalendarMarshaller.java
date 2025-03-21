@@ -1,27 +1,27 @@
 /*
  * ====================================================================
- * Description: XMLGregorianCalendarMarshaller 
+ * Description: XMLGregorianCalendarMarshaller
  * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -35,9 +35,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
@@ -58,17 +58,15 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.datatype.DatatypeConstants;
+import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.DataTypes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
-#if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
-import org.w3c.spi.ImmutableDatatypeFactory;
-#endif
-
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -77,32 +75,32 @@ import org.w3c.spi2.Datatypes;
 public class XMLGregorianCalendarMarshaller {
 
     /**
-     * Constructor 
+     * Constructor
      *
      * @param dateTimeStandardTimeZone
      * @param dateTimeDaylightSavingTimeZone TODO
      * @param sqlDataTypes
-     * @param dateTimePrecision 
+     * @param dateTimePrecision
      * @throws ServiceException
      */
     protected XMLGregorianCalendarMarshaller(
-        String dateTimeStandardTimeZone,
-        String dateTimeDaylightSavingTimeZone,
-        DataTypes sqlDataTypes, 
-        TimeUnit dateTimePrecision
+            String dateTimeStandardTimeZone,
+            String dateTimeDaylightSavingTimeZone,
+            DataTypes sqlDataTypes,
+            TimeUnit dateTimePrecision
     ) throws ServiceException {
         this.sqlDataTypes = sqlDataTypes;
         this.dateTimeFormatBefore1970 = new SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss.SSS"
+                "yyyy-MM-dd HH:mm:ss.SSS"
         );
         this.dateTimeFormatBefore1970.setTimeZone(
-            XMLGregorianCalendarMarshaller.UTC
+                XMLGregorianCalendarMarshaller.UTC
         );
         this.dateTimeFormatSince1970 = new SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss"
+                "yyyy-MM-dd HH:mm:ss"
         );
         this.dateTimeFormatSince1970.setTimeZone(
-            TimeZone.getTimeZone(dateTimeStandardTimeZone)
+                TimeZone.getTimeZone(dateTimeStandardTimeZone)
         );
         this.dateTimeDaylightSavingTimeZone = dateTimeDaylightSavingTimeZone;
         this.dateTimePrecision = dateTimePrecision;
@@ -112,14 +110,14 @@ public class XMLGregorianCalendarMarshaller {
      * The precision used for date/time values since {@code 1970-01-01T00:00:00Z}.
      */
     private final TimeUnit dateTimePrecision;
-    
+
     /**
-     * 
+     *
      */
     private final String dateTimeDaylightSavingTimeZone;
-    
+
     /**
-     * 
+     *
      */
     private DataTypes sqlDataTypes;
 
@@ -130,17 +128,17 @@ public class XMLGregorianCalendarMarshaller {
      * <li>{@code CHARACTER} <i>(default)</i>
      * <li>{@code NUMERIC}
      * </ul>
-     * 
+     *
      * @see LayerConfigurationEntries#TIME_TYPE_STANDARD
      * @see LayerConfigurationEntries#TIME_TYPE_TIME
      * @see LayerConfigurationEntries#TIME_TYPE_CHARACTER
      * @see LayerConfigurationEntries#TIME_TYPE_NUMERIC
      */
     private static final List<String> TIME_TYPES = Arrays.asList(
-        LayerConfigurationEntries.TIME_TYPE_STANDARD,
-        LayerConfigurationEntries.TIME_TYPE_TIME,
-        LayerConfigurationEntries.TIME_TYPE_CHARACTER,
-        LayerConfigurationEntries.TIME_TYPE_NUMERIC
+            LayerConfigurationEntries.TIME_TYPE_STANDARD,
+            LayerConfigurationEntries.TIME_TYPE_TIME,
+            LayerConfigurationEntries.TIME_TYPE_CHARACTER,
+            LayerConfigurationEntries.TIME_TYPE_NUMERIC
     );
 
     /**
@@ -149,15 +147,15 @@ public class XMLGregorianCalendarMarshaller {
      * <li>{@code DATE}
      * <li>{@code CHARACTER} <i>(default)</i>
      * </ul>
-     * 
+     *
      * @see LayerConfigurationEntries#DATE_TYPE_STANDARD
      * @see LayerConfigurationEntries#DATE_TYPE_DATE
      * @see LayerConfigurationEntries#DATE_TYPE_CHARACTER
      */
     private static final List<String> DATE_TYPES = Arrays.asList(
-        LayerConfigurationEntries.DATE_TYPE_STANDARD,
-        LayerConfigurationEntries.DATE_TYPE_DATE,
-        LayerConfigurationEntries.DATE_TYPE_CHARACTER
+            LayerConfigurationEntries.DATE_TYPE_STANDARD,
+            LayerConfigurationEntries.DATE_TYPE_DATE,
+            LayerConfigurationEntries.DATE_TYPE_CHARACTER
     );
 
     /**
@@ -175,15 +173,15 @@ public class XMLGregorianCalendarMarshaller {
      * @see LayerConfigurationEntries#DATETIME_TYPE_NUMERIC
      */
     private static final List<String> DATETIME_TYPES = Arrays.asList(
-        LayerConfigurationEntries.DATETIME_TYPE_STANDARD,
-        LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP,
-        LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE,
-        LayerConfigurationEntries.DATETIME_TYPE_CHARACTER,
-        LayerConfigurationEntries.DATETIME_TYPE_NUMERIC            
+            LayerConfigurationEntries.DATETIME_TYPE_STANDARD,
+            LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP,
+            LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE,
+            LayerConfigurationEntries.DATETIME_TYPE_CHARACTER,
+            LayerConfigurationEntries.DATETIME_TYPE_NUMERIC
     );
 
     /**
-     * 
+     *
      */
     protected final static TimeZone UTC = TimeZone.getTimeZone("UTC");
 
@@ -197,84 +195,86 @@ public class XMLGregorianCalendarMarshaller {
      */
     private final SimpleDateFormat dateTimeFormatBefore1970;
 
-    
+
     /**
      * Factory method
-     * 
+     *
      * @return a new XML GregorianCalendar Marshaller Instance
-     * 
+     *
      * @throws ServiceException
      */
     public static XMLGregorianCalendarMarshaller newInstance(
-        String timeType,
-        String dateType,
-        String dateTimeType, 
-        String dateTimeStandardTimeZone, 
-        String dateTimeDaylightSavingTimeZone,
-        String dateTimePrecision, 
-        DataTypes sqlDataTypes
+            String timeType,
+            String dateType,
+            String dateTimeType,
+            String dateTimeStandardTimeZone,
+            String dateTimeDaylightSavingTimeZone,
+            String dateTimePrecision,
+            DataTypes sqlDataTypes
     ) throws ServiceException{
         if(!TIME_TYPES.contains(timeType)) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.INVALID_CONFIGURATION,
-            "Unsupported time type",
-            new BasicException.Parameter("supported", TIME_TYPES),
-            new BasicException.Parameter("requested", timeType)
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
+                "Unsupported time type",
+                new BasicException.Parameter("supported", TIME_TYPES),
+                new BasicException.Parameter("requested", timeType)
         );
         if(!DATE_TYPES.contains(dateType)) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.INVALID_CONFIGURATION,
-            "Unsupported date type",
-            new BasicException.Parameter("supported", DATE_TYPES),
-            new BasicException.Parameter("requested", dateType)
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
+                "Unsupported date type",
+                new BasicException.Parameter("supported", DATE_TYPES),
+                new BasicException.Parameter("requested", dateType)
         );
         if(!DATETIME_TYPES.contains(dateTimeType)) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.INVALID_CONFIGURATION,
-            "Unsupported dateTime type",
-            new BasicException.Parameter("supported", DATETIME_TYPES),
-            new BasicException.Parameter("requested", dateTimeType)
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
+                "Unsupported dateTime type",
+                new BasicException.Parameter("supported", DATETIME_TYPES),
+                new BasicException.Parameter("requested", dateTimeType)
         );
         TimeUnit precision;
         try {
             precision = TimeUnit.valueOf(dateTimePrecision);
         } catch (RuntimeException exception) {
             throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                "Unsupported dateTimePrecision value",
-                new BasicException.Parameter("supported", TimeUnit.SECONDS, TimeUnit.MILLISECONDS, TimeUnit.MICROSECONDS, TimeUnit.NANOSECONDS),
-                new BasicException.Parameter("requested", dateTimePrecision)
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION,
+                    "Unsupported dateTimePrecision value",
+                    new BasicException.Parameter("supported", TimeUnit.SECONDS, TimeUnit.MILLISECONDS, TimeUnit.MICROSECONDS, TimeUnit.NANOSECONDS),
+                    new BasicException.Parameter("requested", dateTimePrecision)
             );
         }
         return new XMLGregorianCalendarMarshaller(
-            dateTimeStandardTimeZone,
-            dateTimeDaylightSavingTimeZone,
-            sqlDataTypes, 
-            precision
+                dateTimeStandardTimeZone,
+                dateTimeDaylightSavingTimeZone,
+                sqlDataTypes,
+                precision
         );
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param source
      * @param connection
+     * @param sqlProperties
+     *
      * @return
-     * 
+     *
      * @throws ServiceException
      */
     public Object marshal(
-        Object source, 
-        Connection connection
+            Object source,
+            Connection connection
     ) throws ServiceException {
-        if(Datatypes.DATE_CLASS.isInstance(source)) {
-            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif value = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) source;
+        if(source instanceof XMLGregorianCalendar) {
+            XMLGregorianCalendar value = (XMLGregorianCalendar) source;
             QName schemaType = value.getXMLSchemaType();
             if(DatatypeConstants.TIME.equals(schemaType)) {
                 String timeType = sqlDataTypes.getTimeType(connection).intern();
-                if(timeType.equals(LayerConfigurationEntries.TIME_TYPE_NUMERIC)) {
+                if(timeType == LayerConfigurationEntries.TIME_TYPE_NUMERIC) {
                     long milliseconds = value.getMillisecond() + 1000L * (
                             value.getSecond() + 60L * (
                                     value.getMinute() + 60L * (
@@ -290,7 +290,7 @@ public class XMLGregorianCalendarMarshaller {
                     } else {
                         int i = time.indexOf('.');
                         return Time.valueOf(
-                            i < 0 ? time : time.substring(0, i)
+                                i < 0 ? time : time.substring(0, i)
                         );
                     }
                 }
@@ -298,20 +298,20 @@ public class XMLGregorianCalendarMarshaller {
                 String dateTimeType = sqlDataTypes.getDateTimeType(connection).intern();
                 if(dateTimeType == LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP) {
                     Timestamp timestamp = new Timestamp(
-                        value.toGregorianCalendar().getTimeInMillis()
+                            value.toGregorianCalendar().getTimeInMillis()
                     );
                     BigDecimal fractionalSeconds = value.getFractionalSecond();
                     if(fractionalSeconds != null && fractionalSeconds.scale() > 3) {
                         timestamp.setNanos(fractionalSeconds.scaleByPowerOfTen(9).intValue());
                     }
                     return timestamp;
-                } else if(dateTimeType.equals(LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE)) {
+                } else if(dateTimeType == LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE) {
                     return sqlDateTime(value, true);
-                } else if(dateTimeType.equals(LayerConfigurationEntries.DATETIME_TYPE_NUMERIC)) {
+                } else if(dateTimeType == LayerConfigurationEntries.DATETIME_TYPE_NUMERIC) {
                     return value.getFractionalSecond().add(
-                        BigDecimal.valueOf(value.toGregorianCalendar().getTimeInMillis() / 1000)
+                            BigDecimal.valueOf(value.toGregorianCalendar().getTimeInMillis() / 1000)
                     );
-                } else if(dateTimeType.equals(LayerConfigurationEntries.DATETIME_TYPE_CHARACTER)) {
+                } else if(dateTimeType == LayerConfigurationEntries.DATETIME_TYPE_CHARACTER) {
                     return value.normalize().toXMLFormat().replaceAll("[:\\-]","");
                 } else {
                     return sqlDateTime(value, false);
@@ -319,33 +319,33 @@ public class XMLGregorianCalendarMarshaller {
             } else if (DatatypeConstants.DATE.equals(schemaType)) {
                 String dateType = sqlDataTypes.getDateType(connection).intern();
                 String date = value.toString();
-                if(dateType.equals(LayerConfigurationEntries.DATE_TYPE_CHARACTER)) {
+                if(dateType == LayerConfigurationEntries.DATE_TYPE_CHARACTER) {
                     return date.replaceAll("-", "");
                 } else try {
-                    return Date.valueOf(date);    
+                    return Date.valueOf(date);
                 } catch (IllegalArgumentException exception) {
                     throw new ServiceException(
-                        exception,
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.TRANSFORMATION_FAILURE,
-                        "Unable to convert the value into an SQL date, maybe there are some inappropriate fields set",
-                        new BasicException.Parameter("dateType", dateType),
-                        new BasicException.Parameter("value", date),
-                        new BasicException.Parameter("valid", value.isValid()),
-                        new BasicException.Parameter("years", value.getEonAndYear()),
-                        new BasicException.Parameter("months", maskUndefined(value.getMonth())),
-                        new BasicException.Parameter("days", maskUndefined(value.getDay())),
-                        new BasicException.Parameter("hours", maskUndefined(value.getHour())),
-                        new BasicException.Parameter("minutes", maskUndefined(value.getMinute())),
-                        new BasicException.Parameter("seconds", maskUndefined(value.getSecond(), value.getFractionalSecond())),
-                        new BasicException.Parameter("timzone", maskUndefined(value.getTimezone()))
+                            exception,
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.TRANSFORMATION_FAILURE,
+                            "Unable to convert the value into an SQL date, maybe there are some inappropriate fields set",
+                            new BasicException.Parameter("dateType", dateType),
+                            new BasicException.Parameter("value", date),
+                            new BasicException.Parameter("valid", value.isValid()),
+                            new BasicException.Parameter("years", value.getEonAndYear()),
+                            new BasicException.Parameter("months", maskUndefined(value.getMonth())),
+                            new BasicException.Parameter("days", maskUndefined(value.getDay())),
+                            new BasicException.Parameter("hours", maskUndefined(value.getHour())),
+                            new BasicException.Parameter("minutes", maskUndefined(value.getMinute())),
+                            new BasicException.Parameter("seconds", maskUndefined(value.getSecond(), value.getFractionalSecond())),
+                            new BasicException.Parameter("timzone", maskUndefined(value.getTimezone()))
                     );
                 }
             } else throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.TRANSFORMATION_FAILURE,
-                getClass().getName() + " supports only the XML datatypes [time, datetime, date]",
-                new BasicException.Parameter("value", value)
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.TRANSFORMATION_FAILURE,
+                    getClass().getName() + " supports only the XML datatypes [time, datetime, date]",
+                    new BasicException.Parameter("value", value)
             );
         } else {
             return source;
@@ -354,29 +354,29 @@ public class XMLGregorianCalendarMarshaller {
 
     /**
      * Stringify a Datatype field
-     * 
+     *
      * @param value the {@code int} representation of the field value
-     * 
-     * @return the {@code String} representation of the field value, or 
+     *
+     * @return the {@code String} representation of the field value, or
      * {@code null} if the field is undefined
      */
     private static String maskUndefined(
-        int value
+            int value
     ){
         return value == DatatypeConstants.FIELD_UNDEFINED ? null : Integer.toString(value);
     }
 
     /**
      * Stringify the seconds fields
-     * 
+     *
      * @param seconds
      * @param fractionalSeconds
-     * 
+     *
      * @return the complete seconds fields
      */
     private static String maskUndefined(
-        int seconds,
-        BigDecimal fractionalSeconds
+            int seconds,
+            BigDecimal fractionalSeconds
     ){
         if(seconds == DatatypeConstants.FIELD_UNDEFINED) {
             return null;
@@ -386,29 +386,29 @@ public class XMLGregorianCalendarMarshaller {
             return fractionalSeconds.add(BigDecimal.valueOf(seconds)).toString();
         }
     }
-    
+
     /**
      * Use UTC for org::w3c::dateTime values < 1970-01-01T00:00:00.000Z
-     * 
+     *
      * @param xmlDateTime
      * @param withTimeZone
-     * 
+     *
      * @return the SQL date time representation
      */
     private String sqlDateTime(
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif xmlDateTime,
-        boolean withTimeZone
+            XMLGregorianCalendar xmlDateTime,
+            boolean withTimeZone
     ){
-    	final long millisecondsSince1970 = xmlDateTime.toGregorianCalendar().getTimeInMillis();
-    	final SimpleDateFormat format;
-    	final String part1;
+        final long millisecondsSince1970 = xmlDateTime.toGregorianCalendar().getTimeInMillis();
+        final SimpleDateFormat format;
+        final String part1;
         if(millisecondsSince1970 < 0){
             format = this.dateTimeFormatBefore1970; // including fractional part in MILLISECONDS precision
             part1 = "";
         } else {
             format = this.dateTimeFormatSince1970; // excluding fractional part
             switch(this.dateTimePrecision) {
-                case NANOSECONDS: 
+                case NANOSECONDS:
                     part1 = "." + String.valueOf(1000000000 + xmlDateTime.getFractionalSecond().movePointRight(9).intValue()).substring(1);
                     break;
                 case MICROSECONDS:
@@ -417,36 +417,33 @@ public class XMLGregorianCalendarMarshaller {
                 case MILLISECONDS:
                     part1 = "." + String.valueOf(1000 + xmlDateTime.getFractionalSecond().movePointRight(3).intValue()).substring(1);
                     break;
-                case SECONDS: default: 
+                case SECONDS: default:
                     part1 = "";
             }
         }
-        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTime = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(millisecondsSince1970);
-        final String part2 = withTimeZone ? (" " + getTimeZone(format.getTimeZone(), dateTime)) : ""; 
+        final Date dateTime = new Date(millisecondsSince1970);
+        final String part2 = withTimeZone ? (" " + getTimeZone(format.getTimeZone(), dateTime)) : "";
         final String part0 = format.format(dateTime);
         return part0 + part1 + part2;
     }
 
-	/**
-	 * Build the time zone information
-	 * 
-	 * @return the time zone region and including DST information
-	 */
-	private  String getTimeZone(
-            TimeZone standardTimeZone,
-            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTime
-    ) {
-		return standardTimeZone.inDaylightTime(dateTime) ? this.dateTimeDaylightSavingTimeZone : standardTimeZone.getID();
-	}
+    /**
+     * Build the time zone information
+     *
+     * @return the time zone region and including DST information
+     */
+    private  String getTimeZone(TimeZone standardTimeZone, Date dateTime) {
+        return standardTimeZone.inDaylightTime(dateTime) ? this.dateTimeDaylightSavingTimeZone : standardTimeZone.getID();
+    }
 
     /**
-     * 
+     *
      * @param source
      * @return
      * @throws ServiceException
      */
     public Object unmarshal(
-        Object source
+            Object source
     ) throws ServiceException {
         if(source instanceof String) {
             return parse(((String) source).replaceFirst(" ", "T"));
@@ -457,8 +454,7 @@ public class XMLGregorianCalendarMarshaller {
             long milliseconds = value.getTime();
             java.util.GregorianCalendar calendar = new GregorianCalendar(UTC);
             calendar.setTimeInMillis(milliseconds);
-            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif target
-                    = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
+            XMLGregorianCalendar target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
             switch(this.dateTimePrecision){
                 case NANOSECONDS:
                     //
@@ -478,9 +474,9 @@ public class XMLGregorianCalendarMarshaller {
             }
             return target;
         } else if(source instanceof java.time.LocalDateTime) {
-        	java.time.LocalDateTime value = (java.time.LocalDateTime)source;
+            java.time.LocalDateTime value = (java.time.LocalDateTime)source;
             java.util.GregorianCalendar calendar = GregorianCalendar.from(ZonedDateTime.of(value, ZoneOffset.UTC));
-            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
+            XMLGregorianCalendar target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
             switch(this.dateTimePrecision) {
                 case NANOSECONDS:
                     //
@@ -499,17 +495,16 @@ public class XMLGregorianCalendarMarshaller {
                     break;
             }
             return target;
-        } else if (Datatypes.DATE_TIME_CLASS.isInstance(source)) {
+        } else if (source instanceof Date) {
             return parse(source.toString());
         } else if (source instanceof BigDecimal) {
             BigDecimal value = (BigDecimal)source;
             long milliseconds = value.movePointRight(3).longValue();
             java.util.GregorianCalendar calendar = new GregorianCalendar(UTC);
             calendar.setTimeInMillis(milliseconds);
-            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif target
-                    = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
+            XMLGregorianCalendar target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar);
             target.setFractionalSecond(
-                value.subtract(BigDecimal.valueOf(milliseconds / 1000))
+                    value.subtract(BigDecimal.valueOf(milliseconds / 1000))
             );
             return target;
         } else {
@@ -519,18 +514,18 @@ public class XMLGregorianCalendarMarshaller {
 
     /**
      * Unmarshal an XML datatype value
-     * 
+     *
      * @param value
-     * 
+     *
      * @return the corresponding datatype value
      */
     private Object parse(
-        String value
+            String value
     ){
-        return 
-            value.startsWith("P") || value.startsWith("-P") ? Datatypes.create(Datatypes.DURATION_CLASS, value) :
-            value.indexOf('T') < 0 ? Datatypes.create(Datatypes.DATE_CLASS, value) :
-            Datatypes.create(Datatypes.DATE_TIME_CLASS, value);
+        return
+                value.startsWith("P") || value.startsWith("-P") ? Datatypes.create(Duration.class, value) :
+                        value.indexOf('T') < 0 ? Datatypes.create(XMLGregorianCalendar.class, value) :
+                                Datatypes.create(java.util.Date.class, value);
     }
-       
+
 }

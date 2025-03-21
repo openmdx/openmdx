@@ -222,7 +222,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
      * @return	the formatted time string.
      */
     public String format(
-    	#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif date
+    	Date date
     ){
         return get().format(date);
     }
@@ -237,7 +237,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
      * @exception	ParseException
      *				If the given string cannot be parsed as a date.
      */
-    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif parse(
+    public Date parse(
             String text
     ) throws ParseException {
         if(this.rejectE) {
@@ -247,7 +247,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
                     e
             );
         }
-        return get().parse(text)#if !CLASSIC_CHRONO_TYPES .toInstant()#endif;
+        return get().parse(text);
     }
 
 
@@ -384,7 +384,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
          * @see org.openmdx.base.text.format.DateFormat#parse(java.lang.String)
          */
         @Override
-        public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif parse(
+        public Date parse(
                 String text
         ) throws ParseException {
             return super.parse(

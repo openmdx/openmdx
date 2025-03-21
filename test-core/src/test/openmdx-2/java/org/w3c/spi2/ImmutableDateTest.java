@@ -44,12 +44,10 @@
  */
 package org.w3c.spi2;
 
-#if CLASSIC_CHRONO_TYPES
 import java.util.GregorianCalendar;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-#endif
 
 /**
  * Test ImmutableDate

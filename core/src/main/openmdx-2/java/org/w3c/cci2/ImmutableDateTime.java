@@ -196,7 +196,7 @@ public final class ImmutableDateTime
      */
     public String toBasicFormat() {
         if(this.basicValue == null){
-            #if CLASSIC_CHRONO_TYPES this.basicValue = DateTimeFormat.BASIC_UTC_FORMAT.format(this);#endif
+            this.basicValue = DateTimeFormat.BASIC_UTC_FORMAT.format(this);
         }
         return this.basicValue;
     }
@@ -206,7 +206,7 @@ public final class ImmutableDateTime
      */
     public String toXMLFormat() {
         if(this.extendedValue == null) {
-            #if CLASSIC_CHRONO_TYPES this.extendedValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(this);#endif
+           this.extendedValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(this);
         }
         return this.extendedValue;
     }

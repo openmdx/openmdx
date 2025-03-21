@@ -1,7 +1,6 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Description: ImmutableDate Test
+ * Description: XMLGregorianCalendarMarshaller
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,29 +41,11 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.w3c.spi2;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.w3c.cci2.ImmutableDate;
-
-import java.util.GregorianCalendar;
+package org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes;
 
 /**
- * Test ImmutableDate
+ * InstantMarshaller
  */
-public class ImmutableDateTest {
-
-	/**
-	 * CR20019921
-	 */
-	@Test
-	public void testConversionToGregorianCalendar(){
-		ImmutableDate firstOfApril = (ImmutableDate) Datatypes.create(Datatypes.DATE_CLASS, "20000401");
-		GregorianCalendar calendar = firstOfApril.toGregorianCalendar();
-		Assertions.assertEquals(2000, calendar.get(GregorianCalendar.YEAR), "Year 2000");
-		Assertions.assertEquals(GregorianCalendar.APRIL, calendar.get(GregorianCalendar.MONTH), "April");
-		Assertions.assertEquals( 1, calendar.get(GregorianCalendar.DAY_OF_MONTH), "1st");
-	}
+public class InstantMarshaller {
 
 }

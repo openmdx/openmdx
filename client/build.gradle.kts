@@ -101,6 +101,15 @@ dependencies {
     jakartaeeApi("jakarta.platform:jakarta.jakartaee-api")
 }
 
+sourceSets {
+    main {
+        java {
+            srcDir("src/main/java")
+            srcDir("src/main/openmdx-${projectFlavour}/java")
+        }
+    }
+}
+
 tasks {
 
     val openmdxCommonIncludes = listOf<String>()

@@ -224,6 +224,7 @@ sourceSets {
     test {
         java {
             srcDir("src/test/java")
+			srcDir("src/test/openmdx-${projectFlavour}/java")
         }
         resources {
         	srcDir("src/test/resources")

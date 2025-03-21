@@ -1,7 +1,6 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Description: ImmutableDate Test
+ * Description: XMLGregorianCalendarMarshaller
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,29 +41,36 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.w3c.spi2;
+package org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.w3c.cci2.ImmutableDate;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.DataTypes;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.exception.BasicException;
+import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi2.Datatypes;
 
+import javax.xml.datatype.DatatypeConstants;
+import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Test ImmutableDate
+ * InstantMarshaller
  */
-public class ImmutableDateTest {
-
-	/**
-	 * CR20019921
-	 */
-	@Test
-	public void testConversionToGregorianCalendar(){
-		ImmutableDate firstOfApril = (ImmutableDate) Datatypes.create(Datatypes.DATE_CLASS, "20000401");
-		GregorianCalendar calendar = firstOfApril.toGregorianCalendar();
-		Assertions.assertEquals(2000, calendar.get(GregorianCalendar.YEAR), "Year 2000");
-		Assertions.assertEquals(GregorianCalendar.APRIL, calendar.get(GregorianCalendar.MONTH), "April");
-		Assertions.assertEquals( 1, calendar.get(GregorianCalendar.DAY_OF_MONTH), "1st");
-	}
+public class InstantMarshaller {
 
 }
