@@ -240,9 +240,9 @@ public class XMLTarget implements ExportTarget {
     ) throws ServiceException {
         final String stringValue;
         if(PrimitiveTypes.DATETIME.equals(typeName)) {
-            stringValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) value);
+            stringValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value));
         } else if(PrimitiveTypes.DATE.equals(typeName)) {
-            stringValue = ((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) value).toXMLFormat();
+            stringValue = (Datatypes.DATE_CLASS.cast(value)).toXMLFormat();
         } else if(PrimitiveTypes.LONG.equals(typeName) || PrimitiveTypes.INTEGER.equals(typeName) || PrimitiveTypes.SHORT.equals(typeName)) {
             stringValue = String.valueOf(((Number) value).longValue());
         } else if(PrimitiveTypes.BINARY.equals(typeName)) {

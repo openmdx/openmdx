@@ -73,6 +73,7 @@ import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.spi.Order;
 import org.openmdx.state2.spi.TechnicalAttributes;
+import org.w3c.spi2.Datatypes;
 import org.xml.sax.InputSource;
 
 /**
@@ -392,8 +393,8 @@ public class ObjectAndValidStateComparator {
 	) throws ServiceException{
 		for(MappedRecord object : source) {
 			if(this.isInstanceOf(object, "org:openmdx:state2:DateState")) {
-				#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) object.get(TechnicalAttributes.STATE_VALID_FROM);
-				#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) object.get(TechnicalAttributes.STATE_VALID_TO);
+				#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom = Datatypes.DATE_CLASS.cast(object).get(TechnicalAttributes.STATE_VALID_FROM);
+				#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo = Datatypes.DATE_CLASS.cast(object).get(TechnicalAttributes.STATE_VALID_TO);
 				if(object.get(SystemAttributes.REMOVED_AT) == null) {
     				if(
     					Order.compareValidFrom(interval.validFrom, validFrom) >= 0 &&
@@ -447,8 +448,8 @@ public class ObjectAndValidStateComparator {
 		Collection<MappedRecord> source
 	){
 		for(MappedRecord object : source) {
-			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) object.get(TechnicalAttributes.STATE_VALID_FROM);
-			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) object.get(TechnicalAttributes.STATE_VALID_TO);
+			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom = Datatypes.DATE_CLASS.cast(object).get(TechnicalAttributes.STATE_VALID_FROM);
+			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo = Datatypes.DATE_CLASS.cast(object).get(TechnicalAttributes.STATE_VALID_TO);
 			From: for(Interval interval : intervals){
 				int i = Order.compareValidFrom(validFrom, interval.validFrom);
 				if(i == 0) {

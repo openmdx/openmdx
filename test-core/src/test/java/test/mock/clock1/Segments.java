@@ -60,6 +60,7 @@ import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.rest.cci.VoidRecord;
 
+import org.w3c.spi2.Datatypes;
 import test.openmdx.clock1.jmi1.Clock1Package;
 import test.openmdx.clock1.jmi1.Segment;
 import test.openmdx.clock1.jmi1.Time;
@@ -220,7 +221,7 @@ public class Segments {
             "currentDateAndTime", 
             Arrays.asList(param)
         );
-        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) result.refGetValue("utc");
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = Datatypes.DATE_TIME_CLASS.cast(result).refGetValue("utc");
         return utc;
     }
     

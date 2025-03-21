@@ -256,8 +256,8 @@ public final class Codes implements Serializable {
 	    					(String)entry.refGetValue("iconKey"),
 	    					(String)entry.refGetValue("color"),
 	    					(String)entry.refGetValue("backColor"),        					
-	    			        (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)entry.refGetValue("validFrom"),
-	    			        (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)entry.refGetValue("validTo")
+	    			        Datatypes.DATE_TIME_CLASS.cast(entry).refGetValue("validFrom"),
+	    			        Datatypes.DATE_TIME_CLASS.cast(entry).refGetValue("validTo")
 	    			    )
 	    			);
 	    		}

@@ -46,6 +46,7 @@ package org.openmdx.base.accessor.spi;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Date Marshaller
@@ -69,7 +70,7 @@ public class DateMarshaller {
 
         @Override
         protected String toBasicFormat(Object datatype) {
-            return ((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)datatype).toXMLFormat().replaceAll("-", "");
+            return Datatypes.DATE_CLASS.cast(datatype).toXMLFormat().replaceAll("-", "");
         }
         
     };

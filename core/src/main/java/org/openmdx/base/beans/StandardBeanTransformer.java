@@ -75,6 +75,7 @@ import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
+import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -377,8 +378,7 @@ public class StandardBeanTransformer implements BeanTransformer {
                 "new",
                 new Object[]{
                         Long.valueOf(
-                                String.valueOf(((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)
-                                        oldInstance).#if CLASSIC_CHRONO_TYPES getTime() #else now() #endif)
+                                String.valueOf(Datatypes.DATE_TIME_CLASS.cast(oldInstance).#if CLASSIC_CHRONO_TYPES getTime() #else now() #endif)
                         )
                 }
             );
@@ -432,7 +432,7 @@ public class StandardBeanTransformer implements BeanTransformer {
                 "create",
                 new Object[]{
                     #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
-                    DateTimeFormat.BASIC_UTC_FORMAT.format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)oldInstance)
+                    DateTimeFormat.BASIC_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(oldInstance))
                 }
             );
         }

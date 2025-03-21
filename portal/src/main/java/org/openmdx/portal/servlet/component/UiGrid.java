@@ -1663,7 +1663,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 						if(values.isEmpty()) {
 							day = SystemClock.getInstance().now();
 						} else try {
-							day = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)values.get(0);
+							day = Datatypes.DATE_TIME_CLASS.cast(values).get(0);
 						} catch(IllegalArgumentException e) {
 							day = SystemClock.getInstance().now();
 						}

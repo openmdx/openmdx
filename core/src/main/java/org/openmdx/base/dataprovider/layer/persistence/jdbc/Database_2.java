@@ -2985,7 +2985,7 @@ public class Database_2
         boolean dateTime = value instanceof java.util.Date
             || Datatypes.DATE_CLASS.isInstance(value)
                 && DatatypeConstants.DATETIME
-                    .equals(((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) value).getXMLSchemaType());
+                    .equals((Datatypes.DATE_CLASS.cast(value)).getXMLSchemaType());
         boolean timestampWithTimezone = dateTime
             && LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE
                 .equals(getDateTimeType(connection));
@@ -3313,7 +3313,7 @@ public class Database_2
         if(value instanceof java.util.Date) {
             normalizedValue = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(
                 DateTimeFormat.EXTENDED_UTC_FORMAT
-                    .format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) value)
+                    .format(Datatypes.DATE_TIME_CLASS.cast(value))
             );
         } else {
             normalizedValue = value;

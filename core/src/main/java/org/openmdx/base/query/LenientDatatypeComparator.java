@@ -115,20 +115,20 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
             #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif right;
             if(Datatypes.DATE_CLASS.isInstance(second)) {
                 if(first.getClass() == second.getClass()) {
-                    left = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) first;
-                    right = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) second;
+                    left = Datatypes.DATE_CLASS.cast(first);
+                    right = Datatypes.DATE_CLASS.cast(second);
                 } else {
 
                     left = first instanceof #if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif
                             ? ((#if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif)first).clone()
-                            : (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)first;
+                            : Datatypes.DATE_CLASS.cast(first);
 
                     right = second instanceof #if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif
                             ? ((#if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif)second).clone()
-                            : (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)second;
+                            : Datatypes.DATE_CLASS.cast(second);
                 }
             } else if (second instanceof CharSequence){
-                left = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) first;
+                left = Datatypes.DATE_CLASS.cast(first);
                 right = Datatypes.create(Datatypes.DATE_CLASS, second.toString());
             } else throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -152,10 +152,10 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
             );
         }
         if (Datatypes.DATE_TIME_CLASS.isInstance(first)){
-            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif left = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) first;
+            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif left = Datatypes.DATE_TIME_CLASS.cast(first);
             #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif right;
             if(Datatypes.DATE_TIME_CLASS.isInstance(second)) {
-                right = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) second;
+                right = Datatypes.DATE_TIME_CLASS.cast(second);
             } else if (second instanceof CharSequence){
                 right = Datatypes.create(Datatypes.DATE_TIME_CLASS, second.toString());
             } else throw new RuntimeServiceException(

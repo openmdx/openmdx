@@ -55,7 +55,7 @@ public class SystemClock implements Clock {
      */
     @Override
     public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif now() {
-        return #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif;
+        return #if CLASSIC_CHRONO_TYPES new ImmutableDateTime(System.currentTimeMillis()) #else java.time.Instant.now()#endif;
     }
 
     /**
@@ -63,6 +63,16 @@ public class SystemClock implements Clock {
      */
     @Override
     public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif today() {
-        return #if CLASSIC_CHRONO_TYPES org.openmdx.state2.cci.DateStateViews.today() #else java.time.LocalDate.now()#endif;
+        #if CLASSIC_CHRONO_TYPES 
+        final GregorianCalendar calendar = new GregorianCalendar();
+        return DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+            calendar.get(Calendar.YEAR), 
+            calendar.get(Calendar.MONTH) + 1, 
+            calendar.get(Calendar.DAY_OF_MONTH),
+            DatatypeConstants.FIELD_UNDEFINED
+        );
+        #else 
+        return java.time.LocalDate.now()
+        #endif;
     }
 }

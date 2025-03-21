@@ -251,7 +251,7 @@ public class DateValue
             	dateFormatter.format(value) : 
             		dateTimeFormatter.format(value);
         } else if(Datatypes.DATE_CLASS.isInstance(value)) {
-            GregorianCalendar calendar = ((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif)value).toGregorianCalendar(
+            GregorianCalendar calendar = (Datatypes.DATE_CLASS.cast(value)).toGregorianCalendar(
                 TimeZone.getTimeZone(app.getCurrentTimeZone()),
                 this.app.getCurrentLocale(),
                 null

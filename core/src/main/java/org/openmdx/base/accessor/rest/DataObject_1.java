@@ -2176,7 +2176,7 @@ public class DataObject_1
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif lockValue
     )
         throws ServiceException {
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) beforeImage.objGetValue(SystemAttributes.MODIFIED_AT);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = Datatypes.DATE_TIME_CLASS.cast(beforeImage).objGetValue(SystemAttributes.MODIFIED_AT);
         if (currentValue != null) {
             if (currentValue.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(lockValue)) {
                 throw new ServiceException(
@@ -2208,7 +2208,7 @@ public class DataObject_1
         if (lockMatcher.matches())
             try {
                 String lockFeature = lockMatcher.group(1);
-                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) beforeImage.objGetValue(lockFeature);
+                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = Datatypes.DATE_TIME_CLASS.cast(beforeImage).objGetValue(lockFeature);
                 if (currentValue != null) {
                     #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif lockValue = DateTimeFormat.EXTENDED_UTC_FORMAT.parse(lockMatcher.group(2) + "Z");
                     if (!lockValue.equals(currentValue)) {

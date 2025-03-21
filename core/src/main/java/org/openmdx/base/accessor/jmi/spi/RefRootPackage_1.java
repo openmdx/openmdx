@@ -148,6 +148,7 @@ import org.openmdx.kernel.loading.Factory;
 import org.w3c.jpa3.AbstractObject;
 import org.w3c.jpa3.DateTime;
 import org.w3c.spi.StateAccessor;
+import org.w3c.spi2.Datatypes;
 
 /**
  * RefRootPackage_1 class. This is at the same time the JMI root package which 
@@ -2068,8 +2069,8 @@ public class RefRootPackage_1
                         }
                     } else if (ModelHelper.isDerived(attributeDef)){
                         Object value = 
-                            PrimitiveTypes.DATE.equals(typeName) ? org.w3c.jpa3.Date.toJDO((#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) source) :
-                            PrimitiveTypes.DATETIME.equals(typeName) ? DateTime.toJDO((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) source) :
+                            PrimitiveTypes.DATE.equals(typeName) ? org.w3c.jpa3.Date.toJDO(Datatypes.DATE_CLASS.cast(source)) :
+                            PrimitiveTypes.DATETIME.equals(typeName) ? DateTime.toJDO(Datatypes.DATE_TIME_CLASS.cast(source)) :
                             source;
                         try {
                             jpaClass.getField(jpaFeature).set(jpaObject, value);

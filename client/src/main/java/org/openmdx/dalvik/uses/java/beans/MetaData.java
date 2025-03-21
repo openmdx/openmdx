@@ -275,14 +275,14 @@ class java_util_Date_PersistenceDelegate extends PersistenceDelegate {
         if (!super.mutatesTo(oldInstance, newInstance)) {
             return false;
         }
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif oldDate = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)oldInstance;
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newDate = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)newInstance;
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif oldDate = Datatypes.DATE_TIME_CLASS.cast(oldInstance);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newDate = Datatypes.DATE_TIME_CLASS.cast(newInstance);
 
         return oldDate.getTime() == newDate.getTime();
     }
 
     protected Expression instantiate(Object oldInstance, Encoder out) {
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif date = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)oldInstance;
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif date = Datatypes.DATE_TIME_CLASS.cast(oldInstance);
         return new Expression(date, date.getClass(), "new", new Object[] {date.getTime()});
     }
 }

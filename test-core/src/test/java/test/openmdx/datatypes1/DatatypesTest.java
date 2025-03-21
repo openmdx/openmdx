@@ -95,6 +95,7 @@ import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.state2.spi.Order;
 #if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
+import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -219,7 +220,7 @@ public class DatatypesTest  {
         Assertions.assertNotSame(original.getClass(), copy.getClass(), "Immutable date gets mutable");
         Assertions.assertFalse(copy instanceof <?>, "A Date's copy is mutable");
         Assertions.assertEquals("2000-04-01", copy.toXMLFormat());
-        original = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) original.clone();
+        original = Datatypes.DATE_CLASS.cast(original).clone();
         Assertions.assertFalse(original instanceof <?>, "A Date's clone is mutable");
         copy = copy(original);
         Assertions.assertEquals("2000-04-01", copy.toXMLFormat());

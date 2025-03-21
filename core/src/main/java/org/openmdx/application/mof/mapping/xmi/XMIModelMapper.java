@@ -60,6 +60,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.wbxml.cci.StringTable;
 import org.openmdx.base.xml.stream.XMLOutputFactories;
+import org.w3c.spi2.Datatypes;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
@@ -305,9 +306,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, packageDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)packageDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(packageDef).objGetValue(SystemAttributes.CREATED_AT));
                 this.writeElement(SystemAttributes.CREATED_BY, packageDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)packageDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(packageDef).objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, packageDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("container", packageDef.getContainer());
@@ -349,9 +350,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, primitiveTypeDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)primitiveTypeDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(primitiveTypeDef).objGetValue(SystemAttributes.CREATED_AT));
                 this.writeElement(SystemAttributes.CREATED_BY, primitiveTypeDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)primitiveTypeDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(primitiveTypeDef).objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, primitiveTypeDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("container", primitiveTypeDef.getContainer());
@@ -393,9 +394,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, attributeDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)attributeDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(attributeDef).objGetValue(SystemAttributes.CREATED_AT));
                 this.writeElement(SystemAttributes.CREATED_BY, attributeDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)attributeDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(attributeDef).objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, attributeDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("isDerived", attributeDef.isDerived());
@@ -434,9 +435,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, structureFieldDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)structureFieldDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(structureFieldDef).objGetValue(SystemAttributes.CREATED_AT));
                 this.writeElement(SystemAttributes.CREATED_BY, structureFieldDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)structureFieldDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(structureFieldDef).objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, structureFieldDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("maxLength", structureFieldDef.objGetValue("maxLength"));
@@ -471,9 +472,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, operationDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)operationDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(operationDef).objGetValue(SystemAttributes.CREATED_AT));
                 this.writeElement(SystemAttributes.CREATED_BY, operationDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)operationDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(operationDef).objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, operationDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             if(this.derivedFeatures) {
@@ -516,9 +517,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, exceptionDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)exceptionDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(exceptionDef).objGetValue(SystemAttributes.CREATED_AT));
                 this.writeElement(SystemAttributes.CREATED_BY, exceptionDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)exceptionDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(exceptionDef).objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, exceptionDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             if(this.derivedFeatures) {
@@ -558,9 +559,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, parameterDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)parameterDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(parameterDef).objGetValue(SystemAttributes.CREATED_AT));
                 this.writeElement(SystemAttributes.CREATED_BY, parameterDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)parameterDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(parameterDef).objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, parameterDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("container", parameterDef.getContainer());
@@ -595,9 +596,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, associationDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)associationDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(associationDef).objGetValue(SystemAttributes.CREATED_AT));
                 this.writeElement(SystemAttributes.CREATED_BY, associationDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)associationDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(associationDef).objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, associationDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("container", associationDef.getContainer());
@@ -640,9 +641,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, associationEndDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)associationEndDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(associationEndDef).objGetValue(SystemAttributes.CREATED_AT));
                 this.writeElement(SystemAttributes.CREATED_BY, associationEndDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)associationEndDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(associationEndDef).objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, associationEndDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("aggregation", associationEndDef.getAggregation());
@@ -681,9 +682,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, referenceDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)referenceDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(referenceDef).objGetValue(SystemAttributes.CREATED_AT));
                 this.writeElement(SystemAttributes.CREATED_BY, referenceDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)referenceDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(referenceDef).objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, referenceDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("container", referenceDef.getContainer());
@@ -725,9 +726,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, classDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)classDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(classDef).objGetValue(SystemAttributes.CREATED_AT));
                 this.writeElement(SystemAttributes.CREATED_BY, classDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)classDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(classDef).objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, classDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("isSingleton", classDef.objGetValue("isSingleton"));
@@ -781,9 +782,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, structDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)structDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(structDef).objGetValue(SystemAttributes.CREATED_AT));
                 this.writeElement(SystemAttributes.CREATED_BY, structDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)structDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(structDef).objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, structDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             if(this.derivedFeatures) {
@@ -834,9 +835,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, aliasTypeDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)aliasTypeDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(aliasTypeDef).objGetValue(SystemAttributes.CREATED_AT));
                 this.writeElement(SystemAttributes.CREATED_BY, aliasTypeDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)aliasTypeDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(aliasTypeDef).objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, aliasTypeDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             if(this.derivedFeatures) {

@@ -110,7 +110,7 @@ class DateTimeValues {
      */
     private static Object normalizeDateTimeValue(Object value) {
         if (Datatypes.DATE_CLASS.isInstance(value)){
-            final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif datatypeValue = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) value;
+            final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif datatypeValue = Datatypes.DATE_CLASS.cast(value);
             if (DatatypeConstants.DATETIME.equals(datatypeValue.getXMLSchemaType())) {
                 return toDate(datatypeValue);
             }

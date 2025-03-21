@@ -49,6 +49,7 @@ import java.util.Collection;
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 
 import org.openmdx.base.naming.Path;
+import org.w3c.spi2.Datatypes;
 
 /**
  * org::omg::model1::Association Record
@@ -136,7 +137,7 @@ public class AssociationRecord
                  setIdentity(value);
                  break;
              case modifiedAt:
-                 setModifiedAt((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
+                 setModifiedAt(Datatypes.DATE_TIME_CLASS.cast(value));
                  break;
              case createdBy:
                  setCreatedBy((Collection<?>)value);
@@ -145,7 +146,7 @@ public class AssociationRecord
                  setStereotype((Collection<?>)value);
                  break;
              case createdAt:
-                 setCreatedAt((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
+                 setCreatedAt(Datatypes.DATE_TIME_CLASS.cast(value));
                  break;
              case modifiedBy:
                  setModifiedBy((Collection<?>)value);

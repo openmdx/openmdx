@@ -153,8 +153,8 @@ public class StateImportPlugIn implements ImportPlugIn {
             } else if (facade.attributeValue(SystemAttributes.REMOVED_AT) != null){
             	return null;
             } else {
-                #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom =  (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) facade.attributeValue(TechnicalAttributes.STATE_VALID_FROM);
-                #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo = (#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif) facade.attributeValue(TechnicalAttributes.STATE_VALID_TO);
+                #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom =  Datatypes.DATE_CLASS.cast(facade).attributeValue(TechnicalAttributes.STATE_VALID_FROM);
+                #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo = Datatypes.DATE_CLASS.cast(facade).attributeValue(TechnicalAttributes.STATE_VALID_TO);
                 Path objectId = (Path)facade.attributeValue(SystemAttributes.CORE);
                 if(objectId == null) {
                     throw new ServiceException(

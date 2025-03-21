@@ -59,6 +59,7 @@ import org.openmdx.base.mof.repository.cci.ElementRecord;
 import org.openmdx.base.mof.repository.cci.FeatureRecord;
 import org.openmdx.base.mof.repository.cci.StructuralFeatureRecord;
 import org.openmdx.base.naming.Path;
+import org.w3c.spi2.Datatypes;
 
 /**
  * org::omg::model1::Class Record
@@ -152,7 +153,7 @@ public class ClassRecord
                  setIdentity(value);
                  break;
              case modifiedAt:
-                 setModifiedAt((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
+                 setModifiedAt(Datatypes.DATE_TIME_CLASS.cast(value));
                  break;
              case createdBy:
                  setCreatedBy((Collection<?>)value);
@@ -161,7 +162,7 @@ public class ClassRecord
                  setStereotype((Collection<?>)value);
                  break;
              case createdAt:
-                 setCreatedAt((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)value);
+                 setCreatedAt(Datatypes.DATE_TIME_CLASS.cast(value));
                  break;
              case modifiedBy:
                  setModifiedBy((Collection<?>)value);

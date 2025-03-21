@@ -439,7 +439,7 @@ public class AlternateRestFormatter implements RestFormatter {
 	                    writer.writeCData((String) value);
 	                } else if (Datatypes.DATE_TIME_CLASS.isInstance(value)) {
 	                    writer.writeCharacters(
-	                        DateTimeFormat.EXTENDED_UTC_FORMAT.format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif) value)
+	                        DateTimeFormat.EXTENDED_UTC_FORMAT.format(value)
 	                    );
 	                } else if (value instanceof char[]) {
 	                    char[] text = (char[]) value;

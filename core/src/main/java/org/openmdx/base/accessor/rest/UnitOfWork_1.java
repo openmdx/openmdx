@@ -89,6 +89,7 @@ import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.jdo.JDOPersistenceManagerFactory;
 import org.openmdx.kernel.loading.Factory;
 import org.openmdx.kernel.log.SysLog;
+import org.w3c.time.SystemClock;
 
 /**
  * Unit Of Work
@@ -1256,9 +1257,10 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
          * 
          * @see UserObjects#setTransactionTime(PersistenceManager, Factory<Date>)
          */
+        // TODO: kjdd Apply `org.w3c.time.Clock` recommendation, please!
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newTransactionTime() {
             Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> transactionTime = getAccessor().getTransactionTime();
-            return transactionTime == null ? #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now() #endif : transactionTime.instantiate();
+            return transactionTime == null ? SystemClock.getInstance().now() : transactionTime.instantiate();
         }
 
     }

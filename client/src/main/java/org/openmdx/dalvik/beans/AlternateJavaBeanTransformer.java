@@ -311,7 +311,7 @@ public class AlternateJavaBeanTransformer implements BeanTransformer {
                 oldInstance,
                 #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
                 "new", 
-                new Object[]{((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)oldInstance).getTime()}
+                new Object[]{Datatypes.DATE_TIME_CLASS.cast(oldInstance).getTime()}
             );
         }
     }    
@@ -363,7 +363,7 @@ public class AlternateJavaBeanTransformer implements BeanTransformer {
                 "create", 
                 new Object[]{
                     #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
-                    DateTimeFormat.BASIC_UTC_FORMAT.format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)oldInstance)
+                    DateTimeFormat.BASIC_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(oldInstance))
                 }
             );
         }

@@ -55,6 +55,7 @@ import org.openmdx.state2.cci.ViewKind;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
+import org.w3c.spi2.Datatypes;
 import org.w3c.time.SystemClock;
 
 /**
@@ -121,7 +122,7 @@ public class DateStateViewContext
         ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
         return new DateStateViewContext(
             datatypeFactory.toDate(validFor),
-            (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)null
+            Datatypes.DATE_TIME_CLASS.cast(null)
         );
     }
 
