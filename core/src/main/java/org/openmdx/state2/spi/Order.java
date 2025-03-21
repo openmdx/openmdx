@@ -110,7 +110,7 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo
     ){
         if(validFrom != null && validTo != null) {
-            if(validTo.compare(validFrom) == DatatypeConstants.LESSER) {
+            if(validTo.#if CLASSIC_CHRONO_TYPES compare #else compareTo#endif(validFrom) == DatatypeConstants.LESSER) {
                 throw BasicException.initHolder(
                     new IllegalArgumentException(
                         "validTo must be greater than or equal to validFrom",

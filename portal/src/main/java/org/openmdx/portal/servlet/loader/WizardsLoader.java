@@ -96,7 +96,7 @@ public class WizardsLoader extends Loader {
         String[] locale,
         Model_1_0 model
     ) throws ServiceException {
-    	String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
+    	String messagePrefix = SystemClock.getInstance().now() + "  ";
     	System.out.println(messagePrefix + "Loading wizards");
     	SysLog.info("Loading wizards");    	
         Map<String,List<WizardDefinition>> wizardDefinitions = new HashMap<String,List<WizardDefinition>>();

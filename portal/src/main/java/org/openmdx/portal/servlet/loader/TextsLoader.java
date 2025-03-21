@@ -163,7 +163,7 @@ public class TextsLoader extends Loader {
 	synchronized public void loadTexts(
 		String[] locale
 	) throws ServiceException {
-		String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
+		String messagePrefix = SystemClock.getInstance().now() + "  ";
 		System.out.println(messagePrefix + "Loading texts");
 		SysLog.info("Loading texts");
 		List<ResourceBundle> textBundles = getDefaultTextsBundles(

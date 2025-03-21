@@ -117,7 +117,7 @@ public class FilterLoader
         UiContext uiContext,
         Model_1_0 model
     ) throws ServiceException {
-    	String consolePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
+    	String consolePrefix = SystemClock.getInstance().now() + "  ";
         Filters filters = (Filters)filterMap.get(
             qualifiedReferenceName
         );
@@ -224,7 +224,7 @@ public class FilterLoader
         UiContext uiContext,
         Map<String,Filters> filterStore
     ) throws ServiceException {
-    	String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
+    	String messagePrefix = SystemClock.getInstance().now() + "  ";
         boolean resetSession = false;
         long crc = this.getCRCForResourcePath(
             this.context,

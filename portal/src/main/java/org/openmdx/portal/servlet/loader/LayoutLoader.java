@@ -84,7 +84,7 @@ public class LayoutLoader
       String[] locale,
       Model_1_0 model
   ) throws ServiceException {
-	  String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
+	  String messagePrefix = SystemClock.getInstance().now() + "  ";
     System.out.println(messagePrefix + "Loading layouts");
     SysLog.info("Loading layouts");
     // 2-dim list: first index=locale, second index = layout file name

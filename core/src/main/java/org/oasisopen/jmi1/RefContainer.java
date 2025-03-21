@@ -77,7 +77,7 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
      */
     void refAdd(
             QualifierType qualifierType,
-            Object object,
+            Object qualifierValue,
             E refObject
     );
 
@@ -115,7 +115,7 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
      */
     E refGet(
             QualifierType qualifierType,
-            Object object
+            Object qualifierValue
     );
 
     /**
@@ -149,7 +149,7 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
      */
     void refRemove(
             QualifierType qualifierType,
-            Object object
+            Object qualifierValue
     );
 
     /**

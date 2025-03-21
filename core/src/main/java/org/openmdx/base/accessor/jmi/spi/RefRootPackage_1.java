@@ -1978,7 +1978,6 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getServerDate()
          */
-        // TODO: dirty-harry the PersistenceManager interface uses java.util.Date ?
         @Override
         public java.util.Date getServerDate() {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");

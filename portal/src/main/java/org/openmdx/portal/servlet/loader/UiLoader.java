@@ -180,7 +180,7 @@ public class UiLoader
     public List<Path> load(
         String[] locale
     ) throws ServiceException {
-    	String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
+    	String messagePrefix = SystemClock.getInstance().now() + "  ";
     	System.out.println(messagePrefix + "Loading ui configuration...");
     	SysLog.info("Loading ui configuration");
         Map<String,Path> loadedUiSegments = new TreeMap<String,Path>();

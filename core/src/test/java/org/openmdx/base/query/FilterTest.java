@@ -196,7 +196,7 @@ public class FilterTest {
                 "2000-02-29"
             )
         );
-        extension.setDateTimeParam(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
+        extension.setDateTimeParam(SystenClock.getInstance().now());
         extension.setDecimalParam(BigDecimal.ONE, BigDecimal.TEN);
         extension.setStringParam("String parameter 0", "String parameter 1");
         String xml = JavaBeans.toXML(filter);

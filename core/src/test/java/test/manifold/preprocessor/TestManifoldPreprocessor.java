@@ -8,7 +8,7 @@ public class TestManifoldPreprocessor {
 	public static void main(String[] args) {
 	    Class<?> transactionClass = UserTransaction.class;
 	    System.out.println("UserTransaction class=" + transactionClass.getName());
-	    Object dateTime = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif;
+	    Object dateTime = SystemClock.getInstance().now();
 	    System.out.println("org::w3c::dateTime class=" + dateTime.getClass().getName() + ", now=" + dateTime);
 	}
 

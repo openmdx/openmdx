@@ -1661,11 +1661,11 @@ public abstract class UiGrid extends Grid implements Serializable {
 					) {
 						#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif day;
 						if(values.isEmpty()) {
-							day = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif;
+							day = SystemClock.getInstance().now();
 						} else try {
 							day = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif)values.get(0);
 						} catch(IllegalArgumentException e) {
-							day = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif;
+							day = SystemClock.getInstance().now();
 						}
 						Calendar nextDay = new GregorianCalendar();
 						nextDay.setTime(day);

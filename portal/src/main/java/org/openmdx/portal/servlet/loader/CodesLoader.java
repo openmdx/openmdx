@@ -107,7 +107,7 @@ public class CodesLoader extends Loader {
 	synchronized public void loadCodes(
 		String[] locale
 	) throws ServiceException {
-		String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
+		String messagePrefix = SystemClock.getInstance().now() + "  ";
 		System.out.println(messagePrefix + "Loading codes");
 		SysLog.info("Loading codes");
 		List<String> dirs = this.getDirectories("/WEB-INF/config/code/");

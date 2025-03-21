@@ -98,7 +98,7 @@ public class DataLoader
     synchronized public void loadData(
         String location
     ) throws ServiceException {
-    	String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
+    	String messagePrefix = SystemClock.getInstance().now() + "  ";
         System.out.println(messagePrefix + "Loading data");
         SysLog.info("Loading data");
         List<String> dirs = this.getDirectories("/WEB-INF/config/" + location + "/");

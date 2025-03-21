@@ -249,7 +249,7 @@ public class ObjectInspectorServlet extends HttpServlet {
             throw new ServletException("can not get persistence manager factory", e);
         }
         // Info
-        String messagePrefix = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif + "  ";
+        String messagePrefix = SystemClock.getInstance().now() + "  ";
         System.out.println();
         System.out.println();
         System.out.println(messagePrefix + "Starting web application \"" + conf.getServletContext().getContextPath() + "\"");

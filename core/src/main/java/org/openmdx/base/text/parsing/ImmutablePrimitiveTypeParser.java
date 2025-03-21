@@ -52,9 +52,6 @@ import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Durati
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.text.parsing.AbstractParser;
 import org.openmdx.kernel.text.spi.Parser;
-#if CLASSIC_CHRONO_TYPES
-import org.w3c.spi.DatatypeFactories;
-#endif
 
 /**
  * Immutable Primitive Type Parser
@@ -77,9 +74,9 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
      * The supported types
      */
     private static final Collection<Class<?>> SUPPORTED_TYPES = Arrays.asList(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
+        org.w3c.spi2.Datatypes.DATE_TIME_CLASS,
         Duration.class,
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class,
+        org.w3c.spi2.Datatypes.DATE_CLASS,
         Path.class
     );
     
@@ -115,9 +112,15 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
 		Class<?> valueClass
 	) throws Exception {
 		return 
-    		valueClass == #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class ? DatatypeFactories.immutableDatatypeFactory().newDateTime(externalRepresentation) :
-    		valueClass == Duration.class ? DatatypeFactories.immutableDatatypeFactory().newDuration(externalRepresentation) :
-    		valueClass == #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class ? DatatypeFactories.immutableDatatypeFactory().newDate(externalRepresentation) :
+    		valueClass == org.w3c.spi2.Datatypes.DATE_TIME_CLASS ?
+    		#if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDateTime(externalRepresentation)
+    		#else
+    		#endif :
+    		valueClass == Duration.class ? org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDuration(externalRepresentation) :
+                    valueClass == org.w3c.spi2.Datatypes.DATE_CLASS ?
+		#if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDate(externalRepresentation)
+		#else
+		#endif :
     		valueClass == Path.class ? new Path(externalRepresentation) :
     		super.parseAs(externalRepresentation, valueClass);
 	}

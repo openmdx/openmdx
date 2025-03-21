@@ -620,7 +620,7 @@ public class RefContainer_1
      * @see org.oasisopen.jmi1.RefContainer#refAdd(org.oasisopen.cci2.QualifierType, java.lang.Object, RefObject_1_0)
      */
     @Override
-    public void refAdd(QualifierType qualifierType, Object value, RefObject_1_0 refObject) {
+    public void refAdd(QualifierType qualifierType, Object qualifierValue, RefObject_1_0 refObject) {
         this.refAdd(
                 Collections.singletonList(
                         new RefQualifier(qualifierType, value)
@@ -653,7 +653,7 @@ public class RefContainer_1
      * @see org.oasisopen.jmi1.RefContainer#refGet(org.oasisopen.cci2.QualifierType, java.lang.Object)
      */
     @Override
-    public RefObject_1_0 refGet(QualifierType qualifierType, Object value) {
+    public RefObject_1_0 refGet(QualifierType qualifierType, Object qualifierValue) {
         return this.refGet(
                 Collections.singletonList(
                         new RefQualifier(qualifierType, value)
@@ -702,7 +702,7 @@ public class RefContainer_1
      * @see org.oasisopen.jmi1.RefContainer#refRemove(org.oasisopen.cci2.QualifierType, java.lang.Object)
      */
     @Override
-    public void refRemove(QualifierType qualifierType, Object value) {
+    public void refRemove(QualifierType qualifierType, Object qualifierValue) {
         this.refRemove(Collections.singletonList(new RefQualifier(qualifierType, value)));
     }
 
@@ -804,7 +804,7 @@ public class RefContainer_1
                         String.valueOf(firstQualifier.qualifierValue)
         );
 
-        if (iterator.hasNext()) {
+        while (iterator.hasNext()) {
             final RefQualifier next = iterator.next();
             qualifier.append(
                     next.qualifierType == PERSISTENT ? '!' : '*'

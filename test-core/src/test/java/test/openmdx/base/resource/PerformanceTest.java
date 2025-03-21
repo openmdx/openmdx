@@ -300,7 +300,7 @@ public class PerformanceTest {
 				by.add("group1Principal");
 				by.add("group2Principal");
 				by.add("group3Principal");
-				#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif at = #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif;
+				#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif at = SystemClock.getInstance().now();
 				entry.put(SystemAttributes.CREATED_AT, at);
 				entry.put(SystemAttributes.CREATED_BY, by);
 				entry.put(SystemAttributes.MODIFIED_AT, at);

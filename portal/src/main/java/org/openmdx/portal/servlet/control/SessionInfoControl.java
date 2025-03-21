@@ -246,7 +246,7 @@ public class SessionInfoControl extends Control implements Serializable {
                 true, 
                 app
             );
-            String formattedDateTime = dateTimeFormat.format(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif);
+            String formattedDateTime = dateTimeFormat.format(SystemClock.getInstance().now());
             p.write(
                 formattedDateTime.replace(" ", separator), 
                 separator, 

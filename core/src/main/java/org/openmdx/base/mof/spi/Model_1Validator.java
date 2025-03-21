@@ -252,7 +252,7 @@ public class Model_1Validator {
                         BasicException.Code.VALIDATION_FAILURE,
                         "Invalid value class",
                         new BasicException.Parameter("type", type),
-                        new BasicException.Parameter("expected", #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class.getName()),
+                        new BasicException.Parameter("expected", Datatypes.DATE_CLASS.getName()),
                         new BasicException.Parameter("actual", value.getClass().getName())
                     );
                 }
@@ -274,7 +274,7 @@ public class Model_1Validator {
                         BasicException.Code.VALIDATION_FAILURE,
                         "Invalid value class",
                         new BasicException.Parameter("type", type),
-                        new BasicException.Parameter("expected", #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class.getName()),
+                        new BasicException.Parameter("expected", Datatypes.DATE_TIME_CLASS.getName()),
                         new BasicException.Parameter("actual", value.getClass().getName())
                     );
                 }

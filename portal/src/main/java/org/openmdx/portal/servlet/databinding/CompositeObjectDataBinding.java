@@ -169,10 +169,10 @@ public class CompositeObjectDataBinding extends DataBinding {
             valueClass = String.class;
         }
         else if("date".equals(type)) {
-            valueClass = #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class;
+            valueClass = Datatypes.DATE_CLASS;
         }
         else if("datetime".equalsIgnoreCase(type)) {
-            valueClass = #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class;
+            valueClass = Datatypes.DATE_TIME_CLASS;
         }
         else if("short".equalsIgnoreCase(type)) {
             valueClass = Short.class;

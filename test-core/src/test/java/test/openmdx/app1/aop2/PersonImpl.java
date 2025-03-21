@@ -275,7 +275,7 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
     @Override
     @SuppressWarnings("unchecked")
     protected C newContext() {
-        return (C) #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif;
+        return (C) SystemClock.getInstance().now();
     }
 
     /* (non-Javadoc)
