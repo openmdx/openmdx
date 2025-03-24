@@ -56,7 +56,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 
 import javax.xml.datatype.DatatypeConstants;
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.exception.ExceptionListener;
 import org.openmdx.base.exception.RuntimeServiceException;
@@ -75,7 +75,6 @@ import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
-import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -122,7 +121,7 @@ public class StandardBeanTransformer implements BeanTransformer {
                     pathPersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
+                    Datatypes.DATE_TIME_CLASS,
                     datePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
@@ -138,7 +137,7 @@ public class StandardBeanTransformer implements BeanTransformer {
                     dateTimePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    Duration.class,
+                    Datatypes.DURATION_CLASS,
                     durationPersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
@@ -322,7 +321,7 @@ public class StandardBeanTransformer implements BeanTransformer {
                 oldInstance,
                 Datatypes.class,
                 "create",
-                new Object[]{#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class,oldInstance.toString()}
+                    new Object[]{XMLGregorianCalendar.class,oldInstance.toString()}
             );
         }
 
@@ -354,7 +353,7 @@ public class StandardBeanTransformer implements BeanTransformer {
                 oldInstance,
                 Datatypes.class,
                 "create",
-                new Object[]{Duration.class,((Duration)oldInstance).toString()}
+                new Object[]{Datatypes.DURATION_CLASS,(Datatypes.DURATION_CLASS.cast(oldInstance)).toString()}
             );
         }
 
@@ -431,7 +430,7 @@ public class StandardBeanTransformer implements BeanTransformer {
                 Datatypes.class,
                 "create",
                 new Object[]{
-                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
+                    Datatypes.DATE_TIME_CLASS,
                     DateTimeFormat.BASIC_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(oldInstance))
                 }
             );

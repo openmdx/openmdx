@@ -61,8 +61,6 @@ import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jmi.reflect.RefObject;
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
-
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.Names;
@@ -187,7 +185,7 @@ public class CompositeObjectDataBinding extends DataBinding {
             valueClass = BigDecimal.class;
         }
         else if("duration".equalsIgnoreCase(type)) {
-            valueClass = Duration.class;
+            valueClass = Datatypes.DURATION_CLASS;
         }   
         else if("boolean".equalsIgnoreCase(type)) {
             valueClass = Boolean.class;

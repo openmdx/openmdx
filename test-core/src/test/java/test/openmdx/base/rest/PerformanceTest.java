@@ -59,6 +59,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -75,6 +76,9 @@ import org.junit.jupiter.api.Test;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.w3c.cci2.MutableDatatypeFactory;
+import org.w3c.format.DateTimeFormat;
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.SystemClock;
 
 /**
  * Performance Test
@@ -585,7 +589,7 @@ public class PerformanceTest {
                         out.writeUTF("identity");
                         out.writeUTF((String) g0.invoke(v, (Object[]) null));
                         out.writeUTF("field1");
-                        out.writeUTF(dateFormat.format((Date) g1.invoke(v, (Object[]) null)));
+                        out.writeUTF(dateFormat.format((Date) g1.invoke(v, (Object[]) null))); // Datatypes.DATE_TIME_CLASS.cast(g1.invoke(v, (Object[]) null))
                         out.writeUTF("field2");
                         Set<String> f2 = (Set<String>) g2.invoke(v, (Object[]) null);
                         out.writeUTF(String.valueOf(f2.size()));

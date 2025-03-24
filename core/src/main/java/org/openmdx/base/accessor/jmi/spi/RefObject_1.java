@@ -1494,8 +1494,12 @@ class RefObject_1
                                     } else if (PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
                                         this.setValue(
                                             featureDef,
-                                            DateTimeMarshaller.NORMALIZE.marshal
-                                            (DateTimeFormat.BASIC_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif))
+                                            DateTimeMarshaller.NORMALIZE.marshal(
+                                                    #if CLASSIC_CHRONO_TYPES DateTimeFormat.BASIC_UTC_FORMAT.format(new java.util.Date())
+                                                    #else
+                                                    #endif
+
+                                            )
                                         );
                                     } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
                                         this.setValue(

@@ -56,8 +56,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
-
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;

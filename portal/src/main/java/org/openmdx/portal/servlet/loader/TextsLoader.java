@@ -69,6 +69,7 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Codes;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
 import org.openmdx.portal.servlet.Texts.TextsBundle;
+import org.w3c.time.SystemClock;
 
 /**
  * TextsLoader

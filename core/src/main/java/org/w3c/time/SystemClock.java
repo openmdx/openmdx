@@ -55,7 +55,7 @@ public class SystemClock implements Clock {
      */
     @Override
     public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif now() {
-        return #if CLASSIC_CHRONO_TYPES new ImmutableDateTime(System.currentTimeMillis()) #else java.time.Instant.now()#endif;
+        return #if CLASSIC_CHRONO_TYPES new org.w3c.cci2.ImmutableDateTime(System.currentTimeMillis()) #else java.time.Instant.now()#endif;
     }
 
     /**
@@ -64,15 +64,15 @@ public class SystemClock implements Clock {
     @Override
     public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif today() {
         #if CLASSIC_CHRONO_TYPES 
-        final GregorianCalendar calendar = new GregorianCalendar();
-        return DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-            calendar.get(Calendar.YEAR), 
-            calendar.get(Calendar.MONTH) + 1, 
-            calendar.get(Calendar.DAY_OF_MONTH),
-            DatatypeConstants.FIELD_UNDEFINED
+        final java.util.GregorianCalendar calendar = new java.util.GregorianCalendar();
+        return org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+            calendar.get(java.util.Calendar.YEAR),
+            calendar.get(java.util.Calendar.MONTH) + 1,
+            calendar.get(java.util.Calendar.DAY_OF_MONTH),
+            javax.xml.datatype.DatatypeConstants.FIELD_UNDEFINED
         );
         #else 
-        return java.time.LocalDate.now()
-        #endif;
+        return java.time.LocalDate.now();
+        #endif
     }
 }

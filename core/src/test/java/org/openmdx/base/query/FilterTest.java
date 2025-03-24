@@ -50,8 +50,6 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Arrays;
 
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openmdx.base.exception.ServiceException;
@@ -62,6 +60,7 @@ import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 #if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.SystemClock;
 
 /**
  * Test Filter
@@ -196,7 +195,7 @@ public class FilterTest {
                 "2000-02-29"
             )
         );
-        extension.setDateTimeParam(SystenClock.getInstance().now());
+        extension.setDateTimeParam(SystemClock.getInstance().now());
         extension.setDecimalParam(BigDecimal.ONE, BigDecimal.TEN);
         extension.setStringParam("String parameter 0", "String parameter 1");
         String xml = JavaBeans.toXML(filter);

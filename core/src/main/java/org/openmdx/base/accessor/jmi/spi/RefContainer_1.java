@@ -623,7 +623,7 @@ public class RefContainer_1
     public void refAdd(QualifierType qualifierType, Object qualifierValue, RefObject_1_0 refObject) {
         this.refAdd(
                 Collections.singletonList(
-                        new RefQualifier(qualifierType, value)
+                        new RefQualifier(qualifierType, refObject)
                 ),
                 refObject
         );
@@ -656,7 +656,7 @@ public class RefContainer_1
     public RefObject_1_0 refGet(QualifierType qualifierType, Object qualifierValue) {
         return this.refGet(
                 Collections.singletonList(
-                        new RefQualifier(qualifierType, value)
+                        new RefQualifier(qualifierType, qualifierValue)
                 )
         );
     }
@@ -703,7 +703,7 @@ public class RefContainer_1
      */
     @Override
     public void refRemove(QualifierType qualifierType, Object qualifierValue) {
-        this.refRemove(Collections.singletonList(new RefQualifier(qualifierType, value)));
+        this.refRemove(Collections.singletonList(new RefQualifier(qualifierType, qualifierValue)));
     }
 
     /* (non-Javadoc)

@@ -50,6 +50,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.WeakHashMap;
+import org.w3c.spi2.Datatypes;
 
 /*
  * Like the {@code Intropector}, the {@code MetaData} class

@@ -174,11 +174,11 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
         DateTimeStateContext context = getContext();
         return BoundaryCrossing.valueOf(
             Order.compareValidFrom(
-                Datatypes.DATE_TIME_CLASS.cast(candidate).objGetValue(TechnicalAttributes.STATE_VALID_FROM),
+                Datatypes.DATE_TIME_CLASS.cast(candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM)),
                 context.getValidFrom() 
             ) < 0,
             Order.compareInvalidFrom(
-                Datatypes.DATE_TIME_CLASS.cast(candidate).objGetValue(TechnicalAttributes.STATE_INVALID_FROM),
+                Datatypes.DATE_TIME_CLASS.cast(candidate.objGetValue(TechnicalAttributes.STATE_INVALID_FROM)),
                 context.getInvalidFrom() 
             ) > 0
         );
@@ -193,8 +193,8 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
     ) throws ServiceException {
         DateTimeStateContext context = getContext();
         return 
-            Order.compareValidFromToValidTo(context.getValidFrom(), Datatypes.DATE_TIME_CLASS.cast(candidate).objGetValue(TechnicalAttributes.STATE_VALID_TO)) < 0 &&
-            Order.compareValidFromToValidTo(Datatypes.DATE_TIME_CLASS.cast(candidate).objGetValue(TechnicalAttributes.STATE_VALID_FROM), context.getInvalidFrom()) < 0;
+            Order.compareValidFromToValidTo(context.getValidFrom(), Datatypes.DATE_TIME_CLASS.cast(candidate.objGetValue(TechnicalAttributes.STATE_VALID_TO))) < 0 &&
+            Order.compareValidFromToValidTo(Datatypes.DATE_TIME_CLASS.cast(candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM)), context.getInvalidFrom()) < 0;
     }
 
     
@@ -214,27 +214,27 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
             switch(context.getViewKind()) {
                 case TIME_POINT_VIEW:
                     return Order.compareValidFrom(
-                        Datatypes.DATE_TIME_CLASS.cast(candidate).objGetValue(TechnicalAttributes.STATE_VALID_FROM),
+                        Datatypes.DATE_TIME_CLASS.cast(candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM)),
                         context.getValidAt()
                     ) <= 0 && Order.compareInvalidFrom(
                         context.getValidAt(),
-                        Datatypes.DATE_TIME_CLASS.cast(candidate).objGetValue(TechnicalAttributes.STATE_INVALID_FROM)
+                        Datatypes.DATE_TIME_CLASS.cast(candidate.objGetValue(TechnicalAttributes.STATE_INVALID_FROM))
                     ) <= 0;
                 case TIME_RANGE_VIEW:
                 	return accessMode == AccessMode.UNDERLYING_STATE ? (
                         Order.compareValidFrom(
                             context.getValidFrom(), 
-                            Datatypes.DATE_TIME_CLASS.cast(candidate).objGetValue(TechnicalAttributes.STATE_VALID_FROM)
+                            Datatypes.DATE_TIME_CLASS.cast(candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM))
                         ) >= 0 && Order.compareInvalidFrom(
-                            Datatypes.DATE_TIME_CLASS.cast(candidate).objGetValue(TechnicalAttributes.STATE_INVALID_FROM),
+                            Datatypes.DATE_TIME_CLASS.cast(candidate.objGetValue(TechnicalAttributes.STATE_INVALID_FROM)),
                             context.getInvalidFrom()
                         ) >= 0 
                     ) : (
                 		Order.compareValidFromToValidTo(
 	                        context.getValidFrom(), 
-	                        Datatypes.DATE_TIME_CLASS.cast(candidate).objGetValue(TechnicalAttributes.STATE_VALID_TO)
+	                        Datatypes.DATE_TIME_CLASS.cast(candidate.objGetValue(TechnicalAttributes.STATE_VALID_TO))
 	                    ) <= 0 && Order.compareValidFromToValidTo(
-	                        Datatypes.DATE_TIME_CLASS.cast(candidate).objGetValue(TechnicalAttributes.STATE_VALID_FROM),
+	                        Datatypes.DATE_TIME_CLASS.cast(candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM)),
 	                        context.getInvalidFrom()
 	                    ) <= 0 
                     );

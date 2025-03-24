@@ -77,7 +77,7 @@ public class DurationMarshaller {
 	/**
 	 * Factory
 	 * 
-	 * @param type the duration type
+	 * @param durationType the duration type
 	 * 
 	 * @return an new {@code DurationMarshaller} instance
 	 * @throws ServiceException
@@ -116,7 +116,7 @@ public class DurationMarshaller {
 	 * Object)
 	 */
 	public Object marshal(Object source, String databaseProductName) throws ServiceException {
-		if (source instanceof Duration) {
+		if (Datatypes.DURATION_CLASS.isInstance(source)) {
 			Duration duration = (Duration) source;
 			ValueType valueType = ValueType.of(duration);
 			if (valueType == null)
@@ -299,7 +299,7 @@ public class DurationMarshaller {
 	 * Object)
 	 */
 	public Object unmarshal(Object source) throws ServiceException {
-		if (source == null || source instanceof Duration) {
+		if (source == null || Datatypes.DURATION_CLASS.isInstance(source)) {
 			return source;
 		} else {
 			switch (durationType) {
@@ -419,15 +419,23 @@ public class DurationMarshaller {
 	/**
 	 * The value type defines which fields are set
 	 */
-	static enum ValueType {
+    enum ValueType {
 		YEAR_MONTH, YEAR_MONTH_DAY_TIME, DAY_TIME;
 
-		static ValueType of(Duration duration) {
+	static ValueType of(Duration duration) {
+		#if CLASSIC_CHRONO_TYPES
 			boolean yearMonth = duration.isSet(DatatypeConstants.YEARS) || duration.isSet(DatatypeConstants.MONTHS);
 			boolean dayTime = duration.isSet(DatatypeConstants.DAYS) || duration.isSet(DatatypeConstants.HOURS)
-					|| duration.isSet(DatatypeConstants.MINUTES) || duration.isSet(DatatypeConstants.SECONDS);
+				|| duration.isSet(DatatypeConstants.MINUTES) || duration.isSet(DatatypeConstants.SECONDS);
 			return yearMonth ? (dayTime ? YEAR_MONTH_DAY_TIME : YEAR_MONTH) : (dayTime ? DAY_TIME : null);
-		}
+		#else
+			long seconds = duration.getSeconds();
+			int nanos = duration.getNano();
+			boolean dayTime = seconds != 0 || nanos != 0;
+
+			return dayTime ? ValueType.DAY_TIME : null;
+		#endif
+	}
 
 	}
 

@@ -65,7 +65,6 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.openmdx.base.exception.ServiceException;

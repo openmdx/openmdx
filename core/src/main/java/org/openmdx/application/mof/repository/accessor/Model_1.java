@@ -60,7 +60,6 @@ import java.util.TreeSet;
 import java.util.function.Predicate;
 
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
@@ -462,7 +461,7 @@ public class Model_1 implements Model_1_0 {
                 return;
             }
             else if(
-                (value instanceof Duration) && 
+                (Datatypes.DURATION_CLASS.isInstance(value)) &&
                 PrimitiveTypes.DURATION.equals(typeName)
             ) {
                 return;

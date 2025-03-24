@@ -51,6 +51,7 @@ import java.util.List;
 
 import javax.jdo.listener.StoreCallback;
 import javax.jmi.reflect.RefObject;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.aop2.AbstractObject;
@@ -59,6 +60,7 @@ import org.openmdx.base.jmi1.Void;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.SortedMaps;
 
+import org.w3c.time.SystemClock;
 import test.openmdx.app1.jmi1.Address;
 import test.openmdx.app1.jmi1.App1Package;
 import test.openmdx.app1.jmi1.CanNotFormatNameException;
@@ -108,8 +110,6 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
 
     /**
      * Age Calculation
-     * 
-     * @param in the method's input structure
      * 
      * @return the method's result structure
      * 
@@ -198,8 +198,6 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
 
     /**
      * Void Operation
-     * 
-     * @param in the method's input structure
      * 
      * @return the method's result structure
      * 

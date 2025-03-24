@@ -131,6 +131,8 @@ import org.openmdx.portal.servlet.attribute.FieldDef;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 import org.openmdx.portal.servlet.control.UiGridControl;
 import org.openmdx.ui1.jmi1.ValuedField;
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.SystemClock;
 
 /**
  * UiGrid
@@ -1663,7 +1665,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 						if(values.isEmpty()) {
 							day = SystemClock.getInstance().now();
 						} else try {
-							day = Datatypes.DATE_TIME_CLASS.cast(values).get(0);
+							day = Datatypes.DATE_TIME_CLASS.cast(values.get(0));
 						} catch(IllegalArgumentException e) {
 							day = SystemClock.getInstance().now();
 						}

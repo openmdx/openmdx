@@ -46,7 +46,9 @@ package org.openmdx.state2.spi;
 
 import org.openmdx.state2.cci.DateTimeStateContext;
 import org.openmdx.state2.cci.ViewKind;
-import org.w3c.spi.SystemClock;
+import org.w3c.time.DateTimeConstants;
+import org.w3c.time.SystemClock;
+
 /**
  * Date State View Context
  */
@@ -154,7 +156,10 @@ public class DateTimeStateViewContext
     protected String toString(
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif timePoint
     ) {
-        return org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(timePoint);
+        return
+                #if CLASSIC_CHRONO_TYPES org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(timePoint)
+                #else DateTimeConstants.DT_WITH_UTC_TZ_BASIC_PATTERN.format(timePoint)
+                #endif;
     }
 
     /* (non-Javadoc)
@@ -162,7 +167,7 @@ public class DateTimeStateViewContext
      */
     @Override
     protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newValidAt() {
-        return SystemClock.getInstannce().now();
+        return SystemClock.getInstance().now();
     }
 
 }

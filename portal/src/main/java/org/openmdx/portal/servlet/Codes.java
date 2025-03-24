@@ -91,6 +91,8 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.SystemClock;
 
 /**
  * Codes
@@ -256,8 +258,8 @@ public final class Codes implements Serializable {
 	    					(String)entry.refGetValue("iconKey"),
 	    					(String)entry.refGetValue("color"),
 	    					(String)entry.refGetValue("backColor"),        					
-	    			        Datatypes.DATE_TIME_CLASS.cast(entry).refGetValue("validFrom"),
-	    			        Datatypes.DATE_TIME_CLASS.cast(entry).refGetValue("validTo")
+	    			        Datatypes.DATE_TIME_CLASS.cast(entry.refGetValue("validFrom")),
+	    			        Datatypes.DATE_TIME_CLASS.cast(entry.refGetValue("validTo"))
 	    			    )
 	    			);
 	    		}

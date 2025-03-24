@@ -54,7 +54,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jdo.Query;
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.accessor.jmi.spi.Jmi1ObjectPredicateInvocationHandler;
 import org.openmdx.base.exception.ServiceException;
@@ -117,7 +116,7 @@ public class Queries {
     	} else if("decimal".equalsIgnoreCase(name)) {
     		return BigDecimal.class;
     	} else if("duration".equalsIgnoreCase(name)) {
-    		return Duration.class;
+    		return Datatypes.DURATION_CLASS;
     	} else throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_QUERY_CRITERIA,

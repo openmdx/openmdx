@@ -51,7 +51,6 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.time.format.DateTimeFormatter;
 import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
@@ -167,6 +166,8 @@ import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.cci2.LargeObject;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.DateTimeConstants;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 import static org.openmdx.base.mof.cci.PrimitiveTypes.DATE;
@@ -2176,7 +2177,7 @@ public class DataObject_1
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif lockValue
     )
         throws ServiceException {
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = Datatypes.DATE_TIME_CLASS.cast(beforeImage).objGetValue(SystemAttributes.MODIFIED_AT);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = Datatypes.DATE_TIME_CLASS.cast(beforeImage.objGetValue(SystemAttributes.MODIFIED_AT));
         if (currentValue != null) {
             if (currentValue.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(lockValue)) {
                 throw new ServiceException(
@@ -2185,7 +2186,12 @@ public class DataObject_1
                     "Object has been updated by another persistence manager during this unit of work",
                     new BasicException.Parameter(BasicException.Parameter.XRI, ReducedJDOHelper.getAnyObjectId(this)),
                     new BasicException.Parameter("lockAssertion", this.lock),
-                    new BasicException.Parameter(SystemAttributes.MODIFIED_AT, DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue))
+                    new BasicException.Parameter(
+                            SystemAttributes.MODIFIED_AT,
+                            #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue)
+                            #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(Datatypes.DATE_TIME_CLASS.cast(currentValue))
+                            #endif
+                    )
                 );
             }
         }
@@ -2208,7 +2214,7 @@ public class DataObject_1
         if (lockMatcher.matches())
             try {
                 String lockFeature = lockMatcher.group(1);
-                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = Datatypes.DATE_TIME_CLASS.cast(beforeImage).objGetValue(lockFeature);
+                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = Datatypes.DATE_TIME_CLASS.cast(beforeImage.objGetValue(lockFeature));
                 if (currentValue != null) {
                     #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif lockValue = DateTimeFormat.EXTENDED_UTC_FORMAT.parse(lockMatcher.group(2) + "Z");
                     if (!lockValue.equals(currentValue)) {
@@ -2218,7 +2224,12 @@ public class DataObject_1
                             "Object has been updated by another persistence manager since it has been cached",
                             new BasicException.Parameter(BasicException.Parameter.XRI, ReducedJDOHelper.getAnyObjectId(this)),
                             new BasicException.Parameter("lockAssertion", lockAssertion),
-                            new BasicException.Parameter(lockFeature, DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue))
+                            new BasicException.Parameter(
+                                    lockFeature,
+                                    #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue)
+                                    #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(currentValue)
+                                    #endif
+                            )
                         );
                     }
                 }

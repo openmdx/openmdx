@@ -49,6 +49,8 @@ import java.util.logging.Level;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.DateTimeConstants;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
@@ -235,12 +237,12 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
         SysLog.log(
                 Level.WARNING,
                 "Sys|Clock has been set back from {0} to {1}|Clock sequence will be changed from {2} to {3}",
-                DateTimeFormat.EXTENDED_UTC_FORMAT.format(
-                        #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(lastReservation)
-                ),
-                DateTimeFormat.EXTENDED_UTC_FORMAT.format(
-                        #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(nextReservation)
-                ),
+                #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(lastReservation))
+                #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(lastReservation))
+                #endif,
+                #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(nextReservation)),
+                #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(nextReservation))
+                #endif,
                 (long) TimeBasedIdGenerator.clockSequence,
                 (long) clockSequence
         );
@@ -340,8 +342,10 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
          */
         @Override
         public String toString() {
-            return DateTimeFormat.EXTENDED_UTC_FORMAT.format(
-                    #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(millisecond)) + "/P0.001S";
+            return
+                    #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(millisecond))
+                    #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(millisecond))
+                    #endif + "/P0.001S";
         }
         
     }

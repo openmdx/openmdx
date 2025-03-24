@@ -68,6 +68,8 @@ import org.openmdx.base.text.conversion.XMLEncoder;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Resources;
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.DateTimeConstants;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
@@ -240,9 +242,12 @@ public class XMLTarget implements ExportTarget {
     ) throws ServiceException {
         final String stringValue;
         if(PrimitiveTypes.DATETIME.equals(typeName)) {
-            stringValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value));
+            stringValue =
+                    #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value))
+                    #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(Datatypes.DATE_TIME_CLASS.cast(value))
+                    #endif;
         } else if(PrimitiveTypes.DATE.equals(typeName)) {
-            stringValue = (Datatypes.DATE_CLASS.cast(value)).toXMLFormat();
+            stringValue = Datatypes.DATE_CLASS.cast(value).toXMLFormat();
         } else if(PrimitiveTypes.LONG.equals(typeName) || PrimitiveTypes.INTEGER.equals(typeName) || PrimitiveTypes.SHORT.equals(typeName)) {
             stringValue = String.valueOf(((Number) value).longValue());
         } else if(PrimitiveTypes.BINARY.equals(typeName)) {

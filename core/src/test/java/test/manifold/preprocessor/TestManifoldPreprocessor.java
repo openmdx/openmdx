@@ -1,5 +1,7 @@
 package test.manifold.preprocessor;
 
+import org.w3c.time.SystemClock;
+
 import #if JAVA_8 javax.transaction.UserTransaction #else jakarta.transaction.UserTransaction #endif ;
 import #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif ; 
 

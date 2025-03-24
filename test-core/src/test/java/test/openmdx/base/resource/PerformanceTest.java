@@ -63,6 +63,7 @@ import jakarta.resource.ResourceException;
 import jakarta.resource.cci.IndexedRecord;
 import jakarta.resource.cci.MappedRecord;
 #endif
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -85,6 +86,7 @@ import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.state2.cci.DateStateViews;
+import org.w3c.time.SystemClock;
 import org.xml.sax.InputSource;
 
 public class PerformanceTest {

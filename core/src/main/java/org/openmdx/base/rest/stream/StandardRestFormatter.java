@@ -104,6 +104,7 @@ import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.DateTimeConstants;
 
 /**
  * Standard REST Formatter
@@ -469,9 +470,11 @@ public class StandardRestFormatter implements RestFormatter {
 	                } else if (value instanceof String) {
 	                    writer.writeCData((String) value);
 	                } else if (Datatypes.DATE_TIME_CLASS.isInstance(value)) {
-	                    writer.writeCharacters(
-	                        DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value))
-	                    );
+                        writer.writeCharacters(
+                                #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value))
+                                #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(Datatypes.DATE_TIME_CLASS.cast(value))
+                                #endif
+                        );
 	                } else if (value instanceof char[]) {
 	                    char[] text = (char[]) value;
 	                    writer.writeCharacters(text, 0, text.length);
@@ -575,7 +578,7 @@ public class StandardRestFormatter implements RestFormatter {
      * Print Exception
      * 
      * @param target
-     * @param exception
+     * @param source
      * @throws ServiceException
      */
     @Override
@@ -595,7 +598,9 @@ public class StandardRestFormatter implements RestFormatter {
                 if (exceptionTime != null) {
                     writer.writeAttribute(
                         "exceptionTime",
-                        DateTimeFormat.EXTENDED_UTC_FORMAT.format(exceptionTime)
+                        #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(exceptionTime)
+                        #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(Datatypes.DATE_TIME_CLASS.cast(exceptionTime))
+                        #endif
                     );
                 }
                 String exceptionClass = entry.getExceptionClass();

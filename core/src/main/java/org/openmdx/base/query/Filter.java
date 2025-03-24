@@ -60,6 +60,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+#if CLASSIC_CHRONO_TYPES
+import org.w3c.spi2.Datatypes;
+#endif
+
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.persistence.spi.QueryExtension;
 import org.openmdx.base.rest.cci.ConditionRecord;
@@ -67,6 +71,7 @@ import org.openmdx.base.rest.cci.FeatureOrderRecord;
 import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.base.rest.spi.QueryFilterRecord;
 import org.openmdx.base.text.conversion.JavaBeans;
+import org.w3c.spi2.Datatypes;
 
 /**
  * A filter allows to retrieve subsets of filterable maps and to sort
@@ -241,11 +246,11 @@ public class Filter extends QueryFilterRecord {
                                     );
                                 } else if (QUERY_EXTENSION_DATE_PARAM.equals(piggyBackFeature)) {
                                     extension.setDateParam(
-                                        Filter.getValues(#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif.class, condition)
+                                        Filter.getValues(Datatypes.DATE_CLASS, condition)
                                     );
                                 } else if (QUERY_EXTENSION_DATETIME_PARAM.equals(piggyBackFeature)) {
                                     extension.setDateTimeParam(
-                                        Filter.getValues(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class, condition)
+                                        Filter.getValues(Datatypes.DATE_TIME_CLASS, condition)
                                     );
                                 } else if (QUERY_EXTENSION_DECIMAL_PARAM.equals(piggyBackFeature)) {
                                     extension.setDecimalParam(
@@ -333,7 +338,7 @@ public class Filter extends QueryFilterRecord {
     /**
      * Set extensions.
      * 
-     * @param extension The extension to set.
+     * @param extensions The extensions to set.
      */
     public void setExtension(
         QueryExtensionRecord[] extensions

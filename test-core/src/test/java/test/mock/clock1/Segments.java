@@ -60,6 +60,7 @@ import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.rest.cci.VoidRecord;
 
+import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
 import test.openmdx.clock1.jmi1.Clock1Package;
 import test.openmdx.clock1.jmi1.Segment;
@@ -126,7 +127,7 @@ public class Segments {
     private static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif tryToChangeDateAndTimeReflectively(
         Segment segment
     ) throws RefException {
-        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mockTimePoint = #if CLASSIC_CHRONO_TYPES new ava.util.Date #else java.time.Instant.ofEpochMilli #endif(System.currentTimeMillis() - ONE_AND_HALF_AN_HOUR);
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mockTimePoint = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(System.currentTimeMillis() - ONE_AND_HALF_AN_HOUR);
         final RefStruct param = segment.refImmediatePackage().refCreateStruct(
             "test:openmdx:clock1:Time", 
             Collections.singletonList(mockTimePoint)
@@ -221,7 +222,7 @@ public class Segments {
             "currentDateAndTime", 
             Arrays.asList(param)
         );
-        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = Datatypes.DATE_TIME_CLASS.cast(result).refGetValue("utc");
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = Datatypes.DATE_TIME_CLASS.cast(result.refGetValue("utc"));
         return utc;
     }
     

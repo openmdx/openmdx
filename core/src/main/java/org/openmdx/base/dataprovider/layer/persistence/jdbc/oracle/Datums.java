@@ -50,6 +50,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -229,7 +230,11 @@ public class Datums {
 	            		"S"
 	            	);
                 }
-                return DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value.toString());
+                return
+                #if CLASSIC_CHRONO_TYPES DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value.toString());
+                #else Duration.ofDays(days).plusHours(hours).plusMinutes(minutes).plusSeconds(seconds).plusNanos(nanoseconds);
+                #endif
+
             } else if (isDatum(datum)) { 
                 if(datumToJdbc == null) datumToJdbc = oracleDatum.getMethod("toJdbc");
                 return datumToJdbc.invoke(datum);

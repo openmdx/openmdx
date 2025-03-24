@@ -184,10 +184,12 @@ import org.w3c.cci2.Container;
 import org.w3c.cci2.RegularExpressionFlag;
 import org.w3c.cci2.SparseArray;
 import org.w3c.cci2.StringTypePredicate;
+import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.StateAccessor;
 #if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
+import org.w3c.time.SystemClock;
 import test.openmdx.app1.aop2.NaturalPerson;
 import test.openmdx.app1.aop2.PriceCalculator;
 import test.openmdx.app1.aop2.PropagatedUserObject;
@@ -929,7 +931,7 @@ public class TestMain {
 				{
 
 					ProductQuery productQuery = (ProductQuery) entityManager.newQuery(Product.class);
-					productQuery.createdAt().lessThanOrEqualTo(SysttemClock.getInstance().now());
+					productQuery.createdAt().lessThanOrEqualTo(SystemClock.getInstance().now());
 					InvoicePositionQuery invoicePositionQuery = (InvoicePositionQuery) entityManager
 							.newQuery(InvoicePosition.class);
 					invoicePositionQuery.product().elementOf(PersistenceHelper.asSubquery(productQuery));
@@ -2385,7 +2387,7 @@ public class TestMain {
 					assertEquals(Constants.TX_REPEATABLE_READ,  persistenceManagerFactory.getTransactionIsolationLevel(), "Transaction Isolation Level");
 					{
 						final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime1 = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(System.currentTimeMillis() - 20L);
-						UserObjects.setTransactionTime(persistenceManager1, new Factory<>() {
+						UserObjects.setTransactionTime(persistenceManager1, new Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif>() {
                             public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif instantiate() {
                                 return transactionTime1;
                             }

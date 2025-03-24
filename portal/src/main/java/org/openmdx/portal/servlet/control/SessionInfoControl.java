@@ -63,6 +63,7 @@ import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.attribute.DateValue;
 import org.openmdx.portal.servlet.component.ShowObjectView;
 import org.openmdx.portal.servlet.component.View;
+import org.w3c.time.SystemClock;
 
 /**
  * SessionInfoControl

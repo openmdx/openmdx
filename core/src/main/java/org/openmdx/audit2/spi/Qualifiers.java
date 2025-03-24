@@ -52,6 +52,8 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.XRISegment;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.DateTimeConstants;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
@@ -80,7 +82,11 @@ public class Qualifiers {
         String qualifier,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif version
     ){
-        return qualifier + '*' + (version == null ? "%" : DateTimeFormat.BASIC_UTC_FORMAT.format(version));
+        return qualifier + '*' + (version == null ? "%" :
+                    #if CLASSIC_CHRONO_TYPES DateTimeFormat.BASIC_UTC_FORMAT.format(version)
+                    #else DateTimeConstants.DT_WITH_UTC_TZ_BASIC_PATTERN.format(version)
+                    #endif
+        );
     }
 
     /**

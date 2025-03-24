@@ -45,12 +45,16 @@
 package test.cache;
 
 
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.SystemClock;
+
 import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.configuration.Configuration;
 import javax.cache.spi.CachingProvider;
+import java.util.Date;
 
 /**
  * Cache Test
@@ -70,7 +74,8 @@ public class CacheTest {
         try {
             final CachingProvider cachingProvider = Caching.getCachingProvider();
             final CacheManager cacheManager = cachingProvider.getCacheManager();
-            final Configuration<String, #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> configuration = new Configuration<>() {
+            final Configuration<String, #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> configuration
+                    = new Configuration<String, #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif>() {
 
                 /**
 				 * Implements {@code Serializable}

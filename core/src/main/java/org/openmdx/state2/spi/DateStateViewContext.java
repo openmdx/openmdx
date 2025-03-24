@@ -44,11 +44,6 @@
  */
 package org.openmdx.state2.spi;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
-import javax.xml.datatype.DatatypeConstants;
-
 import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.ViewKind;
 #if CLASSIC_CHRONO_TYPES

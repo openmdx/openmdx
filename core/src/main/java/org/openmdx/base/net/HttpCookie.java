@@ -97,12 +97,14 @@ public class HttpCookie implements Comparable<HttpCookie> {
                version = argument;
             } else if ("discard".equals(key)) {
                this.discard = true;
+            #if CLASSIC_CHRONO_TYPES
             } else if ("expires".equals(key)) {
                try {
-                  this.expiresAt = netscapeDateFormat.parse(argument).#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli()#endif;
+                  this.expiresAt = netscapeDateFormat.parse(argument).getTime();
                } catch (ParseException exception) {
                   throw new IllegalArgumentException("Invalid 'expires' value: " + argument, exception);
                }
+            #endif
             } else if ("max-age".equals(key)) {
                try {
                   this.expiresAt = System.currentTimeMillis() + 1000 * Long.parseLong(argument);
@@ -157,11 +159,13 @@ public class HttpCookie implements Comparable<HttpCookie> {
     */
    private static final Boolean EMBEDDED_DOT_DOMAIN_HANDLING = Boolean.FALSE;
 
+   #if CLASSIC_CHRONO_TYPES
    /**
     * The netscape date format
     */
    private static final DateTimeFormat netscapeDateFormat = DateTimeFormat.getInstance("EEE',' dd-MMM-yyyy HH:mm:ss 'GMT'", "GMT", true // lenient
          );
+   #endif
 
    /**
     * The RFC 2965 compliant form

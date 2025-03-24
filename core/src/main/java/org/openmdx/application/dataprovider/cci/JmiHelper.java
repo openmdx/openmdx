@@ -56,7 +56,6 @@ import java.util.Set;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;

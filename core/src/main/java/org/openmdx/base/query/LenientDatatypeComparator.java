@@ -54,7 +54,6 @@ import org.openmdx.kernel.exception.BasicException;
 #if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
-
 /**
  * Allows comparison of XML Datatype classes
  */
@@ -82,10 +81,10 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
         Object first, 
         Object second
     ) {    
-        if(first instanceof Duration){
+        if(Datatypes.DURATION_CLASS.isInstance(first)){
             Duration left = (Duration) first;
             Duration right;
-            if(second instanceof Duration) {
+            if(Datatypes.DURATION_CLASS.isInstance(second)) {
                 right = (Duration) second;
             } else if (second instanceof CharSequence){
                 right = Datatypes.create(Datatypes.DURATION_CLASS, second.toString());
@@ -120,11 +119,11 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
                 } else {
 
                     left = first instanceof #if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif
-                            ? ((#if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif)first).clone()
+                            ? ((#if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif)first)#if CLASSIC_CHRONO_TYPES .clone()#endif
                             : Datatypes.DATE_CLASS.cast(first);
 
                     right = second instanceof #if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif
-                            ? ((#if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif)second).clone()
+                            ? ((#if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif)second)#if CLASSIC_CHRONO_TYPES .clone()#endif
                             : Datatypes.DATE_CLASS.cast(second);
                 }
             } else if (second instanceof CharSequence){

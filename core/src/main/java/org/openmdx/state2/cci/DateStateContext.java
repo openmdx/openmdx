@@ -60,14 +60,14 @@ public interface DateStateContext
      * 
      * @return the beginning of the application-time
      */
-    public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif getValidFrom();
+    #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif getValidFrom();
 
     /**
      * Tells up to which application-time point the information is valid
      * 
      * @return the end of the application-time
      */
-    public #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif getValidTo();
+    #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif getValidTo();
 
     
 }

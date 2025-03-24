@@ -48,6 +48,7 @@ import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.
 
 import org.openmdx.state2.cci.StateContext;
 import org.openmdx.state2.cci.ViewKind;
+import org.w3c.time.DateTimeConstants;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
@@ -92,7 +93,9 @@ public abstract class StateViewContext<V>
                     id.append(
                         '@'
                     ).append(
-                        DateTimeFormat.BASIC_UTC_FORMAT.format(getExistsAt())
+                        #if DateTimeFormat.BASIC_UTC_FORMAT.format(getExistsAt())
+                        #else DateTimeConstants.DT_WITH_UTC_TZ_BASIC_PATTERN.format(getExistsAt())
+                        #endif
                     );
                 }
                 break;

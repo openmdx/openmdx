@@ -46,14 +46,17 @@ package org.openmdx.base.text.parsing;
 
 import java.text.ParseException;
 
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.text.spi.Parser;
+import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi2.Datatypes;
+
+import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Immutable Primitive Type Parser Test
@@ -107,7 +110,8 @@ public class ImmutablePrimitiveTypeParserTest {
 		// Arrange
 		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
 		// Act
-		final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif value = testee.parse(Datatypes.DATE_TIME_CLASS, "2000-04-01");
+		final XMLGregorianCalendar value = testee.parse(XMLGregorianCalendar.class, "2000-04-01");
+//		final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif value = testee.parse(Datatypes.DATE_TIME_CLASS, "2000-04-01");
 		// Assert
 		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDate("20000401"), value);
 	}

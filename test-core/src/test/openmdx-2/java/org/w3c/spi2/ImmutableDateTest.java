@@ -48,13 +48,13 @@ import java.util.GregorianCalendar;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.w3c.cci2.ImmutableDate;
 
 /**
  * Test ImmutableDate
  */
 public class ImmutableDateTest {
 
-	#if CLASSIC_CHRONO_TYPES
 	/**
 	 * CR20019921
 	 */
@@ -66,5 +66,4 @@ public class ImmutableDateTest {
 		Assertions.assertEquals(GregorianCalendar.APRIL, calendar.get(GregorianCalendar.MONTH), "April");
 		Assertions.assertEquals( 1, calendar.get(GregorianCalendar.DAY_OF_MONTH), "1st");
 	}
-	#endif
 }

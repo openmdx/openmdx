@@ -64,7 +64,13 @@ import org.openmdx.dalvik.uses.java.beans.PersistenceDelegate;
 import org.openmdx.dalvik.uses.java.beans.XMLDecoder;
 import org.openmdx.dalvik.uses.java.beans.XMLEncoder;
 import org.openmdx.kernel.exception.BasicException;
-#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
+#if CLASSIC_CHRONO_TYPES
+import org.w3c.format.DateTimeFormat;
+import org.w3c.cci2.ImmutableDate;
+import org.w3c.cci2.ImmutableDateTime;
+import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi.ImmutableDatatypeFactory;
+#endif
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -112,7 +118,7 @@ public class AlternateJavaBeanTransformer implements BeanTransformer {
                     dateTimePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    Duration.class, 
+                    Duration.class,
                     durationPersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(

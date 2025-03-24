@@ -47,11 +47,10 @@ package org.openmdx.base.text.parsing;
 import java.util.Arrays;
 import java.util.Collection;
 
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
-
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.text.parsing.AbstractParser;
 import org.openmdx.kernel.text.spi.Parser;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Immutable Primitive Type Parser
@@ -74,9 +73,9 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
      * The supported types
      */
     private static final Collection<Class<?>> SUPPORTED_TYPES = Arrays.asList(
-        org.w3c.spi2.Datatypes.DATE_TIME_CLASS,
-        Duration.class,
-        org.w3c.spi2.Datatypes.DATE_CLASS,
+        Datatypes.DATE_TIME_CLASS,
+        Datatypes.DURATION_CLASS,
+        Datatypes.DATE_CLASS,
         Path.class
     );
     
@@ -111,18 +110,23 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
 		String externalRepresentation, 
 		Class<?> valueClass
 	) throws Exception {
-		return 
-    		valueClass == org.w3c.spi2.Datatypes.DATE_TIME_CLASS ?
-    		#if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDateTime(externalRepresentation)
-    		#else
-    		#endif :
-    		valueClass == Duration.class ? org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDuration(externalRepresentation) :
-                    valueClass == org.w3c.spi2.Datatypes.DATE_CLASS ?
-		#if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDate(externalRepresentation)
-		#else
-		#endif :
+
+       /*
+        */
+        return
+    		valueClass == java.util.Date.class ? org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDateTime(externalRepresentation) :
+    		valueClass == java.time.Duration.class ? org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDuration(externalRepresentation) :
+    		valueClass == javax.xml.datatype.XMLGregorianCalendar.class ? org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDate(externalRepresentation) :
     		valueClass == Path.class ? new Path(externalRepresentation) :
     		super.parseAs(externalRepresentation, valueClass);
+
+
+//		return
+//    		valueClass == Datatypes.DATE_TIME_CLASS ? #if !CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDateTime(externalRepresentation) #endif :
+//                valueClass == Datatypes.DURATION_CLASS ? #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDuration(externalRepresentation) #endif :
+//                    valueClass == Datatypes.DATE_CLASS ? #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDate(externalRepresentation) #endif :
+//    		            valueClass == Path.class ? new Path(externalRepresentation) :
+//                            super.parseAs(externalRepresentation, valueClass);
 	}
     
 }

@@ -89,6 +89,7 @@ import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
+import org.w3c.time.SystemClock;
 
 public class UiLoader
     extends Loader {

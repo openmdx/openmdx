@@ -49,6 +49,8 @@ import java.text.ParseException;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.DateTimeConstants;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
@@ -93,7 +95,10 @@ public class LockAssertions {
 	public static Object newReadLockAssertion(
 		#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime
 	){
-		return READ_LOCK_PREFIX + DateTimeFormat.EXTENDED_UTC_FORMAT.format(transactionTime);
+		return READ_LOCK_PREFIX +
+				#if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(transactionTime)
+				#else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(Datatypes.DATE_TIME_CLASS.cast(transactionTime))
+				#endif;
 	}
 	
 	/**

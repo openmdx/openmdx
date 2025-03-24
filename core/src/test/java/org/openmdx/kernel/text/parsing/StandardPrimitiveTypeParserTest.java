@@ -55,6 +55,7 @@ import org.junit.jupiter.api.Test;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.text.spi.Parser;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Standard Primitive Type Parser Test 
