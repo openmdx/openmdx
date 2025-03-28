@@ -3371,7 +3371,7 @@ public class Database_2
                 ps.setObject(position, sqlValue);
             }
         } else if(Datatypes.DATE_CLASS.isInstance(normalizedValue)) {
-            Object sqlValue = this.getCalendarMarshaller().marshal(normalizedValue, conn);
+            Object sqlValue = #if CLASSIC_CHRONO_TYPES this.getCalendarMarshaller().marshal(normalizedValue, conn) #else this.convertToSqlValue(normalizedValue)#endif;
             if (sqlValue instanceof Time) {
                 ps.setTime(position, (Time) sqlValue);
             } else if (sqlValue instanceof Timestamp) {
@@ -3415,6 +3415,22 @@ public class Database_2
             );
         }
     }
+
+    #if !CLASSIC_CHRONO_TYPES
+    private Object convertToSqlValue(Object normalizedValue) {
+        if (normalizedValue instanceof java.time.LocalDate) {
+            return java.sql.Date.valueOf((java.time.LocalDate) normalizedValue);
+        } else if (normalizedValue instanceof java.time.LocalDateTime) {
+            return java.sql.Timestamp.valueOf((java.time.LocalDateTime) normalizedValue);
+        } else if (normalizedValue instanceof java.time.Instant) {
+            return java.sql.Timestamp.from((java.time.Instant) normalizedValue);
+        } else if (normalizedValue instanceof java.time.Duration) {
+            return ((java.time.Duration) normalizedValue).toMillis();
+        } else {
+            return normalizedValue;
+        }
+    }
+    #endif
 
     private ObjectRecord getObject(
         Connection conn,
@@ -4413,9 +4429,9 @@ public class Database_2
             this.setValue(
                 target,
                 index,
-                this.getCalendarMarshaller().unmarshal(
-                    val.toString().substring(0, 10)
-                ),
+                #if CLASSIC_CHRONO_TYPES this.getCalendarMarshaller().unmarshal(val.toString().substring(0, 10))
+                #else java.time.LocalDate.parse(val.toString().substring(0, 10), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
+                #endif,
                 isEmbedded
             );
         } else if (PrimitiveTypes.DATE.equals(featureType)
@@ -4428,7 +4444,10 @@ public class Database_2
             this.setValue(
                 target,
                 index,
-                this.getCalendarMarshaller().unmarshal(val),
+//                this.getCalendarMarshaller().unmarshal(val),
+                #if CLASSIC_CHRONO_TYPES this.getCalendarMarshaller().unmarshal(val)
+                #else java.time.LocalDate.parse(val.toString())
+                #endif,
                 isEmbedded
             );
         } else if (PrimitiveTypes.DURATION.equals(featureType)) {
