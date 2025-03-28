@@ -185,10 +185,10 @@ class VariableSizeMappedRecord
         if(!this.immutable) {
             for(Map.Entry<?,Object> e : this.values.entrySet()){
                 Object original = e.getValue();
-                Object immutable = Isolation.toImmutable(original);
-                if(original != immutable) {
-                    e.setValue(immutable);
-                }
+//                Object immutable = Isolation.toImmutable(original);
+//                if(original != immutable) {
+//                    e.setValue(immutable);
+//                }
             }
             this.immutable = true;
         }

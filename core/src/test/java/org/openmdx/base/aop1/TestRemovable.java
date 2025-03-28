@@ -48,21 +48,21 @@ import java.text.ParseException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.w3c.format.DateTimeFormat;
 
 /**
  * Test Removable
  */
 public class TestRemovable {
 
+    #if CLASSIC_CHRONO_TYPES
     @Test
     public void testRemovedAtPlaceholder() throws ParseException{
-        DateTimeFormat format = DateTimeFormat.getInstance("yyyyyMMdd'T'HHmmss.SSS'Z'");
+        org.w3c.format.DateTimeFormat format = org.w3c.format.DateTimeFormat.getInstance("yyyyyMMdd'T'HHmmss.SSS'Z'");
         Assertions.assertEquals(
             "100000101T000000.000Z", 
             format.format(Removable_1.IN_THE_FUTURE),
             "Future placeholder"
         );
     }
-    
+    #endif
 }

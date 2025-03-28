@@ -71,6 +71,7 @@ import jakarta.resource.spi.IllegalStateException;
 import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
+import org.w3c.time.SystemClock;
 
 #if CLASSIC_CHRONO_TYPES
 import org.w3c.cci2.ImmutableDateTime;
@@ -137,10 +138,12 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     /**
      * The interaction time
      */
-    private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.LocalDate #endif interactionTime =
-            #if CLASSIC_CHRONO_TYPES new ImmutableDateTime(System.currentTimeMillis())
-            #else LocalDate.parse(Long.toString(System.currentTimeMillis()), DateTimeFormatter.ISO_LOCAL_DATE)
-            #endif;
+    private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif interactionTime =
+            SystemClock.getInstance().now();
+//            #if CLASSIC_CHRONO_TYPES new ImmutableDateTime(System.currentTimeMillis())
+////            #else LocalDate.parse(Long.toString(System.currentTimeMillis()), DateTimeFormatter.ISO_LOCAL_DATE)
+//            #else java.time.Instant.ofEpochMilli(System.currentTimeMillis()).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+//            #endif;
 
     protected final boolean hasDelegate(){
     	return this.delegate != null;
@@ -332,7 +335,7 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
      * 
      * @return the interaction time
      */
-    protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.LocalDate #endif getInteractionTime(){
+    protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getInteractionTime(){
     	return this.interactionTime;
     }
     

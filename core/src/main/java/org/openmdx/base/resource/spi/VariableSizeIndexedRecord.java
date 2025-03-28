@@ -161,10 +161,10 @@ public class VariableSizeIndexedRecord
 	    	this.immutable = true;
 	    	for(ListIterator<Object> i = this.delegate.listIterator(); i.hasNext();){
 	    		Object original = i.next();
-	    		Object immutable = Isolation.toImmutable(original);
-	    		if(original != immutable) {
-	    			i.set(immutable);
-	    		}
+//	    		Object immutable = Isolation.toImmutable(original);
+//	    		if(original != immutable) {
+//	    			i.set(immutable);
+//	    		}
 	    	}
     	}
     }

@@ -785,7 +785,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                         this.refClass.getMarshaller(), 
                                         FeatureMapper.Kind.METHOD
                                     );
-                                    container.refAdd(jmiToRef(args));
+//                                    container.refAdd(jmiToRef(args));
                                     return null;
                                 } else if (methodName.startsWith("get")) { 
                                     if(args.length != 1 || !(args[0] instanceof RefObject)) {

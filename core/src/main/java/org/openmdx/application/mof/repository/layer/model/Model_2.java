@@ -188,7 +188,7 @@ public class Model_2
             if (isInstanceOfBasicObject(input)) {
                 final IndexedRecord by =
                     toIndexedRecordList(getPrincipalChain());
-                final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.LocalDate #endif at = getInteractionTime();
+                final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif at = getInteractionTime();
                 final MappedRecord target = input.getValue();
                 if (isNew) {
                     target.put(SystemAttributes.CREATED_AT, at);
