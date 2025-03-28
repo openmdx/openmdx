@@ -110,18 +110,17 @@ public class LockAssertions {
 	public static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getTransactionTime(
 		Object readLockAssertion
 	) throws ServiceException {
-		try {
-			return DateTimeFormat.EXTENDED_UTC_FORMAT.parse(
-				((String)readLockAssertion).substring(READ_LOCK_PREFIX.length())
-			);
-		} catch (ParseException exception) {
+		#if CLASSIC_CHRONO_TYPES try { #endif
+			return #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT #else java.time.Instant #endif
+					.parse(((String)readLockAssertion).substring(READ_LOCK_PREFIX.length()));
+		#if CLASSIC_CHRONO_TYPES } catch (ParseException exception) {
 			throw new ServiceException(
 				exception,
 				BasicException.Code.DEFAULT_DOMAIN,
 				BasicException.Code.TRANSFORMATION_FAILURE,
 				"Unable to extract the transaction time from the readLockAssertion"
 			);
-		}		
+		}#endif
 	}
 	
 }

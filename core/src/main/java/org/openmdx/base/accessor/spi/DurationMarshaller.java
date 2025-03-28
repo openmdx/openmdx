@@ -94,11 +94,14 @@ public class DurationMarshaller {
         protected Object normalize(
             Object source
         ) throws ServiceException {
+            #if CLASSIC_CHRONO_TYPES
             return source instanceof Duration ? DatatypeFactories.immutableDatatypeFactory().toNormalizedDuration(
-                Datatypes.DURATION_CLASS.cast(source)
-            ) : super.normalize(
-                source
-            );
+                    Datatypes.DURATION_CLASS.cast(source)
+                ) : super.normalize(source);
+            #else
+            return source instanceof Duration ? Datatypes.DURATION_CLASS.cast(source) : super.normalize(source);
+            #endif
+
         }
         
     };
