@@ -192,7 +192,7 @@ public class PGIntervalMarshaller {
 				seconds = null;
 			}
 
-//			#if CLASSIC_CHRONO_TYPES
+			#if CLASSIC_CHRONO_TYPES
 			return DatatypeFactories.xmlDatatypeFactory().newDuration(
 				!negative,
 				years,
@@ -202,7 +202,20 @@ public class PGIntervalMarshaller {
 				minutes,
 				seconds
 			);
-//			#else #endif
+			#else
+			java.time.Duration duration = java.time.Duration
+					.ofDays(Long.parseLong(String.valueOf(days)))
+					.plusHours(Long.parseLong(String.valueOf(hours)))
+					.plusMinutes(Long.parseLong(String.valueOf(minutes)))
+					.plusSeconds(Long.parseLong(String.valueOf(seconds)));
+
+			// Apply negative sign if needed
+			if (negative) {
+				duration = duration.negated();
+			}
+
+			return duration;
+			#endif
 
 		} else {
 			throw new ServiceException(
