@@ -2984,10 +2984,15 @@ public class Database_2
         Object value
     )
         throws ServiceException {
-        boolean dateTime = value instanceof java.util.Date
-            || Datatypes.DATE_CLASS.isInstance(value)
-                && DatatypeConstants.DATETIME
-                    .equals(Datatypes.DATE_CLASS.cast(value).getXMLSchemaType());
+
+        boolean dateTime =
+            #if CLASSIC_CHRONO_TYPES
+                value instanceof java.util.Date ||
+                Datatypes.DATE_CLASS.isInstance(value) && DatatypeConstants.DATETIME.equals(Datatypes.DATE_CLASS.cast(value).getXMLSchemaType());
+            #else
+                value instanceof java.time.Instant || value instanceof java.time.ZonedDateTime || value instanceof java.time.OffsetDateTime;
+            #endif
+
         boolean timestampWithTimezone = dateTime
             && LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE
                 .equals(getDateTimeType(connection));
@@ -6401,7 +6406,7 @@ public class Database_2
         throws ServiceException {
         this.removePrivateAttributes(object);
         this.setLockAssertion(object);
-        DateTimeValues.normalizeDateTimeValues(object);
+        #if CLASSIC_CHRONO_TYPES DateTimeValues.normalizeDateTimeValues(object);#endif
     }
 
     @Override

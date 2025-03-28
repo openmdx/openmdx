@@ -1075,7 +1075,7 @@ public class RestParser {
                         this.exceptionDomain,
                         Integer.parseInt(this.exceptionCode),
                         this.exceptionClass,
-                        this.exceptionTime == null ? null : DateTimeFormat.EXTENDED_UTC_FORMAT.parse(exceptionTime),
+                        this.exceptionTime == null ? null : #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT #else java.time.Instant#endif.parse(exceptionTime),
                         this.methodName,
                         this.lineNumber == null ? null : Integer.valueOf(this.lineNumber),
                         this.description,

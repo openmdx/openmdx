@@ -58,6 +58,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 #if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.ChronoUtils;
 
 /**
  * DurationMarshaller
@@ -102,7 +103,7 @@ public class DurationMarshaller {
 
 	@SuppressWarnings("unchecked")
 	private <T extends Number> T getValue(Duration duration, DatatypeConstants.Field field) {
-		Number value = duration.getField(field);
+		Number value = #if CLASSIC_CHRONO_TYPES duration.getField(field) #else ChronoUtils.getDurationField(duration, field)#endif;
 		if (value == null) {
 			value = field == DatatypeConstants.SECONDS ? DAY_TIME_ZERO : YEAR_MONTHS_ZERO;
 		}
@@ -121,7 +122,7 @@ public class DurationMarshaller {
 			ValueType valueType = ValueType.of(duration);
 			if (valueType == null)
 				return null;
-			final int signum = duration.getSign();
+			final int signum = duration#if CLASSIC_CHRONO_TYPES .getSign() #else .isNegative() ? -1 : (duration.isZero() ? 0 : 1)#endif;
 			switch (durationType) {
 				case INTERVAL: {
 					if(PGIntervalMarshaller.isApplicableForDatabaseProduct(databaseProductName)) {

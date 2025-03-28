@@ -44,7 +44,9 @@
  */
 package org.w3c.time;
 
+import javax.xml.datatype.DatatypeConstants;
 import java.text.ParseException;
+import java.time.Duration;
 
 public class ChronoUtils {
 
@@ -71,6 +73,26 @@ public class ChronoUtils {
         }
         return value;
         #endif
+
+    }
+
+    public static Number getDurationField(Duration duration, DatatypeConstants.Field field) {
+        if (field.equals(DatatypeConstants.YEARS)) {
+            return duration.toDays() / 365;
+        } else if (field.equals(DatatypeConstants.MONTHS)) {
+            return (duration.toDays() % 365) / 30;
+        } else if (field.equals(DatatypeConstants.DAYS)) {
+            return duration.toDays() % 30;
+        } else if (field.equals(DatatypeConstants.HOURS)) {
+            return duration.toHours() % 24;
+        } else if (field.equals(DatatypeConstants.MINUTES)) {
+            return duration.toMinutes() % 60;
+        } else if (field.equals(DatatypeConstants.SECONDS)) {
+            return duration.getSeconds() % 60;
+        } //else if (field.equals(DatatypeConstants.MILLISECONDS)) {
+            //return duration.toMillis() % 1000;
+        //}
+        return null;
 
     }
 
