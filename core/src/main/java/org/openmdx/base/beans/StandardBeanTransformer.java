@@ -132,11 +132,11 @@ public class StandardBeanTransformer implements BeanTransformer {
                     immutableDatePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    ImmutableDate.class,
+                    #if CLASSIC_CHRONO_TYPES ImmutableDate #else java.time.LocalDate#endif.class,
                     immutableDatePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    ImmutableDateTime.class,
+                    #if CLASSIC_CHRONO_TYPES ImmutableDateTime #else java.time.Instant#endif.class,
                     dateTimePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(

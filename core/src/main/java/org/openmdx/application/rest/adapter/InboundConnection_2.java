@@ -1085,8 +1085,16 @@ public class InboundConnection_2 extends AbstractConnection {
                     Collection refContainer = (Collection) container;
                     refContainer.add(refObject);
                 } else {
-                    RefContainer<?> refContainer = (RefContainer<?>) container;
-                    refContainer.refAdd(toAddArguments(refContainer.getClass(), xri.getLastSegment().toClassicRepresentation(), refObject));
+                    RefContainer<RefObject> refContainer = (RefContainer<RefObject>) container;
+                    #if CLASSIC_CHRONO_TYPES
+                        refContainer.refAdd(toAddArguments(refContainer.getClass(), xri.getLastSegment().toClassicRepresentation(), refObject));
+                    #else
+                        String qualifier = xri.getLastSegment().toClassicRepresentation();
+                        boolean persistent = qualifier.startsWith("!");
+                        QualifierType qualifierType = persistent ? QualifierType.PERSISTENT : QualifierType.REASSIGNABLE;
+                        Object qualifierValue = persistent ? qualifier.substring(1) : qualifier;
+                        refContainer.refAdd(qualifierType, qualifierValue, refObject);
+                    #endif
                 }
                 return propagate(refObject, output, null, null);
             }
@@ -1149,7 +1157,7 @@ public class InboundConnection_2 extends AbstractConnection {
             Path newResourceIdentifier = input.getResourceIdentifier();
             int featurePosition = newResourceIdentifier.size() - 2;
             RefObject refObject = getObjectByResourceIdentifier(newResourceIdentifier.getPrefix(featurePosition));
-            RefContainer<?> refContainer = (RefContainer<?>) refObject.refGetValue(
+            RefContainer<RefObject> refContainer = (RefContainer<RefObject>) refObject.refGetValue(
                 newResourceIdentifier.getSegment(featurePosition).toClassicRepresentation()
             );
             String qualifier = newResourceIdentifier.getLastSegment().toClassicRepresentation();
