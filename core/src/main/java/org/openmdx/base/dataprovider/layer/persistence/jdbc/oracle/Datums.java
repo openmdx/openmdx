@@ -231,7 +231,7 @@ public class Datums {
 	            	);
                 }
                 return
-                #if CLASSIC_CHRONO_TYPES DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value.toString());
+                #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value.toString());
                 #else Duration.ofDays(days).plusHours(hours).plusMinutes(minutes).plusSeconds(seconds).plusNanos(nanoseconds);
                 #endif
 

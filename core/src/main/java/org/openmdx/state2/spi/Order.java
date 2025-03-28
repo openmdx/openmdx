@@ -71,7 +71,7 @@ public class Order {
     /**
      * Plus one day
      */
-    public static final Duration ONE_DAY = #if CLASSIC_CHRONO_TYPES DatatypeFactories.xmlDatatypeFactory(
+    public static final Duration ONE_DAY = #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory(
     ).newDurationDayTime(
         true, // isPositive
         1, // day
@@ -83,7 +83,7 @@ public class Order {
     /**
      * Minus one day
      */
-    public static final Duration MINUS_ONE_DAY = #if CLASSIC_CHRONO_TYPES DatatypeFactories.xmlDatatypeFactory(
+    public static final Duration MINUS_ONE_DAY = #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory(
     ).newDurationDayTime(
         false, // isPositive
         1, // day

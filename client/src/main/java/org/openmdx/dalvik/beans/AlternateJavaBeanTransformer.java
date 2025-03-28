@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 
-import javax.xml.datatype.DatatypeConstants;
 import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 import java.util.Date;
 
@@ -113,11 +112,11 @@ public class AlternateJavaBeanTransformer implements BeanTransformer {
                     immutableDatePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    ImmutableDate.class,
+                    #if CLASSIC_CHRONO_TYPES ImmutableDate #else java.time.LocalDate#endif.class,
                     immutableDatePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    ImmutableDateTime.class,
+                    #if CLASSIC_CHRONO_TYPES ImmutableDateTime #else java.time.Instant#endif.class,
                     dateTimePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
@@ -415,7 +414,7 @@ public class AlternateJavaBeanTransformer implements BeanTransformer {
     private static final PersistenceDelegate quantifierPersistenceDelegate = new QuantifierPersistenceDelegate();
     private static final PersistenceDelegate uriPersistenceDelegate = new URIPersistenceDelegate();
     private static final Class<? extends #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> xmlGregorianCalendarClass =
-            #if CLASSIC_CHRONO_TYPES DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED)
+            #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED)
             #else java.time.LocalDate.of(2000, 1, 1)
             #endif.getClass();
 

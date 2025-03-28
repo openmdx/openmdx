@@ -475,7 +475,7 @@ public class StandardBeanTransformer implements BeanTransformer {
     private static final PersistenceDelegate quantifierPersistenceDelegate = new QuantifierPersistenceDelegate();
     private static final PersistenceDelegate uriPersistenceDelegate = new URIPersistenceDelegate();
     private static final Class<? extends #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> xmlGregorianCalendarClass =
-            #if CLASSIC_CHRONO_TYPES DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED)
+            #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED)
             #else java.time.LocalDate.of(2000, 1, 1)
             #endif.getClass();
 
