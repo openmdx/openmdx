@@ -47,6 +47,7 @@ import org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEn
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.DataTypes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
 import javax.xml.datatype.DatatypeConstants;

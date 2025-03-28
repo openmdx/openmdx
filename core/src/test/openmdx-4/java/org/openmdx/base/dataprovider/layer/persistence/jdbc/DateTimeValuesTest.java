@@ -90,7 +90,7 @@ public class DateTimeValuesTest {
     @Test
     public void whenNowThenConvertToDate() throws ResourceException{
         // Arrange
-        final XMLGregorianCalendar now = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
+        final XMLGregorianCalendar now = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
         object.getValue().put("now", now);
         // Act
         DateTimeValues.normalizeDateTimeValues(object);
@@ -103,7 +103,7 @@ public class DateTimeValuesTest {
     public void convertInListWhereNecessary() throws ResourceException{
         // Arrange
         final XMLGregorianCalendar today = DateStateViews.today();
-        final XMLGregorianCalendar now = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
+        final XMLGregorianCalendar now = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
         final IndexedRecord list = Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.code());
         list.add(today);
         list.add(now);
@@ -120,7 +120,7 @@ public class DateTimeValuesTest {
     public void convertInMapWhereNecessary() throws ResourceException{
         // Arrange
         final XMLGregorianCalendar today = DateStateViews.today();
-        final XMLGregorianCalendar now = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
+        final XMLGregorianCalendar now = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
         final MappedRecord map = Records.getRecordFactory().createMappedRecord(Multiplicity.SPARSEARRAY.code());
         map.put(Integer.valueOf(4), now);
         map.put(Integer.valueOf(2), today);
