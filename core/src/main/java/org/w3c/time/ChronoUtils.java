@@ -48,7 +48,7 @@
 //#define CLASSIC_CHRONO_TYPES
 package org.w3c.time;
 
-#define CLASSIC_CHRONO_TYPES
+//#define CLASSIC_CHRONO_TYPES
 
 import javax.xml.datatype.DatatypeConstants;
 import java.text.ParseException;

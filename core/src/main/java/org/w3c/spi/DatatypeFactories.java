@@ -44,12 +44,11 @@
  */
 package org.w3c.spi;
 
-#define CLASSIC_CHRONO_TYPES
+//#define CLASSIC_CHRONO_TYPES
 
 #if CLASSIC_CHRONO_TYPES
 import javax.xml.datatype.DatatypeFactory;
 import org.w3c.cci2.MutableDatatypeFactory;
-#else
 #endif
 /**
  * DatatypeFactories
