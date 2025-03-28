@@ -51,6 +51,7 @@ import java.net.URI;
 
 import javax.xml.datatype.DatatypeConstants;
 import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
+import java.util.Date;
 
 import org.openmdx.base.exception.ExceptionListener;
 import org.openmdx.base.exception.RuntimeServiceException;
@@ -72,6 +73,8 @@ import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
 import org.w3c.spi2.Datatypes;
+
+import static org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ;
 
 /**
  * Alternate Java Bean Transfomer
@@ -317,7 +320,9 @@ public class AlternateJavaBeanTransformer implements BeanTransformer {
                 oldInstance,
                 #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
                 "new", 
-                new Object[]{Datatypes.DATE_TIME_CLASS.cast(oldInstance).getTime()}
+                new Object[] {
+                        Datatypes.DATE_TIME_CLASS.cast(oldInstance).getTime()
+                }
             );
         }
     }    
@@ -368,7 +373,7 @@ public class AlternateJavaBeanTransformer implements BeanTransformer {
                 Datatypes.class,
                 "create", 
                 new Object[]{
-                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
+                        Date.class,
                         BASIC_FORMATTER_DT_UTC_TZ.format(Datatypes.DATE_TIME_CLASS.cast(oldInstance))
                 }
             );

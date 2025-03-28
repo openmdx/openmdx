@@ -369,7 +369,7 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif date
     ){
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif predecessor
-                = Datatypes.DATE_CLASS.cast(date)#if CLASSIC_CHRONO_TYPES .clone()#endif;
+                = Datatypes.DATE_CLASS.cast(date);
         predecessor.#if CLASSIC_CHRONO_TYPES add #else plus#endif(MINUS_ONE_DAY);
         return predecessor;
     }
@@ -385,7 +385,7 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif date
     ){
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif successor
-                = Datatypes.DATE_CLASS.cast(date)#if CLASSIC_CHRONO_TYPES .clone()#endif;
+                = Datatypes.DATE_CLASS.cast(date);
         successor.#if CLASSIC_CHRONO_TYPES add #else plus#endif(ONE_DAY);
         return successor;
     }

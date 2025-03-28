@@ -114,7 +114,7 @@ public class DateStateViewContext
     ){
         return new DateStateViewContext(
             Datatypes.DATATYPE_FACTORY.toDate(validFor),
-            #if !CLASSIC_CHRONO_TYPES (java.time.Instant)#endif null
+            Datatypes.DATE_CLASS.cast(null)
         );
     }
 
