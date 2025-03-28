@@ -1161,7 +1161,7 @@ public class ViewManager_1 implements ViewManager_1_0, Serializable {
     /**
      * Tells whether the persistence manager represented by this connection is multithreaded or not
      * 
-     * @return {@code  true} if the the persistence manager is multithreaded
+     * @return {@code  true} if the persistence manager is multithreaded
      */
     @Override
     public boolean getMultithreaded() {

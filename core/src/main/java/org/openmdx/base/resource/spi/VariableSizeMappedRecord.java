@@ -459,7 +459,12 @@ class VariableSizeMappedRecord
     }
 
     private static boolean areEqual(Object thisValue, Object thatValue){
-        return thatValue instanceof ImmutableDatatype<?> ? thatValue.equals(thisValue) : thisValue.equals(thatValue);
+        #if CLASSIC_CHRONO_TYPES
+        if (thatValue instanceof ImmutableDatatype<?>) {
+            return thatValue.equals(thisValue);
+        }
+        #endif
+        return thisValue.equals(thatValue);
     }
     
     /**

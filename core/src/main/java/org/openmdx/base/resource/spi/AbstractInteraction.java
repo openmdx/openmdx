@@ -142,8 +142,6 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
             #else LocalDate.parse(Long.toString(System.currentTimeMillis()), DateTimeFormatter.ISO_LOCAL_DATE)
             #endif;
 
-//    private final Date interactionTime = new ImmutableDateTime(System.currentTimeMillis());
-
     protected final boolean hasDelegate(){
     	return this.delegate != null;
     }
@@ -334,7 +332,7 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
      * 
      * @return the interaction time
      */
-    protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getInteractionTime(){
+    protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.LocalDate #endif getInteractionTime(){
     	return this.interactionTime;
     }
     

@@ -3631,7 +3631,7 @@ public class TestMain {
 			this.begin();
 			#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTimeNow = SystemClock.getInstance().now();
 			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif dateIn = Datatypes.create(Datatypes.DATE_CLASS,
-					DateTimeFormat.BASIC_UTC_FORMAT.format(dateTimeNow).substring(0, 8));
+					org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ.format(dateTimeNow).substring(0, 8));
 			PersonDateOpParams personDateOpParams;
 			switch (nextStructureCreation()) {
 			case BY_MEMBER:

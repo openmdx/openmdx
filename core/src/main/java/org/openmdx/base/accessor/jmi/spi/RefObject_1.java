@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +121,9 @@ import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
+import org.w3c.time.DateTimeConstants;
+
+import static org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 //---------------------------------------------------------------------------
@@ -1493,13 +1497,10 @@ class RefObject_1
                                         this.setValue(featureDef, Boolean.FALSE);
                                     } else if (PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
                                         this.setValue(
-                                            featureDef,
-                                            DateTimeMarshaller.NORMALIZE.marshal(
-                                                    #if CLASSIC_CHRONO_TYPES DateTimeFormat.BASIC_UTC_FORMAT.format(new java.util.Date())
-                                                    #else
-                                                    #endif
-
-                                            )
+                                                featureDef,
+                                                DateTimeMarshaller.NORMALIZE.marshal(
+                                                        BASIC_FORMATTER_DT_UTC_TZ.format(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif)
+                                                )
                                         );
                                     } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
                                         this.setValue(

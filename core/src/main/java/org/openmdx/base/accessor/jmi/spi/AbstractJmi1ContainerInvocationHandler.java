@@ -154,6 +154,7 @@ abstract class AbstractJmi1ContainerInvocationHandler
 
         if (args.length % 2 != 0) {
             throw new IllegalArgumentException("Arguments array must have an even number of elements.");
+
         }
 
         List<RefQualifier> qualifiers = new ArrayList<>();

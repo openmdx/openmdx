@@ -60,7 +60,6 @@ import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.state2.cci.DateStateViews;
-import org.w3c.spi.DatatypeFactories;
 
 /**
  * Date Time Values Test

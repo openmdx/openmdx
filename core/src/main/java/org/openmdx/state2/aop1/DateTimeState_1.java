@@ -59,7 +59,7 @@ import org.openmdx.state2.spi.TechnicalAttributes;
 import org.w3c.spi2.Datatypes;
 
 /**
- * Registers the the delegates with their manager
+ * Registers the delegates with their manager
  */
 public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
 

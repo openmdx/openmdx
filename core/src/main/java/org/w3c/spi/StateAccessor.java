@@ -97,7 +97,7 @@ public class StateAccessor
     /**
      * Retrieve the detached object's JDO identity
      * 
-     * @param the detached object
+     * @param pc the detached object
      * 
      * @return  the detached object's XRI
      */

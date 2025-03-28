@@ -109,7 +109,10 @@ public class LockAssertion {
 	private static Object toValue(
 		String value
 	){
-		return value.length() == 0 ? null : DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(value);
+		return value.isEmpty() ? null :
+				#if CLASSIC_CHRONO_TYPES DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(value)
+				#else org.w3c.spi2.Datatypes.create(org.w3c.spi2.Datatypes.DATE_CLASS, value)
+				#endif;
 	}
 
 	/**

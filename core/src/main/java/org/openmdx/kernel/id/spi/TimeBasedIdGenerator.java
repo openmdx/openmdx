@@ -114,7 +114,7 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
      * <p>
      * This method may be overridden by a subclass.
      * <p>
-     * The 60 bit timestamp value is used to set the the time_low, time_mid, 
+     * The 60 bit timestamp value is used to set the time_low, time_mid,
      * and time_hi fields of the UUID. 
      * 
      * @return the timestamp for the next UUID
@@ -237,12 +237,12 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
         SysLog.log(
                 Level.WARNING,
                 "Sys|Clock has been set back from {0} to {1}|Clock sequence will be changed from {2} to {3}",
-                #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(lastReservation))
-                #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(lastReservation))
-                #endif,
-                #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(nextReservation)),
-                #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(nextReservation))
-                #endif,
+                Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(
+                        #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(lastReservation)
+                ),
+                Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(
+                        #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(nextReservation)
+                ),
                 (long) TimeBasedIdGenerator.clockSequence,
                 (long) clockSequence
         );
@@ -342,10 +342,7 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
          */
         @Override
         public String toString() {
-            return
-                    #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(millisecond))
-                    #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(millisecond))
-                    #endif + "/P0.001S";
+            return Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(millisecond)) + "/P0.001S";
         }
         
     }

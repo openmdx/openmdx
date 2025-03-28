@@ -44,10 +44,15 @@ public abstract class DatatypeMarshaller implements Marshaller {
     public Object unmarshal(
         Object source
     ) throws ServiceException {
-        return
-            source == null ? null :
-            source instanceof ImmutableDatatype<?> ? ((ImmutableDatatype<?>)source).toBasicFormat() :
-            toBasicFormat(source);    
+        if (source == null) {
+            return null;
+        }
+        #if CLASSIC_CHRONO_TYPES
+        if (source instanceof ImmutableDatatype<?>) {
+            return ((ImmutableDatatype<?>)source).toBasicFormat();
+        }
+        #endif
+        return toBasicFormat(source);
     }
     
     protected abstract String toBasicFormat(

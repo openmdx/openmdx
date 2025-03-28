@@ -48,6 +48,7 @@ package org.openmdx.base.dataprovider.layer.persistence.jdbc.postgresql;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Period;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,6 +57,7 @@ import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Durati
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
+import org.w3c.spi.DatatypeFactories;
 
 #if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
@@ -189,15 +191,19 @@ public class PGIntervalMarshaller {
 				minutes = null;
 				seconds = null;
 			}
+
+//			#if CLASSIC_CHRONO_TYPES
 			return DatatypeFactories.xmlDatatypeFactory().newDuration(
-				!negative, 
-				years, 
-				months, 
+				!negative,
+				years,
+				months,
 				days,
 				hours,
 				minutes,
 				seconds
 			);
+//			#else #endif
+
 		} else {
 			throw new ServiceException(
 				BasicException.Code.DEFAULT_DOMAIN,

@@ -1248,7 +1248,7 @@ public class RefRootPackage_1
         public Query newQuery(
         ) {
             throw new UnsupportedOperationException(
-                "The the Class of the candidate instances must be specified when " +
+                "The Class of the candidate instances must be specified when " +
                 "creating a new Query instance."
             );            
         }

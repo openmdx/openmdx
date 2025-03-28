@@ -1,7 +1,7 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Description: Datatype Factories
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Description: Time Zones
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,51 +42,36 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.w3c.spi;
+package org.w3c.time;
 
+import java.text.ParseException;
 
-import javax.xml.datatype.DatatypeFactory;
+public class ChronoUtils {
 
-import org.w3c.cci2.MutableDatatypeFactory;
+    public static final java.util.regex.Pattern BASIC_DATE_PATTERN
+            = #if CLASSIC_CHRONO_TYPES DateTimeFormat.BASIC_DATE_PATTERN #else java.util.regex.Pattern.compile("\\d{8}") #endif;
+    public static final java.util.regex.Pattern EXTENDED_DATE_PATTERN
+            = #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_DATE_PATTERN #else java.util.regex.Pattern.compile("\\d{4}-\\d{2}-\\d{2}") #endif;
 
-/**
- * DatatypeFactories
- */
-public class DatatypeFactories {
-
-    /**
-     * Constructor
-     */
-    private DatatypeFactories() {
-        // Avoid instantiation
+    public static final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif createDate(int year, int month, int dayOfMonth, int timezone) {
+        return #if CLASSIC_CHRONO_TYPES DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(year, month, dayOfMonth, timezone)
+        #else java.time.LocalDate.of(year, month, dayOfMonth)
+        #endif;
     }
 
-    /**
-     * The XML Datatype Factory is lazily initialized
-     */
-    private static ImmutableDatatypeFactory immutableFactory;
+    public static final String completeCentury(String value) throws ParseException, NumberFormatException {
 
-    /**
-     * Retrieve an XML Datatype Factory
-     *
-     * @return an XML Datatype Factory instance
-     */
-    public static DatatypeFactory xmlDatatypeFactory(
-    ){
-        return MutableDatatypeFactory.xmlDatatypeFactory();
-    }
-
-    /**
-     * Retrieve an Immutable Datatype Factory
-     *
-     * @return an Immutable Datatype Factory instance
-     */
-    public static ImmutableDatatypeFactory immutableDatatypeFactory(
-    ){
-        if(immutableFactory == null) {
-            immutableFactory = new AlternativeDatatypeFactory();
+        #if CLASSIC_CHRONO_TYPES
+            return DateTimeFormat.completeCentury(value);
+        #else
+        if (value.matches("\\d{2}-\\d{2}-\\d{2}")) {
+            int year = Integer.parseInt(value.substring(0, 2));
+            int century = (year > 50) ? 19 : 20;
+            return century + value;
         }
-        return immutableFactory;
+        return value;
+        #endif
+
     }
 
 }

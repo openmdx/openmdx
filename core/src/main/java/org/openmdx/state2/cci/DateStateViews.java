@@ -114,11 +114,7 @@ import org.openmdx.state2.spi.StateViewContext;
 import org.openmdx.state2.spi.TechnicalAttributes;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.Container;
-#if CLASSIC_CHRONO_TYPES
-import org.w3c.cci2.ImmutableDatatype;
-import org.w3c.spi.DatatypeFactories;
-import org.w3c.spi.ImmutableDatatypeFactory;
-#endif
+import org.w3c.spi2.Datatypes;
 
 /**
  * Date State Views
@@ -135,12 +131,15 @@ public class DateStateViews {
     /**
      * Used in views for invalidated states open at both sides
      */
-    private static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif DEFAULT_VALID_FOR = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-        2000,
-        1, // January
-        1, // 1st
-        DatatypeConstants.FIELD_UNDEFINED
-    );
+    private static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate#endif DEFAULT_VALID_FOR =
+            #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+                    2000,
+                    1, // January
+                    1, // 1st
+                    DatatypeConstants.FIELD_UNDEFINED
+                )
+            #else java.time.LocalDate.of(2000, 1, 1)
+            #endif;
 
     private static final String[] EXCLUDE_FROM_STATE_CLONING = {
         SystemAttributes.OBJECT_IDENTITY, SystemAttributes.CORE, TechnicalAttributes.STATE_VALID_FROM, TechnicalAttributes.STATE_VALID_TO, SystemAttributes.REMOVED_AT,
@@ -481,10 +480,6 @@ public class DateStateViews {
      * @param stateClass
      * 
      * @return a new state
-     * 
-     * @throws InvalidArgumentException
-     *             if validTo is less than validFrom or
-     *             coreClass.getClass().isAssignableFrom(stateClass) is false
      */
     public static <T extends DateState> T createState(
         StateCapable core,
@@ -514,10 +509,6 @@ public class DateStateViews {
      * @param stateClass
      * 
      * @return a stated object with a single state
-     * 
-     * @throws InvalidArgumentException
-     *             if validTo is less than validFrom or
-     *             coreClass.getClass().isAssignableFrom(stateClass) is false
      */
     public static <C extends StateCapable, S extends DateState> S createStatedObject(
         Container<? super C> container,
@@ -761,9 +752,12 @@ public class DateStateViews {
         if (left == null || right == null) {
             return false;
         }
-        if (left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>) {
-            ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
-            return datatypeFactory.toDate(left).equals(datatypeFactory.toDate(right));
+        #if CLASSIC_CHRONO_TYPES
+        if (left instanceof org.w3c.cci2.ImmutableDatatype<?> != right instanceof org.w3c.cci2.ImmutableDatatype<?>)
+        #else
+        if (left instanceof java.time.temporal.Temporal != right instanceof java.time.temporal.Temporal)
+        #endif {
+            return Datatypes.DATATYPE_FACTORY.toDate(left).equals(Datatypes.DATATYPE_FACTORY.toDate(right));
         }
         return left.equals(right);
     }
@@ -778,11 +772,12 @@ public class DateStateViews {
         if (left == null || right == null) {
             return false;
         }
-        // TODO: dirty-harry IntelliJ says: "Condition left instanceof ImmutableDatatype<?> is always false",
-        //  suggests removing "if"
-        if (left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>) {
-            ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
-            return datatypeFactory.toDateTime(left).equals(datatypeFactory.toDateTime(right));
+        #if CLASSIC_CHRONO_TYPES
+        if (left instanceof org.w3c.cci2.ImmutableDatatype<?> != right instanceof org.w3c.cci2.ImmutableDatatype<?>)
+        #else
+        if (left instanceof java.time.temporal.Temporal != right instanceof java.time.temporal.Temporal)
+        #endif {
+            return Datatypes.DATATYPE_FACTORY.toDateTime(left).equals(Datatypes.DATATYPE_FACTORY.toDateTime(right));
         }
         return left.equals(right);
     }

@@ -95,10 +95,7 @@ public class LockAssertions {
 	public static Object newReadLockAssertion(
 		#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime
 	){
-		return READ_LOCK_PREFIX +
-				#if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(transactionTime)
-				#else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(Datatypes.DATE_TIME_CLASS.cast(transactionTime))
-				#endif;
+		return READ_LOCK_PREFIX + Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(transactionTime);
 	}
 	
 	/**

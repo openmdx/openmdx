@@ -69,7 +69,7 @@ class GenericTableAcessor implements AccessorToAnotherDatabase {
     GenericTableAcessor(
     ){
         enabled = System.getProperty("org.openmdx.comp.env.jdbc.DataSource2") != null;
-        oid = DateTimeFormat.BASIC_UTC_FORMAT.format(SystemClock.getInstance().now());
+        oid = org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ.format(SystemClock.getInstance().now());
     }
     
     private final boolean enabled;

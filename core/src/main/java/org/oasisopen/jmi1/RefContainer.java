@@ -145,7 +145,7 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
      * Removes an object from the container
      *
      * @param qualifierType
-     * @param object
+     * @param qualifierValue
      */
     void refRemove(
             QualifierType qualifierType,

@@ -471,9 +471,7 @@ public class StandardRestFormatter implements RestFormatter {
 	                    writer.writeCData((String) value);
 	                } else if (Datatypes.DATE_TIME_CLASS.isInstance(value)) {
                         writer.writeCharacters(
-                                #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value))
-                                #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(Datatypes.DATE_TIME_CLASS.cast(value))
-                                #endif
+                                Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(Datatypes.DATE_TIME_CLASS.cast(value))
                         );
 	                } else if (value instanceof char[]) {
 	                    char[] text = (char[]) value;
@@ -598,9 +596,7 @@ public class StandardRestFormatter implements RestFormatter {
                 if (exceptionTime != null) {
                     writer.writeAttribute(
                         "exceptionTime",
-                        #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(exceptionTime)
-                        #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(Datatypes.DATE_TIME_CLASS.cast(exceptionTime))
-                        #endif
+                        Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(exceptionTime)
                     );
                 }
                 String exceptionClass = entry.getExceptionClass();

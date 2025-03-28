@@ -76,6 +76,9 @@ import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.DateTimeConstants;
+
+import static org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ;
 
 /**
  * Standard Java Beans Transformer
@@ -431,7 +434,7 @@ public class StandardBeanTransformer implements BeanTransformer {
                 "create",
                 new Object[]{
                     Datatypes.DATE_TIME_CLASS,
-                    DateTimeFormat.BASIC_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(oldInstance))
+                    BASIC_FORMATTER_DT_UTC_TZ.format(Datatypes.DATE_TIME_CLASS.cast(oldInstance))
                 }
             );
         }
@@ -471,7 +474,9 @@ public class StandardBeanTransformer implements BeanTransformer {
     private static final PersistenceDelegate immutableDatePersistenceDelegate = new ImmutableDatePersistenceDelegate();
     private static final PersistenceDelegate quantifierPersistenceDelegate = new QuantifierPersistenceDelegate();
     private static final PersistenceDelegate uriPersistenceDelegate = new URIPersistenceDelegate();
-    private static final Class<? extends #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> xmlGregorianCalendarClass
-            = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED).getClass();
+    private static final Class<? extends #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> xmlGregorianCalendarClass =
+            #if CLASSIC_CHRONO_TYPES DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED)
+            #else java.time.LocalDate.of(2000, 1, 1)
+            #endif.getClass();
 
 }

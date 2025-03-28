@@ -110,23 +110,12 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
 		String externalRepresentation, 
 		Class<?> valueClass
 	) throws Exception {
-
-       /*
-        */
-        return
-    		valueClass == java.util.Date.class ? org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDateTime(externalRepresentation) :
-    		valueClass == java.time.Duration.class ? org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDuration(externalRepresentation) :
-    		valueClass == javax.xml.datatype.XMLGregorianCalendar.class ? org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDate(externalRepresentation) :
-    		valueClass == Path.class ? new Path(externalRepresentation) :
-    		super.parseAs(externalRepresentation, valueClass);
-
-
-//		return
-//    		valueClass == Datatypes.DATE_TIME_CLASS ? #if !CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDateTime(externalRepresentation) #endif :
-//                valueClass == Datatypes.DURATION_CLASS ? #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDuration(externalRepresentation) #endif :
-//                    valueClass == Datatypes.DATE_CLASS ? #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().newDate(externalRepresentation) #endif :
-//    		            valueClass == Path.class ? new Path(externalRepresentation) :
-//                            super.parseAs(externalRepresentation, valueClass);
+		return
+    		valueClass == Datatypes.DATE_TIME_CLASS ? Datatypes.DATATYPE_FACTORY.newDateTime(externalRepresentation) :
+                valueClass == Datatypes.DURATION_CLASS ? Datatypes.DATATYPE_FACTORY.newDuration(externalRepresentation) :
+                    valueClass == Datatypes.DATE_CLASS ? Datatypes.DATATYPE_FACTORY.newDate(externalRepresentation) :
+    		            valueClass == Path.class ? new Path(externalRepresentation) :
+                            super.parseAs(externalRepresentation, valueClass);
 	}
     
 }

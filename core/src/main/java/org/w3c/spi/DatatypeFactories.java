@@ -44,11 +44,11 @@
  */
 package org.w3c.spi;
 
-
+#if CLASSIC_CHRONO_TYPES
 import javax.xml.datatype.DatatypeFactory;
-
 import org.w3c.cci2.MutableDatatypeFactory;
-
+#else
+#endif
 /**
  * DatatypeFactories
  */
@@ -60,6 +60,8 @@ public class DatatypeFactories {
     private DatatypeFactories() {
         // Avoid instantiation
     }
+
+    #if CLASSIC_CHRONO_TYPES
 
     /**
      * The XML Datatype Factory is lazily initialized
@@ -88,5 +90,13 @@ public class DatatypeFactories {
         }
         return immutableFactory;
     }
+
+    #else
+
+    public static ContemporaryChronoDatatypeFactory contemporaryChronoDatatypeFactory() {
+        return new DefaultContemporaryChronoDatatypeFactory();
+    }
+
+    #endif
 
 }

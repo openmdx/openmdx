@@ -56,7 +56,6 @@ import org.junit.jupiter.api.Test;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.XMLGregorianCalendarMarshaller;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.DataTypes;
 import org.openmdx.base.exception.ServiceException;
-import org.w3c.spi.DatatypeFactories;
 
 public class TestXMLGregorianCalendarMarshaller {
 

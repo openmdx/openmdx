@@ -45,6 +45,11 @@
 package org.openmdx.base.accessor.spi;
 
 import org.openmdx.base.marshalling.Marshaller;
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.DateTimeConstants;
+
+import static org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ;
+
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
@@ -69,16 +74,16 @@ public class DateTimeMarshaller {
 
         @Override
         protected String toBasicFormat(Object datatype) {
-            return DateTimeFormat.BASIC_UTC_FORMAT.format((#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif)datatype);
+            return BASIC_FORMATTER_DT_UTC_TZ.format(Datatypes.DATE_TIME_CLASS.cast(datatype));
         }
-        
+
     };
 
     /**
      * Normalizing marshaller
      */
     public static final Marshaller NORMALIZE = new NormalizingMarshaller(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class
+        Datatypes.DATE_TIME_CLASS
     );
 
 }

@@ -97,7 +97,6 @@ import jakarta.resource.cci.Record;
 import jakarta.resource.spi.EISSystemException;
 import jakarta.resource.spi.LocalTransactionException;
 #endif
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
@@ -358,7 +357,7 @@ public class InboundConnection_2 extends AbstractConnection {
      * <em>TODO<br>
      * This implementation keeps the actual behaviour for the moment.<br>
      * But in the light of the (CDI induced) recent changes it seems more
-     * appropriate to forward the the transaction control requests to JTA and
+     * appropriate to forward the transaction control requests to JTA and
      * rely on the call-back for container managed transactions.</em>
      */
     class TransitionalTransactionAdapter implements LocalTransaction {

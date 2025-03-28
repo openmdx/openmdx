@@ -91,7 +91,7 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
             } else throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                "The second argument can't be compared to the the first Duration argument", 
+                "The second argument can't be compared to the first Duration argument",
                 new BasicException.Parameter(
                     "values",
                     first,
@@ -132,7 +132,7 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
             } else throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                "The second argument can't be compared to the the first XMLGregorianCalendar argument", 
+                "The second argument can't be compared to the first XMLGregorianCalendar argument",
                 new BasicException.Parameter(
                     "values",
                     first,
@@ -160,7 +160,7 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
             } else throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                "The second argument can't be compared to the the first date-time argument",
+                "The second argument can't be compared to the first date-time argument",
                 new BasicException.Parameter(
                     "values",
                     first,

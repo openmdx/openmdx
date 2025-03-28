@@ -43,6 +43,7 @@
  */
 package org.openmdx.state2.cci;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -419,7 +420,7 @@ public class ObjectAndValidStateComparator {
 		Path xri,
 		Aspects aspects
 	) throws ServiceException {
-		List<Interval> intervals = new ArrayList<Interval>();
+		List<Interval> intervals = new ArrayList<>();
 		intervals.add(new Interval(null,null));
 		getIntervals(intervals, aspects.expected);
 		getIntervals(intervals, aspects.actual);
@@ -448,8 +449,10 @@ public class ObjectAndValidStateComparator {
 		Collection<MappedRecord> source
 	){
 		for(MappedRecord object : source) {
-			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom = Datatypes.DATE_CLASS.cast(object.get(TechnicalAttributes.STATE_VALID_FROM));
-			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo = Datatypes.DATE_CLASS.cast(object.get(TechnicalAttributes.STATE_VALID_TO));
+			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom
+					= Datatypes.DATE_CLASS.cast(object.get(TechnicalAttributes.STATE_VALID_FROM));
+			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo
+					= Datatypes.DATE_CLASS.cast(object.get(TechnicalAttributes.STATE_VALID_TO));
 			From: for(Interval interval : intervals){
 				int i = Order.compareValidFrom(validFrom, interval.validFrom);
 				if(i == 0) {
@@ -697,8 +700,8 @@ public class ObjectAndValidStateComparator {
 	 */
 	static class Aspects {
 		
-		final List<MappedRecord> expected = new ArrayList<MappedRecord>();
-		final List<MappedRecord> actual = new ArrayList<MappedRecord>();
+		final List<MappedRecord> expected = new ArrayList<>();
+		final List<MappedRecord> actual = new ArrayList<>();
 		
 	}
 
@@ -746,7 +749,8 @@ public class ObjectAndValidStateComparator {
                 id.append(
                     '['
                 ).append(
-            		validFrom.toXMLFormat()
+            		validFrom.#if CLASSIC_CHRONO_TYPES toXMLFormat() #else format(DateTimeFormatter.ISO_LOCAL_DATE)#endif
+
                 );
             }
             id.append(',');
@@ -754,7 +758,7 @@ public class ObjectAndValidStateComparator {
                 id.append("\u221E)");
             } else {
                 id.append(
-            		validTo.toXMLFormat()
+            		validTo.#if CLASSIC_CHRONO_TYPES toXMLFormat() #else format(DateTimeFormatter.ISO_LOCAL_DATE)#endif
                 ).append(
                     ']'
                 );

@@ -85,7 +85,7 @@ public class ManagedConnection extends AbstractManagedConnection<ManagedConnecti
     /**
      * Retrieve the physical connection
      * 
-     * @return the the physical connection
+     * @return the physical connection
      */
     RadiusConnection getRadiusClient() {
     	return this.radiusClient;

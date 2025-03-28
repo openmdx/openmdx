@@ -80,7 +80,7 @@ public class MarshallingSpliterator<S,T> implements Spliterator<T> {
     private final Spliterator<S> delegate;
 
     /**
-     * The the target class
+     * The target class
      */
     private final Class<T> targetClass;
     

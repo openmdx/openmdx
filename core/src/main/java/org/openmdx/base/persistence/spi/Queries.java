@@ -60,7 +60,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
-#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -135,7 +134,7 @@ public class Queries {
     private static Object toValue(
     	String parameter
     ) throws ServiceException{
-    	if(parameter.length() == 0) throw new ServiceException(
+    	if(parameter.isEmpty()) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_QUERY_CRITERIA,
             "Missing parameter value"
@@ -305,7 +304,7 @@ public class Queries {
     /**
      * Apply a statement to a given query
      * 
-     * @param channel
+     * @param query
      * @param statement
      * @throws ServiceException 
      */
@@ -422,7 +421,6 @@ public class Queries {
     	ARGUMENTS.put("notAnElementOf", COLLECTION);
     	ARGUMENTS.put("like", COLLECTION);
     	ARGUMENTS.put("unlike", COLLECTION);
-    	ARGUMENTS.put("startsWith", COLLECTION);
     	ARGUMENTS.put("startsWith", COLLECTION);
     	ARGUMENTS.put("endsWith", COLLECTION);
     	ARGUMENTS.put("endsNotWith", COLLECTION);

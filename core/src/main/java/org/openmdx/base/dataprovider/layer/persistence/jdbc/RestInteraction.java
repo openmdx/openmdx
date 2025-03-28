@@ -105,6 +105,7 @@ import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.text.format.IndentingFormatter;
+import org.w3c.time.DateTimeConstants;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
@@ -1127,8 +1128,12 @@ public class RestInteraction extends AbstractRestInteraction {
                             new BasicException.Parameter(BasicException.Parameter.XRI, object.getResourceIdentifier()),
                             new BasicException.Parameter("expected", readLock),
                             new BasicException.Parameter(
-                                "actual", SystemAttributes.MODIFIED_AT + '=' + DateTimeFormat.EXTENDED_UTC_FORMAT
-                                    .format(modifiedAt)));
+                                "actual",
+                                SystemAttributes.MODIFIED_AT + '=' +
+                                            #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(modifiedAt)
+                                            #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(modifiedAt)
+                                            #endif
+                                        ));
                     }
                 } else if (readLock != null) {
                     SysLog.warning("Optimistic read lock expects a modifiedAt<=transactionTime assertion", readLock);

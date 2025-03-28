@@ -52,7 +52,6 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.text.spi.Parser;
-import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
 import javax.xml.datatype.Duration;
@@ -87,7 +86,7 @@ public class ImmutablePrimitiveTypeParserTest {
 		// Act
 		final Duration value = testee.parse(Duration.class, "P6M");
 		// Assert
-		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDuration("P6M"), value);
+		Assertions.assertEquals(Datatypes.DATATYPE_FACTORY.newDuration("P6M"), value);
 	}
 	
 	/**
@@ -100,7 +99,7 @@ public class ImmutablePrimitiveTypeParserTest {
 		// Act
 		final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif value = testee.parse(Datatypes.DATE_TIME_CLASS, "2000-04-01T05:06:07.890Z");
 		// Assert
-		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDateTime("20000401T050607.890Z"), value);
+		Assertions.assertEquals(Datatypes.DATATYPE_FACTORY.newDateTime("20000401T050607.890Z"), value);
 	}
 
 	/**
@@ -113,7 +112,7 @@ public class ImmutablePrimitiveTypeParserTest {
 		final XMLGregorianCalendar value = testee.parse(XMLGregorianCalendar.class, "2000-04-01");
 //		final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif value = testee.parse(Datatypes.DATE_TIME_CLASS, "2000-04-01");
 		// Assert
-		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDate("20000401"), value);
+		Assertions.assertEquals(Datatypes.DATATYPE_FACTORY.newDate("20000401"), value);
 	}
 
 	@Test

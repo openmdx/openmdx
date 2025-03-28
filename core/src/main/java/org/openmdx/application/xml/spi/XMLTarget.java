@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -242,12 +243,9 @@ public class XMLTarget implements ExportTarget {
     ) throws ServiceException {
         final String stringValue;
         if(PrimitiveTypes.DATETIME.equals(typeName)) {
-            stringValue =
-                    #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value))
-                    #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(Datatypes.DATE_TIME_CLASS.cast(value))
-                    #endif;
+            stringValue = Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(Datatypes.DATE_TIME_CLASS.cast(value));
         } else if(PrimitiveTypes.DATE.equals(typeName)) {
-            stringValue = Datatypes.DATE_CLASS.cast(value).toXMLFormat();
+            stringValue = Datatypes.DATE_CLASS.cast(value).#if CLASSIC_CHRONO_TYPES toXMLFormat() #else format(DateTimeFormatter.ISO_LOCAL_DATE)#endif;
         } else if(PrimitiveTypes.LONG.equals(typeName) || PrimitiveTypes.INTEGER.equals(typeName) || PrimitiveTypes.SHORT.equals(typeName)) {
             stringValue = String.valueOf(((Number) value).longValue());
         } else if(PrimitiveTypes.BINARY.equals(typeName)) {

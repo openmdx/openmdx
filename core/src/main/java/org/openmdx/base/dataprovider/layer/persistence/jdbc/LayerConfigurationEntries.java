@@ -342,7 +342,7 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
    
    /**
      * OBJECT_ID_PATTERN defines the regexp pattern of an object id. If
-     * specified, the the pattern is used for the view creation in get and find
+     * specified, the pattern is used for the view creation in get and find
      * operations and for generating the where clause in get operations:
      * <ul>
      * <li>without objectIdPattern

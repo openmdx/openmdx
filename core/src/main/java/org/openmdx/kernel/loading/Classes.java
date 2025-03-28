@@ -116,7 +116,7 @@ public class Classes {
     //------------------------------------------------------------------------
     
     /**
-     * Retrieve information about the the class loaders failing to provide the given class
+     * Retrieve information about the class loaders failing to provide the given class
      * 
      * @param type The entity type
      * @param name The entity name

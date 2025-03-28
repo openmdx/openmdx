@@ -44,18 +44,7 @@
  */
 package org.openmdx.base.dataprovider.layer.persistence.jdbc;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.XMLGregorianCalendarMarshaller;
-import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.DataTypes;
-import org.openmdx.base.exception.ServiceException;
-import org.w3c.spi.DatatypeFactories;
-
-import javax.xml.datatype.XMLGregorianCalendar;
-import java.sql.Connection;
-import java.text.ParseException;
-import java.util.concurrent.TimeUnit;
 
 public class TestInstantMarshaller {
 

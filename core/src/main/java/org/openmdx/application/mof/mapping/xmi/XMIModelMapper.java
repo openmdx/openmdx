@@ -272,9 +272,7 @@ public class XMIModelMapper implements StringTable {
     ) throws XMLStreamException {
         this.pw.writeStartElement(elementName);
         this.pw.writeCharacters(
-                #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(elementValue)
-                #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(elementValue)
-                #endif
+                Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(elementValue)
         );
         this.pw.writeEndElement();
     }  

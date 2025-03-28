@@ -2188,9 +2188,7 @@ public class DataObject_1
                     new BasicException.Parameter("lockAssertion", this.lock),
                     new BasicException.Parameter(
                             SystemAttributes.MODIFIED_AT,
-                            #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue)
-                            #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(Datatypes.DATE_TIME_CLASS.cast(currentValue))
-                            #endif
+                            Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(currentValue)
                     )
                 );
             }
@@ -2214,9 +2212,11 @@ public class DataObject_1
         if (lockMatcher.matches())
             try {
                 String lockFeature = lockMatcher.group(1);
-                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = Datatypes.DATE_TIME_CLASS.cast(beforeImage.objGetValue(lockFeature));
+                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue
+                        = Datatypes.DATE_TIME_CLASS.cast(beforeImage.objGetValue(lockFeature));
                 if (currentValue != null) {
-                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif lockValue = DateTimeFormat.EXTENDED_UTC_FORMAT.parse(lockMatcher.group(2) + "Z");
+                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif lockValue
+                            = DateTimeFormat.EXTENDED_UTC_FORMAT.parse(lockMatcher.group(2) + "Z");
                     if (!lockValue.equals(currentValue)) {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
@@ -2226,9 +2226,7 @@ public class DataObject_1
                             new BasicException.Parameter("lockAssertion", lockAssertion),
                             new BasicException.Parameter(
                                     lockFeature,
-                                    #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue)
-                                    #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(currentValue)
-                                    #endif
+                                    Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(currentValue)
                             )
                         );
                     }

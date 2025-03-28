@@ -46,8 +46,10 @@ package org.openmdx.state2.spi;
 
 import org.openmdx.state2.cci.DateTimeStateContext;
 import org.openmdx.state2.cci.ViewKind;
-import org.w3c.time.DateTimeConstants;
+import org.w3c.spi2.Datatypes;
 import org.w3c.time.SystemClock;
+
+import static org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ;
 
 /**
  * Date State View Context
@@ -67,7 +69,7 @@ public class DateTimeStateViewContext
      * @param validAt the view's transaction time point, or {@code null} for time range views
      */
     private DateTimeStateViewContext(
-        org.w3c.spi.ImmutableDatatypeFactory datatypeFactory,
+        #if CLASSIC_CHRONO_TYPES org.w3c.spi.ImmutableDatatypeFactory #else org.w3c.spi.ContemporaryChronoDatatypeFactory #endif datatypeFactory,
         ViewKind viewKind,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFor,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt,
@@ -100,7 +102,7 @@ public class DateTimeStateViewContext
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ){
         return new DateTimeStateViewContext(
-            org.w3c.spi.DatatypeFactories.immutableDatatypeFactory(),
+            Datatypes.DATATYPE_FACTORY,
             ViewKind.TIME_POINT_VIEW,
             validFor,
             validAt, 
@@ -120,7 +122,7 @@ public class DateTimeStateViewContext
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validTo
     ){
         return new DateTimeStateViewContext(
-            org.w3c.spi.DatatypeFactories.immutableDatatypeFactory(),
+            Datatypes.DATATYPE_FACTORY,
             ViewKind.TIME_RANGE_VIEW,
             null, // validFor
             null, // validAt
@@ -156,10 +158,7 @@ public class DateTimeStateViewContext
     protected String toString(
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif timePoint
     ) {
-        return
-                #if CLASSIC_CHRONO_TYPES org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(timePoint)
-                #else DateTimeConstants.DT_WITH_UTC_TZ_BASIC_PATTERN.format(timePoint)
-                #endif;
+        return BASIC_FORMATTER_DT_UTC_TZ.format(timePoint);
     }
 
     /* (non-Javadoc)

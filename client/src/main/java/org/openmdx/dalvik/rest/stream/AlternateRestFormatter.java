@@ -442,9 +442,7 @@ public class AlternateRestFormatter implements RestFormatter {
 	                    writer.writeCData((String) value);
 	                } else if (Datatypes.DATE_TIME_CLASS.isInstance(value)) {
                         writer.writeCharacters(
-                            #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value))
-                            #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(Datatypes.DATE_TIME_CLASS.cast(value))
-                            #endif
+                            org.w3c.spi2.Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(Datatypes.DATE_TIME_CLASS.cast(value))
                         );
 	                } else if (value instanceof char[]) {
 	                    char[] text = (char[]) value;

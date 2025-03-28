@@ -48,6 +48,8 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.w3c.spi2.Datatypes;
 
+import java.time.format.DateTimeFormatter;
+
 /**
  * Date Marshaller
  */
@@ -70,7 +72,7 @@ public class DateMarshaller {
 
         @Override
         protected String toBasicFormat(Object datatype) {
-            return Datatypes.DATE_CLASS.cast(datatype).toXMLFormat().replaceAll("-", "");
+            return Datatypes.DATE_CLASS.cast(datatype).#if CLASSIC_CHRONO_TYPES toXMLFormat() #else format(DateTimeFormatter.ISO_LOCAL_DATE)#endif.replaceAll("-", "");
         }
         
     };
