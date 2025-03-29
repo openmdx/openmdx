@@ -80,17 +80,17 @@ public class DefaultContemporaryChronoDatatypeFactory implements ContemporaryChr
 
     @Override
     public Instant toDateTime(Instant value) {
-        if (value == null) {
-            throw new IllegalArgumentException("Null datetime value");
-        }
+//        if (value == null) {
+//            throw new IllegalArgumentException("Null datetime value");
+//        }
         return value; // Instant is already immutable
     }
 
     @Override
     public LocalDate toDate(LocalDate value) {
-        if (value == null) {
-            throw new IllegalArgumentException("Null date value");
-        }
+//        if (value == null) {
+//            throw new IllegalArgumentException("Null date value");
+//        }
         return value; // LocalDate is already immutable
     }
 

@@ -81,12 +81,13 @@ public class ImmutablePrimitiveTypeParserTest {
 	 */
 	@Test
 	public void whenHalfAYearThenParseAsDuration(){
+		String source = #if CLASSIC_CHRONO_TYPES "P6M" #else "P180D" #endif;
 		// Arrange
 		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
 		// Act
-		final Duration value = testee.parse(Duration.class, "P6M");
+		final #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration value = testee.parse(Datatypes.DURATION_CLASS, source);
 		// Assert
-		Assertions.assertEquals(Datatypes.DATATYPE_FACTORY.newDuration("P6M"), value);
+		Assertions.assertEquals(Datatypes.DATATYPE_FACTORY.newDuration(source), value);
 	}
 	
 	/**
@@ -94,12 +95,13 @@ public class ImmutablePrimitiveTypeParserTest {
 	 */
 	@Test
 	public void whenDateTimeThenParseAsDate(){
+		String source = #if CLASSIC_CHRONO_TYPES "20000401T050607.890Z" #else "2000-04-01T05:06:07.890000000Z" #endif;
 		// Arrange
 		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
 		// Act
-		final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif value = testee.parse(Datatypes.DATE_TIME_CLASS, "2000-04-01T05:06:07.890Z");
+		final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif value = testee.parse(Datatypes.DATE_TIME_CLASS, source);
 		// Assert
-		Assertions.assertEquals(Datatypes.DATATYPE_FACTORY.newDateTime("20000401T050607.890Z"), value);
+		Assertions.assertEquals(Datatypes.DATATYPE_FACTORY.newDateTime(source), value);
 	}
 
 	/**

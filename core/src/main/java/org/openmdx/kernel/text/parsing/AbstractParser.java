@@ -105,8 +105,8 @@ public abstract class AbstractParser implements Parser {
     /**
      * Parse the string as given type
      * 
+     * @param externalRepresentation the string to be parsed
      * @param valueClass the type
-     * @param value the string to be parsed
      * @return the corresponding type instance
      * 
      * @throws Exception in case of failure
