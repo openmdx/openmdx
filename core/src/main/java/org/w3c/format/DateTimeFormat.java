@@ -44,6 +44,8 @@
  */
 package org.w3c.format;
 
+import org.w3c.spi2.Datatypes;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -58,6 +60,11 @@ import java.util.regex.Pattern;
  * This class provides thread-safe DateFormatters
  */
 public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
+
+    private static final DateTimeFormatFlavour flavourImpl =
+        #if CLASSIC_CHRONO_TYPES new org.w3c.format.impl.DateTimeFormatFlavourClassic()
+        #else new org.w3c.format.impl.DateTimeFormatImpl()
+        #endif;
 
     /**
      * Creates a DateFormat object for the specified pattern.
@@ -222,9 +229,9 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
      * @return	the formatted time string.
      */
     public String format(
-    	Date date
+    	#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif date
     ){
-        return get().format(date);
+        return flavourImpl.format(date);
     }
 
     /**
@@ -237,17 +244,17 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
      * @exception	ParseException
      *				If the given string cannot be parsed as a date.
      */
-    public Date parse(
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif parse(
             String text
     ) throws ParseException {
         if(this.rejectE) {
             int e = text.indexOf('E');
             if(e > 0) throw new ParseException(
-                    "Unparseable date: " + text + " (May be you are using the broken JAXP release 1.4.0?)",
+                    "Unparseable date: " + text + " (Perhaps you are using the broken JAXP release 1.4.0?)",
                     e
             );
         }
-        return get().parse(text);
+        return Datatypes.DATE_TIME_CLASS.cast(flavourImpl.parse(text));
     }
 
 

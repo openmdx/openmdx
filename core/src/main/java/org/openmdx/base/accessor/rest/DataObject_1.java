@@ -166,8 +166,8 @@ import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.cci2.LargeObject;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
+import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
-import org.w3c.time.DateTimeConstants;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 import static org.openmdx.base.mof.cci.PrimitiveTypes.DATE;
@@ -2210,32 +2210,32 @@ public class DataObject_1
         throws ServiceException {
         Matcher lockMatcher = WRITE_LOCK_PATTERN.matcher(lockAssertion);
         if (lockMatcher.matches()) {
-            #if CLASSIC_CHRONO_TYPES try { #endif
-            String lockFeature = lockMatcher.group(1);
-                #if CLASSIC_CHRONO_TYPES java.util.Date #else
-            java.time.Instant #endif currentValue
-                    = Datatypes.DATE_TIME_CLASS.cast(beforeImage.objGetValue(lockFeature));
-            if (currentValue != null) {
+            try {
+                String lockFeature = lockMatcher.group(1);
                     #if CLASSIC_CHRONO_TYPES java.util.Date #else
-                java.time.Instant #endif lockValue
-                        = #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT #else java.time.Instant#endif .parse(lockMatcher.group(2) + "Z");
-                if (!lockValue.equals(currentValue)) {
-                    throw new ServiceException(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-                            "Object has been updated by another persistence manager since it has been cached",
-                            new BasicException.Parameter(BasicException.Parameter.XRI, ReducedJDOHelper.getAnyObjectId(this)),
-                            new BasicException.Parameter("lockAssertion", lockAssertion),
-                            new BasicException.Parameter(
-                                    lockFeature,
-                                    Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(currentValue)
-                            )
-                    );
+                java.time.Instant #endif currentValue
+                        = Datatypes.DATE_TIME_CLASS.cast(beforeImage.objGetValue(lockFeature));
+                if (currentValue != null) {
+                        #if CLASSIC_CHRONO_TYPES java.util.Date #else
+                    java.time.Instant #endif lockValue
+                            = DateTimeFormat.EXTENDED_UTC_FORMAT.parse(lockMatcher.group(2) + "Z");
+                    if (!lockValue.equals(currentValue)) {
+                        throw new ServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+                                "Object has been updated by another persistence manager since it has been cached",
+                                new BasicException.Parameter(BasicException.Parameter.XRI, ReducedJDOHelper.getAnyObjectId(this)),
+                                new BasicException.Parameter("lockAssertion", lockAssertion),
+                                new BasicException.Parameter(
+                                        lockFeature,
+                                        Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(currentValue)
+                                )
+                        );
+                    }
                 }
-            }
-            #if CLASSIC_CHRONO_TYPES } catch (ParseException exception) {
+            } catch (ParseException exception) {
                 SysLog.warning("Unable to validate lock assertion for object " + ReducedJDOHelper.getAnyObjectId(this), lockAssertion);
-            }#endif
+            }
         }
     }
 

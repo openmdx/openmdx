@@ -69,12 +69,6 @@ public class Datatypes {
     public static final org.w3c.spi.#if CLASSIC_CHRONO_TYPES ImmutableDatatypeFactory #else ContemporaryChronoDatatypeFactory #endif DATATYPE_FACTORY
             = org.w3c.spi.DatatypeFactories.#if CLASSIC_CHRONO_TYPES immutableDatatypeFactory() #else contemporaryChronoDatatypeFactory() #endif;
 
-    public static final #if CLASSIC_CHRONO_TYPES org.w3c.format.DateTimeFormat #else java.time.format.DateTimeFormatter #endif BASIC_FORMATTER_DT_UTC_TZ
-            = #if CLASSIC_CHRONO_TYPES org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT #else DateTimeConstants.DT_WITH_UTC_TZ_BASIC_PATTERN #endif;
-
-    public static final #if CLASSIC_CHRONO_TYPES org.w3c.format.DateTimeFormat #else java.time.format.DateTimeFormatter #endif EXTENDED_FORMATTER_DT_UTC_TZ
-            = #if CLASSIC_CHRONO_TYPES org.w3c.format.DateTimeFormat.EXTENDED_UTC_FORMAT #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN #endif;
-
     /**
      * Constructor 
      */
