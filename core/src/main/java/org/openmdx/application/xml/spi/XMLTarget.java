@@ -69,8 +69,8 @@ import org.openmdx.base.text.conversion.XMLEncoder;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Resources;
+import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
-import org.w3c.time.DateTimeConstants;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
@@ -243,7 +243,7 @@ public class XMLTarget implements ExportTarget {
     ) throws ServiceException {
         final String stringValue;
         if(PrimitiveTypes.DATETIME.equals(typeName)) {
-            stringValue = Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(Datatypes.DATE_TIME_CLASS.cast(value));
+            stringValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value));
         } else if(PrimitiveTypes.DATE.equals(typeName)) {
             stringValue = Datatypes.DATE_CLASS.cast(value).#if CLASSIC_CHRONO_TYPES toXMLFormat() #else format(DateTimeFormatter.ISO_LOCAL_DATE)#endif;
         } else if(PrimitiveTypes.LONG.equals(typeName) || PrimitiveTypes.INTEGER.equals(typeName) || PrimitiveTypes.SHORT.equals(typeName)) {
@@ -256,7 +256,7 @@ public class XMLTarget implements ExportTarget {
             stringValue = value.toString();
         }
         if(multiplicity.isMultiValued()) {
-            Map<String, String> atts = new LinkedHashMap<String,String>();
+            Map<String, String> atts = new LinkedHashMap<>();
             if((multiplicity == Multiplicity.SPARSEARRAY)) {
                 atts.put("_position", String.valueOf(position));
             }

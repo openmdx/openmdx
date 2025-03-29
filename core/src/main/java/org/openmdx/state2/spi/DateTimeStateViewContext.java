@@ -46,10 +46,9 @@ package org.openmdx.state2.spi;
 
 import org.openmdx.state2.cci.DateTimeStateContext;
 import org.openmdx.state2.cci.ViewKind;
+import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
 import org.w3c.time.SystemClock;
-
-import static org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ;
 
 /**
  * Date State View Context
@@ -158,7 +157,7 @@ public class DateTimeStateViewContext
     protected String toString(
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif timePoint
     ) {
-        return BASIC_FORMATTER_DT_UTC_TZ.format(timePoint);
+        return DateTimeFormat.BASIC_UTC_FORMAT.format(timePoint);
     }
 
     /* (non-Javadoc)

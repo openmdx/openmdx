@@ -103,8 +103,8 @@ import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
+import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
-import org.w3c.time.DateTimeConstants;
 
 /**
  * Standard REST Formatter
@@ -471,7 +471,7 @@ public class StandardRestFormatter implements RestFormatter {
 	                    writer.writeCData((String) value);
 	                } else if (Datatypes.DATE_TIME_CLASS.isInstance(value)) {
                         writer.writeCharacters(
-                                Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(Datatypes.DATE_TIME_CLASS.cast(value))
+                                DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value))
                         );
 	                } else if (value instanceof char[]) {
 	                    char[] text = (char[]) value;
@@ -594,10 +594,7 @@ public class StandardRestFormatter implements RestFormatter {
                 writer.writeAttribute("exceptionCode", String.valueOf(entry.getExceptionCode()));
                 #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif exceptionTime = entry.getTimestamp();
                 if (exceptionTime != null) {
-                    writer.writeAttribute(
-                        "exceptionTime",
-                        Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(exceptionTime)
-                    );
+                    writer.writeAttribute("exceptionTime", DateTimeFormat.EXTENDED_UTC_FORMAT.format(exceptionTime));
                 }
                 String exceptionClass = entry.getExceptionClass();
                 if (exceptionClass != null) {

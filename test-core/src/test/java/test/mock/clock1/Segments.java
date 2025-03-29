@@ -66,7 +66,6 @@ import test.openmdx.clock1.jmi1.Clock1Package;
 import test.openmdx.clock1.jmi1.Segment;
 import test.openmdx.clock1.jmi1.Time;
 
-import static org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ;
 
 /**
  * Segments

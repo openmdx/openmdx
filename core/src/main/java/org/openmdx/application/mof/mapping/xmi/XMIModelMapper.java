@@ -60,8 +60,8 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.wbxml.cci.StringTable;
 import org.openmdx.base.xml.stream.XMLOutputFactories;
+import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
-import org.w3c.time.DateTimeConstants;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
@@ -271,9 +271,7 @@ public class XMIModelMapper implements StringTable {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif elementValue
     ) throws XMLStreamException {
         this.pw.writeStartElement(elementName);
-        this.pw.writeCharacters(
-                Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(elementValue)
-        );
+        this.pw.writeCharacters(DateTimeFormat.EXTENDED_UTC_FORMAT.format(elementValue));
         this.pw.writeEndElement();
     }  
 

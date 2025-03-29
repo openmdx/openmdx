@@ -49,8 +49,8 @@ import java.text.ParseException;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
-import org.w3c.time.DateTimeConstants;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
@@ -95,7 +95,7 @@ public class LockAssertions {
 	public static Object newReadLockAssertion(
 		#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime
 	){
-		return READ_LOCK_PREFIX + Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(transactionTime);
+		return READ_LOCK_PREFIX + DateTimeFormat.EXTENDED_UTC_FORMAT.format(transactionTime);
 	}
 	
 	/**
@@ -110,17 +110,18 @@ public class LockAssertions {
 	public static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getTransactionTime(
 		Object readLockAssertion
 	) throws ServiceException {
-		#if CLASSIC_CHRONO_TYPES try { #endif
-			return #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT #else java.time.Instant #endif
-					.parse(((String)readLockAssertion).substring(READ_LOCK_PREFIX.length()));
-		#if CLASSIC_CHRONO_TYPES } catch (ParseException exception) {
-			throw new ServiceException(
-				exception,
-				BasicException.Code.DEFAULT_DOMAIN,
-				BasicException.Code.TRANSFORMATION_FAILURE,
-				"Unable to extract the transaction time from the readLockAssertion"
+		try {
+			return DateTimeFormat.EXTENDED_UTC_FORMAT.parse(
+					((String)readLockAssertion).substring(READ_LOCK_PREFIX.length())
 			);
-		}#endif
+		} catch (ParseException exception) {
+			throw new ServiceException(
+					exception,
+					BasicException.Code.DEFAULT_DOMAIN,
+					BasicException.Code.TRANSFORMATION_FAILURE,
+					"Unable to extract the transaction time from the readLockAssertion"
+			);
+		}
 	}
 	
 }

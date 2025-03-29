@@ -44,6 +44,7 @@
  */
 package org.openmdx.audit2.spi;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,10 +53,9 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.XRISegment;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
-import org.w3c.time.DateTimeConstants;
 
-import static org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
@@ -82,11 +82,9 @@ public class Qualifiers {
      */
     public static String toAudit2AfterImageQualifier(
         String qualifier,
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif version
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif version
     ){
-        return qualifier + '*' + (version == null ? "%" :
-                BASIC_FORMATTER_DT_UTC_TZ.format(version)
-        );
+        return qualifier + '*' + (version == null ? "%" : DateTimeFormat.BASIC_UTC_FORMAT.format(version));
     }
 
     /**
@@ -125,9 +123,7 @@ public class Qualifiers {
      * 
      * @param configuration
      * @param objectId
-     * @param modifiedAt
-     * @param unitIfWorkId
-     * 
+     * @param unitOfWorkId
      * @return the object's before or after image id
      * 
      * @throws ServiceException
@@ -139,7 +135,7 @@ public class Qualifiers {
     ) throws ServiceException{
         for (Map.Entry<Path, Path> entry : configuration.getMapping().entrySet()) {
             if (objectId.startsWith(entry.getKey())) {
-            	List<String> imageId = new ArrayList<String>();
+            	List<String> imageId = new ArrayList<>();
             	for(XRISegment c : entry.getValue().getSegments()) {
             		imageId.add(c.toString());
             	}
@@ -174,8 +170,6 @@ public class Qualifiers {
      * @param configuration
      * @param objectId
      * @param modifiedAt
-     * @param unitIfWorkId
-     * 
      * @return the object's before or after image id
      * 
      * @throws ServiceException
@@ -183,7 +177,7 @@ public class Qualifiers {
     public static Path getAudit2AfterImageId(
         Configuration configuration, 
         Path objectId, 
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif modifiedAt
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif modifiedAt
     ) throws ServiceException{
         for (Map.Entry<Path, Path> entry : configuration.getMapping().entrySet()) {
             if (objectId.startsWith(entry.getKey())) {

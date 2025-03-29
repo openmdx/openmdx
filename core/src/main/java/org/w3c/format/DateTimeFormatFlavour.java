@@ -48,5 +48,5 @@ public interface DateTimeFormatFlavour {
 
     String format(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif dateTime);
 
-    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif parse(String dateTimeString);
+    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif parse(String dateTimeString) throws java.text.ParseException;
 }

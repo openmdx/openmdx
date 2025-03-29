@@ -51,7 +51,6 @@ import java.util.TimeZone;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ;
 
 /**
  * Test Gregorian Calendar
@@ -70,7 +69,7 @@ public class TestGregorianCalendar {
                 Calendar.JANUARY, 
                 1
             ).#if CLASSIC_CHRONO_TYPES getTime() #else toInstant() #endif;
-            assertEquals(timeZone.getDisplayName(), "00011231T230000.000Z", BASIC_FORMATTER_DT_UTC_TZ.format(minDate));
+            assertEquals(timeZone.getDisplayName(), "00011231T230000.000Z", DateTimeFormat.BASIC_UTC_FORMAT.format(minDate));
         }
         {
             TimeZone timeZone = UTC; 
@@ -80,7 +79,7 @@ public class TestGregorianCalendar {
                 Calendar.JANUARY, 
                 1
             ).#if CLASSIC_CHRONO_TYPES getTime() #else toInstant() #endif;
-            assertEquals(timeZone.getDisplayName(), "00010101T000000.000Z", BASIC_FORMATTER_DT_UTC_TZ.format(minDate));
+            assertEquals(timeZone.getDisplayName(), "00010101T000000.000Z", DateTimeFormat.BASIC_UTC_FORMAT.format(minDate));
         }
         {
             TimeZone timeZone = TimeZone.getTimeZone("GMT"); 
@@ -90,7 +89,7 @@ public class TestGregorianCalendar {
                 Calendar.JANUARY, 
                 1
             ).#if CLASSIC_CHRONO_TYPES getTime() #else toInstant() #endif;
-            assertEquals(timeZone.getDisplayName(), "00010101T000000.000Z", BASIC_FORMATTER_DT_UTC_TZ.format(minDate));
+            assertEquals(timeZone.getDisplayName(), "00010101T000000.000Z", DateTimeFormat.BASIC_UTC_FORMAT.format(minDate));
         }
     }
     

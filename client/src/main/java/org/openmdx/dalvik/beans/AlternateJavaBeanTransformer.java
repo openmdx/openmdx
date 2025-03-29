@@ -73,7 +73,6 @@ import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
 import org.w3c.spi2.Datatypes;
 
-import static org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ;
 
 /**
  * Alternate Java Bean Transfomer

@@ -44,6 +44,11 @@
  */
 package org.w3c.format.impl;
 
+import org.w3c.format.DateTimeFormatFlavour;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 #if CLASSIC_CHRONO_TYPES
 public class DateTimeFormatClassicImpl extends ThreadLocal<SimpleDateFormat> implements DateTimeFormatFlavour {
 

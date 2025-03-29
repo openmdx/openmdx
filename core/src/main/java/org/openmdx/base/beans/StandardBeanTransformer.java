@@ -76,9 +76,6 @@ import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
 import org.w3c.spi2.Datatypes;
-import org.w3c.time.DateTimeConstants;
-
-import static org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ;
 
 /**
  * Standard Java Beans Transformer

@@ -2186,10 +2186,7 @@ public class DataObject_1
                     "Object has been updated by another persistence manager during this unit of work",
                     new BasicException.Parameter(BasicException.Parameter.XRI, ReducedJDOHelper.getAnyObjectId(this)),
                     new BasicException.Parameter("lockAssertion", this.lock),
-                    new BasicException.Parameter(
-                            SystemAttributes.MODIFIED_AT,
-                            Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(currentValue)
-                    )
+                    new BasicException.Parameter(SystemAttributes.MODIFIED_AT, DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue))
                 );
             }
         }
@@ -2226,10 +2223,7 @@ public class DataObject_1
                                 "Object has been updated by another persistence manager since it has been cached",
                                 new BasicException.Parameter(BasicException.Parameter.XRI, ReducedJDOHelper.getAnyObjectId(this)),
                                 new BasicException.Parameter("lockAssertion", lockAssertion),
-                                new BasicException.Parameter(
-                                        lockFeature,
-                                        Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(currentValue)
-                                )
+                                new BasicException.Parameter(lockFeature, DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue))
                         );
                     }
                 }

@@ -121,9 +121,7 @@ import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
-import org.w3c.time.DateTimeConstants;
-
-import static org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ;
+import org.w3c.format.DateTimeFormat;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 //---------------------------------------------------------------------------
@@ -1499,7 +1497,9 @@ class RefObject_1
                                         this.setValue(
                                                 featureDef,
                                                 DateTimeMarshaller.NORMALIZE.marshal(
-                                                        BASIC_FORMATTER_DT_UTC_TZ.format(#if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif)
+                                                        org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(
+                                                                #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif
+                                                        )
                                                 )
                                         );
                                     } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {

@@ -1,28 +1,28 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Date/Time Marshaller 
+ * Description: Immutable Datatype Factory
  * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,51 +36,71 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.base.accessor.spi;
+package org.w3c.spi;
 
-import org.openmdx.base.marshalling.Marshaller;
-import org.w3c.format.DateTimeFormat;
-import org.w3c.spi2.Datatypes;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
-/**
- * Date/Time Marshaller
- */
-public class DateTimeMarshaller {
+public class DefaultContemporaryChronoDatatypeFactory implements ContemporaryChronoDatatypeFactory {
 
-    /**
-     * Constructor 
-     */
-    private DateTimeMarshaller(
-    ) {
-        // Avoid instantiation
+    @Override
+    public Instant newDateTime(String value) {
+        try {
+            return Instant.parse(value);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Invalid datetime format: " + value, e);
+        }
     }
 
-    /**
-     * Datatype Instance <-> ISO 8601 Basic String
-     */
-    public static final Marshaller BASIC_FORMAT_TO_DATATYPE = new DatatypeMarshaller(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif.class
-    ){
-
-        @Override
-        protected String toBasicFormat(Object datatype) {
-            return DateTimeFormat.BASIC_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(datatype));
+    @Override
+    public LocalDate newDate(String value) {
+        try {
+            return LocalDate.parse(value);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Invalid date format: " + value, e);
         }
+    }
 
-    };
+    @Override
+    public Duration newDuration(String value) {
+        try {
+            return Duration.parse(value);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Invalid duration format: " + value, e);
+        }
+    }
 
-    /**
-     * Normalizing marshaller
-     */
-    public static final Marshaller NORMALIZE = new NormalizingMarshaller(
-        Datatypes.DATE_TIME_CLASS
-    );
+    @Override
+    public Instant toDateTime(Instant value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Null datetime value");
+        }
+        return value; // Instant is already immutable
+    }
+
+    @Override
+    public LocalDate toDate(LocalDate value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Null date value");
+        }
+        return value; // LocalDate is already immutable
+    }
+
+    @Override
+    public Duration toDuration(Duration value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Null duration value");
+        }
+        return value; // Duration is already immutable
+    }
+
 
 }

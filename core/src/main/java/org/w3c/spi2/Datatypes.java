@@ -50,7 +50,6 @@ import java.util.List;
 
 import org.openmdx.kernel.text.spi.Parser;
 import org.w3c.spi.PrimitiveTypeParsers;
-import org.w3c.time.DateTimeConstants;
 
 /**
  * Date

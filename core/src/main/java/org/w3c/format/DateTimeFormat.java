@@ -62,7 +62,7 @@ import java.util.regex.Pattern;
 public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
 
     private static final DateTimeFormatFlavour flavourImpl =
-        #if CLASSIC_CHRONO_TYPES new org.w3c.format.impl.DateTimeFormatFlavourClassic()
+        #if CLASSIC_CHRONO_TYPES new org.w3c.format.impl.DateTimeFormatClassicImpl()
         #else new org.w3c.format.impl.DateTimeFormatImpl()
         #endif;
 
@@ -391,7 +391,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
          * @see org.openmdx.base.text.format.DateFormat#parse(java.lang.String)
          */
         @Override
-        public Date parse(
+        public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif parse(
                 String text
         ) throws ParseException {
             return super.parse(
