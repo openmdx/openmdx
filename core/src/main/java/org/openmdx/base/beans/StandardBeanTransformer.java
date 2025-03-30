@@ -93,7 +93,7 @@ public class StandardBeanTransformer implements BeanTransformer {
             xstreamFromXML = xstream.getClass().getMethod("fromXML", String.class);
             SysLog.info("XStream found. Using as fallback for XML decoding");
         } catch(Exception e) {
-        	// no-op
+            // no-op
         }
     }
 
@@ -102,14 +102,14 @@ public class StandardBeanTransformer implements BeanTransformer {
      */
     @Override
     public String encode(
-        Object javaBean,
-        ExceptionListener exceptionListener
+            Object javaBean,
+            ExceptionListener exceptionListener
     ) {
         try(ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             try(XMLEncoder encoder = new XMLEncoder(out)){
                 if(exceptionListener != null) {
                     encoder.setExceptionListener(
-                        new ExceptionListenerAdapter(exceptionListener)
+                            new ExceptionListenerAdapter(exceptionListener)
                     );
                 }
                 encoder.setPersistenceDelegate(
@@ -153,10 +153,10 @@ public class StandardBeanTransformer implements BeanTransformer {
             return out.toString("UTF-8");
         } catch (IOException exception) {
             throw new RuntimeServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "Unable to convert the output stream to an UTF-8 strung and to close it"
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "Unable to convert the output stream to an UTF-8 strung and to close it"
             );
         }
     }
@@ -166,12 +166,12 @@ public class StandardBeanTransformer implements BeanTransformer {
      */
     @Override
     public Object decode(
-        CharSequence encodedJavaBean,
-        ExceptionListener exceptionListener
+            CharSequence encodedJavaBean,
+            ExceptionListener exceptionListener
     ) {
         Object value = null;
         if(encodedJavaBean != null) {
-        	final String stringifiedBean = encodedJavaBean.toString();
+            final String stringifiedBean = encodedJavaBean.toString();
             if(xstreamFromXML != null && !stringifiedBean.startsWith("<?xml")) {
                 try {
                     return xstreamFromXML.invoke(xstream, stringifiedBean);
@@ -180,17 +180,17 @@ public class StandardBeanTransformer implements BeanTransformer {
                 }
             } else {
                 try (
-                    StringInputStream source = new StringInputStream(
-                    	stringifiedBean,
-                        "UTF-8"
-                    );
-                    XMLDecoder decoder = new XMLDecoder(
-                        source
-                    )
+                        StringInputStream source = new StringInputStream(
+                                stringifiedBean,
+                                "UTF-8"
+                        );
+                        XMLDecoder decoder = new XMLDecoder(
+                                source
+                        )
                 ){
                     if(exceptionListener != null) {
                         decoder.setExceptionListener(
-                            new ExceptionListenerAdapter(exceptionListener)
+                                new ExceptionListenerAdapter(exceptionListener)
                         );
                     }
                     value = decoder.readObject();
@@ -221,10 +221,10 @@ public class StandardBeanTransformer implements BeanTransformer {
          */
         @Override
         protected void initialize(
-            Class<?> type,
-            Object oldInstance,
-            Object newInstance,
-            Encoder out
+                Class<?> type,
+                Object oldInstance,
+                Object newInstance,
+                Encoder out
         ) {
             // Object is completely initialized by the constructor
         }
