@@ -61,8 +61,8 @@ public class ChronoUtils {
     public static final java.util.regex.Pattern EXTENDED_DATE_PATTERN
             = #if CLASSIC_CHRONO_TYPES org.w3c.format.DateTimeFormat.EXTENDED_DATE_PATTERN #else java.util.regex.Pattern.compile("\\d{4}-\\d{2}-\\d{2}") #endif;
 
-    public static final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif createDate(int year, int month, int dayOfMonth, int timezone) {
-        return #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(year, month, dayOfMonth, timezone)
+    public static final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif createDate(int year, int month, int dayOfMonth) {
+        return #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(year, month, dayOfMonth, DatatypeConstants.FIELD_UNDEFINED)
         #else java.time.LocalDate.of(year, month, dayOfMonth)
         #endif;
     }
