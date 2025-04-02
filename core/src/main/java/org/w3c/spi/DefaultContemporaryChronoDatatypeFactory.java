@@ -47,6 +47,7 @@ package org.w3c.spi;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeParseException;
 
 public class DefaultContemporaryChronoDatatypeFactory implements ContemporaryChronoDatatypeFactory {
@@ -102,5 +103,11 @@ public class DefaultContemporaryChronoDatatypeFactory implements ContemporaryChr
         return value; // Duration is already immutable
     }
 
-
+    @Override
+    public Period toPeriod(String value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Null period value");
+        }
+        return Period.parse(value); // Period is already immutable
+    }
 }

@@ -92,6 +92,15 @@ public class DatatypeFactories {
         return immutableFactory;
     }
 
+    /**
+     * Retrieve a new XML Duration
+     *
+     * @return a new XML Duration
+     */
+    public static javax.xml.datatype.Duration toPeriod() {
+        return xmlDatatypeFactory().newDuration();
+    }
+
     #else
 
     public static ContemporaryChronoDatatypeFactory contemporaryChronoDatatypeFactory() {

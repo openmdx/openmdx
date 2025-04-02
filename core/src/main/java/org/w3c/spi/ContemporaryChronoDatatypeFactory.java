@@ -47,6 +47,7 @@ package org.w3c.spi;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Period;
 
 public interface ContemporaryChronoDatatypeFactory {
 
@@ -61,5 +62,7 @@ public interface ContemporaryChronoDatatypeFactory {
     LocalDate toDate(LocalDate value);
 
     Duration toDuration(Duration value);
+
+    Period toPeriod(String value);
 }
 

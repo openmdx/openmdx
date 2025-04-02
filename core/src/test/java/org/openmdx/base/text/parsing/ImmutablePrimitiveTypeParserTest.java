@@ -87,9 +87,9 @@ public class ImmutablePrimitiveTypeParserTest {
 		// Act
 		final #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration value = testee.parse(Datatypes.DURATION_CLASS, source);
 		// Assert
-		Assertions.assertEquals(Datatypes.DATATYPE_FACTORY.newDuration(source), value);
+		Assertions.assertEquals(Datatypes.DATATYPE_FACTORY.toPeriod(source), value);
 	}
-	
+
 	/**
 	 * Timepoint 01.04.2000 05:06:07.890 UTC 
 	 */
