@@ -66,7 +66,7 @@ public class DateTimeMarshaller {
      * Datatype Instance <-> ISO 8601 Basic String
      */
     public static final Marshaller BASIC_FORMAT_TO_DATATYPE = new DatatypeMarshaller(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif.class
+            Datatypes.DATE_TIME_CLASS
     ){
 
         @Override

@@ -113,19 +113,23 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
             #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif left;
             #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif right;
             if(Datatypes.DATE_CLASS.isInstance(second)) {
+                #if CLASSIC_CHRONO_TYPES
                 if(first.getClass() == second.getClass()) {
                     left = Datatypes.DATE_CLASS.cast(first);
                     right = Datatypes.DATE_CLASS.cast(second);
                 } else {
-
-                    left = first instanceof #if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif
-                            ? ((#if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif)first)#if CLASSIC_CHRONO_TYPES .clone()#endif
+                    left = first instanceof org.w3c.cci2.ImmutableDate
+                            ? ((org.w3c.cci2.ImmutableDate)first).clone()
                             : Datatypes.DATE_CLASS.cast(first);
 
-                    right = second instanceof #if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif
-                            ? ((#if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDate #else java.time.LocalDate #endif)second)#if CLASSIC_CHRONO_TYPES .clone()#endif
+                    right = second instanceof org.w3c.cci2.ImmutableDate
+                            ? ((org.w3c.cci2.ImmutableDate)second).clone()
                             : Datatypes.DATE_CLASS.cast(second);
                 }
+                #else
+                left = Datatypes.DATE_CLASS.cast(first);
+                right = Datatypes.DATE_CLASS.cast(second);
+                #endif
             } else if (second instanceof CharSequence){
                 left = Datatypes.DATE_CLASS.cast(first);
                 right = Datatypes.create(Datatypes.DATE_CLASS, second.toString());
@@ -241,5 +245,4 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
             );
         }
     }
-    
 }

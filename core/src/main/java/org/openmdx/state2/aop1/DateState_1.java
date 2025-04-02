@@ -105,9 +105,8 @@ public class DateState_1
     /**
      * 
      */
-    #if CLASSIC_CHRONO_TYPES
-    private static final javax.xml.datatype.XMLGregorianCalendar NULL = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar();
-    #endif
+    private static final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif NULL
+            = #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar() #else java.time.LocalDate.MIN #endif;
 
     private static final List<String> IGNORABLE_ATTRIBUTES = Arrays.asList(
         STATE_VALID_FROM, STATE_VALID_TO,
@@ -129,7 +128,6 @@ public class DateState_1
             return Order.compareValidFrom(o1, o2);
         }
     };
-
 
     //------------------------------------------------------------------------
     // Extends AbstractState_1
@@ -205,10 +203,10 @@ public class DateState_1
                     addState(states, predecessor);
                 }
             } else {
-                validFrom = #if CLASSIC_CHRONO_TYPES NULL #else java.time.LocalDate.MIN #endif;
+                validFrom = NULL;
             }
             //
-            // Handle the period which is not longer involved
+            // Handle the period which is no longer involved
             //
             if(boundaryCrossing.endsLater) {
                 DataObject_1_0 successor = PersistenceHelper.clone(source);
@@ -222,17 +220,17 @@ public class DateState_1
                     addState(states, successor);
                 }
             } else {
-                validTo = #if CLASSIC_CHRONO_TYPES NULL #else java.time.LocalDate.MAX #endif;
+                validTo = NULL;
                 
             }
             //
             // Handle the period which is involved
             //
             DataObject_1_0 target = PersistenceHelper.clone(source);
-            if(validFrom != #if CLASSIC_CHRONO_TYPES NULL #else java.time.LocalDate.MIN #endif) {
+            if(validFrom != NULL) {
                 target.objSetValue(STATE_VALID_FROM, validFrom);
             }
-            if(validTo != #if CLASSIC_CHRONO_TYPES NULL #else java.time.LocalDate.MAX #endif) {
+            if(validTo != NULL) {
                 target.objSetValue(STATE_VALID_TO, validTo);
             }
             if(!target.jdoIsNew()) {
@@ -384,7 +382,7 @@ public class DateState_1
         final SortedMap<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif, DataObject_1_0> active = getActiveStates(states);
         if(active.size() > 1) {
             final Iterator<DataObject_1_0> i = active.values().iterator();
-            final List<DataObject_1_0> merged = new ArrayList<DataObject_1_0>();
+            final List<DataObject_1_0> merged = new ArrayList<>();
             for(
                 DataObject_1_0 predecessor = i.next(), successor = null;
                 predecessor != null;

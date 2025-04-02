@@ -96,6 +96,7 @@ import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
+import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -564,9 +565,7 @@ public class AlternateRestFormatter implements RestFormatter {
                 if (exceptionTime != null) {
                     writer.writeAttribute(
                         "exceptionTime",
-                        #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT.format(exceptionTime)
-                        #else DateTimeConstants.DT_WITH_UTC_TZ_EXT_PATTERN.format(exceptionTime)
-                        #endif
+                        DateTimeFormat.EXTENDED_UTC_FORMAT.format(exceptionTime)
                     );
                 }
                 String exceptionClass = entry.getExceptionClass();

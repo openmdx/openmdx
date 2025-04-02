@@ -122,6 +122,7 @@ import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.time.SystemClock;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 //---------------------------------------------------------------------------
@@ -851,17 +852,9 @@ class RefObject_1
                 return ((Map<?,?>) map).get(qualifier);
             }
             if (map instanceof RefContainer<?>){
-
                 RefContainer<?> container = (RefContainer<?>)map;
-
-                #if CLASSIC_CHRONO_TYPES
-                final Object persistent = RefContainer.PERSISTENT;
-                final Object reassignable = RefContainer.REASSIGNABLE;
-                #else
                 final QualifierType persistent = QualifierType.PERSISTENT;
                 final QualifierType reassignable = QualifierType.REASSIGNABLE;
-                #endif
-
                 return
                     qualifier.startsWith("!") ? container.refGet(persistent, qualifier.substring(1)) :
                     qualifier.startsWith("*") ? container.refGet(reassignable, qualifier.substring(1)) :
@@ -1065,13 +1058,7 @@ class RefObject_1
             );
         }
         else if (values instanceof RefContainer && value instanceof RefObject_1_0) {
-
-            #if CLASSIC_CHRONO_TYPES
-            Object qualifier = RefContainer.REASSIGNABLE;
-            #else
             QualifierType qualifier = QualifierType.REASSIGNABLE;
-            #endif
-
             ((RefContainer)values).refAdd(
                     qualifier,
                     org.openmdx.base.naming.TransactionalSegment.getClassicRepresentationOfNewInstance(),
@@ -1498,7 +1485,7 @@ class RefObject_1
                                                 featureDef,
                                                 DateTimeMarshaller.NORMALIZE.marshal(
                                                         org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(
-                                                                #if CLASSIC_CHRONO_TYPES new java.util.Date() #else java.time.Instant.now()#endif
+                                                                SystemClock.getInstance().now()
                                                         )
                                                 )
                                         );

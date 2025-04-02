@@ -1750,12 +1750,14 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												}
 												// date
 												if(PrimitiveTypes.DATE.equals(featureTypeName)) {
-													#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif mappedNewValueDate = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-														cal.get(Calendar.YEAR),
-														cal.get(Calendar.MONTH) + 1,
-														cal.get(Calendar.DAY_OF_MONTH),
-														DatatypeConstants.FIELD_UNDEFINED
-													);
+													#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif mappedNewValueDate =
+															            #if CLASSIC_CHRONO_TYPES DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+																			cal.get(Calendar.YEAR),
+																			cal.get(Calendar.MONTH) + 1,
+																			cal.get(Calendar.DAY_OF_MONTH),
+																			DatatypeConstants.FIELD_UNDEFINED)
+																		#else java.time.LocalDate.of(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH))
+																		#endif;
 													if(target instanceof RefObject) {
 														Object value = this.getValue(
 															valueHolder, 

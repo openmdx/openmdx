@@ -72,7 +72,7 @@ public class DateMarshaller {
 
         @Override
         protected String toBasicFormat(Object datatype) {
-            return Datatypes.DATE_CLASS.cast(datatype).#if CLASSIC_CHRONO_TYPES toXMLFormat() #else format(DateTimeFormatter.ISO_LOCAL_DATE)#endif.replaceAll("-", "");
+            return Datatypes.DATE_CLASS.cast(datatype).#if CLASSIC_CHRONO_TYPES toXMLFormat() #else toString()#endif.replaceAll("-", "");
         }
         
     };
@@ -81,7 +81,7 @@ public class DateMarshaller {
      * Normalizing Marshaller
      */
     public static final Marshaller NORMALIZE = new NormalizingMarshaller(
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif.class
+            Datatypes.DATE_CLASS
     ){
 
         /* (non-Javadoc)

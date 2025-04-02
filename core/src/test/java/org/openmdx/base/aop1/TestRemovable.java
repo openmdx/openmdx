@@ -44,8 +44,6 @@
  */
 package org.openmdx.base.aop1;
 
-import java.text.ParseException;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -55,14 +53,30 @@ import org.junit.jupiter.api.Test;
 public class TestRemovable {
 
     #if CLASSIC_CHRONO_TYPES
+
     @Test
-    public void testRemovedAtPlaceholder() throws ParseException{
+    public void testRemovedAtPlaceholder() throws java.text.ParseException{
         org.w3c.format.DateTimeFormat format = org.w3c.format.DateTimeFormat.getInstance("yyyyyMMdd'T'HHmmss.SSS'Z'");
-        Assertions.assertEquals(
+        Assertions.Assertions.assertEquals(
             "100000101T000000.000Z", 
             format.format(Removable_1.IN_THE_FUTURE),
             "Future placeholder"
         );
     }
+
+    #else
+
+    @Test
+    public void testRemovedAtPlaceholder() {
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
+                .ofPattern("uuuuMMdd'T'HHmmss.SSS'Z'")
+                .withZone(java.time.ZoneOffset.UTC);
+        Assertions.assertEquals(
+                "100000101T000000.000Z",
+                formatter.format(Removable_1.IN_THE_FUTURE),
+                "Future placeholder"
+        );
+    }
+
     #endif
 }

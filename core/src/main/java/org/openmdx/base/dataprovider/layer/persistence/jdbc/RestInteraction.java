@@ -106,6 +106,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.spi2.Datatypes;
 #if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
@@ -1111,7 +1112,7 @@ public class RestInteraction extends AbstractRestInteraction {
                 if (LockAssertions.isReadLockAssertion(readLock)) {
                     #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime = LockAssertions.getTransactionTime(readLock);
                     #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif modifiedAt
-                            = (#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif ) obj.getValue().get(SystemAttributes.MODIFIED_AT);
+                            = Datatypes.DATE_TIME_CLASS.cast(obj.getValue().get(SystemAttributes.MODIFIED_AT));
                     if (modifiedAt == null) {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,

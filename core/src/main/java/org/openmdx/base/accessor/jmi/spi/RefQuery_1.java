@@ -1919,7 +1919,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                                             quantifier,
                                             qualifiedName)
                                             : PrimitiveTypes.DATE.equals(typeName)
-                                                ? new RefPartiallyOrderedTypePredicate<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif>(
+                                                ? new RefPartiallyOrderedTypePredicate<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else RefComparableTypePredicate<java.time.LocalDate>#endif>(
                                                     quantifier,
                                                     qualifiedName)
                                                 : PrimitiveTypes.ANYURI.equals(typeName)

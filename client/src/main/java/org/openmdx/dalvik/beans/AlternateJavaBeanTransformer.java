@@ -50,7 +50,6 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.util.Date;
 
-import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 

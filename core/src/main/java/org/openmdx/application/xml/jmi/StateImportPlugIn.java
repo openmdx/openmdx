@@ -267,15 +267,15 @@ public class StateImportPlugIn implements ImportPlugIn {
         //
         Path containerId = objectId.getParent();
         String qualifier = objectId.getLastSegment().toClassicRepresentation();
-        RefContainer<?> refContainer = (RefContainer<?>) persistenceManager.getObjectById(containerId);
+        RefContainer<RefObject> refContainer = (RefContainer<RefObject>) persistenceManager.getObjectById(containerId);
         if (qualifier.startsWith("!")) {
-            ((RefContainer<RefObject>) refContainer).refAdd(
+            refContainer.refAdd(
                     QualifierType.PERSISTENT,
                     qualifier.substring(1),
                     refObject
             );
         } else {
-            ((RefContainer<RefObject>) refContainer).refAdd(
+            refContainer.refAdd(
                     QualifierType.REASSIGNABLE,
                     qualifier,
                     refObject

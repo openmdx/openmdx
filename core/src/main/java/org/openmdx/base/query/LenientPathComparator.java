@@ -87,7 +87,7 @@ public class LenientPathComparator extends LenientDatatypeComparator {
     public static boolean isComparable(
         Object candidate
     ){
-        return candidate instanceof Comparable<?>;
+        return candidate instanceof Comparable<?>#if CLASSIC_CHRONO_TYPES || candidate instanceof javax.xml.datatype.XMLGregorianCalendar#endif;
     }
        
     
@@ -119,7 +119,7 @@ public class LenientPathComparator extends LenientDatatypeComparator {
 
     /**
      * 
-     * @param number
+     * @param value
      */
     private static Path toPath(
         Object value

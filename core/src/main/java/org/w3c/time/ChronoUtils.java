@@ -53,6 +53,8 @@ package org.w3c.time;
 import javax.xml.datatype.DatatypeConstants;
 import java.text.ParseException;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 
 public class ChronoUtils {
 
@@ -100,6 +102,88 @@ public class ChronoUtils {
         //}
         return null;
 
+    }
+
+    /**
+     * Checks if the left instant is before the right instant.
+     *
+     * @param left  the first instant
+     * @param right the second instant
+     * @return true if the left instant is before the right instant
+     */
+    public static boolean isBefore(Instant left, Instant right) {
+        if (left == null || right == null) {
+            return false;
+        }
+        return left.isBefore(right);
+    }
+
+    /**
+     * Checks if the left instant is after the right instant.
+     *
+     * @param left  the first instant
+     * @param right the second instant
+     * @return true if the left instant is after the right instant
+     */
+    public static boolean isAfter(Instant left, Instant right) {
+        if (left == null || right == null) {
+            return false;
+        }
+        return left.isAfter(right);
+    }
+
+    /**
+     * Gets the epoch time in milliseconds from an Instant.
+     *
+     * @param dateTime the instant to convert
+     * @return the epoch time in milliseconds
+     */
+    public static long getEpochMilliseconds(Instant dateTime) {
+        if (dateTime == null) {
+            return 0L;
+        }
+        return dateTime.toEpochMilli();
+    }
+
+    /**
+     * Checks if the left date is before the right date.
+     *
+     * @param left  the first date
+     * @param right the second date
+     * @return true if the left date is before the right date
+     */
+    public static boolean isBefore(Date left, Date right) {
+        if (left == null || right == null) {
+            return false;
+        }
+        return left.before(right);
+    }
+
+    /**
+     * Checks if the left date is after the right date.
+     *
+     * @param left  the first date
+     * @param right the second date
+     * @return true if the left date is after the right date
+     */
+    public static boolean isAfter(Date left, Date right) {
+        if (left == null || right == null) {
+            return false;
+        }
+        return left.after(right);
+    }
+
+    /**
+     * Gets the epoch time in milliseconds from a Date.
+     *
+     * @param dateTime the date to convert
+     * @return the epoch time in milliseconds
+     */
+    public static long getEpochMilliseconds(Date dateTime) {
+        if (dateTime == null) {
+            return 0L;
+        }
+        return dateTime.getTime();
     }
 
 }

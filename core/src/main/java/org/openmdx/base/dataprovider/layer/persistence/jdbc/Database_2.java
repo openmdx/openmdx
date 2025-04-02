@@ -106,7 +106,6 @@ import jakarta.resource.cci.MappedRecord;
 #endif
 
 import javax.sql.DataSource;
-import javax.xml.datatype.DatatypeConstants;
 
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
 import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
@@ -2988,7 +2987,7 @@ public class Database_2
         boolean dateTime =
             #if CLASSIC_CHRONO_TYPES
                 value instanceof java.util.Date ||
-                Datatypes.DATE_CLASS.isInstance(value) && DatatypeConstants.DATETIME.equals(Datatypes.DATE_CLASS.cast(value).getXMLSchemaType());
+                Datatypes.DATE_CLASS.isInstance(value) && javax.xml.datatype.DatatypeConstants.DATETIME.equals(Datatypes.DATE_CLASS.cast(value).getXMLSchemaType());
             #else
                 value instanceof java.time.Instant || value instanceof java.time.ZonedDateTime || value instanceof java.time.OffsetDateTime;
             #endif

@@ -71,7 +71,6 @@ import javax.jmi.reflect.RefBaseObject;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
-import javax.xml.datatype.DatatypeConstants;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
@@ -136,7 +135,7 @@ public class DateStateViews {
                     2000,
                     1, // January
                     1, // 1st
-                    DatatypeConstants.FIELD_UNDEFINED
+                    javax.xml.datatype.DatatypeConstants.FIELD_UNDEFINED
                 )
             #else java.time.LocalDate.of(2000, 1, 1)
             #endif;
@@ -752,11 +751,8 @@ public class DateStateViews {
         if (left == null || right == null) {
             return false;
         }
-        #if CLASSIC_CHRONO_TYPES
-        if (left instanceof org.w3c.cci2.ImmutableDatatype<?> != right instanceof org.w3c.cci2.ImmutableDatatype<?>)
-        #else
-        if (left instanceof java.time.temporal.Temporal != right instanceof java.time.temporal.Temporal)
-        #endif {
+        if (left instanceof #if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDatatype<?> #else java.time.temporal.Temporal#endif
+                != right instanceof #if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDatatype<?> #else java.time.temporal.Temporal#endif) {
             return Datatypes.DATATYPE_FACTORY.toDate(left).equals(Datatypes.DATATYPE_FACTORY.toDate(right));
         }
         return left.equals(right);
@@ -772,11 +768,8 @@ public class DateStateViews {
         if (left == null || right == null) {
             return false;
         }
-        #if CLASSIC_CHRONO_TYPES
-        if (left instanceof org.w3c.cci2.ImmutableDatatype<?> != right instanceof org.w3c.cci2.ImmutableDatatype<?>)
-        #else
-        if (left instanceof java.time.temporal.Temporal != right instanceof java.time.temporal.Temporal)
-        #endif {
+        if (left instanceof #if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDatatype<?> #else java.time.temporal.Temporal #endif
+                != right instanceof #if CLASSIC_CHRONO_TYPES org.w3c.cci2.ImmutableDatatype<?> #else java.time.temporal.Temporal #endif) {
             return Datatypes.DATATYPE_FACTORY.toDateTime(left).equals(Datatypes.DATATYPE_FACTORY.toDateTime(right));
         }
         return left.equals(right);
