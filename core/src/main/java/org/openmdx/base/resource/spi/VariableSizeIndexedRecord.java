@@ -83,7 +83,7 @@ public class VariableSizeIndexedRecord
     ){
         this.recordName = recordName;
         this.description = recordShortDescription;
-        this.delegate = new ArrayList<Object>();
+        this.delegate = new ArrayList<>();
     }
 
     /**
@@ -119,7 +119,7 @@ public class VariableSizeIndexedRecord
     ){
         this.recordName = recordName;
         this.description = description;
-        this.delegate = new ArrayList<Object>(initialContent);
+        this.delegate = new ArrayList<>(initialContent);
     }
     
     /**
