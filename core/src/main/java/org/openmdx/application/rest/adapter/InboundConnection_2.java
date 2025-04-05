@@ -1086,15 +1086,32 @@ public class InboundConnection_2 extends AbstractConnection {
                     refContainer.add(refObject);
                 } else {
                     RefContainer<RefObject> refContainer = (RefContainer<RefObject>) container;
-                    #if CLASSIC_CHRONO_TYPES
-                        refContainer.refAdd(toAddArguments(refContainer.getClass(), xri.getLastSegment().toClassicRepresentation(), refObject));
-                    #else
-                        String qualifier = xri.getLastSegment().toClassicRepresentation();
-                        boolean persistent = qualifier.startsWith("!");
-                        QualifierType qualifierType = persistent ? QualifierType.PERSISTENT : QualifierType.REASSIGNABLE;
-                        Object qualifierValue = persistent ? qualifier.substring(1) : qualifier;
-                        refContainer.refAdd(qualifierType, qualifierValue, refObject);
-                    #endif
+                    String qualifier = xri.getLastSegment().toClassicRepresentation();
+                    final Class<? extends RefContainer> containerClass = refContainer.getClass();
+                    final Class<?>[] argumentClasses = ReferenceDef.getAddArguments(containerClass);
+                    if (argumentClasses.length == 3) {
+                        #if CLASSIC_CHRONO_TYPES
+                            refContainer.refAdd(toAddArguments(argumentClasses, qualifier, refObject));
+                        #else
+                            boolean persistent = qualifier.startsWith("!");
+                            QualifierType qualifierType = QualifierType.valueOf(persistent);
+                            Object qualifierValue = persistent ? qualifier.substring(1) : qualifier;
+                            refContainer.refAdd(qualifierType, qualifierValue, refObject);
+                        #endif
+                    } else {
+                        throw ResourceExceptions.initHolder(
+                                new NotSupportedException(
+                                        "More than one qualifier is not yet supported",
+                                        BasicException.newEmbeddedExceptionStack(
+                                                BasicException.Code.DEFAULT_DOMAIN,
+                                                BasicException.Code.NOT_IMPLEMENTED,
+                                                new BasicException.Parameter(
+                                                        "argumentClasses", (Object[]) argumentClasses
+                                                )
+                                        )
+                                )
+                        );
+                    }
                 }
                 return propagate(refObject, output, null, null);
             }
@@ -1102,8 +1119,8 @@ public class InboundConnection_2 extends AbstractConnection {
 
         /**
          * Provide the {@code add()} argument list
-         * 
-         * @param containerClass
+         *
+         * @param argumentClasses
          * @param qualifier
          * @param object
          * 
@@ -1112,31 +1129,14 @@ public class InboundConnection_2 extends AbstractConnection {
          */
         @SuppressWarnings("rawtypes")
         private Object[] toAddArguments(
-            Class<? extends RefContainer> containerClass,
-            String qualifier,
-            RefObject object
-        )
-            throws ResourceException {
-            final Class<?>[] argumentClasses = ReferenceDef.getAddArguments(containerClass);
-            if (argumentClasses.length == 3) {
+                Class<?>[] argumentClasses,
+                String qualifier,
+                RefObject object
+        ) {
                 boolean persistent = qualifier.startsWith("!");
                 return new Object[] { QualifierType.valueOf(
                     persistent
                 ), Datatypes.create(argumentClasses[1], persistent ? qualifier.substring(1) : qualifier), object };
-            } else {
-                throw ResourceExceptions.initHolder(
-                    new NotSupportedException(
-                        "More than one qualifier is not yet supported",
-                        BasicException.newEmbeddedExceptionStack(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.NOT_IMPLEMENTED,
-                            new BasicException.Parameter(
-                                "argumentClasses", (Object[]) argumentClasses
-                            )
-                        )
-                    )
-                );
-            }
         }
 
         /*
