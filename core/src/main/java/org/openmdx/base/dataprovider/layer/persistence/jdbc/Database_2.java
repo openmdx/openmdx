@@ -3368,7 +3368,7 @@ public class Database_2
                 ps.setObject(position, sqlValue);
             }
         } else if(Datatypes.DATE_CLASS.isInstance(normalizedValue)) {
-            Object sqlValue = #if CLASSIC_CHRONO_TYPES this.getCalendarMarshaller().marshal(normalizedValue, conn) #else this.convertToSqlValue(normalizedValue)#endif;
+            Object sqlValue = this.getCalendarMarshaller().marshal(normalizedValue, conn);
             if (sqlValue instanceof Time) {
                 ps.setTime(position, (Time) sqlValue);
             } else if (sqlValue instanceof Timestamp) {
@@ -3413,22 +3413,6 @@ public class Database_2
         }
     }
 
-    #if !CLASSIC_CHRONO_TYPES
-    private Object convertToSqlValue(Object normalizedValue) {
-        if (normalizedValue instanceof java.time.LocalDate) {
-            return java.sql.Date.valueOf((java.time.LocalDate) normalizedValue);
-        } else if (normalizedValue instanceof java.time.LocalDateTime) {
-            return java.sql.Timestamp.valueOf((java.time.LocalDateTime) normalizedValue);
-        } else if (normalizedValue instanceof java.time.Instant) {
-            return java.sql.Timestamp.from((java.time.Instant) normalizedValue);
-        } else if (normalizedValue instanceof java.time.Duration) {
-            return ((java.time.Duration) normalizedValue).toMillis();
-        } else {
-            return normalizedValue;
-        }
-    }
-    #endif
-
     private ObjectRecord getObject(
         Connection conn,
         Path path,
@@ -3443,7 +3427,7 @@ public class Database_2
     )
         throws ServiceException,
         SQLException {
-        List<ObjectRecord> objects = new ArrayList<ObjectRecord>(1);
+        List<ObjectRecord> objects = new ArrayList<>(1);
         this.getObjects(
             conn,
             dbObject,
