@@ -48,8 +48,6 @@
 //#define CLASSIC_CHRONO_TYPES
 package org.w3c.time;
 
-//#define CLASSIC_CHRONO_TYPES
-
 import javax.xml.datatype.DatatypeConstants;
 import java.text.ParseException;
 import java.time.Duration;
@@ -63,13 +61,13 @@ public class ChronoUtils {
     public static final java.util.regex.Pattern EXTENDED_DATE_PATTERN
             = #if CLASSIC_CHRONO_TYPES org.w3c.format.DateTimeFormat.EXTENDED_DATE_PATTERN #else java.util.regex.Pattern.compile("\\d{4}-\\d{2}-\\d{2}") #endif;
 
-    public static final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif createDate(int year, int month, int dayOfMonth) {
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif createDate(int year, int month, int dayOfMonth) {
         return #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(year, month, dayOfMonth, DatatypeConstants.FIELD_UNDEFINED)
         #else java.time.LocalDate.of(year, month, dayOfMonth)
         #endif;
     }
 
-    public static final String completeCentury(String value) throws ParseException, NumberFormatException {
+    public static String completeCentury(String value) throws ParseException, NumberFormatException {
 
         #if CLASSIC_CHRONO_TYPES
             return org.w3c.format.DateTimeFormat.completeCentury(value);

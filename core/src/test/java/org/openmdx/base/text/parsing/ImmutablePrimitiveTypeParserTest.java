@@ -81,7 +81,7 @@ public class ImmutablePrimitiveTypeParserTest {
 	 */
 	@Test
 	public void whenHalfAYearThenParseAsDuration(){
-		String source = #if CLASSIC_CHRONO_TYPES "P6M" #else "P180D" #endif;
+		String source = "P6M";
 		// Arrange
 		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
 		// Act
@@ -95,7 +95,7 @@ public class ImmutablePrimitiveTypeParserTest {
 	 */
 	@Test
 	public void whenDateTimeThenParseAsDate(){
-		String source = #if CLASSIC_CHRONO_TYPES "20000401T050607.890Z" #else "2000-04-01T05:06:07.890000000Z" #endif;
+		String source = "20000401T050607.890Z";
 		// Arrange
 		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
 		// Act
