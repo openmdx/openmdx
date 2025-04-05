@@ -44,12 +44,9 @@
  */
 package org.w3c.spi;
 
-//#define CLASSIC_CHRONO_TYPES
-
-#if CLASSIC_CHRONO_TYPES
 import javax.xml.datatype.DatatypeFactory;
 import org.w3c.cci2.MutableDatatypeFactory;
-#endif
+
 /**
  * DatatypeFactories
  */
@@ -69,15 +66,6 @@ public class DatatypeFactories {
      */
     private static ImmutableDatatypeFactory immutableFactory;
 
-    /**
-     * Retrieve an XML Datatype Factory
-     *
-     * @return an XML Datatype Factory instance
-     */
-    public static DatatypeFactory xmlDatatypeFactory(
-    ){
-        return MutableDatatypeFactory.xmlDatatypeFactory();
-    }
 
     /**
      * Retrieve an Immutable Datatype Factory
@@ -92,6 +80,18 @@ public class DatatypeFactories {
         return immutableFactory;
     }
 
+    #endif
+
+    /**
+     * Retrieve an XML Datatype Factory
+     *
+     * @return an XML Datatype Factory instance
+     */
+    public static DatatypeFactory xmlDatatypeFactory(
+    ){
+        return MutableDatatypeFactory.xmlDatatypeFactory();
+    }
+
     /**
      * Retrieve a new XML Duration
      *
@@ -101,12 +101,8 @@ public class DatatypeFactories {
         return xmlDatatypeFactory().newDuration();
     }
 
-    #else
-
     public static ContemporaryChronoDatatypeFactory contemporaryChronoDatatypeFactory() {
         return new DefaultContemporaryChronoDatatypeFactory();
     }
-
-    #endif
 
 }

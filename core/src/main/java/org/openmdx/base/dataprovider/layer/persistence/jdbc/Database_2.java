@@ -119,6 +119,7 @@ import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.BooleanMar
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.DurationMarshaller;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.LargeObjectMarshaller;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.SetLargeObjectMethod;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.XMLGregorianCalendarMarshaller;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.dbobject.DBOSlicedWithIdAsKey;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.dbobject.DBOSlicedWithParentAndIdAsKey;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.dbobject.DbObject;
@@ -183,9 +184,8 @@ import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.cci2.RegularExpressionFlag;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
-#if CLASSIC_CHRONO_TYPES
-import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.XMLGregorianCalendarMarshaller;
 import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
@@ -502,7 +502,6 @@ public class Database_2
         this.dateTimePrecision = dateTimePrecision;
     }
 
-    #if CLASSIC_CHRONO_TYPES
     /**
      * Get calendar marshaller.
      * 
@@ -525,7 +524,6 @@ public class Database_2
         }
         return this.calendarMarshaller;
     }
-    #endif
 
     /**
      * Retrieve objectIdAttributesSuffix.
@@ -4443,10 +4441,7 @@ public class Database_2
             this.setValue(
                 target,
                 index,
-//                this.getCalendarMarshaller().unmarshal(val),
-                #if CLASSIC_CHRONO_TYPES this.getCalendarMarshaller().unmarshal(val)
-                #else java.time.LocalDate.parse(val.toString())
-                #endif,
+                this.getCalendarMarshaller().unmarshal(val),
                 isEmbedded
             );
         } else if (PrimitiveTypes.DURATION.equals(featureType)) {
@@ -7460,7 +7455,7 @@ public class Database_2
 
     protected BooleanMarshaller booleanMarshaller;
     protected DurationMarshaller durationMarshaller;
-    #if CLASSIC_CHRONO_TYPES protected XMLGregorianCalendarMarshaller calendarMarshaller;#endif
+    protected XMLGregorianCalendarMarshaller calendarMarshaller;
     protected String booleanType = LayerConfigurationEntries.BOOLEAN_TYPE_CHARACTER;
     protected String booleanFalse = null;
     protected String booleanTrue = null;

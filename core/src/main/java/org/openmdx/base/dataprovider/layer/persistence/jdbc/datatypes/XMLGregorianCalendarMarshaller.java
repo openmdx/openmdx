@@ -523,9 +523,9 @@ public class XMLGregorianCalendarMarshaller {
             String value
     ){
         return
-                value.startsWith("P") || value.startsWith("-P") ? Datatypes.create(Duration.class, value) :
-                        value.indexOf('T') < 0 ? Datatypes.create(XMLGregorianCalendar.class, value) :
-                                Datatypes.create(java.util.Date.class, value);
+                value.startsWith("P") || value.startsWith("-P") ? Datatypes.create(Datatypes.DURATION_CLASS, value) :
+                        value.indexOf('T') < 0 ? Datatypes.create(Datatypes.DATE_CLASS, value) :
+                                Datatypes.create(Datatypes.DATE_TIME_CLASS, value);
     }
 
 }

@@ -87,9 +87,6 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
     public static Parser getInstance(){
         return INSTANCE;
     }
-        
-    
-    
 
     /* (non-Javadoc)
      * @see org.openmdx.kernel.text.parsing.AbstractParser#supportedTypes()
@@ -98,9 +95,6 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
     protected Collection<Class<?>> supportedTypes() {
         return SUPPORTED_TYPES;
     }
-
-
-
 
     /* (non-Javadoc)
 	 * @see org.openmdx.kernel.text.parse.AbstractParser#parseAs(java.lang.Class, java.lang.String)

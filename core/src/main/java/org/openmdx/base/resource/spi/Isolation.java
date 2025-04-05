@@ -45,11 +45,9 @@
 package org.openmdx.base.resource.spi;
 
 import #if JAVA_8 javax.resource.cci.Record #else jakarta.resource.cci.Record #endif;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.resource.cci.Freezable;
 import org.openmdx.kernel.exception.BasicException;
-import org.w3c.spi.DatatypeFactories;
 
 #if CLASSIC_CHRONO_TYPES
 import java.util.Date;

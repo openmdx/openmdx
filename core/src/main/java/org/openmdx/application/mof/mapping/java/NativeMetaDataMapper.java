@@ -58,7 +58,7 @@ import org.openmdx.application.mof.mapping.java.metadata.FieldPersistenceModifie
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
+import org.w3c.format.DateTimeFormat;
 
 /**
  * openMDX Meta Data Mapper
