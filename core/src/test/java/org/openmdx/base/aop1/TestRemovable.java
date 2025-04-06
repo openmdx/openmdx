@@ -68,8 +68,10 @@ public class TestRemovable {
 
     @Test
     public void testRemovedAtPlaceholder() {
-        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
-                .ofPattern("uuuuMMdd'T'HHmmss.SSS'Z'")
+        java.time.format.DateTimeFormatter formatter = new java.time.format.DateTimeFormatterBuilder()
+                .appendValue(java.time.temporal.ChronoField.YEAR, 4, 10, java.time.format.SignStyle.NEVER)
+                .appendPattern("MMdd'T'HHmmss.SSS'Z'")
+                .toFormatter()
                 .withZone(java.time.ZoneOffset.UTC);
         Assertions.assertEquals(
                 "100000101T000000.000Z",
