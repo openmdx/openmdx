@@ -75,6 +75,7 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
     private static final Collection<Class<?>> SUPPORTED_TYPES = Arrays.asList(
         Datatypes.DATE_TIME_CLASS,
         Datatypes.DURATION_CLASS,
+        java.time.Period.class,
         Datatypes.DATE_CLASS,
         Path.class
     );
@@ -101,15 +102,16 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
 	 */
 	@Override
 	protected Object parseAs(
-		String externalRepresentation, 
+		String externalRepresentation,
 		Class<?> valueClass
 	) throws Exception {
 		return
     		valueClass == Datatypes.DATE_TIME_CLASS ? Datatypes.DATATYPE_FACTORY.newDateTime(externalRepresentation) :
                 valueClass == Datatypes.DURATION_CLASS ? Datatypes.DATATYPE_FACTORY.newDuration(externalRepresentation) :
-                    valueClass == Datatypes.DATE_CLASS ? Datatypes.DATATYPE_FACTORY.newDate(externalRepresentation) :
-    		            valueClass == Path.class ? new Path(externalRepresentation) :
-                            super.parseAs(externalRepresentation, valueClass);
+                    #if !CLASSIC_CHRONO_TYPES valueClass == java.time.Period.class ? java.time.Period.parse(externalRepresentation) :#endif
+                        valueClass == Datatypes.DATE_CLASS ? Datatypes.DATATYPE_FACTORY.newDate(externalRepresentation) :
+    		                valueClass == Path.class ? new Path(externalRepresentation) :
+                                super.parseAs(externalRepresentation, valueClass);
 	}
     
 }

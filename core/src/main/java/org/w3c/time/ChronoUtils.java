@@ -94,12 +94,15 @@ public class ChronoUtils {
         } else if (field.equals(DatatypeConstants.MINUTES)) {
             return duration.toMinutes() % 60;
         } else if (field.equals(DatatypeConstants.SECONDS)) {
-            return duration.getSeconds() % 60;
+            return duration.toMillis() / 1000 % 60;
+//            return duration.getSeconds() % 60;
+//            return duration.getSeconds();
+//            return duration.toSeconds() % 60;
+//            return (duration.toMinutes() * 60) % 60;
         } //else if (field.equals(DatatypeConstants.MILLISECONDS)) {
             //return duration.toMillis() % 1000;
         //}
         return null;
-
     }
 
     /**

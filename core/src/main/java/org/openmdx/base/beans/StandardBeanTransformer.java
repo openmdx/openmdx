@@ -54,8 +54,9 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URI;
+import java.util.Date;
 
-import javax.xml.datatype.DatatypeConstants;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.exception.ExceptionListener;
@@ -67,14 +68,8 @@ import org.openmdx.base.text.conversion.spi.BeanTransformer;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
-#if CLASSIC_CHRONO_TYPES
-import org.w3c.cci2.ImmutableDatatype;
-import org.w3c.cci2.ImmutableDate;
-import org.w3c.cci2.ImmutableDateTime;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.DatatypeFactories;
-import org.w3c.spi.ImmutableDatatypeFactory;
-#endif
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -113,40 +108,41 @@ public class StandardBeanTransformer implements BeanTransformer {
                     );
                 }
                 encoder.setPersistenceDelegate(
-                    BigDecimal.class,
-                    bigDecimalPersistenceDelegate
+                        BigDecimal.class,
+                        bigDecimalPersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    Path.class,
-                    pathPersistenceDelegate
+                        Path.class,
+                        pathPersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    Datatypes.DATE_TIME_CLASS,
-                    datePersistenceDelegate
+                        Date.class,
+                        datePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    xmlGregorianCalendarClass,
-                    immutableDatePersistenceDelegate
+                        xmlGregorianCalendarClass,
+                        immutableDatePersistenceDelegate
+                );
+                #if CLASSIC_CHRONO_TYPES
+                encoder.setPersistenceDelegate(
+                        org.w3c.cci2.ImmutableDate.class,
+                        immutableDatePersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    #if CLASSIC_CHRONO_TYPES ImmutableDate #else java.time.LocalDate#endif.class,
-                    immutableDatePersistenceDelegate
+                        org.w3c.cci2.ImmutableDateTime.class,
+                        dateTimePersistenceDelegate
+                );#endif
+                encoder.setPersistenceDelegate(
+                        Duration.class,
+                        durationPersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    #if CLASSIC_CHRONO_TYPES ImmutableDateTime #else java.time.Instant#endif.class,
-                    dateTimePersistenceDelegate
+                        Quantifier.class,
+                        quantifierPersistenceDelegate
                 );
                 encoder.setPersistenceDelegate(
-                    Datatypes.DURATION_CLASS,
-                    durationPersistenceDelegate
-                );
-                encoder.setPersistenceDelegate(
-                    Quantifier.class,
-                    quantifierPersistenceDelegate
-                );
-                encoder.setPersistenceDelegate(
-                    URI.class,
-                    uriPersistenceDelegate
+                        URI.class,
+                        uriPersistenceDelegate
                 );
                 encoder.writeObject(javaBean);
             }
@@ -210,8 +206,8 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected boolean mutatesTo(
-            Object oldInstance,
-            Object newInstance
+                Object oldInstance,
+                Object newInstance
         ) {
             return newInstance != null && oldInstance.equals(newInstance);
         }
@@ -262,14 +258,14 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected Expression instantiate(
-            Object oldInstance,
-            Encoder out
+                Object oldInstance,
+                Encoder out
         ) {
             return new Expression(
-                oldInstance,
-                oldInstance.getClass(),
-                "new",
-                new Object[]{oldInstance.toString()}
+                    oldInstance,
+                    oldInstance.getClass(),
+                    "new",
+                    new Object[]{oldInstance.toString()}
             );
         }
 
@@ -283,14 +279,14 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected Expression instantiate(
-            Object oldInstance,
-            Encoder out
+                Object oldInstance,
+                Encoder out
         ) {
             return new Expression(
-                oldInstance,
-                oldInstance.getClass(),
-                "new",
-                new Object[]{((Path)oldInstance).toXRI()}
+                    oldInstance,
+                    oldInstance.getClass(),
+                    "new",
+                    new Object[]{((Path)oldInstance).toXRI()}
             );
         }
 
@@ -304,23 +300,23 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected boolean mutatesTo(
-            Object oldInstance,
-            Object newInstance
+                Object oldInstance,
+                Object newInstance
         ) {
             return newInstance != null && (
-                oldInstance.getClass() == newInstance.getClass() ? oldInstance.equals(newInstance) : oldInstance.toString().equals(newInstance.toString())
+                    oldInstance.getClass() == newInstance.getClass() ? oldInstance.equals(newInstance) : oldInstance.toString().equals(newInstance.toString())
             );
         }
 
         @Override
         protected Expression instantiate(
-            Object oldInstance,
-            Encoder out
+                Object oldInstance,
+                Encoder out
         ) {
             return new Expression(
-                oldInstance,
-                Datatypes.class,
-                "create",
+                    oldInstance,
+                    Datatypes.class,
+                    "create",
                     new Object[]{XMLGregorianCalendar.class,oldInstance.toString()}
             );
         }
@@ -338,22 +334,22 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected boolean mutatesTo(
-            Object oldInstance,
-            Object newInstance
+                Object oldInstance,
+                Object newInstance
         ) {
             return newInstance != null && oldInstance.equals(newInstance);
         }
 
         @Override
         protected Expression instantiate(
-            Object oldInstance,
-            Encoder out
+                Object oldInstance,
+                Encoder out
         ) {
             return new Expression(
-                oldInstance,
-                Datatypes.class,
-                "create",
-                new Object[]{Datatypes.DURATION_CLASS,(Datatypes.DURATION_CLASS.cast(oldInstance)).toString()}
+                    oldInstance,
+                    Datatypes.class,
+                    "create",
+                    new Object[]{Duration.class,((Duration)oldInstance).toString()}
             );
         }
 
@@ -368,18 +364,14 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected Expression instantiate(
-            Object oldInstance,
-            Encoder out
+                Object oldInstance,
+                Encoder out
         ) {
             return new Expression(
-                oldInstance,
-                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif.class,
-                "new",
-                new Object[]{
-                        Long.valueOf(
-                                String.valueOf(Datatypes.DATE_TIME_CLASS.cast(oldInstance).#if CLASSIC_CHRONO_TYPES getTime() #else now() #endif)
-                        )
-                }
+                    oldInstance,
+                    Date.class,
+                    "new",
+                    new Object[]{Long.valueOf(((Date)oldInstance).getTime())}
             );
         }
     }
@@ -392,22 +384,22 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected boolean mutatesTo(
-            Object oldInstance,
-            Object newInstance
+                Object oldInstance,
+                Object newInstance
         ) {
             return oldInstance == newInstance;
         }
 
         @Override
         protected Expression instantiate(
-            Object oldInstance,
-            Encoder out
+                Object oldInstance,
+                Encoder out
         ) {
             return new Expression(
-                oldInstance,
-                Quantifier.class,
-                "valueOf",
-                new Object[]{((Quantifier)oldInstance).name()}
+                    oldInstance,
+                    Quantifier.class,
+                    "valueOf",
+                    new Object[]{((Quantifier)oldInstance).name()}
             );
         }
 
@@ -422,17 +414,17 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected Expression instantiate(
-            Object oldInstance,
-            Encoder out
+                Object oldInstance,
+                Encoder out
         ) {
             return new Expression(
-                oldInstance,
-                Datatypes.class,
-                "create",
-                new Object[]{
-                    Datatypes.DATE_TIME_CLASS,
-                    BASIC_FORMATTER_DT_UTC_TZ.format(Datatypes.DATE_TIME_CLASS.cast(oldInstance))
-                }
+                    oldInstance,
+                    Datatypes.class,
+                    "create",
+                    new Object[]{
+                            Date.class,
+                            DateTimeFormat.BASIC_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(oldInstance))
+                    }
             );
         }
 
@@ -447,17 +439,17 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected Expression instantiate(
-            Object oldInstance,
-            Encoder out
+                Object oldInstance,
+                Encoder out
         ) {
             return new Expression(
-                oldInstance,
-                Datatypes.class,
-                "create",
-                new Object[]{
-                    URI.class,
-                    oldInstance.toString()
-                }
+                    oldInstance,
+                    Datatypes.class,
+                    "create",
+                    new Object[]{
+                            URI.class,
+                            oldInstance.toString()
+                    }
             );
         }
 
@@ -471,9 +463,9 @@ public class StandardBeanTransformer implements BeanTransformer {
     private static final PersistenceDelegate immutableDatePersistenceDelegate = new ImmutableDatePersistenceDelegate();
     private static final PersistenceDelegate quantifierPersistenceDelegate = new QuantifierPersistenceDelegate();
     private static final PersistenceDelegate uriPersistenceDelegate = new URIPersistenceDelegate();
-    private static final Class<? extends #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> xmlGregorianCalendarClass =
-            #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED)
-            #else java.time.LocalDate.of(2000, 1, 1)
-            #endif.getClass();
+    private static final Class<? extends #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else java.time.LocalDate#endif> xmlGregorianCalendarClass
+            = #if CLASSIC_CHRONO_TYPES DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1).getClass()
+            #else Datatypes.DATE_CLASS
+            #endif;
 
 }

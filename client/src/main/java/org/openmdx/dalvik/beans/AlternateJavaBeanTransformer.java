@@ -50,7 +50,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.util.Date;
 
-import javax.xml.datatype.Duration;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.exception.ExceptionListener;
@@ -407,6 +407,6 @@ public class AlternateJavaBeanTransformer implements BeanTransformer {
     private static final PersistenceDelegate immutableDatePersistenceDelegate = new ImmutableDatePersistenceDelegate();
     private static final PersistenceDelegate quantifierPersistenceDelegate = new QuantifierPersistenceDelegate();
     private static final PersistenceDelegate uriPersistenceDelegate = new URIPersistenceDelegate();
-    private static final Class<? extends XMLGregorianCalendar> xmlGregorianCalendarClass = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED).getClass();
+    private static final Class<? extends XMLGregorianCalendar> xmlGregorianCalendarClass = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1).getClass();
 
 }

@@ -1,29 +1,29 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: PostgreSQL Interval Marshaller 
+ * Description: PostgreSQL Interval Marshaller
  * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -37,9 +37,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
@@ -48,16 +48,14 @@ package org.openmdx.base.dataprovider.layer.persistence.jdbc.postgresql;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Period;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time#endif.Duration;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
-import org.w3c.spi.DatatypeFactories;
 
 #if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
@@ -86,20 +84,20 @@ public class PGIntervalMarshaller {
 		}
 		return PG_INTERVAL_CLASS.equals(interval.getClass().getName());
 	}
-	
+
 	public Object marshal(
-		int signum, 
-		int years, 
-		int months, 
-		int days, 
-		int hours, 
-		int minutes, 
+		int signum,
+		int years,
+		int months,
+		int days,
+		int hours,
+		int minutes,
 		double seconds
 	) throws ServiceException {
 		try {
 			return signum < 0 ? Classes.newApplicationInstance(
-				Object.class, 
-				PG_INTERVAL_CLASS, 
+				Object.class,
+				PG_INTERVAL_CLASS,
 				-years,
 				-months,
 				-days,
@@ -107,8 +105,8 @@ public class PGIntervalMarshaller {
 				-minutes,
 				-seconds
 			) : Classes.newApplicationInstance(
-				Object.class, 
-				PG_INTERVAL_CLASS, 
+				Object.class,
+				PG_INTERVAL_CLASS,
 				years,
 				months,
 				days,
@@ -133,8 +131,8 @@ public class PGIntervalMarshaller {
 			);
 		}
 	}
-	
-	public Duration unmarshal(Object interval) throws ServiceException {
+
+	public Object unmarshal(Object interval) throws ServiceException {
 		final Matcher matcher = PG_INTERVAL_PATTERN.matcher(interval.toString());
 		if(matcher.matches()) {
 			BigInteger years = new BigInteger(matcher.group(1));
@@ -203,20 +201,30 @@ public class PGIntervalMarshaller {
 				seconds
 			);
 			#else
-			java.time.Duration duration = java.time.Duration
-					.ofDays(Long.parseLong(String.valueOf(days)))
-					.plusHours(Long.parseLong(String.valueOf(hours)))
-					.plusMinutes(Long.parseLong(String.valueOf(minutes)))
-					.plusSeconds(Long.parseLong(String.valueOf(seconds)));
+			// Handle seconds properly by separating whole seconds and nanoseconds
+			long wholeSeconds = 0L;
+			int nanos = 0;
+			if (seconds != null) {
+				wholeSeconds = seconds.longValue();
+				nanos = seconds.subtract(new BigDecimal(wholeSeconds))
+						.movePointRight(9)
+						.intValue();
+			}
+			Duration duration = Duration
+					.ofDays(days != null ? days.longValue() : 0)
+					.plusHours(hours != null ? hours.longValue() : 0)
+					.plusMinutes(minutes != null ? minutes.longValue() : 0)
+					.plusSeconds(wholeSeconds)
+					.plusNanos(nanos);
 
 			// Apply negative sign if needed
 			if (negative) {
 				duration = duration.negated();
 			}
 
-			return duration;
-			#endif
+			return formatDurationWithDays(negative, years, months, duration);
 
+			#endif
 		} else {
 			throw new ServiceException(
 				BasicException.Code.DEFAULT_DOMAIN,
@@ -227,5 +235,52 @@ public class PGIntervalMarshaller {
 			);
 		}
 	}
-	
+
+    public static String formatDurationWithDays(boolean negative, BigInteger years, BigInteger months, Duration duration) {
+
+		int offset = negative ? 1 : 0;
+        int nanos = duration.getNano();
+
+        long seconds = duration.getSeconds() + (nanos > 0 ? offset : 0);
+
+        long days = seconds / (24 * 3600);
+        seconds = seconds % (24 * 3600);
+        long hours = seconds / 3600;
+        seconds = seconds % 3600;
+        long minutes = seconds / 60;
+        seconds = seconds % 60;
+
+		seconds = getVal(negative, seconds);
+
+        StringBuilder formatted = new StringBuilder(negative ? "-" : "").append("P");
+		if (years != null && months != null) {
+			formatted.append(getVal(negative, years.longValue())).append("Y");
+			formatted.append(getVal(negative, months.longValue())).append("M");
+		}
+
+		// Handle the case where period (Y-M) is absent and duration is 0
+		if (formatted.toString().length() > 1 && duration.toString().equals("PT0S")) {
+			return formatted.toString();
+		}
+		formatted.append(getVal(negative, days)).append("D");
+		formatted.append("T");
+		formatted.append(getVal(negative, hours)).append("H");
+		formatted.append(getVal(negative, minutes)).append("M");
+
+		if (nanos == 0) {
+			formatted.append(seconds).append(".0");
+		} else {
+			// format with proper decimal places for subseconds
+			String fractionalSeconds = String.format("%d.%09d", seconds, nanos);
+			// remove trailing zeros, but keep one decimal place
+			fractionalSeconds = fractionalSeconds.replaceAll("0+$", "");
+			formatted.append(fractionalSeconds);
+		}
+		formatted.append("S");
+        return formatted.toString();
+    }
+
+	private static long getVal(boolean negative, long val) {
+		return negative ? Math.abs(val) : val;
+	}
 }

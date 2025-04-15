@@ -45,6 +45,8 @@
 package org.openmdx.base.text.parsing;
 
 import java.text.ParseException;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
+import java.time.Period;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -54,7 +56,6 @@ import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.text.spi.Parser;
 import org.w3c.spi2.Datatypes;
 
-import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -74,21 +75,31 @@ public class ImmutablePrimitiveTypeParserTest {
 		// Assert
 		Assertions.assertEquals(new Path("org::openmdx::state2"), value);
 	}
-	
-	
+
 	/**
 	 * Duration of 6 Months
 	 */
 	@Test
+	#if CLASSIC_CHRONO_TYPES
 	public void whenHalfAYearThenParseAsDuration(){
-		String source = "P6M";
 		// Arrange
-		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
+		final Parser testee = ImmutablePrimitiveTypeParser.getInstance();
 		// Act
-		final #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration value = testee.parse(Datatypes.DURATION_CLASS, source);
+		final Duration value = testee.parse(Duration.class, "P6M");
+		// Assert
+		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDuration("P6M"), value);
+	}
+	#else
+	public void whenHalfAYearThenParseAsPeriod(){
+		// Arrange
+		final String source = "P6M";
+		final Parser testee = ImmutablePrimitiveTypeParser.getInstance();
+		// Act
+		final Period value = testee.parse(Period.class, source);
 		// Assert
 		Assertions.assertEquals(Datatypes.DATATYPE_FACTORY.toPeriod(source), value);
 	}
+	#endif
 
 	/**
 	 * Timepoint 01.04.2000 05:06:07.890 UTC 
@@ -96,6 +107,10 @@ public class ImmutablePrimitiveTypeParserTest {
 	@Test
 	public void whenDateTimeThenParseAsDate(){
 		String source = "20000401T050607.890Z";
+//		String source = "20000401T050607.890+0100";
+//		String source = "20000401T050607.890+01:00";
+//		String source = "20000401T050607.890-0200";
+//		String source = "20000401T050607.890-02:00";
 		// Arrange
 		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
 		// Act

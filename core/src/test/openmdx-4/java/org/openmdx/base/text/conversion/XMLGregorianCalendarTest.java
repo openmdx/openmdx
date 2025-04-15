@@ -221,7 +221,7 @@ public class XMLGregorianCalendarTest {
 						Quantifier.THERE_EXISTS,
 						TechnicalAttributes.STATE_VALID_FROM,
 						true,
-						org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 4, 1, DatatypeConstants.FIELD_UNDEFINED)
+						org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 4, 1)
 				), new IsGreaterCondition(
 				Quantifier.THERE_EXISTS,
 				TechnicalAttributes.STATE_VALID_TO,

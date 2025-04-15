@@ -140,12 +140,16 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
                     throw new UnsupportedOperationException("Method not supported: " + methodName);
             }
             #endif
+
         } else if (declaringClass == Container.class) {
             // 
             // This interfaces is extended by the typed association end 
             // interface which has been prepended 
             // by the Jmi1ObjectInvocationHandler
             //
+
+            // TODO: kjdd
+            // Wird, wie schon letztes mal angemerkt, bei "add" abstürzen, da Anzahl der ARgumente dann ungerade ist!
             if ("getAll".equals(methodName) && args.length == 1) {
                 return this.marshaller.marshal(
                         this.refDelegate.refGetAll(

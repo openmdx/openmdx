@@ -249,6 +249,8 @@ public class DateValue
             	dateFormatter.format(value) : 
             		dateTimeFormatter.format(value);
         } else if(Datatypes.DATE_CLASS.isInstance(value)) {
+            // TODO: kjdd
+            // Das ist doch mit Flavour 3 gar nicht kompilierbar, oder?
             GregorianCalendar calendar = (Datatypes.DATE_CLASS.cast(value)).toGregorianCalendar(
                 TimeZone.getTimeZone(app.getCurrentTimeZone()),
                 this.app.getCurrentLocale(),

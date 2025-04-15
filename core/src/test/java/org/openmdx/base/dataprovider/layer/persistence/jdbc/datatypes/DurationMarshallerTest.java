@@ -55,79 +55,79 @@ public class DurationMarshallerTest {
 
 	@Test
 	public void postgresZero() throws ServiceException {
-		// Arrange
+		// Arrange
 		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
+		// Act
 		Object duration = testee.unmarshal("0 years 0 mons 0 days 0 hours 0 mins 0.0 secs");
-		// Assert
+		// Assert
 		assertEquals("P0DT0H0M0.0S", duration);
 	}
 	
 	@Test
 	public void postgresPositiveDays() throws ServiceException {
-		// Arrange
+		// Arrange
 		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
+		// Act
 		Object duration = testee.unmarshal("0 years 0 mons 30 days 0 hours 0 mins 0.0 secs");
-		// Assert
+		// Assert
 		assertEquals("P30DT0H0M0.0S", duration);
 	}
 
 	@Test
 	public void postgresPositiveMonths() throws ServiceException {
-		// Arrange
+		// Arrange
 		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
+		// Act
 		Object duration = testee.unmarshal("0 years 14 mons 0 days 0 hours 0 mins 0.0 secs");
-		// Assert
+		// Assert
 		assertEquals("P1Y2M", duration);
 	}
 
 	@Test
 	public void postgresPositiveTime() throws ServiceException {
-		// Arrange
+		// Arrange
 		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
+		// Act
 		Object duration = testee.unmarshal("0 years 0 mons 0 days 0 hours 1 mins 2.5 secs");
-		// Assert
+		// Assert
 		assertEquals("P0DT0H1M2.5S", duration);
 	}
 
 	@Test
 	public void postgresNegativeTime() throws ServiceException {
-		// Arrange
+		// Arrange
 		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
+		// Act
 		Object duration = testee.unmarshal("0 years 0 mons 0 days 0 hours -1 mins -2.5 secs");
-		// Assert
+		// Assert
 		assertEquals("-P0DT0H1M2.5S", duration);
 	}
 
 	@Test
 	public void postgresPositiveMonthTime() throws ServiceException {
-		// Arrange
+		// Arrange
 		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
+		// Act
 		Object duration = testee.unmarshal("0 years 1 mons 0 days 0 hours 2 mins 3.5 secs");
-		// Assert
+		// Assert
 		assertEquals("P0Y1M0DT0H2M3.5S", duration);
 	}
 
 	@Test
 	public void postgresNegativeMonthTime() throws ServiceException {
-		// Arrange
+		// Arrange
 		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
+		// Act
 		Object duration = testee.unmarshal("0 years -1 mons 0 days 0 hours -2 mins -3.5 secs");
-		// Assert
+		// Assert
 		assertEquals("-P0Y1M0DT0H2M3.5S", duration);
 	}
 
 	@Test
 	public void postgresPositiveYearNegativeTime() throws ServiceException {
-		// Arrange
+		// Arrange
 		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
+		// Act
 		try {
 			testee.unmarshal("1 years 0 mons 0 days 0 hours -2 mins -3.5 secs");
 			Assertions.fail();

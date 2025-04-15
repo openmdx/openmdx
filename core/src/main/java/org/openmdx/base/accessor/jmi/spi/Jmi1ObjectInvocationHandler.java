@@ -785,6 +785,8 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                         this.refClass.getMarshaller(), 
                                         FeatureMapper.Kind.METHOD
                                     );
+                                    // TODO: kjdd
+                                    // dirty-harry wrote: TODO
 //                                    container.refAdd(jmiToRef(args));
                                     return null;
                                 } else if (methodName.startsWith("get")) { 
@@ -962,7 +964,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     }
         
     /**
-     * Convert JMIs non-reflective arguments to RefContainer arguments
+     * Convert JMI's non-reflective arguments to RefContainer arguments
      *  
      * @param source non-reflective JMI arguments
      * 

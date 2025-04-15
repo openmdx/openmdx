@@ -44,6 +44,8 @@
  */
 package org.w3c.spi;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -57,6 +59,15 @@ public interface ContemporaryChronoDatatypeFactory {
 
     Duration newDuration(String value);
 
+    Duration newDuration(
+            boolean isPositive,
+            BigInteger years,
+            BigInteger months,
+            BigInteger days,
+            BigInteger hours,
+            BigInteger minutes,
+            BigDecimal seconds);
+
     Instant toDateTime(Instant value);
 
     LocalDate toDate(LocalDate value);
@@ -64,5 +75,9 @@ public interface ContemporaryChronoDatatypeFactory {
     Duration toDuration(Duration value);
 
     Period toPeriod(String value);
+
+    Period newPeriod(boolean isPositive, int year, int month);
+
+    Duration newDurationDayTime(boolean isPositive, int day, int hour, int minute, int second);
 }
 

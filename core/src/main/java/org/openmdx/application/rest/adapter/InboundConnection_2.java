@@ -1035,10 +1035,8 @@ public class InboundConnection_2 extends AbstractConnection {
                             features.add(orderSpecifier.featureName());
                         }
                     }
-                    
                     return propagate(refObject, output, features, toFetchGroups(input));
                 }
-
             }
         }
 

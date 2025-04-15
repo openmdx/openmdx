@@ -46,7 +46,9 @@ plugins {
     kotlin("jvm") version "2.1.0"
 }
 
-val projectFlavour = providers.gradleProperty("flavour").getOrElse("4")
+//val projectFlavour = providers.gradleProperty("flavour").getOrElse("2")
+val projectFlavour = providers.gradleProperty("flavour").getOrElse("3")
+//val projectFlavour = providers.gradleProperty("flavour").getOrElse("4")
 val projectSpecificationVersion = "19"
 val projectMaintenanceVersion = "3"
 val runtimeCompatibility = if (projectFlavour < "4") JavaVersion.VERSION_1_8 else JavaVersion.VERSION_21

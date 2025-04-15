@@ -63,6 +63,7 @@ import java.util.logging.Logger;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.log.ForeignLogRecord;
 import org.openmdx.kernel.log.LoggerFactory;
+import org.w3c.format.DateTimeFormat;
 
 /**
  * An exception stack is a linked list of {@code BasicException}s.
@@ -297,8 +298,9 @@ public final class BasicException extends Exception {
     /**
      * To format the timestamp
      */
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    
+//    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+
     /**
      * Exception Mappers
      */
@@ -318,10 +320,8 @@ public final class BasicException extends Exception {
      * The environment specific line separator
      */
     static final String lineSeparator;
-    
+
     static {
-        dateFormat.setLenient(false);
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         lineSeparator = getProperty("line.separator", "\n");
     }
 
@@ -868,8 +868,8 @@ public final class BasicException extends Exception {
             out.println(); 
         }       
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif thrownAt = this.getTimestamp();
-        if(thrownAt != null) synchronized(BasicException.dateFormat) {
-            out.append("\tTimestamp = ").append(BasicException.dateFormat.format(thrownAt));
+        if(thrownAt != null) {
+            out.append("\tTimestamp = ").append(DateTimeFormat.EXTENDED_UTC_FORMAT.format(thrownAt));
             out.println();
         }
         int i = 0;
