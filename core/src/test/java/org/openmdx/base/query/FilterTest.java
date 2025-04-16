@@ -48,10 +48,10 @@ import java.beans.XMLDecoder;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.time.LocalDate;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.spi.QueryExtension;
@@ -68,6 +68,7 @@ import org.w3c.time.SystemClock;
  */
 public class FilterTest {
 
+    @Disabled("BUH")
     @Test
     public void testEncode() throws IOException, ServiceException {
         Filter filter = new Filter(

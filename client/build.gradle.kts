@@ -106,6 +106,8 @@ sourceSets {
         java {
             srcDir("src/main/java")
             srcDir("src/main/openmdx-${projectFlavour}/java")
+            exclude("org/ietf/jgss/**")
+            exclude("org/openmdx/dalvik/**")
         }
     }
 }
@@ -199,25 +201,25 @@ tasks {
     distTar {
         dependsOn(
             "openmdx-client.jar",
-            "openmdx-dalvik.jar",
+//            "openmdx-dalvik.jar",
             "openmdx-client-sources.jar",
-            "openmdx-dalvik-sources.jar"
+//            "openmdx-dalvik-sources.jar"
         )
     }
     distZip {
         dependsOn(
             "openmdx-client.jar",
-            "openmdx-dalvik.jar",
+//            "openmdx-dalvik.jar",
             "openmdx-client-sources.jar",
-            "openmdx-dalvik-sources.jar"
+//            "openmdx-dalvik-sources.jar"
         )
     }
     assemble {
         dependsOn(
             "openmdx-client.jar",
             "openmdx-client-sources.jar",
-            "openmdx-dalvik.jar",
-            "openmdx-dalvik-sources.jar"
+//            "openmdx-dalvik.jar",
+//            "openmdx-dalvik-sources.jar"
         )
     }
     register<org.openmdx.gradle.ArchiveTask>("openmdx-client.jar") {
