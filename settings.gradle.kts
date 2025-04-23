@@ -62,14 +62,14 @@ include(
     "core"
 )
 val flavour: String = gradle.startParameter.projectProperties.getOrDefault("flavour", "4")
-if (flavour == "2") include(// will flavour != "3" with MDX-2
-    "client",
-    "portal",
-    "tomcat"
-)
-if (flavour == "2" || flavour == "4") include(// will flavour != "3" with MDX-2
+if (flavour == "2" || flavour == "4") include(// will be included in flavour "3" with MDX-1
     "test-core",
     "security",
     "test-security",
     "publish"
+)
+if (flavour == "2") include(// will be included in flavour "3" and "4" with MDX-1
+    "client",
+    "portal",
+    "tomcat",
 )

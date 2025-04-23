@@ -113,7 +113,7 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
                 format.isJPA3() ? "java.sql.Date" :
                         classicChronoTypes ? "javax.xml.datatype.XMLGregorianCalendar" : "java.time.LocalDate";
         if(PrimitiveTypes.DURATION.equals(qualifiedTypeName))
-            return classicChronoTypes ? "javax.xml.datatype.Duration" : "java.time.Duration";
+            return classicChronoTypes ? "javax.xml.datatype.Duration" : "java.time.temporal.TemporalAmount";
         if(PrimitiveTypes.BINARY.equals(qualifiedTypeName)) return "byte[]";
         if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) return "java.net.URI";
         if(PrimitiveTypes.XRI.equals(qualifiedTypeName)) return "java.lang.String"; // no standard implementation as openMDX sticks to XRI 2
@@ -155,15 +155,15 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
         if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) return "org.w3c.cci2.ResourceIdentifierTypePredicate<java.net.URI>";
         if(PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)) return "org.w3c.cci2.StringTypePredicate";
         if(PrimitiveTypes.XRI.equals(qualifiedTypeName)) return "org.w3c.cci2.StringTypePredicate";
-        if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) return "org.w3c.cci2.ComparableTypePredicate<" +
-                (classicChronoTypes ? "java.util.Date" : "java.time.LocalDate") +
-                ">";
-        if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) return "org.w3c.cci2.PartiallyOrderedTypePredicate<" +
-                (classicChronoTypes ? "javax.xml.datatype.XMLGregorianCalendar" : "java.time.Instant") +
-                ">";
-        if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) return "org.w3c.cci2.PartiallyOrderedTypePredicate<" +
-                (classicChronoTypes ? "javax.xml.datatype.Duration" : "java.time.Duration") +
-                ">";
+        if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) return classicChronoTypes ?
+            "org.w3c.cci2.ComparableTypePredicate<java.util.Date>" :
+            "org.w3c.cci2.ComparableTypePredicate<java.time.Instant>";
+        if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) return classicChronoTypes ?
+            "org.w3c.cci2.PartiallyOrderedTypePredicate<javax.xml.datatype.XMLGregorianCalendar>" :
+            "org.w3c.cci2.ComparableTypePredicate<java.time.LocalDate>";
+        if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) return classicChronoTypes ?
+            "org.w3c.cci2.PartiallyOrderedTypePredicate<javax.xml.datatype.Duration>" :
+            "org.w3c.cci2.PartiallyOrderedTypePredicate<java.time.temporal.TemporalAmount>";
         if(PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) return "org.w3c.cci2.ComparableTypePredicate<java.math.BigDecimal>";
         return "org.w3c.cci2.AnyTypePredicate"; // has always a reasonable default value   
     }
