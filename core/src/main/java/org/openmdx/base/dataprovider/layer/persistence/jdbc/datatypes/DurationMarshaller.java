@@ -46,6 +46,7 @@ package org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -131,7 +132,7 @@ public class DurationMarshaller {
 					throw new UnsupportedOperationException("Required for MDX-1");
 				}
 				case CHARACTER: {
-					final java.time.Period period = (java.time.Period) source;
+					java.time.Period period = ((java.time.Period) source).normalized();
 					boolean isNegative = period.isNegative();
 					StringBuilder result = new StringBuilder();
 					if (isNegative) {
@@ -327,12 +328,20 @@ public class DurationMarshaller {
 			case NUMERIC:
 				switch (valueType) {
 				case YEAR_MONTH: {
+					#if CLASSIC_CHRONO_TYPES
 					BigInteger years = getValue(duration, DatatypeConstants.YEARS);
 					BigInteger months = getValue(duration, DatatypeConstants.MONTHS);
 					BigInteger value = months.add(years.multiply(MONTHS_PER_YEAR));
 					return signum < 0 ? value.negate() : value;
+					#else
+					Long years = getValue(duration, DatatypeConstants.YEARS);
+					Long months = getValue(duration, DatatypeConstants.MONTHS);
+					long value = months + (years * MONTHS_PER_YEAR.longValue());
+					return signum < 0 ? -value : value;
+					#endif
 				}
 				case DAY_TIME:
+					#if CLASSIC_CHRONO_TYPES
 					BigInteger days = getValue(duration, DatatypeConstants.DAYS);
 					BigInteger hours = getValue(duration, DatatypeConstants.HOURS);
 					BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
@@ -343,6 +352,44 @@ public class DurationMarshaller {
 							).multiply(SECONDS_PER_MINUTE)
 					);
 					return signum < 0 ? value.negate() : value;
+					#else
+					Number daysNum = getValue(duration, DatatypeConstants.DAYS);
+					Number hoursNum = getValue(duration, DatatypeConstants.HOURS);
+					Number minutesNum = getValue(duration, DatatypeConstants.MINUTES);
+					Number secondsNum = getValue(duration, DatatypeConstants.SECONDS);
+					long days = (daysNum != null) ? daysNum.longValue() : 0L;
+					long hours = (hoursNum != null) ? hoursNum.longValue() : 0L;
+					long minutes = (minutesNum != null) ? minutesNum.longValue() : 0L;
+
+					// Handle seconds with potential fractional part
+					BigDecimal seconds;
+					if (secondsNum == null) {
+						seconds = BigDecimal.ZERO;
+					} else if (secondsNum instanceof BigDecimal) {
+						seconds = (BigDecimal) secondsNum;
+					} else {
+						seconds = new BigDecimal(secondsNum.toString());
+					}
+
+					// Calculate whole seconds part
+					long wholeSeconds = seconds.longValue();
+
+					// Calculate integer part of the value without fractional seconds
+					long integerPart = wholeSeconds
+							+ (minutes * SECONDS_PER_MINUTE.longValue())
+							+ (hours * MINUTES_PER_HOUR.longValue() * SECONDS_PER_MINUTE.longValue())
+							+ (days * HOURS_PER_DAY.longValue() * MINUTES_PER_HOUR.longValue() * SECONDS_PER_MINUTE.longValue());
+
+					// Get the fractional part of seconds
+					BigDecimal fractionalPart = seconds.subtract(new BigDecimal(wholeSeconds));
+
+					// Combine integer part and fractional part
+					BigDecimal result = new BigDecimal(integerPart).add(fractionalPart);
+
+					// Apply scale and sign
+					return result.setScale(PRECISION, RoundingMode.HALF_UP);
+
+					#endif
 				case YEAR_MONTH_DAY_TIME:
 					throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
 							BasicException.Code.TRANSFORMATION_FAILURE,
@@ -427,7 +474,13 @@ public class DurationMarshaller {
 			#else
 				final StringBuilder target = new StringBuilder(duration.isNegative() ? "-P" : "P");
 				final Duration absolute = duration.isNegative() ? duration.negated() : duration;
-				target.append(absolute.toDays()).append("DT");
+				boolean isEmpty = isDurationEmpty(absolute);
+				System.out.println("ValueType: " + valueType);
+				System.out.println("DurationType: " + durationType);
+				if (isEmpty || absolute.toDays() != 0) {
+					target.append(absolute.toDays()).append("D");
+				}
+				target.append("T");
 				target.append(absolute.toHours() % 24).append("H");
 				target.append(absolute.toMinutes() % 60).append("M");
 				target.append(absolute.getSeconds() % 60);
@@ -460,6 +513,11 @@ public class DurationMarshaller {
 		} else {
 			return source;
 		}
+	}
+
+	private boolean isDurationEmpty(Duration d) {
+//		return d.toDays() == 0 && d.toHours() == 0 && d.toMinutes() == 0 && d.getSeconds() == 0 && d.getNano() == 0;
+		return d.toDays() == 0 && d.toHours() == 0 && d.toMinutes() == 0;
 	}
 
 	private String appendUnit(Object source, Long val, String unit) {
