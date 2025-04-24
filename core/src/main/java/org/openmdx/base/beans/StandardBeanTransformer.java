@@ -119,10 +119,10 @@ public class StandardBeanTransformer implements BeanTransformer {
                         Date.class,
                         datePersistenceDelegate
                 );
-                encoder.setPersistenceDelegate(
-                        xmlGregorianCalendarClass,
-                        immutableDatePersistenceDelegate
-                );
+// §                encoder.setPersistenceDelegate(
+//                        xmlGregorianCalendarClass,
+//                        immutableDatePersistenceDelegate
+//                );
                 #if CLASSIC_CHRONO_TYPES
                 encoder.setPersistenceDelegate(
                         org.w3c.cci2.ImmutableDate.class,
@@ -463,9 +463,9 @@ public class StandardBeanTransformer implements BeanTransformer {
     private static final PersistenceDelegate immutableDatePersistenceDelegate = new ImmutableDatePersistenceDelegate();
     private static final PersistenceDelegate quantifierPersistenceDelegate = new QuantifierPersistenceDelegate();
     private static final PersistenceDelegate uriPersistenceDelegate = new URIPersistenceDelegate();
-    private static final Class<? extends #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else java.time.LocalDate#endif> xmlGregorianCalendarClass
-            = #if CLASSIC_CHRONO_TYPES DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1).getClass()
-            #else Datatypes.DATE_CLASS
-            #endif;
+// §    private static final Class<? extends #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else java.time.LocalDate#endif> xmlGregorianCalendarClass
+//            = #if CLASSIC_CHRONO_TYPES DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1).getClass()
+//            #else Datatypes.DATE_CLASS
+//            #endif;
 
 }

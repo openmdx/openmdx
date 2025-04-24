@@ -42,19 +42,39 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.w3c.format.impl;
+package org.w3c.format;
 
-import org.w3c.format.DateTimeFormatFlavour;
+import java.time.Instant;
 
-#if !CLASSIC_CHRONO_TYPES
-public class DateTimeFormatImpl implements DateTimeFormatFlavour {
+class ContemporaryDateTimeFormatter implements DateTimeFormatter<Instant> {
+
+    private enum Format {EXTENDED_UTC, BASIC_UTC, NETSCAPE};
+
+    private ContemporaryDateTimeFormatter(Format format){
+        //…
+    }
+
+    /**
+     * ISO 8601:2004 compliant extended format
+     */
+    final static DateTimeFormatter<Instant> EXTENDED_UTC_FORMAT = new ContemporaryDateTimeFormatter(Format.EXTENDED_UTC);
+
+    /**
+     * ISO 8601:2004 compliant basic format
+     */
+    final static DateTimeFormatter<Instant> BASIC_UTC_FORMAT = new ContemporaryDateTimeFormatter(Format.BASIC_UTC);
+
+    /**
+     * Netscape format used in cookies
+     */
+    final static DateTimeFormatter<Instant> NETSCAPE_FORMAT = new ContemporaryDateTimeFormatter(Format.NETSCAPE);
 
     /**
      * @param instant
      * @return
      */
     @Override
-    public String format(java.time.Instant instant) {
+    public String format(Instant instant) {
         return "";
     }
 
@@ -63,9 +83,8 @@ public class DateTimeFormatImpl implements DateTimeFormatFlavour {
      * @return
      */
     @Override
-    public java.time.Instant parse(String dateTimeString) {
-        return java.time.Instant.parse(dateTimeString);
+    public Instant parse(String dateTimeString) {
+        return Instant.parse(dateTimeString);
     }
 
 }
-#endif

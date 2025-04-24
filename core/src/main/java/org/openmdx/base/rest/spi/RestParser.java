@@ -106,7 +106,6 @@ import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
 #if CLASSIC_CHRONO_TYPES
 import org.w3c.format.DateTimeFormat;
-import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
 import org.w3c.spi2.Datatypes;
 import org.xml.sax.Attributes;

@@ -167,7 +167,7 @@ public class Segments {
         String mode
     ) throws ParseException {
         Assertions.assertEquals(DateTimeFormat.BASIC_UTC_FORMAT.parse("20000401T120000.000Z"),  utc, "High Noon");
-        System.out.println(getMockedSegmentName() + mode + ": " + BASIC_FORMATTER_DT_UTC_TZ.format(utc)); // xri://@openmdx*test.openmdx.clock1/provider/Mocked
+        System.out.println(getMockedSegmentName() + mode + ": " + DateTimeFormat.BASIC_UTC_FORMAT.format(utc)); // xri://@openmdx*test.openmdx.clock1/provider/Mocked
     }
 
     static void validateMockedDescription(
@@ -240,7 +240,7 @@ public class Segments {
     ) {
         long now = System.currentTimeMillis();
         Assertions.assertTrue(Math.abs(now - utc.#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli()#endif) < 1000, "Time window < 1 s");
-        System.out.println(getNormalSegmentName() + mode + ": " + BASIC_FORMATTER_DT_UTC_TZ.format(utc));
+        System.out.println(getNormalSegmentName() + mode + ": " + DateTimeFormat.BASIC_UTC_FORMAT.format(utc));
     }
 
     static void validateNormalDescription(

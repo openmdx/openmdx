@@ -47,20 +47,33 @@ package org.w3c.spi;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.cci2.ImmutableDate;
 import org.w3c.cci2.ImmutableDateTime;
+import org.w3c.time.ChronoUtils;
 import org.w3c.format.DateTimeFormat;
 
 /**
  * Alternative Datatype Factory
  */
-class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
+class StandardChronoTypeFactory extends AbstractChronoTypeFactory {
+
+    /**
+     * Constructor
+     */
+    private StandardChronoTypeFactory(){
+        super();
+    }
 
     /**
      * Match YYYY[...]-MM-DD
@@ -77,6 +90,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
     private static final BigInteger MINUTES_PER_HOUR = BigInteger.valueOf(60);
     private static final BigInteger HOURS_PER_DAY = BigInteger.valueOf(24);
 
+    static final ChronoTypeFactory INSTANCE = new StandardChronoTypeFactory();
 
     //------------------------------------------------------------------------
     // Implements DatatypeFactory
@@ -92,21 +106,21 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value can't be parse
      */
+    @Override
     public ImmutableDateTime newDateTime(
             String value
     ){
         if(value == null) {
             return null;
         } else try {
-            DateTimeFormat dateTimeFormat = DateTimeFormat.BASIC_UTC_FORMAT;
             int firstMinus = value.indexOf('-');
             if(firstMinus > 0) {
                 int timeSeparator = value.indexOf('T');
                 if(timeSeparator < 0 || firstMinus < timeSeparator) {
-                    dateTimeFormat = DateTimeFormat.EXTENDED_UTC_FORMAT;
+                    return toImmutableDateTime(DateTimeFormat.EXTENDED_UTC_FORMAT.parse(value));
                 }
             }
-            return toDateTime(dateTimeFormat.parse(value));
+            return toImmutableDateTime(DateTimeFormat.BASIC_UTC_FORMAT.parse(value));
         } catch (ParseException exception) {
             throw BasicException.initHolder(
                     new IllegalArgumentException(
@@ -125,13 +139,14 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
     /**
      * Create a date instance
      *
-     * @param value the basic or extended representation
+     * @param rawValue the basic or extended representation
      *
      * @return a corresponding date-time instance
      *
      * @exception IllegalArgumentException
      * if the value can't be parsed
      */
+    @Override
     public ImmutableDate newDate(
             String rawValue
     ){
@@ -140,7 +155,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
         }
         String value;
         try {
-            value = DateTimeFormat.completeCentury(rawValue);
+            value = ChronoUtils.completeCentury(rawValue);
         } catch (Exception exception) {
             throw new IllegalArgumentException(
                     "Century completion failure",
@@ -165,29 +180,24 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
         return new ImmutableDate(value);
     }
 
-    /**
-     * Create a duration instance
-     *
-     * @param value the representation with designators
-     *
-     * @return a corresponding Duration instance
-     *
-     * @exception IllegalArgumentException
-     * if the value can't be parsed
-     */
-    public Duration newDuration(
-            String value
-    ){
-        if(value == null) {
-            return null;
-        } else {
-            boolean yearMonth = value.indexOf('Y') > 0 || value.indexOf('M') > 0;
-            boolean dayTime = value.indexOf('D') > 0 || value.indexOf('T') > 0;
-            return
-                    yearMonth == dayTime ? DatatypeFactories.xmlDatatypeFactory().newDuration(value) :
-                            yearMonth ? DatatypeFactories.xmlDatatypeFactory().newDurationYearMonth(value) :
-                                    DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value);
-        }
+    @Override
+    public Duration newDurationYearMonth(String value) {
+        return DatatypeFactories.xmlDatatypeFactory().newDurationYearMonth(value);
+    }
+
+    @Override
+    protected Duration newDurationYearMonthDay(String value) {
+        return DatatypeFactories.xmlDatatypeFactory().newDuration(value);
+    }
+
+    @Override
+    protected Duration newDurationYearMonthDayTime(String value) {
+        return DatatypeFactories.xmlDatatypeFactory().newDuration(value);
+    }
+
+    @Override
+    public Duration newDurationDayTime(String value) {
+        return DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value);
     }
 
     /**
@@ -200,7 +210,8 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value is not an org::w3c::dateTime instance
      */
-    public ImmutableDateTime toDateTime(
+    @Override
+    public ImmutableDateTime toImmutableDateTime(
             java.util.Date value
     ){
         return
@@ -219,7 +230,8 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value is not an org::w3c::date instance
      */
-    public ImmutableDate toDate(
+    @Override
+    public ImmutableDate toImmutableDate(
             javax.xml.datatype.XMLGregorianCalendar value
     ){
         return
@@ -228,10 +240,8 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
                                 newDate(value.toXMLFormat());
     }
 
-    /* (non-Javadoc)
-     * @see org.w3c.spi.ImmutableDatatypeFactory#normalizedDuration(javax.xml.datatype.Duration)
-     */
-    public Duration toNormalizedDuration(
+    @Override
+    public Duration toCanonicalForm(
             Duration value
     ) {
         BigInteger years = (BigInteger) value.getField(DatatypeConstants.YEARS);
@@ -283,6 +293,5 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
                 seconds
         );
     }
-
 
 }

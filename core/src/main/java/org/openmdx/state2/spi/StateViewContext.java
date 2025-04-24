@@ -49,7 +49,6 @@ import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.
 import org.openmdx.state2.cci.StateContext;
 import org.openmdx.state2.cci.ViewKind;
 import org.w3c.format.DateTimeFormat;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * AbstractStateContext
@@ -61,12 +60,12 @@ public abstract class StateViewContext<V>
     /**
      * Constructor 
      *
-     * @param viewKind
-     * @param validAt 
+     * @param viewKind defines whetherit shall be a time point or a time range view
+     * @param validAt the historical time point or {@code null} for an up-to-date view
      * @param existsAt the transaction time point, or {@code null} for an up-to-date view
-     * @param lowerBound
-     * @param upperBound
-     * @param includeUpperBound
+     * @param lowerBound the lower bound of a time range view
+     * @param upperBound the upper bound of a time range view
+     * @param includeUpperBound {@code true} if the upper bound is included in the range
      */
     protected StateViewContext(
         ViewKind viewKind, 
@@ -161,8 +160,8 @@ public abstract class StateViewContext<V>
      * Tests the transaction time
      * 
      * @param existsAt {@code null} stands for the "head" 
-     * @param createdAt 
-     * @param removedAt
+     * @param createdAt the transaction time upon creation
+     * @param removedAt the transaction time upon removal
      * 
      * @return {@code true} if the entry exists at the given transaction time
      */
@@ -177,9 +176,8 @@ public abstract class StateViewContext<V>
         );
             
     }
-        
-        
-    
+
+
     //------------------------------------------------------------------------
     // Implements StateContext
     //------------------------------------------------------------------------

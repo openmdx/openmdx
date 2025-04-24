@@ -691,10 +691,10 @@ public class AuditQueries {
     ){
         UnitOfWorkQuery query = (UnitOfWorkQuery) persistenceManager.newQuery(UnitOfWork.class);
         if(from != null) {
-            query.createdAt().greaterThanOrEqualTo(#if CLASSIC_CHRONO_TYPES from #else java.time.LocalDate.from(from) #endif);
+            query.createdAt().greaterThanOrEqualTo(from);
         }
         if(to != null) {
-            query.createdAt().lessThanOrEqualTo(#if CLASSIC_CHRONO_TYPES to #else java.time.LocalDate.from(to) #endif);
+            query.createdAt().lessThanOrEqualTo(to);
         }
         query.orderByCreatedAt();
         return getAuditSegment(persistenceManager).getUnitOfWork(query);

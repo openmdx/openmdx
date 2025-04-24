@@ -82,7 +82,6 @@ import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.LargeObject;
-#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -472,6 +471,40 @@ public class Model_1 implements Model_1_0 {
             ) {
                 try {
                     Datatypes.create(Datatypes.DURATION_CLASS, (String)value);
+                } catch(IllegalArgumentException e) {
+                    throw new ServiceException(e);
+                }
+                return;
+            }
+            else if(
+                (Datatypes.DURATION_DAYTIME_CLASS.isInstance(value)) &&
+                PrimitiveTypes.DURATION_DAYTIME.equals(typeName)
+            ) {
+                return;
+            }
+            else if(
+                (value instanceof String) &&
+                PrimitiveTypes.DURATION_DAYTIME.equals(typeName)
+            ) {
+                try {
+                    Datatypes.create(Datatypes.DURATION_DAYTIME_CLASS, (String)value);
+                } catch(IllegalArgumentException e) {
+                    throw new ServiceException(e);
+                }
+                return;
+            }
+            else if(
+                (Datatypes.DURATION_YEARMONTH_CLASS.isInstance(value)) &&
+                PrimitiveTypes.DURATION_YEARMONTH.equals(typeName)
+            ) {
+                return;
+            }
+            else if(
+                (value instanceof String) &&
+                PrimitiveTypes.DURATION_YEARMONTH.equals(typeName)
+            ) {
+                try {
+                    Datatypes.create(Datatypes.DURATION_YEARMONTH_CLASS, (String)value);
                 } catch(IllegalArgumentException e) {
                     throw new ServiceException(e);
                 }

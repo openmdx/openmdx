@@ -44,40 +44,51 @@
  */
 package org.openmdx.base.text.parsing;
 
+import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.openmdx.base.naming.Path;
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.openmdx.kernel.text.parsing.AbstractParser;
 import org.openmdx.kernel.text.spi.Parser;
+import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
 /**
  * Immutable Primitive Type Parser
  */
-public class ImmutablePrimitiveTypeParser extends AbstractParser {
+public class ChronoTypeParser extends AbstractParser {
 
     /**
      * Constructor 
      */
-    private ImmutablePrimitiveTypeParser() {
+    private ChronoTypeParser() {
         super();
     }
 
     /**
      * An instance
      */
-    private static final Parser INSTANCE = new ImmutablePrimitiveTypeParser();
+    private static final Parser INSTANCE = new ChronoTypeParser();
 
     /**
      * The supported types
      */
     private static final Collection<Class<?>> SUPPORTED_TYPES = Arrays.asList(
-        Datatypes.DATE_TIME_CLASS,
-        Datatypes.DURATION_CLASS,
-        java.time.Period.class,
-        Datatypes.DATE_CLASS,
-        Path.class
+        // org::w3c::date
+        LocalDate.class,
+        XMLGregorianCalendar.class,
+        // org::w3c::dateTime
+        java.time.Instant.class,
+        java.util.Date.class,
+        // org::w3c::duration
+        java.time.temporal.TemporalAmount.class,
+        javax.xml.datatype.Duration.class,
+        // org::w3c::durationDayTime
+        java.time.Duration.class,
+        // org::w3c::durationYearMonth
+        java.time.Period.class
     );
     
     /**
@@ -106,12 +117,43 @@ public class ImmutablePrimitiveTypeParser extends AbstractParser {
 		Class<?> valueClass
 	) throws Exception {
 		return
-    		valueClass == Datatypes.DATE_TIME_CLASS ? Datatypes.DATATYPE_FACTORY.newDateTime(externalRepresentation) :
-                valueClass == Datatypes.DURATION_CLASS ? Datatypes.DATATYPE_FACTORY.newDuration(externalRepresentation) :
-                    #if !CLASSIC_CHRONO_TYPES valueClass == java.time.Period.class ? java.time.Period.parse(externalRepresentation) :#endif
-                        valueClass == Datatypes.DATE_CLASS ? Datatypes.DATATYPE_FACTORY.newDate(externalRepresentation) :
-    		                valueClass == Path.class ? new Path(externalRepresentation) :
-                                super.parseAs(externalRepresentation, valueClass);
+            valueClass == Datatypes.DATE_CLASS ? DatatypeFactories.immutableDatatypeFactory().newDate(externalRepresentation) :
+            valueClass == Datatypes.DATE_TIME_CLASS ? DatatypeFactories.immutableDatatypeFactory().newDateTime(externalRepresentation) :
+            valueClass == Datatypes.DURATION_CLASS ? DatatypeFactories.immutableDatatypeFactory().newDuration(externalRepresentation) :
+            #if CLASSIC_CHRONOTYPES
+            valueClass == java.time.Duration.class ? java.time.Duration.parse(externalRepresentation) :
+            valueClass == java.time.Period.class ? java.time.Period.parse(externalRepresentation) :
+            valueClass == java.time.temporal.TemporalAmount.class ? toTemporalAmount(externalRepresentation) :
+            #else
+            valueClass == Datatypes.DURATION_DAYTIME_CLASS ? DatatypeFactories.immutableDatatypeFactory().newDurationDayTime(externalRepresentation) :
+            valueClass == Datatypes.DURATION_YEARMONTH_CLASS ? DatatypeFactories.immutableDatatypeFactory().newDurationYearMonth(externalRepresentation) :
+            valueClass == javax.xml.datatype.Duration.class ? DatatypeFactories.xmlDatatypeFactory().newDuration(externalRepresentation) :
+            #endif
+            super.parseAs(externalRepresentation, valueClass);
 	}
-    
+
+    static java.time.temporal.TemporalAmount toTemporalAmount(String externalRepresentation) throws ParseException {
+        final javax.xml.datatype.Duration duration = DatatypeFactories.xmlDatatypeFactory().newDuration(externalRepresentation);
+        if(duration.getYears() != 0 || duration.getMonths() != 0) {
+            if(
+                duration.getHours() == 0 &&
+                duration.getMinutes() == 0 &&
+                duration.getSeconds() == 0
+            ){
+                return java.time.Period.of(
+                    duration.getSign() * duration.getYears(),
+                    duration.getSign() * duration.getMonths(),
+                    duration.getSign() * duration.getDays()
+                );
+            } else {
+                throw new ParseException(
+                    "Time can't be mixed with years or months",
+                    0
+                );
+            }
+        } else {
+            return java.time.Duration.parse(externalRepresentation);
+        }
+    }
+
 }

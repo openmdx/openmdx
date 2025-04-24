@@ -165,12 +165,12 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
     /**
      * Precedes a persistent sub-segment.
      */
-    Object PERSISTENT = QualifierType.PERSISTENT;
+    QualifierType PERSISTENT = QualifierType.PERSISTENT;
     
     /**
      * Precedes re-assignable sub-segment.
      */
-    Object REASSIGNABLE = QualifierType.REASSIGNABLE;
+    QualifierType REASSIGNABLE = QualifierType.REASSIGNABLE;
         
     
     //------------------------------------------------------------------------

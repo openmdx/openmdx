@@ -46,7 +46,6 @@ package org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Period;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,9 +54,10 @@ import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Durati
 
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.postgresql.PGIntervalMarshaller;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
-#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
+import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 import org.w3c.time.ChronoUtils;
 
@@ -118,24 +118,46 @@ public class DurationMarshaller {
 	 * Object)
 	 */
 	public Object marshal(Object source, String databaseProductName) throws ServiceException {
-		#if !CLASSIC_CHRONO_TYPES
-		if (source instanceof java.time.Period) {
-			java.time.Period period = (java.time.Period) source;
-
-			final int years = period.getYears();
-			final int months = period.getMonths();
-			boolean isNegative = years < 0 && months < 0;
-
-			StringBuilder target = new StringBuilder();
-			target.append(isNegative ? "-" : "").append("P");
-
-			target.append(isNegative ? Math.abs(years) : years).append("Y");
-			target.append(isNegative ? Math.abs(months) : months).append("M");
-
-			return target.toString();
+		if (source == null) {
+			return null;
 		}
-		#endif
-		if (Datatypes.DURATION_CLASS.isInstance(source)) {
+		#if !CLASSIC_CHRONO_TYPES
+		if (Datatypes.DURATION_YEARMONTH_CLASS.isInstance(source)) {
+			switch (durationType) {
+				case INTERVAL: {
+					throw new UnsupportedOperationException("Required for MDX-1");
+				}
+				case NUMERIC: {
+					throw new UnsupportedOperationException("Required for MDX-1");
+				}
+				case CHARACTER: {
+					final java.time.Period period = (java.time.Period) source;
+					boolean isNegative = period.isNegative();
+					StringBuilder result = new StringBuilder();
+					if (isNegative) {
+						result.append('-');
+					}
+					result.append('P');
+					int years = Math.abs(period.getYears());
+					int months = Math.abs(period.getMonths());
+					int days = Math.abs(period.getDays());
+					result.append(years).append('Y');
+					result.append(months).append('M');
+					if (days > 0) {
+						result.append(days).append('D');
+					}
+					return result.toString();
+				}
+				default:
+					throw new RuntimeServiceException(
+						BasicException.Code.DEFAULT_DOMAIN,
+						BasicException.Code.ASSERTION_FAILURE,
+						"Unsupported duration type",
+						new BasicException.Parameter("durationType", durationType),
+						new BasicException.Parameter("valueType", ValueType.YEAR_MONTH)
+					);
+			}
+		} else #endif if (Datatypes.DURATION_CLASS.isInstance(source)) {
 			Duration duration = (Duration) source;
 			ValueType valueType = ValueType.of(duration);
 			if (valueType == null)
@@ -183,7 +205,12 @@ public class DurationMarshaller {
 									seconds.doubleValue()
 								);
 							default:
-								return null;
+								throw new RuntimeServiceException(
+									BasicException.Code.DEFAULT_DOMAIN,
+									BasicException.Code.ASSERTION_FAILURE,
+									"Unsupported value type",
+									new BasicException.Parameter("valueType", valueType)
+								);
 						}
 					} else {
 						final StringBuilder target = new StringBuilder(signum < 0 ? "-" : "");
@@ -207,7 +234,13 @@ public class DurationMarshaller {
 										"An INTERVAL duration must be either a year-month or a day-time duration",
 										new BasicException.Parameter("duration", duration));
 							default:
-								return null;
+								throw new RuntimeServiceException(
+									BasicException.Code.DEFAULT_DOMAIN,
+									BasicException.Code.ASSERTION_FAILURE,
+									"Unsupported value type",
+									new BasicException.Parameter("durationType", durationType),
+									new BasicException.Parameter("valueType", valueType)
+								);
 						}
 					}
 					#else
@@ -250,7 +283,13 @@ public class DurationMarshaller {
 										seconds.doubleValue()
 								);
 							default:
-								return null;
+								throw new RuntimeServiceException(
+										BasicException.Code.DEFAULT_DOMAIN,
+										BasicException.Code.ASSERTION_FAILURE,
+										"Unsupported value type",
+										new BasicException.Parameter("durationType", durationType),
+										new BasicException.Parameter("valueType", valueType)
+								);
 						}
 					} else {
 						final StringBuilder target = new StringBuilder(signum < 0 ? "-" : "");
@@ -274,7 +313,13 @@ public class DurationMarshaller {
 										"An INTERVAL duration must be either a year-month or a day-time duration",
 										new BasicException.Parameter("duration", duration));
 							default:
-								return null;
+								throw new RuntimeServiceException(
+										BasicException.Code.DEFAULT_DOMAIN,
+										BasicException.Code.ASSERTION_FAILURE,
+										"Unsupported value type",
+										new BasicException.Parameter("durationType", durationType),
+										new BasicException.Parameter("valueType", valueType)
+								);
 						}
 					}
 					#endif
@@ -304,7 +349,13 @@ public class DurationMarshaller {
 							"A NUMERIC duration must be either a year-month or a day-time duration",
 							new BasicException.Parameter("duration", duration));
 				default:
-					return null;
+					throw new RuntimeServiceException(
+						BasicException.Code.DEFAULT_DOMAIN,
+						BasicException.Code.ASSERTION_FAILURE,
+						"Unsupported value type",
+						new BasicException.Parameter("durationType", durationType),
+						new BasicException.Parameter("valueType", valueType)
+					);
 				}
 			case CHARACTER: {
 			#if CLASSIC_CHRONO_TYPES
@@ -374,139 +425,39 @@ public class DurationMarshaller {
 					return target.toString();
 				}
 			#else
-//				boolean normalized = true;
-				boolean normalized = false;
-				Long years = getValue(duration, DatatypeConstants.YEARS);
-				Long months = getValue(duration, DatatypeConstants.MONTHS);
-				Long days = getValue(duration, DatatypeConstants.DAYS);
-				Long hours = getValue(duration, DatatypeConstants.HOURS);
-				Long minutes = getValue(duration, DatatypeConstants.MINUTES);
-				Long seconds = getValue(duration, DatatypeConstants.SECONDS);
-				if (seconds.compareTo(Long.valueOf(String.valueOf(SECONDS_PER_MINUTE))) > 0) {
-					normalized = false;
-					long quotient = seconds / Long.parseLong(String.valueOf(SECONDS_PER_MINUTE));
-					long remainder = seconds % Long.parseLong(String.valueOf(SECONDS_PER_MINUTE));
-					Long[] values = new Long[] { quotient, remainder };
-//					Long[] values = seconds.divideAndRemainder(SECONDS_PER_MINUTE);
-					seconds = values[1];
-//					minutes = minutes.add(values[0].toBigInteger());
-					minutes += values[0];
-				}
-				if (minutes.compareTo(Long.valueOf(String.valueOf(MINUTES_PER_HOUR))) > 0) {
-					normalized = false;
-					long quotient = seconds / Long.parseLong(String.valueOf(MINUTES_PER_HOUR));
-					long remainder = seconds % Long.parseLong(String.valueOf(MINUTES_PER_HOUR));
-					Long[] values = new Long[] { quotient, remainder };
-//					Long[] values = minutes.divideAndRemainder(MINUTES_PER_HOUR);
-					minutes = values[1];
-//					hours = hours.add(values[0]);
-					hours += values[0];
-				}
-				if (hours.compareTo(Long.valueOf(String.valueOf(HOURS_PER_DAY))) > 0) {
-					normalized = false;
-					long quotient = seconds / Long.parseLong(String.valueOf(HOURS_PER_DAY));
-					long remainder = seconds % Long.parseLong(String.valueOf(HOURS_PER_DAY));
-					Long[] values = new Long[] { quotient, remainder };
-//					Long[] values = hours.divideAndRemainder(HOURS_PER_DAY);
-					hours = values[1];
-//					days = days.add(values[0]);
-					days += values[0];
-				}
-				if (months.compareTo(Long.valueOf(String.valueOf(MONTHS_PER_YEAR))) > 0) {
-					normalized = false;
-					long quotient = seconds / Long.parseLong(String.valueOf(MONTHS_PER_YEAR));
-					long remainder = seconds % Long.parseLong(String.valueOf(MONTHS_PER_YEAR));
-					Long[] values = new Long[] { quotient, remainder };
-//					Long[] values = months.divideAndRemainder(MONTHS_PER_YEAR);
-					months = values[1];
-//					years = years.add(values[0]);
-					years += values[0];
-				}
-				if (normalized) {
-					return duration.toString();
-				} else {
-
-					StringBuilder target = new StringBuilder(signum < 0 ? "-" : "");
-					target.append("P");
-
-//					switch (valueType) {
-//					case ValueType.YEAR_MONTH:
-//						return years + "-" + months;
-//					case ValueType.DAY_TIME:
-//						return days + " " + hours + ":" + minutes + ":" + seconds;
-//					}
-
-					if (valueType != ValueType.DAY_TIME) {
-						if (years > 0) {
-							target.append(years).append("Y");
-						}
-						if (months > 0) {
-							target.append(months).append("M");
+				final StringBuilder target = new StringBuilder(duration.isNegative() ? "-P" : "P");
+				final Duration absolute = duration.isNegative() ? duration.negated() : duration;
+				target.append(absolute.toDays()).append("DT");
+				target.append(absolute.toHours() % 24).append("H");
+				target.append(absolute.toMinutes() % 60).append("M");
+				target.append(absolute.getSeconds() % 60);
+				if(absolute.getNano() > 0) {
+					String fraction = String.valueOf(1000000000 + absolute.getNano()).substring(1);
+					final int digits;
+					if(fraction.charAt(8) == '0' && fraction.charAt(7) == '0' && fraction.charAt(6) == '0') {
+						if(fraction.charAt(5) == '0' && fraction.charAt(4) == '0' && fraction.charAt(3) == '0') {
+							digits = 3;
+						} else {
+							digits = 6;
 						}
 					} else {
-						target.append(this.appendUnit(duration, days, "D"));
-						target.append("T");
-						target.append(this.appendUnit(duration, hours, "H"));
-						target.append(this.appendUnit(duration, minutes, "M"));
-						target.append(seconds);
-						if (seconds == 0 || duration.toString().contains(".")) {
-							int nanos = duration.getNano();
-							int millis = nanos / 1_000_000;
-							if (signum < 0) {
-								millis = 1000 + (signum * millis);
-							}
-							if (nanos >= 0) {
-								// Get milliseconds (first 3 digits of nanos)
-								target.append(".").append(String.format("%03d", millis));
-							}
-						}
-						target.append("S");
+						digits = 9;
 					}
-
-					if (signum < 0) {
-						// The first character is already a "-", we want to keep that
-						// Replace any other "-" characters in the rest of the string
-						String result = target.toString();
-						// Skip the first character (the leading "-") and remove any other "-" chars
-						result = result.charAt(0) + result.substring(1).replace("-", "");
-						return result;
-					}
-
-					return target.toString();
+					target.append('.').append(fraction, 0, digits);
 				}
+				return target.append("S").toString();
 			#endif
 			}
 			default:
-				return null;
+				throw new RuntimeServiceException(
+					BasicException.Code.DEFAULT_DOMAIN,
+					BasicException.Code.ASSERTION_FAILURE,
+					"Unsupported duration type",
+					new BasicException.Parameter("durationType", durationType),
+					new BasicException.Parameter("valueType", valueType)
+				);
 			}
-		}#if !CLASSIC_CHRONO_TYPES else if (source instanceof java.time.Period) {
-			final java.time.Period period = (java.time.Period) source;
-			// Check if the period is negative
-			boolean isNegative = period.isNegative();
-
-			StringBuilder result = new StringBuilder();
-
-			// Add the negative sign at the beginning for a negative period
-			if (isNegative) {
-				result.append('-');
-			}
-
-			result.append('P');
-
-			// Use absolute values for each component
-			int years = Math.abs(period.getYears());
-			int months = Math.abs(period.getMonths());
-
-			if (years > 0) {
-				result.append(years).append('Y');
-			}
-
-			if (months > 0) {
-				result.append(months).append('M');
-			}
-
-			return result.toString();
-		}#endif else {
+		} else {
 			return source;
 		}
 	}
@@ -572,7 +523,7 @@ public class DurationMarshaller {
 					} else if ((matcher = YEAR_TO_MONTH.matcher(value)).matches()) {
 						StringBuilder duration = new StringBuilder().append(matcher.group(1)).append('P')
 								.append(matcher.group(2)).append("Y").append(matcher.group(3)).append("M");
-						return #if CLASSIC_CHRONO_TYPES Datatypes.create(Duration.class, duration.toString()) #else Datatypes.DATATYPE_FACTORY.toPeriod(duration.toString()) #endif;
+						return #if CLASSIC_CHRONO_TYPES Datatypes.create(Duration.class, duration.toString()) #else DatatypeFactories.immutableDatatypeFactory().newDurationYearMonth(duration.toString()) #endif;
 					} else
 						throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
 								BasicException.Code.TRANSFORMATION_FAILURE,

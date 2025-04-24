@@ -42,7 +42,7 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.base.query;
+package org.openmdx.base.query.lenient;
 
 import java.util.Comparator;
 
@@ -51,77 +51,41 @@ import org.openmdx.base.naming.Path;
 /**
  * Allows comparison of not directly comparable classes
  */
-public class LenientPathComparator extends LenientDatatypeComparator {
+class LenientPathComparator implements LenientComparator {
 
     /**
-     * Factory for a LenientComparator using default CharSequence comparator
-     * 
-     * @return  a leinient comparator using the default CharSequence comparator
+     * Constructor
      */
-    public static Comparator<Object> getInstance(
-    ){
-        return LenientPathComparator.instance;
+    LenientPathComparator(){
+        super();
     }
 
-    /**
-     * Use specific CharSequence camparator
-     */
-    public LenientPathComparator(
-        Comparator<Object> charSequenceComparator
-    ) {
-        super(charSequenceComparator);
+    @Override
+    public boolean test(Object first, Object second) {
+        return first instanceof Path || second instanceof Path;
     }
 
-    /**
-     * 
-     */
-    private static final Comparator<Object> instance = new LenientPathComparator(null);
-
-    /**
-     * Tests whether this comparator is able to compare the given value with another one
-     * 
-     * @param candidate the value to be tested
-     * 
-     * @return {@code true} if  this comparator is able to compare the given value with another one
-     */
-    public static boolean isComparable(
-        Object candidate
-    ){
-        return candidate instanceof Comparable<?>#if CLASSIC_CHRONO_TYPES || candidate instanceof javax.xml.datatype.XMLGregorianCalendar#endif;
-    }
-       
-    
-    //------------------------------------------------------------------------
-    // Implements Comparator
-    //------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-     */
     @Override
     public int compare(
         Object first, 
         Object second
     ) {
-        if(first instanceof Path || second instanceof Path) try {
-            return toPath(first).compareTo(toPath(second)); 
+        try {
+            return compare(toPath(first), toPath(second));
         } catch (Exception exception){
-            return String.valueOf(first).compareTo(String.valueOf(second));
-        } else {
-            return super.compare(first, second);
+            return compare(String.valueOf(first), String.valueOf(second));
         }
     }
 
+    private int compare(Path first, Path second) {
+        return first.compareTo(second);
+    }
 
-    //------------------------------------------------------------------------
-    // Type conversions
-    //------------------------------------------------------------------------
+    private int compare(String first, String second) {
+        return first.compareTo(second);
+    }
 
-    /**
-     * 
-     * @param value
-     */
-    private static Path toPath(
+    private Path toPath(
         Object value
     ){
         return value instanceof Path ? 

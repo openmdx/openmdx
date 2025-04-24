@@ -6,23 +6,23 @@
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,87 +36,59 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
 package org.openmdx.base.text.parsing;
 
 import java.text.ParseException;
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
-import java.time.Period;
+import java.util.Date;
+
+import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.text.spi.Parser;
+import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
-
-import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Immutable Primitive Type Parser Test
  */
-public class ImmutablePrimitiveTypeParserTest {
-
-	/**
-	 * org::openmdx::state2
-	 */
-	@Test
-	public void whenStateAUthorityThenParseAsPath(){
-		// Arrange
-		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
-		// Act
-		final Path value = testee.parse(Path.class, "xri://@openmdx*org.openmdx.state2");
-		// Assert
-		Assertions.assertEquals(new Path("org::openmdx::state2"), value);
-	}
+public class ChronoTypeParserTest {
 
 	/**
 	 * Duration of 6 Months
 	 */
 	@Test
-	#if CLASSIC_CHRONO_TYPES
 	public void whenHalfAYearThenParseAsDuration(){
 		// Arrange
-		final Parser testee = ImmutablePrimitiveTypeParser.getInstance();
+		final Parser testee = ChronoTypeParser.getInstance();
 		// Act
-		final Duration value = testee.parse(Duration.class, "P6M");
+		final Object value = testee.parse(Datatypes.DURATION_CLASS, "P6M");
 		// Assert
 		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDuration("P6M"), value);
 	}
-	#else
-	public void whenHalfAYearThenParseAsPeriod(){
-		// Arrange
-		final String source = "P6M";
-		final Parser testee = ImmutablePrimitiveTypeParser.getInstance();
-		// Act
-		final Period value = testee.parse(Period.class, source);
-		// Assert
-		Assertions.assertEquals(Datatypes.DATATYPE_FACTORY.toPeriod(source), value);
-	}
-	#endif
 
 	/**
-	 * Timepoint 01.04.2000 05:06:07.890 UTC 
+	 * Timepoint 01.04.2000 05:06:07.890 UTC
 	 */
 	@Test
 	public void whenDateTimeThenParseAsDate(){
-		String source = "20000401T050607.890Z";
-//		String source = "20000401T050607.890+0100";
-//		String source = "20000401T050607.890+01:00";
-//		String source = "20000401T050607.890-0200";
-//		String source = "20000401T050607.890-02:00";
 		// Arrange
-		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
+		final Parser testee = ChronoTypeParser.getInstance();
 		// Act
-		final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif value = testee.parse(Datatypes.DATE_TIME_CLASS, source);
+		final Object value = testee.parse(Datatypes.DATE_TIME_CLASS, "2000-04-01T05:06:07.890Z");
 		// Assert
-		Assertions.assertEquals(Datatypes.DATATYPE_FACTORY.newDateTime(source), value);
+		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDateTime("20000401T050607.890Z"), value);
 	}
 
 	/**
@@ -124,18 +96,17 @@ public class ImmutablePrimitiveTypeParserTest {
 	 */
 	public void whenDateThenParseAsXMLGregorianCalendar(){
 		// Arrange
-		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
+		final Parser testee = ChronoTypeParser.getInstance();
 		// Act
-		final XMLGregorianCalendar value = testee.parse(XMLGregorianCalendar.class, "2000-04-01");
-//		final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif value = testee.parse(Datatypes.DATE_TIME_CLASS, "2000-04-01");
+		final Object value = testee.parse(Datatypes.DATE_CLASS, "2000-04-01");
 		// Assert
-		Assertions.assertEquals(Datatypes.DATATYPE_FACTORY.newDate("20000401"), value);
+		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDate("20000401"), value);
 	}
 
 	@Test
 	public void whenValueClassIsObjectThenThrowParseException(){
 		// Arrange
-		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
+		final Parser testee = ChronoTypeParser.getInstance();
 		try {
 			// Act
 			testee.parse(Object.class, "null");
@@ -150,7 +121,7 @@ public class ImmutablePrimitiveTypeParserTest {
 	@Test
 	public void whenValueClassIsNullThenKeepString(){
 		// Arrange
-		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
+		final Parser testee = ChronoTypeParser.getInstance();
 		// Act
 		final Object value = testee.parse(null, "null");
 		// Assert
@@ -160,7 +131,7 @@ public class ImmutablePrimitiveTypeParserTest {
 	@Test
 	public void whenValueIsNullThenReturnNull(){
 		// Arrange
-		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
+		final Parser testee = ChronoTypeParser.getInstance();
 		// Act
 		final Object value = testee.parse(Integer.class, null);
 		// Assert
@@ -170,7 +141,7 @@ public class ImmutablePrimitiveTypeParserTest {
 	@Test
 	public void whenValueAndValueClassAreNullThenReturnNull(){
 		// Arrange
-		final Parser testee = ImmutablePrimitiveTypeParser.getInstance(); 
+		final Parser testee = ChronoTypeParser.getInstance();
 		// Act
 		final Object value = testee.parse(null, null);
 		// Assert

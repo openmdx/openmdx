@@ -63,7 +63,6 @@ import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.control.EditInspectorControl;
-#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
 public class DateValue

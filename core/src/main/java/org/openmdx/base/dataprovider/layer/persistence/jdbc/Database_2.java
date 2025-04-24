@@ -187,7 +187,6 @@ import org.w3c.cci2.SparseArray;
 import org.w3c.format.DateTimeFormat;
 #if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
-import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
 import org.w3c.spi2.Datatypes;
 

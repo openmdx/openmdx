@@ -140,7 +140,6 @@ import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.cci2.SparseArray;
-#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -731,6 +730,10 @@ public class InboundConnection_2 extends AbstractConnection {
                     return Datatypes.create(Datatypes.DATE_CLASS, (String) jcaValue);
                 } else if (jcaValue instanceof String && PrimitiveTypes.DURATION.equals(featureType.getQualifiedName())) {
                     return Datatypes.create(Datatypes.DURATION_CLASS, (String) jcaValue);
+                } else if (jcaValue instanceof String && PrimitiveTypes.DURATION_DAYTIME.equals(featureType.getQualifiedName())) {
+                    return Datatypes.create(Datatypes.DURATION_DAYTIME_CLASS, (String) jcaValue);
+                } else if (jcaValue instanceof String && PrimitiveTypes.DURATION_YEARMONTH.equals(featureType.getQualifiedName())) {
+                    return Datatypes.create(Datatypes.DURATION_YEARMONTH_CLASS, (String) jcaValue);
                 } else {
                     return featureDef.getModel().isReferenceType(featureDef) ? getObjectByResourceIdentifier(jcaValue) : jcaValue;
                 }

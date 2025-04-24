@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Immutable Datatype Factory
+ * Description: Lenient Datatype Comparator
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,42 +42,52 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.w3c.spi;
+package org.openmdx.base.query.lenient;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Period;
+import java.util.Date;
+import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.kernel.exception.BasicException;
+import org.w3c.spi2.Datatypes;
 
-public interface ContemporaryChronoDatatypeFactory {
 
-    Instant newDateTime(String value);
+/**
+ * Allows comparison of XML Datatype classes
+ */
+class LenientClassicDurationComparator extends LenientNumberComparator {
 
-    LocalDate newDate(String value);
+    /**
+     * Constructor
+     */
+    LenientClassicDurationComparator(
+    ) {
+        super();
+    }
 
-    Duration newDuration(String value);
+    @Override
+    public boolean test(Object first, Object second) {
+        return first instanceof Duration && (
+            second instanceof Duration || second instanceof CharSequence
+        );
+    }
 
-    Duration newDuration(
-            boolean isPositive,
-            BigInteger years,
-            BigInteger months,
-            BigInteger days,
-            BigInteger hours,
-            BigInteger minutes,
-            BigDecimal seconds);
+    @Override
+    public int compare(
+        Object first,
+        Object second
+    ) {
+        if(second instanceof Duration) {
+            return Datatypes.compare(
+                (Duration) first,
+                (Duration) second
+            );
+        } else {
+            return Datatypes.compare(
+                (Duration) first,
+                Datatypes.create(Duration.class, second.toString())
+            );
+        }
+    }
 
-    Instant toDateTime(Instant value);
-
-    LocalDate toDate(LocalDate value);
-
-    Duration toDuration(Duration value);
-
-    Period toPeriod(String value);
-
-    Period newPeriod(boolean isPositive, int year, int month);
-
-    Duration newDurationDayTime(boolean isPositive, int day, int hour, int minute, int second);
 }
-

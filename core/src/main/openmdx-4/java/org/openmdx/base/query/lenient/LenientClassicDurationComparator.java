@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: infrastructure: date format
+ * Description: Lenient Datatype Comparator
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,11 +42,52 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.w3c.format;
+package org.openmdx.base.query.lenient;
 
-public interface DateTimeFormatFlavour {
+import java.util.Date;
+import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.kernel.exception.BasicException;
+import org.w3c.spi2.Datatypes;
 
-    String format(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif dateTime);
 
-    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif parse(String dateTimeString) throws java.text.ParseException;
+/**
+ * Allows comparison of XML Datatype classes
+ */
+class LenientClassicDurationComparator extends LenientNumberComparator {
+
+    /**
+     * Constructor
+     */
+    LenientClassicDurationComparator(
+    ) {
+        super();
+    }
+
+    @Override
+    public boolean test(Object first, Object second) {
+        return first instanceof Duration && (
+            second instanceof Duration || second instanceof CharSequence
+        );
+    }
+
+    @Override
+    public int compare(
+        Object first,
+        Object second
+    ) {
+        if(second instanceof Duration) {
+            return Datatypes.compare(
+                (Duration) first,
+                (Duration) second
+            );
+        } else {
+            return Datatypes.compare(
+                (Duration) first,
+                Datatypes.create(Duration.class, second.toString())
+            );
+        }
+    }
+
 }

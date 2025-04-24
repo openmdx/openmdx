@@ -101,6 +101,14 @@ import jakarta.servlet.ServletException;
 import jakarta.transaction.UserTransaction;
 #endif
 
+#if CLASSIC_CHRONO_TYPES
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.util.Date;
+#else
+import java.time.LocalDate;
+import java.time.Instant;
+#endif
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -186,7 +194,6 @@ import org.w3c.cci2.SparseArray;
 import org.w3c.cci2.StringTypePredicate;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.StateAccessor;
-#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
 import org.w3c.time.SystemClock;
@@ -254,12 +261,17 @@ import test.openmdx.application.rest.http.ServletPort;
 import test.openmdx.model1.jmi1.ClassContainingOperations;
 import test.openmdx.model1.jmi1.Model1Package;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * Test Main
@@ -315,7 +327,7 @@ public class TestMain {
 		protected Provider provider;
 		protected String taskId;
 		private final Object taskIdentifier;
-		private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif start = SystemClock.getInstance().now();
+		private final #if CLASSIC_CHRONO_TYPES Date #else Instant #endif start = SystemClock.getInstance().now();
 		protected PersistenceManagerFactory entityManagerFactory;
 
 		protected String getProviderName() {
@@ -391,7 +403,7 @@ public class TestMain {
 			PersistenceHelper.currentUnitOfWork(this.entityManager).rollback();
 		}
 
-		protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getStart() {
+		protected #if CLASSIC_CHRONO_TYPES Date #else Instant #endif getStart() {
 			return this.start;
 		}
 
@@ -821,7 +833,7 @@ public class TestMain {
 				invoice = invoiceClass.createInvoice();
 				invoice.setDescription("this is an invoice for PG0");
 				invoice.setProductGroupId("PG0");
-				invoice.setPaymentPeriod(Datatypes.create(Datatypes.DURATION_CLASS, "P30D")); // CR20020068
+				invoice.setPaymentPeriod(Datatypes.create(Datatypes.DURATION_DAYTIME_CLASS, "P30D")); // CR20020068
 				assertNull(ReducedJDOHelper.getObjectId(invoice), "CR0003551");
 				@SuppressWarnings("unchecked")
 				RefContainer<Invoice> refInvoices = (RefContainer<Invoice>) segment.<Invoice>getInvoice();
@@ -2083,9 +2095,8 @@ public class TestMain {
 				this.begin();
 				person = personClass.createPerson();
 				person.setForeignId("YF");
-				#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif birthDate = 
+				#if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif birthDate =
 						Datatypes.create(Datatypes.DATE_CLASS, "1960-01-01");
-				birthDate.setTimezone(-1);
 				person.setBirthdate(birthDate);
 				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
 				assertEquals("1960-01-01T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()), "Born at noon");
@@ -2175,7 +2186,7 @@ public class TestMain {
 				this.begin();
 				person = personClass.createPerson();
 				person.setForeignId("YF");
-				#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif birthDate = Datatypes.create(Datatypes.DATE_CLASS, "1960-01-01");
+				#if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif birthDate = Datatypes.create(Datatypes.DATE_CLASS, "1960-01-01");
 				person.setBirthdate(birthDate);
 				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
 				assertEquals("1960-01-01T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()), "Born at noon");
@@ -2386,13 +2397,18 @@ public class TestMain {
 					PersistenceManager persistenceManager1 = persistenceManagerFactory.getPersistenceManager();
 					assertEquals(Constants.TX_REPEATABLE_READ,  persistenceManagerFactory.getTransactionIsolationLevel(), "Transaction Isolation Level");
 					{
-						final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime1 = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(System.currentTimeMillis() - 20L);
-						UserObjects.setTransactionTime(persistenceManager1, new Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif>() {
-                            public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif instantiate() {
+						final long epochMill1 = System.currentTimeMillis() - 20L;
+						#if CLASSIC_CHRONO_TYPES
+						final Date transactionTime1 = new Date(epochMill1);
+						#else
+						final Instant transactionTime1 = Instant.ofEpochMilli(epochMill1);
+						#endif
+						UserObjects.setTransactionTime(persistenceManager1, new Factory<#if CLASSIC_CHRONO_TYPES Date #else Instant #endif>() {
+                            public #if CLASSIC_CHRONO_TYPES Date #else Instant #endif instantiate() {
                                 return transactionTime1;
                             }
 
-                            public Class<? extends #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif> getInstanceClass() {
+                            public Class<? extends #if CLASSIC_CHRONO_TYPES Date #else Instant #endif> getInstanceClass() {
                                 return Datatypes.DATE_TIME_CLASS;
                             }
                         });
@@ -3629,9 +3645,8 @@ public class TestMain {
 			// test dateOp (date and dateTime in operation parameter)
 			// Test for non-query operation with result
 			this.begin();
-			#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTimeNow = SystemClock.getInstance().now();
-			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif dateIn = Datatypes.create(Datatypes.DATE_CLASS,
-					org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ.format(dateTimeNow).substring(0, 8));
+			#if CLASSIC_CHRONO_TYPES Date #else Instant #endif dateTimeNow = SystemClock.getInstance().now();
+			#if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif dateIn = SystemClock.getInstance().today();
 			PersonDateOpParams personDateOpParams;
 			switch (nextStructureCreation()) {
 			case BY_MEMBER:

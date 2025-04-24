@@ -62,7 +62,6 @@ import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 #if CLASSIC_CHRONO_TYPES
 import org.w3c.cci2.ImmutableDatatype;
-import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
 
 /**

@@ -44,7 +44,6 @@
  */
 package test.openmdx.datatypes1;
 
-import jakarta.resource.cci.MappedRecord;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -155,7 +154,6 @@ public class DatatypesTest {
     public void setUp(
     ) throws ParseException, URISyntaxException{
         DatatypeFactory datatypeFactory = DatatypeFactories.xmlDatatypeFactory();
-        DateTimeFormat dateFormat = DateTimeFormat.BASIC_UTC_FORMAT;
         this.values = new Object[SLICE_COUNT][];
         for(
                 int i = 0;
@@ -168,7 +166,7 @@ public class DatatypesTest {
         this.values[0][VALUE4] = Long.valueOf(8000000000L);
         this.values[0][VALUE5] = BigDecimal.valueOf(1234, 2);
         this.values[0][VALUE6] = "ABC";
-        this.values[0][VALUE7] = dateFormat.parse("20060601T120000.123Z");
+        this.values[0][VALUE7] = DateTimeFormat.BASIC_UTC_FORMAT.parse("20060601T120000.123Z");
         this.values[0][VALUE8] = datatypeFactory.newXMLGregorianCalendarDate(2006,DatatypeConstants.APRIL,01,DatatypeConstants.FIELD_UNDEFINED);
         this.values[0][VALUE9] = new URI("http://www.openmdx.org");
         this.values[0][VALUE10] = new byte[]{Byte.MIN_VALUE, 0, Byte.MAX_VALUE};
@@ -184,7 +182,7 @@ public class DatatypesTest {
         this.values[1][VALUE4] = Long.valueOf(8000000000L);
         this.values[1][VALUE5] = BigDecimal.valueOf(-1234, 2);
         this.values[1][VALUE6] = "qwerty";
-        this.values[1][VALUE7] = dateFormat.parse("29900101T000000.000Z");
+        this.values[1][VALUE7] = DateTimeFormat.BASIC_UTC_FORMAT.parse("29900101T000000.000Z");
         this.values[1][VALUE8] = datatypeFactory.newXMLGregorianCalendarDate(2990,DatatypeConstants.JANUARY,01,DatatypeConstants.FIELD_UNDEFINED);
         this.values[1][VALUE9] = new URI("mailto:info@openmdx.org");
         this.values[1][VALUE10] = new byte[]{};
@@ -200,7 +198,7 @@ public class DatatypesTest {
         this.values[2][VALUE4] = Long.valueOf(8000000000L);
         this.values[2][VALUE5] = BigDecimal.valueOf(-1234, 2);
         this.values[2][VALUE6] = "an_undersocre";
-        this.values[2][VALUE7] = dateFormat.parse("20061201T120000.123Z");
+        this.values[2][VALUE7] = DateTimeFormat.BASIC_UTC_FORMAT.parse("20061201T120000.123Z");
         this.values[2][VALUE8] = datatypeFactory.newXMLGregorianCalendarDate(2006,DatatypeConstants.DECEMBER,01,DatatypeConstants.FIELD_UNDEFINED);
         this.values[2][VALUE9] = new URI("mailto:info@openmdx.org");
         this.values[2][VALUE10] = new byte[]{};
@@ -230,7 +228,7 @@ public class DatatypesTest {
 
     @Test
     public void testDate(){
-        XMLGregorianCalendar firstOfApril = DatatypeFactories.immutableDatatypeFactory().toDate(
+        XMLGregorianCalendar firstOfApril = DatatypeFactories.immutableDatatypeFactory().toImmutableDate(
                 DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
                         2009,
                         4,
@@ -889,7 +887,7 @@ public class DatatypesTest {
                 "application/xml",
                 null
         );
-        MappedRecord getConfigResultT = RestParser.parseRequest(
+        Object getConfigResultT = RestParser.parseRequest(
                 restSource,
                 null // no XRI struct
         );

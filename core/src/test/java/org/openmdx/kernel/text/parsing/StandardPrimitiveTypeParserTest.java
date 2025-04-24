@@ -52,6 +52,8 @@ import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.text.parsing.ChronoTypeParser;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.text.spi.Parser;
@@ -61,6 +63,19 @@ import org.w3c.spi2.Datatypes;
  * Standard Primitive Type Parser Test 
  */
 public class StandardPrimitiveTypeParserTest {
+
+	/**
+	 * org::openmdx::state2
+	 */
+	@Test
+	public void whenStateAuthorityThenParseAsPath(){
+		// Arrange
+		final Parser testee = StandardPrimitiveTypeParser.getInstance();
+		// Act
+		final Path value = testee.parse(Path.class, "xri://@openmdx*org.openmdx.state2");
+		// Assert
+		Assertions.assertEquals(new Path("org::openmdx::state2"), value);
+	}
 
 	@Test
 	public void whenTrueThenParseAsBoolean(){

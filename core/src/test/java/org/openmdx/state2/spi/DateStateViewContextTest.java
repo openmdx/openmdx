@@ -112,11 +112,11 @@ public class DateStateViewContextTest {
     @Test  
     public void noDate(
     ){
-        #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else java.time.LocalDate#endif null1 =
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif null1 =
                 #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar()
 				#else java.time.LocalDate.now()
 				#endif;
-        #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else java.time.LocalDate#endif null2 =
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif null2 =
                 #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar()
 				#else java.time.LocalDate.now()
 				#endif;

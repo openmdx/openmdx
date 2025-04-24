@@ -70,13 +70,12 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.LenientPathComparator;
+import org.openmdx.base.query.lenient.LenientComparators;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.cci2.SparseArray;
-#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
 //---------------------------------------------------------------------------
@@ -135,12 +134,22 @@ public class JmiHelper {
                     Datatypes.DATE_CLASS,
                     (String)source
                 );
-            } else if(PrimitiveTypes.DURATION.equals(this.typeName)) {                
+            } else if(PrimitiveTypes.DURATION.equals(this.typeName)) {
                 return Datatypes.DURATION_CLASS.isInstance(source) ? source : Datatypes.create(
                     Datatypes.DURATION_CLASS,
                     (String)source
                 );
-            } else if(PrimitiveTypes.ANYURI.equals(this.typeName)) {                
+            } else if(PrimitiveTypes.DURATION_DAYTIME.equals(this.typeName)) {
+                return Datatypes.DURATION_DAYTIME_CLASS.isInstance(source) ? source : Datatypes.create(
+                    Datatypes.DURATION_DAYTIME_CLASS,
+                    (String)source
+                );
+            } else if(PrimitiveTypes.DURATION_YEARMONTH.equals(this.typeName)) {
+                return Datatypes.DURATION_YEARMONTH_CLASS.isInstance(source) ? source : Datatypes.create(
+                    Datatypes.DURATION_YEARMONTH_CLASS,
+                    (String)source
+                );
+            } else if(PrimitiveTypes.ANYURI.equals(this.typeName)) {
                 return source instanceof URI ? source : Datatypes.create(
                     URI.class, 
                     (String)source
@@ -163,16 +172,6 @@ public class JmiHelper {
     }
 
     //-------------------------------------------------------------------------
-    private static boolean areEqual(
-        Object v1,
-        Object v2
-    ) {
-        return
-            v1 == null ? v2 == null :
-            v2 == null ? false :
-            LenientPathComparator.isComparable(v1) ? LenientPathComparator.getInstance().compare(v1, v2) == 0 :
-            v1.equals(v2);
-    }
 
     //---------------------------------------------------------------------------
     @SuppressWarnings("rawtypes")
@@ -184,7 +183,7 @@ public class JmiHelper {
         boolean compareWithBeforeImage
     ) throws ServiceException {
         if(targetValues instanceof List) {
-            if(!compareWithBeforeImage || !areEqual(targetValues, new MarshallingList(marshaller, (List)sourceValues))) {
+            if(!compareWithBeforeImage || !LenientComparators.equivalent(targetValues, new MarshallingList(marshaller, (List) sourceValues))) {
                 ((List)targetValues).clear();
                 for(
                     ListIterator j = ((List)sourceValues).listIterator();
@@ -206,7 +205,7 @@ public class JmiHelper {
             }
         }
         else if(targetValues instanceof Set) {
-            if(!compareWithBeforeImage || !areEqual(targetValues, new MarshallingSet(marshaller, (Collection)sourceValues))) {
+            if(!compareWithBeforeImage || !LenientComparators.equivalent(targetValues, new MarshallingSet(marshaller, (Collection) sourceValues))) {
                 ((Set)targetValues).clear();
                 for(
                     Iterator j = ((Collection)sourceValues).iterator();
@@ -219,7 +218,8 @@ public class JmiHelper {
             }
         }
         else if(targetValues instanceof SparseArray) {
-            if(!compareWithBeforeImage || !areEqual(new MarshallingSparseArray(marshaller, (SparseArray)sourceValues), targetValues)) {
+            Object v1 = new MarshallingSparseArray(marshaller, (SparseArray)sourceValues);
+            if(!compareWithBeforeImage || !LenientComparators.equivalent(v1, targetValues)) {
                 ((SparseArray)targetValues).clear();
                 for(
                     ListIterator j = ((SparseArray)sourceValues).populationIterator();
@@ -294,7 +294,7 @@ public class JmiHelper {
 	                Object sourceValue = facade.attributeValue(featureName);                
 	                if(compareWithBeforeImage){
 	                    Object targetValue = target.refGetValue(featureName);
-	                    if(!areEqual(targetValue, sourceValue)) {
+                        if(!LenientComparators.equivalent(targetValue, sourceValue)) {
 	                        target.refSetValue(
 	                            featureName,
 	                            marshaller.marshal(sourceValue)

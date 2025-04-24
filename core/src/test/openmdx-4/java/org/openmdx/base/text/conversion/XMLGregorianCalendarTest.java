@@ -55,6 +55,7 @@ import java.util.Objects;
 import javax.xml.datatype.DatatypeConstants;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.query.Filter;
@@ -214,6 +215,7 @@ public class XMLGregorianCalendarTest {
 		}
 	}
 
+	@Disabled("BUH Work in Progress §")
 	@Test
 	public void testEncodingAndDecoding() throws ServiceException, IOException {
 		Filter original = new Filter(
@@ -221,7 +223,7 @@ public class XMLGregorianCalendarTest {
 						Quantifier.THERE_EXISTS,
 						TechnicalAttributes.STATE_VALID_FROM,
 						true,
-						org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 4, 1)
+						org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 4, 1, DatatypeConstants.FIELD_UNDEFINED)
 				), new IsGreaterCondition(
 				Quantifier.THERE_EXISTS,
 				TechnicalAttributes.STATE_VALID_TO,

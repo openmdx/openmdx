@@ -71,7 +71,6 @@ import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.DataBinding;
-#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -195,11 +194,6 @@ public class CompositeObjectDataBinding extends DataBinding {
     
     /**
      * Map parameter mode to query.
-     * 
-     * @param refPackage
-     * @param parameterMode
-     * @param pm
-     * @return
      */
     protected Query newQuery(
         ParameterMode parameterMode,

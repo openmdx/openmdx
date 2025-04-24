@@ -47,7 +47,7 @@ package org.openmdx.state2.spi;
 import org.openmdx.state2.cci.DateTimeStateContext;
 import org.openmdx.state2.cci.ViewKind;
 import org.w3c.format.DateTimeFormat;
-import org.w3c.spi2.Datatypes;
+import org.w3c.spi.DatatypeFactories;
 import org.w3c.time.SystemClock;
 
 /**
@@ -61,14 +61,12 @@ public class DateTimeStateViewContext
     /**
      * Constructor 
      * 
-     * @param datatypeFactory the immutable datatype factory
      * @param validFrom the begin of the time range, or {@code null} for an unconstrained lower bound
      * @param invalidFrom the end of the time range, or {@code null} for an unconstrained upper bound
      * @param validFor the view's valid time point, or {@code null} for time range views
      * @param validAt the view's transaction time point, or {@code null} for time range views
      */
     private DateTimeStateViewContext(
-        #if CLASSIC_CHRONO_TYPES org.w3c.spi.ImmutableDatatypeFactory #else org.w3c.spi.ContemporaryChronoDatatypeFactory #endif datatypeFactory,
         ViewKind viewKind,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFor,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt,
@@ -77,10 +75,10 @@ public class DateTimeStateViewContext
     ) {
         super(
             viewKind,
-            datatypeFactory.toDateTime(validFor), 
-            datatypeFactory.toDateTime(validAt),
-            datatypeFactory.toDateTime(validFrom),
-            datatypeFactory.toDateTime(invalidFrom),
+            validFor,
+            validAt,
+            validFrom,
+            invalidFrom,
             false // includeUpperBound
         );
     }
@@ -101,10 +99,9 @@ public class DateTimeStateViewContext
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ){
         return new DateTimeStateViewContext(
-            Datatypes.DATATYPE_FACTORY,
             ViewKind.TIME_POINT_VIEW,
-            validFor,
-            validAt, 
+            DatatypeFactories.immutableDatatypeFactory().toImmutableDateTime(validFor),
+            DatatypeFactories.immutableDatatypeFactory().toImmutableDateTime(validAt),
             null, // validFrom
             null // validTo
         );
@@ -121,12 +118,11 @@ public class DateTimeStateViewContext
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validTo
     ){
         return new DateTimeStateViewContext(
-            Datatypes.DATATYPE_FACTORY,
             ViewKind.TIME_RANGE_VIEW,
             null, // validFor
             null, // validAt
-            validFrom, 
-            validTo
+            DatatypeFactories.immutableDatatypeFactory().toImmutableDateTime(validFrom),
+            DatatypeFactories.immutableDatatypeFactory().toImmutableDateTime(validTo)
         );
     }
     

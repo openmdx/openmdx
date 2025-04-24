@@ -43,7 +43,7 @@
  * This product includes software developed by the Apache Software
  * Foundation (http://www.apache.org/).
  */
-package org.openmdx.base.query;
+package org.openmdx.base.query.lenient;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -51,34 +51,29 @@ import java.util.Comparator;
 
 
 /**
- * Allows comparison of not directly comparable classes
+ * Allows comparison of not directly comparable number classes
  */
-public class LenientNumberComparator extends LenientCharacterComparator {
+class LenientNumberComparator implements LenientComparator {
 
     /**
-     * Use specific CharSequence comparator
+     * Constructor
      */
-    protected LenientNumberComparator(
-        Comparator<Object> charSequenceComparator
+    LenientNumberComparator(
     ) {
-        super(charSequenceComparator);
+        super();
     }
 
-    //------------------------------------------------------------------------
-    // Implements Comparator
-    //------------------------------------------------------------------------
+    @Override
+    public boolean test(Object first, Object second) {
+        return first instanceof Number && second instanceof Number;
+    }
 
-    /* (non-Javadoc)
-     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-     */
     @Override
     public int compare(
         Object first, 
         Object second
     ) {
-        return first instanceof Number && second instanceof Number ?
-            compare((Number)first,(Number)second) :
-            super.compare(first, second) ;
+        return compare((Number)first,(Number)second);
     }
 
     /**
@@ -86,8 +81,8 @@ public class LenientNumberComparator extends LenientCharacterComparator {
      * positive integer as the first object is less than, equal to, or greater 
      * than the second object.
      * 
-     * @param first
-     * @param second
+     * @param first the 1st argument
+     * @param second the 2nd argument
      * 
      * @return      a negative integer, zero, or a positive integer as the first 
      *              argument is less than, equal to, or greater than the second.
@@ -108,9 +103,9 @@ public class LenientNumberComparator extends LenientCharacterComparator {
      * Compares two long values for order. Returns a negative integer, zero, or a 
      * positive integer as the first value is less than, equal to, or greater 
      * than the second value.
-     * 
-     * @param first
-     * @param second
+     *
+     * @param first the 1st argument
+     * @param second the 2nd argument
      * 
      * @return      a negative integer, zero, or a positive integer as the first 
      *              argument is less than, equal to, or greater than the second.
@@ -119,17 +114,16 @@ public class LenientNumberComparator extends LenientCharacterComparator {
         long first,
         long second
     ){
-        return first == second ? 0 :
-            first < second ? -1 : +1;
+        return first == second ? 0 : first < second ? -1 : +1;
     }
 
     /**
      * Compares two double values for order. Returns a negative integer, zero, or a 
      * positive integer as the first value is less than, equal to, or greater 
      * than the second value.
-     * 
-     * @param first
-     * @param second
+     *
+     * @param first the 1st argument
+     * @param second the 2nd argument
      * 
      * @return      a negative integer, zero, or a positive integer as the first 
      *              argument is less than, equal to, or greater than the second.
@@ -142,15 +136,6 @@ public class LenientNumberComparator extends LenientCharacterComparator {
             first < second ? -1 : +1;
     }
 
-
-    //------------------------------------------------------------------------
-    // Type tests
-    //------------------------------------------------------------------------
-
-    /**
-     * 
-     * @param number
-     */
     private static boolean isAssignableToLong(
        Number number
     ){
@@ -162,10 +147,6 @@ public class LenientNumberComparator extends LenientCharacterComparator {
             type == Long.TYPE;
     }    
 
-    /**
-     * 
-     * @param number
-     */
     private static boolean isAssignableToDouble(
         Number number
     ){
@@ -175,15 +156,6 @@ public class LenientNumberComparator extends LenientCharacterComparator {
             type == Double.TYPE;
     }    
 
-
-    //------------------------------------------------------------------------
-    // Type conversions
-    //------------------------------------------------------------------------
-
-    /**
-     * 
-     * @param number
-     */
     private static BigDecimal toBigDecimal(
         Number number
     ){

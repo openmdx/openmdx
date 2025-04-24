@@ -44,39 +44,6 @@
  */
 package test.openmdx.datatypes1;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.math.BigDecimal;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.text.ParseException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.UUID;
-
-import javax.jdo.FetchPlan;
-import javax.jdo.JDOHelper;
-import javax.jdo.PersistenceManager;
-import javax.jdo.PersistenceManagerFactory;
-import javax.jdo.Query;
-import javax.jdo.Transaction;
-import javax.naming.NamingException;
-import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
-import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -102,7 +69,6 @@ import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
 import test.openmdx.datatypes1.cci2.NonStatedQuery;
 import test.openmdx.datatypes1.dto.CountryCode;
 import test.openmdx.datatypes1.jmi1.Data;
@@ -110,11 +76,42 @@ import test.openmdx.datatypes1.jmi1.Datatypes1Package;
 import test.openmdx.datatypes1.jmi1.NonStated;
 import test.openmdx.datatypes1.jmi1.Segment;
 
+import javax.jdo.FetchPlan;
+import javax.jdo.JDOHelper;
+import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
+import javax.jdo.Query;
+import javax.jdo.Transaction;
+import javax.naming.NamingException;
+import javax.xml.datatype.DatatypeConstants;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.UUID;
+
 /**
  * Datatypes Test
  */
 @ExtendWith(OpenmdxTestCoreStandardExtension.class)
-public class DatatypesTest  {
+public class DatatypesTest {
 
     @BeforeAll
     public static void createPersistenceManagerFactory(
@@ -157,7 +154,6 @@ public class DatatypesTest  {
     public void setUp(
     ) throws ParseException, URISyntaxException{
         DatatypeFactory datatypeFactory = DatatypeFactories.xmlDatatypeFactory();
-        DateTimeFormat dateFormat = DateTimeFormat.BASIC_UTC_FORMAT;
         this.values = new Object[SLICE_COUNT][];
         for(
                 int i = 0;
@@ -170,7 +166,7 @@ public class DatatypesTest  {
         this.values[0][VALUE4] = Long.valueOf(8000000000L);
         this.values[0][VALUE5] = BigDecimal.valueOf(1234, 2);
         this.values[0][VALUE6] = "ABC";
-        this.values[0][VALUE7] = dateFormat.parse("20060601T120000.123Z");
+        this.values[0][VALUE7] = DateTimeFormat.BASIC_UTC_FORMAT.parse("20060601T120000.123Z");
         this.values[0][VALUE8] = datatypeFactory.newXMLGregorianCalendarDate(2006,DatatypeConstants.APRIL,01,DatatypeConstants.FIELD_UNDEFINED);
         this.values[0][VALUE9] = new URI("http://www.openmdx.org");
         this.values[0][VALUE10] = new byte[]{Byte.MIN_VALUE, 0, Byte.MAX_VALUE};
@@ -186,7 +182,7 @@ public class DatatypesTest  {
         this.values[1][VALUE4] = Long.valueOf(8000000000L);
         this.values[1][VALUE5] = BigDecimal.valueOf(-1234, 2);
         this.values[1][VALUE6] = "qwerty";
-        this.values[1][VALUE7] = dateFormat.parse("29900101T000000.000Z");
+        this.values[1][VALUE7] = DateTimeFormat.BASIC_UTC_FORMAT.parse("29900101T000000.000Z");
         this.values[1][VALUE8] = datatypeFactory.newXMLGregorianCalendarDate(2990,DatatypeConstants.JANUARY,01,DatatypeConstants.FIELD_UNDEFINED);
         this.values[1][VALUE9] = new URI("mailto:info@openmdx.org");
         this.values[1][VALUE10] = new byte[]{};
@@ -202,7 +198,7 @@ public class DatatypesTest  {
         this.values[2][VALUE4] = Long.valueOf(8000000000L);
         this.values[2][VALUE5] = BigDecimal.valueOf(-1234, 2);
         this.values[2][VALUE6] = "an_undersocre";
-        this.values[2][VALUE7] = dateFormat.parse("20061201T120000.123Z");
+        this.values[2][VALUE7] = DateTimeFormat.BASIC_UTC_FORMAT.parse("20061201T120000.123Z");
         this.values[2][VALUE8] = datatypeFactory.newXMLGregorianCalendarDate(2006,DatatypeConstants.DECEMBER,01,DatatypeConstants.FIELD_UNDEFINED);
         this.values[2][VALUE9] = new URI("mailto:info@openmdx.org");
         this.values[2][VALUE10] = new byte[]{};
@@ -232,7 +228,7 @@ public class DatatypesTest  {
 
     @Test
     public void testDate(){
-        XMLGregorianCalendar firstOfApril = DatatypeFactories.immutableDatatypeFactory().toDate(
+        XMLGregorianCalendar firstOfApril = DatatypeFactories.immutableDatatypeFactory().toImmutableDate(
                 DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
                         2009,
                         4,
@@ -891,7 +887,7 @@ public class DatatypesTest  {
                 "application/xml",
                 null
         );
-        MappedRecord getConfigResultT = RestParser.parseRequest(
+        Object getConfigResultT = RestParser.parseRequest(
                 restSource,
                 null // no XRI struct
         );

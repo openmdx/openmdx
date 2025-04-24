@@ -261,7 +261,7 @@ public class PerformanceTest {
 	@BeforeAll
 	@SuppressWarnings("unchecked")
 	static public void setUp() throws ResourceException {
-		XMLGregorianCalendar today = DateStateViews.today();
+		Object today = SystemClock.getInstance().today();
 		testData = Records.getRecordFactory().createIndexedRecord(ResultRecord.class);
 		for (int i = 0; i < SIZE; i++) {
 			if (i < SIZE / 5) {

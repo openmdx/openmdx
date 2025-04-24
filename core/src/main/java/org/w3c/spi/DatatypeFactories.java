@@ -59,23 +59,15 @@ public class DatatypeFactories {
         // Avoid instantiation
     }
 
-    #if CLASSIC_CHRONO_TYPES /**
-     * The XML Datatype Factory is lazily initialized
-     */
-    private static ImmutableDatatypeFactory immutableFactory;
-
     /**
      * Retrieve an Immutable Datatype Factory
      *
      * @return an Immutable Datatype Factory instance
      */
-    public static ImmutableDatatypeFactory immutableDatatypeFactory(
+    public static ChronoTypeFactory immutableDatatypeFactory(
     ){
-        if(immutableFactory == null) {
-            immutableFactory = new AlternativeDatatypeFactory();
-        }
-        return immutableFactory;
-    }#endif
+        return StandardChronoTypeFactory.INSTANCE;
+    }
 
     /**
      * Retrieve an XML Datatype Factory
@@ -85,19 +77,6 @@ public class DatatypeFactories {
     public static DatatypeFactory xmlDatatypeFactory(
     ){
         return MutableDatatypeFactory.xmlDatatypeFactory();
-    }
-
-    /**
-     * Retrieve a new XML Duration
-     *
-     * @return a new XML Duration
-     */
-//    public static javax.xml.datatype.Duration toPeriod() {
-//        return xmlDatatypeFactory().newDuration();
-//    }
-
-    public static ContemporaryChronoDatatypeFactory contemporaryChronoDatatypeFactory() {
-        return new DefaultContemporaryChronoDatatypeFactory();
     }
 
 }

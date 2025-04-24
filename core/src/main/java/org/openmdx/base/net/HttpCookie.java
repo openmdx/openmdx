@@ -46,7 +46,9 @@ package org.openmdx.base.net;
 import java.net.URI;
 import java.text.ParseException;
 
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
+import java.time.Instant;
+import org.w3c.format.DateTimeFormat;
+import org.w3c.time.ChronoUtils;
 
 /**
  * Basic Cookie
@@ -97,14 +99,12 @@ public class HttpCookie implements Comparable<HttpCookie> {
                version = argument;
             } else if ("discard".equals(key)) {
                this.discard = true;
-            #if CLASSIC_CHRONO_TYPES
             } else if ("expires".equals(key)) {
                try {
-                  this.expiresAt = netscapeDateFormat.parse(argument).getTime();
+                  this.expiresAt = ChronoUtils.getEpochMilliseconds(DateTimeFormat.NETSCAPE_FORMAT.parse(argument));
                } catch (ParseException exception) {
                   throw new IllegalArgumentException("Invalid 'expires' value: " + argument, exception);
                }
-            #endif
             } else if ("max-age".equals(key)) {
                try {
                   this.expiresAt = System.currentTimeMillis() + 1000 * Long.parseLong(argument);
@@ -158,14 +158,6 @@ public class HttpCookie implements Comparable<HttpCookie> {
     * Otherwise even the same Java object does not match itself unless it contains a dot
     */
    private static final Boolean EMBEDDED_DOT_DOMAIN_HANDLING = Boolean.FALSE;
-
-   #if CLASSIC_CHRONO_TYPES
-   /**
-    * The netscape date format
-    */
-   private static final DateTimeFormat netscapeDateFormat = DateTimeFormat.getInstance("EEE',' dd-MMM-yyyy HH:mm:ss 'GMT'", "GMT", true // lenient
-         );
-   #endif
 
    /**
     * The RFC 2965 compliant form
@@ -247,7 +239,7 @@ public class HttpCookie implements Comparable<HttpCookie> {
     */
    public boolean matches(URI uri) {
       if ((!this.secure || "https".equalsIgnoreCase(uri.getScheme())) &&
-      /*java.net.*/HttpCookie.domainMatches(this.domain, uri.getHost())) {
+              /*java.net.*/HttpCookie.domainMatches(this.domain, uri.getHost())) {
          int uriPort = getPort(uri);
          for (int cookiePort : this.ports) {
             if (uriPort == cookiePort) {
@@ -376,8 +368,8 @@ public class HttpCookie implements Comparable<HttpCookie> {
     * @return          <tt>true</tt> if they domain-matches; <tt>false</tt> if not
     */
    private static boolean domainMatches(
-      String domain, 
-      String host
+           String domain,
+           String host
    ) {
       if (domain == null || host == null)
          return false;

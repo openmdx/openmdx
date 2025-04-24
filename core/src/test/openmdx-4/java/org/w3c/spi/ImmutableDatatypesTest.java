@@ -137,7 +137,7 @@ public class ImmutableDatatypesTest {
             immutableDate02.reset();
             Assertions.fail("immutableDate02");
         } catch (UnsupportedOperationException expected) {
-            // Unable to reset an immutable object
+            // Unable to reset an immutable object
         }
     }
 
@@ -149,15 +149,15 @@ public class ImmutableDatatypesTest {
 
     @Test
     public void durationValues(){
-        Assertions.assertEquals("P1Y6M",  immutableDatatypeFactory().toNormalizedDuration(oneAndHalfAYear).toString(), "Normalize year/month duration");
-        Assertions.assertEquals("PT1H0M0S",  immutableDatatypeFactory().toNormalizedDuration(oneHour).toString(), "Normalize day/time duration");
+        Assertions.assertEquals("P1Y6M",  immutableDatatypeFactory().toCanonicalForm(oneAndHalfAYear).toString(), "Normalize year/month duration");
+        Assertions.assertEquals("PT1H0M0S",  immutableDatatypeFactory().toCanonicalForm(oneHour).toString(), "Normalize day/time duration");
         Duration d = oneAndHalfAYear.add(oneHour);
         if(isDurationNormalized()) {
             Assertions.assertEquals("P1Y6MT1H0M0S",  d.toString(), "Standard duration is normalized");
         } else {
             Assertions.assertEquals("P18MT3600S",  d.toString(), "Standard duration is non-normalized");
         }
-        Assertions.assertEquals("P1Y6MT1H0M0S",  immutableDatatypeFactory().toNormalizedDuration(d).toString(), "Normalized duration");
+        Assertions.assertEquals("P1Y6MT1H0M0S",  immutableDatatypeFactory().toCanonicalForm(d).toString(), "Normalized duration");
     }
 
     @Test

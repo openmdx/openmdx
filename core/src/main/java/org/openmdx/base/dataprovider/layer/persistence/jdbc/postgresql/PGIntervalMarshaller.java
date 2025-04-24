@@ -57,10 +57,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 
-#if CLASSIC_CHRONO_TYPES
-import org.w3c.spi.DatatypeFactories;
-#endif
-
 /**
  * PostgreSQL Interval Marshaller
  */
@@ -191,7 +187,7 @@ public class PGIntervalMarshaller {
 			}
 
 			#if CLASSIC_CHRONO_TYPES
-			return DatatypeFactories.xmlDatatypeFactory().newDuration(
+			return org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newDuration(
 				!negative,
 				years,
 				months,
@@ -235,8 +231,8 @@ public class PGIntervalMarshaller {
 			);
 		}
 	}
-
-    public static String formatDurationWithDays(boolean negative, BigInteger years, BigInteger months, Duration duration) {
+#if CLASSIC_CHRONO_TYPES #else
+    private static String formatDurationWithDays(boolean negative, BigInteger years, BigInteger months, Duration duration) {
 
 		int offset = negative ? 1 : 0;
         int nanos = duration.getNano();
@@ -280,7 +276,9 @@ public class PGIntervalMarshaller {
         return formatted.toString();
     }
 
+	#endif
 	private static long getVal(boolean negative, long val) {
 		return negative ? Math.abs(val) : val;
 	}
+
 }

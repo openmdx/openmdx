@@ -44,6 +44,7 @@
  */
 package test.openmdx.app1.aop2;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -117,11 +118,11 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
      */
     public short getAge() {
         Person same = sameObject();
-        XMLGregorianCalendar birthdate = same.getBirthdate();
+        #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif birthdate = same.getBirthdate();
         if(birthdate == null) {
             return - 1;
         } else {
-            int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+            int currentYear = SystemClock.getInstance().today().getYear();
             return (short) (currentYear - birthdate.getYear());
         }
     }

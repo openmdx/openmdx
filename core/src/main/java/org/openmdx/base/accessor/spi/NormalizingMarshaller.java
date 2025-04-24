@@ -50,7 +50,6 @@ import org.openmdx.base.marshalling.ReluctantUnmarshalling;
 import org.openmdx.kernel.exception.BasicException;
 #if CLASSIC_CHRONO_TYPES
 import org.w3c.cci2.ImmutableDatatype;
-import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
 import org.w3c.spi2.Datatypes;
 

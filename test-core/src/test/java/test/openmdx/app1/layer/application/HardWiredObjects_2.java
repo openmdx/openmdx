@@ -92,7 +92,7 @@ public class HardWiredObjects_2 extends AccessControl_2 {
         //
         // Creation time of the hard-wired objects
         //
-        String timestamp = org.w3c.spi2.Datatypes.BASIC_FORMATTER_DT_UTC_TZ.format(SystemClock.getInstance().now());
+        String timestamp = DateTimeFormat.BASIC_UTC_FORMAT.format(SystemClock.getInstance().now());
         //
         // hard-wired NameFormat
         //

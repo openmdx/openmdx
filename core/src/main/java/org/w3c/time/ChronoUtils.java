@@ -48,6 +48,7 @@
 //#define CLASSIC_CHRONO_TYPES
 package org.w3c.time;
 
+import java.util.regex.Pattern;
 import javax.xml.datatype.DatatypeConstants;
 import java.text.ParseException;
 import java.time.Duration;
@@ -56,10 +57,15 @@ import java.util.Date;
 
 public class ChronoUtils {
 
-    public static final java.util.regex.Pattern BASIC_DATE_PATTERN
-            = #if CLASSIC_CHRONO_TYPES org.w3c.format.DateTimeFormat.BASIC_DATE_PATTERN #else java.util.regex.Pattern.compile("\\d{8}") #endif;
-    public static final java.util.regex.Pattern EXTENDED_DATE_PATTERN
-            = #if CLASSIC_CHRONO_TYPES org.w3c.format.DateTimeFormat.EXTENDED_DATE_PATTERN #else java.util.regex.Pattern.compile("\\d{4}-\\d{2}-\\d{2}") #endif;
+    /**
+     * Match YYYY[...]MMDD
+     */
+    public static final Pattern BASIC_DATE_PATTERN = Pattern.compile("^\\d{8,}$");
+
+    /**
+     * Match YYYY[...]-MM-DD
+     */
+    public static final Pattern EXTENDED_DATE_PATTERN = Pattern.compile("^\\d{4,}-\\d{2}-\\d{2}$");
 
     public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif createDate(int year, int month, int dayOfMonth) {
         return #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(year, month, dayOfMonth, DatatypeConstants.FIELD_UNDEFINED)
@@ -70,7 +76,19 @@ public class ChronoUtils {
     public static String completeCentury(String value) throws ParseException, NumberFormatException {
 
         #if CLASSIC_CHRONO_TYPES
-            return org.w3c.format.DateTimeFormat.completeCentury(value);
+        int firstHyphen = value.indexOf('-');
+        if(
+                firstHyphen != 2 &&
+                        (firstHyphen >= 0 || value.length() != 6)
+        ) {
+            return value;
+        } else {
+            int y2 = Integer.parseInt(value.substring(0, 2));
+            int y4 = SystemClock.getInstance().today().getYear();
+            int d = y2 - y4 % 100;
+            int c2 = y4 / 100 + (d <= -50 ? 1 : d > 50 ? -1 : 0);
+            return String.valueOf(c2) + value;
+        }
         #else
         if (value.matches("\\d{2}-\\d{2}-\\d{2}")) {
             int year = Integer.parseInt(value.substring(0, 2));
@@ -79,7 +97,6 @@ public class ChronoUtils {
         }
         return value;
         #endif
-
     }
 
     public static Number getDurationField(Duration duration, DatatypeConstants.Field field) {

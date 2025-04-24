@@ -44,18 +44,28 @@
  */
 package org.w3c.spi;
 
+#if CLASSIC_CHRONO_TYPES
 import java.util.Date;
-
-import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.datatype.Duration;
+#else
+import java.time.LocalDate;
+import java.time.Instant;
+import java.time.Duration;
+import java.time.Period;
+import java.time.temporal.TemporalAmount;
+import java.util.Date;
+import javax.xml.datatype.XMLGregorianCalendar;
+import org.w3c.spi2.Datatypes;
+#endif
 
 /**
  * Immutable Datatype Factory
  */
-public interface ImmutableDatatypeFactory {
+public interface ChronoTypeFactory {
 
     //------------------------------------------------------------------------
-    // From String Representation
+    // External Form
     //------------------------------------------------------------------------
 
     /**
@@ -68,8 +78,8 @@ public interface ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value can't be parsed
      */
-    Date newDateTime(
-            String value
+    #if CLASSIC_CHRONO_TYPES Date #else Instant #endif newDateTime(
+        String value
     );
 
     /**
@@ -82,8 +92,8 @@ public interface ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value can't be parsed
      */
-    XMLGregorianCalendar newDate(
-            String value
+    #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif newDate(
+        String value
     );
 
     /**
@@ -91,13 +101,57 @@ public interface ImmutableDatatypeFactory {
      *
      * @param value the representation with designators
      *
-     * @return a corresponding date-time instance
+     * @return a corresponding duration instance
      *
      * @exception IllegalArgumentException
      * if the value can't be parsed
      */
-    Duration newDuration(
-            String value
+    #if CLASSIC_CHRONO_TYPES Duration #else TemporalAmount #endif newDuration(
+        String value
+    );
+
+    /**
+     * Create a new immutable duration instance
+     *
+     * @param value the representation with designators
+     *
+     * @return a corresponding duration instance
+     *
+     * @exception IllegalArgumentException
+     * if the value can't be parsed
+     */
+    Duration newDurationDayTime(
+        String value
+    );
+
+    /**
+     * Create a new immutable duration instance
+     *
+     * @param value the representation with designators
+     *
+     * @return a corresponding duration instance
+     *
+     * @exception IllegalArgumentException
+     * if the value can't be parsed
+     */
+    #if CLASSIC_CHRONO_TYPES Duration #else Period #endif newDurationYearMonth(
+        String value
+    );
+
+
+    //------------------------------------------------------------------------
+    // Canonical Form
+    //------------------------------------------------------------------------
+
+    /**
+     * Retrieve the canonical form of the temporal amount (as opposed to the normalized form!)
+     *
+     * @param value an internal representation
+     *
+     * @return a duration containing seconds or months only
+     */
+    #if CLASSIC_CHRONO_TYPES Duration #else TemporalAmount #endif toCanonicalForm(
+        #if CLASSIC_CHRONO_TYPES Duration #else TemporalAmount #endif value
     );
 
 
@@ -115,8 +169,8 @@ public interface ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value is not an org::w3c::dateTime instance
      */
-    Date toDateTime(
-            Date value
+    #if CLASSIC_CHRONO_TYPES Date #else Instant #endif toImmutableDateTime(
+        #if CLASSIC_CHRONO_TYPES Date #else Instant #endif value
     );
 
     /**
@@ -129,19 +183,8 @@ public interface ImmutableDatatypeFactory {
      * @exception IllegalArgumentException
      * if the value is not an org::w3c::date instance
      */
-    XMLGregorianCalendar toDate(
-            XMLGregorianCalendar value
-    );
-
-    /**
-     * Retrieve a normalized duration instance
-     *
-     * @param value an internal representation
-     *
-     * @return a duration instance containing seconds and months only
-     */
-    Duration toNormalizedDuration(
-            Duration value
+    #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif toImmutableDate(
+            #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif value
     );
 
 }

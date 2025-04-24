@@ -79,7 +79,7 @@ public class YImplementation
         return Collections.singletonList(this.date);
     }
 
-	public <T extends #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif> List<T> list() {
+	public <T extends Date> List<T> list() {
 		return (List<T>) getList();
 	}
 

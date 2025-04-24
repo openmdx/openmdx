@@ -74,7 +74,7 @@ public class DurationMarshaller {
         protected String toBasicFormat(Object datatype) {
             return (Datatypes.DURATION_CLASS.cast(datatype)).toString();
         }
-        
+
     };
 
     /**
@@ -92,9 +92,9 @@ public class DurationMarshaller {
             Object source
         ) throws ServiceException {
             #if CLASSIC_CHRONO_TYPES
-            return source instanceof Duration ? DatatypeFactories.immutableDatatypeFactory().toNormalizedDuration(
-                    Datatypes.DURATION_CLASS.cast(source)
-                ) : super.normalize(source);
+            return source instanceof Duration ? org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().toCanonicalForm(
+                Datatypes.DURATION_CLASS.cast(source)
+            ) : super.normalize(source);
             #else
             return source instanceof Duration ? Datatypes.DURATION_CLASS.cast(source) : super.normalize(source);
             #endif

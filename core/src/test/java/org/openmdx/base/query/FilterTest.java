@@ -59,7 +59,6 @@ import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
-#if CLASSIC_CHRONO_TYPES import org.w3c.spi.ImmutableDatatypeFactory;#endif
 import org.w3c.spi2.Datatypes;
 import org.w3c.time.SystemClock;
 

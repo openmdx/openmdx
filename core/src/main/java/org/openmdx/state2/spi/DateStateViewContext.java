@@ -46,7 +46,7 @@ package org.openmdx.state2.spi;
 
 import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.ViewKind;
-import org.w3c.spi2.Datatypes;
+import org.w3c.spi.DatatypeFactories;
 import org.w3c.time.SystemClock;
 
 import java.time.format.DateTimeFormatter;
@@ -55,7 +55,7 @@ import java.time.format.DateTimeFormatter;
  * Date State View Context
  */
 public class DateStateViewContext 
-    extends StateViewContext<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif>
+    extends StateViewContext<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif>
     implements DateStateContext 
 {
 
@@ -113,8 +113,8 @@ public class DateStateViewContext
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFor
     ){
         return new DateStateViewContext(
-            Datatypes.DATATYPE_FACTORY.toDate(validFor),
-            Datatypes.DATE_CLASS.cast(null)
+            DatatypeFactories.immutableDatatypeFactory().toImmutableDate(validFor),
+            DatatypeFactories.immutableDatatypeFactory().toImmutableDateTime(null)
         );
     }
 
@@ -129,8 +129,8 @@ public class DateStateViewContext
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validAt
     ){
         return new DateStateViewContext(
-                Datatypes.DATATYPE_FACTORY.toDate(validFor),
-                Datatypes.DATATYPE_FACTORY.toDateTime(validAt)
+            DatatypeFactories.immutableDatatypeFactory().toImmutableDate(validFor),
+            DatatypeFactories.immutableDatatypeFactory().toImmutableDateTime(validAt)
         );
     }
     
@@ -146,8 +146,8 @@ public class DateStateViewContext
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom,
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo
     ){
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif immutableValidFrom = Datatypes.DATATYPE_FACTORY.toDate(validFrom);
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif immutableValidTo = Datatypes.DATATYPE_FACTORY.toDate(validTo);
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif immutableValidFrom = DatatypeFactories.immutableDatatypeFactory().toImmutableDate(validFrom);
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif immutableValidTo = DatatypeFactories.immutableDatatypeFactory().toImmutableDate(validTo);
         Order.assertTimeRange(immutableValidFrom, immutableValidTo);
         return new DateStateViewContext(immutableValidFrom, immutableValidTo);
     }

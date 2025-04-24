@@ -54,7 +54,6 @@ import java.util.Date;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi.DatatypeFactories;
-import org.w3c.spi.ImmutableDatatypeFactory;
 #endif
 
 /**
