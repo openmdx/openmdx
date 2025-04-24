@@ -406,7 +406,9 @@ public class DurationMarshaller {
 				}
 			case CHARACTER: {
 			#if CLASSIC_CHRONO_TYPES
-				boolean normalized = true;
+			    if(valueType == null) {
+					return null;
+			    }
 				BigInteger years = getValue(duration, DatatypeConstants.YEARS);
 				BigInteger months = getValue(duration, DatatypeConstants.MONTHS);
 				BigInteger days = getValue(duration, DatatypeConstants.DAYS);
@@ -414,76 +416,94 @@ public class DurationMarshaller {
 				BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
 				BigDecimal seconds = getValue(duration, DatatypeConstants.SECONDS);
 				if (seconds.compareTo(SECONDS_PER_MINUTE) > 0) {
-					normalized = false;
 					BigDecimal[] values = seconds.divideAndRemainder(SECONDS_PER_MINUTE);
 					seconds = values[1];
 					minutes = minutes.add(values[0].toBigInteger());
 				}
 				if (minutes.compareTo(MINUTES_PER_HOUR) > 0) {
-					normalized = false;
 					BigInteger[] values = minutes.divideAndRemainder(MINUTES_PER_HOUR);
 					minutes = values[1];
 					hours = hours.add(values[0]);
 				}
 				if (hours.compareTo(HOURS_PER_DAY) > 0) {
-					normalized = false;
 					BigInteger[] values = hours.divideAndRemainder(HOURS_PER_DAY);
 					hours = values[1];
 					days = days.add(values[0]);
 				}
 				if (months.compareTo(MONTHS_PER_YEAR) > 0) {
-					normalized = false;
 					BigInteger[] values = months.divideAndRemainder(MONTHS_PER_YEAR);
 					months = values[1];
 					years = years.add(values[0]);
 				}
-				if (normalized) {
-					return duration.toString();
-				} else {
-					StringBuilder target = new StringBuilder(signum < 0 ? "-" : "");
-					target.append("P");
-					boolean empty = true;
-					if (years.signum() > 0) {
-						empty = false;
-						target.append(years).append("Y");
-					}
-					if (months.signum() > 0) {
-						empty = false;
-						target.append(months).append("M");
-					}
-					if (days.signum() > 0) {
-						empty = false;
-						target.append(days).append("D");
-					}
-					if (empty || hours.signum() > 0 || minutes.signum() > 0 || seconds.signum() > 0) {
-						target.append("T");
-						if (hours.signum() > 0) {
-							empty = false;
-							target.append(hours).append("H");
-						}
-						if (minutes.signum() > 0) {
-							empty = false;
-							target.append(minutes).append("M");
-						}
-						if (empty || seconds.signum() > 0) {
-							target.append(seconds).append("S");
-						}
-					}
-					return target.toString();
+				StringBuilder target = new StringBuilder(signum < 0 ? "-P" : "P");
+				switch(valueType) {
+					case YEAR_MONTH:
+						return target
+							.append(years)
+							.append("Y")
+							.append(months)
+							.append("M")
+							.toString();
+					case DAY_TIME:
+						return target
+							.append(days)
+							.append("DT")
+							.append(hours)
+							.append("H")
+							.append(minutes)
+							.append("M")
+							.append(seconds)
+							.append("S")
+							.toString();
+					case YEAR_MONTH_DAY_TIME:
+						final boolean time =
+							hours.signum() != 0 ||
+							minutes.signum() != 0 ||
+							seconds.signum() != 0;
+						return (
+							time ? target
+								.append(years)
+								.append("Y")
+								.append(months)
+								.append("M")
+								.append(days)
+								.append("DT")
+								.append(hours)
+								.append("H")
+								.append(minutes)
+								.append("M")
+								.append(seconds)
+								.append("S") :
+							target
+								.append(years)
+								.append("Y")
+								.append(months)
+								.append("M")
+								.append(days)
+								.append("D")
+							).toString();
+						default:
+							throw new RuntimeServiceException(
+								BasicException.Code.DEFAULT_DOMAIN,
+								BasicException.Code.ASSERTION_FAILURE,
+								"Unsupported value type",
+								new BasicException.Parameter("durationType", durationType),
+								new BasicException.Parameter("valueType", valueType)
+							);
 				}
 			#else
 				final StringBuilder target = new StringBuilder(duration.isNegative() ? "-P" : "P");
 				final Duration absolute = duration.isNegative() ? duration.negated() : duration;
-				boolean isEmpty = isDurationEmpty(absolute);
 				System.out.println("ValueType: " + valueType);
 				System.out.println("DurationType: " + durationType);
-				if (isEmpty || absolute.toDays() != 0) {
-					target.append(absolute.toDays()).append("D");
-				}
-				target.append("T");
-				target.append(absolute.toHours() % 24).append("H");
-				target.append(absolute.toMinutes() % 60).append("M");
-				target.append(absolute.getSeconds() % 60);
+				target
+					.append(absolute.toDays())
+					.append("DT")
+					.append(absolute.toHours() % 24)
+					.append("H")
+					.append(absolute.toMinutes() % 60)
+					.append("M")
+					.append(absolute.getSeconds() % 60);
 				if(absolute.getNano() > 0) {
 					String fraction = String.valueOf(1000000000 + absolute.getNano()).substring(1);
 					final int digits;
@@ -513,11 +533,6 @@ public class DurationMarshaller {
 		} else {
 			return source;
 		}
-	}
-
-	private boolean isDurationEmpty(Duration d) {
-//		return d.toDays() == 0 && d.toHours() == 0 && d.toMinutes() == 0 && d.getSeconds() == 0 && d.getNano() == 0;
-		return d.toDays() == 0 && d.toHours() == 0 && d.toMinutes() == 0;
 	}
 
 	private String appendUnit(Object source, Long val, String unit) {

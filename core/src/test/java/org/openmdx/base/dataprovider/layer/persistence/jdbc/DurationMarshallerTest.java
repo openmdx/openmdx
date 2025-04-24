@@ -224,16 +224,16 @@ public class DurationMarshallerTest {
     ) throws Throwable {
         Object internalized = this.numericDurationMarshaller.unmarshal(BigDecimal.valueOf(0, 3));
         Object externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
-//        Assertions.assertEquals(#if CLASSIC_CHRONO_TYPES "PT0.000S" #else "P0DT0H0M0S" #endif, externalized, "P0D");
+        Assertions.assertEquals(#if CLASSIC_CHRONO_TYPES "P0DT0H0M0.000S" #else "P0DT0H0M0S" #endif, externalized, "P0D");
         internalized = this.numericDurationMarshaller.unmarshal(BigInteger.ZERO);
         externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
-        Assertions.assertEquals(#if CLASSIC_CHRONO_TYPES "P0M" #else "P0Y0M" #endif, externalized, "P0M");
+        Assertions.assertEquals("P0Y0M", externalized, "P0M");
         internalized = this.numericDurationMarshaller.unmarshal(BigInteger.valueOf(90));
         externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("P7Y6M", externalized, "P90M");
         internalized = this.numericDurationMarshaller.unmarshal(new BigDecimal("14582.010"));
         externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
-        Assertions.assertEquals("PT4H3M2.010S", externalized, "PT14582.010S");
+        Assertions.assertEquals("P0DT4H3M2.010S", externalized, "PT14582.010S");
         internalized = this.numericDurationMarshaller.unmarshal(new BigDecimal("-446582.010"));
         externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
         Assertions.assertEquals("-P5DT4H3M2.010S", externalized, "-PT446582.010S");
@@ -242,7 +242,7 @@ public class DurationMarshallerTest {
         Assertions.assertEquals("-P7Y6M", externalized, "-P90M");
         internalized = this.numericDurationMarshaller.unmarshal(new BigDecimal("-14582.010"));
         externalized = this.characterDurationMarshaller.marshal(internalized,"anyDB");
-        Assertions.assertEquals("-PT4H3M2.010S", externalized, "-PT14582.010S");
+        Assertions.assertEquals("-P0DT4H3M2.010S", externalized, "-PT14582.010S");
     }
 
     @Test
