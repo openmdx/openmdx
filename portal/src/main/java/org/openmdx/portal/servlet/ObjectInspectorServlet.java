@@ -97,7 +97,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -155,6 +154,7 @@ import org.openmdx.uses.org.apache.commons.fileupload.DiskFileUpload;
 import org.openmdx.uses.org.apache.commons.fileupload.FileItem;
 import org.openmdx.uses.org.apache.commons.fileupload.FileUpload;
 import org.openmdx.uses.org.apache.commons.fileupload.FileUploadException;
+import org.w3c.time.SystemClock;
 
 /**
  * This is a generic servlet which allows to browse and edit MOF-compliant
@@ -250,7 +250,7 @@ public class ObjectInspectorServlet extends HttpServlet {
             throw new ServletException("can not get persistence manager factory", e);
         }
         // Info
-        String messagePrefix = new Date() + "  ";
+        String messagePrefix = SystemClock.getInstance().now() + "  ";
         System.out.println();
         System.out.println();
         System.out.println(messagePrefix + "Starting web application \"" + conf.getServletContext().getContextPath() + "\"");

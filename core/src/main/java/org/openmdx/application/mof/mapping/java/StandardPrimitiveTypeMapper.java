@@ -1,28 +1,28 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Primitive Type Mapper 
+ * Description: Primitive Type Mapper
  * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,9 +36,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
@@ -65,11 +65,11 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
      * @param hasDefault defines whether unknown primitive types are mapped to {@code java.lang.String}
      */
     protected StandardPrimitiveTypeMapper(
-        boolean hasDefault
+            boolean hasDefault
     ){
         this.hasDefault = hasDefault;
     }
-    
+
     /**
      * Constructor for an instance which maps unknown primitive types to {@code java.lang.String}
      */
@@ -77,7 +77,7 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
     ){
         this(true);
     }
-    
+
     /**
      * Defines whether unknown primitive types are mapped to {@code java.lang.String}
      */
@@ -95,10 +95,10 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
      */
     @Override
     public String getFeatureType(
-        String qualifiedTypeName,
-        JavaExportFormat format,
-        boolean alwaysAsObject,
-        boolean classicChronoTypes
+            String qualifiedTypeName,
+            JavaExportFormat format,
+            boolean alwaysAsObject,
+            boolean classicChronoTypes
     ) throws ServiceException{
         if(PrimitiveTypes.STRING.equals(qualifiedTypeName)) return "java.lang.String";
         if(PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) return alwaysAsObject ? "java.lang.Boolean" : "boolean";
@@ -113,7 +113,7 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
                 format.isJPA3() ? "java.sql.Date" :
                         classicChronoTypes ? "javax.xml.datatype.XMLGregorianCalendar" : "java.time.LocalDate";
         if(PrimitiveTypes.DURATION.equals(qualifiedTypeName))
-            return classicChronoTypes ? "javax.xml.datatype.Duration" : "java.time.Duration";
+            return classicChronoTypes ? "javax.xml.datatype.Duration" : "java.time.temporal.TemporalAmount";
         if(PrimitiveTypes.BINARY.equals(qualifiedTypeName)) return "byte[]";
         if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) return "java.net.URI";
         if(PrimitiveTypes.XRI.equals(qualifiedTypeName)) return "java.lang.String"; // no standard implementation as openMDX sticks to XRI 2
@@ -124,11 +124,11 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
             return "java.lang.String";
         } else {
             throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                "Unspupported primitive type with default disabled",
-                new BasicException.Parameter("qualifiedTypeName", qualifiedTypeName),
-                new BasicException.Parameter("hasDefault", Boolean.valueOf(hasDefault))
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED,
+                    "Unspupported primitive type with default disabled",
+                    new BasicException.Parameter("qualifiedTypeName", qualifiedTypeName),
+                    new BasicException.Parameter("hasDefault", Boolean.valueOf(hasDefault))
             );
         }
     }
@@ -144,8 +144,8 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
      */
     @Override
     public String getPredicateType(
-        String qualifiedTypeName,
-        boolean classicChronoTypes
+            String qualifiedTypeName,
+            boolean classicChronoTypes
     ){
         if(PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) return "org.w3c.cci2.BooleanTypePredicate";
         if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) return "org.w3c.cci2.ComparableTypePredicate<java.lang.Short>";
@@ -155,19 +155,19 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
         if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) return "org.w3c.cci2.ResourceIdentifierTypePredicate<java.net.URI>";
         if(PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)) return "org.w3c.cci2.StringTypePredicate";
         if(PrimitiveTypes.XRI.equals(qualifiedTypeName)) return "org.w3c.cci2.StringTypePredicate";
-        if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) return "org.w3c.cci2.ComparableTypePredicate<" +
-                (classicChronoTypes ? "java.util.Date" : "java.time.LocalDate") +
-                ">";
-        if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) return "org.w3c.cci2.PartiallyOrderedTypePredicate<" +
-                (classicChronoTypes ? "javax.xml.datatype.XMLGregorianCalendar" : "java.time.Instant") +
-                ">";
-        if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) return "org.w3c.cci2.PartiallyOrderedTypePredicate<" +
-                (classicChronoTypes ? "javax.xml.datatype.Duration" : "java.time.Duration") +
-                ">";
+        if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) return classicChronoTypes ?
+                "org.w3c.cci2.ComparableTypePredicate<java.util.Date>" :
+                "org.w3c.cci2.ComparableTypePredicate<java.time.Instant>";
+        if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) return classicChronoTypes ?
+                "org.w3c.cci2.PartiallyOrderedTypePredicate<javax.xml.datatype.XMLGregorianCalendar>" :
+                "org.w3c.cci2.ComparableTypePredicate<java.time.LocalDate>";
+        if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) return classicChronoTypes ?
+                "org.w3c.cci2.PartiallyOrderedTypePredicate<javax.xml.datatype.Duration>" :
+                "org.w3c.cci2.PartiallyOrderedTypePredicate<java.time.temporal.TemporalAmount>";
         if(PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) return "org.w3c.cci2.ComparableTypePredicate<java.math.BigDecimal>";
-        return "org.w3c.cci2.AnyTypePredicate"; // has always a reasonable default value   
+        return "org.w3c.cci2.AnyTypePredicate"; // has always a reasonable default value
     }
-    
+
     /**
      * Provide the Java pattern to parse a given expression represented by the EXPRESSION_PLACE_HOLDER.
      * <p>
@@ -182,10 +182,10 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
      */
     @Override
     public String getParsePattern(
-        String qualifiedTypeName, 
-        JavaExportFormat format,
-        boolean asObject,
-        boolean classicChronoTypes
+            String qualifiedTypeName,
+            JavaExportFormat format,
+            boolean asObject,
+            boolean classicChronoTypes
     ) throws ServiceException {
         if(!asObject){
             if(PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) return "java.lang.Boolean.parseBoolean(" + EXPRESSION_PLACEHOLDER + ")";
@@ -198,25 +198,25 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
     }
 
     private String getMappingClass(
-        String qualifiedTypeName
+            String qualifiedTypeName
     ){
         List<String> nameComponents = MapperUtils.getNameComponents(qualifiedTypeName);
         return AbstractMapper.getNamespace(
-            MapperUtils.getNameComponents(MapperUtils.getPackageName(qualifiedTypeName)),
-            Names.JPA3_PACKAGE_SUFFIX
-        ) + '.' + Identifier.CLASS_PROXY_NAME.toIdentifier( 
-            nameComponents.get(nameComponents.size()-1)
+                MapperUtils.getNameComponents(MapperUtils.getPackageName(qualifiedTypeName)),
+                Names.JPA3_PACKAGE_SUFFIX
+        ) + '.' + Identifier.CLASS_PROXY_NAME.toIdentifier(
+                nameComponents.get(nameComponents.size()-1)
         );
-   }
-    
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.application.mof.mapping.java.PrimitiveTypeMapper#getMappingMethod(java.lang.String, org.openmdx.application.mof.mapping.java.Format, org.openmdx.application.mof.mapping.java.Format)
      */
     @Override
     public String getMappingPattern(
-        String qualifiedTypeName,
-        JavaExportFormat from,
-        JavaExportFormat to
+            String qualifiedTypeName,
+            JavaExportFormat from,
+            JavaExportFormat to
     ) throws ServiceException {
         if(from.isCCI2() && to.isJPA3()) {
             return getMappingClass(qualifiedTypeName) + ".toJDO(" + EXPRESSION_PLACEHOLDER + ")";
@@ -224,12 +224,12 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
             return getMappingClass(qualifiedTypeName) + ".toCCI(" + EXPRESSION_PLACEHOLDER + ")";
         } else {
             throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                "Unspupported primitive type mapping",
-                new BasicException.Parameter("qualifiedTypeName", qualifiedTypeName),
-                new BasicException.Parameter("from", from),
-                new BasicException.Parameter("to", to)
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED,
+                    "Unspupported primitive type mapping",
+                    new BasicException.Parameter("qualifiedTypeName", qualifiedTypeName),
+                    new BasicException.Parameter("from", from),
+                    new BasicException.Parameter("to", to)
             );
         }
     }

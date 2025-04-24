@@ -46,7 +46,6 @@ package org.openmdx.audit2.cci;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
@@ -87,7 +86,7 @@ public class AuditQueries {
 
     /**
      * Retrieve the audit configuration
-     * @param persistenceManager
+     * @param persistenceManager the persistence manager to be used
      * @return the audit configuration
      */
     private static Configuration getConfiguration(
@@ -99,7 +98,7 @@ public class AuditQueries {
     /**
      * Retrieve the configured audit segment
      * 
-     * @param persistenceManager
+     * @param persistenceManager the persistence manager to be used
      * 
      * @return the configured audit segment 
      */
@@ -138,7 +137,7 @@ public class AuditQueries {
     /**
      * Retrieve the objects' ids
      * 
-     * @param objects
+     * @param objects the objects
      * 
      * @return the objects' ids
      */
@@ -161,15 +160,15 @@ public class AuditQueries {
      * 
      * @param from earlier units of works are excluded unless {@code from}
      * is {@code null} 
-     * @param units of works starting then or later are excluded unless {@code to}
+     * @param to later units of works are excluded unless {@code to}
      * is {@code null} 
-     * @param modifiable the objects which are involved in these units of work
+     * @param involvedObjects the objects which are involved in these units of work
      * 
      * @return the units of work any of the given objects is involved in
      */
     public static Collection<UnitOfWork> getUnitOfWorkInvolvingObject(
-        Date from,
-        Date to,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to,
         Modifiable... involvedObjects
     ){
         PersistenceManager persistenceManager = AuditQueries.getPersistenceManager(involvedObjects);
@@ -198,13 +197,13 @@ public class AuditQueries {
                         )
                     )
                 );
-                SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
+                SortedMap<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif,UnitOfWork> unitsOfWork = new TreeMap<>();
                 for(Involvement involvement : involvements) {
                     try {
                         UnitOfWork unitOfWork = involvement.getUnitOfWork();
                         if(
-                            (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                            (to == null || to.after(unitOfWork.getCreatedAt()))
+                            (from == null || !from.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(unitOfWork.getCreatedAt())) &&
+                            (to == null || to.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(unitOfWork.getCreatedAt()))
                         ){
                             unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
                         }
@@ -216,7 +215,7 @@ public class AuditQueries {
                 }
                 return unitsOfWork.values();
             }
-            default: 
+            default:
                 throw BasicException.initHolder(
                     new UnsupportedOperationException(
                         "Persistence modes other than EMBEDDED are not yet supported",
@@ -235,16 +234,16 @@ public class AuditQueries {
      * 
      * @param from earlier units of works are excluded unless {@code from}
      * is {@code null} 
-     * @param units of works starting then or later are excluded unless {@code to}
+     * @param to later units of works are excluded unless {@code to}
      * is {@code null} 
-     * @param modifable a usually object id pattern based collection of objects involved
+     * @param modifiable collection of involved objects, usually based on object id pattern
      * in any of the returned units of work
      * 
      * @return the selected units of work
      */
     public static Collection<UnitOfWork> getUnitOfWorkInvolvingObject(
-        Date from,
-        Date to,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to,
         Collection<?> modifiable
     ){
         if(modifiable instanceof ExtentCollection<?>) {
@@ -275,13 +274,13 @@ public class AuditQueries {
                             )
                         )
                     );
-                    SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
+                    SortedMap<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif,UnitOfWork> unitsOfWork = new TreeMap<>();
                     for(Involvement involvement : involvements) {
                         if(ReducedJDOHelper.isPersistent(involvement)) try {
                             UnitOfWork unitOfWork = involvement.getUnitOfWork();
                             if(
-                                (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                                (to == null || to.after(unitOfWork.getCreatedAt()))
+                                (from == null || !from.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(unitOfWork.getCreatedAt())) &&
+                                (to == null || to.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(unitOfWork.getCreatedAt()))
                             ){
                                 unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
                             }
@@ -293,7 +292,7 @@ public class AuditQueries {
                     }
                     return unitsOfWork.values();
                 }
-                default: 
+                default:
                     throw BasicException.initHolder(
                         new UnsupportedOperationException(
                             "Persistence modes other than EMBEDDED are not yet supported",
@@ -322,18 +321,18 @@ public class AuditQueries {
      * 
      * @param from earlier units of works are excluded unless {@code from}
      * is {@code null} 
-     * @param units of works starting then or later are excluded unless {@code to}
+     * @param to later units of works are excluded unless {@code to}
      * is {@code null} 
      * @param attributes the units of work are restricted to the ones which 
      * modified any of the given attributes unless {@code attributes} is 
      * {@code null} 
-     * @param modifiable the object which was touched in the returned units of work
+     * @param touchedObjects the object which was touched in the returned units of work
      * 
      * @return the units of work modifiable was touched in
      */
     public static Collection<UnitOfWork> getUnitOfWorkTouchingObject(
-        Date from,
-        Date to,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to,
         Set<String> attributes,
         Modifiable... touchedObjects
     ){
@@ -381,19 +380,19 @@ public class AuditQueries {
      * 
      * @param from earlier units of works are excluded unless {@code from}
      * is {@code null} 
-     * @param units of works starting then or later are excluded unless {@code to}
+     * @param to later units of works are excluded unless {@code to}
      * is {@code null} 
      * @param attributes the units of work are restricted to the ones which 
      * modified any of the given attributes unless {@code attributes} is 
      * {@code null} 
-     * @param modifable a usually object id pattern based collection of objects touched
+     * @param modifiable collection of touched objects, usually based on object id pattern
      * by any of the returned units of work
      * 
      * @return the selected units of work
      */
     public static Collection<UnitOfWork> getUnitOfWorkTouchingObject(
-        Date from,
-        Date to,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to,
         Set<String> attributes,
         Collection<?> modifiable
     ){
@@ -452,15 +451,15 @@ public class AuditQueries {
      * 
      * @param from earlier units of works are excluded unless {@code from}
      * is {@code null} 
-     * @param units of works starting then or later are excluded unless {@code to}
+     * @param to later units of works are excluded unless {@code to}
      * is {@code null} 
      * @param createdObjects the object which was created in the returned units of work
      * 
      * @return the units of work modifiable was created in
      */
     public static Collection<UnitOfWork> getUnitOfWorkCreatingObject(
-        Date from,
-        Date to,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to,
         Modifiable... createdObjects
     ){
         PersistenceManager persistenceManager = getPersistenceManager(createdObjects);
@@ -496,16 +495,16 @@ public class AuditQueries {
      * 
      * @param from earlier units of works are excluded unless {@code from}
      * is {@code null} 
-     * @param units of works starting then or later are excluded unless {@code to}
+     * @param to later units of works are excluded unless {@code to}
      * is {@code null} 
-     * @param modifable a usually object id pattern based collection of objects created
+     * @param modifiable collection of created objects, usually based on object id pattern
      * by any of the returned units of work
      * 
      * @return the selected units of work
      */
     public static Collection<UnitOfWork> getUnitOfWorkCreatingObject(
-        Date from,
-        Date to,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to,
         Collection<?> modifiable
     ){
         if(modifiable instanceof ExtentCollection<?>) {
@@ -553,15 +552,15 @@ public class AuditQueries {
      * 
      * @param from earlier units of works are excluded unless {@code from}
      * is {@code null} 
-     * @param units of works starting then or later are excluded unless {@code to}
+     * @param to later units of works are excluded unless {@code to}
      * is {@code null} 
      * @param removedObjects the object which was created in the returned units of work
      * 
      * @return the units of work modifiable was created in
      */
     public static Collection<UnitOfWork> getUnitOfWorkRemovingObject(
-        Date from,
-        Date to,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to,
         Modifiable... removedObjects
     ){
         PersistenceManager persistenceManager = getPersistenceManager(removedObjects);
@@ -599,16 +598,16 @@ public class AuditQueries {
      * 
      * @param from earlier units of works are excluded unless {@code from}
      * is {@code null} 
-     * @param units of works starting then or later are excluded unless {@code to}
+     * @param to later units of works are excluded unless {@code to}
      * is {@code null} 
-     * @param modifable a usually object id pattern based collection of objects removed
+     * @param modifiable collection of removed objects, usually based on object id pattern
      * by any of the returned units of work
      * 
      * @return the selected units of work
      */
     public static Collection<UnitOfWork> getUnitOfWorkRemovingObject(
-        Date from,
-        Date to,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to,
         Collection<?> modifiable
     ){
         if(modifiable instanceof ExtentCollection<?>) {
@@ -687,8 +686,8 @@ public class AuditQueries {
      */
     public static Collection<UnitOfWork> getUnitOfWorkForTimeRange(
         PersistenceManager persistenceManager,
-        Date from,
-        Date to
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to
     ){
         UnitOfWorkQuery query = (UnitOfWorkQuery) persistenceManager.newQuery(UnitOfWork.class);
         if(from != null) {

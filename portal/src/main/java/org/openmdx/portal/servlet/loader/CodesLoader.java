@@ -50,7 +50,6 @@
 package org.openmdx.portal.servlet.loader;
 
 import java.net.MalformedURLException;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -72,6 +71,7 @@ import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Codes;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
+import org.w3c.time.SystemClock;
 
 /**
  * CodesLoader
@@ -108,7 +108,7 @@ public class CodesLoader extends Loader {
 	synchronized public void loadCodes(
 		String[] locale
 	) throws ServiceException {
-		String messagePrefix = new Date() + "  ";
+		String messagePrefix = SystemClock.getInstance().now() + "  ";
 		System.out.println(messagePrefix + "Loading codes");
 		SysLog.info("Loading codes");
 		List<String> dirs = this.getDirectories("/WEB-INF/config/code/");

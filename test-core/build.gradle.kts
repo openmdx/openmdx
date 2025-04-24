@@ -126,6 +126,7 @@ sourceSets {
     test {
         java {
             srcDir("src/test/java")
+            srcDir("src/test/openmdx-${projectFlavour}/java")
             srcDir(layout.buildDirectory.dir("generated/sources/java/test"))
         }
         resources {

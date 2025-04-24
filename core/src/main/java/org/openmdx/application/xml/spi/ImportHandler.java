@@ -53,9 +53,9 @@ import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -65,8 +65,6 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.openmdx.base.exception.ServiceException;
@@ -80,6 +78,12 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.spi2.Datatypes;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -96,7 +100,7 @@ public class ImportHandler extends DefaultHandler {
      * Constructor
      *
      * @param target
-     * @param documentURL
+     * @param source
      * @param defaultImportMode
      */
     public ImportHandler(
@@ -295,23 +299,23 @@ public class ImportHandler extends DefaultHandler {
      * @throws ServiceException
      */
     private void initTypes(
-        org.w3c.dom.Document schemaDocument
+        Document schemaDocument
     )
         throws ServiceException {
-        org.w3c.dom.Element docElement = schemaDocument.getDocumentElement();
-        org.w3c.dom.NodeList complexTypeNodes = docElement.getElementsByTagName("xsd:complexType");
+        Element docElement = schemaDocument.getDocumentElement();
+        NodeList complexTypeNodes = docElement.getElementsByTagName("xsd:complexType");
         // iterate all xsd:complexType
         int complexTypeNodesLength = complexTypeNodes.getLength();
         for (int i = 0; i < complexTypeNodesLength; i++) {
-            org.w3c.dom.Node complexType = complexTypeNodes.item(i);
-            org.w3c.dom.NamedNodeMap complexTypeAttributes = complexType.getAttributes();
-            org.w3c.dom.Attr complexTypeName = (org.w3c.dom.Attr) complexTypeAttributes.getNamedItem("name");
+            Node complexType = complexTypeNodes.item(i);
+            NamedNodeMap complexTypeAttributes = complexType.getAttributes();
+            Attr complexTypeName = (Attr) complexTypeAttributes.getNamedItem("name");
             if (complexTypeName != null) {
                 // get qualifierName of complex type
-                org.w3c.dom.NodeList attributeNodes = ((org.w3c.dom.Element) complexType).getElementsByTagName("xsd:attribute");
+                NodeList attributeNodes = ((Element) complexType).getElementsByTagName("xsd:attribute");
                 int attributeNodesLength = attributeNodes.getLength();
                 for (int j = 0; j < attributeNodesLength; j++) {
-                    org.w3c.dom.Node attributeNode = attributeNodes.item(j);
+                    Node attributeNode = attributeNodes.item(j);
                     if ("_qualifier".equals(attributeNode.getAttributes().getNamedItem("name").getNodeValue())) {
                         ImportHandler.qualifierNames.put(
                             complexTypeName
@@ -323,13 +327,13 @@ public class ImportHandler extends DefaultHandler {
                     }
                 }
                 // get qualifierTypes, qualifierMultiplicities
-                org.w3c.dom.NodeList elementNodes = ((org.w3c.dom.Element) complexType).getElementsByTagName("xsd:element");
+                NodeList elementNodes = ((Element) complexType).getElementsByTagName("xsd:element");
                 int elementNodesLength = elementNodes.getLength();
                 for (int j = 0; j < elementNodesLength; j++) {
-                    org.w3c.dom.Node element = elementNodes.item(j);
-                    org.w3c.dom.NamedNodeMap elementAttributes = element.getAttributes();
-                    org.w3c.dom.Attr attributeName = (org.w3c.dom.Attr) elementAttributes.getNamedItem("name");
-                    org.w3c.dom.Attr attributeType = (org.w3c.dom.Attr) elementAttributes.getNamedItem("type");
+                    Node element = elementNodes.item(j);
+                    NamedNodeMap elementAttributes = element.getAttributes();
+                    Attr attributeName = (Attr) elementAttributes.getNamedItem("name");
+                    Attr attributeType = (Attr) elementAttributes.getNamedItem("type");
                     // default multiplicity Multiplicities.SINGLE_VALUE
                     if (attributeName != null &&
                         !"_content".equals(attributeName.getNodeValue()) &&
@@ -341,12 +345,12 @@ public class ImportHandler extends DefaultHandler {
                         if (attributeType == null) {
                             // find xsd:attribute name=""_multiplicity"" of
                             // complexType
-                            org.w3c.dom.NodeList l0 = ((org.w3c.dom.Element) element).getElementsByTagName("xsd:complexType");
+                            NodeList l0 = ((Element) element).getElementsByTagName("xsd:complexType");
                             for (int i0 = 0; i0 < l0.getLength(); i0++) {
-                                org.w3c.dom.Node n0 = l0.item(i0);
-                                org.w3c.dom.NodeList l1 = ((org.w3c.dom.Element) n0).getElementsByTagName("xsd:attribute");
+                                Node n0 = l0.item(i0);
+                                NodeList l1 = ((Element) n0).getElementsByTagName("xsd:attribute");
                                 for (int i1 = 0; i1 < l1.getLength(); i1++) {
-                                    org.w3c.dom.Node n1 = l1.item(i1);
+                                    Node n1 = l1.item(i1);
                                     if ("_multiplicity".equals(n1.getAttributes().getNamedItem("name").getNodeValue())) {
                                         ImportHandler.attributeMultiplicities.put(
                                             complexTypeName.getNodeValue() + ":" + attributeName.getNodeValue(),
@@ -356,21 +360,21 @@ public class ImportHandler extends DefaultHandler {
                                 }
                             }
                             // xsd:extension base=
-                            org.w3c.dom.Node extension = element;
+                            Node extension = element;
                             while (extension != null &&
                                 !"xsd:extension".equals(extension.getNodeName())) {
-                                org.w3c.dom.NodeList children = extension.getChildNodes();
+                                NodeList children = extension.getChildNodes();
                                 extension = null;
                                 for (int k = 0; k < children.getLength(); k++) {
-                                    if (children.item(k).getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+                                    if (children.item(k).getNodeType() == Node.ELEMENT_NODE) {
                                         extension = children.item(k);
                                         break;
                                     }
                                 }
                             }
                             if (extension != null) {
-                                org.w3c.dom.NamedNodeMap extensionAttributes = extension.getAttributes();
-                                org.w3c.dom.Attr extensionBase = (org.w3c.dom.Attr) extensionAttributes.getNamedItem("base");
+                                NamedNodeMap extensionAttributes = extension.getAttributes();
+                                Attr extensionBase = (Attr) extensionAttributes.getNamedItem("base");
                                 if (extensionBase != null) {
                                     attributeTypeName = extensionBase.getValue();
                                 }
@@ -418,7 +422,7 @@ public class ImportHandler extends DefaultHandler {
             Model1MetaData.amendQualifierNames(qualifierNames);
         } else
             try {
-                org.w3c.dom.Document schemaDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
+                Document schemaDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
                     this.getSchemaInputSource(uriSchema)
                 );
                 this.initTypes(schemaDocument);
@@ -435,9 +439,9 @@ public class ImportHandler extends DefaultHandler {
     }
 
     /**
-     * Retrieve the meta data if necessary
+     * Retrieve the metadata if necessary
      * 
-     * @param _uriSchema
+     * @param uriSchema
      * @throws ServiceException
      */
     private void retrieveMetaData(
@@ -751,7 +755,7 @@ public class ImportHandler extends DefaultHandler {
                     Object_2Facade facade = Facades.asObject(this.currentObject);
                     // attribute name
                     String attributeName = this.currentPath.getLastSegment().toClassicRepresentation();
-                    java.lang.Object value = getCurrentAttributeValue();
+                    Object value = getCurrentAttributeValue();
                     //
                     // Set values according to multiplicity and operation
                     //
@@ -966,7 +970,7 @@ public class ImportHandler extends DefaultHandler {
             : AttributeOperation.parse(this.currentAttributeOperation);
     }
 
-    private java.lang.Object getCurrentAttributeValue()
+    private Object getCurrentAttributeValue()
         throws ServiceException {
         // attribute type
         String attributeType = getCurrentAttributeType();
@@ -1008,7 +1012,7 @@ public class ImportHandler extends DefaultHandler {
                 if (v.length() > 0) {
                     try {
                         return Datatypes.create(
-                            XMLGregorianCalendar.class,
+                            Datatypes.DATE_CLASS,
                             v
                         );
                     } catch (IllegalArgumentException e) {
@@ -1016,7 +1020,7 @@ public class ImportHandler extends DefaultHandler {
                     }
                 }
             } else if ("org.openmdx.base.duration".equals(attributeType)) {
-                return Datatypes.create(Duration.class, this.currentAttributeValue.toString().trim());
+                return Datatypes.create(Datatypes.DURATION_CLASS, this.currentAttributeValue.toString().trim());
             } else if ("org.openmdx.base.anyURI".equals(attributeType)) {
                 return Datatypes.create(URI.class, this.currentAttributeValue.toString().trim());
             } else if ("org.openmdx.base.ObjectId".equals(attributeType)) {
@@ -1065,7 +1069,7 @@ public class ImportHandler extends DefaultHandler {
      * 
      * @throws ServiceException
      */
-    private Date parseDateTime(
+    private #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif parseDateTime(
         String source
     )
         throws ServiceException {
@@ -1076,7 +1080,7 @@ public class ImportHandler extends DefaultHandler {
             // 
             for (String utcId : UTC_IDS) {
                 if (v.endsWith(utcId)) {
-                    return Datatypes.create(Date.class, v);
+                    return Datatypes.create(Datatypes.DATE_TIME_CLASS, v);
                 }
             }
             //
@@ -1091,9 +1095,7 @@ public class ImportHandler extends DefaultHandler {
                 !v.regionMatches(true, timeZonePosition - 3, "GMT", 0, 3)) {
                 v = v.substring(0, timeZonePosition) + "GMT" + v.substring(timeZonePosition);
             }
-            return (v.indexOf('.', timePosition) < 0 ? localSecondFormat : localMillisecondFormat).parse(
-                v
-            );
+            return (v.indexOf('.', timePosition) < 0 ? localSecondFormat : localMillisecondFormat).parse(v)#if !CLASSIC_CHRONO_TYPES .toInstant()#endif;
         } catch (IllegalArgumentException exception) {
             throw new ServiceException(exception);
         } catch (ParseException e) {

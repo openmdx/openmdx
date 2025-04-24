@@ -52,7 +52,6 @@ import static org.openmdx.base.persistence.cci.Queries.ASPECT_QUERY;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -85,6 +84,7 @@ import org.openmdx.state2.spi.Parameters;
 import org.openmdx.state2.spi.Propagation;
 import org.openmdx.state2.spi.StateViewContext;
 import org.openmdx.state2.spi.TechnicalAttributes;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Basic State Plug-In
@@ -191,13 +191,13 @@ public abstract class BasicState_1<C extends StateContext<?>>
         AccessMode accessMode
     ) throws ServiceException {
         if(!candidate.jdoIsDeleted() && getModel().isInstanceof(candidate, "org:openmdx:state2:BasicState")) {
-    		final Date removedAt = (Date) candidate.objGetValue(REMOVED_AT); 
+    		final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif removedAt = Datatypes.DATE_TIME_CLASS.cast(candidate.objGetValue(REMOVED_AT));
         	switch(context.getViewKind()) {
 	        	case TIME_POINT_VIEW:
 	        		if(context.getExistsAt() == null) {
 		        		return removedAt == null;
 	        		} else {
-	                    final Date createdAt = (Date)candidate.objGetValue(CREATED_AT);
+	                    final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif createdAt = Datatypes.DATE_TIME_CLASS.cast(candidate.objGetValue(CREATED_AT));
                         return 
 	                    	candidate.jdoIsPersistent() && 
 	                    	!candidate.jdoIsNew() &&

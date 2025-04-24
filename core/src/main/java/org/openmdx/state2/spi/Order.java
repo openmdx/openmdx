@@ -45,15 +45,14 @@
 
 package org.openmdx.state2.spi;
 
-import java.util.Date;
-
-import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.kernel.exception.BasicException;
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi.DatatypeFactories;
+#endif
+import org.w3c.spi2.Datatypes;
 
 /**
  * Valid Times
@@ -70,26 +69,26 @@ public class Order {
     /**
      * Plus one day
      */
-    public static final Duration ONE_DAY = DatatypeFactories.xmlDatatypeFactory(
+    public static final Duration ONE_DAY = #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory(
     ).newDurationDayTime(
         true, // isPositive
         1, // day
         0, // hour
         0, // minute
         0 // second
-    );
+    ); #else Duration.ofDays(1) #endif;
+
     /**
      * Minus one day
      */
-    public static final Duration MINUS_ONE_DAY = DatatypeFactories.xmlDatatypeFactory(
+    public static final Duration MINUS_ONE_DAY = #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory(
     ).newDurationDayTime(
         false, // isPositive
         1, // day
         0, // hour
         0, // minute
         0 // second
-    );
-
+    ); #else Duration.ofDays(-1) #endif;
 
     //------------------------------------------------------------------------
     // Date States
@@ -104,24 +103,24 @@ public class Order {
      * @throws IllegalArgumentException if validTo is less than validFrom 
      */
     public static void assertTimeRange(
-        XMLGregorianCalendar validFrom,
-        XMLGregorianCalendar validTo
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo
     ){
-        if(validFrom != null && validTo != null) {
-            if(validTo.compare(validFrom) == DatatypeConstants.LESSER) {
-                throw BasicException.initHolder(
-                    new IllegalArgumentException(
-                        "validTo must be greater than or equal to validFrom",
-                        BasicException.newEmbeddedExceptionStack(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.BAD_PARAMETER,
-                            new BasicException.Parameter("validFrom", validFrom),
-                            new BasicException.Parameter("validTo", validTo)
-                        )
-                    )
-                );
-            }
-        }
+        if(
+            validFrom != null &&
+            validTo != null &&
+            Datatypes.compare(validTo, validFrom) < 0
+        ) throw BasicException.initHolder(
+            new IllegalArgumentException(
+                "validTo must be greater than or equal to validFrom",
+                BasicException.newEmbeddedExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_PARAMETER,
+                    new BasicException.Parameter("validFrom", validFrom),
+                    new BasicException.Parameter("validTo", validTo)
+                )
+            )
+        );
     }
     
     /**
@@ -135,14 +134,14 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareValidFrom(
-        XMLGregorianCalendar d1,
-        XMLGregorianCalendar d2
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d1,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d2
     ){
         return d1 == null ? (
-            d2 == null ? 0 : -1
-        ) : (
-            d2 == null ? 1 : compare(d1,d2)
-        );
+                d2 == null ? 0 : -1
+        ) : d2 == null ? (
+                1
+        ) : Datatypes.compare(d1, d2);
     }
 
     /**
@@ -156,14 +155,14 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareValidTo(
-        XMLGregorianCalendar d1,
-        XMLGregorianCalendar d2
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d1,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d2
     ){
         return d1 == null ? (
-            d2 == null ? 0 : 1
-        ) : (
-            d2 == null ? -1 : compare(d1,d2)
-        );
+                d2 == null ? 0 : 1
+        ) : d2 == null ? (
+                -1
+        ) : Datatypes.compare(d1, d2);
     }
 
     /**
@@ -178,55 +177,12 @@ public class Order {
      * is less than, equal to, or greater than {@code to}. 
      */
     public static int compareValidFromToValidTo(
-        XMLGregorianCalendar from,
-        XMLGregorianCalendar to
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif from,
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif to
     ){
-        return from == null || to == null ? -1 : compare(from,to);
+        return from == null || to == null ? -1 : Datatypes.compare(from, to);
     }
 
-    /**
-     * Compare two (mutable or immutable) {@code XMLGregorianCalendar} values
-     * 
-     * @param d1
-     * @param d2
-     * 
-     * @return a negative integer, zero, or a positive integer as {@code from} 
-     * is less than, equal to, or greater than {@code to}. 
-     */
-    public static int compare(
-        XMLGregorianCalendar d1,
-        XMLGregorianCalendar d2
-    ){
-        boolean i1 = d1 instanceof ImmutableDatatype<?>;
-        boolean i2 = d2 instanceof ImmutableDatatype<?>;
-        return 
-            i1 == i2 ? d1.compare(d2) :
-            i1 ? ((XMLGregorianCalendar)d1.clone()).compare(d2) :
-            d1.compare((XMLGregorianCalendar) d2.clone());
-    }
-        
-    /**
-     * Compare two (mutable or immutable) {@code XMLGregorianCalendar} values
-     * 
-     * @param d1
-     * @param d2
-     * 
-     * @return true if the two values are either equal or both {@code null}
-     */
-    public static boolean equal(
-        XMLGregorianCalendar d1,
-        XMLGregorianCalendar d2
-    ){
-        boolean i1 = d1 instanceof ImmutableDatatype<?>;
-        boolean i2 = d2 instanceof ImmutableDatatype<?>;
-        return 
-            d1 == d2 ? true :
-            d1 == null || d2 == null ? false :
-            i1 == i2 ? d1.equals(d2) :
-            i1 ? d1.clone().equals(d2) :
-            d1.equals(d2.clone());
-    }
-    
     //------------------------------------------------------------------------
     // Date-Time States
     //------------------------------------------------------------------------
@@ -240,24 +196,24 @@ public class Order {
      * @throws IllegalArgumentException if invalidFrom is less than or equal to validFrom 
      */
     public static void assertTimeRange(
-        Date validFrom,
-        Date invalidFrom
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFrom,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif invalidFrom
     ){
-        if(validFrom != null && invalidFrom != null) {
-            if(invalidFrom.compareTo(validFrom) <= 0) {
-                throw BasicException.initHolder(
-                    new IllegalArgumentException(
-                        "invalidFrom must be greater than validFrom",
-                        BasicException.newEmbeddedExceptionStack(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.BAD_PARAMETER,
-                            new BasicException.Parameter("validFrom", validFrom),
-                            new BasicException.Parameter("invalidFrom", invalidFrom)
-                        )
-                    )
-                );
-            }
-        }
+        if(
+            validFrom != null &&
+            invalidFrom != null &&
+            Datatypes.compare(invalidFrom, validFrom) <= 0
+        ) throw BasicException.initHolder(
+            new IllegalArgumentException(
+                "invalidFrom must be greater than validFrom",
+                BasicException.newEmbeddedExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_PARAMETER,
+                    new BasicException.Parameter("validFrom", validFrom),
+                    new BasicException.Parameter("invalidFrom", invalidFrom)
+                )
+            )
+        );
     }
     
     /**
@@ -271,13 +227,13 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareValidFrom(
-        Date d1,
-        Date d2
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d1,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d2
     ){
         return d1 == null ? (
             d2 == null ? 0 : -1
         ) : (
-            d2 == null ? 1 : d1.compareTo(d2)
+            d2 == null ? 1 : Datatypes.compare(d1, d2)
         );
     }
 
@@ -292,13 +248,13 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareInvalidFrom(
-        Date d1,
-        Date d2
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d1,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d2
     ){
         return d1 == null ? (
             d2 == null ? 0 : 1
         ) : (
-            d2 == null ? -1 : d1.compareTo(d2)
+            d2 == null ? -1 : Datatypes.compare(d1, d2)
         );
     }
 
@@ -314,10 +270,10 @@ public class Order {
      * is less than, equal to, or greater than {@code to}. 
      */
     public static int compareValidFromToValidTo(
-        Date from,
-        Date to
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to
     ){
-        return from == null || to == null ? -1 : from.compareTo(to);
+        return from == null || to == null ? -1 : Datatypes.compare(from, to);
     }
     
     
@@ -336,13 +292,13 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareRemovedAt(
-        Date d1,
-        Date d2
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d1,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d2
     ){
         return d1 == null ? (
             d2 == null ? 0 : 1
         ) : (
-            d2 == null ? -1 : d1.compareTo(d2)
+            d2 == null ? -1 : Datatypes.compare(d1, d2)
         );
     }
     
@@ -358,11 +314,12 @@ public class Order {
      * 
      * @return the previous day
      */
-    public static XMLGregorianCalendar predecessor(
-        XMLGregorianCalendar date
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif predecessor(
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif date
     ){
-        XMLGregorianCalendar predecessor = (XMLGregorianCalendar) date.clone();
-        predecessor.add(MINUS_ONE_DAY);
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif predecessor
+                = Datatypes.DATE_CLASS.cast(date);
+        predecessor.#if CLASSIC_CHRONO_TYPES add #else plus#endif(MINUS_ONE_DAY);
         return predecessor;
     }
 
@@ -373,11 +330,12 @@ public class Order {
      * 
      * @return the next day
      */
-    public static XMLGregorianCalendar successor(
-        XMLGregorianCalendar date
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif successor(
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif date
     ){
-        XMLGregorianCalendar successor = (XMLGregorianCalendar) date.clone();
-        successor.add(ONE_DAY);
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif successor
+                = Datatypes.DATE_CLASS.cast(date);
+        successor.#if CLASSIC_CHRONO_TYPES add #else plus#endif(ONE_DAY);
         return successor;
     }
 

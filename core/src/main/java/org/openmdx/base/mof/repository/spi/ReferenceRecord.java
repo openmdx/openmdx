@@ -47,7 +47,6 @@ package org.openmdx.base.mof.repository.spi;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import org.openmdx.base.marshalling.TypeSafeMarshaller;
@@ -57,6 +56,7 @@ import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.repository.cci.AttributeRecord;
 import org.openmdx.base.mof.repository.cci.ElementRecord;
 import org.openmdx.base.naming.Path;
+import org.w3c.spi2.Datatypes;
 
 /**
  * org::omg::model1::Reference Record
@@ -151,7 +151,7 @@ public class ReferenceRecord
                  setIdentity(value);
                  break;
              case modifiedAt:
-                 setModifiedAt((Date)value);
+                 setModifiedAt(Datatypes.DATE_TIME_CLASS.cast(value));
                  break;
              case createdBy:
                  setCreatedBy((Collection<?>)value);
@@ -160,7 +160,7 @@ public class ReferenceRecord
                  setStereotype((Collection<?>)value);
                  break;
              case createdAt:
-                 setCreatedAt((Date)value);
+                 setCreatedAt(Datatypes.DATE_TIME_CLASS.cast(value));
                  break;
              case modifiedBy:
                  setModifiedBy((Collection<?>)value);

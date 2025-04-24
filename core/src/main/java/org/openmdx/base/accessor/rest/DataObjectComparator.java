@@ -49,17 +49,13 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.UUID;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.rest.cci.FeatureOrderRecord;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
-import org.w3c.cci2.ImmutableDatatype;
-import org.w3c.spi.DatatypeFactories;
-import org.w3c.spi.ImmutableDatatypeFactory;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Object Comparator
@@ -105,13 +101,9 @@ final class DataObjectComparator implements Comparator<DataObject_1_0> {
             return right == null ? 0 : -1;
         } else if (right == null) {
             return +1;
-        } else if(left instanceof XMLGregorianCalendar) {
-            if(left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>){
-                ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
-                return datatypeFactory.toDate((XMLGregorianCalendar) left).compare(datatypeFactory.toDate((XMLGregorianCalendar) right));
-            } else {
-                return ((XMLGregorianCalendar)left).compare((XMLGregorianCalendar) right);
-            }
+        #if CLASSIC_CHRONO_TYPES } else if(left instanceof javax.xml.datatype.XMLGregorianCalendar) {
+            return org.w3c.spi2.Datatypes.compare((javax.xml.datatype.XMLGregorianCalendar)left, (javax.xml.datatype.XMLGregorianCalendar) right);
+        #endif
         } else {
             return ((Comparable)left).compareTo(right);
         }

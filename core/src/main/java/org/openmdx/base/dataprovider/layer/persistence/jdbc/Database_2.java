@@ -95,6 +95,7 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 #if JAVA_8
+import javax.jdo.FetchPlan;
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
@@ -105,9 +106,6 @@ import jakarta.resource.cci.MappedRecord;
 #endif
 
 import javax.sql.DataSource;
-import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
 import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
@@ -187,7 +185,10 @@ import org.w3c.cci2.RegularExpressionFlag;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
+#endif
+import org.w3c.spi2.Datatypes;
 
 /**
  * Database_2 implements a OO-to-Relational mapping and makes MappedRecords
@@ -2258,7 +2259,7 @@ public class Database_2
              */
             if ((mixins != null) && !mixins.isEmpty()) {
                 mixins = new HashSet<String>(mixins);
-                mixins.add(SystemAttributes.OBJECT_CLASS);
+                mixins.add(OBJECT_CLASS);
                 mixins.removeAll(dbObject.getExcludeAttributes());
                 String view = "";
                 view += "SELECT " + dbObject.getHint() + " " + columnSelector;
@@ -2979,10 +2980,15 @@ public class Database_2
         Object value
     )
         throws ServiceException {
-        boolean dateTime = value instanceof java.util.Date
-            || value instanceof XMLGregorianCalendar
-                && DatatypeConstants.DATETIME
-                    .equals(((XMLGregorianCalendar) value).getXMLSchemaType());
+
+        boolean dateTime =
+            #if CLASSIC_CHRONO_TYPES
+                value instanceof java.util.Date ||
+                Datatypes.DATE_CLASS.isInstance(value) && javax.xml.datatype.DatatypeConstants.DATETIME.equals(Datatypes.DATE_CLASS.cast(value).getXMLSchemaType());
+            #else
+                value instanceof java.time.Instant || value instanceof java.time.ZonedDateTime || value instanceof java.time.OffsetDateTime;
+            #endif
+
         boolean timestampWithTimezone = dateTime
             && LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE
                 .equals(getDateTimeType(connection));
@@ -3306,15 +3312,16 @@ public class Database_2
         int position,
         Object value
     ) throws ServiceException, SQLException {
-        Object normalizedValue;
+        Object normalizedValue = null;
+        #if CLASSIC_CHRONO_TYPES
         if(value instanceof java.util.Date) {
             normalizedValue = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(
-                DateTimeFormat.EXTENDED_UTC_FORMAT
-                    .format((java.util.Date) value)
+                DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value))
             );
         } else {
             normalizedValue = value;
         }
+        #endif
         if(normalizedValue instanceof URI) {
             ps.setString(position, normalizedValue.toString());
         } else if(normalizedValue instanceof Short) {
@@ -3345,7 +3352,7 @@ public class Database_2
             } else {
                 ps.setString(position, sqlValue.toString());
             }
-        } else if(normalizedValue instanceof Duration) {
+        } else if(Datatypes.DURATION_CLASS.isInstance(normalizedValue)) {
             Object sqlValue = this.getDurationMarshaller().marshal(normalizedValue, getDatabaseProductName(conn));
             if (sqlValue instanceof BigDecimal) {
                 ps.setBigDecimal(position, (BigDecimal) sqlValue);
@@ -3359,7 +3366,7 @@ public class Database_2
             } else {
                 ps.setObject(position, sqlValue);
             }
-        } else if(normalizedValue instanceof XMLGregorianCalendar) {
+        } else if(Datatypes.DATE_CLASS.isInstance(normalizedValue)) {
             Object sqlValue = this.getCalendarMarshaller().marshal(normalizedValue, conn);
             if (sqlValue instanceof Time) {
                 ps.setTime(position, (Time) sqlValue);
@@ -3419,7 +3426,7 @@ public class Database_2
     )
         throws ServiceException,
         SQLException {
-        List<ObjectRecord> objects = new ArrayList<ObjectRecord>(1);
+        List<ObjectRecord> objects = new ArrayList<>(1);
         this.getObjects(
             conn,
             dbObject,
@@ -3708,7 +3715,7 @@ public class Database_2
                     if (dbObject.includeColumn(columnName)) {
                         // Check whether attribute must be added
                         boolean addValue;
-                        if (SystemAttributes.OBJECT_CLASS.equals(featureName)) {
+                        if (OBJECT_CLASS.equals(featureName)) {
                             addValue = true;
                         } else {
                             switch (attributeSelector) {
@@ -3939,7 +3946,7 @@ public class Database_2
                                 // string
                                 else {
                                     if (val != null) {
-                                        if (SystemAttributes.OBJECT_CLASS
+                                        if (OBJECT_CLASS
                                             .equals(featureName)) {
                                             currentFacade
                                                 .getValue()
@@ -4402,9 +4409,9 @@ public class Database_2
             this.setValue(
                 target,
                 index,
-                this.getCalendarMarshaller().unmarshal(
-                    val.toString().substring(0, 10)
-                ),
+                #if CLASSIC_CHRONO_TYPES this.getCalendarMarshaller().unmarshal(val.toString().substring(0, 10))
+                #else java.time.LocalDate.parse(val.toString().substring(0, 10), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
+                #endif,
                 isEmbedded
             );
         } else if (PrimitiveTypes.DATE.equals(featureType)
@@ -6067,7 +6074,7 @@ public class Database_2
                 if (allSubtypes != null) {
                     objectClassFilterProperty = new FilterProperty(
                         p.quantor(),
-                        SystemAttributes.OBJECT_CLASS,
+                        OBJECT_CLASS,
                         p.operator(),
                         allSubtypes.toArray()
                     );
@@ -6327,7 +6334,7 @@ public class Database_2
                 if (removeSize) {
                     i.remove();
                 }
-            } else if (!SystemAttributes.OBJECT_CLASS.equals(attributeName)) {
+            } else if (!OBJECT_CLASS.equals(attributeName)) {
                 //
                 // Application attributes
                 //
@@ -6395,7 +6402,7 @@ public class Database_2
         throws ServiceException {
         this.removePrivateAttributes(object);
         this.setLockAssertion(object);
-        DateTimeValues.normalizeDateTimeValues(object);
+        #if CLASSIC_CHRONO_TYPES DateTimeValues.normalizeDateTimeValues(object);#endif
     }
 
     @Override
@@ -7476,7 +7483,7 @@ public class Database_2
     protected static final short VIEW_MODE_ADD_MIXIN_COLUMNS_TO_PRIMARY = 0;
     protected static final short VIEW_MODE_SECONDARY_COLUMNS = 1;
     protected static final Set<String> SYSTEM_ATTRIBUTES = Sets.asSet(
-        SystemAttributes.OBJECT_CLASS,
+        OBJECT_CLASS,
         SystemAttributes.CREATED_AT,
         SystemAttributes.CREATED_BY,
         SystemAttributes.MODIFIED_AT,
@@ -7545,7 +7552,7 @@ public class Database_2
      * operations
      */
     protected Set<String> singleValueAttributes = new HashSet<>(
-        Arrays.asList(SystemAttributes.OBJECT_CLASS, "object_stateId")
+        Arrays.asList(OBJECT_CLASS, "object_stateId")
     );
 
     /**
@@ -7600,7 +7607,7 @@ public class Database_2
 
     /**
      * This value is used as result set size if a fetch size of
-     * {@link javax.jdo.FetchPlan.FETCH_SIZE_OPTIMAL} (0) has been
+     * {@link FetchPlan.FETCH_SIZE_OPTIMAL} (0) has been
      * requested and more than optimal fetch size object records are
      * available.
      */
@@ -7622,7 +7629,7 @@ public class Database_2
     /**
      * A TOO_LARGE_RESULT_SET exception is thrown if the result set is larger
      * than result set limit and either
-     * {@link javax.jdo.FetchPlan.FETCH_SIZE_GREEDY} (-1) or a fetch size
+     * {@link FetchPlan.FETCH_SIZE_GREEDY} (-1) or a fetch size
      * greater than the result set limit has been requested.
      */
     protected int resultSetLimit = 10000;

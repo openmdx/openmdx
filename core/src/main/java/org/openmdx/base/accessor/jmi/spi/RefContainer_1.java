@@ -6,23 +6,23 @@
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,9 +36,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
@@ -48,6 +48,7 @@ import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
+#if !CLASSIC_CHRONO_TYPES import java.util.Collections;#endif
 import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterator;
@@ -60,7 +61,9 @@ import javax.jdo.spi.StateManager;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
+#if !CLASSIC_CHRONO_TYPES import org.oasisopen.cci2.QualifierType;#endif
 import org.oasisopen.jmi1.RefContainer;
+#if !CLASSIC_CHRONO_TYPES import org.oasisopen.jmi1.RefQualifier;#endif
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
@@ -75,6 +78,7 @@ import org.openmdx.base.collection.MarshallingSpliterator;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
+#if !CLASSIC_CHRONO_TYPES import org.openmdx.base.naming.TransactionalSegment;#endif
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
@@ -85,7 +89,7 @@ import org.w3c.cci2.AnyTypePredicate;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Stream; 
+import java.util.stream.Stream;
 
 /**
  * RefContainer_1
@@ -98,9 +102,9 @@ public class RefContainer_1
     /**
      * Constructor
      *
-     * @param   the marshaller to be applied to the elements, filter and order
+     * @param marshaller  the marshaller to be applied to the elements, filter and order
      *           objects.
-     * @param   The delegate contains unmarshalled elements
+     * @param container  The delegate contains unmarshalled elements
      */
     public RefContainer_1(
         Marshaller marshaller,
@@ -118,12 +122,12 @@ public class RefContainer_1
     private Marshaller marshaller;
 
     private Container_1_0 container;
-    
+
     public Container_1_0 refDelegate(
     ) {
         return this.container;
     }
-    
+
     /* (non-Javadoc)
      * @see javax.jmi.reflect.RefBaseObject#refImmediatePackage()
      */
@@ -221,9 +225,9 @@ public class RefContainer_1
 
     /**
      * Retrieve a member
-     * 
+     *
      * @param filter
-     * 
+     *
      * @return the requested member
      */
     private RefObject_1_0 get(String filter) {
@@ -301,7 +305,7 @@ public class RefContainer_1
     public List<RefObject_1_0> getAll(AnyTypePredicate predicate) {
         return this.refGetAll(predicate);
     }
-    
+
     /* (non-Javadoc)
      * @see Container#processAll(AnyTypePredicate, Consumer)
      */
@@ -312,8 +316,8 @@ public class RefContainer_1
     ) {
         final QueryComponents queryComponents = toQueryComponents(predicate);
         queryComponents.getSource().processAll(
-            queryComponents.getFetchPlan(), 
-            queryComponents.getOrder(), 
+            queryComponents.getFetchPlan(),
+            queryComponents.getOrder(),
             toConsumer(action)
         );
     }
@@ -326,20 +330,20 @@ public class RefContainer_1
         this.refRemoveAll(predicate);
     }
 
-    
+
     /* (non-Javadoc)
      * @see java.util.Collection#spliterator()
      */
     @Override
     public Spliterator<RefObject_1_0> spliterator() {
         return new MarshallingSpliterator<>(
-            RefObject_1_0.class, 
-            this.container.values().spliterator(), 
+            RefObject_1_0.class,
+            this.container.values().spliterator(),
             this.marshaller
         );
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Iterable
     //------------------------------------------------------------------------
@@ -355,8 +359,8 @@ public class RefContainer_1
     private MarshallingConsumer<DataObject_1_0, RefObject_1_0> toConsumer(Consumer<? super RefObject_1_0> consumer) {
         return new MarshallingConsumer<>(RefObject_1_0.class, consumer, this.marshaller);
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements Collection
     //------------------------------------------------------------------------
@@ -384,11 +388,11 @@ public class RefContainer_1
         return stream(); // No parallel support yet
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements PersistenceCapable
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoIsPersistent()
      */
@@ -420,7 +424,7 @@ public class RefContainer_1
     public PersistenceManager jdoGetPersistenceManager(){
         return this.refOutermostPackage().refPersistenceManager();
     }
-    
+
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
      */
@@ -594,11 +598,12 @@ public class RefContainer_1
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements RefContainer
     //------------------------------------------------------------------------
 
+    #if CLASSIC_CHRONO_TYPES
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refAdd(java.lang.Object[])
      */
@@ -610,7 +615,30 @@ public class RefContainer_1
             (RefObject_1_0) arguments[objectIndex]
         );
     }
+    #else
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refAdd(org.oasisopen.cci2.QualifierType, java.lang.Object, RefObject_1_0)
+     */
+    @Override
+    public void refAdd(QualifierType qualifierType, Object qualifierValue, RefObject_1_0 refObject) {
+        this.refAdd(
+                Collections.singletonList(
+                        new RefQualifier(qualifierType, refObject)
+                ),
+                refObject
+        );
+    }
 
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refAdd(java.util.List<RefQualifier>, org.openmdx.base.accessor.jmi.cci.RefObject_1_0)
+     */
+    @Override
+    public void refAdd(List<RefQualifier> qualifierList, RefObject_1_0 refObject) {
+        add(RefContainer_1.toQualifier(qualifierList), refObject);
+    }
+    #endif
+
+    #if CLASSIC_CHRONO_TYPES
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refGet(java.lang.Object[])
      */
@@ -620,6 +648,27 @@ public class RefContainer_1
             RefContainer_1.toQualifier(arguments.length, arguments)
         );
     }
+    #else
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refGet(org.oasisopen.cci2.QualifierType, java.lang.Object)
+     */
+    @Override
+    public RefObject_1_0 refGet(QualifierType qualifierType, Object qualifierValue) {
+        return this.refGet(
+                Collections.singletonList(
+                        new RefQualifier(qualifierType, qualifierValue)
+                )
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refGetAll(java.util.List<RefQualifier>)
+     */
+    @Override
+    public RefObject_1_0 refGet(List<RefQualifier> qualifierList) {
+        return get(RefContainer_1.toQualifier(qualifierList));
+    }
+    #endif
 
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refGetAll(java.lang.Object)
@@ -628,11 +677,12 @@ public class RefContainer_1
     public List<RefObject_1_0> refGetAll(Object rawQuery) {
         final QueryComponents queryComponents = toQueryComponents(rawQuery);
         return new MarshallingSequentialList<>(
-            this.marshaller, 
+            this.marshaller,
             queryComponents.getSource().values(queryComponents.getFetchPlan(), queryComponents.getOrder())
         );
     }
 
+    #if CLASSIC_CHRONO_TYPES
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refRemove(java.lang.Object[])
      */
@@ -647,6 +697,30 @@ public class RefContainer_1
             }
         }
     }
+    #else
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refRemove(org.oasisopen.cci2.QualifierType, java.lang.Object)
+     */
+    @Override
+    public void refRemove(QualifierType qualifierType, Object qualifierValue) {
+        this.refRemove(Collections.singletonList(new RefQualifier(qualifierType, qualifierValue)));
+    }
+
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refGetAll(java.util.List<RefQualifier>)
+     */
+    @Override
+    public void refRemove(List<RefQualifier> qualifierList) {
+        RefObject_1_0 object = refGet(qualifierList);
+        if(object != null) {
+            if(JDOHelper.isPersistent(object)) {
+                object.refDelete();
+            } else {
+                this.remove(object);
+            }
+        }
+    }
+    #endif
 
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refRemoveAll(java.lang.Object)
@@ -661,12 +735,13 @@ public class RefContainer_1
         return removed;
     }
 
+    #if CLASSIC_CHRONO_TYPES
     /**
      * Create a qualifier from its sub-segment specification array
-     * 
+     *
      * @param size
      * @param arguments
-     * 
+     *
      * @return the corresponding qualifier
      */
     static String toQualifier(
@@ -674,9 +749,9 @@ public class RefContainer_1
         Object[] arguments
     ){
         switch(size) {
-            case 0: 
+            case 0:
                 return null;
-            case 1: 
+            case 1:
                 return String.valueOf(arguments[0]);
             default: {
                 if((size & 1) == 1) throw new IllegalArgumentException(
@@ -702,15 +777,52 @@ public class RefContainer_1
                 }
                 return qualifier.toString();
             }
-        }        
+        }
     }
+    #else
+    /**
+     * Create a qualifier from its sub-segment specification array
+     *
+     * @param qualifierList the list of `RefQualifier`s to convert to its string representation
+     *
+     * @return the corresponding qualifier
+     */
+    static String toQualifier(
+        List<RefQualifier> qualifierList
+    ){
+        if (qualifierList.isEmpty())
+            return null;
+
+        final Iterator<RefQualifier> iterator = qualifierList.iterator();
+        final RefQualifier firstQualifier = iterator.next();
+
+        StringBuilder qualifier = new StringBuilder(
+                firstQualifier.qualifierType == PERSISTENT ? "!" : ""
+        ).append(
+                firstQualifier.qualifierValue == null ?
+                        TransactionalSegment.getClassicRepresentationOfNewInstance() :
+                        String.valueOf(firstQualifier.qualifierValue)
+        );
+
+        while (iterator.hasNext()) {
+            final RefQualifier next = iterator.next();
+            qualifier.append(
+                    next.qualifierType == PERSISTENT ? '!' : '*'
+            ).append(
+                    next.qualifierValue
+            );
+        }
+        return qualifier.toString();
+    }
+    #endif
+
 
     private QueryComponents toQueryComponents (
         Object rawQuery
     ){
         return new QueryComponents(this.container, unwrapQuery(rawQuery));
     }
-    
+
     private static Object unwrapQuery(Object rawQuery) {
         if(rawQuery instanceof Object[]) {
             Object[] args = (Object[]) rawQuery;
@@ -720,13 +832,13 @@ public class RefContainer_1
         }
         return rawQuery;
     }
-    
+
     static class QueryComponents {
 
         private final Container_1_0 source;
         private final FeatureOrderRecord[] order;
         private final FetchPlan fetchPlan;
-        
+
         QueryComponents(
             Container_1_0 container,
             Object query
@@ -740,7 +852,7 @@ public class RefContainer_1
                     )
                 );
                 fetchPlan = null;
-                order = null;  
+                order = null;
             } else if(query instanceof FeatureOrderRecord[]) {
                 source = container;
                 fetchPlan = null;
@@ -765,7 +877,7 @@ public class RefContainer_1
             }
         }
 
-        
+
         /**
          * Retrieve source.
          *
@@ -775,7 +887,7 @@ public class RefContainer_1
             return this.source;
         }
 
-        
+
         /**
          * Retrieve order.
          *
@@ -785,7 +897,7 @@ public class RefContainer_1
             return this.order;
         }
 
-        
+
         /**
          * Retrieve fetchPlan.
          *
@@ -794,7 +906,7 @@ public class RefContainer_1
         FetchPlan getFetchPlan() {
             return this.fetchPlan;
         }
-        
+
     }
-    
+
 }

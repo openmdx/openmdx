@@ -917,7 +917,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
              * 1) p0:t0, p1:t1, ..., pn:tn. In this case a class with stereotype <parameter> is created
              *    and p0, ..., pn are added as class attributes. Finally, a parameter with name 'in'
              *    is created with the created parameter type.
-             * 2) in:t. In this case the the parameter with name 'in' is created with the specified type.
+             * 2) in:t. In this case the parameter with name 'in' is created with the specified type.
              */
 
             /**

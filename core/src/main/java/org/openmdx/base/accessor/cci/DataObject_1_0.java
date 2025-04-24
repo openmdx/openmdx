@@ -130,7 +130,7 @@ import org.openmdx.base.naming.Path;
  *     2) The many typed getters and setters are replaced by untyped getters and setters
  *     which make the interface easier to use and to implement. Attribute types can
  *     be derived from a {@code MOF} repository.
- *   <li>implements the the interface {@code javax.jdo.spi.PersistenceCapable} and adds
+ *   <li>implements the interface {@code javax.jdo.spi.PersistenceCapable} and adds
  *     generic attribute value setters and getters. It also adds methods which allow to
  *     invoke operations on {@code SDO}s.
  * </ul>

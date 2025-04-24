@@ -72,7 +72,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -96,7 +95,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.cci.SystemAttributes;
@@ -1705,7 +1703,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											mappedNewValue = valueHolder.isOptionalValued() || mappedNewValue != null
 												? mappedNewValue 
 												: PrimitiveTypes.DATE.equals(featureTypeName) 
-													? new Date(0) 
+													? #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(0)
 													: DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendar(1, 1, 1, 0, 0, 0, 0, 0);
 											if(valueHolder.isOptionalValued()) {
 												if(target instanceof RefObject) {
@@ -1734,7 +1732,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											}
 										} else {
 											String newValue = (String)newValues.get(0);
-											Date mappedNewValue = null;
+											#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mappedNewValue = null;
 											try {
 												mappedNewValue = dateTimeParser.parse(newValue);
 											} catch(ParseException e) {
@@ -1752,12 +1750,14 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												}
 												// date
 												if(PrimitiveTypes.DATE.equals(featureTypeName)) {
-													XMLGregorianCalendar mappedNewValueDate = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-														cal.get(Calendar.YEAR),
-														cal.get(Calendar.MONTH) + 1,
-														cal.get(Calendar.DAY_OF_MONTH),
-														DatatypeConstants.FIELD_UNDEFINED
-													);
+													#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif mappedNewValueDate =
+															            #if CLASSIC_CHRONO_TYPES DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+																			cal.get(Calendar.YEAR),
+																			cal.get(Calendar.MONTH) + 1,
+																			cal.get(Calendar.DAY_OF_MONTH),
+																			DatatypeConstants.FIELD_UNDEFINED)
+																		#else java.time.LocalDate.of(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH))
+																		#endif;
 													if(target instanceof RefObject) {
 														Object value = this.getValue(
 															valueHolder, 
@@ -1852,7 +1852,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 									for(Iterator<String> j = newValues.iterator(); j.hasNext(); ) {
 										try {
 											String newValue = (String)j.next();
-											Date dateTime = null;
+											#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTime = null;
 											try {
 												dateTime = dateTimeParser.parse(newValue);
 											} catch(ParseException e) {
@@ -1861,7 +1861,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											if(dateTime != null) {
 												cal.setTime(dateTime);
 												if(PrimitiveTypes.DATE.equals(featureTypeName)) {
-													XMLGregorianCalendar date = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+													#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif date = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
 														cal.get(Calendar.YEAR),
 														cal.get(Calendar.MONTH) + 1,
 														cal.get(Calendar.DAY_OF_MONTH),

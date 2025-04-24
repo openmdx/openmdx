@@ -77,7 +77,7 @@ import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.cci2.SortedMaps;
 
 /**
- * Registers the the delegates with their manager
+ * Registers the delegates with their manager
  */
 class ObjectView_1 
     extends MarshallingObject_1<ViewManager_1_0> 

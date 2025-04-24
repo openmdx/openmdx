@@ -51,7 +51,6 @@ package org.openmdx.portal.servlet.loader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +64,7 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
 import org.openmdx.portal.servlet.wizards.WizardDefinition;
 import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
+import org.w3c.time.SystemClock;
 
 /**
  * WizardsLoader
@@ -97,7 +97,7 @@ public class WizardsLoader extends Loader {
         String[] locale,
         Model_1_0 model
     ) throws ServiceException {
-    	String messagePrefix = new Date() + "  ";
+    	String messagePrefix = SystemClock.getInstance().now() + "  ";
     	System.out.println(messagePrefix + "Loading wizards");
     	SysLog.info("Loading wizards");    	
         Map<String,List<WizardDefinition>> wizardDefinitions = new HashMap<String,List<WizardDefinition>>();

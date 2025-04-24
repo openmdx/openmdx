@@ -44,11 +44,11 @@
  */
 package org.openmdx.base.accessor.spi;
 
-import javax.xml.datatype.Duration;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
-import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Duration Marshaller
@@ -67,21 +67,21 @@ public class DurationMarshaller {
      * Datatype Instance <-> ISO 8601 Basic String
      */
     public static final Marshaller BASIC_FORMAT_TO_DATATYPE = new DatatypeMarshaller(
-        Duration.class
+        Datatypes.DURATION_CLASS
     ){
 
         @Override
         protected String toBasicFormat(Object datatype) {
-            return ((Duration)datatype).toString();
+            return (Datatypes.DURATION_CLASS.cast(datatype)).toString();
         }
-        
+
     };
 
     /**
      * Normalizing Marshaller
      */
     public static final Marshaller NORMALIZE = new NormalizingMarshaller(
-        Duration.class
+        Datatypes.DURATION_CLASS
     ){
 
         /* (non-Javadoc)
@@ -91,11 +91,14 @@ public class DurationMarshaller {
         protected Object normalize(
             Object source
         ) throws ServiceException {
-            return source instanceof Duration ? DatatypeFactories.immutableDatatypeFactory().toNormalizedDuration(
-                (Duration)source
-            ) : super.normalize(
-                source
-            );
+            #if CLASSIC_CHRONO_TYPES
+            return source instanceof Duration ? org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().toCanonicalForm(
+                Datatypes.DURATION_CLASS.cast(source)
+            ) : super.normalize(source);
+            #else
+            return source instanceof Duration ? Datatypes.DURATION_CLASS.cast(source) : super.normalize(source);
+            #endif
+
         }
         
     };

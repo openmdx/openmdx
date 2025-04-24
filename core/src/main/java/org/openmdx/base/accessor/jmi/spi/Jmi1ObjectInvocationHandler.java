@@ -76,7 +76,9 @@ import javax.jmi.reflect.RefFeatured;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
+import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
+import org.oasisopen.jmi1.RefQualifier;
 import org.omg.mof.spi.Identifier;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
@@ -783,7 +785,9 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                         this.refClass.getMarshaller(), 
                                         FeatureMapper.Kind.METHOD
                                     );
-                                    container.refAdd(jmiToRef(args));
+                                    // TODO: kjdd
+                                    // dirty-harry wrote: TODO
+//                                    container.refAdd(jmiToRef(args));
                                     return null;
                                 } else if (methodName.startsWith("get")) { 
                                     if(args.length != 1 || !(args[0] instanceof RefObject)) {
@@ -966,46 +970,36 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
      * 
      * @return the corresponding RefContainer arguments
      */
-    private static Object[] jmiToRef(
+    private static List<RefQualifier> jmiToRef(
         Object[] source
     ){
+
         if(source == null) {
             return null;
-        } 
-        else {
-            int size = source.length;
-            if(
-                (size == 1) &&
-                (source[0] instanceof RefObject_1_0)
-            ){
-                return new Object[]{RefContainer.REASSIGNABLE, null, source[0]};
-            }  
-            else if(
-                (size == 1) &&
-                (source[0] instanceof String || source[0] instanceof Number)
-            ){
-                return new Object[]{RefContainer.REASSIGNABLE, source[0]};
-            }  
-            else if(
-                size == 2 &&
-                (source[0] instanceof String)
-            ){
-                return new Object[]{RefContainer.REASSIGNABLE, source[0], source[1]};
-            } 
-            else {
-                Object[] target = new Object[size];
-                for(
-                    int i = 0, iLimit = size - 1;
-                    i <= iLimit;
-                    i++
-                ){
-                    target[i] = i % 2 == 1 || i == iLimit ? 
-                		validateSubSegment(source[i]) : 
-                        ((Boolean)source[i]).booleanValue() ? RefContainer.PERSISTENT : RefContainer.REASSIGNABLE; 
-                }
-                return target;
-            }
         }
+
+        List<RefQualifier> qualifiers = new ArrayList<>();
+
+        // Process the source array in pairs
+        for (int i = 0; i < source.length; i += 2) {
+            // First element of pair is the container management flag
+            Object managementFlag = source[i];
+
+            // Second element is the actual value
+            Object value = null;
+            if (i + 1 < source.length) {
+                value = source[i + 1];
+                if (value instanceof String || value instanceof Number) {
+                    value = validateSubSegment(value);
+                }
+            }
+
+            // Add the qualifier pair to the list
+            qualifiers.add(new RefQualifier(QualifierType.valueOf(managementFlag == RefContainer.PERSISTENT), value));
+        }
+
+        return qualifiers;
+
     }
 
     /**

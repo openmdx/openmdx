@@ -56,7 +56,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -132,6 +131,8 @@ import org.openmdx.portal.servlet.attribute.FieldDef;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 import org.openmdx.portal.servlet.control.UiGridControl;
 import org.openmdx.ui1.jmi1.ValuedField;
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.SystemClock;
 
 /**
  * UiGrid
@@ -1660,13 +1661,13 @@ public abstract class UiGrid extends Grid implements Serializable {
 						(condition instanceof IsBetweenCondition) &&
 						(values.size() < 2)
 					) {
-						Date day;
+						#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif day;
 						if(values.isEmpty()) {
-							day = new Date();
+							day = SystemClock.getInstance().now();
 						} else try {
-							day = (Date)values.get(0);
+							day = Datatypes.DATE_TIME_CLASS.cast(values.get(0));
 						} catch(IllegalArgumentException e) {
-							day = new Date();
+							day = SystemClock.getInstance().now();
 						}
 						Calendar nextDay = new GregorianCalendar();
 						nextDay.setTime(day);

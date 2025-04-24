@@ -49,7 +49,9 @@ import java.util.regex.Pattern;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
+#endif
 
 /**
  * Lock Assertion
@@ -107,7 +109,7 @@ public class LockAssertion {
 	private static Object toValue(
 		String value
 	){
-		return value.length() == 0 ? null : DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(value);
+		return value.isEmpty() ? null : org.w3c.spi2.Datatypes.create(org.w3c.spi2.Datatypes.DATE_CLASS, value);
 	}
 
 	/**

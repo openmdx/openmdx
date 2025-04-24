@@ -52,7 +52,6 @@ import java.net.URLDecoder;
 import java.security.PrivilegedExceptionAction;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -92,7 +91,6 @@ import jakarta.resource.ResourceException;
 import jakarta.resource.cci.InteractionSpec;
 import jakarta.resource.cci.Record;
 #endif
-import javax.xml.datatype.XMLGregorianCalendar;
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.AbstractNames;
@@ -150,6 +148,7 @@ import org.openmdx.kernel.loading.Factory;
 import org.w3c.jpa3.AbstractObject;
 import org.w3c.jpa3.DateTime;
 import org.w3c.spi.StateAccessor;
+import org.w3c.spi2.Datatypes;
 
 /**
  * RefRootPackage_1 class. This is at the same time the JMI root package which 
@@ -1249,7 +1248,7 @@ public class RefRootPackage_1
         public Query newQuery(
         ) {
             throw new UnsupportedOperationException(
-                "The the Class of the candidate instances must be specified when " +
+                "The Class of the candidate instances must be specified when " +
                 "creating a new Query instance."
             );            
         }
@@ -1981,7 +1980,7 @@ public class RefRootPackage_1
          * @see javax.jdo.PersistenceManager#getServerDate()
          */
         @Override
-        public Date getServerDate() {
+        public java.util.Date getServerDate() {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");
         }
 
@@ -2070,8 +2069,8 @@ public class RefRootPackage_1
                         }
                     } else if (ModelHelper.isDerived(attributeDef)){
                         Object value = 
-                            PrimitiveTypes.DATE.equals(typeName) ? org.w3c.jpa3.Date.toJDO((XMLGregorianCalendar) source) :
-                            PrimitiveTypes.DATETIME.equals(typeName) ? DateTime.toJDO((Date) source) :
+                            PrimitiveTypes.DATE.equals(typeName) ? org.w3c.jpa3.Date.toJDO(Datatypes.DATE_CLASS.cast(source)) :
+                            PrimitiveTypes.DATETIME.equals(typeName) ? DateTime.toJDO(Datatypes.DATE_TIME_CLASS.cast(source)) :
                             source;
                         try {
                             jpaClass.getField(jpaFeature).set(jpaObject, value);

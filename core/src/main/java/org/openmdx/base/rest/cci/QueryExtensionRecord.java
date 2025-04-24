@@ -115,7 +115,7 @@ public interface QueryExtensionRecord extends MappedRecord {
      * Retrieves a list containing all the elements for the attribute {@code dateParam}.
      * @return A list containing all elements for this attribute.
      */
-    java.util.List<javax.xml.datatype.XMLGregorianCalendar> getDateParam(
+    java.util.List<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> getDateParam(
     );
 
     /**
@@ -130,18 +130,18 @@ public interface QueryExtensionRecord extends MappedRecord {
      * @param dateParam value(s) to be added to {@code dateParam}
      */
     void setDateParam(
-        javax.xml.datatype.XMLGregorianCalendar... dateParam
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif... dateParam
     );
 
     void setDateParam(
-        java.util.List<javax.xml.datatype.XMLGregorianCalendar> dateParam
+        java.util.List<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> dateParam
     );
 
     /**
      * Retrieves a list containing all the elements for the attribute {@code dateTimeParam}.
      * @return A list containing all elements for this attribute.
      */
-    java.util.List<java.util.Date> getDateTimeParam(
+    java.util.List<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> getDateTimeParam(
     );
 
     /**
@@ -156,11 +156,11 @@ public interface QueryExtensionRecord extends MappedRecord {
      * @param dateTimeParam value(s) to be added to {@code dateTimeParam}
      */
     void setDateTimeParam(
-        java.util.Date... dateTimeParam
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif... dateTimeParam
     );
 
     void setDateTimeParam(
-        java.util.List<java.util.Date> dateTimeParam
+        java.util.List<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> dateTimeParam
     );
 
     /**

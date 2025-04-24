@@ -51,7 +51,6 @@ package org.openmdx.portal.servlet.loader;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -90,6 +89,7 @@ import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
+import org.w3c.time.SystemClock;
 
 public class UiLoader
     extends Loader {
@@ -181,7 +181,7 @@ public class UiLoader
     public List<Path> load(
         String[] locale
     ) throws ServiceException {
-    	String messagePrefix = new Date() + "  ";
+    	String messagePrefix = SystemClock.getInstance().now() + "  ";
     	System.out.println(messagePrefix + "Loading ui configuration...");
     	SysLog.info("Loading ui configuration");
         Map<String,Path> loadedUiSegments = new TreeMap<String,Path>();

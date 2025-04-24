@@ -190,6 +190,7 @@ dependencies {
     openmdxBootstrap(files(file(layout.buildDirectory.dir("generated/classes/openmdxBootstrap"))))
     openmdxBootstrap("jakarta.platform:jakarta.jakartaee-api")
 	openmdxBootstrap("com.vladsch.flexmark:flexmark")
+	openmdxBootstrap("javax.resource:javax.resource-api:1.7.1") // Until openMDX 4.19.4+ has been released and configured
 	// manifold preprocessor
 	compileOnly("systems.manifold:manifold-preprocessor")
     annotationProcessor(platform(project(projectPlatform)))
@@ -224,6 +225,7 @@ sourceSets {
     test {
         java {
             srcDir("src/test/java")
+			srcDir("src/test/openmdx-${projectFlavour}/java")
         }
         resources {
         	srcDir("src/test/resources")

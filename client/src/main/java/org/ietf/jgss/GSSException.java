@@ -215,7 +215,7 @@ public class GSSException extends Exception {
     /** 
      *  Creates a GSSException object with a specified major code.
      * 
-     * @param majorCode the The GSS error code for the problem causing this
+     * @param majorCode The GSS error code for the problem causing this
      * exception to be thrown.
      */
     public GSSException (int majorCode) {

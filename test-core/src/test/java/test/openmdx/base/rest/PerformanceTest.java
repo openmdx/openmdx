@@ -58,6 +58,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -77,6 +78,8 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.w3c.cci2.MutableDatatypeFactory;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.SystemClock;
 
 /**
  * Performance Test
@@ -139,7 +142,7 @@ public class PerformanceTest {
             MappedRecord d = facade.getValue();
             m.put("identity", o.identity = facade.getPath().toXRI());
             d.put("identity", o.identity);
-            m.put("field1", o.field1 = new Date());
+            m.put("field1", o.field1 = SystemClock.getInstance().now());
             d.put("field1", o.field1);
             m.put("field2", o.field2 = Collections.singleton("JUnit"));
             d.put("field2", o.field2);
@@ -325,13 +328,13 @@ public class PerformanceTest {
                     out.writeUTF("identity");
                     out.writeUTF(v.identity);
                     out.writeUTF("field1");
-                    out.writeLong(v.field1.getTime());
+                    out.writeLong(toEpochMillis(v.field1));
                     out.writeUTF("field2");
                     out.writeInt(v.field2.size());
                     for (Iterator<String> k = v.field2.iterator(); k.hasNext();)
                         out.writeUTF(k.next());
                     out.writeUTF("field3");
-                    out.writeLong(v.field3.getTime());
+                    out.writeLong(toEpochMillis(v.field3));
                     out.writeUTF("field4");
                     out.writeInt(v.field4.size());
                     for (Iterator<String> k = v.field4.iterator(); k.hasNext();)
@@ -374,14 +377,14 @@ public class PerformanceTest {
                     out.writeUTF("identity");
                     out.writeUTF((String) v.get("identity"));
                     out.writeUTF("field1");
-                    out.writeLong(((Date) v.get("field1")).getTime());
+                    out.writeLong(toEpochMillis(Datatypes.DATE_TIME_CLASS.cast(v.get("field1"))));
                     out.writeUTF("field2");
                     Set<String> f2 = (Set<String>) v.get("field2");
                     out.writeInt(f2.size());
                     for (Iterator<String> k = f2.iterator(); k.hasNext();)
                         out.writeUTF(k.next());
                     out.writeUTF("field3");
-                    out.writeLong(((Date) v.get("field3")).getTime());
+                    out.writeLong(toEpochMillis(Datatypes.DATE_TIME_CLASS.cast(v.get("field3"))));
                     out.writeUTF("field4");
                     Set<String> f4 = (Set<String>) v.get("field4");
                     out.writeInt(f4.size());
@@ -425,13 +428,13 @@ public class PerformanceTest {
                     out.writeUTF("identity");
                     out.writeUTF(v.getIdentity());
                     out.writeUTF("field1");
-                    out.writeLong(v.getField1().getTime());
+                    out.writeLong(toEpochMillis(v.getField1()));
                     out.writeUTF("field2");
                     out.writeInt(v.getField2().size());
                     for (Iterator<String> k = v.getField2().iterator(); k.hasNext();)
                         out.writeUTF(k.next());
                     out.writeUTF("field3");
-                    out.writeLong(v.getField3().getTime());
+                    out.writeLong(toEpochMillis(v.getField3()));
                     out.writeUTF("field4");
                     out.writeInt(v.getField4().size());
                     for (Iterator<String> k = v.getField4().iterator(); k.hasNext();)
@@ -482,14 +485,14 @@ public class PerformanceTest {
                     out.writeUTF("identity");
                     out.writeUTF((String) g0.invoke(v, (Object[]) null));
                     out.writeUTF("field1");
-                    out.writeLong(((Date) g1.invoke(v, (Object[]) null)).getTime());
+                    out.writeLong(toEpochMillis(Datatypes.DATE_TIME_CLASS.cast(g1.invoke(v, (Object[]) null))));
                     out.writeUTF("field2");
                     Set<String> f2 = (Set<String>) g2.invoke(v, (Object[]) null);
                     out.writeInt(f2.size());
                     for (Iterator<String> k = f2.iterator(); k.hasNext();)
                         out.writeUTF(k.next());
                     out.writeUTF("field3");
-                    out.writeLong(((Date) g3.invoke(v, (Object[]) null)).getTime());
+                    out.writeLong(toEpochMillis(Datatypes.DATE_TIME_CLASS.cast(g3.invoke(v, (Object[]) null))));
                     out.writeUTF("field4");
                     Set<String> f4 = (Set<String>) g4.invoke(v, (Object[]) null);
                     out.writeInt(f4.size());
@@ -516,7 +519,6 @@ public class PerformanceTest {
     @Test
     public void testFormatValueObjectsNatively(
     ) throws Exception {
-        DateTimeFormat dateFormat = DateTimeFormat.BASIC_UTC_FORMAT;
         {
             OutputStream storage = newOutputStream();
             long begin = System.currentTimeMillis();
@@ -531,13 +533,13 @@ public class PerformanceTest {
                         out.writeUTF("identity");
                         out.writeUTF(v.identity);
                         out.writeUTF("field1");
-                        out.writeUTF(dateFormat.format(v.field1));
+                        out.writeUTF(DateTimeFormat.BASIC_UTC_FORMAT.format(v.field1));
                         out.writeUTF("field2");
                         out.writeUTF(String.valueOf(v.field2.size()));
                         for (Iterator<String> k = v.field2.iterator(); k.hasNext();)
                             out.writeUTF(k.next());
                         out.writeUTF("field3");
-                        out.writeUTF(dateFormat.format(v.field3));
+                        out.writeUTF(DateTimeFormat.BASIC_UTC_FORMAT.format(v.field3));
                         out.writeUTF("field4");
                         out.writeUTF(String.valueOf(v.field4.size()));
                         for (Iterator<String> k = v.field4.iterator(); k.hasNext();)
@@ -564,7 +566,6 @@ public class PerformanceTest {
     @Test
     public void testFormatValueObjectsReflectively(
     ) throws Exception {
-        DateTimeFormat dateFormat = DateTimeFormat.BASIC_UTC_FORMAT;
         Method g0 = ValueObject.class.getMethod("getIdentity", (Class[]) null);
         Method g1 = ValueObject.class.getMethod("getField1", (Class[]) null);
         Method g2 = ValueObject.class.getMethod("getField2", (Class[]) null);
@@ -587,14 +588,14 @@ public class PerformanceTest {
                         out.writeUTF("identity");
                         out.writeUTF((String) g0.invoke(v, (Object[]) null));
                         out.writeUTF("field1");
-                        out.writeUTF(dateFormat.format((Date) g1.invoke(v, (Object[]) null)));
+                        out.writeUTF(DateTimeFormat.BASIC_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(g1.invoke(v, (Object[]) null)))); // Datatypes.DATE_TIME_CLASS.cast(g1.invoke(v, (Object[]) null))
                         out.writeUTF("field2");
                         Set<String> f2 = (Set<String>) g2.invoke(v, (Object[]) null);
                         out.writeUTF(String.valueOf(f2.size()));
                         for (Iterator<String> k = f2.iterator(); k.hasNext();)
                             out.writeUTF(k.next());
                         out.writeUTF("field3");
-                        out.writeUTF(dateFormat.format((Date) g3.invoke(v, (Object[]) null)));
+                        out.writeUTF(DateTimeFormat.BASIC_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(g3.invoke(v, (Object[]) null))));
                         out.writeUTF("field4");
                         Set<String> f4 = (Set<String>) g4.invoke(v, (Object[]) null);
                         out.writeUTF(String.valueOf(f4.size()));
@@ -622,7 +623,6 @@ public class PerformanceTest {
     @Test
     public void testFormatValueObjectsNormally(
     ) throws Exception {
-        DateTimeFormat dateFormat = DateTimeFormat.BASIC_UTC_FORMAT;
         {
             OutputStream storage = newOutputStream();
             long begin = System.currentTimeMillis();
@@ -637,14 +637,14 @@ public class PerformanceTest {
                         out.writeUTF("identity");
                         out.writeUTF(v.getIdentity());
                         out.writeUTF("field1");
-                        out.writeUTF(dateFormat.format(v.getField1()));
+                        out.writeUTF(DateTimeFormat.BASIC_UTC_FORMAT.format(v.getField1()));
                         out.writeUTF("field2");
                         Set<String> f2 = v.getField2();
                         out.writeUTF(String.valueOf(f2.size()));
                         for (Iterator<String> k = f2.iterator(); k.hasNext();)
                             out.writeUTF(k.next());
                         out.writeUTF("field3");
-                        out.writeUTF(dateFormat.format(v.getField3()));
+                        out.writeUTF(DateTimeFormat.BASIC_UTC_FORMAT.format(v.getField3()));
                         out.writeUTF("field4");
                         Set<String> f4 = v.getField4();
                         out.writeUTF(String.valueOf(f4.size()));
@@ -689,12 +689,12 @@ public class PerformanceTest {
                             out.writeUTF(p.getSegment(k).toClassicRepresentation());
                         ValueObject v = e.getValue();
                         out.writeUTF(v.getIdentity());
-                        out.writeLong(v.getField1().getTime());
+                        out.writeLong(toEpochMillis(v.getField1()));
                         Set<String> f2 = v.getField2();
                         out.writeInt(f2.size());
                         for (Iterator<String> k = f2.iterator(); k.hasNext();)
                             out.writeUTF(k.next());
-                        out.writeLong(v.getField3().getTime());
+                        out.writeLong(toEpochMillis(v.getField3()));
                         Set<String> f4 = v.getField4();
                         out.writeInt(f4.size());
                         for (Iterator<String> k = f4.iterator(); k.hasNext();)
@@ -724,12 +724,12 @@ public class PerformanceTest {
                         ValueObject v = new ValueObject();
                         this.valueObjects.put(new Path(p), v);
                         v.setIdentity(in.readUTF());
-                        v.setField1(new Date(in.readLong()));
+                        v.setField1(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong()));
                         Set<String> f2 = new HashSet<String>();
                         v.setField2(f2);
                         for (int k = 0, l = in.readInt(); k < l; k++)
                             f2.add(in.readUTF());
-                        v.setField1(new Date(in.readLong()));
+                        v.setField1(#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong()));
                         Set<String> f4 = new HashSet<String>();
                         v.setField4(f4);
                         for (int k = 0, l = in.readInt(); k < l; k++)
@@ -768,11 +768,11 @@ public class PerformanceTest {
                         out.writeUTF(p.getSegment(k).toClassicRepresentation());
                     ValueObject v = e.getValue();
                     out.writeUTF(v.identity);
-                    out.writeLong(v.field1.getTime());
+                    out.writeLong(toEpochMillis(v.field1));
                     out.writeInt(v.field2.size());
                     for (Iterator<String> k = v.field2.iterator(); k.hasNext();)
                         out.writeUTF(k.next());
-                    out.writeLong(v.field3.getTime());
+                    out.writeLong(toEpochMillis(v.field3));
                     out.writeInt(v.field4.size());
                     for (Iterator<String> k = v.field4.iterator(); k.hasNext();)
                         out.writeUTF(k.next());
@@ -800,11 +800,11 @@ public class PerformanceTest {
                             p[k] = in.readUTF();
                         this.valueObjects.put(new Path(p), v);
                         v.identity = in.readUTF();
-                        v.field1 = new Date(in.readLong());
+                        v.field1 = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong());
                         v.field2 = new HashSet<String>();
                         for (int k = 0, l = in.readInt(); k < l; k++)
                             v.field2.add(in.readUTF());
-                        v.field3 = new Date(in.readLong());
+                        v.field3 = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong());
                         v.field4 = new HashSet<String>();
                         for (int k = 0, l = in.readInt(); k < l; k++)
                             v.field4.add(in.readUTF());
@@ -850,12 +850,12 @@ public class PerformanceTest {
                             out.writeUTF(p.getSegment(k).toClassicRepresentation());
                         ValueObject v = e.getValue();
                         out.writeUTF((String) g0.get(v));
-                        out.writeLong(((Date) g1.get(v)).getTime());
+                        out.writeLong(toEpochMillis((Datatypes.DATE_TIME_CLASS.cast(g1.get(v)))));
                         Set<String> f2 = (Set<String>) g2.get(v);
                         out.writeInt(f2.size());
                         for (Iterator<String> k = f2.iterator(); k.hasNext();)
                             out.writeUTF(k.next());
-                        out.writeLong(((Date) g3.get(v)).getTime());
+                        out.writeLong(toEpochMillis((Datatypes.DATE_TIME_CLASS.cast(g3.get(v)))));
                         Set<String> f4 = (Set<String>) g4.get(v);
                         out.writeInt(f4.size());
                         for (Iterator<String> k = f4.iterator(); k.hasNext();)
@@ -885,12 +885,12 @@ public class PerformanceTest {
                         ValueObject v = new ValueObject();
                         this.valueObjects.put(new Path(p), v);
                         g0.set(v, in.readUTF());
-                        g1.set(v, new Date(in.readLong()));
+                        g1.set(v, #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong()));
                         Set<String> f2 = new HashSet<String>();
                         g2.set(v, f2);
                         for (int k = 0, l = in.readInt(); k < l; k++)
                             f2.add(in.readUTF());
-                        g3.set(v, new Date(in.readLong()));
+                        g3.set(v, #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong()));
                         Set<String> f4 = new HashSet<String>();
                         g4.set(v, f4);
                         for (int k = 0, l = in.readInt(); k < l; k++)
@@ -929,12 +929,12 @@ public class PerformanceTest {
                             out.writeUTF(p.getSegment(k).toClassicRepresentation());
                         Map<String, Object> v = e.getValue();
                         out.writeUTF((String) v.get("identity"));
-                        out.writeLong(((Date) v.get("field1")).getTime());
+                        out.writeLong(toEpochMillis((Datatypes.DATE_TIME_CLASS.cast(v.get("field1")))));
                         Set<String> f2 = (Set<String>) v.get("field2");
                         out.writeInt(f2.size());
                         for (Iterator<String> k = f2.iterator(); k.hasNext();)
                             out.writeUTF(k.next());
-                        out.writeLong(((Date) v.get("field3")).getTime());
+                        out.writeLong(toEpochMillis((Datatypes.DATE_TIME_CLASS.cast(v.get("field3")))));
                         Set<String> f4 = (Set<String>) v.get("field4");
                         out.writeInt(f4.size());
                         for (Iterator<String> k = f4.iterator(); k.hasNext();)
@@ -964,12 +964,12 @@ public class PerformanceTest {
                         Map<String, Object> v = new HashMap<String, Object>();
                         this.valueMaps.put(new Path(p), v);
                         v.put("identity", in.readUTF());
-                        v.put("field1", new Date(in.readLong()));
+                        v.put("field1", #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong()));
                         Set<String> f2 = new HashSet<String>();
                         v.put("field2", f2);
                         for (int k = 0, l = in.readInt(); k < l; k++)
                             f2.add(in.readUTF());
-                        v.put("field3", new Date(in.readLong()));
+                        v.put("field3", #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli #endif(in.readLong()));
                         Set<String> f4 = new HashSet<String>();
                         v.put("field4", f4);
                         for (int k = 0, l = in.readInt(); k < l; k++)
@@ -1078,6 +1078,18 @@ public class PerformanceTest {
         out.writeUTF("field4");
         out.writeUTF("field5");
         out.writeUTF("field6");
+    }
+
+    private static long toEpochMillis(
+            Date date
+    ) {
+        return date.getTime();
+    }
+
+    private static long toEpochMillis(
+            Instant date
+    ) {
+        return date.getEpochSecond() * 1000 + date.getNano() / 1000000;
     }
 
 }

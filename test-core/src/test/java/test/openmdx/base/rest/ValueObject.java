@@ -47,7 +47,6 @@
 package test.openmdx.base.rest;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Set;
 
 /**
@@ -62,21 +61,21 @@ public class ValueObject implements Serializable {
 
     transient Object id;
     public String identity;
-    public Date field1;
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif field1;
     public Set<String> field2;
-    public Date field3;
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif field3;
     public Set<String> field4;
     public int field5;
     public String field6;
     public String field7;
     
-    public final Date getField1() {
+    public final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getField1() {
     return this.field1;}
     
     public final Set<String> getField2() {
     return this.field2;}
     
-    public final Date getField3() {
+    public final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getField3() {
     return this.field3;}
     
     public final Set<String> getField4() {
@@ -97,13 +96,13 @@ public class ValueObject implements Serializable {
     public final String getIdentity() {
     return this.identity;}
     
-    public final void setField1(Date f1) {
+    public final void setField1(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif f1) {
     this.field1 = f1;}
     
     public final void setField2(Set<String> f2) {
     this.field2 = f2;}
     
-    public final void setField3(Date f3) {
+    public final void setField3(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif f3) {
     this.field3 = f3;}
     
     public final void setField4(Set<String> f4) {

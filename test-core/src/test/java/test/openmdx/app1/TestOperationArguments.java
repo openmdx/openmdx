@@ -46,10 +46,8 @@ package test.openmdx.app1;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.Date;
 
 import javax.jdo.PersistenceManager;
-import javax.xml.datatype.Duration;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -174,9 +172,9 @@ public class TestOperationArguments {
                     Structures.create(
                         SimpleStructSet.class,
                         new Boolean[]{}, // booleanField
-                        new Date[]{}, // dateTimeField
+                        new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif []{}, // dateTimeField
                         new BigDecimal[]{}, // decimalField
-                        new Duration[]{}, // durationField
+                        new #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.Duration #endif []{}, // durationField
                         new Integer[]{
                            Integer.valueOf(0)
                         }, // integerField
@@ -190,9 +188,9 @@ public class TestOperationArguments {
                     Structures.create(
                         SimpleStructSet.class,
                         new Boolean[]{}, // booleanField
-                        new Date[]{}, // dateTimeField
+                        new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif []{}, // dateTimeField
                         new BigDecimal[]{}, // decimalField
-                        new Duration[]{}, // durationField
+                        new #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.Duration #endif []{}, // durationField
                         new Integer[]{
                             Integer.valueOf(1)
                          }, // integerField
@@ -262,9 +260,9 @@ public class TestOperationArguments {
                     Structures.create(
                         SimpleStructSet.class,
                         new Boolean[]{}, // booleanField
-                        new Date[]{}, // dateTimeField
+                        new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif []{}, // dateTimeField
                         new BigDecimal[]{}, // decimalField
-                        new Duration[]{}, // durationField
+                        new #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.Duration #endif []{}, // durationField
                         new Integer[]{
                            Integer.valueOf(0)
                         }, // integerField
@@ -278,9 +276,9 @@ public class TestOperationArguments {
                     Structures.create(
                         SimpleStructSet.class,
                         new Boolean[]{}, // booleanField
-                        new Date[]{}, // dateTimeField
+                        new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif []{}, // dateTimeField
                         new BigDecimal[]{}, // decimalField
-                        new Duration[]{}, // durationField
+                        new #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.Duration #endif []{}, // durationField
                         new Integer[]{
                             Integer.valueOf(1)
                          }, // integerField

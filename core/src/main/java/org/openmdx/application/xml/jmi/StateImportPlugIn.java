@@ -54,7 +54,6 @@ import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefObject;
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
@@ -75,6 +74,7 @@ import org.openmdx.state2.jmi1.StateCapable;
 import org.openmdx.state2.spi.DateStateViewContext;
 import org.openmdx.state2.spi.Parameters;
 import org.openmdx.state2.spi.TechnicalAttributes;
+import org.w3c.spi2.Datatypes;
 
 /**
  * State Import Plug-In
@@ -154,8 +154,8 @@ public class StateImportPlugIn implements ImportPlugIn {
             } else if (facade.attributeValue(SystemAttributes.REMOVED_AT) != null){
             	return null;
             } else {
-                XMLGregorianCalendar validFrom =  (XMLGregorianCalendar) facade.attributeValue(TechnicalAttributes.STATE_VALID_FROM);
-                XMLGregorianCalendar validTo = (XMLGregorianCalendar) facade.attributeValue(TechnicalAttributes.STATE_VALID_TO);
+                #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom =  Datatypes.DATE_CLASS.cast(facade.attributeValue(TechnicalAttributes.STATE_VALID_FROM));
+                #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo = Datatypes.DATE_CLASS.cast(facade.attributeValue(TechnicalAttributes.STATE_VALID_TO));
                 Path objectId = (Path)facade.attributeValue(SystemAttributes.CORE);
                 if(objectId == null) {
                     throw new ServiceException(
@@ -267,18 +267,18 @@ public class StateImportPlugIn implements ImportPlugIn {
         //
         Path containerId = objectId.getParent();
         String qualifier = objectId.getLastSegment().toClassicRepresentation();
-        RefContainer<?> refContainer = (RefContainer<?>) persistenceManager.getObjectById(containerId);
-        if(qualifier.startsWith("!")) {
+        RefContainer<RefObject> refContainer = (RefContainer<RefObject>) persistenceManager.getObjectById(containerId);
+        if (qualifier.startsWith("!")) {
             refContainer.refAdd(
-                QualifierType.PERSISTENT,
-                qualifier.substring(1),
-                refObject
+                    QualifierType.PERSISTENT,
+                    qualifier.substring(1),
+                    refObject
             );
         } else {
             refContainer.refAdd(
-                QualifierType.REASSIGNABLE,
-                qualifier,
-                refObject
+                    QualifierType.REASSIGNABLE,
+                    qualifier,
+                    refObject
             );
         }
     }

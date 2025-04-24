@@ -47,9 +47,9 @@ package org.openmdx.base.aop1;
 import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_AT;
 import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_BY;
 
+import java.time.Instant;
 import java.util.AbstractList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.openmdx.base.accessor.view.Interceptor_1;
@@ -77,9 +77,10 @@ public class Removable_1 extends Interceptor_1 {
     }
 
     /**
-     * The future place holder has actually the value {@code 10000-01-01T00:00:00.000Z}.
+     * The future placeholder has actually the value {@code 10000-01-01T00:00:00.000Z}.
      */
-    public static final Date IN_THE_FUTURE = new Date(253402300800000l);
+    public static final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif IN_THE_FUTURE
+            = #if CLASSIC_CHRONO_TYPES new java.util.Date #else Instant.ofEpochMilli#endif(253402300800000l);
 
     /**
      * The cached <code<removedBy} value

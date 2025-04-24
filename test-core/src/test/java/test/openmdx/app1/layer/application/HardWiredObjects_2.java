@@ -46,7 +46,6 @@ package test.openmdx.app1.layer.application;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +73,8 @@ import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.format.DateTimeFormat;
+import org.w3c.time.SystemClock;
 
 /**
  * Hard-wired Objects Layer
@@ -91,11 +92,11 @@ public class HardWiredObjects_2 extends AccessControl_2 {
         //
         // Creation time of the hard-wired objects
         //
-        String timestamp = org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(new Date());
+        String timestamp = DateTimeFormat.BASIC_UTC_FORMAT.format(SystemClock.getInstance().now());
         //
         // hard-wired NameFormat
         //
-        this.nameFormats = new HashMap<String,MappedRecord>();
+        this.nameFormats = new HashMap<>();
         MappedRecord nameFormatStandard = Records.getRecordFactory().createMappedRecord(NAME_FORMAT_TYPE_NAME);
         nameFormatStandard.put("description","default name format");
         nameFormatStandard.put(SystemAttributes.CREATED_AT,timestamp);
@@ -107,7 +108,7 @@ public class HardWiredObjects_2 extends AccessControl_2 {
         //
         // hard-wired AddressFormat
         //
-        this.addressFormats = new HashMap<String,MappedRecord>();
+        this.addressFormats = new HashMap<>();
         MappedRecord addressFormatStandard = Records.getRecordFactory().createMappedRecord(ADDRESS_FORMAT_TYPE_NAME);
         addressFormatStandard.put("description","default address format");
         addressFormatStandard.put(SystemAttributes.CREATED_AT,timestamp);

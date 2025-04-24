@@ -48,7 +48,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -57,6 +56,7 @@ import javax.sql.DataSource;
 import org.openmdx.kernel.collection.TreeSparseArray;
 import org.w3c.cci2.SparseArray;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.time.SystemClock;
 
 /**
  * Generic Table Accessor
@@ -69,7 +69,7 @@ class GenericTableAcessor implements AccessorToAnotherDatabase {
     GenericTableAcessor(
     ){
         enabled = System.getProperty("org.openmdx.comp.env.jdbc.DataSource2") != null;
-        oid = DateTimeFormat.BASIC_UTC_FORMAT.format(new Date());
+        oid = DateTimeFormat.BASIC_UTC_FORMAT.format(SystemClock.getInstance().now());
     }
     
     private final boolean enabled;

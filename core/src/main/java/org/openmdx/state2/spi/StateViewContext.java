@@ -44,8 +44,6 @@
  */
 package org.openmdx.state2.spi;
 
-import java.util.Date;
-
 import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
 
 import org.openmdx.state2.cci.StateContext;
@@ -62,17 +60,17 @@ public abstract class StateViewContext<V>
     /**
      * Constructor 
      *
-     * @param viewKind
-     * @param validAt 
+     * @param viewKind defines whetherit shall be a time point or a time range view
+     * @param validAt the historical time point or {@code null} for an up-to-date view
      * @param existsAt the transaction time point, or {@code null} for an up-to-date view
-     * @param lowerBound
-     * @param upperBound
-     * @param includeUpperBound
+     * @param lowerBound the lower bound of a time range view
+     * @param upperBound the upper bound of a time range view
+     * @param includeUpperBound {@code true} if the upper bound is included in the range
      */
     protected StateViewContext(
         ViewKind viewKind, 
         V validAt,
-        Date existsAt,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt,
         V lowerBound,
         V upperBound,
         boolean includeUpperBound
@@ -136,7 +134,7 @@ public abstract class StateViewContext<V>
     /**
      * 
      */
-    private final Date existsAt;
+    private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt;
 
     /**
      * validFrom
@@ -162,25 +160,24 @@ public abstract class StateViewContext<V>
      * Tests the transaction time
      * 
      * @param existsAt {@code null} stands for the "head" 
-     * @param createdAt 
-     * @param removedAt
+     * @param createdAt the transaction time upon creation
+     * @param removedAt the transaction time upon removal
      * 
      * @return {@code true} if the entry exists at the given transaction time
      */
     public static boolean compareTransactionTime(
-        Date existsAt,
-        Date createdAt,
-        Date removedAt
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif createdAt,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif removedAt
     ){
         return existsAt == null ? removedAt == null : (
-             (createdAt != null && !existsAt.before(createdAt)) &&
-             (removedAt == null || existsAt.before(removedAt))
+             (createdAt != null && !existsAt.#if CLASSIC_CHRONO_TYPES before #else isBefore #endif(createdAt)) &&
+             (removedAt == null || existsAt.#if CLASSIC_CHRONO_TYPES before #else isBefore #endif(removedAt))
         );
             
     }
-        
-        
-    
+
+
     //------------------------------------------------------------------------
     // Implements StateContext
     //------------------------------------------------------------------------
@@ -195,7 +192,7 @@ public abstract class StateViewContext<V>
     /* (non-Javadoc)
      * @see org.openmdx.state2.cci.StateContext#getExistsAt()
      */
-    public Date getExistsAt() {
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getExistsAt() {
         return this.existsAt;
     }
 

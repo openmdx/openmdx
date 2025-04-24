@@ -44,7 +44,7 @@
  */
 package org.openmdx.state2.cci;
 
-import java.util.Date;
+
 
 /**
  * State Context
@@ -78,6 +78,6 @@ public interface StateContext<V> {
      * 
      * @return the view's system-time point
      */
-    public Date getExistsAt();
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getExistsAt();
 
 }

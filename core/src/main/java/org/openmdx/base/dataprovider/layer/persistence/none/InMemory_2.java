@@ -116,7 +116,7 @@ public class InMemory_2 implements Port<RestConnection> {
     }
 
     /**
-     * Sets the namspace id and provides the namespace local data
+     * Sets the namespace id and provides the namespace local data
      * 
      * @param namespaceId
      *            the namespaceId to set

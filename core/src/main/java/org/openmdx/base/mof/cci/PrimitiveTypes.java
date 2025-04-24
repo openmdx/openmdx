@@ -78,6 +78,8 @@ public class PrimitiveTypes {
   static public final String OBJECT_ID = "org:openmdx:base:ObjectId";
 
   static public final String DURATION = "org:w3c:duration";
+  static public final String DURATION_DAYTIME = "org:w3c:durationDayTime";
+  static public final String DURATION_YEARMONTH = "org:w3c:durationYearMonth";
 
   static public final String OID = "org:ietf:OID";
 

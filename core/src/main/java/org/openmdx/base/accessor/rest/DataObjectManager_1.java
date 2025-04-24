@@ -48,7 +48,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -357,7 +356,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /**
      * The transaction time factory may be set by an application
      */
-    protected Factory<Date> transactionTime;
+    protected Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> transactionTime;
 
     /**
      * Multitenancy support is opaque to the persistence manager
@@ -464,7 +463,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
          * @see org.openmdx.base.persistence.spi.SharedObjects.Accessor#getTransactionTime()
          */
         @Override
-        public Factory<Date> getTransactionTime() {
+        public Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> getTransactionTime() {
             return DataObjectManager_1.this.transactionTime;
         }
 
@@ -474,7 +473,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
          * @see org.openmdx.base.persistence.spi.SharedObjects.Accessor#setTransactionTime(org.openmdx.kernel.loading.Factory)
          */
         @Override
-        public void setTransactionTime(Factory<Date> transactionTime) {
+        public void setTransactionTime(Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> transactionTime) {
             DataObjectManager_1.this.transactionTime = transactionTime;
         }
 
@@ -976,7 +975,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     }
 
     @Override
-    public Date getServerDate() {
+    public java.util.Date getServerDate() {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 

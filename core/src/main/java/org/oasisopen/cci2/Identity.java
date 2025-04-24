@@ -67,7 +67,7 @@ import java.io.Serializable;
  * the class name.
  * <li>Its components are separated by two colons (<b>::</b>).
  * <li>The namespace should be omitted if it consists of exactly the same 
- * components as the the <i>openmdx-authority</i>.
+ * components as the <i>openmdx-authority</i>.
  * </ul>
  * <li>A <em>transient object's</em> {@code Identity} has the following XRI 2 authority form<ul>
  * <li><b>$t*uuid*</b><i>&lsaquo;uuid&rsaquo;</i>

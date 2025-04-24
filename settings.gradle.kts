@@ -59,17 +59,17 @@ include(
     "openmdx-3-platform",
     "openmdx-4-platform",
     "openmdx-5-platform",
-    "core"
-)
-val flavour: String = gradle.startParameter.projectProperties.getOrDefault("flavour", "4")
-if (flavour == "2") include(// will flavour != "3" with MDX-2
-    "client",
-    "portal",
-    "tomcat"
-)
-if (flavour == "2" || flavour == "4") include(// will flavour != "3" with MDX-2
+    "core",
     "test-core",
-    "security",
+    "client",
+    "security"
+)
+
+val flavour: String = gradle.startParameter.projectProperties.getOrDefault("flavour", "3")
+// projects out of scope for flavour 3 with MDX-1 but included in all flavours with MDX-2!
+if (flavour != "3") include(
+    "portal",
+    "tomcat",
     "test-security",
     "publish"
 )

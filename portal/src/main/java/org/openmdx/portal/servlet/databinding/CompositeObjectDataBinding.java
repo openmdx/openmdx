@@ -53,7 +53,6 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,9 +61,6 @@ import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jmi.reflect.RefObject;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.Names;
@@ -170,10 +166,10 @@ public class CompositeObjectDataBinding extends DataBinding {
             valueClass = String.class;
         }
         else if("date".equals(type)) {
-            valueClass = XMLGregorianCalendar.class;
+            valueClass = Datatypes.DATE_CLASS;
         }
         else if("datetime".equalsIgnoreCase(type)) {
-            valueClass = Date.class;
+            valueClass = Datatypes.DATE_TIME_CLASS;
         }
         else if("short".equalsIgnoreCase(type)) {
             valueClass = Short.class;
@@ -188,7 +184,7 @@ public class CompositeObjectDataBinding extends DataBinding {
             valueClass = BigDecimal.class;
         }
         else if("duration".equalsIgnoreCase(type)) {
-            valueClass = Duration.class;
+            valueClass = Datatypes.DURATION_CLASS;
         }   
         else if("boolean".equalsIgnoreCase(type)) {
             valueClass = Boolean.class;
@@ -198,11 +194,6 @@ public class CompositeObjectDataBinding extends DataBinding {
     
     /**
      * Map parameter mode to query.
-     * 
-     * @param refPackage
-     * @param parameterMode
-     * @param pm
-     * @return
      */
     protected Query newQuery(
         ParameterMode parameterMode,

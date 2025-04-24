@@ -58,7 +58,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -86,6 +85,7 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.action.SelectObjectAction;
 import org.openmdx.portal.servlet.component.LayoutFactory;
 import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
+import org.w3c.time.SystemClock;
 
 /**
  * ApplicationContext holds the state of the current (user) session.
@@ -1098,7 +1098,7 @@ public final class ApplicationContext implements Serializable {
         } catch(Exception ignore) {
 			SysLog.trace("Exception ignored", ignore);
         }
-        this.pmDataReloadedAt = new Date();
+        this.pmDataReloadedAt = SystemClock.getInstance().now();
     }
 
     /**
@@ -1114,7 +1114,7 @@ public final class ApplicationContext implements Serializable {
             this.getPmfData(),
             this.currentUserRole
         );
-        this.pmDataReloadedAt = new Date();
+        this.pmDataReloadedAt = SystemClock.getInstance().now();
         return this.pmData;
     }
 
@@ -1206,7 +1206,7 @@ public final class ApplicationContext implements Serializable {
      * Get time when pm data was last reloaded.
      * @return
      */
-    public Date getPmDataReloadedAt(
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getPmDataReloadedAt(
     ) {
         return this.pmDataReloadedAt;
     }
@@ -2097,7 +2097,7 @@ public final class ApplicationContext implements Serializable {
 	protected String currentLoginPrincipal;
 	protected String currentUserRole;
 	protected PersistenceManager pmData; // package managing data objects
-	protected Date pmDataReloadedAt;
+	protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif pmDataReloadedAt;
 	protected PersistenceManager pmControl; // package managing control objects
 	protected String currentLocaleAsString = null;
 	protected String currentTimeZone = null;

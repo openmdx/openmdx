@@ -60,7 +60,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -168,6 +167,8 @@ import org.w3c.cci2.LargeObject;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.spi2.Datatypes;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 import static org.openmdx.base.mof.cci.PrimitiveTypes.DATE;
 import static org.openmdx.base.mof.cci.PrimitiveTypes.DATETIME;
@@ -2173,12 +2174,12 @@ public class DataObject_1
      */
     private void assertReadLock(
         DataObject_1_0 beforeImage,
-        Date lockValue
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif lockValue
     )
         throws ServiceException {
-        Date currentValue = (Date) beforeImage.objGetValue(SystemAttributes.MODIFIED_AT);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = Datatypes.DATE_TIME_CLASS.cast(beforeImage.objGetValue(SystemAttributes.MODIFIED_AT));
         if (currentValue != null) {
-            if (currentValue.after(lockValue)) {
+            if (currentValue.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(lockValue)) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.CONCURRENT_ACCESS_FAILURE,
@@ -2205,26 +2206,31 @@ public class DataObject_1
     )
         throws ServiceException {
         Matcher lockMatcher = WRITE_LOCK_PATTERN.matcher(lockAssertion);
-        if (lockMatcher.matches())
+        if (lockMatcher.matches()) {
             try {
                 String lockFeature = lockMatcher.group(1);
-                Date currentValue = (Date) beforeImage.objGetValue(lockFeature);
+                    #if CLASSIC_CHRONO_TYPES java.util.Date #else
+                java.time.Instant #endif currentValue
+                        = Datatypes.DATE_TIME_CLASS.cast(beforeImage.objGetValue(lockFeature));
                 if (currentValue != null) {
-                    Date lockValue = DateTimeFormat.EXTENDED_UTC_FORMAT.parse(lockMatcher.group(2) + "Z");
+                        #if CLASSIC_CHRONO_TYPES java.util.Date #else
+                    java.time.Instant #endif lockValue
+                            = DateTimeFormat.EXTENDED_UTC_FORMAT.parse(lockMatcher.group(2) + "Z");
                     if (!lockValue.equals(currentValue)) {
                         throw new ServiceException(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-                            "Object has been updated by another persistence manager since it has been cached",
-                            new BasicException.Parameter(BasicException.Parameter.XRI, ReducedJDOHelper.getAnyObjectId(this)),
-                            new BasicException.Parameter("lockAssertion", lockAssertion),
-                            new BasicException.Parameter(lockFeature, DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue))
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+                                "Object has been updated by another persistence manager since it has been cached",
+                                new BasicException.Parameter(BasicException.Parameter.XRI, ReducedJDOHelper.getAnyObjectId(this)),
+                                new BasicException.Parameter("lockAssertion", lockAssertion),
+                                new BasicException.Parameter(lockFeature, DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue))
                         );
                     }
                 }
             } catch (ParseException exception) {
                 SysLog.warning("Unable to validate lock assertion for object " + ReducedJDOHelper.getAnyObjectId(this), lockAssertion);
             }
+        }
     }
 
     private String getWriteLockAssertion(

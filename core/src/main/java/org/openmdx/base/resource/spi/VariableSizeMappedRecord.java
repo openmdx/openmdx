@@ -60,7 +60,9 @@ import org.openmdx.kernel.collection.InternalizedKeyMap;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.cci2.ImmutableDatatype;
+#endif
 
 /**
  * Java Connector Architecture:
@@ -170,7 +172,6 @@ class VariableSizeMappedRecord
        }
     }
 
-    
     //--------------------------------------------------------------------------
     // Implements Freezable
     //--------------------------------------------------------------------------
@@ -456,7 +457,12 @@ class VariableSizeMappedRecord
     }
 
     private static boolean areEqual(Object thisValue, Object thatValue){
-        return thatValue instanceof ImmutableDatatype<?> ? thatValue.equals(thisValue) : thisValue.equals(thatValue);
+        #if CLASSIC_CHRONO_TYPES
+        if (thatValue instanceof ImmutableDatatype<?>) {
+            return thatValue.equals(thisValue);
+        }
+        #endif
+        return thisValue.equals(thatValue);
     }
     
     /**

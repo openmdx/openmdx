@@ -48,7 +48,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -56,7 +56,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.jmi.reflect.RefObject;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -71,6 +70,8 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Resources;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.spi2.Datatypes;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * XML Target
@@ -242,9 +243,9 @@ public class XMLTarget implements ExportTarget {
     ) throws ServiceException {
         final String stringValue;
         if(PrimitiveTypes.DATETIME.equals(typeName)) {
-            stringValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format((Date) value);
+            stringValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value));
         } else if(PrimitiveTypes.DATE.equals(typeName)) {
-            stringValue = ((XMLGregorianCalendar) value).toXMLFormat();
+            stringValue = Datatypes.DATE_CLASS.cast(value).#if CLASSIC_CHRONO_TYPES toXMLFormat() #else toString()#endif;
         } else if(PrimitiveTypes.LONG.equals(typeName) || PrimitiveTypes.INTEGER.equals(typeName) || PrimitiveTypes.SHORT.equals(typeName)) {
             stringValue = String.valueOf(((Number) value).longValue());
         } else if(PrimitiveTypes.BINARY.equals(typeName)) {
@@ -255,7 +256,7 @@ public class XMLTarget implements ExportTarget {
             stringValue = value.toString();
         }
         if(multiplicity.isMultiValued()) {
-            Map<String, String> atts = new LinkedHashMap<String,String>();
+            Map<String, String> atts = new LinkedHashMap<>();
             if((multiplicity == Multiplicity.SPARSEARRAY)) {
                 atts.put("_position", String.valueOf(position));
             }

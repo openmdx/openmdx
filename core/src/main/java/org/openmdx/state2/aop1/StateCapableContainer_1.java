@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,7 +66,6 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
 import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.InteractionSpec #endif;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
@@ -246,7 +244,7 @@ public class StateCapableContainer_1
 	        );
             switch(stateContext.getViewKind()) {
                 case TIME_RANGE_VIEW:
-                	XMLGregorianCalendar validTo = stateContext.getValidTo();
+                	#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo = stateContext.getValidTo();
                 	if(validTo != null) {
                 		filter.add(
                             new IsGreaterCondition(
@@ -257,7 +255,7 @@ public class StateCapableContainer_1
                             )
                 		);
                 	}
-                	XMLGregorianCalendar validFrom = stateContext.getValidFrom();
+                	#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom = stateContext.getValidFrom();
                 	if(validFrom != null) {
                 		filter.add(
                             new IsGreaterOrEqualCondition(
@@ -277,7 +275,7 @@ public class StateCapableContainer_1
                     );
             		break;
                 case TIME_POINT_VIEW:
-                	XMLGregorianCalendar validAt = stateContext.getValidAt();
+                	#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validAt = stateContext.getValidAt();
                 	if(validAt != null) {
                 		filter.add(
                             new IsGreaterCondition(
@@ -296,7 +294,7 @@ public class StateCapableContainer_1
                             )
                         );
                 	}
-                	Date existsAt = stateContext.getExistsAt();
+                	#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif existsAt = stateContext.getExistsAt();
                 	if(existsAt == null) {
                 		filter.add(
                             new IsInCondition(

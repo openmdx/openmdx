@@ -47,7 +47,6 @@ package org.openmdx.base.accessor.rest;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -90,6 +89,7 @@ import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.jdo.JDOPersistenceManagerFactory;
 import org.openmdx.kernel.loading.Factory;
 import org.openmdx.kernel.log.SysLog;
+import org.w3c.time.SystemClock;
 
 /**
  * Unit Of Work
@@ -203,7 +203,7 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
     /**
      * Defines when the unit of work did start.
      */
-    private Date transactionTime = null;
+    private #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime = null;
 
     /**
      * A unit-of-work id is assigned when the unit of work is activated.
@@ -524,7 +524,7 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
      * 
      * @return the transaction time
      */
-    public Date getTransactionTime() {
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getTransactionTime() {
         return this.transactionTime;
     }
 
@@ -1141,7 +1141,7 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
             this.taskId = null;
             this.aspectSpecificContexts.clear();
             if (status == Status.STATUS_COMMITTED) {
-                // TODO §SharedObjects.getPlugInObject(this.dataObjectManager, DataStoreCache_2_0.class).evictAll();
+                // § SharedObjects.getPlugInObject(this.dataObjectManager, DataStoreCache_2_0.class).evictAll();
             }
             if (!this.dataObjectManager.isRetainValues()) {
                 this.dataObjectManager.evictAll();
@@ -1257,9 +1257,10 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
          * 
          * @see UserObjects#setTransactionTime(PersistenceManager, Factory<Date>)
          */
-        Date newTransactionTime() {
-            Factory<Date> transactionTime = getAccessor().getTransactionTime();
-            return transactionTime == null ? new Date() : transactionTime.instantiate();
+        // TODO: kjdd Apply `org.w3c.time.Clock` recommendation, please!
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newTransactionTime() {
+            Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> transactionTime = getAccessor().getTransactionTime();
+            return transactionTime == null ? SystemClock.getInstance().now() : transactionTime.instantiate();
         }
 
     }

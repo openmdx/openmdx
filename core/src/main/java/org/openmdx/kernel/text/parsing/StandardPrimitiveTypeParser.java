@@ -51,6 +51,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.ietf.jgss.Oid;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.text.spi.Parser;
 
 /**
@@ -77,8 +78,9 @@ public class StandardPrimitiveTypeParser extends AbstractParser {
         Long.class,
         BigDecimal.class,
         BigInteger.class,
-        URI.class,
-        Oid.class
+        URI.class, // aus java.net
+        Oid.class, // aus org.ietf.jgss
+		Path.class // aus org.openmdx.base.naming
     );
     
     /**
@@ -116,6 +118,7 @@ public class StandardPrimitiveTypeParser extends AbstractParser {
     		valueClass == BigInteger.class ? new BigInteger(externalRepresentation) :
     		valueClass == URI.class ? new URI(externalRepresentation) :
     		valueClass == Oid.class ? new Oid(externalRepresentation) :
+			valueClass == Path.class ? new Path(externalRepresentation) :
     		super.parseAs(externalRepresentation, valueClass);
 	}
 

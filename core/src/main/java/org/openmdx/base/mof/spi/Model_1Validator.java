@@ -52,13 +52,10 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.RuntimeServiceException;
@@ -74,6 +71,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Model Validator
@@ -247,13 +245,13 @@ public class Model_1Validator {
         } else {
             String type = attribute.getType().getLastSegment().toClassicRepresentation();
             if(PrimitiveTypes.DATE.equals(type)) {
-                if(!(value instanceof XMLGregorianCalendar)) {
+                if(!(Datatypes.DATE_CLASS.isInstance(value))) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.VALIDATION_FAILURE,
                         "Invalid value class",
                         new BasicException.Parameter("type", type),
-                        new BasicException.Parameter("expected", XMLGregorianCalendar.class.getName()),
+                        new BasicException.Parameter("expected", Datatypes.DATE_CLASS.getName()),
                         new BasicException.Parameter("actual", value.getClass().getName())
                     );
                 }
@@ -269,13 +267,13 @@ public class Model_1Validator {
                     );
                 }
             } else if (PrimitiveTypes.DATETIME.equals(type)) {
-                if(!(value instanceof Date)) {
+                if(!(Datatypes.DATE_TIME_CLASS.isInstance(value))) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.VALIDATION_FAILURE,
                         "Invalid value class",
                         new BasicException.Parameter("type", type),
-                        new BasicException.Parameter("expected", Date.class.getName()),
+                        new BasicException.Parameter("expected", Datatypes.DATE_TIME_CLASS.getName()),
                         new BasicException.Parameter("actual", value.getClass().getName())
                     );
                 }

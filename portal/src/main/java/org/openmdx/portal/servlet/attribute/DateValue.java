@@ -51,13 +51,10 @@ package org.openmdx.portal.servlet.attribute;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -121,7 +118,7 @@ public class DateValue
             application
         );
         try {
-            this.defaultValue = Datatypes.create(Date.class, fieldDef.defaultValue);
+            this.defaultValue = Datatypes.create(Datatypes.DATE_TIME_CLASS, fieldDef.defaultValue);
         } catch(IllegalArgumentException e) {
         	// ignore
         }
@@ -246,12 +243,14 @@ public class DateValue
     ) {
         SimpleDateFormat dateFormatter = this.getLocalizedDateFormatter(useEditStyle);
         SimpleDateFormat dateTimeFormatter = this.getLocalizedDateTimeFormatter(useEditStyle);
-        if(value instanceof Date) {
+        if(Datatypes.DATE_TIME_CLASS.isInstance(value)) {
             return this.isDate() ? 
             	dateFormatter.format(value) : 
             		dateTimeFormatter.format(value);
-        } else if(value instanceof XMLGregorianCalendar) {
-            GregorianCalendar calendar = ((XMLGregorianCalendar)value).toGregorianCalendar(
+        } else if(Datatypes.DATE_CLASS.isInstance(value)) {
+            // TODO: kjdd
+            // Das ist doch mit Flavour 3 gar nicht kompilierbar, oder?
+            GregorianCalendar calendar = (Datatypes.DATE_CLASS.cast(value)).toGregorianCalendar(
                 TimeZone.getTimeZone(app.getCurrentTimeZone()),
                 this.app.getCurrentLocale(),
                 null
@@ -488,7 +487,7 @@ public class DateValue
             return new HashMap<String,SimpleDateFormat>();
         }
     };
-    private Date defaultValue = null;
+    private #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif defaultValue = null;
 
 }
 

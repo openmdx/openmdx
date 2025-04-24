@@ -50,7 +50,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
-import java.util.Date;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
@@ -156,7 +155,7 @@ final class Token
     			"The token has expired",
 				new BasicException.Parameter(
 					"expiration", 
-					new Date(this.expiration)
+					#if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(this.expiration)
 				)
 			);
 		}
@@ -174,7 +173,7 @@ final class Token
 	public String toString() {
         return IndentingFormatter.toString(
             this.getClass().getName() + 
-            " (exires " + new Date(this.expiration) + "): " + 
+            " (exires " + #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(this.expiration) + "): " +
             this.value
         );
 	}

@@ -45,12 +45,13 @@
 package org.openmdx.kernel.exception;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
@@ -62,6 +63,7 @@ import java.util.logging.Logger;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.log.ForeignLogRecord;
 import org.openmdx.kernel.log.LoggerFactory;
+import org.w3c.format.DateTimeFormat;
 
 /**
  * An exception stack is a linked list of {@code BasicException}s.
@@ -192,7 +194,7 @@ public final class BasicException extends Exception {
         String exceptionDomain,
         int exceptionCode,
         String exceptionClass,
-        Date exceptionTime,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif exceptionTime,
         String exceptionMethod,
         Integer exceptionLine,
         String description,
@@ -203,7 +205,7 @@ public final class BasicException extends Exception {
         this.domain = exceptionDomain;
         this.code = exceptionCode;
         this.exceptionClass = exceptionClass;
-        this.timestamp = exceptionTime == null ? Long.MIN_VALUE : exceptionTime.getTime();
+        this.timestamp = exceptionTime == null ? Long.MIN_VALUE : exceptionTime.#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli() #endif;
         this.methodName = exceptionMethod;
         this.lineNumber = exceptionLine == null ? -1 : exceptionLine.intValue();
         this.description = description;
@@ -296,8 +298,9 @@ public final class BasicException extends Exception {
     /**
      * To format the timestamp
      */
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    
+//    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+
     /**
      * Exception Mappers
      */
@@ -317,10 +320,8 @@ public final class BasicException extends Exception {
      * The environment specific line separator
      */
     static final String lineSeparator;
-    
+
     static {
-        dateFormat.setLenient(false);
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         lineSeparator = getProperty("line.separator", "\n");
     }
 
@@ -462,7 +463,6 @@ public final class BasicException extends Exception {
     /**
      * Creates an exception stack for kernel classes.
      *
-     * @param cause An embedded exception
      * @param exceptionDomain An exception domain. A null objects references
      * the default exception domain with negative exception codes only.
      * @param exceptionCode  An exception code. Negative codes describe common
@@ -510,16 +510,14 @@ public final class BasicException extends Exception {
     ) {
         return this.stackTrace == null && lazily ? NO_STACK_TRACE : getStackTrace();
     }
-    
+
     /**
-     * Associate the cause, a {@code BasicExcpetion} with its holder
-     * 
+     * Associate the cause, a {@code BasicException} with its holder
+     *
      * @param throwable
-     * 
+     *
      * @return the throwable
-     * 
-     * @throws NullPointerExceptionn if either the throwable or its cause is {@code null}
-     * @throws InvalidArgumentException if the throwable's cause is not a {@code BasicException}
+     *
      * @throws IllegalStateException if the {@code BasicException} is already connected with a holder
      */
     public static <T extends Throwable> T initHolder(
@@ -791,9 +789,9 @@ public final class BasicException extends Exception {
      *
      * @return the timestamp
      */
-    public Date getTimestamp(
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getTimestamp(
     ){
-        return this.timestamp == Long.MIN_VALUE ? null : new Date(this.timestamp);
+        return this.timestamp == Long.MIN_VALUE ? null : #if CLASSIC_CHRONO_TYPES new java.util.Date #else Instant.ofEpochMilli#endif(this.timestamp);
     }
 
     public Parameter[] getParameters(){
@@ -869,9 +867,9 @@ public final class BasicException extends Exception {
             out.append("\tDescription = ").append(description);
             out.println(); 
         }       
-        Date thrownAt = this.getTimestamp();
-        if(thrownAt != null) synchronized(BasicException.dateFormat) {
-            out.append("\tTimestamp = ").append(BasicException.dateFormat.format(thrownAt));
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif thrownAt = this.getTimestamp();
+        if(thrownAt != null) {
+            out.append("\tTimestamp = ").append(DateTimeFormat.EXTENDED_UTC_FORMAT.format(thrownAt));
             out.println();
         }
         int i = 0;
@@ -1013,7 +1011,7 @@ public final class BasicException extends Exception {
     //------------------------------------------------------------------------
 
     private void writeObject(
-        java.io.ObjectOutputStream out
+        ObjectOutputStream out
     ) throws IOException {
         this.getCause();
         this.getMessage();
@@ -1421,7 +1419,7 @@ public final class BasicException extends Exception {
         /**
          * Selects a domain specific exception stack element
          * 
-         * @param the requested domain, or {@code null} ti retrieve the initial cause.
+         * @param exceptionDomain requested domain, or {@code null} to retrieve the initial cause.
          *
          * @return the first exception stack element for the requested domain, 
          * or {@code null} if no such element exists

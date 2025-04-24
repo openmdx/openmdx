@@ -996,7 +996,7 @@ checkLongOption()
   * This method returns a char that is the current option that has been
   * parsed from the command line.  If the option takes an argument, then
   * the internal variable 'optarg' is set which is a String representing
-  * the the value of the argument.  This value can be retrieved by the
+  * the value of the argument.  This value can be retrieved by the
   * caller using the getOptarg() method.  If an invalid option is found,
   * an error message is printed and a '?' is returned.  The name of the
   * invalid option character can be retrieved by calling the getOptopt()

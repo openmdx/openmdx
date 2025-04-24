@@ -34,7 +34,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -51,6 +50,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.WeakHashMap;
+import org.w3c.spi2.Datatypes;
 
 /*
  * Like the {@code Intropector}, the {@code MetaData} class
@@ -276,14 +276,14 @@ class java_util_Date_PersistenceDelegate extends PersistenceDelegate {
         if (!super.mutatesTo(oldInstance, newInstance)) {
             return false;
         }
-        Date oldDate = (Date)oldInstance;
-        Date newDate = (Date)newInstance;
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif oldDate = Datatypes.DATE_TIME_CLASS.cast(oldInstance);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newDate = Datatypes.DATE_TIME_CLASS.cast(newInstance);
 
         return oldDate.getTime() == newDate.getTime();
     }
 
     protected Expression instantiate(Object oldInstance, Encoder out) {
-        Date date = (Date)oldInstance;
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif date = Datatypes.DATE_TIME_CLASS.cast(oldInstance);
         return new Expression(date, date.getClass(), "new", new Object[] {date.getTime()});
     }
 }

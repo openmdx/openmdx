@@ -43,6 +43,7 @@
  */
 package org.openmdx.state2.cci;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -57,7 +58,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.application.xml.Importer;
 import org.openmdx.base.accessor.cci.SystemAttributes;
@@ -74,6 +74,7 @@ import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.spi.Order;
 import org.openmdx.state2.spi.TechnicalAttributes;
+import org.w3c.spi2.Datatypes;
 import org.xml.sax.InputSource;
 
 /**
@@ -393,8 +394,8 @@ public class ObjectAndValidStateComparator {
 	) throws ServiceException{
 		for(MappedRecord object : source) {
 			if(this.isInstanceOf(object, "org:openmdx:state2:DateState")) {
-				XMLGregorianCalendar validFrom = (XMLGregorianCalendar) object.get(TechnicalAttributes.STATE_VALID_FROM);
-				XMLGregorianCalendar validTo = (XMLGregorianCalendar) object.get(TechnicalAttributes.STATE_VALID_TO);
+				#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom = Datatypes.DATE_CLASS.cast(object.get(TechnicalAttributes.STATE_VALID_FROM));
+				#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo = Datatypes.DATE_CLASS.cast(object.get(TechnicalAttributes.STATE_VALID_TO));
 				if(object.get(SystemAttributes.REMOVED_AT) == null) {
     				if(
     					Order.compareValidFrom(interval.validFrom, validFrom) >= 0 &&
@@ -419,7 +420,7 @@ public class ObjectAndValidStateComparator {
 		Path xri,
 		Aspects aspects
 	) throws ServiceException {
-		List<Interval> intervals = new ArrayList<Interval>();
+		List<Interval> intervals = new ArrayList<>();
 		intervals.add(new Interval(null,null));
 		getIntervals(intervals, aspects.expected);
 		getIntervals(intervals, aspects.actual);
@@ -448,8 +449,10 @@ public class ObjectAndValidStateComparator {
 		Collection<MappedRecord> source
 	){
 		for(MappedRecord object : source) {
-			XMLGregorianCalendar validFrom = (XMLGregorianCalendar) object.get(TechnicalAttributes.STATE_VALID_FROM);
-			XMLGregorianCalendar validTo = (XMLGregorianCalendar) object.get(TechnicalAttributes.STATE_VALID_TO);
+			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom
+					= Datatypes.DATE_CLASS.cast(object.get(TechnicalAttributes.STATE_VALID_FROM));
+			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo
+					= Datatypes.DATE_CLASS.cast(object.get(TechnicalAttributes.STATE_VALID_TO));
 			From: for(Interval interval : intervals){
 				int i = Order.compareValidFrom(validFrom, interval.validFrom);
 				if(i == 0) {
@@ -697,8 +700,8 @@ public class ObjectAndValidStateComparator {
 	 */
 	static class Aspects {
 		
-		final List<MappedRecord> expected = new ArrayList<MappedRecord>();
-		final List<MappedRecord> actual = new ArrayList<MappedRecord>();
+		final List<MappedRecord> expected = new ArrayList<>();
+		final List<MappedRecord> actual = new ArrayList<>();
 		
 	}
 
@@ -719,8 +722,8 @@ public class ObjectAndValidStateComparator {
 		 * @param validTo
 		 */
 		Interval(
-			XMLGregorianCalendar validFrom, 
-			XMLGregorianCalendar validTo
+			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom,
+			#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo
 		) {
 			this.validFrom = validFrom;
 			this.validTo = validTo;
@@ -729,12 +732,12 @@ public class ObjectAndValidStateComparator {
 		/**
 		 * The (modifiable) start date
 		 */
-		XMLGregorianCalendar validFrom;
+		#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom;
 		
 		/**
 		 * The (modifiable) end date
 		 */
-		XMLGregorianCalendar validTo;
+		#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo;
 	
 		@Override
 		public String toString(
@@ -746,7 +749,8 @@ public class ObjectAndValidStateComparator {
                 id.append(
                     '['
                 ).append(
-            		validFrom.toXMLFormat()
+            		validFrom.#if CLASSIC_CHRONO_TYPES toXMLFormat() #else format(DateTimeFormatter.ISO_LOCAL_DATE)#endif
+
                 );
             }
             id.append(',');
@@ -754,7 +758,7 @@ public class ObjectAndValidStateComparator {
                 id.append("\u221E)");
             } else {
                 id.append(
-            		validTo.toXMLFormat()
+            		validTo.#if CLASSIC_CHRONO_TYPES toXMLFormat() #else format(DateTimeFormatter.ISO_LOCAL_DATE)#endif
                 ).append(
                     ']'
                 );

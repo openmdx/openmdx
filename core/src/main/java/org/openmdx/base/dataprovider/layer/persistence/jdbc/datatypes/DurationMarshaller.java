@@ -50,13 +50,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.Duration;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.postgresql.PGIntervalMarshaller;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.ChronoUtils;
 
 /**
  * DurationMarshaller
@@ -76,7 +79,7 @@ public class DurationMarshaller {
 	/**
 	 * Factory
 	 * 
-	 * @param type the duration type
+	 * @param durationType the duration type
 	 * 
 	 * @return an new {@code DurationMarshaller} instance
 	 * @throws ServiceException
@@ -101,7 +104,7 @@ public class DurationMarshaller {
 
 	@SuppressWarnings("unchecked")
 	private <T extends Number> T getValue(Duration duration, DatatypeConstants.Field field) {
-		Number value = duration.getField(field);
+		Number value = #if CLASSIC_CHRONO_TYPES duration.getField(field) #else ChronoUtils.getDurationField(duration, field)#endif;
 		if (value == null) {
 			value = field == DatatypeConstants.SECONDS ? DAY_TIME_ZERO : YEAR_MONTHS_ZERO;
 		}
@@ -115,14 +118,54 @@ public class DurationMarshaller {
 	 * Object)
 	 */
 	public Object marshal(Object source, String databaseProductName) throws ServiceException {
-		if (source instanceof Duration) {
+		if (source == null) {
+			return null;
+		}
+		#if !CLASSIC_CHRONO_TYPES
+		if (Datatypes.DURATION_YEARMONTH_CLASS.isInstance(source)) {
+			switch (durationType) {
+				case INTERVAL: {
+					throw new UnsupportedOperationException("Required for MDX-1");
+				}
+				case NUMERIC: {
+					throw new UnsupportedOperationException("Required for MDX-1");
+				}
+				case CHARACTER: {
+					final java.time.Period period = (java.time.Period) source;
+					boolean isNegative = period.isNegative();
+					StringBuilder result = new StringBuilder();
+					if (isNegative) {
+						result.append('-');
+					}
+					result.append('P');
+					int years = Math.abs(period.getYears());
+					int months = Math.abs(period.getMonths());
+					int days = Math.abs(period.getDays());
+					result.append(years).append('Y');
+					result.append(months).append('M');
+					if (days > 0) {
+						result.append(days).append('D');
+					}
+					return result.toString();
+				}
+				default:
+					throw new RuntimeServiceException(
+						BasicException.Code.DEFAULT_DOMAIN,
+						BasicException.Code.ASSERTION_FAILURE,
+						"Unsupported duration type",
+						new BasicException.Parameter("durationType", durationType),
+						new BasicException.Parameter("valueType", ValueType.YEAR_MONTH)
+					);
+			}
+		} else #endif if (Datatypes.DURATION_CLASS.isInstance(source)) {
 			Duration duration = (Duration) source;
 			ValueType valueType = ValueType.of(duration);
 			if (valueType == null)
 				return null;
-			final int signum = duration.getSign();
+			final int signum = duration#if CLASSIC_CHRONO_TYPES .getSign() #else .isNegative() ? -1 : (duration.isZero() ? 0 : 1)#endif;
 			switch (durationType) {
 				case INTERVAL: {
+					#if CLASSIC_CHRONO_TYPES
 					if(PGIntervalMarshaller.isApplicableForDatabaseProduct(databaseProductName)) {
 						switch (valueType) {
 							case YEAR_MONTH: {
@@ -162,7 +205,12 @@ public class DurationMarshaller {
 									seconds.doubleValue()
 								);
 							default:
-								return null;
+								throw new RuntimeServiceException(
+									BasicException.Code.DEFAULT_DOMAIN,
+									BasicException.Code.ASSERTION_FAILURE,
+									"Unsupported value type",
+									new BasicException.Parameter("valueType", valueType)
+								);
 						}
 					} else {
 						final StringBuilder target = new StringBuilder(signum < 0 ? "-" : "");
@@ -186,9 +234,95 @@ public class DurationMarshaller {
 										"An INTERVAL duration must be either a year-month or a day-time duration",
 										new BasicException.Parameter("duration", duration));
 							default:
-								return null;
+								throw new RuntimeServiceException(
+									BasicException.Code.DEFAULT_DOMAIN,
+									BasicException.Code.ASSERTION_FAILURE,
+									"Unsupported value type",
+									new BasicException.Parameter("durationType", durationType),
+									new BasicException.Parameter("valueType", valueType)
+								);
 						}
 					}
+					#else
+					if(PGIntervalMarshaller.isApplicableForDatabaseProduct(databaseProductName)) {
+						switch (valueType) {
+							case YEAR_MONTH: {
+								BigInteger years = getValue(duration, DatatypeConstants.YEARS);
+								BigInteger months = getValue(duration, DatatypeConstants.MONTHS);
+								return PG_INTERVAL_MARSHALLER.marshal(signum, years.intValue(), months.intValue(), 0, 0, 0, 0);
+							}
+							case DAY_TIME: {
+								BigInteger days = getValue(duration, DatatypeConstants.DAYS);
+								BigInteger hours = getValue(duration, DatatypeConstants.HOURS);
+								BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
+								BigDecimal seconds = getValue(duration, DatatypeConstants.SECONDS);
+								return PG_INTERVAL_MARSHALLER.marshal(
+										signum,
+										0,
+										0,
+										days.intValue(),
+										hours.intValue(),
+										minutes.intValue(),
+										seconds.doubleValue()
+								);
+							}
+							case YEAR_MONTH_DAY_TIME:
+								BigInteger years = getValue(duration, DatatypeConstants.YEARS);
+								BigInteger months = getValue(duration, DatatypeConstants.MONTHS);
+								BigInteger days = getValue(duration, DatatypeConstants.DAYS);
+								BigInteger hours = getValue(duration, DatatypeConstants.HOURS);
+								BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
+								BigDecimal seconds = getValue(duration, DatatypeConstants.SECONDS);
+								return PG_INTERVAL_MARSHALLER.marshal(
+										signum,
+										years.intValue(),
+										months.intValue(),
+										days.intValue(),
+										hours.intValue(),
+										minutes.intValue(),
+										seconds.doubleValue()
+								);
+							default:
+								throw new RuntimeServiceException(
+										BasicException.Code.DEFAULT_DOMAIN,
+										BasicException.Code.ASSERTION_FAILURE,
+										"Unsupported value type",
+										new BasicException.Parameter("durationType", durationType),
+										new BasicException.Parameter("valueType", valueType)
+								);
+						}
+					} else {
+						final StringBuilder target = new StringBuilder(signum < 0 ? "-" : "");
+						switch (valueType) {
+							case YEAR_MONTH: {
+								BigInteger years = getValue(duration, DatatypeConstants.YEARS);
+								BigInteger months = getValue(duration, DatatypeConstants.MONTHS);
+								return target.append(years).append("-").append(months).toString();
+							}
+							case DAY_TIME: {
+								BigInteger days = getValue(duration, DatatypeConstants.DAYS);
+								BigInteger hours = getValue(duration, DatatypeConstants.HOURS);
+								BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
+								Number seconds = getValue(duration, DatatypeConstants.SECONDS);
+								return target.append(days).append(" ").append(hours).append(":").append(minutes).append(":")
+										.append(seconds).toString();
+							}
+							case YEAR_MONTH_DAY_TIME:
+								throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
+										BasicException.Code.TRANSFORMATION_FAILURE,
+										"An INTERVAL duration must be either a year-month or a day-time duration",
+										new BasicException.Parameter("duration", duration));
+							default:
+								throw new RuntimeServiceException(
+										BasicException.Code.DEFAULT_DOMAIN,
+										BasicException.Code.ASSERTION_FAILURE,
+										"Unsupported value type",
+										new BasicException.Parameter("durationType", durationType),
+										new BasicException.Parameter("valueType", valueType)
+								);
+						}
+					}
+					#endif
 			}
 			case NUMERIC:
 				switch (valueType) {
@@ -203,9 +337,11 @@ public class DurationMarshaller {
 					BigInteger hours = getValue(duration, DatatypeConstants.HOURS);
 					BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
 					BigDecimal seconds = getValue(duration, DatatypeConstants.SECONDS);
-					BigDecimal value = seconds.add(new BigDecimal(
-							minutes.add(hours.add(days.multiply(HOURS_PER_DAY)).multiply(MINUTES_PER_HOUR)))
-									.multiply(SECONDS_PER_MINUTE));
+					BigDecimal value = seconds.add(
+							new BigDecimal(
+									minutes.add(hours.add(days.multiply(HOURS_PER_DAY)).multiply(MINUTES_PER_HOUR))
+							).multiply(SECONDS_PER_MINUTE)
+					);
 					return signum < 0 ? value.negate() : value;
 				case YEAR_MONTH_DAY_TIME:
 					throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
@@ -213,9 +349,16 @@ public class DurationMarshaller {
 							"A NUMERIC duration must be either a year-month or a day-time duration",
 							new BasicException.Parameter("duration", duration));
 				default:
-					return null;
+					throw new RuntimeServiceException(
+						BasicException.Code.DEFAULT_DOMAIN,
+						BasicException.Code.ASSERTION_FAILURE,
+						"Unsupported value type",
+						new BasicException.Parameter("durationType", durationType),
+						new BasicException.Parameter("valueType", valueType)
+					);
 				}
 			case CHARACTER: {
+			#if CLASSIC_CHRONO_TYPES
 				boolean normalized = true;
 				BigInteger years = getValue(duration, DatatypeConstants.YEARS);
 				BigInteger months = getValue(duration, DatatypeConstants.MONTHS);
@@ -281,13 +424,50 @@ public class DurationMarshaller {
 					}
 					return target.toString();
 				}
+			#else
+				final StringBuilder target = new StringBuilder(duration.isNegative() ? "-P" : "P");
+				final Duration absolute = duration.isNegative() ? duration.negated() : duration;
+				target.append(absolute.toDays()).append("DT");
+				target.append(absolute.toHours() % 24).append("H");
+				target.append(absolute.toMinutes() % 60).append("M");
+				target.append(absolute.getSeconds() % 60);
+				if(absolute.getNano() > 0) {
+					String fraction = String.valueOf(1000000000 + absolute.getNano()).substring(1);
+					final int digits;
+					if(fraction.charAt(8) == '0' && fraction.charAt(7) == '0' && fraction.charAt(6) == '0') {
+						if(fraction.charAt(5) == '0' && fraction.charAt(4) == '0' && fraction.charAt(3) == '0') {
+							digits = 3;
+						} else {
+							digits = 6;
+						}
+					} else {
+						digits = 9;
+					}
+					target.append('.').append(fraction, 0, digits);
+				}
+				return target.append("S").toString();
+			#endif
 			}
 			default:
-				return null;
+				throw new RuntimeServiceException(
+					BasicException.Code.DEFAULT_DOMAIN,
+					BasicException.Code.ASSERTION_FAILURE,
+					"Unsupported duration type",
+					new BasicException.Parameter("durationType", durationType),
+					new BasicException.Parameter("valueType", valueType)
+				);
 			}
 		} else {
 			return source;
 		}
+	}
+
+	private String appendUnit(Object source, Long val, String unit) {
+		final String src = source.toString();
+		if (src.contains("PT") && !src.contains(unit)) {
+			return val + unit;
+		}
+		return src.contains(unit) ? val + unit : "";
 	}
 
 	/*
@@ -298,12 +478,12 @@ public class DurationMarshaller {
 	 * Object)
 	 */
 	public Object unmarshal(Object source) throws ServiceException {
-		if (source == null || source instanceof Duration) {
+		if (source == null || Datatypes.DURATION_CLASS.isInstance(source)) {
 			return source;
 		} else {
 			switch (durationType) {
 			case CHARACTER:
-				return Datatypes.create(Duration.class, source.toString());
+				return Datatypes.create(Datatypes.DURATION_CLASS, source.toString());
 			case INTERVAL: {
 				if(PGIntervalMarshaller.isApplicableForDataType(source)) {
 					return PG_INTERVAL_MARSHALLER.unmarshal(source);
@@ -338,11 +518,12 @@ public class DurationMarshaller {
 							}
 							duration.append("S");
 						}
-						return Datatypes.create(Duration.class, duration.toString());
+						return Datatypes.create(Datatypes.DURATION_CLASS, duration.toString());
+
 					} else if ((matcher = YEAR_TO_MONTH.matcher(value)).matches()) {
 						StringBuilder duration = new StringBuilder().append(matcher.group(1)).append('P')
 								.append(matcher.group(2)).append("Y").append(matcher.group(3)).append("M");
-						return Datatypes.create(Duration.class, duration.toString());
+						return #if CLASSIC_CHRONO_TYPES Datatypes.create(Duration.class, duration.toString()) #else DatatypeFactories.immutableDatatypeFactory().newDurationYearMonth(duration.toString()) #endif;
 					} else
 						throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
 								BasicException.Code.TRANSFORMATION_FAILURE,
@@ -356,6 +537,7 @@ public class DurationMarshaller {
 					return source instanceof BigDecimal && ((BigDecimal) source).scale() > 0
 							? toDuration("T", value, "S")
 							: toDuration("", value, "M");
+//					return java.time.Period.(((Number) source).intValue());
 				} else
 					throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
 							BasicException.Code.TRANSFORMATION_FAILURE,
@@ -373,7 +555,7 @@ public class DurationMarshaller {
 
 	private Object toDuration(String prefix, Number infix, String suffix) {
 		String value = infix.toString();
-		return Datatypes.create(Duration.class, value.charAt(0) == '-' ? ("-P" + prefix + value.substring(1) + suffix)
+		return Datatypes.create(Datatypes.DURATION_CLASS, value.charAt(0) == '-' ? ("-P" + prefix + value.substring(1) + suffix)
 				: ("P" + prefix + value + suffix));
 	}
 
@@ -418,16 +600,41 @@ public class DurationMarshaller {
 	/**
 	 * The value type defines which fields are set
 	 */
-	static enum ValueType {
+    enum ValueType {
 		YEAR_MONTH, YEAR_MONTH_DAY_TIME, DAY_TIME;
 
 		static ValueType of(Duration duration) {
-			boolean yearMonth = duration.isSet(DatatypeConstants.YEARS) || duration.isSet(DatatypeConstants.MONTHS);
-			boolean dayTime = duration.isSet(DatatypeConstants.DAYS) || duration.isSet(DatatypeConstants.HOURS)
+			#if CLASSIC_CHRONO_TYPES
+				boolean yearMonth = duration.isSet(DatatypeConstants.YEARS) || duration.isSet(DatatypeConstants.MONTHS);
+				boolean dayTime = duration.isSet(DatatypeConstants.DAYS) || duration.isSet(DatatypeConstants.HOURS)
 					|| duration.isSet(DatatypeConstants.MINUTES) || duration.isSet(DatatypeConstants.SECONDS);
-			return yearMonth ? (dayTime ? YEAR_MONTH_DAY_TIME : YEAR_MONTH) : (dayTime ? DAY_TIME : null);
-		}
+				return yearMonth ? (dayTime ? YEAR_MONTH_DAY_TIME : YEAR_MONTH) : (dayTime ? DAY_TIME : null);
+			#else
+			// Convert the duration to string representation
+			String durationStr = duration.toString();
 
+			// Check for year/month components
+			boolean hasYears = durationStr.contains("Y");
+			boolean hasMonths = durationStr.contains("M") && !durationStr.matches(".*T.*M.*"); // M not after T
+			boolean yearMonth = hasYears || hasMonths;
+
+			// Check for day/time components
+			boolean hasDays = durationStr.contains("D");
+			boolean hasHours = durationStr.contains("H");
+			boolean hasMinutes = durationStr.contains("T") && durationStr.contains("M"); // M after T
+			boolean hasSeconds = durationStr.contains("S");
+			boolean dayTime = hasDays || hasHours || hasMinutes || hasSeconds;
+
+			if (yearMonth) {
+				return dayTime ? YEAR_MONTH_DAY_TIME : YEAR_MONTH;
+			} else {
+				// For a duration with only day/time components or empty duration,
+				// always return DAY_TIME (never null)
+				return DAY_TIME;
+			}
+
+			#endif
+		}
 	}
 
 }

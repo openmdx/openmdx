@@ -1277,7 +1277,7 @@ extends AbstractClassMapper {
             newLine();            
             if(this.isBaseClass() && (this.classMetaData.getBaseClass() == null)) {
                 printLine("  /**");
-                printLine("   * The the object's JDO identity key");
+                printLine("   * The object's JDO identity key");
                 printLine("   */");
                 print(hasContainer() ? "   private" : "   public");
                 printLine("  java.lang.String ", JDO_IDENTITY_MEMBER, ";");

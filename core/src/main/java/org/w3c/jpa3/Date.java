@@ -44,12 +44,12 @@
  */
 package org.w3c.jpa3;
 
+import org.w3c.time.ChronoUtils;
+
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-
-import org.w3c.cci2.ImmutableDate;
-import org.w3c.format.DateTimeFormat;
+#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Date
@@ -70,9 +70,9 @@ public class Date {
      * @return a corresponding SQL date instance
      */
     public static final java.sql.Date toJDO (
-        javax.xml.datatype.XMLGregorianCalendar cciDate
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif cciDate
     ){
-        return cciDate == null ? null : java.sql.Date.valueOf(cciDate.toXMLFormat());
+        return cciDate == null ? null : java.sql.Date.valueOf(cciDate#if CLASSIC_CHRONO_TYPES .toXMLFormat()#endif);
     }
 
     /**
@@ -82,29 +82,21 @@ public class Date {
      * 
      * @return the corresponding org::w3c::date value
      */
-    public static final  #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif toCCI (
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif toCCI (
         java.sql.Date jdoDate
     ){
         String value = jdoDate == null ? null : jdoDate.toString();
         if(value == null) {
             return null;
         } else try {
-            value = DateTimeFormat.completeCentury(value);
+            value = ChronoUtils.completeCentury(value);
         } catch (ParseException exception) {
             throw new IllegalArgumentException(exception);
         }
-        if(DateTimeFormat.BASIC_DATE_PATTERN.matcher(value).matches()) {
-            #if CLASSIC_CHRONO_TYPES
-            return new ImmutableDate(value);
-            #else
-            return LocalDate.parse(value, DateTimeFormatter.BASIC_ISO_DATE);
-            #endif
-        } else if(DateTimeFormat.EXTENDED_DATE_PATTERN.matcher(value).matches()) {
-            #if CLASSIC_CHRONO_TYPES
-            return new ImmutableDate(value.replaceAll("-", ""));
-            #else
-            return LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE);
-            #endif
+        if(ChronoUtils.BASIC_DATE_PATTERN.matcher(value).matches()) {
+            return #if CLASSIC_CHRONO_TYPES new org.w3c.cci2.ImmutableDate(value) #else LocalDate.parse(value, DateTimeFormatter.BASIC_ISO_DATE)#endif;
+        } else if(ChronoUtils.EXTENDED_DATE_PATTERN.matcher(value).matches()) {
+            return #if CLASSIC_CHRONO_TYPES new org.w3c.cci2.ImmutableDate(value.replaceAll("-", "")) #else LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE)#endif;
         } else {
             throw new IllegalArgumentException(
                 "The value does not match the org::w3c::date pattern. Pattern=YYYY[...]-MM-DD. Value=" + value

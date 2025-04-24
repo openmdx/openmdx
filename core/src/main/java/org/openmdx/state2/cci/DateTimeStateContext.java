@@ -44,12 +44,12 @@
  */
 package org.openmdx.state2.cci;
 
-import java.util.Date;
+
 
 /**
  * Date State Context
  */
-public interface DateTimeStateContext extends StateContext<Date> {
+public interface DateTimeStateContext extends StateContext<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> {
 
     //------------------------------------------------------------------------
     // Time Range View
@@ -60,13 +60,13 @@ public interface DateTimeStateContext extends StateContext<Date> {
      * 
      * @return the view's validFrom
      */
-    public Date getValidFrom();
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getValidFrom();
 
     /**
      * Tells up to when on modifications are valid
      * 
      * @return the view's validFrom
      */
-    public Date getInvalidFrom();
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getInvalidFrom();
 
 }
