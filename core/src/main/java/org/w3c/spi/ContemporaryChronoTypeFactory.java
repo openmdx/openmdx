@@ -46,25 +46,23 @@ package org.w3c.spi;
 
 import java.time.temporal.TemporalAmount;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeParseException;
 
-class StandardChronoTypeFactory extends AbstractChronoTypeFactory {
+#if !CLASSIC_CHRONO_TYPES
+class ContemporaryChronoTypeFactory extends AbstractChronoTypeFactory {
 
     /**
      * Constructor
      */
-    private StandardChronoTypeFactory(){
+    private ContemporaryChronoTypeFactory(){
         super();
     }
 
-    static final ChronoTypeFactory INSTANCE = new StandardChronoTypeFactory();
+    static final ChronoTypeFactory INSTANCE = new ContemporaryChronoTypeFactory();
 
     @Override
     public Instant newDateTime(String value) {
@@ -72,24 +70,36 @@ class StandardChronoTypeFactory extends AbstractChronoTypeFactory {
             return null;
         }
         try {
-            // Handle the basic format: YYYYMMDDTHHmmss.SSSZ
-            String transformed = value.substring(0, 4) + "-" +
-                    value.substring(4, 6) + "-" +
-                    value.substring(6, 8) + "T" +
-                    value.substring(9, 11) + ":" +
-                    value.substring(11, 13) + ":" +
-                    value.substring(13);
-
-            // Handle timezone offset without colon if present
-            if (transformed.length() > 19) {  // Has timezone part
-                int tzPos = transformed.length() - 5;
-                if (transformed.charAt(tzPos) == '+' || transformed.charAt(tzPos) == '-') {
-                    String prefix = transformed.substring(0, tzPos + 3);
-                    String suffix = transformed.substring(tzPos + 3);
-                    transformed = prefix + ":" + suffix;
+            String toParse = value;
+            boolean isBasicFormat = false;
+            if (value.length() >= 15) {
+                if (value.charAt(4) != '-' && value.charAt(7) != '-') {
+                    isBasicFormat = true;
                 }
             }
-            return Instant.parse(transformed);
+
+            if (isBasicFormat) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(value, 0, 4).append('-');
+                sb.append(value, 4, 6).append('-');
+                sb.append(value, 6, 8).append('T');
+                sb.append(value, 9, 11).append(':');
+                sb.append(value, 11, 13).append(':');
+                sb.append(value.substring(13));
+
+                toParse = sb.toString();
+
+                if (toParse.length() > 19) { // after seconds position
+                    int tzPos = toParse.length() - 5;
+                    char sign = toParse.charAt(tzPos);
+                    if (sign == '+' || sign == '-') {
+                        String prefix = toParse.substring(0, tzPos + 3);
+                        String suffix = toParse.substring(tzPos + 3);
+                        toParse = prefix + ":" + suffix;
+                    }
+                }
+            }
+            return Instant.parse(toParse);
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid datetime format: " + value, e);
         }
@@ -215,3 +225,4 @@ class StandardChronoTypeFactory extends AbstractChronoTypeFactory {
     }
 
 }
+#endif

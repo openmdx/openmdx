@@ -42,36 +42,33 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
+#if CLASSIC_CHRONO_TYPES
 package org.w3c.spi;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Date;
 import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.kernel.exception.BasicException;
-import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.cci2.ImmutableDate;
 import org.w3c.cci2.ImmutableDateTime;
 import org.w3c.time.ChronoUtils;
 import org.w3c.format.DateTimeFormat;
 
+
 /**
  * Alternative Datatype Factory
  */
-class StandardChronoTypeFactory extends AbstractChronoTypeFactory {
+class ClassicChronoTypeFactory extends AbstractChronoTypeFactory {
 
     /**
      * Constructor
      */
-    private StandardChronoTypeFactory(){
+    private ClassicChronoTypeFactory(){
         super();
     }
 
@@ -90,7 +87,7 @@ class StandardChronoTypeFactory extends AbstractChronoTypeFactory {
     private static final BigInteger MINUTES_PER_HOUR = BigInteger.valueOf(60);
     private static final BigInteger HOURS_PER_DAY = BigInteger.valueOf(24);
 
-    static final ChronoTypeFactory INSTANCE = new StandardChronoTypeFactory();
+    static final ChronoTypeFactory INSTANCE = new ClassicChronoTypeFactory();
 
     //------------------------------------------------------------------------
     // Implements DatatypeFactory
@@ -104,7 +101,7 @@ class StandardChronoTypeFactory extends AbstractChronoTypeFactory {
      * @return a corresponding date-time instance
      *
      * @exception IllegalArgumentException
-     * if the value can't be parse
+     * if the value can't be parsed
      */
     @Override
     public ImmutableDateTime newDateTime(
@@ -295,3 +292,4 @@ class StandardChronoTypeFactory extends AbstractChronoTypeFactory {
     }
 
 }
+#endif

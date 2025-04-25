@@ -66,7 +66,7 @@ public class DatatypeFactories {
      */
     public static ChronoTypeFactory immutableDatatypeFactory(
     ){
-        return StandardChronoTypeFactory.INSTANCE;
+        return #if CLASSIC_CHRONO_TYPES ClassicChronoTypeFactory #else ContemporaryChronoTypeFactory#endif.INSTANCE;
     }
 
     /**
