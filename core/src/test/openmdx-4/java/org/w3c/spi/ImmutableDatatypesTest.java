@@ -70,6 +70,7 @@ public class ImmutableDatatypesTest {
     static XMLGregorianCalendar immutableDate03; // 2000-03-01
     static Date immutableDateTime02; // 2000-02-29T12:00Z
     static Date immutableDateTime03; // 2000-03-01T12:00Z
+    static Date immutableDateTime04; // 10000-01-01T00:00:00Z
     static Duration oneDay;
     static Duration oneAndHalfAYear;
     static Duration oneHour;
@@ -77,6 +78,7 @@ public class ImmutableDatatypesTest {
     XMLGregorianCalendar mutableDate03;
     Date mutableDateTime02;
     Date mutableDateTime03;
+    Date mutableDateTime04;
 
     @BeforeAll
     public static void immutableValues(){
@@ -87,6 +89,7 @@ public class ImmutableDatatypesTest {
         oneHour = immutableDatatypeFactory().newDuration("PT3600S");
         immutableDateTime02 = immutableDatatypeFactory().newDateTime("20000229T120000.000Z");
         immutableDateTime03 = immutableDatatypeFactory().newDateTime("20000301T120000.000Z");
+        immutableDateTime04 = immutableDatatypeFactory().newDateTime("+100000101T000000.000Z");
     }
 
     @BeforeEach
@@ -105,6 +108,7 @@ public class ImmutableDatatypesTest {
         );
         mutableDateTime02 = DateTimeFormat.BASIC_UTC_FORMAT.parse("20000229T120000.000Z");
         mutableDateTime03 = DateTimeFormat.BASIC_UTC_FORMAT.parse("20000301T120000.000Z");
+        mutableDateTime04 = new Date(253402300800000l);
     }
 
     @SuppressWarnings("unchecked")
@@ -133,12 +137,7 @@ public class ImmutableDatatypesTest {
         Assertions.assertEquals("20000229",  ((ImmutableDatatype<?>)immutableDate02).toBasicFormat(), "immutableDate02.toBasicFormat()");
         mutableDate02.add(oneDay);
         Assertions.assertEquals(mutableDate02,  mutableDate03, "mutableDate02 += P1D");
-        try {
-            immutableDate02.reset();
-            Assertions.fail("immutableDate02");
-        } catch (UnsupportedOperationException expected) {
-            // Unable to reset an immutable object
-        }
+        Assertions.assertThrows(UnsupportedOperationException.class, immutableDate02::reset, "immutableDate02");
     }
 
     private boolean isDurationNormalized(){
@@ -175,18 +174,15 @@ public class ImmutableDatatypesTest {
         Assertions.assertEquals(-1,  mutableDateTime02.compareTo(immutableDateTime03), "mutableDateTime02.compareTo(immutableDateTime03)");
         Assertions.assertEquals(0,  mutableDateTime02.compareTo(immutableDateTime02), "mutableDateTime02.compareTo(immutableDateTime02)");
         Assertions.assertEquals(-1,  mutableDateTime02.compareTo(immutableDateTime03), "mutableDateTime02.compareTo(immutableDateTime03)");
+        Assertions.assertEquals(0,  mutableDateTime04.compareTo(immutableDateTime04), "mutableDateTime04.compareTo(immutableDateTime04)");
         Assertions.assertEquals("2000-02-29T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(immutableDateTime02), "immutableDate02.toExtendedFormat()");
         Assertions.assertEquals("2000-02-29T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(mutableDateTime02), "mutableDate02.toExtendedFormat()");
         Assertions.assertEquals("20000229T120000.000Z",  DateTimeFormat.BASIC_UTC_FORMAT.format(immutableDateTime02), "immutableDate02.toBasicFormat()");
         Assertions.assertEquals("20000229T120000.000Z",  DateTimeFormat.BASIC_UTC_FORMAT.format(mutableDateTime02), "mutableDate02.toBasicFormat()");
+        Assertions.assertEquals("+100000101T000000.000Z",  DateTimeFormat.BASIC_UTC_FORMAT.format(mutableDateTime04), "mutableDate04.toBasicFormat()");
         mutableDateTime03 = new Date(mutableDateTime02.getTime() + 1000L * 60 * 60 * 24);
         Assertions.assertEquals(immutableDateTime03,  mutableDateTime03, "mutableDateTime02 += P1D");
-        try {
-            immutableDateTime02.setTime(System.currentTimeMillis());
-            Assertions.fail("immutableDateTime02");
-        } catch (UnsupportedOperationException expected) {
-            // Unable to modify an immutable object
-        }
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> immutableDateTime02.setTime(System.currentTimeMillis()), "immutableDateTime02");
     }
 
 }

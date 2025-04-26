@@ -46,11 +46,14 @@ package org.w3c.format;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.w3c.time.SystemClock;
 
 /**
@@ -109,6 +112,7 @@ class ClassicDateTimeFormatter extends ThreadLocal<SimpleDateFormat> implements 
     final static DateTimeFormatter<Date> EXTENDED_UTC_FORMAT = new Lenient(
             EXTENDED_UTC_PATTERN,
             "0000-01-01T00:00:00.000Z",
+            "^([-+][0-9]+)-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2}(?:[.][0-9]+)?)$",
             "Z", "+00:00", "-00:00", "+00", "-00"
     );
 
@@ -121,9 +125,10 @@ class ClassicDateTimeFormatter extends ThreadLocal<SimpleDateFormat> implements 
      * ISO 8601:2004 compliant basic format
      */
     final static DateTimeFormatter<Date> BASIC_UTC_FORMAT = new Lenient(
-            BASIC_UTC_PATTERN,
-            "00000101T000000.000Z",
-            "Z", "+0000", "-0000", "+00", "-00"
+        BASIC_UTC_PATTERN,
+        "00000101T000000.000Z",
+        "^([-+][0-9]+)([0-9]{2})([0-9]{2})T([0-9]{2})([0-9]{2})([0-9]{2}(?:[.][0-9]+)?)$",
+        "Z", "+0000", "-0000", "+00", "-00"
     );
 
     final static DateTimeFormatter<Date> NETSCAPE_FORMAT = getInstance(
@@ -292,18 +297,23 @@ class ClassicDateTimeFormatter extends ThreadLocal<SimpleDateFormat> implements 
          * Constructor
          *
          * @param pattern
-         * @param defaultValue for missing characters
-         * @param utcTimezone UTC time zone representations
+         * @param defaultValue     for missing characters
+         * @param wideRangePattern
+         * @param utcTimezone      UTC time zone representations
          */
         Lenient(
                 String pattern,
                 String defaultValue,
+                String wideRangePattern,
                 String... utcTimezone
         ) {
             super(pattern, "UTC", false);
             this.defaultValue = defaultValue;
+            this.wideRangePattern = Pattern.compile(wideRangePattern);
             this.utcTimezone = utcTimezone;
         }
+
+        private final Pattern wideRangePattern;
 
         /**
          * Default value for missing characters
@@ -318,15 +328,24 @@ class ClassicDateTimeFormatter extends ThreadLocal<SimpleDateFormat> implements 
         /**
          * Test and remove the time zone
          *
-         * @param text
+         * @param rawText the raw text
          *
          * @return the value without time zone
          *
          * @throws ParseException if the UTC time zone field is missing
          */
         private final String validateAndRemoveTimezone(
-                String text
+            String rawText
         ) throws ParseException {
+            //
+            // Replace standard compliant fraction separator by canonical one
+            //
+            final String text;
+            if(rawText.indexOf(',') > 0) {
+                text = rawText.replace(',', '.');
+            } else {
+                text = rawText;
+            }
             for(String utcTimezone : this.utcTimezone) {
                 if(text.endsWith(utcTimezone)) {
                     return text.substring(0, text.length() - utcTimezone.length());
@@ -343,39 +362,30 @@ class ClassicDateTimeFormatter extends ThreadLocal<SimpleDateFormat> implements 
         /**
          * Convert to millisecond accuracy
          *
-         * @param rawText the raw text
+         * @param withoutTimeZone the raw text
          *
          * @return a normalized value (with maybe trailing zeroes, as opposed to W3's XML schema recommendation
          *
          * @throws ParseException
          */
         private final String adjustToMillisecondAccuracyAndAddTimezone(
-                String rawText
+            String withoutTimeZone
         ) throws ParseException {
-            //
-            // Replace standard compliant fraction separator by canonical one
-            //
-            String text;
-            if(rawText.indexOf(',') > 0) {
-                text = rawText.replace(',', '.');
-            } else {
-                text = rawText;
-            }
             //
             // Add missing century in case of a two digit year
             //
-            int timeSeparator = text.indexOf('T');
-            String oldDate = timeSeparator < 0 ? text : text.substring(0, timeSeparator);
+            int timeSeparator = withoutTimeZone.indexOf('T');
+            String oldDate = timeSeparator < 0 ? withoutTimeZone : withoutTimeZone.substring(0, timeSeparator);
             String newDate = completeCentury(oldDate);
             if(newDate.length() > oldDate.length()) {
-                text = timeSeparator < 0 ? newDate : newDate + text.substring(timeSeparator);
+                withoutTimeZone = timeSeparator < 0 ? newDate : newDate + withoutTimeZone.substring(timeSeparator);
             }
             //
             // Adjust accuracy
             //
-            return text.length() >= this.defaultValue.length() ?
-                    text.substring(0, this.defaultValue.length() -1) + "Z" :
-                    text + defaultValue.substring(text.length(), defaultValue.length());
+            return withoutTimeZone.length() >= this.defaultValue.length() ?
+                    withoutTimeZone.substring(0, this.defaultValue.length() -1) + "Z" :
+                    withoutTimeZone + defaultValue.substring(withoutTimeZone.length(), defaultValue.length());
         }
 
         /* (non-Javadoc)
@@ -383,13 +393,35 @@ class ClassicDateTimeFormatter extends ThreadLocal<SimpleDateFormat> implements 
          */
         @Override
         public Date parse(
-                String text
+            String text
         ) throws ParseException {
-            return super.parse(
-                    adjustToMillisecondAccuracyAndAddTimezone(
-                            validateAndRemoveTimezone(text)
-                    )
-            );
+            final String withoutTimeZone = validateAndRemoveTimezone(text);
+            Matcher matcher = wideRangePattern.matcher(withoutTimeZone);
+            if(matcher.matches()) {
+                return new Date (
+                    Instant.parse(
+                    matcher.group(1) + '-' +
+                        matcher.group(2) + '-' +
+                        matcher.group(3) + 'T' +
+                        matcher.group(4) + ':' +
+                        matcher.group(5) + ':' +
+                        matcher.group(6) + 'Z'
+                    ).toEpochMilli()
+                );
+            } else {
+                return super.parse(
+                        adjustToMillisecondAccuracyAndAddTimezone(
+                                withoutTimeZone
+                        )
+                );
+            }
+        }
+
+        @Override
+        public String format(Date date) {
+            return date.getTime() < 253402300800000l ?
+                super.format(date) :
+                '+' + super.format(date);
         }
 
     }
