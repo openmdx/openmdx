@@ -233,7 +233,9 @@ public class RefContainer_1
     private RefObject_1_0 get(String filter) {
         try {
             DataObject_1_0 viewObject = this.container.get(filter);
-            return viewObject == null || viewObject.objDoesNotExist() ? null : (RefObject_1_0) this.marshaller.marshal(
+            return viewObject == null || viewObject.objDoesNotExist()
+                    ? null
+                    : (RefObject_1_0) this.marshaller.marshal(
             	 viewObject
             );
         } catch (ServiceException exception){
@@ -649,6 +651,7 @@ public class RefContainer_1
         );
     }
     #else
+
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refGet(org.oasisopen.cci2.QualifierType, java.lang.Object)
      */
@@ -790,8 +793,37 @@ public class RefContainer_1
     static String toQualifier(
         List<RefQualifier> qualifierList
     ){
+//        if (qualifierList.isEmpty())
+//            return null;
+//
+//        final Iterator<RefQualifier> iterator = qualifierList.iterator();
+//        final RefQualifier firstQualifier = iterator.next();
+//
+//        StringBuilder qualifier = new StringBuilder(
+//                firstQualifier.qualifierType == PERSISTENT ? "!" : ""
+//        ).append(
+//                firstQualifier.qualifierValue == null ?
+//                        TransactionalSegment.getClassicRepresentationOfNewInstance() :
+//                        String.valueOf(firstQualifier.qualifierValue)
+//        );
+//
+//        while (iterator.hasNext()) {
+//            final RefQualifier next = iterator.next();
+//            qualifier.append(
+//                    next.qualifierType == PERSISTENT ? '!' : '*'
+//            ).append(
+//                    next.qualifierValue
+//            );
+//        }
+//        return qualifier.toString();
+
         if (qualifierList.isEmpty())
             return null;
+
+        if (qualifierList.size() == 1 && qualifierList.get(0).qualifierType != PERSISTENT) {
+            // Handle case equivalent to classic's size==1 case
+            return String.valueOf(qualifierList.get(0).qualifierValue);
+        }
 
         final Iterator<RefQualifier> iterator = qualifierList.iterator();
         final RefQualifier firstQualifier = iterator.next();
@@ -812,10 +844,11 @@ public class RefContainer_1
                     next.qualifierValue
             );
         }
+
         return qualifier.toString();
+
     }
     #endif
-
 
     private QueryComponents toQueryComponents (
         Object rawQuery

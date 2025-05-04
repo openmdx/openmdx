@@ -58,7 +58,7 @@ import org.w3c.cci2.Container;
 public interface RefContainer<E extends RefObject> extends Container<E>, RefBaseObject {
 
     #if CLASSIC_CHRONO_TYPES
-        /**
+    /**
      * Adds an object to the container
      *
      * @param arguments there is always an odd number of arguments:
@@ -72,7 +72,7 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
      * Adds an object to the container
      *
      * @param qualifierType
-     * @param object
+     * @param qualifierValue
      * @param refObject
      */
     void refAdd(
@@ -109,7 +109,7 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
      * Retrieves an object from the container
      *
      * @param qualifierType
-     * @param object
+     * @param qualifierValue
      *
      * @return the object
      */

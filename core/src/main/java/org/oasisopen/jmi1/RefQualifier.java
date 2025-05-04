@@ -62,4 +62,12 @@ public class RefQualifier {
         this.qualifierValue = qualifierValue;
     }
 
+    public RefQualifier(
+            boolean isPersistent,
+            Object qualifierValue
+    ) {
+        this.qualifierType = isPersistent ? QualifierType.PERSISTENT : QualifierType.REASSIGNABLE;
+        this.qualifierValue = qualifierValue;
+    }
+
 }

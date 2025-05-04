@@ -123,10 +123,10 @@ public final class RuntimeServiceException
      *          The exception code. Negative codes are shared by all exception
      *          domains, while positive ones are (non-default) exception
      *          domain specific.
+     * @param   description
+     *          A readable description not including the parameters.
      * @param   parameters
      *          The exception specific parameters.
-     * @param   message
-     *          A readable description not including the parameters.
      */
     public RuntimeServiceException(
         String exceptionDomain,

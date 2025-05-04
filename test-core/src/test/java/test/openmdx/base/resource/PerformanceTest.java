@@ -69,6 +69,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.io.UTF8Writer;
@@ -103,14 +104,16 @@ public class PerformanceTest {
 	 */
 	protected static final StandardRestFormatter restFormatter = RestFormatters.getFormatter();
 
-	private final SerializationTest[] tests = { new SerializationTest("Java (Externalizable)") {
+	private final SerializationTest[] tests = {
+
+			new SerializationTest("Java (Externalizable)") {
 
 		private BinarySink sink = new BinarySink();
 		private boolean prolog = true;
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see test.openmdx.base.resource.TestPerformance.SerializationTest#reset()
 		 */
 		@Override
@@ -121,7 +124,7 @@ public class PerformanceTest {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * test.openmdx.base.resource.TestPerformance.SerializationTest#deserialize()
 		 */
@@ -136,7 +139,7 @@ public class PerformanceTest {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see test.openmdx.base.resource.TestPerformance.SerializationTest#serialize()
 		 */
 		@Override
@@ -151,13 +154,15 @@ public class PerformanceTest {
 			return this.sink.size();
 		}
 
-	}, new SerializationTest("XML (UTF-16)") {
+	},
+
+			new SerializationTest("XML (UTF-16)") {
 
 		private UTF16Sink sink = new UTF16Sink();
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * test.openmdx.base.resource.TestPerformance.SerializationTest#deserialize()
 		 */
@@ -170,7 +175,7 @@ public class PerformanceTest {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see test.openmdx.base.resource.TestPerformance.SerializationTest#serialize()
 		 */
 		@Override
@@ -180,7 +185,8 @@ public class PerformanceTest {
 			return sink.size();
 		}
 
-	}, new SerializationTest("XML (UTF-8)") {
+	},
+			new SerializationTest("XML (UTF-8)") {
 
 		private UTF8Sink sink = new UTF8Sink();
 
@@ -209,13 +215,14 @@ public class PerformanceTest {
 			return sink.size();
 		}
 
-	}, new SerializationTest("WBXML (UTF-8)") {
+	},
+			new SerializationTest("WBXML (UTF-8)") {
 
 		private WBXMLSink sink = new WBXMLSink();
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * test.openmdx.base.resource.TestPerformance.SerializationTest#deserialize()
 		 */
@@ -228,7 +235,7 @@ public class PerformanceTest {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see test.openmdx.base.resource.TestPerformance.SerializationTest#serialize()
 		 */
 		@Override
@@ -238,8 +245,10 @@ public class PerformanceTest {
 			return this.sink.size();
 		}
 
-	} };
+	}
+	};
 
+//	@Disabled
 	@Test
 	public void testSerialization() throws Exception {
 		for (SerializationTest test : tests) {

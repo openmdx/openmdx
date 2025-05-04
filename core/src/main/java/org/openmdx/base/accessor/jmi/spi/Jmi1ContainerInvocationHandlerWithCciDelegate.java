@@ -47,8 +47,10 @@ package org.openmdx.base.accessor.jmi.spi;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
@@ -57,6 +59,7 @@ import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.RefBaseObject;
 
 import org.oasisopen.jmi1.RefContainer;
+import org.oasisopen.jmi1.RefQualifier;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.collection.MarshallingConsumer;
@@ -64,6 +67,7 @@ import org.openmdx.base.collection.MarshallingSpliterator;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.Container;
@@ -119,21 +123,21 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
         } else if(declaringClass == RefContainer.class) {
             if("refAdd".equals(methodName)) {
                 ReferenceDef.getInstance(proxy.getClass()).add.invoke(
-                    this.cciDelegate, 
-                    (Object[]) this.marshaller.unmarshal(args[0])
+                    this.cciDelegate,
+                    toRefArguments(args)
                 );
                 return null;
             } else if("refGet".equals(methodName)) {
                 return this.marshaller.marshal(
                     ReferenceDef.getInstance(proxy.getClass()).get.invoke(
-                        this.cciDelegate, 
-                        (Object[]) this.marshaller.unmarshal(args[0])
+                        this.cciDelegate,
+                        toRefArguments(args)
                     )
                 );
             } else if("refRemove".equals(methodName)) {
                 ReferenceDef.getInstance(proxy.getClass()).remove.invoke(
-                    this.cciDelegate, 
-                    (Object[]) this.marshaller.unmarshal(args[0])
+                    this.cciDelegate,
+                    toRefArguments(args)
                 );
                 return null;
             } else if("refGetAll".equals(methodName)) {
@@ -149,7 +153,7 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
                         predicate
                     );
                 } else if (predicate instanceof RefQuery_1_0) {
-                    value = ((Container<?>)this.cciDelegate).getAll(
+                    value = this.cciDelegate.getAll(
                         ((RefQuery_1_0)predicate).refGetFilter()
                     );
                 } else {
@@ -265,6 +269,42 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
                 (Object[]) this.marshaller.unmarshal(args)
             )
         );
+    }
+
+    private Object[] toRefArguments(Object[] args) throws ServiceException {
+        #if CLASSIC_CHRONO_TYPES return (Object[]) this.marshaller.unmarshal(args[0]);
+        #else
+        if (args.length == 0 || args.length > 2) {
+            throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_IMPLEMENTED,
+                    "TODO",
+                    new BasicException.Parameter("args", args));
+        }
+
+        final Object[] unmarshalled = (Object[]) this.marshaller.unmarshal(args);
+        List<Object> refArgs = new ArrayList<>();
+        if (unmarshalled[0] instanceof List) {
+            List<RefQualifier> qualifiers = (List<RefQualifier>) unmarshalled[0];
+            for (RefQualifier qualifier : qualifiers) {
+                refArgs.add(qualifier.qualifierType);
+                refArgs.add(qualifier.qualifierValue);
+            }
+        } else {
+            throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_IMPLEMENTED,
+                    "TODO",
+                    new BasicException.Parameter("args", args));
+        }
+
+        if (unmarshalled.length > 1) {
+            refArgs.add(unmarshalled[1]);
+        }
+
+        return refArgs.toArray();
+
+        #endif
     }
 
 }

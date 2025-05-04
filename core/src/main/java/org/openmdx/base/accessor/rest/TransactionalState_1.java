@@ -227,7 +227,7 @@ public final class TransactionalState_1 {
     /**
      * Remember unavailable children
      * 
-     * @param boolean readOnly
+     * @param readOnly
      * 
      * @return the unavailability cache
      */
@@ -238,7 +238,7 @@ public final class TransactionalState_1 {
             if(readOnly) {
                 return Collections.emptyMap();
             } else {
-                this.unavailability = new HashMap<String, Set<String>>();
+                this.unavailability = new HashMap<>();
             }
         }
         return this.unavailability;
@@ -368,8 +368,7 @@ public final class TransactionalState_1 {
     /**
      * Set or clear an aspect specific context
      * 
-     * @param key 
-     * @param context
+     * @param key
      */
     final void removeContext(
         Class<?> key

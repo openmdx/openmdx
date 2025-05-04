@@ -121,20 +121,20 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
             }
             #else
             final Object[] arguments = (Object[]) this.marshaller.unmarshal(args);
-            List<RefQualifier> qualifiers = AbstractJmi1ContainerInvocationHandler.getQualifierList(arguments);
+            final RefArguments refArguments = RefArguments.newInstance(arguments);
             switch (methodName) {
                 case "add":
                     ((RefContainer_1) this.refDelegate).refAdd(
-                            qualifiers,
-                            (RefObject_1_0) arguments[arguments.length - 1]
+                            refArguments.qualifiers,
+                            (RefObject_1_0) refArguments.value
                     );
                     break;
                 case "get":
                     return this.marshaller.marshal(
-                            this.refDelegate.refGet(qualifiers)
+                            this.refDelegate.refGet(refArguments.qualifiers)
                     );
                 case "remove":
-                    this.refDelegate.refRemove(qualifiers);
+                    this.refDelegate.refRemove(refArguments.qualifiers);
                     break;
                 default:
                     throw new UnsupportedOperationException("Method not supported: " + methodName);
@@ -143,11 +143,31 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
 
         } else if (declaringClass == Container.class) {
             // 
-            // This interfaces is extended by the typed association end 
+            // This interface is extended by the typed association end
             // interface which has been prepended 
             // by the Jmi1ObjectInvocationHandler
             //
-
+            #if CLASSIC_CHRONO_TYPES
+            if ("getAll".equals(methodName) && args.length == 1) {
+                return this.marshaller.marshal(
+                        this.refDelegate.refGetAll(
+                                this.marshaller.unmarshal(args[0])
+                        )
+                );
+            } else if ("removeAll".equals(methodName) && args.length == 1) {
+                this.refDelegate.refRemoveAll(
+                        this.marshaller.unmarshal(args[0])
+                );
+                return null;
+            } else if ("processAll".equals(methodName) && args.length == 2) {
+                @SuppressWarnings("unchecked") final Consumer<RefObject_1_0> action = (Consumer<RefObject_1_0>) args[1];
+                this.refDelegate.processAll(
+                        (AnyTypePredicate) this.marshaller.unmarshal(args[0]),
+                        new MarshallingConsumer<>(RefObject_1_0.class, action, this.marshaller)
+                );
+                return null;
+            }
+            #else
             // TODO: kjdd
             // Wird, wie schon letztes mal angemerkt, bei "add" abstürzen, da Anzahl der ARgumente dann ungerade ist!
             if ("getAll".equals(methodName) && args.length == 1) {
@@ -169,6 +189,7 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
                 );
                 return null;
             }
+            #endif
         } else if (declaringClass == Collection.class) {
             if ("toArray".equals(methodName) && args != null && args.length == 1) {
                 Object[] source = ((Collection<?>) this.refDelegate).toArray();

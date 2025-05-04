@@ -70,12 +70,12 @@ public class Clock_1Test {
     @Test
     public void normal(
     ) throws ResourceException, RefException{
-        // Arrange
+        // Arrange
         final PersistenceManagerFactory entityManagerFactory = EntityManagerFactories.getNormalEntityManagerFactory();
         final PersistenceManager persistenceManager = entityManagerFactory.getPersistenceManager();
-        // Act
+        // Act
         final Segment segment = Segments.getNormalSegment(persistenceManager);
-        // Assert
+        // Assert
         Segments.validateNormalDescription(segment);
         Segments.validateNormalTimePoint(segment);
         Segments.validateNormalTimePointReflectively(segment);
@@ -90,12 +90,12 @@ public class Clock_1Test {
     @Test
     public void mocked(
     ) throws ResourceException, ParseException, RefException {
-        // Arrange
+        // Arrange
         final PersistenceManagerFactory entityManagerFactory = EntityManagerFactories.getMockedEntityManagerFactory();
         final PersistenceManager persistenceManager = entityManagerFactory.getPersistenceManager();
-        // Act
+        // Act
         final Segment segment = Segments.getMockedSegment(persistenceManager);
-        // Assert
+        // Assert
         Segments.validateMockedDescription(segment);
         Segments.validateMockedTimePoint(segment);
         Segments.validateMockedTimePointReflectively(segment);

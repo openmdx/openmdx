@@ -120,7 +120,7 @@ public class ChronoTypeParser extends AbstractParser {
             valueClass == Datatypes.DATE_CLASS ? DatatypeFactories.immutableDatatypeFactory().newDate(externalRepresentation) :
             valueClass == Datatypes.DATE_TIME_CLASS ? DatatypeFactories.immutableDatatypeFactory().newDateTime(externalRepresentation) :
             valueClass == Datatypes.DURATION_CLASS ? DatatypeFactories.immutableDatatypeFactory().newDuration(externalRepresentation) :
-            #if CLASSIC_CHRONOTYPES
+            #if CLASSIC_CHRONO_TYPES
             valueClass == java.time.Duration.class ? java.time.Duration.parse(externalRepresentation) :
             valueClass == java.time.Period.class ? java.time.Period.parse(externalRepresentation) :
             valueClass == java.time.temporal.TemporalAmount.class ? toTemporalAmount(externalRepresentation) :

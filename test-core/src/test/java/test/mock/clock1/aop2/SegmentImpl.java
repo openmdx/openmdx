@@ -50,12 +50,13 @@ import java.text.ParseException;
 import org.openmdx.base.aop2.AbstractObject;
 
 import org.w3c.format.DateTimeFormat;
+import org.w3c.time.ChronoUtils;
 import test.openmdx.clock1.jmi1.Clock1Package;
 
 /**
  * AOP 2 Segment Plugin-In
  */
-public class SegmentImpl extends AbstractObject<test.openmdx.clock1.jmi1.Segment,test.openmdx.clock1.cci2.Segment,#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif> {
+public class SegmentImpl extends AbstractObject<test.openmdx.clock1.jmi1.Segment,test.openmdx.clock1.cci2.Segment, SegmentImpl.Context> {
 
     /**
      * Constructor 
@@ -70,33 +71,40 @@ public class SegmentImpl extends AbstractObject<test.openmdx.clock1.jmi1.Segment
         super(same, next);
         
     }
-        
+
+    static class Context {
+
+        private long epochMillis = java.time.Instant.parse("2000-04-01T12:00:00Z").toEpochMilli();
+
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getDateTime() {
+            return ChronoUtils.ofEpochMilliseconds(this.epochMillis);
+        }
+
+        void setDateTime(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTime) {
+            this.epochMillis = ChronoUtils.getEpochMilliseconds(dateTime);
+        }
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.aop2.AbstractObject#newContext()
      */
     @Override
-    protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newContext(
+    protected Context newContext(
     ) {
-        try {
-            return DateTimeFormat.BASIC_UTC_FORMAT.parse("20000401T120000.000Z");
-        } catch (ParseException exception) {
-            throw new UndeclaredThrowableException(exception);
-        }        
+        return new Context();
     }
 
     public test.openmdx.clock1.jmi1.Time currentDateAndTime(
     ){
         Clock1Package clock1Package = (Clock1Package) this.sameObject().refImmediatePackage();
-        return clock1Package.createTime(thisContext());
+        return clock1Package.createTime(thisContext().getDateTime());
     }
     
     public org.openmdx.base.jmi1.Void setDateAndTime(
         test.openmdx.clock1.jmi1.Time in
     ){
         final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = in.getUtc();
-        thisContext().#if CLASSIC_CHRONO_TYPES setTime #else ofEpochMilli#endif(
-                utc.#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli() #endif
-        );
+        thisContext().setDateTime(utc);
         AsAdmin.notifyDateAndTimeChange(sameObject(), utc);
         return super.newVoid();
     }

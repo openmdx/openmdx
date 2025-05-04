@@ -48,6 +48,7 @@
 //#define CLASSIC_CHRONO_TYPES
 package org.w3c.time;
 
+import java.time.LocalDate;
 import java.util.regex.Pattern;
 import javax.xml.datatype.DatatypeConstants;
 import java.text.ParseException;
@@ -67,9 +68,9 @@ public class ChronoUtils {
      */
     public static final Pattern EXTENDED_DATE_PATTERN = Pattern.compile("^\\d{4,}-\\d{2}-\\d{2}$");
 
-    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif createDate(int year, int month, int dayOfMonth) {
+    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else LocalDate #endif createDate(int year, int month, int dayOfMonth) {
         return #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(year, month, dayOfMonth, DatatypeConstants.FIELD_UNDEFINED)
-        #else java.time.LocalDate.of(year, month, dayOfMonth)
+        #else LocalDate.of(year, month, dayOfMonth)
         #endif;
     }
 
@@ -111,14 +112,8 @@ public class ChronoUtils {
         } else if (field.equals(DatatypeConstants.MINUTES)) {
             return duration.toMinutes() % 60;
         } else if (field.equals(DatatypeConstants.SECONDS)) {
-            return duration.toMillis() / 1000 % 60;
-//            return duration.getSeconds() % 60;
-//            return duration.getSeconds();
-//            return duration.toSeconds() % 60;
-//            return (duration.toMinutes() * 60) % 60;
-        } //else if (field.equals(DatatypeConstants.MILLISECONDS)) {
-            //return duration.toMillis() % 1000;
-        //}
+            return duration.toMillis() / 1000.0 % 60;
+        }
         return null;
     }
 
@@ -161,6 +156,16 @@ public class ChronoUtils {
             return 0L;
         }
         return dateTime.toEpochMilli();
+    }
+
+    /**
+     *
+     *
+     * @param millis  the millis to set
+     * @return
+     */
+    public static #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif ofEpochMilliseconds(long millis) {
+        return #if CLASSIC_CHRONO_TYPES new Date(millis) #else Instant.ofEpochMilli(millis) #endif;
     }
 
     /**

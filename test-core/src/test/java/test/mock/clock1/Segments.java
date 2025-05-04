@@ -177,7 +177,7 @@ public class Segments {
             segment.getDescription();
             Assertions.fail("IndexOutOfBoundsException expected");
         } catch (IndexOutOfBoundsException exception) {
-            // Excpected behaviour
+            System.out.println("Expected exception caught: " + exception.getClass().getName());
         }
     }
 

@@ -44,14 +44,24 @@
  */
 package org.w3c.format;
 
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.DurationMarshaller;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.kernel.exception.BasicException;
+
+import java.text.ParseException;
 import java.time.Instant;
 
 class ContemporaryDateTimeFormatter implements DateTimeFormatter<Instant> {
 
     private enum Format {EXTENDED_UTC, BASIC_UTC, NETSCAPE};
 
+    private final Format format;
+
     private ContemporaryDateTimeFormatter(Format format){
-        //…
+        if (format == null) {
+            throw new IllegalArgumentException("Format must not be null");
+        }
+        this.format = format;
     }
 
     /**
@@ -75,7 +85,24 @@ class ContemporaryDateTimeFormatter implements DateTimeFormatter<Instant> {
      */
     @Override
     public String format(Instant instant) {
-        return "";
+        switch (format) {
+            case BASIC_UTC: {
+                return instant.toString().replaceAll("[-:]", "");
+            }
+            case EXTENDED_UTC: {
+                return instant.toString();
+            }
+            case NETSCAPE: {
+                return new java.text.SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss z").format(instant);
+            }
+            default: throw new RuntimeServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "Unsupported format",
+                        new BasicException.Parameter("format", format),
+                        new BasicException.Parameter("value", instant)
+            );
+        }
     }
 
     /**
@@ -83,8 +110,40 @@ class ContemporaryDateTimeFormatter implements DateTimeFormatter<Instant> {
      * @return
      */
     @Override
-    public Instant parse(String dateTimeString) {
-        return Instant.parse(dateTimeString);
+    public Instant parse(String dateTimeString) throws ParseException {
+        if (dateTimeString == null || dateTimeString.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            // Try direct ISO-8601 parsing first
+            return Instant.parse(dateTimeString);
+        } catch (Exception e) {
+            try {
+                // Handle basic format (no separators)
+                if (format == Format.BASIC_UTC) {
+                    String extended = dateTimeString
+                            .replaceAll("(\\d{4})(\\d{2})(\\d{2})T(\\d{2})(\\d{2})(\\d{2})Z?",
+                                    "$1-$2-$3T$4:$5:$6");
+                    return Instant.parse(extended);
+                }
+
+                // For Netscape format, convert to ISO format
+                if (format == Format.NETSCAPE) {
+                    java.text.SimpleDateFormat netscapeFormat =
+                            new java.text.SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss z");
+                    netscapeFormat.setLenient(true);
+                    return netscapeFormat.parse(dateTimeString).toInstant();
+                }
+
+                throw new ParseException("Unparseable date: " + dateTimeString, 0);
+
+            } catch (Exception nested) {
+                throw new ParseException("Failed to parse date: " + dateTimeString, 0);
+            }
+        }
+
+
     }
 
 }

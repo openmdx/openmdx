@@ -50,6 +50,7 @@ import java.util.Collections;
 import javax.jdo.PersistenceManager;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -93,6 +94,7 @@ public class TestOperationArguments {
     /**
      * CR10011193
      */
+//    @Disabled
     @Test
     public void invokeOperationWithNestedStructs(){
     	begin();
@@ -131,6 +133,7 @@ public class TestOperationArguments {
     /**
      * CR10011473
      */
+//    @Disabled
     @Test
     public void callOperationWithListOfStructs(){
         this.begin();
@@ -217,7 +220,8 @@ public class TestOperationArguments {
         Assertions.assertEquals(Collections.singleton(Integer.valueOf(1)), out.getResult().getSimpleStructSetField().get(1).getIntegerField());
         Assertions.assertTrue(out.getResult().getSimpleStructSetField().get(1).getShortField().isEmpty());
     }
-    
+
+//    @Disabled
 	@Test
     public void callOperationWithSetArgument(
     ) throws Exception {

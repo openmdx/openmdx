@@ -55,105 +55,103 @@ import org.openmdx.base.naming.Path;
 
 public interface ModelElement_1_0 {
 
-    public Model_1_0 getModel();
+    Model_1_0 getModel();
   
-    public boolean isAliasType();
+    boolean isAliasType();
   
-    public boolean isPrimitiveType();
+    boolean isPrimitiveType();
   
-    public boolean isStructureType();
+    boolean isStructureType();
   
-    public boolean isStructureFieldType();
+    boolean isStructureFieldType();
     
-    public boolean isClassType();
+    boolean isClassType();
     
-    public boolean isReferenceType();
+    boolean isReferenceType();
     
-    public boolean isAttributeType();
+    boolean isAttributeType();
     
-    public boolean isOperationType();
+    boolean isOperationType();
     
-    public boolean isPackageType();
+    boolean isPackageType();
     
-    public boolean isAssociationType();
+    boolean isAssociationType();
     
-    public boolean isElementType();
+    boolean isElementType();
     
-    public boolean isNamespaceType();
+    boolean isNamespaceType();
     
-    public boolean isGeneralizableElementType();
+    boolean isGeneralizableElementType();
     
-    public boolean isTypedElementType();
+    boolean isTypedElementType();
     
-    public boolean isDataType();
+    boolean isDataType();
     
-    public boolean isExceptionType();
+    boolean isExceptionType();
     
-    public boolean isAssociationEndType();
+    boolean isAssociationEndType();
     
-    public boolean isImportType();
+    boolean isImportType();
     
-    public boolean isConstraintType();
+    boolean isConstraintType();
     
-    public boolean isConstantType();
+    boolean isConstantType();
     
-    public boolean isStructuralFeatureType();
+    boolean isStructuralFeatureType();
     
-    public boolean isParameterType();
+    boolean isParameterType();
     
-    public boolean isCollectionType();
+    boolean isCollectionType();
 
-    public boolean isClassifierType();
+    boolean isClassifierType();
     
-    public boolean isEnumerationType();
+    boolean isEnumerationType();
 
-    public boolean isBehaviouralFeatureType();
+    boolean isBehaviouralFeatureType();
 
-    public boolean isTagType();
+    boolean isTagType();
     
-    public boolean isReferenceStoredAsAttribute();
+    boolean isReferenceStoredAsAttribute();
     
-    public boolean isSet(String feature);
+    boolean isSet(String feature);
     
-    public boolean isInstanceOf(Class<? extends ElementRecord> type);
+    boolean isInstanceOf(Class<? extends ElementRecord> type);
 
-    public boolean isInstanceOf(Collection<Class<? extends ElementRecord>> types);
+    boolean isInstanceOf(Collection<Class<? extends ElementRecord>> types);
     
-    public String getName();
+    String getName();
     
-    public String getQualifiedName();
+    String getQualifiedName();
     
-    public String getSegmentName();
+    String getSegmentName();
     
-    public Path getReferencedEnd();
+    Path getReferencedEnd();
     
-    public Path getExposedEnd();
+    Path getExposedEnd();
     
-    public String getAggregation();
+    String getAggregation();
     
-    public Path getContainer();
+    Path getContainer();
     
-    public Boolean isDerived();
+    Boolean isDerived();
     
-    public Boolean isChangeable();
+    Boolean isChangeable();
     
-    public Boolean isAbstract();
+    Boolean isAbstract();
     
-    public Path getType();
+    Path getType();
 
-    public String getMultiplicity();
+    String getMultiplicity();
     
-    public Path getQualifierType();
+    Path getQualifierType();
     
     /**
      * Tells whether the given feature is a reference. The same as 
      * isReferenceType() || (getReferencedEnd() != && exposedEnd != null)
      * 
-     * @param feature the feature to be inspected
-     * 
      * @return {@code true} if the given feature is a reference
      */
-    public boolean isReference();
+    boolean isReference();
         
     /**
      * CR20020817 support

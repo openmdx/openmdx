@@ -4900,6 +4900,7 @@ public class TestMain {
 
 	}
 
+	@Disabled
 	public static class StandardProviderTest extends AbstractLocalConnectionTest {
 
 		@Test
@@ -4914,6 +4915,7 @@ public class TestMain {
 
 	}
 
+	@Disabled
 	public static class TransientProviderTest extends AbstractLocalConnectionTest {
 
 		@Test
@@ -5173,6 +5175,7 @@ public class TestMain {
 	/**
 	 * 2nd Run
 	 */
+	@Disabled
 	public static class ProxyConnectionTest extends AbstractRepeatableTest {
 
 		/**

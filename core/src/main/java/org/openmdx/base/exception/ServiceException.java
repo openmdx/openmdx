@@ -123,7 +123,7 @@ public final class ServiceException
      *          domain specific.
      * @param   parameters
      *          The exception specific parameters.
-     * @param   message
+     * @param   description
      *          A readable description not including the parameters.
      */
     public ServiceException(

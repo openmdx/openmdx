@@ -188,6 +188,7 @@ import org.w3c.format.DateTimeFormat;
 #if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
 #endif
+import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -3313,7 +3314,6 @@ public class Database_2
         Object value
     ) throws ServiceException, SQLException {
         Object normalizedValue = null;
-        #if CLASSIC_CHRONO_TYPES
         if(value instanceof java.util.Date) {
             normalizedValue = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(
                 DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value))
@@ -3321,7 +3321,6 @@ public class Database_2
         } else {
             normalizedValue = value;
         }
-        #endif
         if(normalizedValue instanceof URI) {
             ps.setString(position, normalizedValue.toString());
         } else if(normalizedValue instanceof Short) {

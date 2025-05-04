@@ -119,20 +119,6 @@ public class DurationMarshallerTest {
             Assertions.assertEquals("-7-6", externalized, "-P7Y6M");
         }
         {
-            Object internalized = this.characterDurationMarshaller.unmarshal("-PT4H3M2.010S");
-            Object externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
-            Assertions.assertEquals("-0 4:3:2.010", externalized, "-PT4H3M2.010S");
-        }
-        {
-            Object internalized = this.characterDurationMarshaller.unmarshal("P7Y6M5DT4H3M2.010S");
-            try {
-                Object externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
-                fail("year-month or day-time");
-            } catch (ServiceException exception) {
-                Assertions.assertEquals( BasicException.Code.TRANSFORMATION_FAILURE,  exception.getExceptionCode(), "TRANSFORMATION_FAILURE");
-            }
-        }
-        {
             Object internalized = this.characterDurationMarshaller.unmarshal("P7Y6M5D");
             try {
                 Object externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
@@ -151,6 +137,21 @@ public class DurationMarshallerTest {
             }
         }
         {
+            Object internalized = this.characterDurationMarshaller.unmarshal("-PT4H3M2.010S");
+            Object externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
+            Assertions.assertEquals("-0 4:3:2.010", externalized, "-PT4H3M2.010S");
+        }
+        #if CLASSIC_CHRONO_TYPES
+        {
+            Object internalized = this.characterDurationMarshaller.unmarshal("P7Y6M5DT4H3M2.010S");
+            try {
+                Object externalized = this.intervalDurationMarshaller.marshal(internalized,"anyDB");
+                fail("year-month or day-time");
+            } catch (ServiceException exception) {
+                Assertions.assertEquals( BasicException.Code.TRANSFORMATION_FAILURE,  exception.getExceptionCode(), "TRANSFORMATION_FAILURE");
+            }
+        }
+        {
             Object internalized = this.characterDurationMarshaller.unmarshal("-P7Y6M5DT4H3M2.010S");
             try {
                 Object externalized = this.intervalDurationMarshaller.marshal(internalized, "anyDB");
@@ -159,6 +160,7 @@ public class DurationMarshallerTest {
                 Assertions.assertEquals(BasicException.Code.TRANSFORMATION_FAILURE, exception.getExceptionCode(), "TRANSFORMATION_FAILURE");
             }
         }
+        #endif
     }
 
     @Test
@@ -240,15 +242,6 @@ public class DurationMarshallerTest {
             Assertions.assertEquals(new BigDecimal("-14582.010"), externalized, "-PT4H3M2.010S");
         }
         {
-            Object internalized = this.characterDurationMarshaller.unmarshal("P7Y6M5DT4H3M2.010S");
-            try {
-                Object externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
-                fail("year-month or day-time");
-            } catch (ServiceException exception) {
-                Assertions.assertEquals( BasicException.Code.TRANSFORMATION_FAILURE,  exception.getExceptionCode(), "TRANSFORMATION_FAILURE");
-            }
-        }
-        {
             Object internalized = this.characterDurationMarshaller.unmarshal("P7Y6M5D");
             try {
                 Object externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
@@ -267,6 +260,15 @@ public class DurationMarshallerTest {
             }
         }
         #if CLASSIC_CHRONO_TYPES
+        {
+            Object internalized = this.characterDurationMarshaller.unmarshal("P7Y6M5DT4H3M2.010S");
+            try {
+                Object externalized = this.numericDurationMarshaller.marshal(internalized,"anyDB");
+                fail("year-month or day-time");
+            } catch (ServiceException exception) {
+                Assertions.assertEquals( BasicException.Code.TRANSFORMATION_FAILURE,  exception.getExceptionCode(), "TRANSFORMATION_FAILURE");
+            }
+        }
         {
             Object internalized = this.characterDurationMarshaller.unmarshal("-P7Y6M5DT4H3M2.010S");
             try {
