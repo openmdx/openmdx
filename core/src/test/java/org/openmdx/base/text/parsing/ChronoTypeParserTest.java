@@ -98,7 +98,7 @@ public class ChronoTypeParserTest {
 		// Act
 		final Object value = testee.parse(Datatypes.DATE_TIME_CLASS, "+10000-01-01T00:00:00Z");
 		// Assert
-		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDateTime("100000101T000000Z"), value);
+		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDateTime("+100000101T000000Z"), value);
 	}
 
 	/**

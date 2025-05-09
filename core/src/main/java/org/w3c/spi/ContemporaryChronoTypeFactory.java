@@ -83,8 +83,7 @@ class ContemporaryChronoTypeFactory extends AbstractChronoTypeFactory {
                 String y = ymd.substring(0, ymd.length() - 4);
 
                 int idx = y.length();
-                boolean isLeadingSignumRequired = y.length() > 4;
-                StringBuilder sb = new StringBuilder(isLeadingSignumRequired ? "+" : "");
+                StringBuilder sb = new StringBuilder();
                 sb.append(value, 0, idx).append('-');
                 sb.append(value, idx, idx + 2).append('-');
                 idx += 2;
