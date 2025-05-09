@@ -66,40 +66,43 @@ class ContemporaryChronoTypeFactory extends AbstractChronoTypeFactory {
 
     @Override
     public Instant newDateTime(String value) {
+
         if (value == null) {
             return null;
         }
+
         try {
+
             String toParse = value;
-            boolean isBasicFormat = false;
-            if (value.length() >= 15) {
-                if (value.charAt(4) != '-' && value.charAt(7) != '-') {
-                    isBasicFormat = true;
-                }
-            }
+            boolean isBasicFormat = !(value.length() - value.replace(":", "").length() == 2
+                    && value.length() - value.replace("-", "").length() == 2);
 
             if (isBasicFormat) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(value, 0, 4).append('-');
-                sb.append(value, 4, 6).append('-');
-                sb.append(value, 6, 8).append('T');
-                sb.append(value, 9, 11).append(':');
-                sb.append(value, 11, 13).append(':');
-                sb.append(value.substring(13));
+
+                String ymd = value.substring(0, value.indexOf("T"));
+                String y = ymd.substring(0, ymd.length() - 4);
+
+                int idx = y.length();
+                boolean isLeadingSignumRequired = y.length() > 4;
+                StringBuilder sb = new StringBuilder(isLeadingSignumRequired ? "+" : "");
+                sb.append(value, 0, idx).append('-');
+                sb.append(value, idx, idx + 2).append('-');
+                idx += 2;
+                sb.append(value, idx, idx + 2);
+                sb.append('T');
+                int timeSegmentIdx = ymd.length() + 1;
+                sb.append(value, timeSegmentIdx, timeSegmentIdx + 2).append(':');
+                timeSegmentIdx += 2;
+                sb.append(value, timeSegmentIdx, timeSegmentIdx + 2).append(':');
+                timeSegmentIdx += 2;
+                boolean hasMillis = value.contains(".");
+                sb.append(value, timeSegmentIdx, timeSegmentIdx + (!hasMillis ? 3 : 7));
 
                 toParse = sb.toString();
-
-                if (toParse.length() > 19) { // after seconds position
-                    int tzPos = toParse.length() - 5;
-                    char sign = toParse.charAt(tzPos);
-                    if (sign == '+' || sign == '-') {
-                        String prefix = toParse.substring(0, tzPos + 3);
-                        String suffix = toParse.substring(tzPos + 3);
-                        toParse = prefix + ":" + suffix;
-                    }
-                }
             }
+
             return Instant.parse(toParse);
+
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid datetime format: " + value, e);
         }

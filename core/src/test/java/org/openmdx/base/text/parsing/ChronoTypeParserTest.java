@@ -91,7 +91,6 @@ public class ChronoTypeParserTest {
 		Assertions.assertEquals(DatatypeFactories.immutableDatatypeFactory().newDateTime("20000401T050607.890Z"), value);
 	}
 
-//	@Disabled
 	@Test
 	public void whenRemovedAtInTheFutureThenParseAsDate(){
 		// Arrange
