@@ -46,7 +46,6 @@ package org.openmdx.base.accessor.jmi.spi;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefQualifier;
-import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
@@ -63,91 +62,75 @@ public class RefArguments {
     final List<RefQualifier> qualifiers;
     final RefObject value;
 
-    public RefArguments(List<RefQualifier> qualifiers, RefObject value) {
+    private RefArguments(List<RefQualifier> qualifiers, RefObject value) {
         this.qualifiers = qualifiers;
         this.value = value;
     }
 
     static RefArguments newInstance(
-            Object[] source
+        Object[] source
     ) throws ServiceException {
-        if(source == null) {
+        if(source == null || source.length == 0) {
             return null;
-        }
-        else {
-            final int length = source.length;
-            int size = length;
-            if(
-                    (size == 1) &&
-                            (source[0] instanceof RefObject_1_0)
-            ){
-                return new RefArguments(Collections.emptyList(), (RefObject) source[0]);
+        } else {
+            final int qualifierLimit;
+            final RefObject value;
+            if (source[source.length - 1] instanceof RefObject) {
+                qualifierLimit = source.length - 1;
+                value = (RefObject) source[qualifierLimit];
+            } else {
+                qualifierLimit = source.length;
+                value = null;
             }
-            else if(
-                    (size == 1) &&
-                            (source[0] instanceof String || source[0] instanceof Number)
-            ){
-                return new RefArguments(Collections.singletonList(
-                        new RefQualifier(QualifierType.REASSIGNABLE, source[0])
-                ), null);
-            }
-            else if(
-                    size == 2 &&
-                            (source[0] instanceof String)
-            ){
-                return new RefArguments(Collections.singletonList(
-                        new RefQualifier(QualifierType.REASSIGNABLE, source[0])
-                ), (RefObject) source[1]);
-            }
-            else {
-                List<RefQualifier> qualifiers = new ArrayList<>();
-                int end = length % 2 == 0 ? length : length - 1;
-                for(
-                        int i = 0;
-                        i < end;
-                        i += 2
-                ){
-                    if (source[i] instanceof Boolean) {
-                        qualifiers.add(
-                                new RefQualifier((Boolean) source[i], validateSubSegment(source[i + 1]))
-                        );
-                    } else if (source[i] instanceof QualifierType) {
-                        qualifiers.add(
-                                new RefQualifier((QualifierType) source[i], validateSubSegment(source[i + 1]))
-                        );
-                    } else {
-                         throw new ServiceException(
-                                BasicException.Code.DEFAULT_DOMAIN,
-                                BasicException.Code.NOT_IMPLEMENTED,
-                                "TODO",
-                                new BasicException.Parameter("source", source));
+            switch (qualifierLimit) {
+                case 0:
+                    return new RefArguments(
+                            Collections.emptyList(),
+                            value
+                    );
+                case 1:
+                    return new RefArguments(
+                            Collections.singletonList(newRefQualifier(QualifierType.REASSIGNABLE, source[0])),
+                            value
+                    );
+                case 2:
+                    return new RefArguments(
+                        source[1] == null ? Collections.emptyList() : Collections.singletonList(newRefQualifier(source[0], source[1])),
+                        value
+                    );
+                default: {
+                    if (qualifierLimit % 2 == 1) throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_IMPLEMENTED,
+                            "Odd number of qualifier arguments",
+                            new BasicException.Parameter("source", source)
+                    );
+                    final List<RefQualifier> qualifiers = new ArrayList<>();
+                    for (int i = 0; i < qualifierLimit;) {
+                        qualifiers.add(newRefQualifier(source[i++], source[i++]));
                     }
+                    return new RefArguments(qualifiers, value);
                 }
-                return new RefArguments(qualifiers, length % 2 == 0 ? null : (RefObject) source[length - 1]);
             }
         }
     }
 
-    /**
-     * Validate an XRI sub-segment
-     *
-     * @param subSegment
-     *
-     * @return the validated XRI sub-segment
-     *
-     * @exception JmiException BAD_PARAMETER if the sub-segment is {@code null}Y
-     */
-    private static Object validateSubSegment(
-            Object subSegment
-    ){
-        if(subSegment == null) {
-            throw new JmiServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.BAD_PARAMETER,
-                    "Null is an invalid value for an XRI sub-segment"
-            );
+    private static RefQualifier newRefQualifier(
+        Object qualifierType,
+        Object qualifierValue
+    ) throws ServiceException {
+        if (qualifierType instanceof Boolean) {
+            return new RefQualifier((Boolean) qualifierType, qualifierValue);
+        } else if (qualifierType instanceof QualifierType) {
+            return new RefQualifier((QualifierType) qualifierType, qualifierValue);
         } else {
-            return subSegment;
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                "The qualifier type must be specified as a Boolean or a QualifierType",
+                new BasicException.Parameter("type", qualifierType),
+                new BasicException.Parameter("Value", qualifierValue)
+            );
         }
     }
 

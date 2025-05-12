@@ -624,10 +624,10 @@ public class RefContainer_1
     @Override
     public void refAdd(QualifierType qualifierType, Object qualifierValue, RefObject_1_0 refObject) {
         this.refAdd(
-                Collections.singletonList(
-                        new RefQualifier(qualifierType, refObject)
-                ),
-                refObject
+            qualifierValue == null ? Collections.emptyList() : Collections.singletonList(
+                new RefQualifier(qualifierType, refObject)
+            ),
+            refObject
         );
     }
 
@@ -793,60 +793,19 @@ public class RefContainer_1
     static String toQualifier(
         List<RefQualifier> qualifierList
     ){
-//        if (qualifierList.isEmpty())
-//            return null;
-//
-//        final Iterator<RefQualifier> iterator = qualifierList.iterator();
-//        final RefQualifier firstQualifier = iterator.next();
-//
-//        StringBuilder qualifier = new StringBuilder(
-//                firstQualifier.qualifierType == PERSISTENT ? "!" : ""
-//        ).append(
-//                firstQualifier.qualifierValue == null ?
-//                        TransactionalSegment.getClassicRepresentationOfNewInstance() :
-//                        String.valueOf(firstQualifier.qualifierValue)
-//        );
-//
-//        while (iterator.hasNext()) {
-//            final RefQualifier next = iterator.next();
-//            qualifier.append(
-//                    next.qualifierType == PERSISTENT ? '!' : '*'
-//            ).append(
-//                    next.qualifierValue
-//            );
-//        }
-//        return qualifier.toString();
-
-        if (qualifierList.isEmpty())
+        if (qualifierList.isEmpty()) {
             return null;
-
-        if (qualifierList.size() == 1 && qualifierList.get(0).qualifierType != PERSISTENT) {
-            // Handle case equivalent to classic's size==1 case
-            return String.valueOf(qualifierList.get(0).qualifierValue);
+        } else {
+            StringBuilder qualifier = new StringBuilder();
+            for(RefQualifier qualifierItem : qualifierList) {
+                qualifier.append(
+                    qualifierItem.qualifierType == PERSISTENT ? "!" : qualifier.length() == 0 ? "" : "*"
+                ).append(
+                    qualifierItem.qualifierValue
+                );
+            }
+            return    qualifier.toString();
         }
-
-        final Iterator<RefQualifier> iterator = qualifierList.iterator();
-        final RefQualifier firstQualifier = iterator.next();
-
-        StringBuilder qualifier = new StringBuilder(
-                firstQualifier.qualifierType == PERSISTENT ? "!" : ""
-        ).append(
-                firstQualifier.qualifierValue == null ?
-                        TransactionalSegment.getClassicRepresentationOfNewInstance() :
-                        String.valueOf(firstQualifier.qualifierValue)
-        );
-
-        while (iterator.hasNext()) {
-            final RefQualifier next = iterator.next();
-            qualifier.append(
-                    next.qualifierType == PERSISTENT ? '!' : '*'
-            ).append(
-                    next.qualifierValue
-            );
-        }
-
-        return qualifier.toString();
-
     }
     #endif
 

@@ -44,6 +44,7 @@
  */
 package org.oasisopen.jmi1;
 
+import java.lang.Object;
 import java.util.List;
 
 import javax.jmi.reflect.RefBaseObject;
@@ -68,27 +69,31 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
         Object... arguments
     );
     #else
+
     /**
-     * Adds an object to the container
+     * A convenience method to add an object to the container, delegating to {@link #refAdd(java.util.List, java.lang.Object)}
      *
-     * @param qualifierType
-     * @param qualifierValue
-     * @param refObject
+     * @param qualifierType the qualifier type
+     * @param qualifierValue the optional qualifier value leading to a singleton list when present or an empty list when absent
+     * @param refObject the object to be added
+     *
+     * @see #refAdd(java.util.List, java.lang.Object)
      */
     void refAdd(
-            QualifierType qualifierType,
-            Object qualifierValue,
-            E refObject
+        QualifierType qualifierType,
+        Object qualifierValue,
+        E refObject
     );
 
     /**
      * Adds an object to the container
      *
-     * @param qualifierList
+     * @param qualifierList an empty qualifier list creates the qualifiers automatically
+     * @param refObject the object to be added
      */
     void refAdd(
-            List<RefQualifier> qualifierList,
-            E refObject
+        List<RefQualifier> qualifierList,
+        E refObject
     );
     #endif
 

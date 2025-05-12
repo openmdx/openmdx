@@ -45,6 +45,8 @@
 package org.oasisopen.jmi1;
 
 import org.oasisopen.cci2.QualifierType;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 
 /**
  * RefQualifier
@@ -55,19 +57,25 @@ public class RefQualifier {
     public final Object qualifierValue;
 
     public RefQualifier(
-            QualifierType qualifierType,
-            Object qualifierValue
+        QualifierType qualifierType,
+        Object qualifierValue
     ) {
+        if(qualifierValue == null) {
+            throw new JmiServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                "Null is an invalid value for an XRI sub-segment"
+            );
+        }
         this.qualifierType = qualifierType;
         this.qualifierValue = qualifierValue;
     }
 
     public RefQualifier(
-            boolean isPersistent,
-            Object qualifierValue
+        boolean isPersistent,
+        Object qualifierValue
     ) {
-        this.qualifierType = isPersistent ? QualifierType.PERSISTENT : QualifierType.REASSIGNABLE;
-        this.qualifierValue = qualifierValue;
+        this(isPersistent ? QualifierType.PERSISTENT : QualifierType.REASSIGNABLE, qualifierValue);
     }
 
 }

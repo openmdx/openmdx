@@ -57,6 +57,7 @@ import java.util.stream.StreamSupport;
 
 import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.RefBaseObject;
+import javax.jmi.reflect.RefObject;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.oasisopen.jmi1.RefQualifier;
@@ -122,22 +123,25 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
             );
         } else if(declaringClass == RefContainer.class) {
             if("refAdd".equals(methodName)) {
-                ReferenceDef.getInstance(proxy.getClass()).add.invoke(
+                final Method cciAdd = ReferenceDef.getInstance(proxy.getClass()).add;
+                cciAdd.invoke(
                     this.cciDelegate,
-                    toRefArguments(args)
+                    toCciArguments(args, cciAdd.getParameterCount())
                 );
                 return null;
             } else if("refGet".equals(methodName)) {
+                final Method cciGet = ReferenceDef.getInstance(proxy.getClass()).get;
                 return this.marshaller.marshal(
-                    ReferenceDef.getInstance(proxy.getClass()).get.invoke(
+                        cciGet.invoke(
                         this.cciDelegate,
-                        toRefArguments(args)
+                        toCciArguments(args, cciGet.getParameterCount())
                     )
                 );
             } else if("refRemove".equals(methodName)) {
-                ReferenceDef.getInstance(proxy.getClass()).remove.invoke(
+                final Method cciRemove = ReferenceDef.getInstance(proxy.getClass()).remove;
+                cciRemove.invoke(
                     this.cciDelegate,
-                    toRefArguments(args)
+                    toCciArguments(args, cciRemove.getParameterCount())
                 );
                 return null;
             } else if("refGetAll".equals(methodName)) {
@@ -271,40 +275,48 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
         );
     }
 
-    private Object[] toRefArguments(Object[] args) throws ServiceException {
-        #if CLASSIC_CHRONO_TYPES return (Object[]) this.marshaller.unmarshal(args[0]);
-        #else
-        if (args.length == 0 || args.length > 2) {
-            throw new ServiceException(
+    #if CLASSIC_CHRONO_TYPES
+
+    private Object[] toCciArguments(Object[] refArgs, int parameterCount) throws ServiceException {
+        return (Object[]) this.marshaller.unmarshal(refArgs[0]);
+    }
+
+    #else
+
+    private Object[] toCciArguments(Object[] refArgs, int parameterCount) throws ServiceException {
+        final Object[] cciArgs = new Object[parameterCount];
+        switch(refArgs.length) {
+            case 1:
+                toCciQualifiers(cciArgs, (List<RefQualifier>) refArgs[0]);
+                break;
+            case 2:
+                toCciQualifiers(cciArgs, (List<RefQualifier>) refArgs[0], (RefObject) refArgs[1]);
+                break;
+            default:
+                throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_IMPLEMENTED,
-                    "TODO",
-                    new BasicException.Parameter("args", args));
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "Unexpected number of arguments",
+                    new BasicException.Parameter("refArgs", refArgs)
+                );
         }
+        return cciArgs;
+    }
 
-        final Object[] unmarshalled = (Object[]) this.marshaller.unmarshal(args);
-        List<Object> refArgs = new ArrayList<>();
-        if (unmarshalled[0] instanceof List) {
-            List<RefQualifier> qualifiers = (List<RefQualifier>) unmarshalled[0];
-            for (RefQualifier qualifier : qualifiers) {
-                refArgs.add(qualifier.qualifierType);
-                refArgs.add(qualifier.qualifierValue);
-            }
-        } else {
-            throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_IMPLEMENTED,
-                    "TODO",
-                    new BasicException.Parameter("args", args));
+    private void toCciQualifiers(Object[] target, List<RefQualifier> source) {
+        int i = 0;
+        for (RefQualifier refQualifier : source) {
+            target[i++] = refQualifier.qualifierType;
+            target[i++] = refQualifier.qualifierValue;
         }
+    }
 
-        if (unmarshalled.length > 1) {
-            refArgs.add(unmarshalled[1]);
-        }
-
-        return refArgs.toArray();
+    private void toCciQualifiers(Object[] target, List<RefQualifier> source, RefObject value)  throws ServiceException {
+        toCciQualifiers(target, source);
+        target[target.length - 1] = this.marshaller.unmarshal(value);
+    }
 
         #endif
-    }
+
 
 }
