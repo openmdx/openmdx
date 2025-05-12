@@ -96,7 +96,8 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
     ) throws ServiceException, IllegalAccessException, InvocationTargetException {
         final Class<?> declaringClass = method.getDeclaringClass();
         final String methodName = method.getName();
-        if (declaringClass == proxy.getClass().getInterfaces()[0]) {
+        Class<?>[] interfaces = proxy.getClass().getInterfaces();
+        if (declaringClass == interfaces[0]) {
             // 
             // This typed association end interface has been prepended 
             // by the Jmi1ObjectInvocationHandler
@@ -128,14 +129,14 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
                             refArguments.qualifiers,
                             (RefObject_1_0) refArguments.value
                     );
-                    break;
+                    return null;
                 case "get":
                     return this.marshaller.marshal(
                             this.refDelegate.refGet(refArguments.qualifiers)
                     );
                 case "remove":
                     this.refDelegate.refRemove(refArguments.qualifiers);
-                    break;
+                    return null;
                 default:
                     throw new UnsupportedOperationException("Method not supported: " + methodName);
             }
@@ -240,6 +241,7 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
                 this.refDelegate.forEach(
                         new MarshallingConsumer<>(RefObject_1_0.class, action, marshaller)
                 );
+                return null;
             }
         }
         return this.marshaller.marshal(

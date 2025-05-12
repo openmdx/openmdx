@@ -112,18 +112,10 @@ public class StandardMarshaller implements Marshaller {
             return 
                 source instanceof RefStruct_1_0 ? ((RefStruct_1_0)source).refDelegate() :  
                 source instanceof Object[] ? unmarshal((Object[]) source) :
-                source instanceof RefArguments ? unmarshal((RefArguments) source) :
             	this.outermostPackage.unmarshal(source);
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
         }
-    }
-
-    private RefArguments unmarshal(RefArguments source) throws ServiceException {
-        return new RefArguments(
-                source.qualifiers,
-                (RefObject) unmarshal(source.value)
-        );
     }
 
     /* (non-Javadoc)
