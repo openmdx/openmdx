@@ -474,7 +474,6 @@ public class DateAndTimeMarshaller {
             return target;
             #else
             Timestamp value = (Timestamp)source;
-//            return value.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime();
             return value.toInstant();
             #endif
         } else if(source instanceof java.time.LocalDateTime) {
