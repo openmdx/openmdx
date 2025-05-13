@@ -44,26 +44,25 @@
  */
 package org.openmdx.base.dataprovider.layer.persistence.jdbc;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.DateAndTimeMarshaller;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.DataTypes;
+import org.openmdx.base.exception.ServiceException;
+
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.sql.Connection;
 import java.text.ParseException;
 import java.util.concurrent.TimeUnit;
 
-import javax.xml.datatype.XMLGregorianCalendar;
+public class DateAndTimeMarshallerTest {
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.XMLGregorianCalendarMarshaller;
-import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.DataTypes;
-import org.openmdx.base.exception.ServiceException;
-
-public class TestXMLGregorianCalendarMarshaller {
-
-	private static XMLGregorianCalendarMarshaller marshaller;
+	private static DateAndTimeMarshaller marshaller;
 
 	@BeforeAll
 	public static void setUp() throws ServiceException{
-		marshaller = XMLGregorianCalendarMarshaller.newInstance(
+		marshaller = DateAndTimeMarshaller.newInstance(
 				LayerConfigurationEntries.TIME_TYPE_STANDARD,
 				LayerConfigurationEntries.DATE_TYPE_STANDARD,
 				LayerConfigurationEntries.DATETIME_TYPE_STANDARD,

@@ -1,6 +1,6 @@
 /*
  * ====================================================================
- * Description: XMLGregorianCalendarMarshaller
+ * Description: DateAndTimeMarshaller
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -58,7 +58,6 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 
@@ -70,9 +69,9 @@ import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
 /**
- * XMLGregorianCalendarMarshaller
+ * DateAndTimeMarshaller
  */
-public class XMLGregorianCalendarMarshaller {
+public class DateAndTimeMarshaller {
 
     /**
      * Constructor
@@ -83,7 +82,7 @@ public class XMLGregorianCalendarMarshaller {
      * @param dateTimePrecision
      * @throws ServiceException
      */
-    protected XMLGregorianCalendarMarshaller(
+    protected DateAndTimeMarshaller(
             String dateTimeStandardTimeZone,
             String dateTimeDaylightSavingTimeZone,
             DataTypes sqlDataTypes,
@@ -94,7 +93,7 @@ public class XMLGregorianCalendarMarshaller {
                 "yyyy-MM-dd HH:mm:ss.SSS"
         );
         this.dateTimeFormatBefore1970.setTimeZone(
-                XMLGregorianCalendarMarshaller.UTC
+                DateAndTimeMarshaller.UTC
         );
         this.dateTimeFormatSince1970 = new SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss"
@@ -203,7 +202,7 @@ public class XMLGregorianCalendarMarshaller {
      *
      * @throws ServiceException
      */
-    public static XMLGregorianCalendarMarshaller newInstance(
+    public static DateAndTimeMarshaller newInstance(
             String timeType,
             String dateType,
             String dateTimeType,
@@ -246,7 +245,7 @@ public class XMLGregorianCalendarMarshaller {
                     new BasicException.Parameter("requested", dateTimePrecision)
             );
         }
-        return new XMLGregorianCalendarMarshaller(
+        return new DateAndTimeMarshaller(
                 dateTimeStandardTimeZone,
                 dateTimeDaylightSavingTimeZone,
                 sqlDataTypes,
@@ -259,7 +258,6 @@ public class XMLGregorianCalendarMarshaller {
      *
      * @param source
      * @param connection
-     * @param sqlProperties
      *
      * @return
      *
@@ -450,6 +448,7 @@ public class XMLGregorianCalendarMarshaller {
         } else if(source instanceof Time) {
             return parse("T" + source);
         } else if (source instanceof Timestamp) {
+            #if CLASSIC_CHRONO_TYPES
             Timestamp value = (Timestamp) source;
             long milliseconds = value.getTime();
             java.util.GregorianCalendar calendar = new GregorianCalendar(UTC);
@@ -473,6 +472,11 @@ public class XMLGregorianCalendarMarshaller {
                     break;
             }
             return target;
+            #else
+            Timestamp value = (Timestamp)source;
+//            return value.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime();
+            return value.toInstant();
+            #endif
         } else if(source instanceof java.time.LocalDateTime) {
             java.time.LocalDateTime value = (java.time.LocalDateTime)source;
             java.util.GregorianCalendar calendar = GregorianCalendar.from(ZonedDateTime.of(value, ZoneOffset.UTC));

@@ -119,7 +119,7 @@ import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.BooleanMar
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.DurationMarshaller;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.LargeObjectMarshaller;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.SetLargeObjectMethod;
-import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.XMLGregorianCalendarMarshaller;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.DateAndTimeMarshaller;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.dbobject.DBOSlicedWithIdAsKey;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.dbobject.DBOSlicedWithParentAndIdAsKey;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.dbobject.DbObject;
@@ -508,10 +508,10 @@ public class Database_2
      * @return
      * @throws ServiceException
      */
-    protected XMLGregorianCalendarMarshaller getCalendarMarshaller()
+    protected DateAndTimeMarshaller getCalendarMarshaller()
         throws ServiceException {
         if (this.calendarMarshaller == null) {
-            this.calendarMarshaller = XMLGregorianCalendarMarshaller.newInstance(
+            this.calendarMarshaller = DateAndTimeMarshaller.newInstance(
                 this.timeType,
                 this.dateType,
                 this.dateTimeType,
@@ -3376,6 +3376,14 @@ public class Database_2
                 ps.setDate(position, (Date) sqlValue);
             } else if (sqlValue instanceof String) {
                 ps.setString(position, (String) sqlValue);
+            } else {
+                ps.setObject(position, sqlValue);
+            }
+        } else if (Datatypes.DATE_TIME_CLASS.isInstance(normalizedValue)) {
+            final Object sqlValue = this.getDurationMarshaller().marshal(normalizedValue, getDatabaseProductName(conn));
+            if (sqlValue instanceof java.time.Instant) {
+                java.time.Instant instant = (java.time.Instant)sqlValue;
+                ps.setTimestamp(position, Timestamp.from(instant));
             } else {
                 ps.setObject(position, sqlValue);
             }
@@ -7437,7 +7445,7 @@ public class Database_2
 
     protected BooleanMarshaller booleanMarshaller;
     protected DurationMarshaller durationMarshaller;
-    protected XMLGregorianCalendarMarshaller calendarMarshaller;
+    protected DateAndTimeMarshaller calendarMarshaller;
     protected String booleanType = LayerConfigurationEntries.BOOLEAN_TYPE_CHARACTER;
     protected String booleanFalse = null;
     protected String booleanTrue = null;

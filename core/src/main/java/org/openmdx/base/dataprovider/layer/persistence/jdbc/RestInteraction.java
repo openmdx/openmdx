@@ -1110,9 +1110,18 @@ public class RestInteraction extends AbstractRestInteraction {
                     SysLog.warning("Optimistic write lock expects a byte[] version", writeLock.getClass().getName());
                 }
                 if (LockAssertions.isReadLockAssertion(readLock)) {
+                    final Object obj1 = obj.getValue().get(SystemAttributes.MODIFIED_AT);
                     #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime = LockAssertions.getTransactionTime(readLock);
-                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif modifiedAt
-                            = Datatypes.DATE_TIME_CLASS.cast(obj.getValue().get(SystemAttributes.MODIFIED_AT));
+                    #if CLASSIC_CHRONO_TYPES java.util.Date
+                    #else
+
+                    // Convert XMLGregorianCalendar to Instant
+//                    if (obj1 instanceof XMLGregorianCalendar) {
+//                        XMLGregorianCalendar xmlCal = (XMLGregorianCalendar)obj1;
+//                        return xmlCal.toGregorianCalendar().toZonedDateTime().toInstant();
+//                    }
+
+                    java.time.Instant #endif modifiedAt = Datatypes.DATE_TIME_CLASS.cast(obj1);
                     if (modifiedAt == null) {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
