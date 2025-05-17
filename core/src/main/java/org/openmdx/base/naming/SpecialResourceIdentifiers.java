@@ -78,7 +78,7 @@ public class SpecialResourceIdentifiers {
     /**
      * Unescape a JDO-escaped xri
      * 
-     * @param xri
+     * @param xri a JDO-escaped XRI
      * 
      * @return the unescaped XRI
      */

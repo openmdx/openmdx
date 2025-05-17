@@ -534,7 +534,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
      * @return   A non-null string representation of this path.
      * 
      * @deprecated use toXRI()
-     * @see toXRI()
+     * @see #toXRI()
      */
     @Deprecated
     public String toXri()
