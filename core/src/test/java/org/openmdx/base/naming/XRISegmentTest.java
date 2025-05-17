@@ -46,14 +46,46 @@ package org.openmdx.base.naming;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import java.util.List;
 
-/**
- * Testee is the PathComponent, tested is its static valueOf method.
- */
-public class XRISegmentTest {
+class XRISegmentTest {
 
 	@Test
-	public void whenColonAndAsteriskThenCreateClassicSegmentWildcardPathComponent(){
+	void parseXRIOSegments(){
+		// Arrange
+		final String xriRepresentation = "provider/($..)/segment/($...)";
+		// Act
+		final List<XRISegment> descendant = XRISegment.parseDescendant(xriRepresentation);
+		// Assert
+		Assertions.assertEquals(4, descendant.size());
+		Assertions.assertEquals("provider", descendant.get(0).toXRIRepresentation());
+		Assertions.assertEquals(XRISegment.anyChildPattern(), descendant.get(1));
+		Assertions.assertEquals("segment", descendant.get(2).toXRIRepresentation());
+		Assertions.assertEquals(XRISegment.itselfAndAnyDescendantPattern(), descendant.get(3));
+	}
+
+	@Test
+	void whenAnyChildPatternThenClassicWildcard(){
+		// Arrange
+		final String classicRepresentation = ":*";
+		// Act
+		final XRISegment pathComponent = XRISegment.anyChildPattern();
+		// Assert
+		validate(classicRepresentation, pathComponent, ClassicWildcardSegment.class);
+	}
+
+	@Test
+	void whenItselfAndAnyDescendantPatternThenClassicWildcard(){
+		// Arrange
+		final String classicRepresentation = "%";
+		// Act
+		final XRISegment pathComponent = XRISegment.itselfAndAnyDescendantPattern();
+		// Assert
+		validate(classicRepresentation, pathComponent, ClassicWildcardMultiSegment.class);
+	}
+
+	@Test
+	void whenColonAndAsteriskThenCreateClassicSegmentWildcardPathComponent(){
 		// Arrange
 		final String classicRepresentation = ":*";
 		// Act
@@ -63,7 +95,7 @@ public class XRISegmentTest {
 	}
 
 	@Test
-	public void whenMultiColonThenCreatePlainVanillaSegmentPathComponent(){
+	void whenMultiColonThenCreatePlainVanillaSegmentPathComponent(){
 		// Arrange
 		final String classicRepresentation = "A:B:C";
 		// Act
@@ -73,7 +105,7 @@ public class XRISegmentTest {
 	}
 
 	@Test
-	public void whenNoColonThenCreatePlainVanillaSegmentPathComponent(){
+	void whenNoColonThenCreatePlainVanillaSegmentPathComponent(){
 		// Arrange
 		final String classicRepresentation = "AAA";
 		// Act
@@ -83,7 +115,7 @@ public class XRISegmentTest {
 	}
 	
 	@Test
-	public void whenStartsWithColonAndEndsWithAsteriskThenCreateClassicSegmentWildcardPathComponent(){
+	void whenStartsWithColonAndEndsWithAsteriskThenCreateClassicSegmentWildcardPathComponent(){
 		// Arrange
 		final String classicRepresentation = ":Test*";
 		// Act
@@ -93,7 +125,7 @@ public class XRISegmentTest {
 	}
 
 	@Test
-	public void whenPercentThenCreateClassicWildcardPathComponent(){
+	void whenPercentThenCreateClassicWildcardPathComponent(){
 		// Arrange
 		final String classicRepresentation = "%";
 		// Act
@@ -103,7 +135,7 @@ public class XRISegmentTest {
 	}
 	
 	@Test
-	public void whenStartsWithPercentThenCreateClassicWildcardPathComponent(){
+	void whenStartsWithPercentThenCreateClassicWildcardPathComponent(){
 		// Arrange
 		final String classicRepresentation = "Test%";
 		// Act
@@ -113,7 +145,7 @@ public class XRISegmentTest {
 	}
 	
 	@Test
-	public void whenUUIDCrossReferenceThenCreateTransactionalPathComponent(){
+	void whenUUIDCrossReferenceThenCreateTransactionalPathComponent(){
 		// Arrange
 		final String classicRepresentation = "!($t*uuid*d8731124-db0d-431d-b405-6915c3e415a2)";
 		// Act
@@ -124,7 +156,7 @@ public class XRISegmentTest {
 	}
 
 	@Test
-	public void whenUUIDPlaceholderThenCreateTransactionalPathComponent(){
+	void whenUUIDPlaceholderThenCreateTransactionalPathComponent(){
 		// Arrange
 		final String classicRepresentation = ":d8731124-db0d-431d-b405-6915c3e415a2";
 		// Act
@@ -135,7 +167,7 @@ public class XRISegmentTest {
 	}
 	
 	@Test
-	public void whenClassicPlaceholderThenCreateTransactionalPathComponent(){
+	void whenClassicPlaceholderThenCreateTransactionalPathComponent(){
 		// Arrange
 		final String classicRepresentation = TransactionalSegment.getClassicRepresentationOfNewInstance();
 		// Act
@@ -147,7 +179,7 @@ public class XRISegmentTest {
 	
 
 	@Test
-	public void whenAnotherCrossReferenceThenCreateExtensibleCrossReferencePathComponent(){
+	void whenAnotherCrossReferenceThenCreateExtensibleCrossReferencePathComponent(){
 		// Arrange
 		final String classicRepresentation = "(java:comp/env)";
 		// Act
@@ -158,7 +190,7 @@ public class XRISegmentTest {
 	}
 
 	@Test
-	public void whenWildcardCrossReferenceThenCreateExtensibleCrossReferencePathComponent(){
+	void whenWildcardCrossReferenceThenCreateExtensibleCrossReferencePathComponent(){
 		// Arrange
 		final String classicRepresentation = "Test*($.)";
 		// Act
@@ -169,7 +201,7 @@ public class XRISegmentTest {
 	}
 
 	@Test
-	public void whenClassicCrossReferenceThenCreateClassicCrossReferencePathComponent(){
+	void whenClassicCrossReferenceThenCreateClassicCrossReferencePathComponent(){
 		// Arrange
 		final String classicRepresentation = "org::openmdx::audit2/provider/Audit";
 		// Act
