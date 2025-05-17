@@ -62,18 +62,19 @@ import org.openmdx.kernel.xri.XRIAuthorities;
 
 /**
  * The Path class represents an object's XRI.
- * 
+ * <p>
  * The components of a name are numbered. The indices of a
  * name with N components range from 0 up to, but not
  * including, N. This range may be written as [0,N). The
  * most significant component is at index 0. An empty name
  * has no components. 
- * 
+ * </p>
+ * <p>
  * None of the methods in this interface accept null as a
  * valid value for a parameter that is a name or a name
  * component. Likewise, methods that return a name or name
  * component never return null. 
- * 
+ * </p>
  * A path is immutable.
  */
 public final class Path implements Comparable<Path>, Cloneable, Serializable {
@@ -139,7 +140,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     /**
      * Creates a {@code Path} object.
      *
-     * @param  path  The non-null string to parse.
+     * @param  charSequence  The non-null string to parse.
      * 
      * @exception   RuntimeServiceException
      *              in case of marshalling error
@@ -176,8 +177,6 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
 
     /**
      * Constructor 
-     *
-     * @param transactionalObjectId
      */
     public Path(
         UUID transactionalObjectId
@@ -258,7 +257,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     
     private final int size;
     private final Path parent;
-    private XRISegment base;
+    private final XRISegment base;
     
     private transient String xri;
     private transient int hash;
@@ -272,10 +271,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
 
     /**
      * Parse the components with the given marshaller
-     * 
-     * @param charSequence
-     * @param marshaller
-     * 
+     *
      * @return the components
      */
     private static String[] getComponents(
@@ -358,7 +354,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     /**
      * Returns a child path
      *
-     * @param       component 
+     * @param       crossReference
      *              the component to be added
      *
      * @return      a new and longer path
@@ -383,7 +379,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
      *
      * @return      a new path with a size greater by one  
      *
-     * @exception   NuillPointerException if the xriSegment is {@code null}
+     * @exception   NullPointerException if the xriSegment is {@code null}
      */
     public Path getChild(
     	XRISegment xriSegment
@@ -669,7 +665,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
      * Returns a negative integer, zero, or a positive integer as this  
      * path is less than, equal to, or greater than the given path. 
      * 
-     * @param       the non-null object to compare against.
+     * @param       that the non-null object to compare against.
      * 
      * @return      a negative integer, zero, or a positive integer as this 
      *              path is less than, equal to, or greater than the given 
@@ -853,7 +849,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
      * Determines whether this path starts with a specified prefix.
      * A path is a prefix if it is equal to getPrefix(prefix.size()).
      * 
-     * @param   components  the path to check
+     * @param   prefix  the path to check
      * 
      * @return  true if components is a prefix of this path, false otherwise
      */
@@ -926,14 +922,14 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     /**
      * Determines whether the path corresponds to the pattern.
      * The following patterns are supported:<ul>
-     * <li>The pattern component ":&lt;prefix&gt;*" matches the corresponding
-     *     path component starting with &lt;prefix&gt;. The pattern component
+     * <li>The pattern component ":&lsaquo;prefix&rsaquo;*" matches the corresponding
+     *     path component starting with &lsaquo;prefix&rsaquo;. The pattern component
      *     ":*" matches therefore the corresponding path component regardless
      *     of its content.
      * <li>Field "%" is only allowed as the last field of the pattern's last 
      *     path component and matches any number of fields and path components 
      *     regardless of their content.
-     * <li>Cross reference pattern {@link Wildcards#pathMatchesPattern(org.openxri.XRIReference, org.openxri.XRIReference)}
+     * <li>Cross reference pattern
      * </ul> 
      */
     public boolean isLike(

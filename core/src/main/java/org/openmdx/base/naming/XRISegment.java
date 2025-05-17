@@ -55,21 +55,11 @@ public abstract class XRISegment implements Comparable<XRISegment>, Serializable
 	protected XRISegment(){
 		super();
 	}
-	
-    /**
-     * Implements {@code Serializable}
-     */
+
+	/**
+	 * Implements {@code Serializable}
+	 */
     private static final long serialVersionUID = -5111725167053688670L;
-
-	/**
-	 * Any child corresponds to {@code "($..)"} in XRI syntax
-	 */
-	private static final XRISegment ANY_CHILD = new ClassicWildcardSegment(":*");
-
-	/**
-	 * Any child corresponds to {@code "($...)"} in XRI syntax
-	 */
-	private static final XRISegment ITSELF_AND_ANY_DESCENDENT = new ClassicWildcardMultiSegment("%");
 
 	public abstract String toClassicRepresentation();
 
@@ -85,7 +75,7 @@ public abstract class XRISegment implements Comparable<XRISegment>, Serializable
 	 * @return the {@code ($..)} pattern
 	 */
 	public static XRISegment anyChildPattern() {
-		return ANY_CHILD;
+		return ClassicWildcardSegment.ANY_CHILD;
 	}
 
 	/**
@@ -94,7 +84,7 @@ public abstract class XRISegment implements Comparable<XRISegment>, Serializable
 	 * @return the {@code ($...)} pattern
 	 */
 	public static XRISegment itselfAndAnyDescendantPattern() {
-		return ITSELF_AND_ANY_DESCENDENT;
+		return ClassicWildcardMultiSegment.ITSELF_AND_ANY_DESCENDENT;
 	}
 
 	public static List<XRISegment> parseDescendant(String descedants){
@@ -187,7 +177,7 @@ public abstract class XRISegment implements Comparable<XRISegment>, Serializable
 		return classicRepresentation.indexOf('/') > 0 && classicRepresentation.indexOf('(') < 0;
 	}
 
-	private static final boolean parseAsSimpleSegment(String classicRepresentation){
+	private static boolean parseAsSimpleSegment(String classicRepresentation){
 		for(int i = 0, l = classicRepresentation.length(); i < l; i++){
 			if(!isPChar(classicRepresentation.charAt(i))){
 				return false;
