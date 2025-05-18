@@ -143,9 +143,7 @@ public abstract class AbstractConnectionManager
         );
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ConnectionManager#allocateConnection(javax.resource.spi.ManagedConnectionFactory, javax.resource.spi.ConnectionRequestInfo)
-     */
+    @Override
     public Object allocateConnection (
         ManagedConnectionFactory managedConnectionFactory,
         ConnectionRequestInfo connectionRequestInfo

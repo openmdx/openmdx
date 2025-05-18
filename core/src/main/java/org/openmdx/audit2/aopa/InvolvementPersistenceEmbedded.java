@@ -80,11 +80,8 @@ public class InvolvementPersistenceEmbedded extends AbstractRestPort {
         return request.getResourceIdentifier().isLike(INVOLVEMENT_PATTERN);
     }
 
-    
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
-     */
+
+
     @Override
     public Interaction getInteraction(
         RestConnection connection

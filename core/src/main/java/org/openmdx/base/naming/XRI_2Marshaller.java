@@ -362,9 +362,7 @@ public final class XRI_2Marshaller
                 reply = new String[
                         segments.size() - (treeWildcard ? 1 : 0)
                         ];
-                reply[0] = authority.substring(
-                        authority.charAt(8) == '*' ? 9 : 8
-                ).replaceAll(
+                reply[0] = authority.charAt(8) == '*' ? authority.substring(9).replaceAll(
                         "\\(\\$\\.\\.\\.\\)", "%"
                 ).replaceAll(
                         "\\(\\$\\.\\.\\)", ":*"
@@ -377,7 +375,7 @@ public final class XRI_2Marshaller
                 ).replaceAll(
                         "\\.",
                         ":"
-                );
+                ) : authority.substring(8);
                 for (
                         int i = 1;
                         i < reply.length;

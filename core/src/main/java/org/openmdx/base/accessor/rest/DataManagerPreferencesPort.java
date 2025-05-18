@@ -207,11 +207,6 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
         destinations.put(EXPOSED_PATH, new DataManagerPreferencesPort(destinations, raw));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
-     */
     @Override
     public Interaction getInteraction(
         RestConnection connection

@@ -92,10 +92,7 @@ public class VoidRecord
         return INSTANCE; 
     }
 
-	/* (non-Javadoc)
-     * @see javax.resource.cci.Record#getRecordName()
-     */
-    @Override
+	@Override
     public String getRecordName() {
         return NAME;
     }

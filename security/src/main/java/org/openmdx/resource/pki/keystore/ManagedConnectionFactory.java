@@ -116,10 +116,8 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
      * 'ConnectionType' property
      */
     private ConnectionType connectionType = ConnectionType.CERTIFICATE_PROVIDER;
-    
-	/* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory(javax.resource.spi.ConnectionManager)
-     */
+
+    @Override
     public org.openmdx.resource.cci.ConnectionFactory<KeyStoreConnection, GeneralSecurityException> createConnectionFactory(
         ConnectionManager connectionManager
     ) throws ResourceException {

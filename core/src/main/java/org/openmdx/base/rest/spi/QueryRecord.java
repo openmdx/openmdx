@@ -344,9 +344,6 @@ public class QueryRecord
         return new QueryRecord(this);
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#getRecordName()
-     */
     @Override
     public String getRecordName() {
         return NAME;

@@ -268,9 +268,6 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
         }
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory(javax.resource.spi.ConnectionManager)
-     */
 	@Override
     public org.openmdx.resource.cci.ConnectionFactory<RadiusConnection,RadiusException> createConnectionFactory(
         ConnectionManager connectionManager

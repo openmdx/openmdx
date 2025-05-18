@@ -171,9 +171,6 @@ public abstract class AbstractManagedConnection<F extends ManagedConnectionFacto
         return factory;
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#addConnectionEventListener(javax.resource.spi.ConnectionEventListener)
-     */
     @Override
 	public void addConnectionEventListener(
         ConnectionEventListener connectionEventListener
@@ -183,9 +180,6 @@ public abstract class AbstractManagedConnection<F extends ManagedConnectionFacto
 		}
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#getLocalTransaction()
-     */
     @Override
 	public LocalTransaction getLocalTransaction(
     ) throws ResourceException {
@@ -197,28 +191,19 @@ public abstract class AbstractManagedConnection<F extends ManagedConnectionFacto
         );
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#getLogWriter()
-     */
     @Override
     public PrintWriter getLogWriter(
     ){
         return this.logWriter;
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#getMetaData()
-     */
-	@Override
+    @Override
 	public ManagedConnectionMetaData getMetaData(
     ) throws ResourceException {
         return this.metaData;
     }
 
-     /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#getXAResource()
-     */
-	@Override
+    @Override
     public XAResource getXAResource(
     ) throws ResourceException {
         throw this.log(
@@ -229,10 +214,7 @@ public abstract class AbstractManagedConnection<F extends ManagedConnectionFacto
         );
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#removeConnectionEventListener(javax.resource.spi.ConnectionEventListener)
-     */
-	@Override
+    @Override
     public void removeConnectionEventListener(
         ConnectionEventListener connectionEventListener
     ) {
@@ -241,9 +223,6 @@ public abstract class AbstractManagedConnection<F extends ManagedConnectionFacto
 		}
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#setLogWriter(java.io.PrintWriter)
-     */
     @Override
     public void setLogWriter(
         PrintWriter logWriter
@@ -320,9 +299,6 @@ public abstract class AbstractManagedConnection<F extends ManagedConnectionFacto
         return Objects.equals(this.connectionRequestInfo, connectionRequestInfo);
     }
 
-	/* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#destroy()
-     */
     @Override
     public void destroy(
     ) throws ResourceException {
@@ -410,9 +386,6 @@ public abstract class AbstractManagedConnection<F extends ManagedConnectionFacto
     protected abstract Object newConnection(Subject subject, ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException;
 
-	/* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#getConnection(javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
-     */
     @Override
     public Object getConnection(
         Subject subject, 

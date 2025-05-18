@@ -115,9 +115,6 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
         return LdapConnectionConfig.LDAP_V3;
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory(javax.resource.spi.ConnectionManager)
-     */
     @Override
     public org.openmdx.resource.cci.ConnectionFactory<LdapConnection,LdapException> createConnectionFactory(
         ConnectionManager connectionManager

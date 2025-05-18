@@ -439,7 +439,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     /**
      * Tests, whether the path contains a wildcard
      * 
-     * @return {@code true} if the path in XRI format contains any of the following XRI cross references<ul>
+     * @return {@code true} if the path in XRI format contains any of the following XRI cross-references<ul>
      * <li>($.)
      * <li>($..)
      * <li>($...)
@@ -789,7 +789,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
      * @exception       ArrayIndexOutOfBoundsException
      *                  if position is outside the specified range
      *                  
-     * @deprecated use {@link #getSegments()}.subList(position,{@link #size()}).toArray(new String[{@link #size()}-position}])
+     * @deprecated use {@link #getSegments()}.subList(position,{@link #size()}).toArray(new String[{@link #size()}-position])
      */
     @Deprecated
     public String[] getSuffix(
@@ -904,9 +904,9 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     }
 
     /**
-     * Test whether it is a cross reference or a path component pattern
+     * Test whether it is a cross-reference or a path component pattern
      * 
-     * @return {@code true} if it is a cross reference pattern
+     * @return {@code true} if it is a cross-reference pattern
      */
     private boolean isCrossReferencePattern(
     ) {
@@ -929,7 +929,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
      * <li>Field "%" is only allowed as the last field of the pattern's last 
      *     path component and matches any number of fields and path components 
      *     regardless of their content.
-     * <li>Cross reference pattern
+     * <li>Cross-reference pattern
      * </ul> 
      */
     public boolean isLike(

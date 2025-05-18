@@ -201,9 +201,7 @@ class Connection_2RemotePort implements Port<RestConnection> {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.resource.spi.PlugIn#getInteraction(javax.resource.cci.Connection)
-     */
+    @Override
     public Interaction getInteraction(
     	RestConnection connection
     ) throws ResourceException {

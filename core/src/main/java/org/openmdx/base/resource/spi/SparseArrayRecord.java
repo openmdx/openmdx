@@ -181,21 +181,11 @@ public class SparseArrayRecord
     // Implements Record
     //------------------------------------------------------------------------
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.resource.cci.Record#getRecordName()
-     */
     @Override
     public String getRecordName() {
         return NAME;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.resource.cci.Record#setRecordName(java.lang.String)
-     */
     @Override
     public void setRecordName(String name) {
         if (!NAME.equals(name)) {
@@ -203,11 +193,6 @@ public class SparseArrayRecord
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.resource.cci.Record#setRecordShortDescription(java.lang.String)
-     */
     @Override
     public void setRecordShortDescription(String description) {
         if (description != null) {
@@ -215,11 +200,6 @@ public class SparseArrayRecord
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.resource.cci.Record#getRecordShortDescription()
-     */
     @Override
     public String getRecordShortDescription() {
         return null;
