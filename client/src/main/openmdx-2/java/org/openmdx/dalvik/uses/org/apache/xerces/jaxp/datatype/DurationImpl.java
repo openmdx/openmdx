@@ -179,7 +179,6 @@ class DurationImpl
     }
 
     /**
-     * TODO: Javadoc
      * @param isPositive Sign.
      *
      * @return 1 if positive, else -1.
@@ -323,8 +322,6 @@ class DurationImpl
     }
 
     /**
-     * TODO: Javadoc
-     *
      * @param i int to convert to BigInteger.
      *
      * @return BigInteger representation of int.
@@ -513,8 +510,6 @@ class DurationImpl
 
 
     /**
-     * TODO: Javadoc
-     *
      * @param ch char to test.
      *
      * @return true if ch is a digit, else false.
@@ -524,8 +519,6 @@ class DurationImpl
     }
 
     /**
-     * TODO: Javadoc
-     *
      * @param ch to test.
      *
      * @return true if ch is a digit or a period, else false.
@@ -538,7 +531,6 @@ class DurationImpl
      * TODO: Javadoc
      *
      * @param whole String to parse.
-     * @param idx TODO: ???
      *
      * @return Result of parsing.
      *
@@ -560,17 +552,6 @@ class DurationImpl
         return whole.substring(start, idx[0]);
     }
 
-    /**
-     * TODO: Javadoc.
-     *
-     * @param whole TODO: ???
-     * @param parts TODO: ???
-     * @param partsIndex TODO: ???
-     * @param len TODO: ???
-     * @param tokens TODO: ???
-     *
-     * @throws IllegalArgumentException TODO: ???
-     */
     private static void organizeParts(
             String whole,
             String[] parts,
@@ -605,17 +586,6 @@ class DurationImpl
         }
     }
 
-    /**
-     * TODO: Javadoc
-     *
-     * @param whole TODO: ???.
-     * @param part TODO: ???.
-     * @param index TODO: ???.
-     *
-     * @return TODO: ???.
-     *
-     * @throws IllegalArgumentException TODO: ???.
-     */
     private static BigInteger parseBigInteger(
             String whole,
             String part,
@@ -632,17 +602,6 @@ class DurationImpl
         //        }
     }
 
-    /**
-     * TODO: Javadoc.
-     *
-     * @param whole TODO: ???.
-     * @param part TODO: ???.
-     * @param index TODO: ???.
-     *
-     * @return TODO: ???.
-     *
-     * @throws IllegalArgumentException TODO: ???.
-     */
     private static BigDecimal parseBigDecimal(
             String whole,
             String part,

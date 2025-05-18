@@ -4482,7 +4482,7 @@ public class DataObject_1
 
         @Override
         public Set<String> keySet() {
-            return ManagedMap.this.getDelegate(false, false).keySet(); // TODO make it modifiable
+            return ManagedMap.this.getDelegate(false, false).keySet();
         }
 
         @Override

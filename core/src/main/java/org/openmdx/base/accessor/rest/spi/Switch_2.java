@@ -236,7 +236,7 @@ public class Switch_2 implements Port<RestConnection> {
                 destination != cachingPort && 
                 ispec.getFunction() == RestFunction.GET && 
                 output instanceof ResultRecord
-                // TODO && Fetch Group is ALL
+                // TODO && Fetch Group is ALL
             ){
                 for(Object object : (ResultRecord)output) {
                     cachingPort.offer((ObjectRecord)object);

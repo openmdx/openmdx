@@ -75,12 +75,6 @@ public class DateAndTimeMarshaller {
 
     /**
      * Constructor
-     *
-     * @param dateTimeStandardTimeZone
-     * @param dateTimeDaylightSavingTimeZone TODO
-     * @param sqlDataTypes
-     * @param dateTimePrecision
-     * @throws ServiceException
      */
     protected DateAndTimeMarshaller(
             String dateTimeStandardTimeZone,

@@ -62,6 +62,8 @@ import java.util.Stack;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 
+import org.openmdx.kernel.exception.Throwables;
+
 public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
     
 	private static final String MIXED_CONTENT_VALUE_KEY = "$";
@@ -241,8 +243,7 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
 	                object.put(property.getKey(), value);
 	            }
 	        } catch (JSONException e) {
-	            // TODO Auto-generated catch block
-	            e.printStackTrace();
+				Throwables.log(e);
 	        }
             return this;
 	    }

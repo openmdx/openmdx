@@ -402,9 +402,7 @@ public abstract class AbstractManagedConnection<F extends ManagedConnectionFacto
     
     /**
      * Create a new connection handle
-     * @param subject TODO
-     * @param connectionRequestInfo TODO
-     * 
+     *
      * @return a new connection handle
      */
     protected abstract Object newConnection(Subject subject, ConnectionRequestInfo connectionRequestInfo

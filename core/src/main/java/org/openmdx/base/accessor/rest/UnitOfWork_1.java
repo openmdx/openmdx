@@ -1257,7 +1257,6 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
          * 
          * @see UserObjects#setTransactionTime(PersistenceManager, Factory<Date>)
          */
-        // TODO: kjdd Apply `org.w3c.time.Clock` recommendation, please!
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newTransactionTime() {
             Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> transactionTime = getAccessor().getTransactionTime();
             return transactionTime == null ? SystemClock.getInstance().now() : transactionTime.instantiate();

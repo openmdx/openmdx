@@ -383,8 +383,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	     * Consume the XML Declaration and return it or reset the stream otherwise.
 	     * 
 	     * @param in the stream
-	     * @param regexpFactory TODO
-	     * 
+	     *
 	     * @return the XML Declaration; or {@code null} if none has been 
 	     * specified.
 	     * 

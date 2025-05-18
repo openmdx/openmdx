@@ -99,10 +99,8 @@ public class LockAssertion {
 
 	/**
 	 * Marshal the assertion value
-	 * 
-	 * TODO be aware of other data types
-	 * 
-	 * @param value
+	 *
+	 * @param value the assertion value to be marshaled
 	 * 
 	 * @return the assertion value, or {@code null} if the value is empty
 	 */
