@@ -221,12 +221,6 @@ public class Database_2
     	MAX_ROWS
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.application.dataprovider.spi.OperationAwareLayer_1#
-     * getInteraction(javax.resource.cci.Connection)
-     */
     @Override
     public Interaction getInteraction(RestConnection connection)
         throws ResourceException {
@@ -342,8 +336,8 @@ public class Database_2
     /**
      * Get boolean marshaller.
      * 
-     * @return
-     * @throws ServiceException
+     * @return the Boolean marshaller
+     * @throws ServiceException in case of failure
      */
     protected BooleanMarshaller getBooleanMarshaller()
         throws ServiceException {
@@ -375,9 +369,9 @@ public class Database_2
 
     /**
      * Get duration marshaller.
-     * 
-     * @return
-     * @throws ServiceException
+     *
+     * @return the Duration marshaller
+     * @throws ServiceException in case of failure
      */
     protected DurationMarshaller getDurationMarshaller()
         throws ServiceException {
@@ -503,9 +497,9 @@ public class Database_2
 
     /**
      * Get calendar marshaller.
-     * 
-     * @return
-     * @throws ServiceException
+     *
+     * @return the XMLGregorianCalendar marshaller
+     * @throws ServiceException in case of failure
      */
     protected XMLGregorianCalendarMarshaller getCalendarMarshaller()
         throws ServiceException {

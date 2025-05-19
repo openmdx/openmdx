@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <jdoconfig xmlns="http://java.sun.com/xml/ns/jdo/jdoconfig"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://java.sun.com/xml/ns/jdo/jdoconfig"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://java.sun.com/xml/ns/jdo/jdoconfig xri://+resource/javax/jdo/jdoconfig_3_1.xsd"
 >
 
     <!-- Entity manager factory configuration for the application "Vertrag" -->

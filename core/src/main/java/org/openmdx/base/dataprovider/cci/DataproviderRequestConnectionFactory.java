@@ -101,9 +101,6 @@ class DataproviderRequestConnectionFactory extends AbstractConnectionFactory {
         return new DataproviderRequestConnection(this, defaultConnectionSpec, port);
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.resource.cci.ConnectionFactory#getConnection(javax.resource.cci.ConnectionSpec)
-     */
     @Override
     public DataproviderRequestConnection getConnection(ConnectionSpec properties)
         throws ResourceException {

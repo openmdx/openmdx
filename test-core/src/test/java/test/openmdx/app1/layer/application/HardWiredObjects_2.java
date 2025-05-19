@@ -212,10 +212,7 @@ public class HardWiredObjects_2 extends AccessControl_2 {
         reply.addAll(values);
         reply.setHasMore(Boolean.valueOf(hasMore));
     }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
-     */
+
     @Override
     public Interaction getInteraction(
         RestConnection connection

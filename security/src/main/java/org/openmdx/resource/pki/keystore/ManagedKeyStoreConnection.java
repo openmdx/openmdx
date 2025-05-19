@@ -220,9 +220,6 @@ class ManagedKeyStoreConnection extends AbstractManagedConnection<ManagedConnect
     	return this.validator.validate(certificationPath, this.parameters);
     }
 
-	/* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#destroy()
-     */
     @Override
     public void destroy(
     ) throws ResourceException {

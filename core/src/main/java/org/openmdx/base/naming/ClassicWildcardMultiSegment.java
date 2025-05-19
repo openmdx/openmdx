@@ -58,7 +58,12 @@ public class ClassicWildcardMultiSegment extends XRISegment {
 	private final String classicRepresentation;
 	private transient String xriRepresentation;
 	private transient String prefix;
-	
+
+	/**
+	 * This constant corresponds to {@code "($...)"} in XRI 2 syntax
+	 */
+	static final XRISegment ITSELF_AND_ANY_DESCENDENT = new ClassicWildcardMultiSegment("%");
+
 	/**
 	 * Implements {@code Serializable}
 	 */

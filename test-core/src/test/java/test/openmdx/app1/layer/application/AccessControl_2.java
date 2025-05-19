@@ -79,9 +79,6 @@ public abstract class AccessControl_2 extends AbstractRestPort {
         this.connectionFactory = connectionFactory;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
-     */
     @Override
     public Interaction getInteraction(
         RestConnection connection

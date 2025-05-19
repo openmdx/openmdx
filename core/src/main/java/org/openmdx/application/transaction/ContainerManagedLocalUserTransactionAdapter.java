@@ -102,10 +102,6 @@ public class ContainerManagedLocalUserTransactionAdapter implements LocalUserTra
         return transactionSynchronizationRegistry;
     }
 
-    /**
-     * @throws ResourceException
-     * @see javax.resource.spi.LocalTransaction#begin()
-     */
     @Override
     public void begin(
     ) throws ResourceException {
@@ -114,10 +110,6 @@ public class ContainerManagedLocalUserTransactionAdapter implements LocalUserTra
             );
     }
 
-    /**
-     * @throws ResourceException
-     * @see javax.resource.spi.LocalTransaction#commit()
-     */
     @Override
     public void commit(
     ) throws ResourceException {

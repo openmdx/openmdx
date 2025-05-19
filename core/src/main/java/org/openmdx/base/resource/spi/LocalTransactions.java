@@ -130,9 +130,7 @@ public class LocalTransactions {
             return PersistenceHelper.currentUnitOfWork(persistenceManager);
         }
 
-        /* (non-Javadoc)
-         * @see javax.resource.cci.LocalTransaction#begin()
-         */
+        @Override
         public void begin(
         ) throws ResourceException {
             try {
@@ -145,9 +143,7 @@ public class LocalTransactions {
             }
         }
 
-        /* (non-Javadoc)
-         * @see javax.resource.cci.LocalTransaction#commit()
-         */
+        @Override
         public void commit(
         ) throws ResourceException {
             try {
@@ -160,9 +156,7 @@ public class LocalTransactions {
             }
         }
 
-        /* (non-Javadoc)
-         * @see javax.resource.cci.LocalTransaction#rollback()
-         */
+        @Override
         public void rollback(
         ) throws ResourceException {
             try {
@@ -203,25 +197,19 @@ public class LocalTransactions {
          */
         private final LocalTransaction delegate;
 
-        /* (non-Javadoc)
-         * @see javax.resource.spi.LocalTransaction#begin()
-         */
+        @Override
         public void begin(
         ) throws ResourceException {
             this.delegate.begin();
         }
 
-        /* (non-Javadoc)
-         * @see javax.resource.spi.LocalTransaction#commit()
-         */
+        @Override
         public void commit(
         ) throws ResourceException {
             this.delegate.commit();
         }
 
-        /* (non-Javadoc)
-         * @see javax.resource.spi.LocalTransaction#rollback()
-         */
+        @Override
         public void rollback(
         ) throws ResourceException {
             this.delegate.rollback();

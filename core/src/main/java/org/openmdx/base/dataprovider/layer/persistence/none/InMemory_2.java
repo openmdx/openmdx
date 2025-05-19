@@ -215,12 +215,6 @@ public class InMemory_2 implements Port<RestConnection> {
         return data;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.application.dataprovider.spi.OperationAwareLayer_1#
-     * getInteraction(javax.resource.cci.Connection)
-     */
     @Override
     public Interaction getInteraction(
         RestConnection connection

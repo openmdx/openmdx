@@ -117,9 +117,7 @@ public class RestConnectionFactory extends AbstractConnectionFactory {
         );
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.resource.cci.ConnectionFactory#getConnection(javax.resource.cci.ConnectionSpec)
-     */
+    @Override
     public RestConnection getConnection(
         ConnectionSpec properties
     ) throws ResourceException {

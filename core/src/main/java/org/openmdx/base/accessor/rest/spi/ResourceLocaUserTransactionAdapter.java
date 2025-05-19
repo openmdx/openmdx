@@ -83,29 +83,20 @@ class ResourceLocaUserTransactionAdapter implements LocalUserTransaction {
      * The delegate in case of an optimistic transaction
      */
     private final LocalTransaction localTransaction;
-    
-    /**
-     * @throws ResourceException
-     * @see javax.resource.spi.LocalTransaction#begin()
-     */
+
+    @Override
     public void begin(
     ) throws ResourceException {
         this.localTransaction.begin();
     }
 
-    /**
-     * @throws ResourceException
-     * @see javax.resource.spi.LocalTransaction#commit()
-     */
+    @Override
     public void commit(
     ) throws ResourceException {
         this.localTransaction.commit();
     }
 
-    /**
-     * @throws ResourceException
-     * @see javax.resource.spi.LocalTransaction#rollback()
-     */
+    @Override
     public void rollback(
     ) throws ResourceException {
         this.localTransaction.rollback();

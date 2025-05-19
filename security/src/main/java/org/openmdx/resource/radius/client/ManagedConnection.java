@@ -91,9 +91,6 @@ public class ManagedConnection extends AbstractManagedConnection<ManagedConnecti
     	return this.radiusClient;
     }
 
-	/* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#destroy()
-     */
     @Override
     public void destroy(
     ) throws ResourceException {
