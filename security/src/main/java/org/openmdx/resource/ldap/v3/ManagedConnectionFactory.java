@@ -320,19 +320,13 @@ public class ManagedConnectionFactory
          );
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory(javax.resource.spi.ConnectionManager)
-     */
     @Override
     public org.openmdx.resource.cci.ConnectionFactory<LdapConnection,LdapException> createConnectionFactory(
         ConnectionManager cxManager
     ) throws ResourceException {
         return new ConnectionFactory(this, cxManager);
     }
-    
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory(javax.resource.spi.ConnectionManager)
-     */
+
     @Override
     public org.openmdx.resource.cci.ConnectionFactory<LdapConnection,LdapException> createConnectionFactory(
     ) throws ResourceException {

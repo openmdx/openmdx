@@ -140,30 +140,22 @@ final class SingletonIndexedRecord
         return 1;
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#getRecordName()
-     */
+    @Override
     public String getRecordName() {
         return this.name;
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#getRecordShortDescription()
-     */
+    @Override
     public String getRecordShortDescription() {
         return this.description;
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#setRecordName(java.lang.String)
-     */
+    @Override
     public void setRecordName(String name) {
         this.name = name;
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#setRecordShortDescription(java.lang.String)
-     */
+    @Override
     public void setRecordShortDescription(String description) {
         this.description = description;
     }

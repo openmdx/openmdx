@@ -154,9 +154,7 @@ public abstract class AbstractConnectionFactory <C extends AutoCloseable, E exte
     // Implements Referenceable
     //------------------------------------------------------------------------    
 
-    /* (non-Javadoc)
-     * @see javax.resource.Referenceable#setReference(javax.naming.Reference)
-     */
+    @Override
     public void setReference(Reference reference) {
         this.reference = reference;
     }

@@ -60,6 +60,11 @@ public class ClassicWildcardSegment extends XRISegment {
 	private transient String prefix;
 
 	/**
+	 * This constant corresponds to {@code "($..)"} in XRI syntax
+	 */
+	static final XRISegment ANY_CHILD = new ClassicWildcardSegment(":*");
+
+	/**
 	 * Implements {@code Serializable}
 	 */
 	private static final long serialVersionUID = 7275141720000254336L;

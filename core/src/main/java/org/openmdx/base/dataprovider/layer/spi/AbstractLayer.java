@@ -166,10 +166,7 @@ public abstract class AbstractLayer extends AbstractRestPort {
     protected boolean isOutgoingInterceptionEnabled(RestInteractionSpec ispec) {
         return outgoingInterceptionEnabled && isOutgoingTrafficEnabled(ispec);
     }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
-     */
+
     @Override
     public Interaction getInteraction(
         RestConnection connection

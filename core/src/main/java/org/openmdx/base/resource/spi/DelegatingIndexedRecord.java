@@ -223,30 +223,22 @@ public class DelegatingIndexedRecord
     // Implements Record
     //------------------------------------------------------------------------
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#getRecordName()
-     */
+    @Override
     public final String getRecordName() {
         return this.recordName;
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#setRecordName(java.lang.String)
-     */
+    @Override
     public void setRecordName(String recordName) {
         this.recordName = recordName;        
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#setRecordShortDescription(java.lang.String)
-     */
+    @Override
     public void setRecordShortDescription(String recordShortDescription) {
         this.recordShortDescription = recordShortDescription;
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#getRecordShortDescription()
-     */
+    @Override
     public final String getRecordShortDescription() {
         return this.recordShortDescription;
     }

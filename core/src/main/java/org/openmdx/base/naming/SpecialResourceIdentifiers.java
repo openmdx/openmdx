@@ -73,12 +73,12 @@ public class SpecialResourceIdentifiers {
     /**
      * An escaped dot
      */
-    private final static Pattern ESCAPED_DOT = Pattern.compile("\\.".toString(), Pattern.LITERAL);
+    private final static Pattern ESCAPED_DOT = Pattern.compile("\\.", Pattern.LITERAL);
     
     /**
      * Unescape a JDO-escaped xri
      * 
-     * @param xri
+     * @param xri a JDO-escaped XRI
      * 
      * @return the unescaped XRI
      */

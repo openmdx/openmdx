@@ -59,34 +59,22 @@ public abstract class DelegatingConsumerRecord implements ConsumerRecord {
     private static final long serialVersionUID = -5806017211362158607L;
 
     protected abstract ConsumerRecord getDelegate();
-    
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#getRecordName()
-     */
+
     @Override
     public String getRecordName() {
         return getDelegate().getRecordName();
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#getRecordShortDescription()
-     */
     @Override
     public String getRecordShortDescription() {
         return getDelegate().getRecordShortDescription();
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#setRecordName(java.lang.String)
-     */
     @Override
     public void setRecordName(String recordName) {
         getDelegate().setRecordName(recordName);
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#setRecordShortDescription(java.lang.String)
-     */
     @Override
     public void setRecordShortDescription(String shortDescription) {
         getDelegate().setRecordShortDescription(shortDescription);

@@ -45,6 +45,7 @@
 package org.openmdx.base.naming;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * This class represents an XRI segment
@@ -54,21 +55,44 @@ public abstract class XRISegment implements Comparable<XRISegment>, Serializable
 	protected XRISegment(){
 		super();
 	}
-	
-    public abstract String toClassicRepresentation();
-    
-    public abstract String toXRIRepresentation();
-    
-    public abstract boolean isPattern();
 
-    protected abstract Object discriminant();
-    
-    /**
-     * Implements {@code Serializable}
-     */
+	/**
+	 * Implements {@code Serializable}
+	 */
     private static final long serialVersionUID = -5111725167053688670L;
-    
-    static XRISegment valueOf(
+
+	public abstract String toClassicRepresentation();
+
+	public abstract String toXRIRepresentation();
+
+	public abstract boolean isPattern();
+
+	protected abstract Object discriminant();
+
+	/**
+	 * The pattern {@code ($..)} matches any child
+	 *
+	 * @return the {@code ($..)} pattern
+	 */
+	public static XRISegment anyChildPattern() {
+		return ClassicWildcardSegment.ANY_CHILD;
+	}
+
+	/**
+	 * The pattern {@code ($...)} matches the object itself and any descendant
+	 *
+	 * @return the {@code ($...)} pattern
+	 */
+	public static XRISegment itselfAndAnyDescendantPattern() {
+		return ClassicWildcardMultiSegment.ITSELF_AND_ANY_DESCENDENT;
+	}
+
+	public static List<XRISegment> parseDescendant(String descedants){
+		final List<XRISegment> segments = new Path("@openmdx!-/" + descedants).getSegments();
+		return segments.subList(1, segments.size());
+	}
+
+	static XRISegment valueOf(
 		int index,	
 		String classicRepresentation
 	){
@@ -153,7 +177,7 @@ public abstract class XRISegment implements Comparable<XRISegment>, Serializable
 		return classicRepresentation.indexOf('/') > 0 && classicRepresentation.indexOf('(') < 0;
 	}
 
-	private static final boolean parseAsSimpleSegment(String classicRepresentation){
+	private static boolean parseAsSimpleSegment(String classicRepresentation){
 		for(int i = 0, l = classicRepresentation.length(); i < l; i++){
 			if(!isPChar(classicRepresentation.charAt(i))){
 				return false;

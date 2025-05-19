@@ -112,9 +112,6 @@ public class Ui_1 extends AbstractRestPort {
         this.navigateToParentOperationDef = this.createBasicObjectOperationDef(NAVIGATE_TO_PARENT_OPERATION_NAME, true);
     }
 
-	/* (non-Javadoc)
-	 * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
-	 */
 	@Override
     public Interaction getInteraction(
         RestConnection connection

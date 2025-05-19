@@ -537,17 +537,11 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
         };
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#getRecordShortDescription()
-     */
     @Override
     public String getRecordShortDescription() {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#setRecordName(java.lang.String)
-     */
     @Override
     public void setRecordName(String recordName) {
         if(!recordName.equals(getRecordName())) {

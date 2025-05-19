@@ -118,10 +118,8 @@ class Connection_2LocalPort implements Port<RestConnection> {
             );
         }
     }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.RestPlugIn#getInteraction(javax.resource.cci.Connection)
-     */
+
+    @Override
     public Interaction getInteraction(
         RestConnection connection
     ) throws ResourceException {
