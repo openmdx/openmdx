@@ -68,18 +68,12 @@ class MarshallingConsumer implements ConsumerRecord {
         this.dataObjectManager = dataObjectManager;
         this.delegate = delegate;
     }
-    
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#getRecordName()
-     */
+
     @Override
     public String getRecordName() {
         return ConsumerRecord.NAME;
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#setRecordName(java.lang.String)
-     */
     @Override
     public void setRecordName(String recordName) {
         if(!getRecordName().equals(recordName)) throw BasicException.initHolder(
@@ -95,17 +89,11 @@ class MarshallingConsumer implements ConsumerRecord {
         );
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#setRecordShortDescription(java.lang.String)
-     */
     @Override
     public void setRecordShortDescription(String description) {
         // The short description set by this method is ignored
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Record#getRecordShortDescription()
-     */
     @Override
     public String getRecordShortDescription() {
         return null;

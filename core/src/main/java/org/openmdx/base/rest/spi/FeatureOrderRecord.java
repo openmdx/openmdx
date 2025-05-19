@@ -128,11 +128,6 @@ public class FeatureOrderRecord
         return new FeatureOrderRecord(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.resource.cci.Record#getRecordName()
-     */
     @Override
     public String getRecordName() {
         return NAME;

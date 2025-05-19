@@ -106,10 +106,7 @@ public class Switch_2 implements Port<RestConnection> {
     //------------------------------------------------------------------------
     // Implements Port
     //------------------------------------------------------------------------
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.base.resource.sp#getInteraction(javax.resource.cci.Connection)
-     */
+
     @Override
     public Interaction getInteraction(
         RestConnection connection

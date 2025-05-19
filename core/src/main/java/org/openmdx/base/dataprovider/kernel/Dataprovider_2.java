@@ -320,11 +320,8 @@ public class Dataprovider_2 implements Port<RestConnection> {
     public void setDataprovider(ConnectionFactory dataprovider) {
         this.connectionFactory = dataprovider;
     }
-     
-    /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.RestPlugIn#getInteraction(javax.resource.cci.Connection)
-     */
-    @Override
+
+	@Override
     public Interaction getInteraction(
 		RestConnection connection
     ) throws ResourceException {

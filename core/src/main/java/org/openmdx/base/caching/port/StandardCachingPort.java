@@ -85,11 +85,6 @@ public class StandardCachingPort implements CachingPort {
     // Implements Port
     //------------------------------------------------------------------------
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
-     */
     @Override
     public CachingInteraction getInteraction(
         RestConnection connection

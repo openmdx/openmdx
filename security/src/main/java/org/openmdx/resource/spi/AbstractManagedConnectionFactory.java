@@ -111,11 +111,8 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
      * The resource adapter's internal connection manager
      */
     private ConnectionManager defaultConnectionManager;
-    
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#matchManagedConnections(java.util.Set, javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
-     */
-    @Override
+
+	@Override
 	@SuppressWarnings("rawtypes")
     public final ManagedConnection matchManagedConnections(
         Set managedConnections,
@@ -133,10 +130,8 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
         }
         return null;
     }
-    
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory()
-     */
+
+	@Override
     public Object createConnectionFactory(
     ) throws ResourceException {
         if(this.defaultConnectionManager == null) {
@@ -145,9 +140,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
         return createConnectionFactory(defaultConnectionManager);
     }
 
-	/* (non-Javadoc)
-	 * @see javax.resource.spi.ManagedConnectionFactory#getLogWriter()
-	 */
+	@Override
 	public final PrintWriter getLogWriter(
 	){
 		return this.logWriter;
@@ -179,9 +172,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 		} 
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.resource.spi.ManagedConnectionFactory#setLogWriter(java.io.PrintWriter)
-	 */
+	@Override
 	public void setLogWriter(
 		PrintWriter logWriter
 	){
@@ -327,10 +318,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 		return this.hash;
 	}
 
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#createManagedConnection(javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
-     */
-    @Override
+	@Override
     public final ManagedConnection createManagedConnection(
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo

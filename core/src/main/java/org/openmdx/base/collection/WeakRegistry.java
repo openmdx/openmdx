@@ -86,9 +86,6 @@ public class WeakRegistry<K,V> implements Registry<K, V> {
      */
     private final Set<V> values = new AbstractSet<V>() {
 
-        /* (non-Javadoc)D
-         * @see java.util.AbstractCollection#iterator()
-         */
         @Override
         public Iterator<V> iterator(
         ) {

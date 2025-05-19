@@ -195,9 +195,6 @@ public class InboundConnectionFactory_2 extends AbstractConnectionFactory {
         );
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.Referenceable#setReference(javax.naming.Reference)
-     */
     public void setReference(Reference reference) {
         this.reference = reference;
     }
@@ -224,10 +221,7 @@ public class InboundConnectionFactory_2 extends AbstractConnectionFactory {
         );
     }
 
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.resource.cci.ConnectionFactory#getConnection(javax.resource.cci.ConnectionSpec)
-     */
+    @Override
     public Connection getConnection(
         ConnectionSpec properties
     ) throws ResourceException {

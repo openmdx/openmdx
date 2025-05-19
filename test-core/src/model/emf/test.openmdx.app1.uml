@@ -132,6 +132,9 @@
             <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
           <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3E822FD80243" name="foreignId">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_xxkBEOrwEe-0d5wazOylVQ" annotatedElement="_3C7B8A60016D3E822FD80243">
+              <body>@deprecated</body>
+            </ownedComment>
             <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
           <ownedAttribute xmi:type="uml:Property" xmi:id="_3C7B8A60016D3DA87C3A032F" name="givenName">
@@ -195,6 +198,9 @@
             </ownedParameter>
           </ownedOperation>
           <ownedOperation xmi:type="uml:Operation" xmi:id="_3C7B8A60016D3EDB93610167" name="assignAddress">
+            <ownedComment xmi:type="uml:Comment" xmi:id="_492BkOrwEe-0d5wazOylVQ" annotatedElement="_3C7B8A60016D3EDB93610167">
+              <body>@deprecated since 1.2.3</body>
+            </ownedComment>
             <ownedParameter xmi:type="uml:Parameter" xmi:id="_qhGRTN7CEdmkJO73lqONhA" direction="return">
               <type xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3E40433402E1"/>
             </ownedParameter>

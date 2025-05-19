@@ -8,7 +8,7 @@
             <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_UPUGQE0UEeiDgZp6R_9Hfw" key="struct"/>
           </eAnnotations>
           <ownedAttribute xmi:type="uml:Property" xmi:id="_wwQekE0REeiDgZp6R_9Hfw" name="value" isReadOnly="true">
-            <type xmi:type="uml:PrimitiveType" href="../openMDX 2 ~ Core (EMF)/org.w3c.uml#_3C7B8A60016D3C8B631401F0"/>
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B631401F0"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_9hkoQHNPEeG9T95WWtTPPR" name="Sequence">
