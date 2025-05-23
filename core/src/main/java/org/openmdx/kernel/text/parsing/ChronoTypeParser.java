@@ -42,14 +42,20 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.base.text.parsing;
+package org.openmdx.kernel.text.parsing;
 
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
+import java.time.Instant;
+import java.time.Period;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAmount;
 
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.datatype.DatatypeConstants;
 import org.openmdx.kernel.text.parsing.AbstractParser;
 import org.openmdx.kernel.text.spi.Parser;
 import org.w3c.spi.DatatypeFactories;
@@ -80,15 +86,15 @@ public class ChronoTypeParser extends AbstractParser {
         LocalDate.class,
         XMLGregorianCalendar.class,
         // org::w3c::dateTime
-        java.time.Instant.class,
-        java.util.Date.class,
+        Instant.class,
+        Date.class,
         // org::w3c::duration
-        java.time.temporal.TemporalAmount.class,
+        TemporalAmount.class,
         javax.xml.datatype.Duration.class,
         // org::w3c::durationDayTime
         java.time.Duration.class,
         // org::w3c::durationYearMonth
-        java.time.Period.class
+        Period.class
     );
     
     /**
@@ -122,17 +128,32 @@ public class ChronoTypeParser extends AbstractParser {
             valueClass == Datatypes.DURATION_CLASS ? DatatypeFactories.immutableDatatypeFactory().newDuration(externalRepresentation) :
             #if CLASSIC_CHRONO_TYPES
             valueClass == java.time.Duration.class ? java.time.Duration.parse(externalRepresentation) :
-            valueClass == java.time.Period.class ? java.time.Period.parse(externalRepresentation) :
-            valueClass == java.time.temporal.TemporalAmount.class ? toTemporalAmount(externalRepresentation) :
+            valueClass == Period.class ? Period.parse(externalRepresentation) :
+            valueClass == TemporalAmount.class ? toContemporaryDuration(externalRepresentation) :
+            valueClass == LocalDate.class ? toContemporaryDate(externalRepresentation) :
+            valueClass == Instant.class ? toContemporaryDateTime(externalRepresentation) :
             #else
             valueClass == Datatypes.DURATION_DAYTIME_CLASS ? DatatypeFactories.immutableDatatypeFactory().newDurationDayTime(externalRepresentation) :
             valueClass == Datatypes.DURATION_YEARMONTH_CLASS ? DatatypeFactories.immutableDatatypeFactory().newDurationYearMonth(externalRepresentation) :
-            valueClass == javax.xml.datatype.Duration.class ? DatatypeFactories.xmlDatatypeFactory().newDuration(externalRepresentation) :
+            valueClass == javax.xml.datatype.Duration.class ? toClassicDuration(externalRepresentation) :
+            valueClass == javax.xml.datatype.XMLGregorianCalendar.class ? toClassicDate(externalRepresentation) :
+            valueClass == java.util.Date.class ? toClassicDateTime(externalRepresentation) :
             #endif
             super.parseAs(externalRepresentation, valueClass);
 	}
 
-    static java.time.temporal.TemporalAmount toTemporalAmount(String externalRepresentation) throws ParseException {
+    #if CLASSIC_CHRONO_TYPES
+
+    /**
+     * Create a contemporary org::w3c::duration instance
+     *
+     * @param externalRepresentation the standard representation
+     *
+     * @return a corresponding org::w3c::duration instance
+     */
+    private TemporalAmount toContemporaryDuration(
+        String externalRepresentation
+    ) throws ParseException {
         final javax.xml.datatype.Duration duration = DatatypeFactories.xmlDatatypeFactory().newDuration(externalRepresentation);
         if(duration.getYears() != 0 || duration.getMonths() != 0) {
             if(
@@ -140,7 +161,7 @@ public class ChronoTypeParser extends AbstractParser {
                 duration.getMinutes() == 0 &&
                 duration.getSeconds() == 0
             ){
-                return java.time.Period.of(
+                return Period.of(
                     duration.getSign() * duration.getYears(),
                     duration.getSign() * duration.getMonths(),
                     duration.getSign() * duration.getDays()
@@ -155,5 +176,98 @@ public class ChronoTypeParser extends AbstractParser {
             return java.time.Duration.parse(externalRepresentation);
         }
     }
+
+    /**
+     * Create contemporary org::w3c::dateTime instance
+     *
+     * @param externalRepresentation the basic or extended representation
+     *
+     * @return a corresponding org::w3c::dateTime instance
+     */
+    private Instant toContemporaryDateTime(
+        String externalRepresentation
+    ){
+        return externalRepresentation == null ?
+            null :
+            DatatypeFactories.immutableDatatypeFactory().newDateTime(externalRepresentation).toInstant();
+    }
+
+    /**
+     * Create a contemporary org::w3c::date instance
+     *
+     * @param externalRepresentation the basic or extended representation
+     *
+     * @return a corresponding org::w3c::date instance
+     */
+    private LocalDate toContemporaryDate(
+        String externalRepresentation
+    ){
+
+        if(externalRepresentation == null) {
+            return null;
+        }
+        final javax.xml.datatype.XMLGregorianCalendar date = DatatypeFactories.immutableDatatypeFactory().newDate(externalRepresentation);
+        return LocalDate.of(
+            date.getYear(),
+            date.getMonth(),
+            date.getDay()
+        );
+    }
+
+    #else
+
+    /**
+     * Create a classic org::w3c::duration instance
+     *
+     * @param externalRepresentation the standard representation
+     *
+     * @return a corresponding org::w3c::duration instance
+     */
+    private javax.xml.datatype.Duration toClassicDuration(
+        String externalRepresentation
+    ){
+        return externalRepresentation == null ?
+            null :
+            DatatypeFactories.xmlDatatypeFactory().newDuration(externalRepresentation);
+    }
+
+    /**
+     * Create an UTC based classic org::w3c::dateTime instance
+     *
+     * @param externalRepresentation the basic or extended representation
+     *
+     * @return a corresponding org::w3c::dateTime instance
+     */
+    private java.util.Date toClassicDateTime(
+        String externalRepresentation
+    ){
+        return externalRepresentation == null ? null : java.util.Date.from(
+            DatatypeFactories.immutableDatatypeFactory().newDateTime(externalRepresentation)
+        );
+    }
+
+    /**
+     * Create a classic org::w3c::date instance
+     *
+     * @param externalRepresentation the basic or extended representation
+     *
+     * @return a corresponding classic org::w3c::date instance
+     */
+    private XMLGregorianCalendar toClassicDate(
+        String externalRepresentation
+    ){
+        if(externalRepresentation == null) {
+            return null;
+        }
+        final LocalDate date = DatatypeFactories.immutableDatatypeFactory().newDate(externalRepresentation);
+        return DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+            date.getYear(),
+            date.getMonthValue(),
+            date.getDayOfMonth(),
+            DatatypeConstants.FIELD_UNDEFINED
+        );
+    }
+
+    #endif
 
 }

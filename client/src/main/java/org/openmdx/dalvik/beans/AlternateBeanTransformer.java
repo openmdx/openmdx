@@ -1,7 +1,7 @@
 /*
  * ====================================================================
- * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Standard Java Beans Transformer
+ * Project:     openMDX/Dalvik, http://www.openmdx.org/
+ * Description: Alternate Java Bean Transformer
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,13 +42,14 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.base.beans;
+package org.openmdx.dalvik.beans;
 
-import java.beans.Encoder;
-import java.beans.Expression;
-import java.beans.PersistenceDelegate;
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
+import org.openmdx.dalvik.uses.java.beans.Encoder;
+import org.openmdx.dalvik.uses.java.beans.Expression;
+import org.openmdx.dalvik.uses.java.beans.PersistenceDelegate;
+import org.openmdx.dalvik.uses.java.beans.XMLDecoder;
+import org.openmdx.dalvik.uses.java.beans.XMLEncoder;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -56,9 +57,8 @@ import java.net.URI;
 import java.util.Date;
 import java.util.Optional;
 import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.Instant;
 
+import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.datatype.DatatypeConstants;
 
@@ -75,13 +75,13 @@ import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
 /**
- * Standard Java Beans Transformer
+ * Alternate Java Bean Transfomer
  *
  * @since openMDX 2.12
  */
-public class StandardBeanTransformer implements BeanTransformer {
+public class AlternateBeanTransformer implements BeanTransformer {
 
-    static final Class<? extends XMLGregorianCalendar> classicDateClass = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED).getClass();
+    static final Class<? extends XMLGregorianCalendar> xmlGregorianCalendarClass = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED).getClass();
     static final Class<? extends javax.xml.datatype.Duration> classicDayTimeDurationClass = DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(1000L).getClass();
     static final Class<? extends javax.xml.datatype.Duration> classicYearMonthDurationClass = DatatypeFactories.xmlDatatypeFactory().newDurationYearMonth(true, BigInteger.ONE, BigInteger.ZERO).getClass();
     static final Class<? extends javax.xml.datatype.Duration> classicDurationClass = DatatypeFactories.xmlDatatypeFactory().newDuration(true, 1, 1, 1, 0, 0, 0).getClass();
@@ -118,7 +118,7 @@ public class StandardBeanTransformer implements BeanTransformer {
                         ContemporaryDateTimePersistenceDelegate.INSTANCE
                 );
                 encoder.setPersistenceDelegate(
-                        classicDateClass,
+                        xmlGregorianCalendarClass,
                         ClassicDatePersistenceDelegate.INSTANCE
                 );
                 encoder.setPersistenceDelegate(
@@ -163,7 +163,7 @@ public class StandardBeanTransformer implements BeanTransformer {
                         new ImmutableDateTimePersistenceDelegate()
                 );
                 #endif
-                encoder.writeObject(javaBean);
+                        encoder.writeObject(javaBean);
             }
             return out.toString("UTF-8");
         } catch (IOException exception) {
@@ -188,15 +188,9 @@ public class StandardBeanTransformer implements BeanTransformer {
             return null;
         }
         final String stringifiedBean = encodedJavaBean.toString();
-        if(!stringifiedBean.startsWith("<?xml")) {
-            final Optional<Object> value = FallbackBeanDecoder.decode(stringifiedBean);
-            if(value.isPresent()) {
-                return value.get();
-            }
-        }
         try (
-            java.io.StringReader reader = new java.io.StringReader(stringifiedBean);
-            java.beans.XMLDecoder decoder = new java.beans.XMLDecoder(new org.xml.sax.InputSource(reader))
+                java.io.StringReader reader = new java.io.StringReader(stringifiedBean);
+                java.beans.XMLDecoder decoder = new java.beans.XMLDecoder(new org.xml.sax.InputSource(reader))
         ){
             if(exceptionListener != null) {
                 decoder.setExceptionListener(
@@ -338,14 +332,14 @@ public class StandardBeanTransformer implements BeanTransformer {
 
         @Override
         protected Expression instantiate(
-            Object oldInstance,
-            Encoder out
+                Object oldInstance,
+                Encoder out
         ) {
             return new Expression(
-                oldInstance,
-                Datatypes.class,
-                "create",
-                new Object[]{java.time.Duration.class,oldInstance.toString()}
+                    oldInstance,
+                    Datatypes.class,
+                    "create",
+                    new Object[]{java.time.Duration.class,oldInstance.toString()}
             );
         }
 
