@@ -231,22 +231,6 @@ public interface Database_2_0 extends Database_1_0 {
         int maxRows
     ) throws SQLException;
 
-    /**
-     * @param conn
-     * @param dbObject
-     * @param rs
-     * @param objects
-     * @param attributeSelector
-     * @param attributeSpecifiers
-     * @param objectClassAsAttribute
-     * @param position
-     * @param primaryObjectClass
-     * @param target TODO
-     * @param maxObjectsToReturn
-     * @return
-     * @throws ServiceException
-     * @throws SQLException
-     */
     boolean getObjects(
         Connection conn, DbObject dbObject, ResultSet rs, List<ObjectRecord> objects, short attributeSelector,
         Map<String, AttributeSpecifier> attributeSpecifiers, boolean objectClassAsAttribute, int position, int objectBatchSize,

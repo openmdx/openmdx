@@ -267,8 +267,7 @@ public class MagicNumberFileFilter extends AbstractFileFilter implements
     public String toString() {
         final StringBuilder builder = new StringBuilder(super.toString());
         builder.append("(");
-        builder.append(new String(magicNumbers, Charset.defaultCharset()));// TODO perhaps use hex if value is not
-                                                                           // printable
+        builder.append(new String(magicNumbers, Charset.defaultCharset())); // TODO perhaps use hex if value is not printable
         builder.append(",");
         builder.append(this.byteOffset);
         builder.append(")");

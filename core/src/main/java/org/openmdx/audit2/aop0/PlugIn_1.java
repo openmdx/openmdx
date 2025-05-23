@@ -230,7 +230,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     protected Path toPrefix(String value) {
         if (value != null) {
             Path candidate = new Path(value);
-            if (candidate.toXRI().endsWith("/($...)")) { // TODO simplify
+            if (candidate.toXRI().endsWith("/($...)")) {
                 Path parent = candidate.getParent();
                 if (!parent.isPattern()) {
                     return parent;

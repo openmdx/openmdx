@@ -329,7 +329,6 @@ public class Charsets {
         {"ISO-8859-9-Windows-Latin-5","csWindows31Latin5"}, // MIBenum 2003
         {"hp-roman8"}, // MIBenum 2004
         {"Adobe-Standard-Encoding"} // MIBenum 2005
-        // TODO add more vendor codes if necessary
     };
     
 }

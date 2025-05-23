@@ -454,8 +454,6 @@ public class TestMain {
 		protected long id;
 
 		/**
-		 * TODO
-		 * 
 		 * @return {@code true} if remote exception are mapped to GENERIC
 		 */
 		protected boolean causeIsGeneric() {

@@ -315,7 +315,7 @@ public class DatatypesTest {
         }
     }
 
-    //§ @Test
+    @Test
     public void testCR10009964() throws Exception{
         storeBulk(
                 "Persistent",

@@ -808,7 +808,7 @@ public class InboundConnection_2 extends AbstractConnection {
          * <li>TODO take extensions into consideration
          * </ul>
          * 
-         * @param input
+         * @param input the Query
          * 
          * @return a new query object
          * 

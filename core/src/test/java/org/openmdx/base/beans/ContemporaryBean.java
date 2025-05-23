@@ -1,28 +1,28 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: build.gradle.kts
+ * Description: Contemporary Bean
  * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,43 +36,61 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            url = uri("https://datura.econoffice.ch/maven2")
-        }
-        maven {
-            url = uri("https://www.openmdx.org/repos/releases")
-        }
-    }
-}
-rootProject.name = "openmdx"
-include(
-    "openmdx-2-platform",
-    "openmdx-3-platform",
-    "openmdx-4-platform",
-    "openmdx-5-platform",
-    "core",
-    "test-core",
-    "client",
-    "security"
-)
+package org.openmdx.base.beans;
 
-val flavour: String = gradle.startParameter.projectProperties.getOrDefault("flavour", "3")
-// projects out of scope for flavour 3 & 4 with MDX-1 but included in all flavours with MDX-2!
-if (flavour == "2") include(
-    "portal"
-)
-// projects out of scope for flavour 3 with MDX-1 but included in all flavours with MDX-2!
-if (flavour != "3") include(
-    "tomcat",
-    "test-security",
-    "publish"
-)
+import java.util.Date;
+import java.time.LocalDate;
+import java.time.Instant;
+import java.time.Period;
+import java.time.Duration;
+import org.openmdx.kernel.log.SysLog;
+
+public class ContemporaryBean {
+    private Instant immutableDateTime;
+    private LocalDate immutableDate;
+    private Period yearMonthDayDuration;
+    private Duration dayTimeDuration;
+
+    public Instant getImmutableDateTime() {
+        return this.immutableDateTime;
+    }
+
+    public void setImmutableDateTime(Instant immutableDateTime) {
+        SysLog.detail("setImmutableDateTime", immutableDateTime);
+        this.immutableDateTime = immutableDateTime;
+    }
+
+    public LocalDate getImmutableDate() {
+        return this.immutableDate;
+    }
+
+    public void setImmutableDate(LocalDate immutableDate) {
+        SysLog.detail("setImmutableDate", immutableDate);
+        this.immutableDate = immutableDate;
+    }
+
+    public Period getYearMonthDayDuration() {
+        return yearMonthDayDuration;
+    }
+
+    public void setYearMonthDayDuration(Period yearMonthDayDuration) {
+        SysLog.detail("setYearMonthDuration", yearMonthDayDuration);
+        this.yearMonthDayDuration = yearMonthDayDuration;
+    }
+
+    public Duration getDayTimeDuration() {
+        return dayTimeDuration;
+    }
+
+    public void setDayTimeDuration(Duration dayTimeDuration) {
+        SysLog.detail("setDayTimeDuration", dayTimeDuration);
+        this.dayTimeDuration = dayTimeDuration;
+    }
+
+}

@@ -1,28 +1,28 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Delegating Parser 
+ * Description: Fallback Java Beans Transformer
  * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,91 +36,81 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.kernel.text.parsing;
+package org.openmdx.base.beans;
 
-import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.lang.reflect.Method;
 
-import org.openmdx.kernel.text.spi.Parser;
+import org.openmdx.base.exception.ExceptionListener;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.log.SysLog;
 
 /**
- * Delegating Parser
+ * Fallback Java Beans Decoder
  */
-public class DelegatingParser extends AbstractParser {
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param delegates the delegates ordered by priority
-	 */
-	public DelegatingParser(
-		Parser... delegates
-	) {
-		this.delegates = delegates;
-	}
+class FallbackBeanDecoder {
 
-	/**
-	 * The delegate parsers 
-	 */
-	private final Parser[] delegates;
+    private final Object xstream;
+    private final Method xstreamFromXML;
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.text.parsing.AbstractParser#supportedTypes()
-     */
-    @Override
-    protected Collection<Class<?>> supportedTypes() {
-		throw new UnsupportedOperationException("The supported types are not known in advance");
-	}
+    private static final FallbackBeanDecoder INSTANCE = new FallbackBeanDecoder();
 
-	@Override
-	public boolean handles(Class<?> type) {
-		for(Parser parser : delegates) {
-			if(parser.handles(type)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.text.parsing.AbstractParser#handles(java.lang.String)
-     */
-    @Override
-    public Optional<Class<?>> handles(String className) {
-        for(Parser parser : delegates) {
-            final Optional<Class<?>> optional = parser.handles(className);
-            if(optional.isPresent()) {
-                return optional;
-            }
+    private FallbackBeanDecoder () {
+        xstream = getXstream();
+        xstreamFromXML = getFromXML(xstream);
+        if(isAvailable()) {
+            SysLog.info("XStream found. Using as fallback for XML decoding");
         }
-        return Optional.empty();
     }
 
+    static Optional<Object> decode(
+        String encodedJavaBean
+    ) {
+        return INSTANCE.isAvailable() ?
+            Optional.of(INSTANCE.fromXML(encodedJavaBean)) :
+            Optional.empty();
+    }
 
+    private boolean isAvailable () {
+        return xstreamFromXML != null;
+    }
 
-    /* (non-Javadoc)
-	 * @see org.openmdx.kernel.text.parsing.AbstractParser#parseAs(java.lang.String, java.lang.Class)
-	 */
-	@Override
-	protected Object parseAs(
-		String externalRepresentation,
-		Class<?> type
-	) throws Exception {
-		for(Parser parser : delegates) {
-			if(parser.handles(type)) {
-				return parser.parse(type, externalRepresentation);
-			}
-		}
-		return super.parseAs(externalRepresentation, type);
-	}
+    private Object fromXML(
+        CharSequence encodedJavaBean
+    ) {
+        try {
+            return INSTANCE.xstreamFromXML.invoke(INSTANCE.xstream, encodedJavaBean);
+        } catch(Exception e) {
+            throw new RuntimeServiceException(e);
+        }
+    }
+
+    private static Method getFromXML(final Object xstream) {
+        if (xstream == null) {
+            return null;
+        }
+        try {
+            final Method fromXML = xstream.getClass().getMethod("fromXML", String.class);
+            return fromXML;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static Object getXstream() {
+        try {
+            return Classes.getApplicationClass("com.thoughtworks.xstream.XStream").newInstance();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
 }

@@ -42,7 +42,7 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-package org.openmdx.base.text.parsing;
+package org.openmdx.kernel.text.parsing;
 
 import java.text.ParseException;
 import java.util.Date;

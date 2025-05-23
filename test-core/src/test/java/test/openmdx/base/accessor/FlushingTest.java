@@ -134,8 +134,7 @@ public class FlushingTest {
     
     /**
      * Tells whether adjacent members are ordered
-     * @param comparator TODO
-     * 
+     *
      * @return {@code true} if adjacent members are ordered
      */
     private boolean isPartiallyOrdered(Comparator<DataObject_1_0> comparator){

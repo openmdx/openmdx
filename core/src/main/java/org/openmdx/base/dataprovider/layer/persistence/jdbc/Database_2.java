@@ -5767,7 +5767,7 @@ public class Database_2
                 "X_QUERY not yet supported"
             ); // TODO
         } else if (flagSet.contains(RegularExpressionFlag.JSON_QUERY)) {
-            // @TODO hard-coded for PG. Better use LikeFlavour
+            // TODO hard-coded for PG. Better use LikeFlavour
             String operator = "@>";
             if (externalized.startsWith("?&") || externalized.startsWith("?|")
                 || externalized.startsWith("@>")) {
