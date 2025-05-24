@@ -93,11 +93,6 @@ public class RefArguments {
                             Collections.singletonList(newRefQualifier(QualifierType.REASSIGNABLE, source[0])),
                             value
                     );
-                case 2:
-                    return new RefArguments(
-                        source[1] == null ? Collections.emptyList() : Collections.singletonList(newRefQualifier(source[0], source[1])),
-                        value
-                    );
                 default: {
                     if (qualifierLimit % 2 == 1) throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
@@ -107,7 +102,11 @@ public class RefArguments {
                     );
                     final List<RefQualifier> qualifiers = new ArrayList<>();
                     for (int i = 0; i < qualifierLimit;) {
-                        qualifiers.add(newRefQualifier(source[i++], source[i++]));
+                        Object qualifierType = source[i++];
+                        Object qualifierValue = source[i++];
+                        if(qualifierType != null) {
+                            qualifiers.add(newRefQualifier(qualifierType, qualifierValue));
+                        }
                     }
                     return new RefArguments(qualifiers, value);
                 }

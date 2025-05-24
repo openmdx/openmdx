@@ -1257,7 +1257,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                             return container.refGetAll(args[0]);
                                         } else {
                                             final RefArguments refArgs = RefArguments.newInstance(args);
-                                            ((RefContainer)container).refGet(refArgs.qualifiers);
+                                            return ((RefContainer)container).refGet(refArgs.qualifiers);
                                         }
                                     }
                                 } else if(methodName.startsWith("set")) {
@@ -1845,11 +1845,22 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
 
         Object invoke(
             Object... arguments
-        ) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-            return this.method.invoke(
+        ) throws ServiceException, IllegalAccessException, InvocationTargetException {
+            try {
+                return this.method.invoke(
                     this.object,
                     arguments
-            );
+                );
+            } catch (IllegalArgumentException exception) {
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_PARAMETER,
+                    "The method's arguments are not compatible with the method's signature",
+                    new BasicException.Parameter("method", this.method),
+                    new BasicException.Parameter("arguments", arguments)
+                );
+            }
         }
 
     }
