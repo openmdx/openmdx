@@ -68,6 +68,7 @@ import org.openmdx.base.collection.MarshallingSpliterator;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
+import org.oasisopen.cci2.QualifierType;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.cci2.AnyTypePredicate;
@@ -285,38 +286,58 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
 
     private Object[] toCciArguments(Object[] refArgs, int parameterCount) throws ServiceException {
         final Object[] cciArgs = new Object[parameterCount];
-        switch(refArgs.length) {
-            case 1:
-                toCciQualifiers(cciArgs, (List<RefQualifier>) refArgs[0]);
-                break;
-            case 2:
-                toCciQualifiers(cciArgs, (List<RefQualifier>) refArgs[0], (RefObject) refArgs[1]);
-                break;
-            default:
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE,
-                    "Unexpected number of arguments",
-                    new BasicException.Parameter("refArgs", refArgs)
-                );
+        if(refArgs[0] instanceof QualifierType) {
+            switch (refArgs.length) {
+                case 2:
+                    return toCciArguments(cciArgs, refArgs);
+                case 3:
+                    if(refArgs[2] instanceof RefObject) {
+                        return toCciArguments(cciArgs, refArgs);
+                    }
+                    break;
+            }
+        } else if (refArgs[0] instanceof List<?>) {
+            switch (refArgs.length) {
+                case 1:
+                    return toCciQualifiers(cciArgs, (List<RefQualifier>) refArgs[0]);
+                case 2:
+                    if(refArgs[1] instanceof RefObject) {
+                        return toCciQualifiers(cciArgs, (List<RefQualifier>) refArgs[0], (RefObject) refArgs[1]);
+                    }
+                    break;
+            }
+        }
+        throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.ASSERTION_FAILURE,
+            "Unexpected combination of arguments",
+            new BasicException.Parameter("refArgs", refArgs)
+        );
+    }
+
+    private Object[] toCciArguments(Object[] cciArgs, Object[] refArgs) throws ServiceException {
+        System.arraycopy(refArgs, 0, cciArgs, 0, 2);
+        if(refArgs.length == 3) {
+            cciArgs[2] = this.marshaller.unmarshal(refArgs[2]);
         }
         return cciArgs;
     }
 
-    private void toCciQualifiers(Object[] target, List<RefQualifier> source) {
+    private Object[] toCciQualifiers(Object[] target, List<RefQualifier> source) {
         int i = 0;
         for (RefQualifier refQualifier : source) {
             target[i++] = refQualifier.qualifierType;
             target[i++] = refQualifier.qualifierValue;
         }
+        return target;
     }
 
-    private void toCciQualifiers(Object[] target, List<RefQualifier> source, RefObject value)  throws ServiceException {
+    private Object[] toCciQualifiers(Object[] target, List<RefQualifier> source, RefObject value)  throws ServiceException {
         toCciQualifiers(target, source);
         target[target.length - 1] = this.marshaller.unmarshal(value);
+        return target;
     }
 
-        #endif
-
+    #endif
 
 }

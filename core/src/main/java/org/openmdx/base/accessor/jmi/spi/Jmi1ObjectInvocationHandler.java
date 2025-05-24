@@ -486,34 +486,28 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                             	//
                                 // Query
                             	//
-                                return ((RefContainer<?>)
-                                    this.refDelegate.refGetValue(featureName)
-                                ).refGetAll(
-                                    args[0]
-                                );
-                            }
-                            else {
+                                final RefContainer<?> container = (RefContainer<?>) this.refDelegate.refGetValue(featureName);
+                                return container.refGetAll(args[0]);
+                            } else if(args.length == 1 && args[0] instanceof RefObject) {
                             	//
                                 // Qualifier
                             	//
-                                if(args.length == 1 && args[0] instanceof RefObject){
-                                    Container<?> collection = (Container<?>) ((Jmi1Object_1_0)this.refDelegate).refGetValue(
-                                        featureName,
-                                        args[0]
-                                    );
-                                    return collection.getAll(null);
+                                final Container<?> collection = (Container<?>) ((Jmi1Object_1_0)this.refDelegate).refGetValue(
+                                    featureName,
+                                    args[0]
+                                );
+                                return collection.getAll(null);
+                            } else {
+                                Object qualifier;
+                                if(args.length == 2 && args[0] instanceof Boolean) {
+                                    qualifier = ((Boolean)args[0]).booleanValue() ? "!" + args[1] : validateSubSegment(args[1]);
                                 } else {
-                                    Object qualifier;
-                                    if(args.length == 2 && args[0] instanceof Boolean) {
-                                        qualifier = ((Boolean)args[0]).booleanValue() ? "!" + args[1] : validateSubSegment(args[1]);
-                                    } else {
-                                        qualifier = validateSubSegment(args[0]);
-                                    }
-                                    return ((Jmi1Object_1_0)this.refDelegate).refGetValue(
-                                        featureName,
-                                        qualifier
-                                    );
+                                    qualifier = validateSubSegment(args[0]);
                                 }
+                                return ((Jmi1Object_1_0)this.refDelegate).refGetValue(
+                                    featureName,
+                                    qualifier
+                                );
                             }
                         }
                         // Boolean getters
@@ -952,34 +946,28 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                 //
                                 // Query
                                 //
-                                return ((RefContainer<?>)
-                                        this.refDelegate.refGetValue(featureName)
-                                ).refGetAll(
-                                        args[0]
-                                );
-                            }
-                            else {
+                                RefContainer<?> container = (RefContainer<?>)this.refDelegate.refGetValue(featureName);
+                                return container.refGetAll(args[0]);
+                            } else if(args.length == 1 && args[0] instanceof RefObject) {
                                 //
                                 // Qualifier
                                 //
-                                if(args.length == 1 && args[0] instanceof RefObject){
-                                    Container<?> collection = (Container<?>) ((Jmi1Object_1_0)this.refDelegate).refGetValue(
-                                            featureName,
-                                            args[0]
-                                    );
-                                    return collection.getAll(null);
+                                Container<?> collection = (Container<?>) ((Jmi1Object_1_0)this.refDelegate).refGetValue(
+                                    featureName,
+                                    args[0]
+                                );
+                                return collection.getAll(null);
+                            } else {
+                                final Object qualifier;
+                                if(args.length == 2 && args[0] instanceof Boolean) {
+                                    qualifier = ((Boolean)args[0]).booleanValue() ? "!" + args[1] : validateSubSegment(args[1]);
                                 } else {
-                                    Object qualifier;
-                                    if(args.length == 2 && args[0] instanceof Boolean) {
-                                        qualifier = ((Boolean)args[0]).booleanValue() ? "!" + args[1] : validateSubSegment(args[1]);
-                                    } else {
-                                        qualifier = validateSubSegment(args[0]);
-                                    }
-                                    return ((Jmi1Object_1_0)this.refDelegate).refGetValue(
-                                            featureName,
-                                            qualifier
-                                    );
+                                    qualifier = validateSubSegment(args[0]);
                                 }
+                                return ((Jmi1Object_1_0)this.refDelegate).refGetValue(
+                                        featureName,
+                                        qualifier
+                                );
                             }
                         }
                         // Boolean getters
@@ -1859,8 +1847,8 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             Object... arguments
         ) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
             return this.method.invoke(
-                this.object,
-                arguments
+                    this.object,
+                    arguments
             );
         }
 

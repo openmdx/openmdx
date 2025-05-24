@@ -2088,15 +2088,16 @@ public class TestMain {
 				super.taskId = null;
 			}
 
+			#if CLASSIC_CHRONO_TYPES
 			try {
 				super.taskId = "CR20019721";
 				this.begin();
 				person = personClass.createPerson();
 				person.setForeignId("YF");
-				#if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif birthDate =
-						Datatypes.create(Datatypes.DATE_CLASS, "1960-01-01");
+				javax.xml.datatype.XMLGregorianCalendar birthDate = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("1960-01-01");
+				birthDate.setTimezone(-1);
 				person.setBirthdate(birthDate);
-				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
+				person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
 				assertEquals("1960-01-01T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()), "Born at noon");
 				person.setLastName("MusterX");
 				person.setSalutation("Herr");
@@ -2178,6 +2179,7 @@ public class TestMain {
 			} finally {
 				super.taskId = null;
 			}
+			#endif
 
 			try {
 				super.taskId = "CR20020187";
@@ -2187,7 +2189,9 @@ public class TestMain {
 				#if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif birthDate = Datatypes.create(Datatypes.DATE_CLASS, "1960-01-01");
 				person.setBirthdate(birthDate);
 				person.setBirthdateAsDateTime(Datatypes.create(Datatypes.DATE_TIME_CLASS, "19600101T120000.000Z"));
-				assertEquals("1960-01-01T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()), "Born at noon");
+				assertEquals(
+					#if CLASSIC_CHRONO_TYPES  "1960-01-01T12:00:00.000Z" #else "1960-01-01T12:00:00Z" #endif,
+					DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime()), "Born at noon");
 				person.setLastName("MusterX");
 				person.setSalutation("Herr");
 				person.setSex((short) 0);
@@ -4898,7 +4902,6 @@ public class TestMain {
 
 	}
 
-	@Disabled
 	public static class StandardProviderTest extends AbstractLocalConnectionTest {
 
 		@Test
@@ -4913,7 +4916,6 @@ public class TestMain {
 
 	}
 
-	@Disabled
 	public static class TransientProviderTest extends AbstractLocalConnectionTest {
 
 		@Test
@@ -5173,7 +5175,7 @@ public class TestMain {
 	/**
 	 * 2nd Run
 	 */
-	@Disabled
+	@Disabled("Leads to StandardProviderTest failure at the very moment")
 	public static class ProxyConnectionTest extends AbstractRepeatableTest {
 
 		/**
@@ -5234,7 +5236,7 @@ public class TestMain {
 
 	}
 
-	@Disabled("openMDX test server usually not running")
+	@Disabled("openMDX test server usually not running")
 	public static class RemoteConnectionTest extends ProxyConnectionTest {
 
 		/*

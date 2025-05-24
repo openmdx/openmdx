@@ -56,7 +56,7 @@ import org.w3c.spi.DatatypeFactories;
 /**
  * Lock Assertion
  * <p>
- * Parses an expresion of the form 
+ * Parses an expression of the form
  * {@code &lsaquo;feature&rsaquo;&lsaquo;relation&rsaquo;&lsaquo;value&rsaquo;},
  * e.g. {@code modifiedAt=2000-02-29T00:00:00.000000Z}
  */
@@ -107,7 +107,13 @@ public class LockAssertion {
 	private static Object toValue(
 		String value
 	){
-		return value.isEmpty() ? null : org.w3c.spi2.Datatypes.create(org.w3c.spi2.Datatypes.DATE_CLASS, value);
+		return value.isEmpty() ?
+			null :
+			#if CLASSIC_CHRONO_TYPES
+			DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(value);
+			#else
+			java.time.Instant.parse(value);
+			#endif
 	}
 
 	/**
