@@ -62,7 +62,8 @@ include(
     "core",
     "test-core",
     "client",
-    "security"
+    "security",
+    "test-security"
 )
 
 val flavour: String = gradle.startParameter.projectProperties.getOrDefault("flavour", "3")
@@ -73,6 +74,5 @@ if (flavour == "2") include(
 // projects out of scope for flavour 3 with MDX-1 but included in all flavours with MDX-2!
 if (flavour != "3") include(
     "tomcat",
-    "test-security",
     "publish"
 )
