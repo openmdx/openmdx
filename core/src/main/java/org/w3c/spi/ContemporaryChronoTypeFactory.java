@@ -44,6 +44,7 @@
  */
 package org.w3c.spi;
 
+import java.time.Year;
 import java.time.temporal.TemporalAmount;
 
 import java.time.Duration;
@@ -109,13 +110,32 @@ class ContemporaryChronoTypeFactory extends AbstractChronoTypeFactory {
 
     @Override
     public LocalDate newDate(String value) {
+
         if (value == null) {
             return null;
         }
+
         try {
-            return LocalDate.parse(value);
+
+            if (value.length() == 10 && value.charAt(4) == '-' && value.charAt(7) == '-') {
+                return LocalDate.parse(value);
+            }
+
+            // handle as basic format (YYYYMMDD or YYMMDD)
+            value = value.replace("-", "");
+
+            int d = Integer.parseInt(value.substring(value.length() - 2));
+            int m = Integer.parseInt(value.substring(value.length() - 4, value.length() - 2));
+            String y = value.substring(0, value.length() - 4);
+
+            if (y.length() == 2) {
+                y = Year.now().getValue() / 100 + y;
+            }
+
+            return LocalDate.of(Integer.parseInt(y), m, d);
+
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid date format: " + value, e);
+            throw new IllegalArgumentException("Invalid period format: " + value, e);
         }
     }
 

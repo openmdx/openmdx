@@ -57,11 +57,11 @@ import org.junit.jupiter.api.Assertions;
 public class DatatypesTest {
 
     @Test
-    void incompleteExtendedFormatClassicDate(){
+    void incompleteBasicFormatClassicDate(){
         //
         // Arrange
         //
-        String external = "25-04-30";
+        String external = "250430";
         //
         // Act
         //
@@ -73,11 +73,11 @@ public class DatatypesTest {
     }
 
     @Test
-    void incompleteBasicFormatClassicDate(){
+    void incompleteExtendedFormatClassicDate(){
         //
         // Arrange
         //
-        String external = "250430";
+        String external = "25-04-30";
         //
         // Act
         //
