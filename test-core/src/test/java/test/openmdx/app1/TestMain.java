@@ -5225,6 +5225,10 @@ public class TestMain {
 
 		@Test
 		public void run() throws Exception {
+			org.junit.jupiter.api.Assumptions.assumeFalse(
+				"3".equals(Version.getFlavourVersion()),
+				"RefContainer is erronous for proxy connections in openMDX 3 Flavour"
+			);
 			super.resetDataSegment();
 			super.testPackageAcquisition();
 			super.testCR20019462();
