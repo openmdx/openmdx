@@ -64,6 +64,7 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1097,7 +1098,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
                             for(Iterator<ModelElement_1_0> k = lookupTypeAttributes.values().iterator(); k.hasNext(); ) {
                                 ModelElement_1_0 attributeDef = (ModelElement_1_0)k.next();
                                 ModelElement_1_0 attributeType = model.getElement(attributeDef.getType());
-                                String attributeName = (String)attributeDef.getName();
+                                String attributeName = attributeDef.getName();
                                 if(
                                     (attributeName.indexOf("name") >= 0 ||
                                     attributeName.indexOf("Name") >= 0 ||
@@ -1114,10 +1115,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
                                     int order = 10000 * (filterByFeatures.size() + 1);
                                     try {
                                         org.openmdx.ui1.jmi1.ElementDefinition field = app.getUiElementDefinition(
-                                            (String)attributeDef.getQualifiedName()
+											attributeDef.getQualifiedName()
                                         );
                                         org.openmdx.ui1.jmi1.AssertableInspector referencedTypeInspector =
-                                            app.getAssertableInspector((String)referencedType.getQualifiedName());                                        
+                                            app.getAssertableInspector(referencedType.getQualifiedName());
                                         String referencedTypeLabel =  app.getLabel(
                                             referencedTypeInspector.getForClass()
                                         );
@@ -1215,7 +1216,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
         RefObject_1_0 context,
         String qualifiedFeatureName
     ) {
-        return new ArrayList<Condition>();
+        return new ArrayList<>();
     }
 
     /**
@@ -1276,7 +1277,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
             (RefObject)target, 
             featureName,
             app
-        );    		
+        );
     }
 
     /**
@@ -1300,7 +1301,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
             featureName,
             value,
             app
-        );    		
+        );
     }
 
     /* (non-Javadoc)
@@ -1321,7 +1322,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     	Map<String,Attribute> updatedFeatures = new HashMap<String,Attribute>();
     	while(count < 3) {
     		// map object
-    		Set<String> modifiedFeatures = new HashSet<String>();
+    		Set<String> modifiedFeatures = new HashSet<>();
     		for(
     			Iterator<String> i = parameterMap.keySet().iterator(); 
     			i.hasNext(); 
@@ -1342,7 +1343,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				// Lookup feature in model repository
     				try {
     					ModelElement_1_0 featureDef = model.getElement(featureName);
-    					featureTypeName = (String)model.getElement(featureDef.getType()).getQualifiedName();
+    					featureTypeName = model.getElement(featureDef.getType()).getQualifiedName();
     				} catch(Exception e) {
     					try {
     						// Fallback: lookup feature in ui repository as feature definition
@@ -1359,7 +1360,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     					StringTokenizer tokenizer = parameterValues.isEmpty() 
     						? new StringTokenizer("", "\n", true) 
     						: new StringTokenizer((String)parameterValues.get(0), "\n\r", true);
-						List<String> newValues = new ArrayList<String>();
+						List<String> newValues = new ArrayList<>();
 						boolean lastTokenIsNewLine = false;
 						while(tokenizer.hasMoreTokens()) {
 							String token = tokenizer.nextToken();
@@ -1398,7 +1399,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 									String multiLineString = parameterValues.isEmpty() 
 										? "" 
 										: (String)parameterValues.get(0);
-									String mappedNewValue = multiLineString.length() == 0 ? null : multiLineString;
+									String mappedNewValue = multiLineString.isEmpty() ? null : multiLineString;
 									// Mandatory attributes must not be set to null
 									mappedNewValue = valueHolder.isOptionalValued() || mappedNewValue != null 
 										? mappedNewValue 
@@ -1428,7 +1429,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 									}
 								} else {
 									// multi-valued
-									Collection<Object> values = null;
+									Collection<Object> values;
 									if(target instanceof RefObject) {
 										values = valueAsCollection(
 											this.getValue(
@@ -1443,7 +1444,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 										if(values == null) {
 											targetAsValueMap(target).put(
 												featureName,
-												values = new ArrayList<Object>()
+												values = new ArrayList<>()
 											);
 										}
 									}
@@ -1502,7 +1503,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												);
 											}
 										} else if(PrimitiveTypes.INTEGER.equals(featureTypeName)) {
-											Integer mappedNewValue = Integer.valueOf(number.intValue());
+											Integer mappedNewValue = number.intValue();
 											if(target instanceof RefObject) {
 												Object value = this.getValue(
 													valueHolder, 
@@ -1606,12 +1607,12 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 										SysLog.detail(e.getMessage(), e.getCause());
 										app.addErrorMessage(
 											app.getTexts().getErrorTextCanNotEditNumber(),
-											new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse number"}
+											new String[]{feature.getLabel(), newValues.get(0), "can not parse number"}
 										);
 									}
 								} else {
 									// multi-valued
-									Collection<Object> values = null;
+									Collection<Object> values;
 									if(target instanceof RefObject) {
 										values = valueAsCollection(
 											this.getValue(
@@ -1626,14 +1627,14 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 										if(values == null) {
 											targetAsValueMap(target).put(
 												featureName,
-												values = new ArrayList<Object>()
+												values = new ArrayList<>()
 											);
 										}
 									}
-									List<Object> mappedNewValues = new ArrayList<Object>();
+									List<Object> mappedNewValues = new ArrayList<>();
 									for(Iterator<String> j = newValues.iterator(); j.hasNext(); ) {
 										try {
-											String numberAsString = ((String)j.next()).trim();
+											String numberAsString = j.next().trim();
 											BigDecimal number = app.parseNumber(numberAsString);
 											if(number != null) {
 												if(PrimitiveTypes.INTEGER.equals(featureTypeName)) {
@@ -1656,14 +1657,14 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											} else {
 												app.addErrorMessage(
 													app.getTexts().getErrorTextCanNotEditNumber(),
-													new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse number"}
+													new String[]{feature.getLabel(), newValues.get(0), "can not parse number"}
 												);
 											}
 										} catch(Exception e) {
 											SysLog.detail(e.getMessage(), e.getCause());
 											app.addErrorMessage(
 												app.getTexts().getErrorTextCanNotEditNumber(),
-												new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+												new String[]{feature.getLabel(), newValues.get(0), e.getMessage()}
 											);
 										}
 									}
@@ -1731,15 +1732,15 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												}
 											}
 										} else {
-											String newValue = (String)newValues.get(0);
-											#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mappedNewValue = null;
+											String newValue = newValues.get(0);
+											#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif mappedNewValue;
 											try {
-												mappedNewValue = dateTimeParser.parse(newValue);
+												mappedNewValue = dateTimeParser.parse(newValue)#if !CLASSIC_CHRONO_TYPES .toInstant()#endif;
 											} catch(ParseException e) {
-												mappedNewValue = dateParser.parse(newValue);
+												mappedNewValue = dateParser.parse(newValue)#if !CLASSIC_CHRONO_TYPES .toInstant()#endif;
 											}                        
 											if(mappedNewValue != null) {
-												cal.setTime(mappedNewValue);
+												cal.setTime(#if CLASSIC_CHRONO_TYPES mappedNewValue #else Date.from(mappedNewValue) #endif);
 												if(cal.get(GregorianCalendar.YEAR) < 100) {
 													int currentYear = new GregorianCalendar().get(GregorianCalendar.YEAR);
 													int year = cal.get(GregorianCalendar.YEAR);
@@ -1783,7 +1784,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 													}
 												} else if(PrimitiveTypes.DATETIME.equals(featureTypeName)) {
 													// dateTime
-													mappedNewValue = cal.getTime();
+													mappedNewValue = cal.getTime()#if !CLASSIC_CHRONO_TYPES .toInstant()#endif;
 													if(target instanceof RefObject) {
 														Object value = this.getValue(
 															valueHolder, 
@@ -1799,7 +1800,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 																? Collections.singletonList(mappedNewValue) 
 																: mappedNewValue, 
 															app
-														);	                                	  
+														);
 														modifiedFeatures.add(featureName);
 													} else {
 														targetAsValueMap(target).put(
@@ -1816,7 +1817,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											} else {
 												app.addErrorMessage(
 													app.getTexts().getErrorTextCanNotEditDate(),
-													new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse date"}
+													new String[]{feature.getLabel(), newValues.get(0), "can not parse date"}
 												);
 											}
 										}
@@ -1824,12 +1825,12 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 										SysLog.detail(e.getMessage(), e.getCause());
 										app.addErrorMessage(
 											app.getTexts().getErrorTextCanNotEditDate(),
-											new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+											new String[]{feature.getLabel(), newValues.get(0), e.getMessage()}
 										);
 									}
 								} else {
 									// multi-valued
-									Collection<Object> values = null;
+									Collection<Object> values;
 									if(target instanceof RefObject) {
 										values = valueAsCollection(
 											this.getValue(
@@ -1851,22 +1852,27 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 									List<Object> mappedNewValues = new ArrayList<Object>();
 									for(Iterator<String> j = newValues.iterator(); j.hasNext(); ) {
 										try {
-											String newValue = (String)j.next();
+											String newValue = j.next();
 											#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTime = null;
 											try {
-												dateTime = dateTimeParser.parse(newValue);
+												dateTime = dateTimeParser.parse(newValue)#if !CLASSIC_CHRONO_TYPES .toInstant()#endif;
 											} catch(ParseException e) {
-												dateTime = dateParser.parse(newValue);
+												dateTime = dateParser.parse(newValue)#if !CLASSIC_CHRONO_TYPES .toInstant()#endif;
 											}
 											if(dateTime != null) {
-												cal.setTime(dateTime);
+												cal.setTime(#if CLASSIC_CHRONO_TYPES dateTime #else Date.from(dateTime) #endif);
 												if(PrimitiveTypes.DATE.equals(featureTypeName)) {
-													#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif date = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-														cal.get(Calendar.YEAR),
-														cal.get(Calendar.MONTH) + 1,
-														cal.get(Calendar.DAY_OF_MONTH),
-														DatatypeConstants.FIELD_UNDEFINED
+													#if CLASSIC_CHRONO_TYPES
+													final java.util.GregorianCalendar calendar = new java.util.GregorianCalendar();
+													javax.xml.datatype.XMLGregorianCalendar date = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+														calendar.get(java.util.Calendar.YEAR),
+														calendar.get(java.util.Calendar.MONTH) + 1,
+														calendar.get(java.util.Calendar.DAY_OF_MONTH),
+														javax.xml.datatype.DatatypeConstants.FIELD_UNDEFINED
 													);
+													#else
+													java.time.LocalDate date = java.time.LocalDate.now();
+													#endif
 													mappedNewValues.add(date);
 												} else if(PrimitiveTypes.DATETIME.equals(featureTypeName)) {
 													mappedNewValues.add(dateTime);
@@ -1879,14 +1885,14 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											} else {
 												app.addErrorMessage(
 													app.getTexts().getErrorTextCanNotEditDate(),
-													new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse date"}
+													new String[]{feature.getLabel(), newValues.get(0), "can not parse date"}
 												);
 											}
 										} catch(Exception e) {
 											SysLog.detail(e.getMessage(), e.getCause());
 											app.addErrorMessage(
 												app.getTexts().getErrorTextCanNotEditDate(),
-												new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+												new String[]{feature.getLabel(), newValues.get(0), e.getMessage()}
 											);
 										}
 									}
@@ -1936,12 +1942,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 															}
 														}
 													}
-												} catch(MalformedURLException e) {
-													xriSetAsTitleIsInvalid = true;
-												} catch(UnsupportedEncodingException e) {
+												} catch (MalformedURLException | UnsupportedEncodingException e) {
 													xriSetAsTitleIsInvalid = true;
 												}
-											}
+                                            }
 										}
 										// xri entered as title is valid
 										if(xriSetAsTitleIsInvalid && newValues.isEmpty()) {
@@ -1954,7 +1958,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											}
 										} else {
 											// xri entered as title is either valid or xri is set in field
-											if((xri == null) && (newValues.size() > 0)) {
+											if((xri == null) && (!newValues.isEmpty())) {
 												xri = (String)newValues.get(0);
 											}
 											try {
@@ -1986,7 +1990,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												SysLog.detail(e.getMessage(), e.getCause());
 												app.addErrorMessage(
 													app.getTexts().getErrorTextCanNotEditObjectReference(),
-													new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+													new String[]{feature.getLabel(), newValues.get(0), e.getMessage()}
 												);
 											}
 										}
@@ -2004,7 +2008,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 										try {
 											mappedNewValue = newValues.isEmpty() 
 												? (short)0 
-												: Short.valueOf(newValues.get(0).toString());
+												: Short.parseShort(newValues.get(0));
 										} catch(Exception ignore) {}
 										// Mandatory attributes must not be set to null
 										if(mappedNewValue != null) {
@@ -2030,18 +2034,18 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												);
 											}
 										} else {
-											SysLog.warning("Unable to map code field", newValues.get(0).toString());
+											SysLog.warning("Unable to map code field", newValues.get(0));
 										}
 									} catch(Exception e) {
 										SysLog.detail(e.getMessage(), e.getCause());
 										app.addErrorMessage(
 											app.getTexts().getErrorTextCanNotEditCode(),
-											new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+											new String[]{feature.getLabel(), newValues.get(0), e.getMessage()}
 										);
 									}
 								} else {
     								// multi-valued
-									Collection<Object> values = null;
+									Collection<Object> values;
 									if(target instanceof RefObject) {
 										values = valueAsCollection(
 											this.getValue(
@@ -2056,11 +2060,11 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 										if(values == null) {
 											targetAsValueMap(target).put(
 												featureName,
-												values = new ArrayList<Object>()
+												values = new ArrayList<>()
 											);
 										}
 									}
-									List<Object> mappedNewValues = new ArrayList<Object>();                        
+									List<Object> mappedNewValues = new ArrayList<>();
 									for(Iterator<String> j = newValues.iterator(); j.hasNext(); ) {
 										try {
 											String codeAsString = j.next();
@@ -2071,7 +2075,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											SysLog.detail(e.getMessage(), e.getCause());
 											app.addErrorMessage(
 												app.getTexts().getErrorTextCanNotEditCode(),
-												new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+												new String[]{feature.getLabel(), newValues.get(0), e.getMessage()}
 											);
 										}
 									}
@@ -2129,7 +2133,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 									}
 								} else {
 									// Multi-valued
-									Collection<Object> values = null;
+									Collection<Object> values;
 									if(target instanceof RefObject) {
 										values = valueAsCollection(
 											this.getValue(
@@ -2144,11 +2148,11 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 										if(values == null) {
 											targetAsValueMap(target).put(
 												featureName,
-												values = new ArrayList<Object>()
+												values = new ArrayList<>()
 											);
 										}
 									}
-									List<Object> mappedNewValues = new ArrayList<Object>();
+									List<Object> mappedNewValues = new ArrayList<>();
 									for(Iterator<String> j = newValues.iterator(); j.hasNext(); ) {
 										Object mappedNewValue = j.next();
 										mappedNewValues.add(
@@ -2438,7 +2442,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 							);
 						} else {
 							Object container = parent.refGetValue(forReference);
-							((RefContainer<?>)container).refAdd(
+							((RefContainer<RefObject>)container).refAdd(
 							    org.oasisopen.cci2.QualifierType.REASSIGNABLE,
 							    qualifiers.length > 0 ? (String) qualifiers[0] : "",
 							    object
@@ -2453,7 +2457,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 					}
 				} catch(Exception e) {
 					try {
-						tx.rollback();				
+						tx.rollback();
 			        } catch(Exception ignore) {
 						SysLog.trace("Exception ignored", ignore);
 					}
@@ -2507,7 +2511,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     ) throws ServiceException {
     	Model_1_0 model = ofType.getModel();        
     	// add ofType to hierarchy
-    	String ofTypeName = (String)ofType.getQualifiedName();
+    	String ofTypeName = ofType.getQualifiedName();
     	if(hierarchy.get(ofTypeName) != null) {
     		return;
     	}
@@ -2541,7 +2545,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     		hierarchy.get(
     			exposingType.getQualifiedName()
     		).add(
-    			(String)compositeReference.getName()
+                    compositeReference.getName()
     		);
     	}
     }
@@ -2566,7 +2570,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     	return
 			(ModelHelper.isCompositeEnd(referenceDef, false) || ModelHelper.isSharedEnd(referenceDef, false)) &&
 			!"org:openmdx:base:ExtentCapable".equals(referencedType.getQualifiedName()) &&
-			model.isSubtypeOf(lookupType, referencedType);    	
+			model.isSubtypeOf(lookupType, referencedType);
     }
 
     /* (non-Javadoc)
@@ -2580,7 +2584,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     ) throws ServiceException {
     	Model_1_0 model = app.getModel();
     	PersistenceManager pm = JDOHelper.getPersistenceManager(startFrom);
-    	String qualifiedNameLookupType = (String)lookupType.getQualifiedName();
+    	String qualifiedNameLookupType = lookupType.getQualifiedName();
     	ModelElement_1_0 startFromType = model.getElement(startFrom.refClass().refMofId());
     	// First check whether startFrom has a reference with type lookupType
     	{
@@ -2670,13 +2674,13 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
             startFrom, 
             app
         );
-        String qualifiedNameLookupType = (String)lookupType.getQualifiedName();        
+        String qualifiedNameLookupType = lookupType.getQualifiedName();
         ObjectView view = new ShowObjectView(
             id,
             null,
             (RefObject_1_0)app.getNewPmData().getObjectById(lookupObject.refGetPath()),
             app,
-            new LinkedHashMap<Path,Action>(),
+			new LinkedHashMap<>(),
             null, // no nextPrevActions
             qualifiedNameLookupType,
             null, // resourcePathPrefix

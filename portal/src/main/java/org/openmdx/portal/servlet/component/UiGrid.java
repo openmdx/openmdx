@@ -51,6 +51,7 @@ package org.openmdx.portal.servlet.component;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1670,7 +1671,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 							day = SystemClock.getInstance().now();
 						}
 						Calendar nextDay = new GregorianCalendar();
-						nextDay.setTime(day);
+						nextDay.setTime(#if CLASSIC_CHRONO_TYPES day #else Date.from(day) #endif);
 						nextDay.add(Calendar.DAY_OF_MONTH, 1);
 						values.clear();
 						values.add(day);
@@ -1689,7 +1690,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 						} else {
 							conditions.put(
 								condition.getFeature(),
-								new ArrayList<ConditionRecord>(Collections.singletonList(condition))							
+                                    new ArrayList<>(Collections.singletonList(condition))
 							);
 						}
 						this.activeFilterFeatures.add(featureName);

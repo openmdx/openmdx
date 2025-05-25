@@ -199,13 +199,13 @@ public class DataLoader
 	                                        	(RefObject_1_0)store.getObjectById(parentIdentity);
 	                                    } catch(Exception e) {}
 	                                    if(parent != null) {
-	                                        RefContainer<?> container = (RefContainer<?>)parent.refGetValue(
+	                                        RefContainer<RefObject> container = (RefContainer<RefObject>)parent.refGetValue(
 	                                        	entryPath.getSegment(entryPath.size() - 2).toClassicRepresentation()
 	                                        );
 	                                        container.refAdd(
 	                                            QualifierType.REASSIGNABLE,
-	                                            entryPath.getSegment(entryPath.size() - 1).toClassicRepresentation(), 
-	                                            newEntry
+	                                            entryPath.getSegment(entryPath.size() - 1).toClassicRepresentation(),
+												newEntry
 	                                        );
 	                                    }                                    
 	                                    if("bootstrap".equals(location)) {

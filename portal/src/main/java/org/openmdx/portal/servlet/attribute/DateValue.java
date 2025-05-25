@@ -51,6 +51,8 @@ package org.openmdx.portal.servlet.attribute;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAccessor;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -250,14 +252,18 @@ public class DateValue
         } else if(Datatypes.DATE_CLASS.isInstance(value)) {
             // TODO: kjdd
             // Das ist doch mit Flavour 3 gar nicht kompilierbar, oder?
+            #if CLASSIC_CHRONO_TYPES
             GregorianCalendar calendar = (Datatypes.DATE_CLASS.cast(value)).toGregorianCalendar(
                 TimeZone.getTimeZone(app.getCurrentTimeZone()),
                 this.app.getCurrentLocale(),
                 null
             );
+            #else
+            LocalDate calendar = LocalDate.from((TemporalAccessor) value);
+            #endif
             return this.isDate() ? 
-            	dateFormatter.format(calendar.getTime()) : 
-            		dateTimeFormatter.format(calendar.getTime());
+            	dateFormatter.format(calendar#if CLASSIC_CHRONO_TYPES .getTime()#endif) :
+            		dateTimeFormatter.format(calendar#if CLASSIC_CHRONO_TYPES .getTime()#endif);
         } else {
         	return value == null ? null : value.toString();
         }
