@@ -138,12 +138,7 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     /**
      * The interaction time
      */
-    private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif interactionTime =
-            SystemClock.getInstance().now();
-//            #if CLASSIC_CHRONO_TYPES new ImmutableDateTime(System.currentTimeMillis())
-////            #else LocalDate.parse(Long.toString(System.currentTimeMillis()), DateTimeFormatter.ISO_LOCAL_DATE)
-//            #else java.time.Instant.ofEpochMilli(System.currentTimeMillis()).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
-//            #endif;
+    private final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif interactionTime = SystemClock.getInstance().now();
 
     protected final boolean hasDelegate(){
     	return this.delegate != null;

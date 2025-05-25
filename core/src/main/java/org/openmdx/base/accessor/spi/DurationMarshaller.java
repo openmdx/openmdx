@@ -72,7 +72,7 @@ public class DurationMarshaller {
 
         @Override
         protected String toBasicFormat(Object datatype) {
-            return (Datatypes.DURATION_CLASS.cast(datatype)).toString();
+            return Datatypes.DURATION_CLASS.cast(datatype).toString();
         }
 
     };

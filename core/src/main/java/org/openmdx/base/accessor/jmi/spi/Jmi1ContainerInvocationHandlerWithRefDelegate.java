@@ -73,7 +73,7 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
      * Constructor
      *
      * @param marshaller the marshaller
-     * @param delegate   thedelegate
+     * @param delegate   the delegate
      */
     public Jmi1ContainerInvocationHandlerWithRefDelegate(
             Marshaller marshaller,
@@ -169,8 +169,6 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
                 return null;
             }
             #else
-            // TODO: kjdd
-            // Wird, wie schon letztes mal angemerkt, bei "add" abstürzen, da Anzahl der ARgumente dann ungerade ist!
             if ("getAll".equals(methodName) && args.length == 1) {
                 return this.marshaller.marshal(
                         this.refDelegate.refGetAll(

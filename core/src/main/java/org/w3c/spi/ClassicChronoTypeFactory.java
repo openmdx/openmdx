@@ -56,7 +56,7 @@ import javax.xml.datatype.Duration;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.ImmutableDate;
 import org.w3c.cci2.ImmutableDateTime;
-import org.w3c.time.ChronoUtils;
+import org.w3c.time.ChronoTypes;
 import org.w3c.format.DateTimeFormat;
 
 
@@ -152,7 +152,7 @@ class ClassicChronoTypeFactory extends AbstractChronoTypeFactory {
         }
         String value;
         try {
-            value = ChronoUtils.completeCentury(rawValue);
+            value = ChronoTypes.completeCentury(rawValue);
         } catch (Exception exception) {
             throw new IllegalArgumentException(
                     "Century completion failure",

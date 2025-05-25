@@ -105,7 +105,7 @@ public class NormalizingMarshaller
         if(source == null) {
             return null;
         } else if(this.targetClass.isInstance(source)) {
-            return source#if CLASSIC_CHRONO_TYPES instanceof ImmutableDatatype<?> ? ((ImmutableDatatype<?>)source).clone() : source#endif;
+            return #if source CLASSIC_CHRONO_TYPES instanceof ImmutableDatatype<?> ? ((ImmutableDatatype<?>)source).clone() : #endif source;
         } else if (source instanceof String) {
             return Datatypes.create(this.targetClass, (String)source);
         } else if (source instanceof Number){

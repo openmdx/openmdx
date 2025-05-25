@@ -56,8 +56,6 @@ import org.openmdx.kernel.exception.BasicException;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
 
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
-
 /**
  * Qualifiers
  */
@@ -65,7 +63,6 @@ public class Qualifiers {
 
     /**
      * Constructor 
-     *
      */
     private Qualifiers(
     ) {
@@ -74,10 +71,7 @@ public class Qualifiers {
 
     /**
      * Build an org::openmdx::audit2 compliant after image qualifier
-     * 
-     * @param qualifier
-     * @param version
-     * 
+     *
      * @return an audit2 compliant after image qualifier
      */
     public static String toAudit2AfterImageQualifier(
@@ -89,10 +83,7 @@ public class Qualifiers {
 
     /**
      * Build an org::openmdx::audit2 compliant before image qualifier
-     * 
-     * @param qualifier
-     * @param unitOfWorkId
-     * 
+     *
      * @return an audit2 compliant before image qualifier
      */
     public static String toAudit2BeforeImageQualifier(
@@ -104,8 +95,6 @@ public class Qualifiers {
     
     /**
      * Extract the base from an audit2 qualifier
-     * 
-     * @param segment
      * 
      * @return the base from an audit2 qualifier
      */
@@ -121,12 +110,7 @@ public class Qualifiers {
     /**
      * Create a before or after image identifier
      * 
-     * @param configuration
-     * @param objectId
-     * @param unitOfWorkId
      * @return the object's before or after image id
-     * 
-     * @throws ServiceException
      */
     public static Path getAudit2BeforeImageId(
         Configuration configuration, 
@@ -166,10 +150,7 @@ public class Qualifiers {
 
     /**
      * Create a before or after image identifier
-     * 
-     * @param configuration
-     * @param objectId
-     * @param modifiedAt
+     *
      * @return the object's before or after image id
      * 
      * @throws ServiceException

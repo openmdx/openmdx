@@ -55,7 +55,7 @@ val projectSpecificationVersion = project.extra["projectSpecificationVersion"] a
 val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
 val runtimeCompatibility = project.extra["runtimeCompatibility"] as JavaVersion
 
-if (runtimeCompatibility.isJava8() && System.getenv("JRE_18") == null) {
+if (projectFlavour == "2"  && System.getenv("JRE_18") == null) {
     throw GradleException("ERROR: JRE_18 not set " +
             "(e.g. export JRE_18=/usr/lib/jvm/java-8-openjdk-amd64/jre)")
 }

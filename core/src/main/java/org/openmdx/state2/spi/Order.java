@@ -48,11 +48,13 @@ package org.openmdx.state2.spi;
 import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.time.ChronoTypes;
+import org.w3c.spi2.Datatypes;
+
 #if CLASSIC_CHRONO_TYPES
 import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi.DatatypeFactories;
 #endif
-import org.w3c.spi2.Datatypes;
 
 /**
  * Valid Times
@@ -109,7 +111,7 @@ public class Order {
         if(
             validFrom != null &&
             validTo != null &&
-            Datatypes.compare(validTo, validFrom) < 0
+            ChronoTypes.compare(validTo, validFrom) < 0
         ) throw BasicException.initHolder(
             new IllegalArgumentException(
                 "validTo must be greater than or equal to validFrom",
@@ -137,11 +139,7 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d1,
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d2
     ){
-        return d1 == null ? (
-                d2 == null ? 0 : -1
-        ) : d2 == null ? (
-                1
-        ) : Datatypes.compare(d1, d2);
+        return ChronoTypes.compare(d1, d2, ChronoTypes.NullRepresents.NEGATIVE_INFINITY);
     }
 
     /**
@@ -158,11 +156,7 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d1,
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d2
     ){
-        return d1 == null ? (
-                d2 == null ? 0 : 1
-        ) : d2 == null ? (
-                -1
-        ) : Datatypes.compare(d1, d2);
+        return ChronoTypes.compare(d1, d2, ChronoTypes.NullRepresents.POSITIVE_INFINITY);
     }
 
     /**
@@ -180,7 +174,7 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif from,
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif to
     ){
-        return from == null || to == null ? -1 : Datatypes.compare(from, to);
+        return ChronoTypes.compare(from, to, ChronoTypes.NullRepresents.NEGATIVE_AND_POSITIVE_INFINITY);
     }
 
     //------------------------------------------------------------------------
@@ -202,7 +196,7 @@ public class Order {
         if(
             validFrom != null &&
             invalidFrom != null &&
-            Datatypes.compare(invalidFrom, validFrom) <= 0
+            ChronoTypes.compare(invalidFrom, validFrom) <= 0
         ) throw BasicException.initHolder(
             new IllegalArgumentException(
                 "invalidFrom must be greater than validFrom",
@@ -233,7 +227,7 @@ public class Order {
         return d1 == null ? (
             d2 == null ? 0 : -1
         ) : (
-            d2 == null ? 1 : Datatypes.compare(d1, d2)
+            d2 == null ? 1 : ChronoTypes.compare(d1, d2)
         );
     }
 
@@ -254,7 +248,7 @@ public class Order {
         return d1 == null ? (
             d2 == null ? 0 : 1
         ) : (
-            d2 == null ? -1 : Datatypes.compare(d1, d2)
+            d2 == null ? -1 : ChronoTypes.compare(d1, d2)
         );
     }
 
@@ -273,7 +267,7 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to
     ){
-        return from == null || to == null ? -1 : Datatypes.compare(from, to);
+        return from == null || to == null ? -1 : ChronoTypes.compare(from, to);
     }
     
     
@@ -298,7 +292,7 @@ public class Order {
         return d1 == null ? (
             d2 == null ? 0 : 1
         ) : (
-            d2 == null ? -1 : Datatypes.compare(d1, d2)
+            d2 == null ? -1 : ChronoTypes.compare(d1, d2)
         );
     }
     

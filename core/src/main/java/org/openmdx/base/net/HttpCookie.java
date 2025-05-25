@@ -48,7 +48,7 @@ import java.text.ParseException;
 
 import java.time.Instant;
 import org.w3c.format.DateTimeFormat;
-import org.w3c.time.ChronoUtils;
+import org.w3c.time.ChronoTypes;
 
 /**
  * Basic Cookie
@@ -101,7 +101,7 @@ public class HttpCookie implements Comparable<HttpCookie> {
                this.discard = true;
             } else if ("expires".equals(key)) {
                try {
-                  this.expiresAt = ChronoUtils.getEpochMilliseconds(DateTimeFormat.NETSCAPE_FORMAT.parse(argument));
+                  this.expiresAt = ChronoTypes.getEpochMilliseconds(DateTimeFormat.NETSCAPE_FORMAT.parse(argument));
                } catch (ParseException exception) {
                   throw new IllegalArgumentException("Invalid 'expires' value: " + argument, exception);
                }

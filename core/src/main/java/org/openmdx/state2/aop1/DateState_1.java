@@ -103,10 +103,15 @@ public class DateState_1
     }
 
     /**
-     * 
+     * To distinguish bewteen the {@code NULL} value and {@code null} for "not yet set"
      */
-    private static final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif NULL
-            = #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar() #else java.time.LocalDate.MIN #endif;
+    private static final
+    #if CLASSIC_CHRONO_TYPES
+    javax.xml.datatype.XMLGregorianCalendar NULL = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory()
+        .newXMLGregorianCalendar(java.time.LocalDate.MIN.toString());
+    #else
+    java.time.LocalDate NULL = java.time.LocalDate.MIN;
+    #endif
 
     private static final List<String> IGNORABLE_ATTRIBUTES = Arrays.asList(
         STATE_VALID_FROM, STATE_VALID_TO,

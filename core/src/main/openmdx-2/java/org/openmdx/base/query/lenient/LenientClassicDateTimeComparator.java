@@ -46,6 +46,7 @@ package org.openmdx.base.query.lenient;
 
 import java.util.Date;
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.ChronoTypes;
 
 /**
  * Allows comparison of XML Datatype classes
@@ -73,12 +74,12 @@ class LenientClassicDateTimeComparator extends LenientNumberComparator {
         Object second
     ) {
         if(second instanceof Date) {
-            return Datatypes.compare(
+            return ChronoTypes.compare(
                 (Date) first,
                 (Date) second
             );
         } else {
-            return Datatypes.compare(
+            return ChronoTypes.compare(
                 (Date) first,
                 Datatypes.create(Date.class, second.toString())
             );

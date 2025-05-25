@@ -442,8 +442,8 @@ public class DateAndTimeMarshaller {
         } else if(source instanceof Time) {
             return parse("T" + source);
         } else if (source instanceof Timestamp) {
+            final Timestamp value = (Timestamp) source;
             #if CLASSIC_CHRONO_TYPES
-            Timestamp value = (Timestamp) source;
             long milliseconds = value.getTime();
             java.util.GregorianCalendar calendar = new GregorianCalendar(UTC);
             calendar.setTimeInMillis(milliseconds);
@@ -467,7 +467,6 @@ public class DateAndTimeMarshaller {
             }
             return target;
             #else
-            Timestamp value = (Timestamp)source;
             return value.toInstant();
             #endif
         } else if(source instanceof java.time.LocalDateTime) {

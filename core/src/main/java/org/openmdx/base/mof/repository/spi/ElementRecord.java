@@ -66,6 +66,7 @@ import org.openmdx.base.resource.cci.SetRecord;
 import org.openmdx.base.rest.spi.AbstractMappedRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
+import org.w3c.time.ChronoTypes;
 
 /**
  * org::omg::model1::Element Record
@@ -170,12 +171,12 @@ abstract class ElementRecord<M extends Enum<M>>
     }
 
     protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getCreatedAt(){
-        return this.createdAt == NULL_DATE ? null : #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(this.createdAt);
+        return this.createdAt == NULL_DATE ? null : ChronoTypes.ofEpochMilliseconds(this.createdAt);
     }
 
-    protected void setCreatedAt(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newValue){
+    protected void setCreatedAt(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif createdAt){
         assertMutability();
-        this.createdAt = newValue == null ? NULL_DATE : #if CLASSIC_CHRONO_TYPES newValue.getTime() #else newValue.toEpochMilli()#endif;
+        this.createdAt = createdAt == null ? NULL_DATE : ChronoTypes.getEpochMilliseconds(createdAt);
     }
 
     protected IndexedRecord createdBy() {
@@ -212,12 +213,12 @@ abstract class ElementRecord<M extends Enum<M>>
     }
     
     protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getModifiedAt(){
-        return this.modifiedAt == NULL_DATE ? null : #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(this.modifiedAt);
+        return this.modifiedAt == NULL_DATE ? null : ChronoTypes.ofEpochMilliseconds(this.modifiedAt);
     }
 
-    protected void setModifiedAt(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newValue){
+    protected void setModifiedAt(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif modifiedAt){
         assertMutability();
-        this.modifiedAt = newValue == null ? NULL_DATE : #if CLASSIC_CHRONO_TYPES newValue.getTime() #else newValue.toEpochMilli()#endif;
+        this.modifiedAt = modifiedAt == null ? NULL_DATE : ChronoTypes.getEpochMilliseconds(modifiedAt);
     }
 
     protected IndexedRecord modifiedBy(){

@@ -175,12 +175,13 @@ public class Datums {
                     datum, 
                     (Object[])null
                 );
-            	StringBuilder value = new StringBuilder();
                 int days = toInt(intervalDaysSeconds, 0) - 0x80000000;
                 int hours = toInt(intervalDaysSeconds[4]) - 60;
                 int minutes = toInt(intervalDaysSeconds[5]) - 60;
                 int seconds = toInt(intervalDaysSeconds[6]) - 60;
                 int nanoseconds = toInt(intervalDaysSeconds, 7) - 0x80000000;
+                #if CLASSIC_CHRONO_TYPES
+                StringBuilder value = new StringBuilder();
                 if(days < 0) {
                 	value.append(
                 		"-P"
@@ -230,12 +231,16 @@ public class Datums {
 	            		"S"
 	            	);
                 }
-                return
-                #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value.toString());
-                #else Duration.ofDays(days).plusHours(hours).plusMinutes(minutes).plusSeconds(seconds).plusNanos(nanoseconds);
+                return org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value.toString());
+                #else
+                return Duration
+                    .ofDays(days)
+                    .plusHours(hours)
+                    .plusMinutes(minutes)
+                    .plusSeconds(seconds)
+                    .plusNanos(nanoseconds);
                 #endif
-
-            } else if (isDatum(datum)) { 
+            } else if (isDatum(datum)) {
                 if(datumToJdbc == null) datumToJdbc = oracleDatum.getMethod("toJdbc");
                 return datumToJdbc.invoke(datum);
             } else {

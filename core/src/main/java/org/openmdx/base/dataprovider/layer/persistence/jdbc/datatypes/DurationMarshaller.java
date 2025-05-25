@@ -51,7 +51,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
-import org.w3c.time.ChronoUtils;
+import org.w3c.time.ChronoTypes;
 
 import javax.xml.datatype.DatatypeConstants;
 import java.math.BigDecimal;
@@ -105,7 +105,7 @@ public class DurationMarshaller {
 
     @SuppressWarnings("unchecked")
     private <T extends Number> T getValue(Duration duration, DatatypeConstants.Field field) {
-        Number value = #if CLASSIC_CHRONO_TYPES duration.getField(field) #else ChronoUtils.getDurationField(duration, field)#endif ;
+        Number value = #if CLASSIC_CHRONO_TYPES duration.getField(field) #else ChronoTypes.getDurationField(duration, field)#endif ;
         if (value == null) {
             value = field == DatatypeConstants.SECONDS ? DAY_TIME_ZERO : YEAR_MONTHS_ZERO;
         }
@@ -567,21 +567,6 @@ public class DurationMarshaller {
         return period.getDays() == 0;
     }
 
-    private String appendUnit(Object source, Long val, String unit) {
-        final String src = source.toString();
-        if (src.contains("PT") && !src.contains(unit)) {
-            return val + unit;
-        }
-        return src.contains(unit) ? val + unit : "";
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.openmdx.compatibility.base.marshalling.Marshaller#unmarshal(java.lang.
-     * Object)
-     */
     public Object unmarshal(Object source) throws ServiceException {
         if (source == null || Datatypes.DURATION_CLASS.isInstance(source)) {
             return source;
@@ -628,7 +613,7 @@ public class DurationMarshaller {
                         } else if ((matcher = YEAR_TO_MONTH.matcher(value)).matches()) {
                             StringBuilder duration = new StringBuilder().append(matcher.group(1)).append('P')
                                     .append(matcher.group(2)).append("Y").append(matcher.group(3)).append("M");
-                            return #if CLASSIC_CHRONO_TYPES Datatypes.create(Duration.class, duration.toString()) #else DatatypeFactories.immutableDatatypeFactory().newDurationYearMonth(duration.toString()) #endif ;
+                            return DatatypeFactories.immutableDatatypeFactory().newDurationYearMonth(duration.toString());
                         } else
                             throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
                                     BasicException.Code.TRANSFORMATION_FAILURE,
@@ -709,36 +694,16 @@ public class DurationMarshaller {
         YEAR_MONTH, YEAR_MONTH_DAY_TIME, DAY_TIME;
 
         static ValueType of(Duration duration) {
+			if(duration == null) {
+				return null;
+			}
 			#if CLASSIC_CHRONO_TYPES
 				boolean yearMonth = duration.isSet(DatatypeConstants.YEARS) || duration.isSet(DatatypeConstants.MONTHS);
 				boolean dayTime = duration.isSet(DatatypeConstants.DAYS) || duration.isSet(DatatypeConstants.HOURS)
 					|| duration.isSet(DatatypeConstants.MINUTES) || duration.isSet(DatatypeConstants.SECONDS);
 				return yearMonth ? (dayTime ? YEAR_MONTH_DAY_TIME : YEAR_MONTH) : (dayTime ? DAY_TIME : null);
 			#else
-                return duration == null ? null : DAY_TIME;
-//            // Convert the duration to string representation
-//            String durationStr = duration.toString();
-
-//            // Check for year/month components
-//            boolean hasYears = durationStr.contains("Y");
-//            boolean hasMonths = durationStr.contains("M") && !durationStr.matches(".*T.*M.*"); // M not after T
-//            boolean yearMonth = hasYears || hasMonths;
-//
-//            // Check for day/time components
-//            boolean hasDays = durationStr.contains("D");
-//            boolean hasHours = durationStr.contains("H");
-//            boolean hasMinutes = durationStr.contains("T") && durationStr.contains("M"); // M after T
-//            boolean hasSeconds = durationStr.contains("S");
-//            boolean dayTime = hasDays || hasHours || hasMinutes || hasSeconds;
-//
-//            if (yearMonth) {
-//                return dayTime ? YEAR_MONTH_DAY_TIME : YEAR_MONTH;
-//            } else {
-//                // For a duration with only day/time components or empty duration,
-//                // always return DAY_TIME (never null)
-//                return DAY_TIME;
-//            }
-
+                return DAY_TIME;
 			#endif
         }
     }

@@ -108,7 +108,6 @@ public final class BasicException extends Exception {
         String description,
         Parameter... parameters
     ){
-        super();
         this.source = null;
         this.domain = exceptionDomain;
         this.code = exceptionCode;
@@ -137,7 +136,6 @@ public final class BasicException extends Exception {
         int exceptionCode,
         Parameter... parameters
     ){
-        super();
         this.source = null;
         this.domain = exceptionDomain;
         this.code = exceptionCode;
@@ -180,15 +178,6 @@ public final class BasicException extends Exception {
 
     /**
      * Constructor for the XML parser
-     *
-     * @param exceptionDomain
-     * @param exceptionCode
-     * @param exceptionClass
-     * @param exceptionTime
-     * @param exceptionMethod
-     * @param exceptionLine
-     * @param description
-     * @param parameters
      */
     public BasicException(
         String exceptionDomain,
@@ -214,8 +203,6 @@ public final class BasicException extends Exception {
 
     /**
      * Constructor 
-     *
-     * @param throwable
      */
     private BasicException(
         Throwable throwable
@@ -296,12 +283,6 @@ public final class BasicException extends Exception {
     private static final long serialVersionUID = -1081067273393341482L;
 
     /**
-     * To format the timestamp
-     */
-//    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-
-
-    /**
      * Exception Mappers
      */
     private static final Mapper mappers = new Mappers();
@@ -327,10 +308,7 @@ public final class BasicException extends Exception {
 
     /**
      * Lenient System Property retrieval
-     * 
-     * @param key
-     * @param defaultValue
-     * 
+     *
      * @return the system property value or its default value
      */
     private static final String getProperty(
@@ -346,8 +324,6 @@ public final class BasicException extends Exception {
     	
     /**
      * Log a {@code BasicException.Holder}
-     * 
-     * @param holder
      */
     public static <T extends Holder> T log(
         T holder
@@ -486,9 +462,6 @@ public final class BasicException extends Exception {
         );
     }
     
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.exception.ExceptionStack#getStackTrace()
-     */
     @Override
     public final StackTraceElement[] getStackTrace() {
         if(this.stackTrace == null) {
@@ -574,17 +547,11 @@ public final class BasicException extends Exception {
         return this;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#fillInStackTrace()
-     */
     @Override
     public synchronized Throwable fillInStackTrace() {
         return this; // No stack trace required
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#getCause()
-     */
     @Override
     public final synchronized BasicException getCause() {
         BasicException cause = (BasicException) super.getCause();
@@ -601,8 +568,6 @@ public final class BasicException extends Exception {
      * Maps a {@code Throwable} to a {@code BasicException} using the 
      * registered exception mappers
      *
-     * @param throwable
-     * 
      * @return a {@code BasicException} or {@code null} if there is 
      * no mapping
      */
@@ -623,14 +588,8 @@ public final class BasicException extends Exception {
     /**
      * Create a {@code BasicException} representing a {@code cause} 
      * wrapped into a {@code wrapper}.
-     * 
-     * @param cause
-     * @param holder
-     * @param exceptionDomain 
-     * @param exceptionCode 
-     * @param description 
      *
-     * @return a {@code BasicException} representing the {@code cause} 
+     * @return a {@code BasicException} representing the {@code cause}
      * wrapped into {@code wrapper}
      */
     public static BasicException toStackedException(
@@ -668,10 +627,7 @@ public final class BasicException extends Exception {
         }
         return initialCause;
     }
-    
-    /* (non-Javadoc)
-     * @see Holder#getCause(java.lang.String)
-     */
+
     public BasicException getCause(String exceptionDomain) {
         if(exceptionDomain == null) {
             return getInitialCause();
@@ -689,9 +645,6 @@ public final class BasicException extends Exception {
         }
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#getMessage()
-     */
     @Override
     public String getMessage() {
         if(this.message == null) {
@@ -700,9 +653,6 @@ public final class BasicException extends Exception {
         return this.message;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.exception.ExceptionStack#getDescription()
-     */
     public String getDescription() {
         if(this.description == null && this.source != null && !(source instanceof Holder)) {
             this.description = this.source.getMessage();
@@ -710,16 +660,10 @@ public final class BasicException extends Exception {
         return this.description;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.exception.ExceptionStack#getExceptionCode()
-     */
     public int getExceptionCode() {
         return this.code;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.exception.ExceptionStack#getExceptionDomain()
-     */
     public String getExceptionDomain() {
         return this.domain;
     }
@@ -810,9 +754,6 @@ public final class BasicException extends Exception {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.exception.ExceptionStackElement#getExceptionStack()
-     */
     public Iterable<BasicException> getExceptionStack() {
         if(this.exceptionStack == null) {
             this.exceptionStack = new Iterable<BasicException>() {
@@ -826,9 +767,6 @@ public final class BasicException extends Exception {
         return this.exceptionStack;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#toString()
-     */
     @Override
     public String toString() {
     	final StringBuilder out = new StringBuilder(getExceptionClass());
@@ -932,9 +870,6 @@ public final class BasicException extends Exception {
         }
     }
     
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
-     */
     @Override
     public void printStackTrace(final PrintStream s) {
         printStackTrace(null, s);
@@ -965,9 +900,6 @@ public final class BasicException extends Exception {
         }
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
-     */
     @Override
     public void printStackTrace(final PrintWriter s) {
         printStackTrace(null, s);
@@ -998,13 +930,11 @@ public final class BasicException extends Exception {
         }
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#setStackTrace(java.lang.StackTraceElement[])
-     */
     @Override
     public void setStackTrace(StackTraceElement[] stackTrace) {
         this.stackTrace = stackTrace;
     }    
+
 
     //------------------------------------------------------------------------
     // Implements {@code Serializable}

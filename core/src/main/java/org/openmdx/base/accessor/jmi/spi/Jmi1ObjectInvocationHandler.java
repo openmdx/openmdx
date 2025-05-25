@@ -119,12 +119,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
 
     /**
      * Constructor 
-     * 
-     * @param refClass
-     * @param delegate
-     * @throws ServiceException 
-     *
-     * @see RefClass_1#refCreateInstance
      */
     Jmi1ObjectInvocationHandler(
         Jmi1Class_1_0 refClass,
@@ -197,12 +191,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     /**
      * Retrive a (maybe newly created) aspect implementation instance
      *  
-     * @param index
-     * @param self
-     * @param next
      * @return the requested aspect implementation instance
-     *  
-     * @throws ServiceException
      */
     protected Object getAspectImplementationInstance(
         int index,
@@ -219,11 +208,8 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
 
     /**
      * Retrieve the proxy's invocation handler
-     * 
-     * @param proxy
-     * 
+     *
      * @returne the proxy's invocation handler
-     * @throws ServiceException
      */
     private static Jmi1ObjectInvocationHandler getInstance(
         Object proxy
@@ -268,14 +254,8 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     
     /**
      * Retrieve the invocation target
-     * 
-     * @param self
-     * @param next
-     * @param method
-     * 
+     *
      * @return the implementation for the given feature
-     * 
-     * @throws ServiceException
      */
     protected InvocationTarget getImpl(
         Object self,
@@ -373,14 +353,12 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
-     */
     @SuppressWarnings({
         "unchecked", "rawtypes"
     })
     #if CLASSIC_CHRONO_TYPES
-        public Object invoke(
+    @Override
+    public Object invoke(
         Object proxy,
         Method method,
         Object[] args
@@ -1306,8 +1284,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     /**
      * Analyse refGetValue's first argument
      *
-     * @param feature
-     *
      * @return the feature's name
      */
     private static String getFeatureName(
@@ -1327,13 +1303,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     /**
      * Proxify the value if necessary
      *
-     * @param value
-     * @param featureName
-     * @param returnType
-     *
      * @return the proxified value
-     *
-     * @throws ServiceException
      */
     @SuppressWarnings("unchecked")
     private Object marshal(
@@ -1474,20 +1444,9 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     /**
      * Apply the given method to the next layer's CCI API
      *
-     * @param proxy
-     * @param method
-     * @param args
-     * @param marshaller
      * @param kind tells which kind of method or operation invocation has to be executed
      *
      * @return the methods return value
-     *
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
-     * @throws InvocationTargetException
-     * @throws ServiceException
-     * @throws SecurityException
-     * @throws NoSuchMethodException
      */
     protected Object invokeCci(
             Object proxy,
@@ -1702,9 +1661,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
 
         /**
          * Constructor
-         *
-         * @param featureName
-         * @param value
          */
         Jmi1BinaryLargeObject(
             String featureName,
@@ -1768,9 +1724,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
 
         /**
          * Constructor
-         *
-         * @param featureName
-         * @param value
          */
         Jmi1CharacterLargeObject(
             String featureName,
@@ -1784,9 +1737,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         protected final String featureName;
         protected transient Long length = null;
 
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.CharacterLargeObject#getContent()
-         */
+        @Override
         public Reader getContent(
         ) throws IOException {
             Reader value = this.initialValue == null ?
@@ -1796,17 +1747,13 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             return value;
         }
 
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.LargeObject#getLength()
-         */
+        @Override
         public Long getLength(
         ) throws IOException {
             return this.length;
         }
 
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.CharacterLargeObject#getContent(java.io.Writer, long)
-         */
+        @Override
         public void getContent(
             Writer stream,
             long position
@@ -1878,9 +1825,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
 
         /**
          * Constructor
-         *
-         * @param delegate
-         * @param refClass
          */
         DelegatingRefObject_1(
             Object delegate,
@@ -1906,24 +1850,18 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         private final static String STANDARD =
             "This JMI method is not supported by CCI delegates";
 
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refGetPath()
-         */
+        @Override
         public Path refGetPath(
         ) {
             return (Path) ReducedJDOHelper.getObjectId(this.cciDelegate);
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefObject#refClass()
-         */
+        @Override
         public RefClass refClass() {
             return this.refClass;
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefObject#refDelete()
-         */
+        @Override
         public void refDelete() {
             ReducedJDOHelper.getPersistenceManager(
                 this.cciDelegate
@@ -1932,9 +1870,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             );
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefObject#refImmediateComposite()
-         */
+        @Override
         public RefFeatured refImmediateComposite() {
             Path objectId = refGetPath();
             if(objectId == null) {
@@ -1946,9 +1882,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             }
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefObject#refIsInstanceOf(javax.jmi.reflect.RefObject, boolean)
-         */
+        @Override
         public boolean refIsInstanceOf(
             RefObject objType,
             boolean considerSubtypes
@@ -1974,9 +1908,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             }
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefObject#refOutermostComposite()
-         */
+        @Override
         public RefFeatured refOutermostComposite() {
             Path objectId = refGetPath();
             if(objectId == null) {
@@ -1988,27 +1920,21 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             }
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefFeatured#refGetValue(javax.jmi.reflect.RefObject)
-         */
+        @Override
         public Object refGetValue(
             RefObject feature
         ) {
             throw newUnsupportedOperationException(REFLECTIVE, feature);
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefFeatured#refGetValue(java.lang.String)
-         */
+        @Override
         public Object refGetValue(
             String featureName
         ) {
             throw newUnsupportedOperationException(REFLECTIVE, featureName);
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefFeatured#refInvokeOperation(javax.jmi.reflect.RefObject, java.util.List)
-         */
+        @Override
         @SuppressWarnings("rawtypes")
         public Object refInvokeOperation(
             RefObject requestedOperation,
@@ -2017,9 +1943,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             throw newUnsupportedOperationException(REFLECTIVE, requestedOperation);
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefFeatured#refInvokeOperation(java.lang.String, java.util.List)
-         */
+        @Override
         @SuppressWarnings("rawtypes")
         public Object refInvokeOperation(
             String requestedOperation,
@@ -2028,9 +1952,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             throw newUnsupportedOperationException(REFLECTIVE, requestedOperation);
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefFeatured#refSetValue(javax.jmi.reflect.RefObject, java.lang.Object)
-         */
+        @Override
         public void refSetValue(
             RefObject feature,
             Object value
@@ -2038,9 +1960,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             throw newUnsupportedOperationException(REFLECTIVE, feature);
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefFeatured#refSetValue(java.lang.String, java.lang.Object)
-         */
+        @Override
         public void refSetValue(
             String featureName,
             Object value
@@ -2048,16 +1968,12 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             throw newUnsupportedOperationException(REFLECTIVE, featureName);
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefBaseObject#refImmediatePackage()
-         */
+        @Override
         public RefPackage refImmediatePackage() {
             return this.refClass.refImmediatePackage();
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefBaseObject#refMetaObject()
-         */
+        @Override
         public RefObject refMetaObject(
         ) {
             if (this.metaObject == null) try {
@@ -2071,9 +1987,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             return this.metaObject;
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefBaseObject#refMofId()
-         */
+        @Override
         public String refMofId(
         ) {
             Path objectId = refGetPath();
@@ -2081,17 +1995,13 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 objectId == null ? null : objectId.toXRI();
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefBaseObject#refOutermostPackage()
-         */
+        @Override
         public Jmi1Package_1_0 refOutermostPackage(
         ) {
             return (Jmi1Package_1_0) this.refClass.refOutermostPackage();
         }
 
-        /* (non-Javadoc)
-         * @see javax.jmi.reflect.RefBaseObject#refVerifyConstraints(boolean)
-         */
+        @Override
         @SuppressWarnings("rawtypes")
         public Collection refVerifyConstraints(
             boolean deepVerify
@@ -2106,17 +2016,13 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             }
         }
 
-        /* (non-Javadoc)
-         * org.openmdx.base.persistence.spi.Entity_2_0#openmdxjdoGetDelegate()
-         */
+        @Override
         public Object openmdxjdoGetDelegate(
         ) {
             return this.cciDelegate;
         }
 
-        /* (non-Javadoc)
-         * @see org.openmdx.base.persistence.spi.Entity_2_0#openmdxjdoGetDataObject()
-         */
+        @Override
         public Object openmdxjdoGetDataObject(
         ) {
             return this.cciDelegate instanceof DelegatingRefObject_1_0 ?
@@ -2124,9 +2030,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 this.cciDelegate;
         }
 
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refDefaultFetchGroup()
-         */
+        @Override
         public Set<String> refDefaultFetchGroup(
         ) {
             if(this.cciDelegate instanceof RefObject_1_0) {
@@ -2140,9 +2044,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             }
         }
 
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refDelegate()
-         */
+        @Override
         public ObjectView_1_0 refDelegate(
         ) {
             throw newUnsupportedOperationException(
@@ -2151,9 +2053,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             );
         }
 
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refGetValue(java.lang.String, java.lang.Object, long)
-         */
+        @Override
         public long refGetValue(
             String feature,
             Object value,
@@ -2162,9 +2062,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             throw newUnsupportedOperationException(REFLECTIVE, feature);
         }
 
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refInitialize(boolean, boolean)
-         */
         @Override
         public void refInitialize(
             boolean setRequiredToNull,
@@ -2185,9 +2082,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             }
         }
 
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refSetValue(java.lang.String, java.lang.Object, long)
-         */
+        @Override
         public void refSetValue(
             String feature,
             Object newValue,
@@ -2227,25 +2122,17 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 message + " on object " + objectId;
         }
 
-        /* (non-Javadoc)
-         * @see java.lang.Object#hashCode()
-         */
         @Override
         public int hashCode() {
             return this.cciDelegate.hashCode();
         }
 
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
         @Override
         public String toString() {
             return this.cciDelegate.toString();
         }
 
-        /* (non-Javadoc)
-         * @see org.openmdx.base.persistence.spi.Cloneable#openmdxjdoClone()
-         */
+        @Override
         public RefObject openmdxjdoClone(String... exclude) {
             return this.refClass.refCreateInstance(
                 Collections.singletonList(
