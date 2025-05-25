@@ -276,10 +276,12 @@ public class DurationMarshaller {
                                 return PG_INTERVAL_MARSHALLER.marshal(signum, years.intValue(), months.intValue(), 0, 0, 0, 0);
                             }
                             case DAY_TIME: {
-                                BigInteger days = getValue(duration, DatatypeConstants.DAYS);
-                                BigInteger hours = getValue(duration, DatatypeConstants.HOURS);
-                                BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
-                                BigDecimal seconds = getValue(duration, DatatypeConstants.SECONDS);
+                                BigInteger days = BigInteger.valueOf(getValue(duration, DatatypeConstants.DAYS));
+                                BigInteger hours = BigInteger.valueOf(getValue(duration, DatatypeConstants.HOURS));
+                                BigInteger minutes = BigInteger.valueOf(getValue(duration, DatatypeConstants.MINUTES));
+                                BigDecimal seconds = getValue(duration, DatatypeConstants.SECONDS) instanceof BigDecimal ?
+                                        getValue(duration, DatatypeConstants.SECONDS) :
+                                        new BigDecimal(getValue(duration, DatatypeConstants.SECONDS).toString());
                                 return PG_INTERVAL_MARSHALLER.marshal(
                                         signum,
                                         0,

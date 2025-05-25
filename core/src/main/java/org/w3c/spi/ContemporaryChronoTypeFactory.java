@@ -95,9 +95,7 @@ class ContemporaryChronoTypeFactory extends AbstractChronoTypeFactory {
                 timeSegmentIdx += 2;
                 sb.append(value, timeSegmentIdx, timeSegmentIdx + 2).append(':');
                 timeSegmentIdx += 2;
-                boolean hasMillis = value.contains(".");
-                sb.append(value, timeSegmentIdx, timeSegmentIdx + (!hasMillis ? 3 : 7));
-
+                sb.append(value.substring(timeSegmentIdx));
                 toParse = sb.toString();
             }
 
