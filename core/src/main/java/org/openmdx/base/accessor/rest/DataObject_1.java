@@ -168,7 +168,6 @@ import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 import static org.openmdx.base.mof.cci.PrimitiveTypes.DATE;
 import static org.openmdx.base.mof.cci.PrimitiveTypes.DATETIME;

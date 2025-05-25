@@ -44,7 +44,7 @@
  */
 package org.w3c.jpa3;
 
-import org.w3c.time.ChronoUtils;
+import org.w3c.time.ChronoTypes;
 
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -89,13 +89,13 @@ public class Date {
         if(value == null) {
             return null;
         } else try {
-            value = ChronoUtils.completeCentury(value);
+            value = ChronoTypes.completeCentury(value);
         } catch (ParseException exception) {
             throw new IllegalArgumentException(exception);
         }
-        if(ChronoUtils.BASIC_DATE_PATTERN.matcher(value).matches()) {
+        if(ChronoTypes.BASIC_DATE_PATTERN.matcher(value).matches()) {
             return #if CLASSIC_CHRONO_TYPES new org.w3c.cci2.ImmutableDate(value) #else LocalDate.parse(value, DateTimeFormatter.BASIC_ISO_DATE)#endif;
-        } else if(ChronoUtils.EXTENDED_DATE_PATTERN.matcher(value).matches()) {
+        } else if(ChronoTypes.EXTENDED_DATE_PATTERN.matcher(value).matches()) {
             return #if CLASSIC_CHRONO_TYPES new org.w3c.cci2.ImmutableDate(value.replaceAll("-", "")) #else LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE)#endif;
         } else {
             throw new IllegalArgumentException(

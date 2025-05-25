@@ -196,18 +196,14 @@ class ContemporaryChronoTypeFactory extends AbstractChronoTypeFactory {
     ){
         if (value instanceof Period) {
             final Period period = (Period) value;
-            if (period.getYears() != 0) {
-                return Period.of(
-                    0,
-                    period.getMonths() + period.getYears() * 12,
-                    period.getDays()
-                );
-            }
-            if (period.getMonths() == 0 && period.getDays() != 0) {
+            if (period.toTotalMonths() == 0 && period.getDays() != 0) {
                 return Duration.ofDays(period.getDays());
+            } else {
+                return period.normalized();
             }
+        } else {
+            return value;
         }
-        return value;
     }
 
     /**

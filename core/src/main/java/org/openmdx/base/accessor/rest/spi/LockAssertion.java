@@ -100,7 +100,7 @@ public class LockAssertion {
 	/**
 	 * Marshal the assertion value
 	 *
-	 * @param value the assertion value to be marshaled
+	 * @param value the assertion value is an org::w3c::dateTime value with arbitrary precision
 	 * 
 	 * @return the assertion value, or {@code null} if the value is empty
 	 */

@@ -47,7 +47,7 @@ package org.openmdx.state2.spi;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openmdx.state2.cci.DateStateContext;
-import org.w3c.time.ChronoUtils;
+import org.w3c.time.ChronoTypes;
 
 /**
  * Date State Context Test
@@ -83,12 +83,12 @@ public class DateStateViewContextTest {
     public void dateStateContext(
     ){
         DateStateContext c1 = DateStateViewContext.newTimeRangeViewContext(
-            ChronoUtils.createDate(2000, 4, 1),
-            ChronoUtils.createDate(2000, 4, 30)
+            ChronoTypes.createDate(2000, 4, 1),
+            ChronoTypes.createDate(2000, 4, 30)
         );
         DateStateContext c2 = DateStateViewContext.newTimeRangeViewContext(
-            ChronoUtils.createDate(2000, 4, 1),
-            ChronoUtils.createDate(2000, 4, 30)
+            ChronoTypes.createDate(2000, 4, 1),
+            ChronoTypes.createDate(2000, 4, 30)
        );
        DateStateContext c3 = DateStateViewContext.newTimeRangeViewContext(null,null);
        Assertions.assertNotSame(c1,  c2, "identitiy"); 
@@ -96,10 +96,10 @@ public class DateStateViewContextTest {
        Assertions.assertEquals(c1.hashCode(),  c2.hashCode(), "hashCode"); 
        DateStateContext c4 = DateStateViewContext.newTimeRangeViewContext(
            null,
-           ChronoUtils.createDate(2000, 4, 30)
+           ChronoTypes.createDate(2000, 4, 30)
        );
        DateStateContext c5 = DateStateViewContext.newTimeRangeViewContext(
-               ChronoUtils.createDate(2000, 4, 1),
+               ChronoTypes.createDate(2000, 4, 1),
            null
        );
        Assertions.assertEquals(C1,  c1.toString(), "toString"); 

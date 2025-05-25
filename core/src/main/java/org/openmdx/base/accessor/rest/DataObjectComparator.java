@@ -55,7 +55,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.rest.cci.FeatureOrderRecord;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
-import org.w3c.spi2.Datatypes;
+import org.w3c.time.ChronoTypes;
 
 /**
  * Object Comparator
@@ -102,7 +102,7 @@ final class DataObjectComparator implements Comparator<DataObject_1_0> {
         } else if (right == null) {
             return +1;
         #if CLASSIC_CHRONO_TYPES } else if(left instanceof javax.xml.datatype.XMLGregorianCalendar) {
-            return org.w3c.spi2.Datatypes.compare((javax.xml.datatype.XMLGregorianCalendar)left, (javax.xml.datatype.XMLGregorianCalendar) right);
+            return ChronoTypes.compare((javax.xml.datatype.XMLGregorianCalendar)left, (javax.xml.datatype.XMLGregorianCalendar) right);
         #endif
         } else {
             return ((Comparable)left).compareTo(right);

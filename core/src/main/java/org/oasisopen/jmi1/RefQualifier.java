@@ -47,6 +47,7 @@ package org.oasisopen.jmi1;
 import org.oasisopen.cci2.QualifierType;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
+import javax.jmi.reflect.RefObject;
 
 /**
  * RefQualifier
@@ -65,6 +66,13 @@ public class RefQualifier {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
                 "Null is an invalid value for an XRI sub-segment"
+            );
+        }
+        if(qualifierValue instanceof RefObject) {
+            throw new JmiServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "Internal error: RefObject is not a valid qualifier value"
             );
         }
         this.qualifierType = qualifierType;

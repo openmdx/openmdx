@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Objects;
 
 import javax.jdo.JDOObjectNotFoundException;
 
@@ -136,14 +137,7 @@ public class Involvement_1 extends Interceptor_1 {
         }
         return modifiedFeatures;
     }
-    
-    private static boolean areEqual(
-    	Object left,
-    	Object right
-    ){
-    	return left == null ? right == null : left.equals(right); 
-    }
-    
+
     private static boolean isFeatureModified(
         ModelElement_1_0 feature,
         ObjectView_1_0 beforeImage,
@@ -151,8 +145,8 @@ public class Involvement_1 extends Interceptor_1 {
     ) throws ServiceException {
         String featureName = feature.getName();
         switch(ModelHelper.getMultiplicity(feature)){
-	        case OPTIONAL: case SINGLE_VALUE: 
-	            return !areEqual(beforeImage.objGetValue(featureName), afterImage.objGetValue(featureName));
+	        case OPTIONAL: case SINGLE_VALUE:
+                return !Objects.equals(beforeImage.objGetValue(featureName), afterImage.objGetValue(featureName));
 	        case LIST:
 	        	return !beforeImage.objGetList(featureName).equals(afterImage.objGetList(featureName));
 	        case SET:

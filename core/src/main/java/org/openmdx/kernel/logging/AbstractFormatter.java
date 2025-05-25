@@ -48,9 +48,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Instant;
 import java.text.Format;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
@@ -76,25 +75,10 @@ public abstract class AbstractFormatter
     private final static String lineSeparator = getProperty("line.separator", "\n");
     
     /**
-     * The UTC time zone
-     */
-    protected final static TimeZone UTC = TimeZone.getTimeZone("UTC");
-
-    /**
-     * Formatter input
-     */
-    private #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif timestamp = null; // lazily initialized
-
-    /**
      * 
      */
     private String hostName = null; // lazily initialized
     
-    /**
-     * 
-     */
-    private Format timestampFormatter = null; // lazily initialized
-
     /**
      * Exclude thrown must be enabled explicitly
      */
@@ -123,18 +107,6 @@ public abstract class AbstractFormatter
         return "|";
     }
     
-    /**
-     * The format to construct a simple date formatter
-     * 
-     * @return the timestamp format
-     */
-    protected Format newTimestampFormat(){
-        SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        timestampFormat.setLenient(false);
-        timestampFormat.setTimeZone(UTC);
-        return timestampFormat;
-    }
-
     /**
      * Lenient System Property retrieval
      * 
@@ -200,22 +172,16 @@ public abstract class AbstractFormatter
     /**
      * Format the time stamp in UTC
      * 
-     * @param record
+     * @param record the Log Record
      * 
      * @return the formatted time stamp
      */
     protected void appendTimestamp(
         LogRecord record
     ){
-        long timestamp = record.getMillis();
-        if(this.timestampFormatter == null) {
-            this.timestampFormatter = newTimestampFormat();
-            this.timestamp = #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(timestamp);
-        } else {
-            this.timestamp#if CLASSIC_CHRONO_TYPES .setTime(timestamp) #else = java.time.Instant.ofEpochMilli(timestamp)#endif;
-        }
+        final long timestamp = record.getMillis();
         this.appendable.append(
-            this.timestampFormatter.format(timestamp)
+            Instant.ofEpochMilli(timestamp)
         );
     }
 

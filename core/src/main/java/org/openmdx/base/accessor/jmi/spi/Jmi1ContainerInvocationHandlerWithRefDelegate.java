@@ -73,7 +73,7 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
      * Constructor
      *
      * @param marshaller the marshaller
-     * @param delegate   thedelegate
+     * @param delegate   the delegate
      */
     public Jmi1ContainerInvocationHandlerWithRefDelegate(
             Marshaller marshaller,
@@ -148,7 +148,6 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
             // interface which has been prepended 
             // by the Jmi1ObjectInvocationHandler
             //
-            #if CLASSIC_CHRONO_TYPES
             if ("getAll".equals(methodName) && args.length == 1) {
                 return this.marshaller.marshal(
                         this.refDelegate.refGetAll(
@@ -168,29 +167,6 @@ public class Jmi1ContainerInvocationHandlerWithRefDelegate extends AbstractJmi1C
                 );
                 return null;
             }
-            #else
-            // TODO: kjdd
-            // Wird, wie schon letztes mal angemerkt, bei "add" abstürzen, da Anzahl der ARgumente dann ungerade ist!
-            if ("getAll".equals(methodName) && args.length == 1) {
-                return this.marshaller.marshal(
-                        this.refDelegate.refGetAll(
-                                this.marshaller.unmarshal(args[0])
-                        )
-                );
-            } else if ("removeAll".equals(methodName) && args.length == 1) {
-                this.refDelegate.refRemoveAll(
-                        this.marshaller.unmarshal(args[0])
-                );
-                return null;
-            } else if ("processAll".equals(methodName) && args.length == 2) {
-                @SuppressWarnings("unchecked") final Consumer<RefObject_1_0> action = (Consumer<RefObject_1_0>) args[1];
-                this.refDelegate.processAll(
-                        (AnyTypePredicate) this.marshaller.unmarshal(args[0]),
-                        new MarshallingConsumer<>(RefObject_1_0.class, action, this.marshaller)
-                );
-                return null;
-            }
-            #endif
         } else if (declaringClass == Collection.class) {
             if ("toArray".equals(methodName) && args != null && args.length == 1) {
                 Object[] source = ((Collection<?>) this.refDelegate).toArray();

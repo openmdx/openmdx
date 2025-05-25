@@ -63,6 +63,7 @@ import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.state2.spi.Order;
+import org.w3c.time.ChronoTypes;
 import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.DatatypeFactories;
@@ -827,9 +828,8 @@ public class DatatypesTest {
         Assertions.assertEquals(((BigDecimal) source[VALUE5]).doubleValue(),  data.getValue5().doubleValue(), 0.0, "value5");
         Assertions.assertEquals((String)source[VALUE6],  data.getValue6(), "value6");
         Assertions.assertEquals((Date)source[VALUE7],  data.getValue7(), "value7");
-        Assertions.assertEquals((XMLGregorianCalendar)source[VALUE8],  data.getValue8(), "value8");
-        Assertions.assertEquals((URI)
-                source[VALUE9],  data.getValue9(), "value9");
+        Assertions.assertTrue(ChronoTypes.equals((XMLGregorianCalendar)source[VALUE8], data.getValue8()), "value8");
+        Assertions.assertEquals((URI) source[VALUE9], data.getValue9(), "value9");
         byte[] expected10 = (byte[]) source[VALUE10];
         byte[] actual10 = data.getValue10();
         if(expected10.length == 0) {

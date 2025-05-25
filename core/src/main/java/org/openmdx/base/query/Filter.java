@@ -60,10 +60,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-#if CLASSIC_CHRONO_TYPES
-import org.w3c.spi2.Datatypes;
-#endif
-
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.persistence.spi.QueryExtension;
 import org.openmdx.base.rest.cci.ConditionRecord;

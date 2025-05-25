@@ -45,6 +45,7 @@
 package org.openmdx.base.dataprovider.layer.persistence.jdbc;
 
 import static javax.jdo.FetchPlan.FETCH_SIZE_GREEDY;
+import static javax.jdo.FetchPlan.FETCH_SIZE_OPTIMAL;
 import static org.openmdx.base.accessor.cci.SystemAttributes.OBJECT_CLASS;
 import static org.openmdx.base.naming.SpecialResourceIdentifiers.EXTENT_REFERENCES;
 
@@ -95,7 +96,6 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 #if JAVA_8
-import javax.jdo.FetchPlan;
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
@@ -185,9 +185,6 @@ import org.w3c.cci2.RegularExpressionFlag;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 import org.w3c.format.DateTimeFormat;
-#if CLASSIC_CHRONO_TYPES
-import org.w3c.spi.DatatypeFactories;
-#endif
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
@@ -497,12 +494,13 @@ public class Database_2
     }
 
     /**
-     * Get calendar marshaller.
+     * Get date and time marshaller
      *
-     * @return the XMLGregorianCalendar marshaller
+     * @return the date and time marshaller
+     *
      * @throws ServiceException in case of failure
      */
-    protected DateAndTimeMarshaller getCalendarMarshaller()
+    protected DateAndTimeMarshaller getDateAndTimeMarshaller()
         throws ServiceException {
         if (this.calendarMarshaller == null) {
             this.calendarMarshaller = DateAndTimeMarshaller.newInstance(
@@ -510,8 +508,7 @@ public class Database_2
                 this.dateType,
                 this.dateTimeType,
                 this.dateTimeZone,
-                this.dateTimeDaylightZone == null ? dateTimeZone
-                    : this.dateTimeDaylightZone,
+                this.dateTimeDaylightZone == null ? dateTimeZone : this.dateTimeDaylightZone,
                 this.dateTimePrecision,
                 this
             );
@@ -1912,14 +1909,8 @@ public class Database_2
     /**
      * Execute a query
      * 
-     * @param ps
-     * @param statement
-     * @param statementParameters
-     * @param rowBatchSize
-     *            the requested fetch is, use FetchPlan.FETCH_SIZE_OPTIMAL as
-     *            default
-     * @return the query result
-     * 
+     * @param rowBatchSize the requested fetch, use {@code FETCH_SIZE_OPTIMAL} as default
+     *
      * @throws SQLException
      */
     @Override
@@ -2973,23 +2964,23 @@ public class Database_2
     public String getPlaceHolder(
         Connection connection,
         Object value
-    )
-        throws ServiceException {
+    ) throws ServiceException {
 
-        boolean dateTime =
-            #if CLASSIC_CHRONO_TYPES
-                value instanceof java.util.Date ||
-                Datatypes.DATE_CLASS.isInstance(value) && javax.xml.datatype.DatatypeConstants.DATETIME.equals(Datatypes.DATE_CLASS.cast(value).getXMLSchemaType());
-            #else
-                value instanceof java.time.Instant || value instanceof java.time.ZonedDateTime || value instanceof java.time.OffsetDateTime;
-            #endif
+        final boolean dateTime = Datatypes.DATE_TIME_CLASS.isInstance(value) || (
+        #if CLASSIC_CHRONO_TYPES
+            value instanceof javax.xml.datatype.XMLGregorianCalendar &&
+            javax.xml.datatype.DatatypeConstants.DATETIME.equals(((javax.xml.datatype.XMLGregorianCalendar)value).getXMLSchemaType())
+        #else
+            value instanceof java.time.ZonedDateTime ||
+            value instanceof java.time.OffsetDateTime
+        #endif
+        );
 
-        boolean timestampWithTimezone = dateTime
-            && LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE
-                .equals(getDateTimeType(connection));
-        return timestampWithTimezone
-            ? getTimestampWithTimzoneExpression(connection)
-            : "?";
+        final boolean timestampWithTimezone = dateTime &&
+            LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE.equals(getDateTimeType(connection));
+
+        return timestampWithTimezone ? getTimestampWithTimzoneExpression(connection) : "?";
+
     }
 
     /**
@@ -3307,14 +3298,9 @@ public class Database_2
         int position,
         Object value
     ) throws ServiceException, SQLException {
-        Object normalizedValue = null;
-        if(value instanceof java.util.Date) {
-            normalizedValue = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(
-                DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value))
-            );
-        } else {
-            normalizedValue = value;
-        }
+        final Object normalizedValue = #if CLASSIC_CHRONO_TYPES value instanceof java.util.Date ? DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(
+            DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value))
+        ) : #endif value;
         if(normalizedValue instanceof URI) {
             ps.setString(position, normalizedValue.toString());
         } else if(normalizedValue instanceof Short) {
@@ -3360,7 +3346,8 @@ public class Database_2
                 ps.setObject(position, sqlValue);
             }
         } else if(Datatypes.DATE_CLASS.isInstance(normalizedValue)) {
-            Object sqlValue = this.getCalendarMarshaller().marshal(normalizedValue, conn);
+            // With classic chrono types XMLGregorianCalendar handles org::w3c:date as well as org::w3c::dateTime (on this layer only!)
+            Object sqlValue = this.getDateAndTimeMarshaller().marshal(normalizedValue, conn);
             if (sqlValue instanceof Time) {
                 ps.setTime(position, (Time) sqlValue);
             } else if (sqlValue instanceof Timestamp) {
@@ -4410,7 +4397,7 @@ public class Database_2
             this.setValue(
                 target,
                 index,
-                #if CLASSIC_CHRONO_TYPES this.getCalendarMarshaller().unmarshal(val.toString().substring(0, 10))
+                #if CLASSIC_CHRONO_TYPES this.getDateAndTimeMarshaller().unmarshal(val.toString().substring(0, 10))
                 #else java.time.LocalDate.parse(val.toString().substring(0, 10), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
                 #endif,
                 isEmbedded
@@ -4425,7 +4412,7 @@ public class Database_2
             this.setValue(
                 target,
                 index,
-                this.getCalendarMarshaller().unmarshal(val),
+                this.getDateAndTimeMarshaller().unmarshal(val),
                 isEmbedded
             );
         } else if (PrimitiveTypes.DURATION.equals(featureType)) {
@@ -7608,7 +7595,7 @@ public class Database_2
 
     /**
      * This value is used as result set size if a fetch size of
-     * {@link FetchPlan.FETCH_SIZE_OPTIMAL} (0) has been
+     * {@link FETCH_SIZE_OPTIMAL} (0) has been
      * requested and more than optimal fetch size object records are
      * available.
      */
@@ -7630,7 +7617,7 @@ public class Database_2
     /**
      * A TOO_LARGE_RESULT_SET exception is thrown if the result set is larger
      * than result set limit and either
-     * {@link FetchPlan.FETCH_SIZE_GREEDY} (-1) or a fetch size
+     * {@link FETCH_SIZE_GREEDY} (-1) or a fetch size
      * greater than the result set limit has been requested.
      */
     protected int resultSetLimit = 10000;

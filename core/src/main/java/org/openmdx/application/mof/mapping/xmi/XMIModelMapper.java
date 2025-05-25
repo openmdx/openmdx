@@ -62,7 +62,6 @@ import org.openmdx.base.wbxml.cci.StringTable;
 import org.openmdx.base.xml.stream.XMLOutputFactories;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * XMI Model Mapper
@@ -71,12 +70,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Constructor 
-     *
-     * @param os
-     * @param mimeType
-     * @param allFeatures 
-     * 
-     * @throws ServiceException
      */
     public XMIModelMapper(
         OutputStream os,
@@ -96,9 +89,6 @@ public class XMIModelMapper implements StringTable {
     private final boolean derivedFeatures;
     private final boolean emptyFeatures;
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.wbxml.cci.StringTable#isStringTablePopulatedExplicitely()
-     */
     @Override
     public boolean isStringTablePopulatedExplicitely() {
         if(this.pw instanceof StringTable) {
@@ -108,9 +98,6 @@ public class XMIModelMapper implements StringTable {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.wbxml.cci.StringTable#addString(java.lang.String)
-     */
     @Override
     public void addString(String string) {
         if(this.pw instanceof StringTable) {
@@ -119,11 +106,8 @@ public class XMIModelMapper implements StringTable {
     }
 
     /**
-     * In case of a multi-valued element write it in the form 
-     * <elementName>{<_item >value</_item>}</elementName>.
-     * 
-     * @param elementName
-     * @param elementValues
+     * In case of a multi-valued element write it in the form
+     * &lt;&lsaquo;elementName&rsaquo;&gt;&lt;_item&gt;&lsaquo;value&rsaquo;&lt;/_item&gt;…&lt;/&lsaquo;elementName&rsaquo;&gt;.
      */
     void writeElement(
         String elementName,
@@ -146,10 +130,7 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * In case of a map element write it in the form 
-     * <elementName>{<_item key="key">value</_item>}</elementName>.
-     * 
-     * @param elementName
-     * @param elementValues
+     * &lt;&lsaquo;elementName&rsaquo;&gt;&lt;_item key="&lsaquo;key&rsaquo;"&gt;&lsaquo;value&rsaquo;&lt;/_item&gt;…&lt;/&lsaquo;elementName&rsaquo;&gt;.
      */
     void writeElement(
         String elementName,
@@ -173,10 +154,8 @@ public class XMIModelMapper implements StringTable {
 
     
     /**
-     * Otherwise write it in the form <elementName>value</elementName>
-     *
-     * @param elementName
-     * @param elementValue
+     * Otherwise write it in the form
+     * &lt;&lsaquo;elementName&rsaquo;&gt;&lsaquo;value&rsaquo;&lt;/&lsaquo;elementName&rsaquo;&gt;.
      */
     void writeElement(
         String elementName,
@@ -191,9 +170,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Externalize an element value
-     * 
-     * @param elementValue
-     * @throws XMLStreamException
      */
     void writeValue(
         Object elementValue
@@ -209,21 +185,12 @@ public class XMIModelMapper implements StringTable {
         }
     }
 
-    /**
-     * @param xri
-     * @throws XMLStreamException
-     */
     private void writeValue(
         final Path xri
     ) throws XMLStreamException {
         this.pw.writeCharacters(xri.toXRI());
     }
     
-   /**
-     * @param pos
-     * @param elementName
-     * @param elementValue
-     */
     void writeElement(
         int pos,
         String elementName,
@@ -241,11 +208,8 @@ public class XMIModelMapper implements StringTable {
     } 
 
     /**
-     * Translate a string of the form 20020406T082623.930Z to a string of the
-     * form 2002-04-06T08:26:23Z.
-     * 
-     * @param elementName
-     * @param elementValue
+     * Translate a string of the form {@code 20020406T082623.930Z} to a string of the
+     * form {@code 2002-04-06T08:26:23Z}.
      */
     void writeElementAsDateTime(
         String elementName,
@@ -260,10 +224,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write element as date time.
-     * 
-     * @param pos
-     * @param elementName
-     * @param elementValue
      */
     void writeElementAsDateTime(
         int pos,
@@ -277,9 +237,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write element with XML-encoded element values.
-     * 
-     * @param elementName
-     * @param elementValues
      */
     void writeElementEncoded(
         String elementName,
@@ -294,9 +251,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write model package definition.
-     * 
-     * @param packageDef
-     * @throws ServiceException
      */
     public void writePackage(
         ModelElement_1_0 packageDef
@@ -308,7 +262,6 @@ public class XMIModelMapper implements StringTable {
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, packageDef.jdoGetObjectId().toXRI());
                 this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(packageDef.objGetValue(SystemAttributes.CREATED_AT)));
-//                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(packageDef).
                 this.writeElement(SystemAttributes.CREATED_BY, packageDef.objGetSet(SystemAttributes.CREATED_BY));
                 this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(packageDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, packageDef.objGetSet(SystemAttributes.MODIFIED_BY));
@@ -339,9 +292,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write primitive type definition.
-     * 
-     * @param primitiveTypeDef
-     * @throws ServiceException
      */
     public void writePrimitiveType(
         ModelElement_1_0 primitiveTypeDef
@@ -383,9 +333,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write attribute definition.
-     * 
-     * @param attributeDef
-     * @throws ServiceException
      */
     public void writeAttribute(
         ModelElement_1_0 attributeDef
@@ -424,9 +371,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write structure field definition.
-     * 
-     * @param structureFieldDef
-     * @throws ServiceException
      */
     public void writeStructureField(
         ModelElement_1_0 structureFieldDef
@@ -461,9 +405,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write operation definition.
-     * 
-     * @param operationDef
-     * @throws ServiceException
      */
     public void writeOperation(
         ModelElement_1_0 operationDef
@@ -506,9 +447,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write exception definition.
-     * 
-     * @param exceptionDef
-     * @throws ServiceException
      */
     public void writeException(
         ModelElement_1_0 exceptionDef
@@ -548,9 +486,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write parameter definition.
-     * 
-     * @param parameterDef
-     * @throws ServiceException
      */
     public void writeParameter(
         ModelElement_1_0 parameterDef
@@ -585,9 +520,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write association definition.
-     * 
-     * @param associationDef
-     * @throws ServiceException
      */
     public void writeAssociation(
         ModelElement_1_0 associationDef
@@ -630,9 +562,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write association end definition.
-     * 
-     * @param associationEndDef
-     * @throws ServiceException
      */
     public void writeAssociationEnd(
         ModelElement_1_0 associationEndDef
@@ -671,9 +600,6 @@ public class XMIModelMapper implements StringTable {
   
     /**
      * Write reference definition.
-     * 
-     * @param referenceDef
-     * @throws ServiceException
      */
     public void writeReference(
         ModelElement_1_0 referenceDef
@@ -715,9 +641,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write class definition.
-     * 
-     * @param classDef
-     * @throws ServiceException
      */
     public void writeClass(
         ModelElement_1_0 classDef
@@ -771,9 +694,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write structure type definition.
-     * 
-     * @param structDef
-     * @throws ServiceException
      */
     public void writeStructureType(
         ModelElement_1_0 structDef
@@ -824,9 +744,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write alias type definition.
-     * 
-     * @param aliasTypeDef
-     * @throws ServiceException
      */
     public void writeAliasType(
         ModelElement_1_0 aliasTypeDef
@@ -872,9 +789,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write model header.
-     * 
-     * @param providerName
-     * @param schemaFileName
      */
     public void writeModelHeader(
         String providerName,
@@ -952,5 +866,3 @@ public class XMIModelMapper implements StringTable {
     }
 
 }
-
-//---------------------------------------------------------------------------

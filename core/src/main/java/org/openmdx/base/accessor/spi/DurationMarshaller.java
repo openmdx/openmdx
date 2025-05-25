@@ -72,7 +72,7 @@ public class DurationMarshaller {
 
         @Override
         protected String toBasicFormat(Object datatype) {
-            return (Datatypes.DURATION_CLASS.cast(datatype)).toString();
+            return Datatypes.DURATION_CLASS.cast(datatype).toString();
         }
 
     };
@@ -91,14 +91,13 @@ public class DurationMarshaller {
         protected Object normalize(
             Object source
         ) throws ServiceException {
-            #if CLASSIC_CHRONO_TYPES
-            return source instanceof Duration ? org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().toCanonicalForm(
-                Datatypes.DURATION_CLASS.cast(source)
-            ) : super.normalize(source);
-            #else
-            return source instanceof Duration ? Datatypes.DURATION_CLASS.cast(source) : super.normalize(source);
-            #endif
-
+            if(Datatypes.DURATION_CLASS.isInstance(source)) {
+                return org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().toCanonicalForm(
+                    Datatypes.DURATION_CLASS.cast(source)
+                );
+            } else {
+                return super.normalize(source);
+            }
         }
         
     };

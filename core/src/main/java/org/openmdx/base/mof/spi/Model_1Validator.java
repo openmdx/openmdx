@@ -245,7 +245,7 @@ public class Model_1Validator {
         } else {
             String type = attribute.getType().getLastSegment().toClassicRepresentation();
             if(PrimitiveTypes.DATE.equals(type)) {
-                if(!(Datatypes.DATE_CLASS.isInstance(value))) {
+                if(!Datatypes.DATE_CLASS.isInstance(value)) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.VALIDATION_FAILURE,
@@ -267,7 +267,7 @@ public class Model_1Validator {
                     );
                 }
             } else if (PrimitiveTypes.DATETIME.equals(type)) {
-                if(!(Datatypes.DATE_TIME_CLASS.isInstance(value))) {
+                if(!Datatypes.DATE_TIME_CLASS.isInstance(value)) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.VALIDATION_FAILURE,

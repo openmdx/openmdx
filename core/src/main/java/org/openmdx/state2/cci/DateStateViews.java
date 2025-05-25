@@ -121,6 +121,7 @@ import org.openmdx.state2.spi.TechnicalAttributes;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.Container;
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.ChronoTypes;
 
 /**
  * Date State Views
@@ -842,8 +843,8 @@ public class DateStateViews {
             }
         } else if (
             context.getViewKind() == ViewKind.TIME_POINT_VIEW &&
-            Datatypes.equals(validAt, context.getExistsAt()) &&
-            Datatypes.equals(validFor, context.getValidAt())
+            ChronoTypes.equals(validAt, context.getExistsAt()) &&
+            ChronoTypes.equals(validFor, context.getValidAt())
         ){
             return (V) object;
         }
@@ -888,8 +889,8 @@ public class DateStateViews {
         if (
             context != null &&
             context.getViewKind() == ViewKind.TIME_POINT_VIEW &&
-            Datatypes.equals(validAt, context.getExistsAt()) &&
-            Datatypes.equals(validFor, context.getValidAt())
+            ChronoTypes.equals(validAt, context.getExistsAt()) &&
+            ChronoTypes.equals(validFor, context.getValidAt())
         ) {
             return (T) source;
         } else {
@@ -988,8 +989,8 @@ public class DateStateViews {
             );
         } else if (
             context.getViewKind() == ViewKind.TIME_RANGE_VIEW &&
-            Datatypes.equals(validFrom, context.getValidFrom()) &&
-            Datatypes.equals(validTo, context.getValidTo())
+            ChronoTypes.equals(validFrom, context.getValidFrom()) &&
+            ChronoTypes.equals(validTo, context.getValidTo())
         ) {
             return (V) object;
         } else {
@@ -1038,8 +1039,8 @@ public class DateStateViews {
         if (
             context != null &&
             context.getViewKind() == ViewKind.TIME_RANGE_VIEW &&
-            Datatypes.equals(validFrom, context.getValidFrom()) &&
-            Datatypes.equals(validTo, context.getValidTo())
+            ChronoTypes.equals(validFrom, context.getValidFrom()) &&
+            ChronoTypes.equals(validTo, context.getValidTo())
         ) {
             return container;
         } else {

@@ -1,6 +1,6 @@
 /*
  * ====================================================================
- * Description: DateAndTimeMarshaller
+ * Description: Date And Time Marshaller
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -69,7 +69,7 @@ import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
 /**
- * DateAndTimeMarshaller
+ * Date And TimeM arshaller
  */
 public class DateAndTimeMarshaller {
 
@@ -86,9 +86,7 @@ public class DateAndTimeMarshaller {
         this.dateTimeFormatBefore1970 = new SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss.SSS"
         );
-        this.dateTimeFormatBefore1970.setTimeZone(
-                DateAndTimeMarshaller.UTC
-        );
+        this.dateTimeFormatBefore1970.setTimeZone(DateAndTimeMarshaller.UTC);
         this.dateTimeFormatSince1970 = new SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss"
         );
@@ -104,14 +102,8 @@ public class DateAndTimeMarshaller {
      */
     private final TimeUnit dateTimePrecision;
 
-    /**
-     *
-     */
     private final String dateTimeDaylightSavingTimeZone;
 
-    /**
-     *
-     */
     private DataTypes sqlDataTypes;
 
     /**
@@ -173,9 +165,6 @@ public class DateAndTimeMarshaller {
             LayerConfigurationEntries.DATETIME_TYPE_NUMERIC
     );
 
-    /**
-     *
-     */
     protected final static TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     /**
@@ -187,7 +176,6 @@ public class DateAndTimeMarshaller {
      * For values < 1979-01-01T00:00:00.000Z
      */
     private final SimpleDateFormat dateTimeFormatBefore1970;
-
 
     /**
      * Factory method
@@ -247,16 +235,6 @@ public class DateAndTimeMarshaller {
         );
     }
 
-    /**
-     *
-     *
-     * @param source
-     * @param connection
-     *
-     * @return
-     *
-     * @throws ServiceException
-     */
     public Object marshal(
             Object source,
             Connection connection
@@ -428,12 +406,6 @@ public class DateAndTimeMarshaller {
         return standardTimeZone.inDaylightTime(dateTime) ? this.dateTimeDaylightSavingTimeZone : standardTimeZone.getID();
     }
 
-    /**
-     *
-     * @param source
-     * @return
-     * @throws ServiceException
-     */
     public Object unmarshal(
             Object source
     ) throws ServiceException {
@@ -442,8 +414,8 @@ public class DateAndTimeMarshaller {
         } else if(source instanceof Time) {
             return parse("T" + source);
         } else if (source instanceof Timestamp) {
+            final Timestamp value = (Timestamp) source;
             #if CLASSIC_CHRONO_TYPES
-            Timestamp value = (Timestamp) source;
             long milliseconds = value.getTime();
             java.util.GregorianCalendar calendar = new GregorianCalendar(UTC);
             calendar.setTimeInMillis(milliseconds);
@@ -467,7 +439,6 @@ public class DateAndTimeMarshaller {
             }
             return target;
             #else
-            Timestamp value = (Timestamp)source;
             return value.toInstant();
             #endif
         } else if(source instanceof java.time.LocalDateTime) {
@@ -512,17 +483,18 @@ public class DateAndTimeMarshaller {
     /**
      * Unmarshal an XML datatype value
      *
-     * @param value
+     * @param value to be parsed
      *
      * @return the corresponding datatype value
      */
     private Object parse(
             String value
     ){
-        return
-                value.startsWith("P") || value.startsWith("-P") ? Datatypes.create(Datatypes.DURATION_CLASS, value) :
-                        value.indexOf('T') < 0 ? Datatypes.create(Datatypes.DATE_CLASS, value) :
-                                Datatypes.create(Datatypes.DATE_TIME_CLASS, value);
+        final Class<?> chronoType =
+            value.startsWith("P") || value.startsWith("-P") ? Datatypes.DURATION_CLASS :
+            value.indexOf('T') < 0 ? Datatypes.DATE_CLASS :
+            Datatypes.DATE_TIME_CLASS;
+        return Datatypes.create(chronoType, value);
     }
 
 }

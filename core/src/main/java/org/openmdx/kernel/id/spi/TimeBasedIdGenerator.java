@@ -46,12 +46,10 @@ package org.openmdx.kernel.id.spi;
 
 import java.security.SecureRandom;
 import java.util.logging.Level;
+import java.time.Instant;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-import org.w3c.format.DateTimeFormat;
-import org.w3c.spi2.Datatypes;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Time Based Id Provider 
@@ -235,16 +233,12 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
      ) {
         int clockSequence = (TimeBasedIdGenerator.clockSequence + 1) & 0x3FFF;
         SysLog.log(
-                Level.WARNING,
-                "Sys|Clock has been set back from {0} to {1}|Clock sequence will be changed from {2} to {3}",
-                DateTimeFormat.EXTENDED_UTC_FORMAT.format(
-                        #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(lastReservation)
-                ),
-                DateTimeFormat.EXTENDED_UTC_FORMAT.format(
-                        #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(nextReservation)
-                ),
-                (long) TimeBasedIdGenerator.clockSequence,
-                (long) clockSequence
+            Level.WARNING,
+            "Sys|Clock has been set back from {0} to {1}|Clock sequence will be changed from {2} to {3}",
+            Instant.ofEpochMilli(lastReservation),
+            Instant.ofEpochMilli(nextReservation),
+            (long) TimeBasedIdGenerator.clockSequence,
+            (long) clockSequence
         );
         TimeBasedIdGenerator.clockSequence = clockSequence;
     }
@@ -337,14 +331,9 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
             return this.currentTimeStamp++;
         }
         
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
         @Override
         public String toString() {
-            return DateTimeFormat.EXTENDED_UTC_FORMAT.format(
-                    #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(millisecond)
-            ) + "/P0.001S";
+            return Instant.ofEpochMilli(millisecond) + "/P0.001S";
         }
         
     }

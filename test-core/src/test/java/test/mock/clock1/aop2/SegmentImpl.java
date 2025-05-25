@@ -50,7 +50,7 @@ import java.text.ParseException;
 import org.openmdx.base.aop2.AbstractObject;
 
 import org.w3c.format.DateTimeFormat;
-import org.w3c.time.ChronoUtils;
+import org.w3c.time.ChronoTypes;
 import test.openmdx.clock1.jmi1.Clock1Package;
 
 /**
@@ -77,11 +77,11 @@ public class SegmentImpl extends AbstractObject<test.openmdx.clock1.jmi1.Segment
         private long epochMillis = java.time.Instant.parse("2000-04-01T12:00:00Z").toEpochMilli();
 
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getDateTime() {
-            return ChronoUtils.ofEpochMilliseconds(this.epochMillis);
+            return ChronoTypes.ofEpochMilliseconds(this.epochMillis);
         }
 
         void setDateTime(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTime) {
-            this.epochMillis = ChronoUtils.getEpochMilliseconds(dateTime);
+            this.epochMillis = ChronoTypes.getEpochMilliseconds(dateTime);
         }
     }
 

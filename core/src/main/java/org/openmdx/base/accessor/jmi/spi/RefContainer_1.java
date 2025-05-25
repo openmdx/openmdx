@@ -624,7 +624,7 @@ public class RefContainer_1
     @Override
     public void refAdd(QualifierType qualifierType, Object qualifierValue, RefObject_1_0 refObject) {
         this.refAdd(
-            qualifierValue == null ? Collections.emptyList() : Collections.singletonList(
+            qualifierType == null ? Collections.emptyList() : Collections.singletonList(
                 new RefQualifier(qualifierType, refObject)
             ),
             refObject
