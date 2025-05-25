@@ -49,7 +49,7 @@ import java.text.ParseException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefException;
-import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
+import #if JAVA_8 javax #else jakarta#endif.resource.ResourceException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

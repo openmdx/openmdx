@@ -92,8 +92,14 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefStruct;
+#if JAVA_8
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
+#else
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
+#endif
+
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 
@@ -1528,7 +1534,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												);
 											}
 										} else if(PrimitiveTypes.LONG.equals(featureTypeName)) {
-											Long mappedNewValue = new Long(number.longValue());
+											Long mappedNewValue = number.longValue();
 											if(target instanceof RefObject) {
 												Object value = this.getValue(
 													valueHolder, 
@@ -1578,7 +1584,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												);
 											}
 										} else {
-											Short mappedNewValue = new Short(number.shortValue());
+											Short mappedNewValue = number.shortValue();
 											if(target instanceof RefObject) {
 												Object value = this.getValue(
 													valueHolder, 
@@ -1639,11 +1645,11 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											if(number != null) {
 												if(PrimitiveTypes.INTEGER.equals(featureTypeName)) {
 													mappedNewValues.add(
-														Integer.valueOf(number.intValue())
+														number.intValue()
 													);
 												} else if(PrimitiveTypes.LONG.equals(featureTypeName)) {
 													mappedNewValues.add(
-														Long.valueOf(number.longValue())
+														number.longValue()
 													);
 												} else if(PrimitiveTypes.DECIMAL.equals(featureTypeName)) {
 													mappedNewValues.add(
@@ -1651,7 +1657,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 													);
 												} else { // if(PrimitiveTypes.SHORT.equals(featureTypeName)) {
 													mappedNewValues.add(
-														new Short(number.shortValue())
+														number.shortValue()
 													);
 												}
 											} else {
@@ -2098,12 +2104,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 								// single-valued
 								if(valueHolder.isSingleValued()) {
 									Boolean mappedNewValue =
-										new Boolean(
-											!newValues.isEmpty() &&
-											("true".equals(newValues.get(0)) ||
-												"on".equals(newValues.get(0)) ||
-												app.getTexts().getTrueText().equals(newValues.get(0)))
-										);
+										!newValues.isEmpty() &&
+												("true".equals(newValues.get(0)) ||
+														"on".equals(newValues.get(0)) ||
+														app.getTexts().getTrueText().equals(newValues.get(0)));
 									// Mandatory attributes must not be null
 									mappedNewValue = valueHolder.isOptionalValued() || mappedNewValue != null 
 										? mappedNewValue 
@@ -2156,11 +2160,9 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 									for(Iterator<String> j = newValues.iterator(); j.hasNext(); ) {
 										Object mappedNewValue = j.next();
 										mappedNewValues.add(
-											new Boolean(
-												"true".equals(mappedNewValue) ||
-												"on".equals(mappedNewValue) ||
-												app.getTexts().getTrueText().equals(mappedNewValue)
-											)
+											"true".equals(mappedNewValue) ||
+													"on".equals(mappedNewValue) ||
+													app.getTexts().getTrueText().equals(mappedNewValue)
 										);
 									}
 									if(target instanceof RefObject) {

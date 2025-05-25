@@ -243,7 +243,7 @@ public final class Codes implements Serializable {
 	    		for(RefObject_1_0 entry: entryQuery == null ? entries : entries.refGetAll(entryQuery)) {
 	                Short code = 0;
 	                try {
-	                    code = new Short(entry.refGetPath().getLastSegment().toClassicRepresentation());
+	                    code = Short.valueOf(entry.refGetPath().getLastSegment().toClassicRepresentation());
 	                } catch(Exception ignore) {}
 	                @SuppressWarnings("unchecked")
 	                List<String> shortTexts = (List<String>)entry.refGetValue("shortText");

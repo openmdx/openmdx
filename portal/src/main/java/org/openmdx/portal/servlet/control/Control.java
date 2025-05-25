@@ -68,7 +68,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.jmi.reflect.RefObject;
-import javax.servlet.http.HttpServletRequest;
+import #if JAVA_8 javax.servlet.http.HttpServletRequest #else jakarta.servlet.http.HttpServletRequest#endif;
 
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;

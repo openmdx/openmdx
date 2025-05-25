@@ -107,6 +107,8 @@ import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.naming.NamingException;
+
+#if JAVA_8
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -117,6 +119,18 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
+#else
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
+import jakarta.servlet.http.HttpSession;
+#endif
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -1144,7 +1158,7 @@ public class ObjectInspectorServlet extends HttpServlet {
                     ModelElement_1_0 featureDef = app.getModel().getElement(feature);
                     if(Multiplicity.STREAM.code().equals(featureDef.getMultiplicity())) {
                         long length = refObj.refGetValue(feature, os, 0);
-                        response.setContentLength(new Long(length).intValue());       
+                        response.setContentLength(Long.valueOf(length).intValue());
                     } else {
                         byte[] bytes = (byte[])refObj.refGetValue(feature);
                         if(bytes != null) {

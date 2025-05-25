@@ -61,7 +61,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.jdo.PersistenceManagerFactory;
-import javax.servlet.ServletContext;
+import #if JAVA_8 javax #else jakarta#endif.servlet.ServletContext;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;

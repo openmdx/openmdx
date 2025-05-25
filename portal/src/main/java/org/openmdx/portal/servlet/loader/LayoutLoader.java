@@ -56,7 +56,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
+import #if JAVA_8 javax #else jakarta#endif.servlet.ServletContext;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;

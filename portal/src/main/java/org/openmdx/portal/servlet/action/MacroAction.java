@@ -53,10 +53,17 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+#if JAVA_8
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+#else
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+#endif
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.naming.Path;
@@ -112,7 +119,7 @@ public class MacroAction extends BoundAction {
             );
             nextView.setMacro(
                 new Object[]{
-                    actionType == null ? new Short((short)0) : new Short(actionType),
+                    actionType == null ? Short.valueOf((short) 0) : Short.valueOf(actionType),
                     actionName,
                     Collections.EMPTY_LIST
                 }

@@ -56,10 +56,17 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jdo.PersistenceManager;
+#if JAVA_8
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+#else
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+#endif
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.naming.Path;
@@ -163,7 +170,7 @@ public abstract class GetObjectAction extends BoundAction {
                     null, // do not propagate navigationTarget
                     ViewMode.STANDARD
                 );
-            } else if(this.isGetAndNew() && (forClass.length() > 0) && (forReference.length() > 0)) {
+            } else if(this.isGetAndNew() && (!forClass.isEmpty()) && (!forReference.isEmpty())) {
             	PersistenceManager pm = app.getNewPmData();
                 RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(objectIdentity);
                 RefObject_1_0 newObject = (RefObject_1_0)parent.refOutermostPackage().refClass(forClass).refCreateInstance(null);

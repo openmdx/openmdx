@@ -51,10 +51,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.jdo.PersistenceManager;
+#if JAVA_8
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.jdo.PersistenceManager;
 import javax.servlet.http.HttpServletRequest;
+#else
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
+#endif
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
@@ -232,7 +238,7 @@ public abstract class JsfWizardController extends AbstractWizardController {
 		int i = 0;
 		while(i < message.length()) {
 			if((i <= message.length()-4) && "${".equals(message.substring(i,i+2))) {
-				short index = new Short(message.substring(i+2, i+3)).shortValue();
+				short index = Short.parseShort(message.substring(i + 2, i + 3));
 				try {
 					preparedMessage += parameters[index];
 				} catch(Exception ignore) {
@@ -361,7 +367,7 @@ public abstract class JsfWizardController extends AbstractWizardController {
    	 * @throws ServiceException
    	 */
    	public void doRefresh(
-   		javax.faces.event.AjaxBehaviorEvent event   		
+   		#if JAVA_8 javax #else jakarta#endif.faces.event.AjaxBehaviorEvent event
    	) throws ServiceException {
    	}
    	
@@ -372,7 +378,7 @@ public abstract class JsfWizardController extends AbstractWizardController {
    	 * @throws ServiceException
    	 */
    	public void doCancel(
-   		javax.faces.event.AjaxBehaviorEvent event
+   		#if JAVA_8 javax #else jakarta#endif.faces.event.AjaxBehaviorEvent event
    	) throws ServiceException {
    		try {
    			Action exitAction = new ObjectReference(this.getObject(), this.getApp()).getSelectObjectAction();

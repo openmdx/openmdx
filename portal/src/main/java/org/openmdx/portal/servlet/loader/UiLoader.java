@@ -65,9 +65,16 @@ import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefObject;
-import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
-import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
+
+#if JAVA_8
+import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
 import javax.servlet.ServletContext;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.MappedRecord;
+import jakarta.servlet.ServletContext;
+#endif
 
 import org.openmdx.application.xml.Importer;
 import org.openmdx.base.accessor.jmi.spi.EntityManagerFactory_1;

@@ -1508,7 +1508,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 									}
 									if(code == null) {
     									try {
-    										code = new Short(trimmedToken);
+    										code = Short.valueOf(trimmedToken);
     									} catch(Exception e) {}
 									}
 								}
@@ -1603,7 +1603,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 								// should not be used because serializing of
 								// filters with XMLEncoder does not work
 								values.add(
-									new Long(num.longValue())
+									num.longValue()
 								);
 							}
 						}
@@ -1883,7 +1883,7 @@ public abstract class UiGrid extends Grid implements Serializable {
     	ObjectView view = this.getView();
     	this.columnSortOrders.put(
     		feature,
-    		new Short(order)
+			order
     	);
     	// apply filter to container
     	if(this.currentFilter != null) {

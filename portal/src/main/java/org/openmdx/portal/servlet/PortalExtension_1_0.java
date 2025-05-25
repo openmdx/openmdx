@@ -55,13 +55,14 @@ import java.util.TimeZone;
 
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefStruct;
-import javax.servlet.http.HttpSession;
+import #if JAVA_8 javax.servlet.http.HttpSession #else jakarta.servlet.http.HttpSession#endif;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Condition;
+import org.openmdx.base.query.Filter;
 import org.openmdx.portal.servlet.action.AbstractAction;
 import org.openmdx.portal.servlet.action.FindSearchFieldValuesAction;
 import org.openmdx.portal.servlet.attribute.Attribute;
@@ -73,6 +74,9 @@ import org.openmdx.portal.servlet.control.EditInspectorControl;
 import org.openmdx.portal.servlet.control.ShowInspectorControl;
 import org.openmdx.portal.servlet.control.UiGridControl;
 import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
+import org.openmdx.ui1.jmi1.Inspector;
+import org.openmdx.ui1.jmi1.Tab;
+import org.openmdx.ui1.jmi1.ValuedField;
 
 public interface PortalExtension_1_0 {
 
@@ -80,7 +84,7 @@ public interface PortalExtension_1_0 {
      * Evaluates the object title of the given object.
      * If used in HTML the title must be encoded. 
      * 
-     * @param refObj object to evaluate the title
+     * @param obj object to evaluate the title
      * @param locale locale index. Can be used to lookup code texts
      * @param localeAsString the locale name
      * @param asShortTitle true for object title in short form
@@ -170,7 +174,7 @@ public interface PortalExtension_1_0 {
      *
      * @return a filter
      */
-    org.openmdx.base.query.Filter getQuery(        
+    Filter getQuery(
     	String qualifiedFeatureName,
         String filterValue,
         int queryFilterStringParamCount,
@@ -309,7 +313,7 @@ public interface PortalExtension_1_0 {
      * User-defineable qualifiers can be entered by the user when creating a new object.
      */
     boolean hasUserDefineableQualifier(
-        org.openmdx.ui1.jmi1.Inspector inspector,
+        Inspector inspector,
         ApplicationContext app
     );
     
@@ -473,7 +477,7 @@ public interface PortalExtension_1_0 {
 	        int perspective,
 	        String locale,
 	        int localeAsIndex,
-	        org.openmdx.ui1.jmi1.Tab tabDef,
+	        Tab tabDef,
 	        int paneIndex,
 	        String containerClass
 	    );    	
@@ -494,7 +498,7 @@ public interface PortalExtension_1_0 {
 	        int perspective,
 	        String locale,
 	        int localeAsIndex,
-	        org.openmdx.ui1.jmi1.Inspector inspectorDef,
+	        Inspector inspectorDef,
 	        String forClass,
 	        WizardDefinitionFactory wizardFactory	        
 	    );
@@ -515,7 +519,7 @@ public interface PortalExtension_1_0 {
 	        int perspective,
 	        String locale,
 	        int localeAsIndex,
-	        org.openmdx.ui1.jmi1.Inspector inspectorDef,
+	        Inspector inspectorDef,
 	        String forClass
 	    );
     	
@@ -547,7 +551,7 @@ public interface PortalExtension_1_0 {
     	 * @throws ServiceException
     	 */
     	AttributeValue createAttributeValue(
-	        org.openmdx.ui1.jmi1.ValuedField fieldDef,
+	        ValuedField fieldDef,
 	        Object object,
 	        ApplicationContext app
 	    ) throws ServiceException;    	
