@@ -48,6 +48,7 @@ package org.openmdx.base.dataprovider.layer.persistence.jdbc.postgresql;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Period;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -232,7 +233,7 @@ public class PGIntervalMarshaller {
 		}
 	}
 #if CLASSIC_CHRONO_TYPES #else
-    private static String formatDurationWithDays(boolean negative, BigInteger years, BigInteger months, Duration duration) {
+    private static Object formatDurationWithDays(boolean negative, BigInteger years, BigInteger months, Duration duration) throws ServiceException {
 
 		int offset = negative ? 1 : 0;
         int nanos = duration.getNano();
@@ -248,16 +249,19 @@ public class PGIntervalMarshaller {
 
 		seconds = getVal(negative, seconds);
 
+		// period
         StringBuilder formatted = new StringBuilder(negative ? "-" : "").append("P");
 		if (years != null && months != null) {
 			formatted.append(getVal(negative, years.longValue())).append("Y");
 			formatted.append(getVal(negative, months.longValue())).append("M");
 		}
 
-		// Handle the case where period (Y-M) is absent and duration is 0
+		// handle the case where period (Y-M) is absent and duration is 0
 		if (formatted.toString().length() > 1 && duration.toString().equals("PT0S")) {
-			return formatted.toString();
+			return java.time.Period.parse(formatted.toString());
 		}
+
+		// duration
 		formatted.append(getVal(negative, days)).append("D");
 		formatted.append("T");
 		formatted.append(getVal(negative, hours)).append("H");
@@ -268,12 +272,22 @@ public class PGIntervalMarshaller {
 		} else {
 			// format with proper decimal places for subseconds
 			String fractionalSeconds = String.format("%d.%09d", seconds, nanos);
-			// remove trailing zeros, but keep one decimal place
+			// remove trailing zeros but keep one decimal place
 			fractionalSeconds = fractionalSeconds.replaceAll("0+$", "");
 			formatted.append(fractionalSeconds);
 		}
 		formatted.append("S");
-        return formatted.toString();
+
+		if (formatted.toString().contains("Y") && formatted.toString().contains("M")) {
+			throw new ServiceException(
+					BasicException.Code.DEFAULT_DOMAIN,
+					BasicException.Code.PARSE_FAILURE,
+					"Cannot parse a duration with both time and date components",
+					new BasicException.Parameter("formatted", formatted.toString())
+			);
+		}
+
+        return java.time.Duration.parse(formatted.toString());
     }
 
 	#endif
