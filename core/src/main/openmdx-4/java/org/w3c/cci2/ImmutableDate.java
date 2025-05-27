@@ -438,9 +438,6 @@ public final class ImmutableDate
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see javax.xml.datatype.XMLGregorianCalendar#toXMLFormat()
-     */
     @Override
     public String toXMLFormat() {
         if(this.extendedValue == null) {

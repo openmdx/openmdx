@@ -271,7 +271,7 @@ public class ChronoTypes {
      */
     public static boolean equals(java.util.Date first, java.util.Date second) {
         if(first == null || second == null) {
-            return first == null && second == null;
+            return first == second;
         }
         return comparable(first, second) ?
                 first.equals(second) :
@@ -545,7 +545,7 @@ public class ChronoTypes {
      */
     public static boolean equals(java.time.temporal.TemporalAmount first, java.time.temporal.TemporalAmount second) {
         if(first == null || second == null) {
-            return first == null && second == null;
+            return first == second;
         }
         return compare(first, second) == 0;
     }
@@ -594,7 +594,7 @@ public class ChronoTypes {
     }
 
     /**
-     * Compare correctly even in case mutable and immutable classic chrono type arguments are mixed
+     * Compare with specific {@code null} interpretation
      *
      * @param first the 1st argument of the comparison
      * @param second the 1st argument of the comparison
@@ -609,6 +609,30 @@ public class ChronoTypes {
         java.time.LocalDate first,
         java.time.LocalDate second,
         NullRepresents nullRepresents
+    ) {
+        if(first == null || second == null) {
+            return nullRepresents.compareWithNull(first, second);
+        } else {
+            return first.compareTo(second);
+        }
+    }
+
+    /**
+     * Compare with specific {@code null} interpretation
+     *
+     * @param first the 1st argument of the comparison
+     * @param second the 1st argument of the comparison
+     * @param nullRepresents      defines how {@code null}  is interpreted
+     *
+     * @return a negative integer, zero, or a positive integer as this object is less than, equal to,
+     * or greater than the specified object.
+     *
+     * @throws NullPointerException if the specified object is null
+     */
+    public static int compare(
+            java.time.Instant first,
+            java.time.Instant second,
+            NullRepresents nullRepresents
     ) {
         if(first == null || second == null) {
             return nullRepresents.compareWithNull(first, second);
@@ -664,6 +688,7 @@ public class ChronoTypes {
             );
         }
     }
+
     #endif
 
     public enum NullRepresents {
@@ -687,7 +712,7 @@ public class ChronoTypes {
                 }
             }
         },
-        NEGATIVE_AND_POSITIVE_INFINITY {
+        NEGATIVE_AND_POSITIVE_INFINITY_RESPECTIVELY {
             @Override
             int compareWithNull(Object first, Object second) {
                 return -1;

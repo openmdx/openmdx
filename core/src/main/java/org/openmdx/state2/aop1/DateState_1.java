@@ -102,15 +102,12 @@ public class DateState_1
         super(self, next);
     }
 
-    /**
-     * To distinguish bewteen the {@code NULL} value and {@code null} for "not yet set"
-     */
     private static final
     #if CLASSIC_CHRONO_TYPES
-    javax.xml.datatype.XMLGregorianCalendar NULL = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory()
+    javax.xml.datatype.XMLGregorianCalendar NULL_DATE = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory()
         .newXMLGregorianCalendar(java.time.LocalDate.MIN.toString());
     #else
-    java.time.LocalDate NULL = java.time.LocalDate.MIN;
+    java.time.LocalDate NULL_DATE = java.time.LocalDate.MIN;
     #endif
 
     private static final List<String> IGNORABLE_ATTRIBUTES = Arrays.asList(
@@ -208,7 +205,7 @@ public class DateState_1
                     addState(states, predecessor);
                 }
             } else {
-                validFrom = NULL;
+                validFrom = NULL_DATE;
             }
             //
             // Handle the period which is no longer involved
@@ -225,17 +222,17 @@ public class DateState_1
                     addState(states, successor);
                 }
             } else {
-                validTo = NULL;
+                validTo = NULL_DATE;
                 
             }
             //
             // Handle the period which is involved
             //
             DataObject_1_0 target = PersistenceHelper.clone(source);
-            if(validFrom != NULL) {
+            if(validFrom != NULL_DATE) {
                 target.objSetValue(STATE_VALID_FROM, validFrom);
             }
-            if(validTo != NULL) {
+            if(validTo != NULL_DATE) {
                 target.objSetValue(STATE_VALID_TO, validTo);
             }
             if(!target.jdoIsNew()) {

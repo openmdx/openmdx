@@ -189,7 +189,7 @@ public class DateStateViewContext
     protected String toString(
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif timePoint
     ) {
-        String xmlFormat = timePoint.#if CLASSIC_CHRONO_TYPES toXMLFormat() #else format(DateTimeFormatter.ISO_LOCAL_DATE)#endif;
+        final String xmlFormat = timePoint.toString();
         return new StringBuilder(8).append(
             xmlFormat.substring(0, xmlFormat.length() - 6)
         ).append(

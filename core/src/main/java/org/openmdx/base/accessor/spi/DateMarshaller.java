@@ -72,7 +72,7 @@ public class DateMarshaller {
 
         @Override
         protected String toBasicFormat(Object datatype) {
-            return Datatypes.DATE_CLASS.cast(datatype).#if CLASSIC_CHRONO_TYPES toXMLFormat() #else toString()#endif.replaceAll("-", "");
+            return toString().replaceAll("-", "");
         }
         
     };

@@ -203,9 +203,6 @@ public final class ImmutableDateTime
         return this.basicValue;
     }
 
-    /* (non-Javadoc)
-     * @see org.w3c.spi.ImmutableDatatype#toXMLFormat()
-     */
     public String toXMLFormat() {
         if(this.extendedValue == null) {
            this.extendedValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(this);
