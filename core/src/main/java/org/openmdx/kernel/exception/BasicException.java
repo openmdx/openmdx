@@ -64,6 +64,7 @@ import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.log.ForeignLogRecord;
 import org.openmdx.kernel.log.LoggerFactory;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.time.ChronoTypes;
 
 /**
  * An exception stack is a linked list of {@code BasicException}s.
@@ -88,6 +89,9 @@ import org.w3c.format.DateTimeFormat;
  * 
  */
 public final class BasicException extends Exception {
+
+    private static final long NULL_DATE_TIME = Long.MIN_VALUE;
+    private static final int NULL_LINE_NUMBER = -1;
 
     /**
      * Creates a stand-alone exception stack
@@ -194,9 +198,9 @@ public final class BasicException extends Exception {
         this.domain = exceptionDomain;
         this.code = exceptionCode;
         this.exceptionClass = exceptionClass;
-        this.timestamp = exceptionTime == null ? Long.MIN_VALUE : exceptionTime.#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli() #endif;
+        this.timestamp = exceptionTime == null ? NULL_DATE_TIME : ChronoTypes.getEpochMilliseconds(exceptionTime);
         this.methodName = exceptionMethod;
-        this.lineNumber = exceptionLine == null ? -1 : exceptionLine.intValue();
+        this.lineNumber = exceptionLine == null ? NULL_LINE_NUMBER : exceptionLine.intValue();
         this.description = description;
         this.parameter = parameters;
     }
@@ -207,7 +211,6 @@ public final class BasicException extends Exception {
     private BasicException(
         Throwable throwable
     ){
-        super();
         this.source = throwable;
         this.domain = Code.DEFAULT_DOMAIN;
         this.code = Code.GENERIC;
@@ -270,7 +273,7 @@ public final class BasicException extends Exception {
     /**
      * 
      */
-    private int lineNumber = -1;
+    private int lineNumber = NULL_LINE_NUMBER;
     
     /**
      * The stack trace is lazily retrieved from the throwable
@@ -300,11 +303,7 @@ public final class BasicException extends Exception {
     /**
      * The environment specific line separator
      */
-    static final String lineSeparator;
-
-    static {
-        lineSeparator = getProperty("line.separator", "\n");
-    }
+    private static final String LINE_SEPARATOR = getProperty("line.separator", "\n");
 
     /**
      * Lenient System Property retrieval
@@ -555,7 +554,7 @@ public final class BasicException extends Exception {
     @Override
     public final synchronized BasicException getCause() {
         BasicException cause = (BasicException) super.getCause();
-        if(cause == null && this.source != null && this.timestamp == Long.MIN_VALUE) {
+        if(cause == null && this.source != null && this.timestamp == NULL_DATE_TIME) {
             Throwable source = this.source.getCause();
             if(source != null) {
                 return initCauseInternal(source);
@@ -722,7 +721,7 @@ public final class BasicException extends Exception {
     ){
         if(this.lineNumber < 0) {
             StackTraceElement[] stackTrace = getStackTrace(lazily);
-            this.lineNumber = stackTrace.length > 0 ? stackTrace[0].getLineNumber() : -1;
+            this.lineNumber = stackTrace.length > 0 ? stackTrace[0].getLineNumber() : NULL_LINE_NUMBER;
         }
         return this.lineNumber < 0 ? null : Integer.valueOf(this.lineNumber);
     }
@@ -735,7 +734,7 @@ public final class BasicException extends Exception {
      */
     public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getTimestamp(
     ){
-        return this.timestamp == Long.MIN_VALUE ? null : #if CLASSIC_CHRONO_TYPES new java.util.Date #else Instant.ofEpochMilli#endif(this.timestamp);
+        return this.timestamp == NULL_DATE_TIME ? null : #if CLASSIC_CHRONO_TYPES new java.util.Date #else Instant.ofEpochMilli#endif(this.timestamp);
     }
 
     public Parameter[] getParameters(){
@@ -776,7 +775,7 @@ public final class BasicException extends Exception {
 
 	        		@Override
 	                void println() {
-	        			out.append(lineSeparator);
+	        			out.append(LINE_SEPARATOR);
 	                }
 	        		
 	        	}

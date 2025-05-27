@@ -94,7 +94,7 @@ abstract class ElementRecord<M extends Enum<M>>
     private IndexedRecord stereotype;
     private Path container;
 
-    private final static long NULL_DATE = Long.MIN_VALUE;
+    private final static long NULL_DATE_TIME = Long.MIN_VALUE;
     
     /**
      * Implements {@code Serializable}
@@ -171,12 +171,12 @@ abstract class ElementRecord<M extends Enum<M>>
     }
 
     protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getCreatedAt(){
-        return this.createdAt == NULL_DATE ? null : ChronoTypes.ofEpochMilliseconds(this.createdAt);
+        return this.createdAt == NULL_DATE_TIME ? null : ChronoTypes.ofEpochMilliseconds(this.createdAt);
     }
 
     protected void setCreatedAt(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif createdAt){
         assertMutability();
-        this.createdAt = createdAt == null ? NULL_DATE : ChronoTypes.getEpochMilliseconds(createdAt);
+        this.createdAt = createdAt == null ? NULL_DATE_TIME : ChronoTypes.getEpochMilliseconds(createdAt);
     }
 
     protected IndexedRecord createdBy() {
@@ -213,12 +213,12 @@ abstract class ElementRecord<M extends Enum<M>>
     }
     
     protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getModifiedAt(){
-        return this.modifiedAt == NULL_DATE ? null : ChronoTypes.ofEpochMilliseconds(this.modifiedAt);
+        return this.modifiedAt == NULL_DATE_TIME ? null : ChronoTypes.ofEpochMilliseconds(this.modifiedAt);
     }
 
     protected void setModifiedAt(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif modifiedAt){
         assertMutability();
-        this.modifiedAt = modifiedAt == null ? NULL_DATE : ChronoTypes.getEpochMilliseconds(modifiedAt);
+        this.modifiedAt = modifiedAt == null ? NULL_DATE_TIME : ChronoTypes.getEpochMilliseconds(modifiedAt);
     }
 
     protected IndexedRecord modifiedBy(){
