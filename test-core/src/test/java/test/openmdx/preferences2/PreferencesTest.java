@@ -56,7 +56,6 @@ import javax.jdo.PersistenceManagerFactory;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openmdx.base.collection.Sets;
@@ -140,7 +139,6 @@ public class PreferencesTest {
     /**
      * Create Preferences through the JMI API
      */
-//    @Disabled
     @Test
     public void jmiCreatePreferences(
     ) {
@@ -198,7 +196,6 @@ public class PreferencesTest {
     /**
      * Read Preferences through the JDK API
      */
-//    @Disabled
     @Test
     public void jdkReadPreferences(
     ) throws BackingStoreException{
@@ -230,7 +227,6 @@ public class PreferencesTest {
 	/**
      * Create Preferences through the JDK API
      */
-//    @Disabled
     @Test
     public void jdkCreatePreferences(
     ) throws BackingStoreException {
@@ -273,7 +269,6 @@ public class PreferencesTest {
     /**
      * Read Preferences through the JMI API
      */
-//    @Disabled
     @Test
     public void jmiReadPreferences(
     ){
@@ -318,7 +313,6 @@ public class PreferencesTest {
     /**
      * Reads and writes the preferences through the JDK API
      */
-//    @Disabled
     @Test
     public void jdkTouchPreferences(
     ) throws BackingStoreException {
@@ -330,7 +324,6 @@ public class PreferencesTest {
     /**
      * Reads and writes the preferences through the JDK API
      */
-//    @Disabled
     @Test
     public void jdkDumpPreferences(
     ) throws BackingStoreException {

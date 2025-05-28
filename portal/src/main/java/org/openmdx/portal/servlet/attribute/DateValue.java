@@ -51,12 +51,13 @@ package org.openmdx.portal.servlet.attribute;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.temporal.TemporalAccessor;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
+
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -73,10 +74,6 @@ public class DateValue
 
     /**
      * Create a DateValue attribute.
-     * @param object
-     * @param fieldDef
-     * @param application
-     * @return
      */
     public static AttributeValue createDateValue(
         Object object,
@@ -104,10 +101,6 @@ public class DateValue
     
     /**
      * Constructor 
-     *
-     * @param object
-     * @param fieldDef
-     * @param application
      */
     protected DateValue(
         Object object,
@@ -120,7 +113,7 @@ public class DateValue
             application
         );
         try {
-            this.defaultValue = Datatypes.create(Datatypes.DATE_TIME_CLASS, fieldDef.defaultValue);
+            this.defaultValue = Datatypes.create(Date.class, fieldDef.defaultValue);
         } catch(IllegalArgumentException e) {
         	// ignore
         }
@@ -128,7 +121,6 @@ public class DateValue
 
     /**
      * Assert that formatter has a 4-digit year as pattern.
-     * @param formatter
      */
     public static void assert4DigitYear(
         SimpleDateFormat formatter
@@ -142,8 +134,6 @@ public class DateValue
     
     /**
      * Get localized date formatter with given edit style.
-     * @param useEditStyle
-     * @return
      */
     public SimpleDateFormat getLocalizedDateFormatter(
         boolean useEditStyle
@@ -157,10 +147,6 @@ public class DateValue
 
     /**
      * Get localized date formatter.
-     * @param qualifiedFeatureName
-     * @param useEditStyle
-     * @param app
-     * @return
      */
     public static SimpleDateFormat getLocalizedDateFormatter(
         String qualifiedFeatureName,
@@ -188,8 +174,6 @@ public class DateValue
 
     /**
      * Get localized dateTime formatter for given attribute and edit style.
-     * @param useEditStyle
-     * @return
      */
     public SimpleDateFormat getLocalizedDateTimeFormatter(
         boolean useEditStyle
@@ -203,10 +187,6 @@ public class DateValue
   
     /**
      * Get localized dateTime formatter.
-     * @param qualifiedFeatureName
-     * @param useEditStyle
-     * @param app
-     * @return
      */
     public static SimpleDateFormat getLocalizedDateTimeFormatter(
         String qualifiedFeatureName,
@@ -235,43 +215,50 @@ public class DateValue
   
     /**
      * Return localized and formatted attribute value.
-     * @param value
-     * @param useEditStyle
-     * @return
      */
     private String formatLocalized(
         Object value,
         boolean useEditStyle
     ) {
-        SimpleDateFormat dateFormatter = this.getLocalizedDateFormatter(useEditStyle);
-        SimpleDateFormat dateTimeFormatter = this.getLocalizedDateTimeFormatter(useEditStyle);
-        if(Datatypes.DATE_TIME_CLASS.isInstance(value)) {
+        final SimpleDateFormat dateFormatter = this.getLocalizedDateFormatter(useEditStyle);
+        final SimpleDateFormat dateTimeFormatter = this.getLocalizedDateTimeFormatter(useEditStyle);
+        if(value instanceof Date) {
             return this.isDate() ? 
             	dateFormatter.format(value) : 
-            		dateTimeFormatter.format(value);
-        } else if(Datatypes.DATE_CLASS.isInstance(value)) {
-            // TODO: kjdd
-            // Das ist doch mit Flavour 3 gar nicht kompilierbar, oder?
-            #if CLASSIC_CHRONO_TYPES
-            GregorianCalendar calendar = (Datatypes.DATE_CLASS.cast(value)).toGregorianCalendar(
-                TimeZone.getTimeZone(app.getCurrentTimeZone()),
-                this.app.getCurrentLocale(),
-                null
+                dateTimeFormatter.format(value);
+        } else if(value instanceof java.time.Instant) {
+            final Date dateTime = Date.from((java.time.Instant)value);
+            return this.isDate() ?
+                dateFormatter.format(dateTime) :
+                dateTimeFormatter.format(dateTime);
+        } else if(value instanceof XMLGregorianCalendar) {
+            final XMLGregorianCalendar calendar = (XMLGregorianCalendar) value;
+            return formatLocalized(calendar, dateFormatter, dateTimeFormatter);
+        } else if(value instanceof java.time.LocalDate) {
+            final java.time.LocalDate localDate = (java.time.LocalDate) value;
+            final XMLGregorianCalendar calendar = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+                localDate.getYear(),
+                localDate.getMonthValue(),
+                localDate.getMonthValue(),
+                javax.xml.datatype.DatatypeConstants.FIELD_UNDEFINED
             );
-            #else
-            LocalDate calendar = LocalDate.from((TemporalAccessor) value);
-            #endif
-            return this.isDate() ? 
-            	dateFormatter.format(calendar#if CLASSIC_CHRONO_TYPES .getTime()#endif) :
-            		dateTimeFormatter.format(calendar#if CLASSIC_CHRONO_TYPES .getTime()#endif);
+            return formatLocalized((XMLGregorianCalendar) value, dateFormatter, dateTimeFormatter);
         } else {
         	return value == null ? null : value.toString();
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.portal.servlet.attribute.AttributeValue#getStringifiedValueInternal(org.openmdx.portal.servlet.ViewPort, java.lang.Object, boolean, boolean, boolean)
-     */
+    private String formatLocalized(XMLGregorianCalendar value, SimpleDateFormat dateFormatter, SimpleDateFormat dateTimeFormatter) {
+        final GregorianCalendar calendar = value.toGregorianCalendar(
+            TimeZone.getTimeZone(app.getCurrentTimeZone()),
+            this.app.getCurrentLocale(),
+            null
+        );
+        return this.isDate() ?
+                dateFormatter.format(calendar.getTime()) :
+                dateTimeFormatter.format(calendar.getTime());
+    }
+
     @Override
     protected String getStringifiedValueInternal(
         ViewPort p,
@@ -284,9 +271,6 @@ public class DateValue
         return this.app.getHtmlEncoder().encode(s, false);
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.portal.servlet.attribute.AttributeValue#getDefaultValue()
-     */
     @Override
     public Object getDefaultValue(
     ) {
@@ -297,7 +281,6 @@ public class DateValue
 
     /**
      * Returns true if the attribute has format DATE.
-     * @return
      */
     public boolean isDate(
     ) {
@@ -306,7 +289,6 @@ public class DateValue
 
     /**
      * Get format of date field.
-     * @return
      */
     public String getFormat(
     ) {
@@ -315,8 +297,6 @@ public class DateValue
 
     /**
      * Get calendar format pattern matching the given formatter.
-     * @param formatter
-     * @return
      */
     public static String getCalendarFormat(
         SimpleDateFormat formatter
@@ -360,9 +340,6 @@ public class DateValue
         return pattern;
     }
     
-    /* (non-Javadoc)
-     * @see org.openmdx.portal.servlet.attribute.AttributeValue#paint(org.openmdx.portal.servlet.attribute.Attribute, org.openmdx.portal.servlet.ViewPort, java.lang.String, java.lang.String, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, int, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean)
-     */
     @Override
     public void paint(
         Attribute attribute,
@@ -493,7 +470,7 @@ public class DateValue
             return new HashMap<String,SimpleDateFormat>();
         }
     };
-    private #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif defaultValue = null;
+    private Date defaultValue = null;
 
 }
 

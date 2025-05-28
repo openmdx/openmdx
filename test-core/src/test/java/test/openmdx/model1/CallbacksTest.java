@@ -52,7 +52,6 @@ import javax.naming.NamingException;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openmdx.base.jmi1.Authority;
@@ -89,7 +88,6 @@ public class CallbacksTest {
         this.entityManager = entityManagerFactory.getPersistenceManager();
     }
 
-//    @Disabled
     @Test
     public void testAbstractCallbackOrder(){
         this.entityManager.currentTransaction().begin();
@@ -102,7 +100,6 @@ public class CallbacksTest {
         System.out.println(c4.refClass().refMofId() + " Callback Order: " + c4.getCallback());
     }
 
-//    @Disabled
     @Test
     public void testConcreteCallbackOrder(){
         this.entityManager.currentTransaction().begin();
@@ -114,8 +111,7 @@ public class CallbacksTest {
         this.entityManager.currentTransaction().commit();
         System.out.println(c4.refClass().refMofId() + " Callback Order: " + c4.getCallback());
     }
-    
-    
+
     /**
      * Retrieve the Test segment
      * 

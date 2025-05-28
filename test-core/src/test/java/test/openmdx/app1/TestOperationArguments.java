@@ -94,7 +94,6 @@ public class TestOperationArguments {
     /**
      * CR10011193
      */
-//    @Disabled
     @Test
     public void invokeOperationWithNestedStructs(){
     	begin();
@@ -133,7 +132,6 @@ public class TestOperationArguments {
     /**
      * CR10011473
      */
-//    @Disabled
     @Test
     public void callOperationWithListOfStructs(){
         this.begin();
@@ -221,7 +219,6 @@ public class TestOperationArguments {
         Assertions.assertTrue(out.getResult().getSimpleStructSetField().get(1).getShortField().isEmpty());
     }
 
-//    @Disabled
 	@Test
     public void callOperationWithSetArgument(
     ) throws Exception {

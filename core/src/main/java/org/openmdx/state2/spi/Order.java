@@ -109,9 +109,11 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo
     ){
         if(
-            validFrom != null &&
-            validTo != null &&
-            ChronoTypes.compare(validTo, validFrom) < 0
+            ChronoTypes.compare(
+                validFrom,
+                validTo,
+                ChronoTypes.NullRepresents.NEGATIVE_AND_POSITIVE_INFINITY_RESPECTIVELY
+            ) > 0
         ) throw BasicException.initHolder(
             new IllegalArgumentException(
                 "validTo must be greater than or equal to validFrom",
@@ -194,9 +196,11 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif invalidFrom
     ){
         if(
-            validFrom != null &&
-            invalidFrom != null &&
-            ChronoTypes.compare(invalidFrom, validFrom) <= 0
+            ChronoTypes.compare(
+                validFrom,
+                invalidFrom,
+                ChronoTypes.NullRepresents.NEGATIVE_AND_POSITIVE_INFINITY_RESPECTIVELY
+            ) >= 0
         ) throw BasicException.initHolder(
             new IllegalArgumentException(
                 "invalidFrom must be greater than validFrom",

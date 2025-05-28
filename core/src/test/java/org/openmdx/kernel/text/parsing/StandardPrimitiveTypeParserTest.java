@@ -187,16 +187,15 @@ public class StandardPrimitiveTypeParserTest {
 	@Test
 	public void whenValueClassIsDateThenThrowParseException(){
 		// Arrange
-		final Parser testee = StandardPrimitiveTypeParser.getInstance(); 
-		try {
-			// Act
-			testee.parse(Datatypes.DATE_TIME_CLASS, "20000401T000000.000Z");
-			Assertions.fail("IllegalArgumentException expected");
-		} catch (IllegalArgumentException expected) {
-			// Assert
-			final BasicException cause = Throwables.getCause(expected, null);
-			Assertions.assertEquals(ParseException.class.getName(), cause.getExceptionClass());
-		}
+		final Parser testee = StandardPrimitiveTypeParser.getInstance();
+		final String value = "20000401T000000.000Z";
+		// Act & Assert
+		final IllegalArgumentException expected = Assertions.assertThrows(
+			IllegalArgumentException.class,
+			() -> testee.parse(Datatypes.DATE_CLASS, value)
+		);
+		final BasicException cause = Throwables.getCause(expected, null);
+		Assertions.assertEquals(ParseException.class.getName(), cause.getExceptionClass());
 	}
 	
 }

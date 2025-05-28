@@ -48,6 +48,7 @@ import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.ViewKind;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.time.SystemClock;
+import org.w3c.spi2.Datatypes;
 
 import java.time.format.DateTimeFormatter;
 
@@ -114,7 +115,7 @@ public class DateStateViewContext
     ){
         return new DateStateViewContext(
             DatatypeFactories.immutableDatatypeFactory().toImmutableDate(validFor),
-            DatatypeFactories.immutableDatatypeFactory().toImmutableDateTime(null)
+            Datatypes.DATE_TIME_CLASS.cast(null)
         );
     }
 

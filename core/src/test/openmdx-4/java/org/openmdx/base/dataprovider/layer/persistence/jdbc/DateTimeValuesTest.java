@@ -60,6 +60,8 @@ import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.state2.cci.DateStateViews;
+import org.w3c.spi.DatatypeFactories;
+import org.w3c.time.SystemClock;
 
 /**
  * Date Time Values Test
@@ -119,8 +121,8 @@ public class DateTimeValuesTest {
     @Test
     public void convertInMapWhereNecessary() throws ResourceException{
         // Arrange
-        final XMLGregorianCalendar today = DateStateViews.today();
-        final XMLGregorianCalendar now = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
+        final XMLGregorianCalendar today = SystemClock.getInstance().today();
+        final XMLGregorianCalendar now = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(new GregorianCalendar());
         final MappedRecord map = Records.getRecordFactory().createMappedRecord(Multiplicity.SPARSEARRAY.code());
         map.put(Integer.valueOf(4), now);
         map.put(Integer.valueOf(2), today);

@@ -102,10 +102,15 @@ public class DateState_1
         super(self, next);
     }
 
+    /**
+     * The null date value<ul>
+     *     <li>All fields undefined for classic chrono types</li>
+     *     <li>A magic number for contemporary chrono types </li>
+     * </ul>
+     */
     private static final
     #if CLASSIC_CHRONO_TYPES
-    javax.xml.datatype.XMLGregorianCalendar NULL_DATE = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory()
-        .newXMLGregorianCalendar(java.time.LocalDate.MIN.toString());
+    javax.xml.datatype.XMLGregorianCalendar NULL_DATE = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar();
     #else
     java.time.LocalDate NULL_DATE = java.time.LocalDate.MIN;
     #endif
@@ -120,16 +125,7 @@ public class DateState_1
      * Compare two XMLGregorianCalendar values where {@code null} is
      * considered to be smaller than every other value.
      */
-    private static final Comparator<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> VALID_FROM_COMPARATOR = new Comparator<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> () {
-
-        @Override
-        public int compare(
-            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif o1,
-            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif o2
-        ) {
-            return Order.compareValidFrom(o1, o2);
-        }
-    };
+    private static final Comparator<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> VALID_FROM_COMPARATOR = Order::compareValidFrom;
 
     //------------------------------------------------------------------------
     // Extends AbstractState_1

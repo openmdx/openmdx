@@ -65,7 +65,6 @@ import javax.transaction.Synchronization; // JDO 3 requires JTA 1.3!
 #endif	
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openmdx.application.transaction.UserTransactions;
@@ -92,13 +91,11 @@ public class TransactionTest {
     protected static PersistenceManagerFactory entityManagerFactory;
 
 
-//    @Disabled
     @Test
     public void testSuccessfulCallback() throws ResourceException, NamingException{
         runTest("successfulCallback", true);
     }
 
-//    @Disabled
     @Test
     public void testFailingCallback() throws ResourceException, NamingException{
         runTest("failingCallback", false);
