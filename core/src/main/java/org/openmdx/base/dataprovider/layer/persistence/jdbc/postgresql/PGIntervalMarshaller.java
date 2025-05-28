@@ -54,6 +54,7 @@ import java.util.regex.Pattern;
 
 import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time#endif.Duration;
 
+import org.openmdx.base.Version;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
@@ -177,7 +178,7 @@ public class PGIntervalMarshaller {
 				months = values[1];
 				years = years.add(values[0]);
 			}
-			if(years.signum() == 0 && months.signum() == 0) {
+			if (years.signum() == 0 && months.signum() == 0) {
 				years = null;
 				months = null;
 			} else if (days.signum() == 0 && hours.signum() == 0 && minutes.signum() == 0 && seconds.signum() == 0){
@@ -219,7 +220,35 @@ public class PGIntervalMarshaller {
 				duration = duration.negated();
 			}
 
-			return formatDurationWithDays(negative, years, months, duration);
+/*
+			years == 0 && months == 0 ⟹ java.time.Duration-Instanz zurückgeben
+			(years != 0 || months != 0) && (hours == 0 && minutes == 0 && seconds == 0) ⟹ java.time.Period-InstanzPeriod-Instanz zurückgeben
+			(years != 0 || months != 0) && (hours != 0 || minutes != 0 || seconds != 0) ⟹ Exception „unsupported duration in flavour“ Version.getFlavourVersion()
+*/
+
+			if (years == null && months == null) {
+				// Return Duration instance
+				return duration;
+            } else {
+                final boolean yearsAndMonthsAreNotZero = !BigInteger.ZERO.equals(years) || !BigInteger.ZERO.equals(months);
+                if (yearsAndMonthsAreNotZero && (BigInteger.ZERO.equals(months) && BigInteger.ZERO.equals(minutes) && BigDecimal.ZERO.equals(seconds))) {
+                    // Return Period instance
+                    return Period.of(
+                            years.intValue(),
+                            months.intValue(),
+                            days.intValue()
+                    );
+                } else if (yearsAndMonthsAreNotZero && (!BigInteger.ZERO.equals(months) || !BigInteger.ZERO.equals(minutes) || !BigDecimal.ZERO.equals(seconds))) {
+                    throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.TRANSFORMATION_FAILURE,
+                            "Unsupported duration in flavour " + Version.getFlavourVersion(),
+                            new BasicException.Parameter("formatted", "P" + years + "Y" + months + "M" + days + "DT" + hours + "H" + minutes + "M" + wholeSeconds + "." + nanos + "S")
+                    );
+                }
+            }
+
+//			return formatDurationWithDays(negative, years, months, duration);
 
 			#endif
 		} else {
@@ -231,6 +260,8 @@ public class PGIntervalMarshaller {
 				new BasicException.Parameter("expected", PG_INTERVAL_PATTERN)
 			);
 		}
+
+        return null;
 	}
 #if CLASSIC_CHRONO_TYPES #else
     private static Object formatDurationWithDays(boolean negative, BigInteger years, BigInteger months, Duration duration) throws ServiceException {
@@ -281,8 +312,8 @@ public class PGIntervalMarshaller {
 		if (formatted.toString().contains("Y") && formatted.toString().contains("M")) {
 			throw new ServiceException(
 					BasicException.Code.DEFAULT_DOMAIN,
-					BasicException.Code.PARSE_FAILURE,
-					"Cannot parse a duration with both time and date components",
+					BasicException.Code.TRANSFORMATION_FAILURE,
+					"Unsupported duration in flavour " + Version.getFlavourVersion(),
 					new BasicException.Parameter("formatted", formatted.toString())
 			);
 		}
