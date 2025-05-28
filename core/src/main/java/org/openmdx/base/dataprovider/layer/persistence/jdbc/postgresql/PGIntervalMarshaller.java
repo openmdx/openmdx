@@ -147,6 +147,7 @@ public class PGIntervalMarshaller {
 						BasicException.Code.DEFAULT_DOMAIN,
 						BasicException.Code.TRANSFORMATION_FAILURE,
 						"Unable to convert the PGInterval: Duration does not allow mixing of positive and negative fields",
+						new BasicException.Parameter("flavour", Version.getFlavourVersion()),
 						new BasicException.Parameter("interval", interval)
 					);
 				} else {
@@ -178,6 +179,8 @@ public class PGIntervalMarshaller {
 				months = values[1];
 				years = years.add(values[0]);
 			}
+
+			#if CLASSIC_CHRONO_TYPES
 			if (years.signum() == 0 && months.signum() == 0) {
 				years = null;
 				months = null;
@@ -187,8 +190,6 @@ public class PGIntervalMarshaller {
 				minutes = null;
 				seconds = null;
 			}
-
-			#if CLASSIC_CHRONO_TYPES
 			return org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newDuration(
 				!negative,
 				years,
@@ -199,131 +200,45 @@ public class PGIntervalMarshaller {
 				seconds
 			);
 			#else
-			// Handle seconds properly by separating whole seconds and nanoseconds
-			long wholeSeconds = 0L;
-			int nanos = 0;
-			if (seconds != null) {
-				wholeSeconds = seconds.longValue();
-				nanos = seconds.subtract(new BigDecimal(wholeSeconds))
-						.movePointRight(9)
-						.intValue();
+			if (years.signum() == 0 && months.signum() == 0) {
+				// Handle seconds properly by separating whole seconds and nanoseconds
+				final long wholeSeconds = seconds.longValue();
+				final int nanos = seconds.subtract(new BigDecimal(wholeSeconds))
+					.movePointRight(9)
+					.intValue();
+				final Duration duration = Duration
+						.ofDays(days.longValue())
+						.plusHours(hours.longValue())
+						.plusMinutes(minutes.longValue())
+						.plusSeconds(wholeSeconds)
+						.plusNanos(nanos);
+				return negative ? duration.negated() : duration;
+            } else if (hours.signum() == 0 && minutes.signum() == 0 && seconds.signum() == 0) {
+				return Period.of(
+						years.intValue(),
+						months.intValue(),
+						days.intValue()
+				);
+			} else {
+				throw new ServiceException(
+					BasicException.Code.DEFAULT_DOMAIN,
+					BasicException.Code.TRANSFORMATION_FAILURE,
+					"Unable to convert the PGInterval: years/monnths and time values are mutually exclusive",
+					new BasicException.Parameter("flavour", Version.getFlavourVersion()),
+					new BasicException.Parameter("interval", interval)
+				);
 			}
-			Duration duration = Duration
-					.ofDays(days != null ? days.longValue() : 0)
-					.plusHours(hours != null ? hours.longValue() : 0)
-					.plusMinutes(minutes != null ? minutes.longValue() : 0)
-					.plusSeconds(wholeSeconds)
-					.plusNanos(nanos);
-
-			// Apply negative sign if needed
-			if (negative) {
-				duration = duration.negated();
-			}
-
-/*
-			years == 0 && months == 0 ⟹ java.time.Duration-Instanz zurückgeben
-			(years != 0 || months != 0) && (hours == 0 && minutes == 0 && seconds == 0) ⟹ java.time.Period-InstanzPeriod-Instanz zurückgeben
-			(years != 0 || months != 0) && (hours != 0 || minutes != 0 || seconds != 0) ⟹ Exception „unsupported duration in flavour“ Version.getFlavourVersion()
-*/
-
-			if (years == null && months == null) {
-				// Return Duration instance
-				return duration;
-            } else {
-                final boolean yearsAndMonthsAreNotZero = !BigInteger.ZERO.equals(years) || !BigInteger.ZERO.equals(months);
-                if (yearsAndMonthsAreNotZero && (BigInteger.ZERO.equals(months) && BigInteger.ZERO.equals(minutes) && BigDecimal.ZERO.equals(seconds))) {
-                    // Return Period instance
-                    return Period.of(
-                            years.intValue(),
-                            months.intValue(),
-                            days.intValue()
-                    );
-                } else if (yearsAndMonthsAreNotZero && (!BigInteger.ZERO.equals(months) || !BigInteger.ZERO.equals(minutes) || !BigDecimal.ZERO.equals(seconds))) {
-                    throw new ServiceException(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.TRANSFORMATION_FAILURE,
-                            "Unsupported duration in flavour " + Version.getFlavourVersion(),
-                            new BasicException.Parameter("formatted", "P" + years + "Y" + months + "M" + days + "DT" + hours + "H" + minutes + "M" + wholeSeconds + "." + nanos + "S")
-                    );
-                }
-            }
-
-//			return formatDurationWithDays(negative, years, months, duration);
-
 			#endif
 		} else {
 			throw new ServiceException(
 				BasicException.Code.DEFAULT_DOMAIN,
 				BasicException.Code.TRANSFORMATION_FAILURE,
 				"Unable to parse the PGInterval",
+				new BasicException.Parameter("flavour", Version.getFlavourVersion()),
 				new BasicException.Parameter("interval", interval),
 				new BasicException.Parameter("expected", PG_INTERVAL_PATTERN)
 			);
 		}
-
-        return null;
-	}
-#if CLASSIC_CHRONO_TYPES #else
-    private static Object formatDurationWithDays(boolean negative, BigInteger years, BigInteger months, Duration duration) throws ServiceException {
-
-		int offset = negative ? 1 : 0;
-        int nanos = duration.getNano();
-
-        long seconds = duration.getSeconds() + (nanos > 0 ? offset : 0);
-
-        long days = seconds / (24 * 3600);
-        seconds = seconds % (24 * 3600);
-        long hours = seconds / 3600;
-        seconds = seconds % 3600;
-        long minutes = seconds / 60;
-        seconds = seconds % 60;
-
-		seconds = getVal(negative, seconds);
-
-		// period
-        StringBuilder formatted = new StringBuilder(negative ? "-" : "").append("P");
-		if (years != null && months != null) {
-			formatted.append(getVal(negative, years.longValue())).append("Y");
-			formatted.append(getVal(negative, months.longValue())).append("M");
-		}
-
-		// handle the case where period (Y-M) is absent and duration is 0
-		if (formatted.toString().length() > 1 && duration.toString().equals("PT0S")) {
-			return java.time.Period.parse(formatted.toString());
-		}
-
-		// duration
-		formatted.append(getVal(negative, days)).append("D");
-		formatted.append("T");
-		formatted.append(getVal(negative, hours)).append("H");
-		formatted.append(getVal(negative, minutes)).append("M");
-
-		if (nanos == 0) {
-			formatted.append(seconds).append(".0");
-		} else {
-			// format with proper decimal places for subseconds
-			String fractionalSeconds = String.format("%d.%09d", seconds, nanos);
-			// remove trailing zeros but keep one decimal place
-			fractionalSeconds = fractionalSeconds.replaceAll("0+$", "");
-			formatted.append(fractionalSeconds);
-		}
-		formatted.append("S");
-
-		if (formatted.toString().contains("Y") && formatted.toString().contains("M")) {
-			throw new ServiceException(
-					BasicException.Code.DEFAULT_DOMAIN,
-					BasicException.Code.TRANSFORMATION_FAILURE,
-					"Unsupported duration in flavour " + Version.getFlavourVersion(),
-					new BasicException.Parameter("formatted", formatted.toString())
-			);
-		}
-
-        return java.time.Duration.parse(formatted.toString());
-    }
-
-	#endif
-	private static long getVal(boolean negative, long val) {
-		return negative ? Math.abs(val) : val;
 	}
 
 }
