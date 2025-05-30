@@ -69,7 +69,7 @@ public interface BeanTransformer {
     /**
      * Decode a Java bean
      * 
-     * @param javaBean a Java bean's String representation
+     * @param encodedJavaBean a Java bean's String representation
      * @param exceptionListener the (optional) exception listener
      * 
      * @return the Java bean

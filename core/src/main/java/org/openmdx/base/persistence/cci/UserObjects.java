@@ -44,8 +44,8 @@
  */
 package org.openmdx.base.persistence.cci;
 
+import java.time.Instant;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
@@ -105,11 +105,11 @@ public class UserObjects extends SharedObjects {
      * at the beginning of each unit of work.
      * 
      * @param persistenceManager
-     * @param taskIdentifier
+     * @param transactionTime
      */
     public static void setTransactionTime(
         PersistenceManager persistenceManager,
-        Factory<Date> transactionTime
+        Factory<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> transactionTime
     ){
         SharedObjects.sharedObjects(persistenceManager).setTransactionTime(transactionTime);
     }

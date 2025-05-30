@@ -44,10 +44,14 @@
  */
 package org.w3c.spi2;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.text.spi.Parser;
 import org.w3c.spi.PrimitiveTypeParsers;
 
@@ -55,7 +59,22 @@ import org.w3c.spi.PrimitiveTypeParsers;
  * Date
  */
 public class Datatypes {
-    
+
+    public static final Class<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> DATE_TIME_CLASS
+            = #if CLASSIC_CHRONO_TYPES java.util.Date.class #else java.time.Instant.class #endif;
+
+    public static final Class<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif> DATE_CLASS
+            = #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar.class #else java.time.LocalDate.class #endif;
+
+    public static final Class<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.temporal.TemporalAmount #endif> DURATION_CLASS
+            = #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration.class #else java.time.temporal.TemporalAmount.class #endif;
+
+    public static final Class<#if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration> DURATION_DAYTIME_CLASS
+            = #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration.class #else java.time.Duration.class #endif;
+
+    public static final Class<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.Period #endif> DURATION_YEARMONTH_CLASS
+            = #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration.class #else java.time.Period.class #endif;
+
     /**
      * Constructor 
      */
@@ -132,22 +151,5 @@ public class Datatypes {
     ){
         return new Structures.Member<T>(name, value);
     }
-        
-    /**
-     * Create a qualified type name
-     * 
-     * @param components the qualified type name's components
-     * 
-     * @return the qualified type name
-     */
-    public static List<String> typeName(
-        String... components
-    ){
-        return Collections.unmodifiableList(
-            Arrays.asList(
-                components
-            )
-        );  
-    }
-    
+
 }

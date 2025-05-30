@@ -51,7 +51,6 @@ package org.openmdx.portal.servlet.loader;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -66,9 +65,16 @@ import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefObject;
-import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
-import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
+
+#if JAVA_8
+import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
 import javax.servlet.ServletContext;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.MappedRecord;
+import jakarta.servlet.ServletContext;
+#endif
 
 import org.openmdx.application.xml.Importer;
 import org.openmdx.base.accessor.jmi.spi.EntityManagerFactory_1;
@@ -90,6 +96,7 @@ import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
+import org.w3c.time.SystemClock;
 
 public class UiLoader
     extends Loader {
@@ -181,7 +188,7 @@ public class UiLoader
     public List<Path> load(
         String[] locale
     ) throws ServiceException {
-    	String messagePrefix = new Date() + "  ";
+    	String messagePrefix = SystemClock.getInstance().now() + "  ";
     	System.out.println(messagePrefix + "Loading ui configuration...");
     	SysLog.info("Loading ui configuration");
         Map<String,Path> loadedUiSegments = new TreeMap<String,Path>();

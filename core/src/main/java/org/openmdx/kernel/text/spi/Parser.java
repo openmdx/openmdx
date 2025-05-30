@@ -82,7 +82,7 @@ public interface Parser {
      * 
      * @return the corresponding value
      * 
-     * @exception InvalidArgumentException if the given type is not handled by this parser
+     * @exception IllegalArgumentException if the given type is not handled by this parser
      */
     <T> T parse(
     	Class<T> type, 

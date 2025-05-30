@@ -46,6 +46,9 @@ package org.openmdx.kernel.text.parsing;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.openmdx.kernel.text.spi.Parser;
 
@@ -75,8 +78,8 @@ public class DelegatingParser extends AbstractParser {
      */
     @Override
     protected Collection<Class<?>> supportedTypes() {
-        throw new UnsupportedOperationException();
-    }
+		throw new UnsupportedOperationException("The supported types are not known in advance");
+	}
 
 	@Override
 	public boolean handles(Class<?> type) {

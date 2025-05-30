@@ -45,11 +45,11 @@
 package org.openmdx.base.mof.repository.spi;
 
 import java.util.Collection;
-import java.util.Date;
 
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 
 import org.openmdx.base.naming.Path;
+import org.w3c.spi2.Datatypes;
 
 /**
  * org::omg::model1::AliasType Record
@@ -135,7 +135,7 @@ public class AliasTypeRecord
                  setIdentity(value);
                  break;
              case modifiedAt:
-                 setModifiedAt((Date)value);
+                 setModifiedAt(Datatypes.DATE_TIME_CLASS.cast(value));
                  break;
              case createdBy:
                  setCreatedBy((Collection<?>)value);
@@ -144,7 +144,7 @@ public class AliasTypeRecord
                  setStereotype((Collection<?>)value);
                  break;
              case createdAt:
-                 setCreatedAt((Date)value);
+                 setCreatedAt(Datatypes.DATE_TIME_CLASS.cast(value));
                  break;
              case modifiedBy:
                  setModifiedBy((Collection<?>)value);

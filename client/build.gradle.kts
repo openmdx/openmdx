@@ -55,7 +55,7 @@ val projectSpecificationVersion = project.extra["projectSpecificationVersion"] a
 val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
 val runtimeCompatibility = project.extra["runtimeCompatibility"] as JavaVersion
 
-if (runtimeCompatibility.isJava8() && System.getenv("JRE_18") == null) {
+if (projectFlavour == "2"  && System.getenv("JRE_18") == null) {
     throw GradleException("ERROR: JRE_18 not set " +
             "(e.g. export JRE_18=/usr/lib/jvm/java-8-openjdk-amd64/jre)")
 }
@@ -99,6 +99,17 @@ dependencies {
     // jakartaee-api
     jakartaeeApi(platform(project(projectPlatform)))
     jakartaeeApi("jakarta.platform:jakarta.jakartaee-api")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir("src/main/java")
+            srcDir("src/main/openmdx-${projectFlavour}/java")
+            exclude("org/ietf/jgss/**")
+            exclude("org/openmdx/dalvik/**")
+        }
+    }
 }
 
 tasks {
@@ -190,25 +201,25 @@ tasks {
     distTar {
         dependsOn(
             "openmdx-client.jar",
-            "openmdx-dalvik.jar",
+//            "openmdx-dalvik.jar",
             "openmdx-client-sources.jar",
-            "openmdx-dalvik-sources.jar"
+//            "openmdx-dalvik-sources.jar"
         )
     }
     distZip {
         dependsOn(
             "openmdx-client.jar",
-            "openmdx-dalvik.jar",
+//            "openmdx-dalvik.jar",
             "openmdx-client-sources.jar",
-            "openmdx-dalvik-sources.jar"
+//            "openmdx-dalvik-sources.jar"
         )
     }
     assemble {
         dependsOn(
             "openmdx-client.jar",
             "openmdx-client-sources.jar",
-            "openmdx-dalvik.jar",
-            "openmdx-dalvik-sources.jar"
+//            "openmdx-dalvik.jar",
+//            "openmdx-dalvik-sources.jar"
         )
     }
     register<org.openmdx.gradle.ArchiveTask>("openmdx-client.jar") {

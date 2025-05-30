@@ -44,6 +44,7 @@
  */
 package org.oasisopen.jmi1;
 
+import java.lang.Object;
 import java.util.List;
 
 import javax.jmi.reflect.RefBaseObject;
@@ -57,47 +58,124 @@ import org.w3c.cci2.Container;
  */
 public interface RefContainer<E extends RefObject> extends Container<E>, RefBaseObject {
 
+    #if CLASSIC_CHRONO_TYPES
     /**
      * Adds an object to the container
-     * 
+     *
      * @param arguments there is always an odd number of arguments:
      * ((REASSIGNABLE|PERSISTENT) identifier)+ value
      */
     void refAdd(
-        Object... arguments 
+        Object... arguments
     );
-    
+    #else
+
     /**
-     * Retrieves an object from the container
-     * 
-     * @param arguments there is always an even number of arguments:
-     * (({@link #REASSIGNABLE}|{@link #PERSISTENT}) identifier)+
-     * 
-     * @return the object
+     * A convenience method to add an object to the container, delegating to {@link #refAdd(java.util.List, java.lang.Object)}
+     *
+     * @param qualifierType the qualifier type
+     * @param qualifierValue the optional qualifier value leading to a singleton list when present or an empty list when absent
+     * @param refObject the object to be added
+     *
+     * @see #refAdd(java.util.List, java.lang.Object)
      */
-    E refGet(
-        Object... arguments 
+    void refAdd(
+        QualifierType qualifierType,
+        Object qualifierValue,
+        E refObject
     );
 
     /**
+     * Adds an object to the container
+     *
+     * @param qualifierList an empty qualifier list creates the qualifiers automatically
+     * @param refObject the object to be added
+     */
+    void refAdd(
+        List<RefQualifier> qualifierList,
+        E refObject
+    );
+    #endif
+
+    #if CLASSIC_CHRONO_TYPES
+    /**
+     * Retrieves an object from the container
+     *
+     * @param arguments there is always an even number of arguments:
+     * (({@link #REASSIGNABLE}|{@link #PERSISTENT}) identifier)+
+     *
+     * @return the object
+     */
+    E refGet(
+        Object... arguments
+    );
+    #else
+    /**
+     * Retrieves an object from the container
+     *
+     * @param qualifierType
+     * @param qualifierValue
+     *
+     * @return the object
+     */
+    E refGet(
+            QualifierType qualifierType,
+            Object qualifierValue
+    );
+
+    /**
+     * Retrieves an object from the container
+     *
+     * @param qualifierList
+     *
+     * @return the object
+     */
+    E refGet(
+            List<RefQualifier> qualifierList
+    );
+    #endif
+
+    #if CLASSIC_CHRONO_TYPES
+    /**
      * Removes an object from the container
-     * 
+     *
      * @param arguments there is always an even number of arguments:
      * (({@link #REASSIGNABLE}|{@link #PERSISTENT}) identifier)+
      */
     void refRemove(
-        Object... arguments 
+            Object... arguments
     );
+    #else
+    /**
+     * Removes an object from the container
+     *
+     * @param qualifierType
+     * @param qualifierValue
+     */
+    void refRemove(
+            QualifierType qualifierType,
+            Object qualifierValue
+    );
+
+    /**
+     * Removes an object from the container
+     *
+     * @param qualifierList
+     */
+    void refRemove(
+            List<RefQualifier> qualifierList
+    );
+    #endif
 
     /**
      * Precedes a persistent sub-segment.
      */
-    Object PERSISTENT = QualifierType.PERSISTENT;
+    QualifierType PERSISTENT = QualifierType.PERSISTENT;
     
     /**
      * Precedes re-assignable sub-segment.
      */
-    Object REASSIGNABLE = QualifierType.REASSIGNABLE;
+    QualifierType REASSIGNABLE = QualifierType.REASSIGNABLE;
         
     
     //------------------------------------------------------------------------
@@ -107,7 +185,7 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
     /**
      * Executes a query 
      * 
-     * @param query
+     * @param query the query to be executed
      * 
      * @return the result
      */
@@ -118,7 +196,7 @@ public interface RefContainer<E extends RefObject> extends Container<E>, RefBase
     /**
      * Executes a query 
      * 
-     * @param query
+     * @param query the query to be executed
      * 
      * @return the result
      */

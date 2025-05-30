@@ -217,7 +217,7 @@ public class ContainerManagedUnitOfWorkSynchronization implements Synchronizatio
     }
     
     /**
-     * Determine the the current thread's actual context class loader
+     * Determine the current thread's actual context class loader
      * 
      * @return the current thread's context class loader
      */

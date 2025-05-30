@@ -90,6 +90,7 @@ public class TransactionTest {
      */
     protected static PersistenceManagerFactory entityManagerFactory;
 
+
     @Test
     public void testSuccessfulCallback() throws ResourceException, NamingException{
         runTest("successfulCallback", true);

@@ -42,7 +42,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 plugins {
 	java
 	`java-library`
@@ -224,6 +223,7 @@ sourceSets {
     test {
         java {
             srcDir("src/test/java")
+			srcDir("src/test/openmdx-${projectFlavour}/java")
         }
         resources {
         	srcDir("src/test/resources")

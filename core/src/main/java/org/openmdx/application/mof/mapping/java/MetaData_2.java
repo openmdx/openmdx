@@ -318,14 +318,14 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                     if(targetSpecificExtensions == null) {
                         this.extensions.put(
                             target, 
-                            targetSpecificExtensions = new HashMap<String,Map<String,String>>()
+                            targetSpecificExtensions = new HashMap<>()
                         );
                     }
                     Map<String, String> vendorSpecificExtensions = targetSpecificExtensions.get(vendor);
                     if(vendorSpecificExtensions == null) {
                         targetSpecificExtensions.put(
                             vendor,
-                            vendorSpecificExtensions = new HashMap<String,String>()
+                            vendorSpecificExtensions = new HashMap<>()
                         );
                     }
                     vendorSpecificExtensions.put(key, value);
@@ -341,7 +341,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
         /**
          * 
          */
-        private final Map<ExtensionTarget,Map<String,Map<String,String>>> extensions = new HashMap<ExtensionTarget,Map<String,Map<String,String>>>();  
+        private final Map<ExtensionTarget,Map<String,Map<String,String>>> extensions = new HashMap<>();
         
     }
     
@@ -474,7 +474,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
         /**
          * 
          */
-        private final Map<String, ClassMetaData> classes = new HashMap<String, ClassMetaData>();
+        private final Map<String, ClassMetaData> classes = new HashMap<>();
 
         /**
          * The package directory

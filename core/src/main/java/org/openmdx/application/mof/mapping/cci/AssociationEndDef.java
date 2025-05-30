@@ -53,15 +53,6 @@ import org.openmdx.base.mof.cci.Model_1_0;
 
 public class AssociationEndDef extends ElementDef {
 
-    /**
-     * TODO multi-valued qualifier support
-     * 
-     * Constructor 
-     *
-     * @param associationEndDef
-     * @param model
-     * @throws ServiceException
-     */
     public AssociationEndDef(
         ModelElement_1_0 associationEndDef,
         Model_1_0 model

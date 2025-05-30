@@ -219,7 +219,7 @@ public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements Keyed
     public static final int DEFAULT_MAX_ACTIVE  = 8;
 
     /**
-     * The default cap on the the maximum number of objects that can exists at one time.
+     * The default cap on the maximum number of objects that can exists at one time.
      * @see #getMaxTotal
      * @see #setMaxTotal
      */

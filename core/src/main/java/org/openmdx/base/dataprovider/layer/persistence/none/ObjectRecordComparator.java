@@ -49,15 +49,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.rest.cci.FeatureOrderRecord;
 import org.openmdx.base.rest.cci.ObjectRecord;
-import org.w3c.cci2.ImmutableDatatype;
-import org.w3c.spi.DatatypeFactories;
-import org.w3c.spi.ImmutableDatatypeFactory;
+import org.w3c.time.ChronoTypes;
 
 /**
  * Object Record Comparator
@@ -95,28 +91,7 @@ class ObjectRecordComparator implements Comparator<ObjectRecord> {
         	order.toArray(new FeatureOrderRecord[order.size()])
         );
     }
-    
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static int compareValues(
-        Object left, 
-        Object right
-    ) {
-        if(left == null) {
-            return right == null ? 0 : -1;
-        } else if (right == null) {
-            return +1;
-        } else if(left instanceof XMLGregorianCalendar) {
-            if(left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>){
-                ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
-                return datatypeFactory.toDate((XMLGregorianCalendar) left).compare(datatypeFactory.toDate((XMLGregorianCalendar) right));
-            } else {
-                return ((XMLGregorianCalendar)left).compare((XMLGregorianCalendar) right);
-            }
-        } else {
-            return ((Comparable)left).compareTo(right);
-        }
-    }
-    
+
     @Override
     public int compare(
         ObjectRecord ox, 
@@ -145,7 +120,7 @@ class ObjectRecordComparator implements Comparator<ObjectRecord> {
                 if(s.getSortOrder() != SortOrder.UNSORTED) {
 					Object vx = getValue(ox, s);
                     Object vy = getValue(oy, s);
-                    int c = ObjectRecordComparator.compareValues(vx,vy);
+                    int c = ChronoTypes.compare(vx, vy, ChronoTypes.NullRepresents.NEGATIVE_INFINITY);
                     if (c != 0) {
                         return s.getSortOrder() == SortOrder.ASCENDING ? c : -c;
                     }

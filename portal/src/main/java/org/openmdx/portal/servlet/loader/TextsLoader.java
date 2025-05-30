@@ -54,7 +54,6 @@ import java.io.InputStreamReader;
 import java.io.SequenceInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -62,7 +61,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.jdo.PersistenceManagerFactory;
-import javax.servlet.ServletContext;
+import #if JAVA_8 javax #else jakarta#endif.servlet.ServletContext;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
@@ -70,6 +69,7 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Codes;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
 import org.openmdx.portal.servlet.Texts.TextsBundle;
+import org.w3c.time.SystemClock;
 
 /**
  * TextsLoader
@@ -164,7 +164,7 @@ public class TextsLoader extends Loader {
 	synchronized public void loadTexts(
 		String[] locale
 	) throws ServiceException {
-		String messagePrefix = new Date() + "  ";
+		String messagePrefix = SystemClock.getInstance().now() + "  ";
 		System.out.println(messagePrefix + "Loading texts");
 		SysLog.info("Loading texts");
 		List<ResourceBundle> textBundles = getDefaultTextsBundles(

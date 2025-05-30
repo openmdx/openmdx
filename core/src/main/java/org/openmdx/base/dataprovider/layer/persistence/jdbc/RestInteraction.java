@@ -106,6 +106,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Rest Interaction
@@ -1108,8 +1109,8 @@ public class RestInteraction extends AbstractRestInteraction {
                     SysLog.warning("Optimistic write lock expects a byte[] version", writeLock.getClass().getName());
                 }
                 if (LockAssertions.isReadLockAssertion(readLock)) {
-                    java.util.Date transactionTime = LockAssertions.getTransactionTime(readLock);
-                    java.util.Date modifiedAt = (java.util.Date) obj.getValue().get(SystemAttributes.MODIFIED_AT);
+                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif transactionTime = LockAssertions.getTransactionTime(readLock);
+                    #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif modifiedAt = Datatypes.DATE_TIME_CLASS.cast(obj.getValue().get(SystemAttributes.MODIFIED_AT));
                     if (modifiedAt == null) {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
@@ -1118,16 +1119,15 @@ public class RestInteraction extends AbstractRestInteraction {
                             new BasicException.Parameter(BasicException.Parameter.XRI, object.getResourceIdentifier()),
                             new BasicException.Parameter("expected", readLock),
                             new BasicException.Parameter("actual"));
-                    } else if (transactionTime.before(modifiedAt)) {
+                    } else if (transactionTime.#if CLASSIC_CHRONO_TYPES before #else isBefore #endif(modifiedAt)) {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.CONCURRENT_ACCESS_FAILURE,
                             "The object has been modified since the unit of work has started",
                             new BasicException.Parameter(BasicException.Parameter.XRI, object.getResourceIdentifier()),
                             new BasicException.Parameter("expected", readLock),
-                            new BasicException.Parameter(
-                                "actual", SystemAttributes.MODIFIED_AT + '=' + DateTimeFormat.EXTENDED_UTC_FORMAT
-                                    .format(modifiedAt)));
+                            new BasicException.Parameter("actual", SystemAttributes.MODIFIED_AT + '=' + DateTimeFormat.EXTENDED_UTC_FORMAT.format(modifiedAt))
+                        );
                     }
                 } else if (readLock != null) {
                     SysLog.warning("Optimistic read lock expects a modifiedAt<=transactionTime assertion", readLock);

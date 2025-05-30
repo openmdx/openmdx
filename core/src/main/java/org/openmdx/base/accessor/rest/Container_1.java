@@ -351,12 +351,10 @@ class Container_1
             } else if(notFound(key)) {
                 return null;
             } else try { 
-            	DataObject_1_0 member =  this.openmdxjdoGetDataObjectManager().getObjectById(
+            	return this.openmdxjdoGetDataObjectManager().getObjectById(
                     this.jdoGetObjectId().getChild(qualifier), 
                     this.mustValidate()
                 );
-            	// TODO This tests a workaround for an erroneous JRE 5.0 behaviour!!!  
-            	return this.jdoIsPersistent() == member.jdoIsPersistent() ? member : null;
             } catch (JDOObjectNotFoundException exception) {
                 return null;
             }

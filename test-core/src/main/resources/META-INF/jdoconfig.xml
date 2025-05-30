@@ -59,7 +59,7 @@
         <property name="test.openmdx.app1.jdo.EntityManagerPlugIn.packageImpl[1]" value="test.openmdx.model1.aop2"/>
         <property name="test.openmdx.app1.jdo.EntityManagerPlugIn.userObject[0]" value="PriceCalculator"/>
         <property name="PriceCalculator.class" value="test.openmdx.app1.aop2.PriceCalculator"/>
-        <property name="PriceCalculator.duration" value="(java.lang.Long)1000"/>duration
+        <property name="PriceCalculator.duration" value="(java.lang.Long)1000"/>
         <property name="test.openmdx.app1.jdo.EntityManagerPlugIn.userObject[1]" value="PropagatedUserObject"/>
         <property name="PropagatedUserObject.class" value="test.openmdx.app1.aop2.PropagatedUserObjectImpl"/>
         <property name="PropagatedUserObject.interface" value="test.openmdx.app1.aop2.PropagatedUserObject"/>

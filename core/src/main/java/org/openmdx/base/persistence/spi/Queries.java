@@ -49,14 +49,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.jdo.Query;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.jmi.spi.Jmi1ObjectPredicateInvocationHandler;
 import org.openmdx.base.exception.ServiceException;
@@ -106,9 +103,9 @@ public class Queries {
     	if("string".equalsIgnoreCase(name)) {
     		return String.class;
     	} else if("date".equals(name)) {
-    		return XMLGregorianCalendar.class;
+    		return Datatypes.DATE_CLASS;
     	} else if("datetime".equalsIgnoreCase(name)) {
-    		return Date.class;
+    		return Datatypes.DATE_TIME_CLASS;
     	} else if("short".equalsIgnoreCase(name)) {
     		return Short.class;
     	} else  if("int".equalsIgnoreCase(name) || "integer".equalsIgnoreCase(name)) {
@@ -118,7 +115,7 @@ public class Queries {
     	} else if("decimal".equalsIgnoreCase(name)) {
     		return BigDecimal.class;
     	} else if("duration".equalsIgnoreCase(name)) {
-    		return Duration.class;
+    		return Datatypes.DURATION_CLASS;
     	} else throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_QUERY_CRITERIA,
@@ -137,7 +134,7 @@ public class Queries {
     private static Object toValue(
     	String parameter
     ) throws ServiceException{
-    	if(parameter.length() == 0) throw new ServiceException(
+    	if(parameter.isEmpty()) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_QUERY_CRITERIA,
             "Missing parameter value"
@@ -307,7 +304,7 @@ public class Queries {
     /**
      * Apply a statement to a given query
      * 
-     * @param channel
+     * @param query
      * @param statement
      * @throws ServiceException 
      */
@@ -424,7 +421,6 @@ public class Queries {
     	ARGUMENTS.put("notAnElementOf", COLLECTION);
     	ARGUMENTS.put("like", COLLECTION);
     	ARGUMENTS.put("unlike", COLLECTION);
-    	ARGUMENTS.put("startsWith", COLLECTION);
     	ARGUMENTS.put("startsWith", COLLECTION);
     	ARGUMENTS.put("endsWith", COLLECTION);
     	ARGUMENTS.put("endsNotWith", COLLECTION);

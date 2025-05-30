@@ -49,12 +49,14 @@ import java.util.regex.Pattern;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
+#endif
 
 /**
  * Lock Assertion
  * <p>
- * Parses an expresion of the form 
+ * Parses an expression of the form
  * {@code &lsaquo;feature&rsaquo;&lsaquo;relation&rsaquo;&lsaquo;value&rsaquo;},
  * e.g. {@code modifiedAt=2000-02-29T00:00:00.000000Z}
  */
@@ -97,17 +99,21 @@ public class LockAssertion {
 
 	/**
 	 * Marshal the assertion value
-	 * 
-	 * TODO be aware of other data types
-	 * 
-	 * @param value
+	 *
+	 * @param value the assertion value is an org::w3c::dateTime value with arbitrary precision
 	 * 
 	 * @return the assertion value, or {@code null} if the value is empty
 	 */
 	private static Object toValue(
 		String value
 	){
-		return value.length() == 0 ? null : DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(value);
+		return value.isEmpty() ?
+			null :
+			#if CLASSIC_CHRONO_TYPES
+			DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(value);
+			#else
+			java.time.Instant.parse(value);
+			#endif
 	}
 
 	/**

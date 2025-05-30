@@ -48,7 +48,9 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.marshalling.ReluctantUnmarshalling;
 import org.openmdx.kernel.exception.BasicException;
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.cci2.ImmutableDatatype;
+#endif
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -93,7 +95,7 @@ public class NormalizingMarshaller
     /**
      * Normalize the source value to the targetClass
      * 
-     * @param sourceValue
+     * @param source
      * 
      * @return the normalized value
      */
@@ -103,7 +105,7 @@ public class NormalizingMarshaller
         if(source == null) {
             return null;
         } else if(this.targetClass.isInstance(source)) {
-            return source instanceof ImmutableDatatype<?> ? ((ImmutableDatatype<?>)source).clone() : source;
+            return #if source CLASSIC_CHRONO_TYPES instanceof ImmutableDatatype<?> ? ((ImmutableDatatype<?>)source).clone() : #endif source;
         } else if (source instanceof String) {
             return Datatypes.create(this.targetClass, (String)source);
         } else if (source instanceof Number){

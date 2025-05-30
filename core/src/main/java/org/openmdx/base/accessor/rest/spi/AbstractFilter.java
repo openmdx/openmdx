@@ -53,9 +53,9 @@ import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.ConditionType;
-import org.openmdx.base.query.LenientPathComparator;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.Selector;
+import org.openmdx.base.query.lenient.LenientComparators;
 import org.openmdx.base.query.spi.AbstractPattern;
 import org.openmdx.base.query.spi.PathPattern;
 import org.openmdx.base.query.spi.Soundex;
@@ -158,9 +158,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
         Object candidate,
         Object filterValue
     ){
-        return 
-            LenientPathComparator.isComparable(candidate) ? compare(candidate,filterValue) == 0 :
-            candidate.equals(filterValue);
+        return LenientComparators.equivalent(candidate, filterValue);
     }
 
     /**
@@ -175,7 +173,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
         Object candidate,
         Object filterValue
     ){
-        return LenientPathComparator.getInstance().compare(candidate, filterValue);
+        return LenientComparators.getComparator().compare(candidate, filterValue);
     }
     
     /**

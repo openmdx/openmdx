@@ -51,12 +51,12 @@ package org.openmdx.portal.servlet.component;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -132,6 +132,8 @@ import org.openmdx.portal.servlet.attribute.FieldDef;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 import org.openmdx.portal.servlet.control.UiGridControl;
 import org.openmdx.ui1.jmi1.ValuedField;
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.SystemClock;
 
 /**
  * UiGrid
@@ -1506,7 +1508,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 									}
 									if(code == null) {
     									try {
-    										code = new Short(trimmedToken);
+    										code = Short.valueOf(trimmedToken);
     									} catch(Exception e) {}
 									}
 								}
@@ -1601,7 +1603,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 								// should not be used because serializing of
 								// filters with XMLEncoder does not work
 								values.add(
-									new Long(num.longValue())
+									num.longValue()
 								);
 							}
 						}
@@ -1660,16 +1662,16 @@ public abstract class UiGrid extends Grid implements Serializable {
 						(condition instanceof IsBetweenCondition) &&
 						(values.size() < 2)
 					) {
-						Date day;
+						#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif day;
 						if(values.isEmpty()) {
-							day = new Date();
+							day = SystemClock.getInstance().now();
 						} else try {
-							day = (Date)values.get(0);
+							day = Datatypes.DATE_TIME_CLASS.cast(values.get(0));
 						} catch(IllegalArgumentException e) {
-							day = new Date();
+							day = SystemClock.getInstance().now();
 						}
 						Calendar nextDay = new GregorianCalendar();
-						nextDay.setTime(day);
+						nextDay.setTime(#if CLASSIC_CHRONO_TYPES day #else Date.from(day) #endif);
 						nextDay.add(Calendar.DAY_OF_MONTH, 1);
 						values.clear();
 						values.add(day);
@@ -1688,7 +1690,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 						} else {
 							conditions.put(
 								condition.getFeature(),
-								new ArrayList<ConditionRecord>(Collections.singletonList(condition))							
+                                    new ArrayList<>(Collections.singletonList(condition))
 							);
 						}
 						this.activeFilterFeatures.add(featureName);
@@ -1881,7 +1883,7 @@ public abstract class UiGrid extends Grid implements Serializable {
     	ObjectView view = this.getView();
     	this.columnSortOrders.put(
     		feature,
-    		new Short(order)
+			order
     	);
     	// apply filter to container
     	if(this.currentFilter != null) {

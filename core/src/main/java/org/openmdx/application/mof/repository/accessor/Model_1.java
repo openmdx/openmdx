@@ -50,7 +50,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -61,8 +60,6 @@ import java.util.TreeSet;
 import java.util.function.Predicate;
 
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
@@ -429,7 +426,7 @@ public class Model_1 implements Model_1_0 {
                 return;
             }
             else if(
-                (value instanceof Date) && 
+                (Datatypes.DATE_TIME_CLASS.isInstance(value)) &&
                 PrimitiveTypes.DATETIME.equals(typeName)
             ) {
                 return;
@@ -439,14 +436,14 @@ public class Model_1 implements Model_1_0 {
                 PrimitiveTypes.DATETIME.equals(typeName)
             ) {
                 try {
-                    Datatypes.create(Date.class, (String)value);
+                    Datatypes.create(Datatypes.DATE_TIME_CLASS, (String)value);
                 } catch(IllegalArgumentException e) {
                     throw new ServiceException(e);
                 }
                 return;
             }
             else if(
-                (value instanceof XMLGregorianCalendar) && 
+                (Datatypes.DATE_CLASS.isInstance(value)) &&
                 PrimitiveTypes.DATE.equals(typeName)
             ) {
                 return;
@@ -456,14 +453,14 @@ public class Model_1 implements Model_1_0 {
                 PrimitiveTypes.DATE.equals(typeName)
             ) {
                 try {
-                    Datatypes.create(XMLGregorianCalendar.class, (String)value);
+                    Datatypes.create(Datatypes.DATE_CLASS, (String)value);
                 } catch(IllegalArgumentException e) {
                     throw new ServiceException(e);
                 }
                 return;
             }
             else if(
-                (value instanceof Duration) && 
+                (Datatypes.DURATION_CLASS.isInstance(value)) &&
                 PrimitiveTypes.DURATION.equals(typeName)
             ) {
                 return;
@@ -473,7 +470,41 @@ public class Model_1 implements Model_1_0 {
                 PrimitiveTypes.DURATION.equals(typeName)
             ) {
                 try {
-                    Datatypes.create(Duration.class, (String)value);
+                    Datatypes.create(Datatypes.DURATION_CLASS, (String)value);
+                } catch(IllegalArgumentException e) {
+                    throw new ServiceException(e);
+                }
+                return;
+            }
+            else if(
+                (Datatypes.DURATION_DAYTIME_CLASS.isInstance(value)) &&
+                PrimitiveTypes.DURATION_DAYTIME.equals(typeName)
+            ) {
+                return;
+            }
+            else if(
+                (value instanceof String) &&
+                PrimitiveTypes.DURATION_DAYTIME.equals(typeName)
+            ) {
+                try {
+                    Datatypes.create(Datatypes.DURATION_DAYTIME_CLASS, (String)value);
+                } catch(IllegalArgumentException e) {
+                    throw new ServiceException(e);
+                }
+                return;
+            }
+            else if(
+                (Datatypes.DURATION_YEARMONTH_CLASS.isInstance(value)) &&
+                PrimitiveTypes.DURATION_YEARMONTH.equals(typeName)
+            ) {
+                return;
+            }
+            else if(
+                (value instanceof String) &&
+                PrimitiveTypes.DURATION_YEARMONTH.equals(typeName)
+            ) {
+                try {
+                    Datatypes.create(Datatypes.DURATION_YEARMONTH_CLASS, (String)value);
                 } catch(IllegalArgumentException e) {
                     throw new ServiceException(e);
                 }

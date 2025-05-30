@@ -70,7 +70,7 @@ public class Sets {
     
     /**
      * Create a null-masking concurrent hash set
-     * @param threadSafetyRequired TODO
+     * @param threadSafetyRequired tells, whether thread-safety is required
      * 
      * @return a newly created concurrent hash set
      */

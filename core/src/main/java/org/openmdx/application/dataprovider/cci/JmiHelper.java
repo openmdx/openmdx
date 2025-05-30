@@ -47,7 +47,6 @@ package org.openmdx.application.dataprovider.cci;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -57,8 +56,6 @@ import java.util.Set;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
@@ -73,7 +70,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.LenientPathComparator;
+import org.openmdx.base.query.lenient.LenientComparators;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
@@ -128,21 +125,31 @@ public class JmiHelper {
                     );
                 }
             } else if(PrimitiveTypes.DATETIME.equals(this.typeName)) {
-                return source instanceof Date ? source : Datatypes.create(
-                    Date.class, 
+                return Datatypes.DATE_TIME_CLASS.isInstance(source) ? source : Datatypes.create(
+                    Datatypes.DATE_TIME_CLASS,
                     (String)source
                 );
             } else if(PrimitiveTypes.DATE.equals(this.typeName)) {                
-                return source instanceof XMLGregorianCalendar ? source : Datatypes.create(
-                    XMLGregorianCalendar.class, 
+                return Datatypes.DATE_CLASS.isInstance(source) ? source : Datatypes.create(
+                    Datatypes.DATE_CLASS,
                     (String)source
                 );
-            } else if(PrimitiveTypes.DURATION.equals(this.typeName)) {                
-                return source instanceof Duration ? source : Datatypes.create(
-                    Duration.class, 
+            } else if(PrimitiveTypes.DURATION.equals(this.typeName)) {
+                return Datatypes.DURATION_CLASS.isInstance(source) ? source : Datatypes.create(
+                    Datatypes.DURATION_CLASS,
                     (String)source
                 );
-            } else if(PrimitiveTypes.ANYURI.equals(this.typeName)) {                
+            } else if(PrimitiveTypes.DURATION_DAYTIME.equals(this.typeName)) {
+                return Datatypes.DURATION_DAYTIME_CLASS.isInstance(source) ? source : Datatypes.create(
+                    Datatypes.DURATION_DAYTIME_CLASS,
+                    (String)source
+                );
+            } else if(PrimitiveTypes.DURATION_YEARMONTH.equals(this.typeName)) {
+                return Datatypes.DURATION_YEARMONTH_CLASS.isInstance(source) ? source : Datatypes.create(
+                    Datatypes.DURATION_YEARMONTH_CLASS,
+                    (String)source
+                );
+            } else if(PrimitiveTypes.ANYURI.equals(this.typeName)) {
                 return source instanceof URI ? source : Datatypes.create(
                     URI.class, 
                     (String)source
@@ -165,16 +172,6 @@ public class JmiHelper {
     }
 
     //-------------------------------------------------------------------------
-    private static boolean areEqual(
-        Object v1,
-        Object v2
-    ) {
-        return
-            v1 == null ? v2 == null :
-            v2 == null ? false :
-            LenientPathComparator.isComparable(v1) ? LenientPathComparator.getInstance().compare(v1, v2) == 0 :
-            v1.equals(v2);
-    }
 
     //---------------------------------------------------------------------------
     @SuppressWarnings("rawtypes")
@@ -186,7 +183,7 @@ public class JmiHelper {
         boolean compareWithBeforeImage
     ) throws ServiceException {
         if(targetValues instanceof List) {
-            if(!compareWithBeforeImage || !areEqual(targetValues, new MarshallingList(marshaller, (List)sourceValues))) {
+            if(!compareWithBeforeImage || !LenientComparators.equivalent(targetValues, new MarshallingList(marshaller, (List) sourceValues))) {
                 ((List)targetValues).clear();
                 for(
                     ListIterator j = ((List)sourceValues).listIterator();
@@ -208,7 +205,7 @@ public class JmiHelper {
             }
         }
         else if(targetValues instanceof Set) {
-            if(!compareWithBeforeImage || !areEqual(targetValues, new MarshallingSet(marshaller, (Collection)sourceValues))) {
+            if(!compareWithBeforeImage || !LenientComparators.equivalent(targetValues, new MarshallingSet(marshaller, (Collection) sourceValues))) {
                 ((Set)targetValues).clear();
                 for(
                     Iterator j = ((Collection)sourceValues).iterator();
@@ -221,7 +218,8 @@ public class JmiHelper {
             }
         }
         else if(targetValues instanceof SparseArray) {
-            if(!compareWithBeforeImage || !areEqual(new MarshallingSparseArray(marshaller, (SparseArray)sourceValues), targetValues)) {
+            Object v1 = new MarshallingSparseArray(marshaller, (SparseArray)sourceValues);
+            if(!compareWithBeforeImage || !LenientComparators.equivalent(v1, targetValues)) {
                 ((SparseArray)targetValues).clear();
                 for(
                     ListIterator j = ((SparseArray)sourceValues).populationIterator();
@@ -296,7 +294,7 @@ public class JmiHelper {
 	                Object sourceValue = facade.attributeValue(featureName);                
 	                if(compareWithBeforeImage){
 	                    Object targetValue = target.refGetValue(featureName);
-	                    if(!areEqual(targetValue, sourceValue)) {
+                        if(!LenientComparators.equivalent(targetValue, sourceValue)) {
 	                        target.refSetValue(
 	                            featureName,
 	                            marshaller.marshal(sourceValue)

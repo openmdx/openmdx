@@ -50,13 +50,16 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.util.Calendar;
 import java.util.TimeZone;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Classes;
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.spi.DatatypeFactories;
+#endif
 
 /**
  * Oracle SQL Datum Conversions
@@ -172,12 +175,13 @@ public class Datums {
                     datum, 
                     (Object[])null
                 );
-            	StringBuilder value = new StringBuilder();
                 int days = toInt(intervalDaysSeconds, 0) - 0x80000000;
                 int hours = toInt(intervalDaysSeconds[4]) - 60;
                 int minutes = toInt(intervalDaysSeconds[5]) - 60;
                 int seconds = toInt(intervalDaysSeconds[6]) - 60;
                 int nanoseconds = toInt(intervalDaysSeconds, 7) - 0x80000000;
+                #if CLASSIC_CHRONO_TYPES
+                StringBuilder value = new StringBuilder();
                 if(days < 0) {
                 	value.append(
                 		"-P"
@@ -227,8 +231,16 @@ public class Datums {
 	            		"S"
 	            	);
                 }
-                return DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value.toString());
-            } else if (isDatum(datum)) { 
+                return org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value.toString());
+                #else
+                return Duration
+                    .ofDays(days)
+                    .plusHours(hours)
+                    .plusMinutes(minutes)
+                    .plusSeconds(seconds)
+                    .plusNanos(nanoseconds);
+                #endif
+            } else if (isDatum(datum)) {
                 if(datumToJdbc == null) datumToJdbc = oracleDatum.getMethod("toJdbc");
                 return datumToJdbc.invoke(datum);
             } else {

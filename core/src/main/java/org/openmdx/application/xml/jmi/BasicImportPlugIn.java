@@ -170,18 +170,18 @@ public class BasicImportPlugIn implements ImportPlugIn {
         if(!ReducedJDOHelper.isPersistent(refObject)) {
             Path containerId = objectId.getParent();
             String qualifier = objectId.getLastSegment().toClassicRepresentation();
-            RefContainer<?> refContainer = (RefContainer<?>) persistenceManager.getObjectById(containerId);
+            RefContainer<RefObject> refContainer = (RefContainer<RefObject>) persistenceManager.getObjectById(containerId);
             if(qualifier.startsWith("!")) {
                 refContainer.refAdd(
-                    QualifierType.PERSISTENT,
-                    qualifier.substring(1),
-                    refObject
+                        QualifierType.PERSISTENT,
+                        qualifier.substring(1),
+                        refObject
                 );
             } else {
                 refContainer.refAdd(
-                    QualifierType.REASSIGNABLE,
-                    qualifier,
-                    refObject
+                        QualifierType.REASSIGNABLE,
+                        qualifier,
+                        refObject
                 );
             }
         }

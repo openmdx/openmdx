@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -68,8 +67,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefObject;
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.mof.cci.ModelAttributes;
@@ -1905,7 +1903,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     qualifiedName) : PrimitiveTypes.STRING.equals(typeName) ? new RefStringTypePredicate(
                         quantifier,
                         qualifiedName)
-                        : PrimitiveTypes.DATETIME.equals(typeName) ? new RefComparableTypePredicate<Date>(
+                        : PrimitiveTypes.DATETIME.equals(typeName) ? new RefComparableTypePredicate<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif>(
                             quantifier,
                             qualifiedName)
                             : PrimitiveTypes.DECIMAL.equals(typeName) ? new RefComparableTypePredicate<BigDecimal>(
@@ -1921,7 +1919,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                                             quantifier,
                                             qualifiedName)
                                             : PrimitiveTypes.DATE.equals(typeName)
-                                                ? new RefPartiallyOrderedTypePredicate<XMLGregorianCalendar>(
+                                                ? new RefPartiallyOrderedTypePredicate<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else RefComparableTypePredicate<java.time.LocalDate>#endif>(
                                                     quantifier,
                                                     qualifiedName)
                                                 : PrimitiveTypes.ANYURI.equals(typeName)

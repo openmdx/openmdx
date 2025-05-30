@@ -116,7 +116,7 @@ public class InMemory_2 implements Port<RestConnection> {
     }
 
     /**
-     * Sets the namspace id and provides the namespace local data
+     * Sets the namespace id and provides the namespace local data
      * 
      * @param namespaceId
      *            the namespaceId to set
@@ -419,14 +419,8 @@ public class InMemory_2 implements Port<RestConnection> {
             afterImage.setValue(value);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.openmdx.base.rest.spi.AbstractRestInteraction#find(org.openmdx.
-         * base.resource.spi.RestInteractionSpec,
-         * org.openmdx.base.rest.cci.QueryRecord,
-         * org.openmdx.base.rest.cci.ResultRecord)
+        /**
+         * TODO take position and size into consideration, too
          */
         @SuppressWarnings({
             "unchecked", "rawtypes"
@@ -436,9 +430,7 @@ public class InMemory_2 implements Port<RestConnection> {
             RestInteractionSpec ispec,
             QueryRecord input,
             ResultRecord output
-        )
-            throws ResourceException {
-            // TODO position, size
+        ) throws ResourceException {
             final Path xri = input.getResourceIdentifier();
             final boolean extentQuery = xri.isLike(EXTENT_PATTERN);
             final QueryFilterRecord queryFilter = input.getQueryFilter();

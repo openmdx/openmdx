@@ -46,7 +46,6 @@
 package test.mock.clock1.aop2;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import javax.jdo.JDOHelper;
@@ -67,7 +66,7 @@ public class AsAdmin {
     
     static void notifyDateAndTimeChange(
         Segment segmentAsUser,
-        Date to
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to
     ) {
         asAdministrator(segmentAsUser).setDescription(
             "Date set to " + to

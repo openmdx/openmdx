@@ -54,8 +54,13 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jdo.PersistenceManager;
+#if JAVA_8
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+#else
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+#endif
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -195,9 +200,8 @@ public abstract class AbstractApiController {
 	 * Init request dispatcher.
 	 * 
 	 * @param request
-	 * @param assertRequestId
-	 * @param assertObjectXri
-	 */
+	 * @param encoding
+     */
 	public boolean init(
 		HttpServletRequest request,
 		String encoding
@@ -316,7 +320,7 @@ public abstract class AbstractApiController {
 		Map<Short,String> codeEntries = codes.getLongTextByCode(name, locale, includeAll);		
 		List<OptionBean> options = new ArrayList<OptionBean>();
 		for(Map.Entry<Short,String> codeEntry: codeEntries.entrySet()) {
-			AbstractApiController.OptionBean optionBean = new AbstractApiController.OptionBean();
+			OptionBean optionBean = new OptionBean();
 			optionBean.setValue(codeEntry.getKey());
 			optionBean.setTitle(codeEntry.getValue());
 			options.add(optionBean);
@@ -688,8 +692,8 @@ public abstract class AbstractApiController {
 	 */
 	public void setParameterMap(Map<String, String[]> parameterMap) {
 		this.parameterMap = parameterMap;
-	}	
-	
+	}
+
 	//-----------------------------------------------------------------------
 	// Members
 	//-----------------------------------------------------------------------

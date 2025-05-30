@@ -170,7 +170,7 @@ public class Structures {
      */
     public static <S> S create(
         Class<S> structureClass,
-        Structures.Member<?>... members
+        Member<?>... members
     ) {
         MetaData metaData = MetaData.getInstance(structureClass);
         return create(
@@ -195,7 +195,7 @@ public class Structures {
      */
     public static <S> S create(
         Class<S> structureClass,
-        List<? extends Structures.Member<?>> members
+        List<? extends Member<?>> members
     ) {
         MetaData metaData = MetaData.getInstance(structureClass);
         return create(
@@ -501,8 +501,8 @@ public class Structures {
          * Constructor
          * 
          * @param persistenceManager the (optional) PersistenceManager
+         * @param metaData
          * @param values
-         * @param nameClass
          */
         ProxyHandler(
             PersistenceManager persistenceManager, 
@@ -1081,7 +1081,7 @@ public class Structures {
         
             final int end;
         
-            private transient Set<Map.Entry<Integer, Object>> entries;
+            private transient Set<Entry<Integer, Object>> entries;
         
             /**
              * Implements {@code Serializable}
@@ -1094,7 +1094,7 @@ public class Structures {
              * @see java.util.AbstractMap#entrySet()
              */
             @Override
-            public Set<Map.Entry<Integer, Object>> entrySet() {
+            public Set<Entry<Integer, Object>> entrySet() {
                 return this.entries == null ? this.entries = new EntrySet()
                     : this.entries;
             }
@@ -1185,7 +1185,7 @@ public class Structures {
              * Entry Set
              */
             class EntrySet
-                extends AbstractSet<Map.Entry<Integer, Object>>
+                extends AbstractSet<Entry<Integer, Object>>
             {
         
                 /*
@@ -1194,9 +1194,9 @@ public class Structures {
                  * @see java.util.AbstractCollection#iterator()
                  */
                 @Override
-                public Iterator<Map.Entry<Integer, Object>> iterator() {
+                public Iterator<Entry<Integer, Object>> iterator() {
         
-                    return new Iterator<Map.Entry<Integer, Object>>() {
+                    return new Iterator<Entry<Integer, Object>>() {
         
                         int i = UnmodifiableSortedMap.this.begin;
         
@@ -1204,9 +1204,9 @@ public class Structures {
                             return i < UnmodifiableSortedMap.this.end;
                         }
         
-                        public Map.Entry<Integer, Object> next() {
+                        public Entry<Integer, Object> next() {
         
-                            return new Map.Entry<Integer, Object>() {
+                            return new Entry<Integer, Object>() {
         
                                 final int position = i++;
         
@@ -1411,13 +1411,13 @@ public class Structures {
         
         private static final String STEREOTYPE_SPARSEARRAY = "\u00absparsearray\u00bb";                    
 
-        private static final ConcurrentMap<Class<?>, MetaData> forStructureClass = new ConcurrentHashMap<Class<?>, Structures.MetaData>();
+        private static final ConcurrentMap<Class<?>, MetaData> forStructureClass = new ConcurrentHashMap<Class<?>, MetaData>();
 
-        private static final ConcurrentMap<List<String>, MetaData> forTypeName = new ConcurrentHashMap<List<String>, Structures.MetaData>();
+        private static final ConcurrentMap<List<String>, MetaData> forTypeName = new ConcurrentHashMap<List<String>, MetaData>();
         
-        Object[] toValues(Structures.Member<?>... members) {
+        Object[] toValues(Member<?>... members) {
             Object[] values = new Object[this.names.length];
-            for (Structures.Member<?> member : members) {
+            for (Member<?> member : members) {
                 Enum<?> name = member.getName();
                 Object value = member.getValue();
                 if (!this.nameClass.isInstance(name)) throw new IllegalArgumentException(
@@ -1428,9 +1428,9 @@ public class Structures {
             return values;
         }
 
-        Object[] toValues(List<? extends Structures.Member<?>> members) {
+        Object[] toValues(List<? extends Member<?>> members) {
             Object[] values = new Object[this.names.length];
-            for (Structures.Member<?> member : members) {
+            for (Member<?> member : members) {
                 values[member.getName().ordinal()] = member.getValue();
             }
             return values;
@@ -1742,7 +1742,7 @@ public class Structures {
         /**
          * Retrieve the member name for a given key
          * 
-         * @param featureName
+         * @param key
          * 
          * @return the member name for a given key
          */
@@ -1783,7 +1783,7 @@ public class Structures {
         /**
          * Retrieve the meta data instance
          * 
-         * @param structureClass
+         * @param structure
          * 
          * @return the structure's meta data
          * 

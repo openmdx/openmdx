@@ -46,15 +46,13 @@ package org.openmdx.state2.aop1;
 
 import java.io.Serializable;
 import java.util.Comparator;
-import java.util.Date;
-
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.state2.spi.Order;
 import org.openmdx.state2.spi.TechnicalAttributes;
+import org.w3c.spi2.Datatypes;
 
 /**
  * State Comparator
@@ -95,15 +93,15 @@ public class StateComparator
         }
         try {
             int validFrom = Order.compareValidFrom(
-                (XMLGregorianCalendar)o1.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
-                (XMLGregorianCalendar)o2.objGetValue(TechnicalAttributes.STATE_VALID_FROM)
+                Datatypes.DATE_CLASS.cast(o1.objGetValue(TechnicalAttributes.STATE_VALID_FROM)),
+                Datatypes.DATE_CLASS.cast(o2.objGetValue(TechnicalAttributes.STATE_VALID_FROM))
             ); 
             if(validFrom != 0) {
                 return validFrom;
             }
             int removedAt = Order.compareRemovedAt(
-                (Date)o1.objGetValue(SystemAttributes.REMOVED_AT),
-                (Date)o2.objGetValue(SystemAttributes.REMOVED_AT)
+                Datatypes.DATE_TIME_CLASS.cast(o1.objGetValue(SystemAttributes.REMOVED_AT)),
+                Datatypes.DATE_TIME_CLASS.cast(o2.objGetValue(SystemAttributes.REMOVED_AT))
             );  
             return removedAt;
         } catch (ServiceException exception) {

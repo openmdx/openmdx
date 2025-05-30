@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.zip.CRC32;
 
-import javax.servlet.ServletContext;
+import #if JAVA_8 javax #else jakarta#endif.servlet.ServletContext;
 
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.PortalExtension_1_0;

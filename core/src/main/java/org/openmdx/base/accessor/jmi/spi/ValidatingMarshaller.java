@@ -102,7 +102,7 @@ public class ValidatingMarshaller implements Marshaller {
 	/**
 	 * Validate a given object
 	 * 
-	 * @param candidate
+	 * @param value
 	 * 
 	 * @throws ServiceException 
 	 */

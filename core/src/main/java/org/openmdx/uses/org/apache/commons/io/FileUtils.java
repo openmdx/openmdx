@@ -42,11 +42,12 @@ import java.net.URLConnection;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 import java.util.zip.Checksum;
@@ -58,6 +59,7 @@ import org.openmdx.uses.org.apache.commons.io.filefilter.IOFileFilter;
 import org.openmdx.uses.org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.openmdx.uses.org.apache.commons.io.filefilter.TrueFileFilter;
 import org.openmdx.uses.org.apache.commons.io.output.NullOutputStream;
+import org.w3c.time.ChronoTypes;
 
 /**
  * General file manipulation utilities.
@@ -512,7 +514,7 @@ public class FileUtils {
      * @param dirFilter  optional filter to apply when finding subdirectories.
      *                   If this parameter is {@code null}, subdirectories will not be included in the
      *                   search. Use TrueFileFilter.INSTANCE to match all directories.
-     * @return an collection of java.io.File with the matching files
+     * @return a collection of java.io.File with the matching files
      * @see org.apache.commons.io.filefilter.FileFilterUtils
      * @see org.apache.commons.io.filefilter.NameFileFilter
      */
@@ -583,7 +585,7 @@ public class FileUtils {
      * @param dirFilter  optional filter to apply when finding subdirectories.
      *                   If this parameter is {@code null}, subdirectories will not be included in the
      *                   search. Use TrueFileFilter.INSTANCE to match all directories.
-     * @return an collection of java.io.File with the matching files
+     * @return a collection of java.io.File with the matching files
      * @see org.apache.commons.io.FileUtils#listFiles
      * @see org.apache.commons.io.filefilter.FileFilterUtils
      * @see org.apache.commons.io.filefilter.NameFileFilter
@@ -679,7 +681,7 @@ public class FileUtils {
      * @param extensions an array of extensions, ex. {"java","xml"}. If this
      *                   parameter is {@code null}, all files are returned.
      * @param recursive  if true all subdirectories are searched as well
-     * @return an collection of java.io.File with the matching files
+     * @return a collection of java.io.File with the matching files
      */
     public static Collection<File> listFiles(
             final File directory, final String[] extensions, final boolean recursive) {
@@ -2721,11 +2723,14 @@ public class FileUtils {
      * @throws IllegalArgumentException if the file is {@code null}
      * @throws IllegalArgumentException if the date is {@code null}
      */
-    public static boolean isFileNewer(final File file, final Date date) {
-        if (date == null) {
-            throw new IllegalArgumentException("No specified date");
-        }
-        return isFileNewer(file, date.getTime());
+    public static boolean isFileNewer(
+        final File file,
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTime
+    ) {
+        return isFileNewer(
+            file,
+            ChronoTypes.getEpochMilliseconds(Objects.requireNonNull(dateTime, "No specified dateTime"))
+        );
     }
 
     /**
@@ -2788,11 +2793,14 @@ public class FileUtils {
      * @throws IllegalArgumentException if the file is {@code null}
      * @throws IllegalArgumentException if the date is {@code null}
      */
-    public static boolean isFileOlder(final File file, final Date date) {
-        if (date == null) {
-            throw new IllegalArgumentException("No specified date");
-        }
-        return isFileOlder(file, date.getTime());
+    public static boolean isFileOlder(
+        final File file,
+        final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif dateTime
+    ) {
+        return isFileOlder(
+                file,
+                ChronoTypes.getEpochMilliseconds(Objects.requireNonNull(dateTime, "No specified dateTime"))
+        );
     }
 
     /**

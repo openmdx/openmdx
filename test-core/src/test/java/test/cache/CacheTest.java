@@ -44,7 +44,9 @@
  */
 package test.cache;
 
-import java.util.Date;
+
+import org.w3c.spi2.Datatypes;
+import org.w3c.time.SystemClock;
 
 import javax.cache.Cache;
 import javax.cache.CacheException;
@@ -52,6 +54,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.configuration.Configuration;
 import javax.cache.spi.CachingProvider;
+import java.util.Date;
 
 /**
  * Cache Test
@@ -71,7 +74,8 @@ public class CacheTest {
         try {
             final CachingProvider cachingProvider = Caching.getCachingProvider();
             final CacheManager cacheManager = cachingProvider.getCacheManager();
-            final Configuration<String, Date> configuration = new Configuration<String, Date>() {
+            final Configuration<String, #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> configuration
+                    = new Configuration<String, #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif>() {
 
                 /**
 				 * Implements {@code Serializable}
@@ -85,9 +89,9 @@ public class CacheTest {
                 }
 
                 @Override
-                public Class<Date> getValueType(
+                public Class<#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> getValueType(
                 ) {
-                    return Date.class;
+                    return Datatypes.DATE_TIME_CLASS;
                 }
 
                 @Override
@@ -96,11 +100,11 @@ public class CacheTest {
                     return false;
                 }
             };
-            Date now = new Date();
-            Cache<String,Date> cache1 = cacheManager.createCache("testCache", configuration);
+            #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif now = SystemClock.getInstance().now();
+            Cache<String,#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> cache1 = cacheManager.createCache("testCache", configuration);
             cache1.put("created", now);
-            now = new Date(now.getTime() + 1000);
-            Cache<String,Date> cache2 = cacheManager.createCache("testCache", configuration);
+            now = #if CLASSIC_CHRONO_TYPES new java.util.Date(now.getTime() + 1000) #else now.plusMillis(1000) #endif;
+            Cache<String,#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> cache2 = cacheManager.createCache("testCache", configuration);
             cache2.put("created", now);
             System.out.println(cache1.getClass().getName() + '@' + System.identityHashCode(cache1) + " created at " + cache1.get("created"));
             System.out.println(cache2.getClass().getName() + '@' + System.identityHashCode(cache2) + " created at " + cache2.get("created"));

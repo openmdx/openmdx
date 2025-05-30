@@ -50,7 +50,6 @@
 package org.openmdx.portal.servlet.loader;
 
 import java.net.MalformedURLException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -78,6 +77,7 @@ import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
+import org.w3c.time.SystemClock;
 
 public class DataLoader
     extends Loader {
@@ -99,7 +99,7 @@ public class DataLoader
     synchronized public void loadData(
         String location
     ) throws ServiceException {
-    	String messagePrefix = new Date() + "  ";
+    	String messagePrefix = SystemClock.getInstance().now() + "  ";
         System.out.println(messagePrefix + "Loading data");
         SysLog.info("Loading data");
         List<String> dirs = this.getDirectories("/WEB-INF/config/" + location + "/");
@@ -199,13 +199,13 @@ public class DataLoader
 	                                        	(RefObject_1_0)store.getObjectById(parentIdentity);
 	                                    } catch(Exception e) {}
 	                                    if(parent != null) {
-	                                        RefContainer<?> container = (RefContainer<?>)parent.refGetValue(
+	                                        RefContainer<RefObject> container = (RefContainer<RefObject>)parent.refGetValue(
 	                                        	entryPath.getSegment(entryPath.size() - 2).toClassicRepresentation()
 	                                        );
 	                                        container.refAdd(
 	                                            QualifierType.REASSIGNABLE,
-	                                            entryPath.getSegment(entryPath.size() - 1).toClassicRepresentation(), 
-	                                            newEntry
+	                                            entryPath.getSegment(entryPath.size() - 1).toClassicRepresentation(),
+												newEntry
 	                                        );
 	                                    }                                    
 	                                    if("bootstrap".equals(location)) {

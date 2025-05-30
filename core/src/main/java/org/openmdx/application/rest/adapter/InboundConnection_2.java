@@ -97,8 +97,6 @@ import jakarta.resource.cci.Record;
 import jakarta.resource.spi.EISSystemException;
 import jakarta.resource.spi.LocalTransactionException;
 #endif
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
@@ -345,7 +343,7 @@ public class InboundConnection_2 extends AbstractConnection {
      * <em>TODO<br>
      * This implementation keeps the actual behaviour for the moment.<br>
      * But in the light of the (CDI induced) recent changes it seems more
-     * appropriate to forward the the transaction control requests to JTA and
+     * appropriate to forward the transaction control requests to JTA and
      * rely on the call-back for container managed transactions.</em>
      */
     class TransitionalTransactionAdapter implements LocalTransaction {
@@ -699,11 +697,15 @@ public class InboundConnection_2 extends AbstractConnection {
                                     (InputStream) jcaValue
                                 ) : jcaValue;
                 } else if (jcaValue instanceof String && PrimitiveTypes.DATETIME.equals(featureType.getQualifiedName())) {
-                    return Datatypes.create(java.util.Date.class, (String) jcaValue);
+                    return Datatypes.create(Datatypes.DATE_TIME_CLASS, (String) jcaValue);
                 } else if (jcaValue instanceof String && PrimitiveTypes.DATE.equals(featureType.getQualifiedName())) {
-                    return Datatypes.create(XMLGregorianCalendar.class, (String) jcaValue);
+                    return Datatypes.create(Datatypes.DATE_CLASS, (String) jcaValue);
                 } else if (jcaValue instanceof String && PrimitiveTypes.DURATION.equals(featureType.getQualifiedName())) {
-                    return Datatypes.create(Duration.class, (String) jcaValue);
+                    return Datatypes.create(Datatypes.DURATION_CLASS, (String) jcaValue);
+                } else if (jcaValue instanceof String && PrimitiveTypes.DURATION_DAYTIME.equals(featureType.getQualifiedName())) {
+                    return Datatypes.create(Datatypes.DURATION_DAYTIME_CLASS, (String) jcaValue);
+                } else if (jcaValue instanceof String && PrimitiveTypes.DURATION_YEARMONTH.equals(featureType.getQualifiedName())) {
+                    return Datatypes.create(Datatypes.DURATION_YEARMONTH_CLASS, (String) jcaValue);
                 } else {
                     return featureDef.getModel().isReferenceType(featureDef) ? getObjectByResourceIdentifier(jcaValue) : jcaValue;
                 }
@@ -806,7 +808,7 @@ public class InboundConnection_2 extends AbstractConnection {
          * <li>TODO take extensions into consideration
          * </ul>
          * 
-         * @param input
+         * @param input the Query
          * 
          * @return a new query object
          * 
@@ -1008,10 +1010,8 @@ public class InboundConnection_2 extends AbstractConnection {
                             features.add(orderSpecifier.featureName());
                         }
                     }
-                    
                     return propagate(refObject, output, features, toFetchGroups(input));
                 }
-
             }
         }
 
@@ -1058,8 +1058,33 @@ public class InboundConnection_2 extends AbstractConnection {
                     Collection refContainer = (Collection) container;
                     refContainer.add(refObject);
                 } else {
-                    RefContainer<?> refContainer = (RefContainer<?>) container;
-                    refContainer.refAdd(toAddArguments(refContainer.getClass(), xri.getLastSegment().toClassicRepresentation(), refObject));
+                    RefContainer<RefObject> refContainer = (RefContainer<RefObject>) container;
+                    String qualifier = xri.getLastSegment().toClassicRepresentation();
+                    final Class<? extends RefContainer> containerClass = refContainer.getClass();
+                    final Class<?>[] argumentClasses = ReferenceDef.getAddArguments(containerClass);
+                    if (argumentClasses.length == 3) {
+                        #if CLASSIC_CHRONO_TYPES
+                            refContainer.refAdd(toAddArguments(argumentClasses, qualifier, refObject));
+                        #else
+                            boolean persistent = qualifier.startsWith("!");
+                            QualifierType qualifierType = QualifierType.valueOf(persistent);
+                            Object qualifierValue = persistent ? qualifier.substring(1) : qualifier;
+                            refContainer.refAdd(qualifierType, qualifierValue, refObject);
+                        #endif
+                    } else {
+                        throw ResourceExceptions.initHolder(
+                                new NotSupportedException(
+                                        "More than one qualifier is not yet supported",
+                                        BasicException.newEmbeddedExceptionStack(
+                                                BasicException.Code.DEFAULT_DOMAIN,
+                                                BasicException.Code.NOT_IMPLEMENTED,
+                                                new BasicException.Parameter(
+                                                        "argumentClasses", (Object[]) argumentClasses
+                                                )
+                                        )
+                                )
+                        );
+                    }
                 }
                 return propagate(refObject, output, null, null);
             }
@@ -1067,8 +1092,8 @@ public class InboundConnection_2 extends AbstractConnection {
 
         /**
          * Provide the {@code add()} argument list
-         * 
-         * @param containerClass
+         *
+         * @param argumentClasses
          * @param qualifier
          * @param object
          * 
@@ -1077,31 +1102,14 @@ public class InboundConnection_2 extends AbstractConnection {
          */
         @SuppressWarnings("rawtypes")
         private Object[] toAddArguments(
-            Class<? extends RefContainer> containerClass,
-            String qualifier,
-            RefObject object
-        )
-            throws ResourceException {
-            final Class<?>[] argumentClasses = ReferenceDef.getAddArguments(containerClass);
-            if (argumentClasses.length == 3) {
+                Class<?>[] argumentClasses,
+                String qualifier,
+                RefObject object
+        ) {
                 boolean persistent = qualifier.startsWith("!");
                 return new Object[] { QualifierType.valueOf(
                     persistent
                 ), Datatypes.create(argumentClasses[1], persistent ? qualifier.substring(1) : qualifier), object };
-            } else {
-                throw ResourceExceptions.initHolder(
-                    new NotSupportedException(
-                        "More than one qualifier is not yet supported",
-                        BasicException.newEmbeddedExceptionStack(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.NOT_IMPLEMENTED,
-                            new BasicException.Parameter(
-                                "argumentClasses", (Object[]) argumentClasses
-                            )
-                        )
-                    )
-                );
-            }
         }
 
         /*
@@ -1122,7 +1130,7 @@ public class InboundConnection_2 extends AbstractConnection {
             Path newResourceIdentifier = input.getResourceIdentifier();
             int featurePosition = newResourceIdentifier.size() - 2;
             RefObject refObject = getObjectByResourceIdentifier(newResourceIdentifier.getPrefix(featurePosition));
-            RefContainer<?> refContainer = (RefContainer<?>) refObject.refGetValue(
+            RefContainer<RefObject> refContainer = (RefContainer<RefObject>) refObject.refGetValue(
                 newResourceIdentifier.getSegment(featurePosition).toClassicRepresentation()
             );
             String qualifier = newResourceIdentifier.getLastSegment().toClassicRepresentation();

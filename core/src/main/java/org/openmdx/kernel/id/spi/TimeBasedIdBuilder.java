@@ -137,7 +137,7 @@ public abstract class TimeBasedIdBuilder {
      * <p>
      * This method may be overridden by a subclass.
      * <p>
-     * The 60 bit timestamp value is used to set the the time_low, time_mid, 
+     * The 60 bit timestamp value is used to set the time_low, time_mid,
      * and time_hi fields of the UUID. 
      * 
      * @return the timestamp for the next UUID

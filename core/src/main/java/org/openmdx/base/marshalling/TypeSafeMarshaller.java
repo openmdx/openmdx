@@ -57,7 +57,7 @@ public interface TypeSafeMarshaller<U,M> {
      * @return           The marshalled object
      * 
      * @exception        InvalidArgumentException
-     *                   if the the object can't be marshalled
+     *                   if the object can't be marshalled
      */
     M marshal (
         U source
@@ -71,7 +71,7 @@ public interface TypeSafeMarshaller<U,M> {
      * @return          The unmarshalled object
      * 
      * @exception        InvalidArgumentException
-     *                   if the the object can't be marshalled
+     *                   if the object can't be marshalled
      */
     U unmarshal (
         M source

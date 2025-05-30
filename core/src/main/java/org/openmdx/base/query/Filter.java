@@ -54,12 +54,11 @@ import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_
 import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_STRING_PARAM;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.persistence.spi.QueryExtension;
@@ -67,6 +66,8 @@ import org.openmdx.base.rest.cci.ConditionRecord;
 import org.openmdx.base.rest.cci.FeatureOrderRecord;
 import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.base.rest.spi.QueryFilterRecord;
+import org.openmdx.base.text.conversion.JavaBeans;
+import org.w3c.spi2.Datatypes;
 
 /**
  * A filter allows to retrieve subsets of filterable maps and to sort
@@ -76,7 +77,7 @@ import org.openmdx.base.rest.spi.QueryFilterRecord;
  * The Filter class is bean-compliant. Hence, it can be externalized
  * with the XMLDecoder.
  * 
- * @see org.openmdx.base.text.conversion.JavaBeans
+ * @see JavaBeans
  */
 public class Filter extends QueryFilterRecord {
 
@@ -241,11 +242,11 @@ public class Filter extends QueryFilterRecord {
                                     );
                                 } else if (QUERY_EXTENSION_DATE_PARAM.equals(piggyBackFeature)) {
                                     extension.setDateParam(
-                                        Filter.getValues(XMLGregorianCalendar.class, condition)
+                                        Filter.getValues(Datatypes.DATE_CLASS, condition)
                                     );
                                 } else if (QUERY_EXTENSION_DATETIME_PARAM.equals(piggyBackFeature)) {
                                     extension.setDateTimeParam(
-                                        Filter.getValues(Date.class, condition)
+                                        Filter.getValues(Datatypes.DATE_TIME_CLASS, condition)
                                     );
                                 } else if (QUERY_EXTENSION_DECIMAL_PARAM.equals(piggyBackFeature)) {
                                     extension.setDecimalParam(
@@ -278,7 +279,7 @@ public class Filter extends QueryFilterRecord {
     /**
      * Replace the order specifiers
      * 
-     * @param order specifiers
+     * @param orderSpecifiers
      */
     public void setOrderSpecifier(
         List<OrderSpecifier> orderSpecifiers
@@ -333,7 +334,7 @@ public class Filter extends QueryFilterRecord {
     /**
      * Set extensions.
      * 
-     * @param extension The extension to set.
+     * @param extensions The extensions to set.
      */
     public void setExtension(
         QueryExtensionRecord[] extensions

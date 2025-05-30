@@ -43,10 +43,8 @@
  */
 package org.openmdx.state2.cci;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-
 public interface PeriodFactory <PERIOD> {
 
-	PERIOD newPeriod(XMLGregorianCalendar from, XMLGregorianCalendar to);
+	PERIOD newPeriod(#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif from, #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif to);
 	
 }

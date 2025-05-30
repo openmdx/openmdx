@@ -54,8 +54,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jdo.PersistenceManager;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import #if JAVA_8 javax.servlet.http.HttpServletRequest #else jakarta.servlet.http.HttpServletRequest#endif;
+import #if JAVA_8 javax.servlet.http.HttpSession #else jakarta.servlet.http.HttpSession#endif;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;

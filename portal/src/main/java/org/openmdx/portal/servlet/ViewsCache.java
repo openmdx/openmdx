@@ -56,7 +56,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpSession;
+import #if JAVA_8 javax.servlet.http.HttpSession #else jakarta.servlet.http.HttpSession#endif;
 
 import org.openmdx.portal.servlet.component.ObjectView;
 
@@ -100,8 +100,8 @@ public class ViewsCache {
     		}
     	}
         session.setAttribute(
-            WebKeys.VIEW_CACHE_CACHED_SINCE, 
-            new Long(cachedSince)
+            WebKeys.VIEW_CACHE_CACHED_SINCE,
+            cachedSince
         );
     }
 

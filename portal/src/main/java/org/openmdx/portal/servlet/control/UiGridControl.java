@@ -196,7 +196,7 @@ public class UiGridControl extends Control implements Serializable {
           if(!columnTitleIsSortable) {
               this.initialColumnSortOrders.put(
                   columnDef.getFeatureName(),
-                  new Short(Short.MIN_VALUE)              
+                  Short.MIN_VALUE
               );
           }
           if(columnDef instanceof ObjectReferenceField) {

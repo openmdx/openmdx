@@ -121,7 +121,7 @@ public class BooleanValue
         );
         this.defaultValue = fieldDef.defaultValue == null 
             ? null 
-            : new Boolean(fieldDef.defaultValue);
+            : Boolean.valueOf(fieldDef.defaultValue);
     }
 
     /* (non-Javadoc)

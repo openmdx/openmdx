@@ -81,9 +81,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.WriteListener;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
+#if JAVA_8
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+#else
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+#endif
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 import javax.servlet.http.HttpSessionContext;

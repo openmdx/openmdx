@@ -68,7 +68,7 @@ public final class UUIDs {
      * Constructor 
      */
     private UUIDs() {
-        // TODO Avoid instantiation
+        // Avoid instantiation
     }
 
     /**

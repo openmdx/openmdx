@@ -52,7 +52,6 @@ package org.openmdx.portal.servlet.control;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
@@ -61,6 +60,7 @@ import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.attribute.DateValue;
+import org.w3c.time.SystemClock;
 
 /**
  * ShowErrorsControl
@@ -105,7 +105,7 @@ public class ShowErrorsControl extends Control implements Serializable {
                true, 
                app
            );
-           String formattedDateTime = dateTimeFormat.format(new Date());
+           String formattedDateTime = dateTimeFormat.format(SystemClock.getInstance().now());
            String separator = " | ";
            p.write("  <tr>");
            p.write("    <td>");

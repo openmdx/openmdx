@@ -97,7 +97,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -108,6 +107,8 @@ import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.naming.NamingException;
+
+#if JAVA_8
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -118,6 +119,18 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
+#else
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
+import jakarta.servlet.http.HttpSession;
+#endif
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -155,6 +168,7 @@ import org.openmdx.uses.org.apache.commons.fileupload.DiskFileUpload;
 import org.openmdx.uses.org.apache.commons.fileupload.FileItem;
 import org.openmdx.uses.org.apache.commons.fileupload.FileUpload;
 import org.openmdx.uses.org.apache.commons.fileupload.FileUploadException;
+import org.w3c.time.SystemClock;
 
 /**
  * This is a generic servlet which allows to browse and edit MOF-compliant
@@ -250,7 +264,7 @@ public class ObjectInspectorServlet extends HttpServlet {
             throw new ServletException("can not get persistence manager factory", e);
         }
         // Info
-        String messagePrefix = new Date() + "  ";
+        String messagePrefix = SystemClock.getInstance().now() + "  ";
         System.out.println();
         System.out.println();
         System.out.println(messagePrefix + "Starting web application \"" + conf.getServletContext().getContextPath() + "\"");
@@ -1144,7 +1158,7 @@ public class ObjectInspectorServlet extends HttpServlet {
                     ModelElement_1_0 featureDef = app.getModel().getElement(feature);
                     if(Multiplicity.STREAM.code().equals(featureDef.getMultiplicity())) {
                         long length = refObj.refGetValue(feature, os, 0);
-                        response.setContentLength(new Long(length).intValue());       
+                        response.setContentLength(Long.valueOf(length).intValue());
                     } else {
                         byte[] bytes = (byte[])refObj.refGetValue(feature);
                         if(bytes != null) {

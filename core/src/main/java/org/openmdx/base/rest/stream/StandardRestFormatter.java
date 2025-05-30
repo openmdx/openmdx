@@ -53,7 +53,6 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -71,7 +70,6 @@ import jakarta.resource.cci.IndexedRecord;
 import jakarta.resource.cci.MappedRecord;
 import jakarta.resource.spi.ResourceAllocationException;
 #endif
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -102,6 +100,7 @@ import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Standard REST Formatter
@@ -466,10 +465,10 @@ public class StandardRestFormatter implements RestFormatter {
 	                    writer.writeCharacters(xri.toXRI());
 	                } else if (value instanceof String) {
 	                    writer.writeCData((String) value);
-	                } else if (value instanceof Date) {
-	                    writer.writeCharacters(
-	                        DateTimeFormat.EXTENDED_UTC_FORMAT.format((Date) value)
-	                    );
+	                } else if (Datatypes.DATE_TIME_CLASS.isInstance(value)) {
+                        writer.writeCharacters(
+                                DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value))
+                        );
 	                } else if (value instanceof char[]) {
 	                    char[] text = (char[]) value;
 	                    writer.writeCharacters(text, 0, text.length);
@@ -560,8 +559,8 @@ public class StandardRestFormatter implements RestFormatter {
     		value instanceof BigDecimal ? PrimitiveTypes.DECIMAL :
     		value instanceof Boolean ? PrimitiveTypes.BOOLEAN :
     		value instanceof Path ? PrimitiveTypes.OBJECT_ID :
-    		value instanceof Date ? PrimitiveTypes.DATETIME :
-    		value instanceof XMLGregorianCalendar ? PrimitiveTypes.DATE :
+            Datatypes.DATE_TIME_CLASS.isInstance(value) ? PrimitiveTypes.DATETIME :
+            Datatypes.DATE_CLASS.isInstance(value) ? PrimitiveTypes.DATE :
     		value instanceof URI ? PrimitiveTypes.ANYURI :
     		value instanceof byte[] ? PrimitiveTypes.BINARY :
     		value instanceof UUID ? PrimitiveTypes.UUID :
@@ -573,7 +572,7 @@ public class StandardRestFormatter implements RestFormatter {
      * Print Exception
      * 
      * @param target
-     * @param exception
+     * @param source
      * @throws ServiceException
      */
     @Override
@@ -589,12 +588,9 @@ public class StandardRestFormatter implements RestFormatter {
                 writer.writeStartElement("element");
                 writer.writeAttribute("exceptionDomain", entry.getExceptionDomain());
                 writer.writeAttribute("exceptionCode", String.valueOf(entry.getExceptionCode()));
-                Date exceptionTime = entry.getTimestamp();
+                #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif exceptionTime = entry.getTimestamp();
                 if (exceptionTime != null) {
-                    writer.writeAttribute(
-                        "exceptionTime",
-                        DateTimeFormat.EXTENDED_UTC_FORMAT.format(exceptionTime)
-                    );
+                    writer.writeAttribute("exceptionTime", DateTimeFormat.EXTENDED_UTC_FORMAT.format(exceptionTime));
                 }
                 String exceptionClass = entry.getExceptionClass();
                 if (exceptionClass != null) {

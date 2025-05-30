@@ -52,7 +52,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Date;
 import java.util.UUID;
 
 #if JAVA_8
@@ -87,7 +86,9 @@ import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.state2.cci.DateStateViews;
+import org.w3c.time.SystemClock;
 import org.xml.sax.InputSource;
+import org.w3c.time.ChronoTypes;
 
 public class PerformanceTest {
 
@@ -103,14 +104,16 @@ public class PerformanceTest {
 	 */
 	protected static final StandardRestFormatter restFormatter = RestFormatters.getFormatter();
 
-	private final SerializationTest[] tests = { new SerializationTest("Java (Externalizable)") {
+	private final SerializationTest[] tests = {
+
+			new SerializationTest("Java (Externalizable)") {
 
 		private BinarySink sink = new BinarySink();
 		private boolean prolog = true;
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see test.openmdx.base.resource.TestPerformance.SerializationTest#reset()
 		 */
 		@Override
@@ -121,7 +124,7 @@ public class PerformanceTest {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * test.openmdx.base.resource.TestPerformance.SerializationTest#deserialize()
 		 */
@@ -136,7 +139,7 @@ public class PerformanceTest {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see test.openmdx.base.resource.TestPerformance.SerializationTest#serialize()
 		 */
 		@Override
@@ -151,13 +154,15 @@ public class PerformanceTest {
 			return this.sink.size();
 		}
 
-	}, new SerializationTest("XML (UTF-16)") {
+	},
+
+			new SerializationTest("XML (UTF-16)") {
 
 		private UTF16Sink sink = new UTF16Sink();
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * test.openmdx.base.resource.TestPerformance.SerializationTest#deserialize()
 		 */
@@ -170,7 +175,7 @@ public class PerformanceTest {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see test.openmdx.base.resource.TestPerformance.SerializationTest#serialize()
 		 */
 		@Override
@@ -180,7 +185,8 @@ public class PerformanceTest {
 			return sink.size();
 		}
 
-	}, new SerializationTest("XML (UTF-8)") {
+	},
+			new SerializationTest("XML (UTF-8)") {
 
 		private UTF8Sink sink = new UTF8Sink();
 
@@ -209,13 +215,14 @@ public class PerformanceTest {
 			return sink.size();
 		}
 
-	}, new SerializationTest("WBXML (UTF-8)") {
+	},
+			new SerializationTest("WBXML (UTF-8)") {
 
 		private WBXMLSink sink = new WBXMLSink();
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * test.openmdx.base.resource.TestPerformance.SerializationTest#deserialize()
 		 */
@@ -228,7 +235,7 @@ public class PerformanceTest {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see test.openmdx.base.resource.TestPerformance.SerializationTest#serialize()
 		 */
 		@Override
@@ -238,7 +245,8 @@ public class PerformanceTest {
 			return this.sink.size();
 		}
 
-	} };
+	}
+	};
 
 	@Test
 	public void testSerialization() throws Exception {
@@ -261,7 +269,7 @@ public class PerformanceTest {
 	@BeforeAll
 	@SuppressWarnings("unchecked")
 	static public void setUp() throws ResourceException {
-		XMLGregorianCalendar today = DateStateViews.today();
+		Object today = SystemClock.getInstance().today();
 		testData = Records.getRecordFactory().createIndexedRecord(ResultRecord.class);
 		for (int i = 0; i < SIZE; i++) {
 			if (i < SIZE / 5) {
@@ -283,7 +291,7 @@ public class PerformanceTest {
 				entry.put("value5", value5);
 				UUID value6 = UUIDs.newUUID();
 				entry.put("value6", value6.toString());
-				entry.put("value7", new Date(value4));
+				entry.put("value7", ChronoTypes.ofEpochMilliseconds(value4));
 				entry.put("value8", today);
 				entry.put("value9", UUIDConversion.toURI(value6));
 				BigInteger value10 = BigInteger.valueOf(1000000 * i);
@@ -302,7 +310,7 @@ public class PerformanceTest {
 				by.add("group1Principal");
 				by.add("group2Principal");
 				by.add("group3Principal");
-				Date at = new Date();
+				#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif at = SystemClock.getInstance().now();
 				entry.put(SystemAttributes.CREATED_AT, at);
 				entry.put(SystemAttributes.CREATED_BY, by);
 				entry.put(SystemAttributes.MODIFIED_AT, at);

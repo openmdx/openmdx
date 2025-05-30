@@ -71,5 +71,13 @@ public enum QualifierType {
     ){
         return persistent ? PERSISTENT : REASSIGNABLE;
     }
-    
+
+    /**
+     * Maps a qualifier type to a persistency flag
+     *
+     * @return the corresponding persistency flag
+     */
+    public boolean isPersistent() {
+        return this == PERSISTENT;
+    }
 }

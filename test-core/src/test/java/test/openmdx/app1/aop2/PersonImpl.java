@@ -44,10 +44,10 @@
  */
 package test.openmdx.app1.aop2;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import javax.jdo.listener.StoreCallback;
@@ -61,6 +61,7 @@ import org.openmdx.base.jmi1.Void;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.SortedMaps;
 
+import org.w3c.time.SystemClock;
 import test.openmdx.app1.jmi1.Address;
 import test.openmdx.app1.jmi1.App1Package;
 import test.openmdx.app1.jmi1.CanNotFormatNameException;
@@ -76,7 +77,7 @@ import test.openmdx.app1.jmi1.PersonFormatNameAsResult;
 /**
  * Person
  */
-public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test.openmdx.app1.cci2.Person, C extends Date>  
+public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test.openmdx.app1.cci2.Person, C extends #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif>
     extends AbstractObject<S,N,C> 
     implements StoreCallback, NaturalPerson
 {
@@ -111,19 +112,17 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
     /**
      * Age Calculation
      * 
-     * @param in the method's input structure
-     * 
      * @return the method's result structure
      * 
      * @see test.openmdx.app1.cci2.Person#getAge()
      */
     public short getAge() {
         Person same = sameObject();
-        XMLGregorianCalendar birthdate = same.getBirthdate();
+        #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif birthdate = same.getBirthdate();
         if(birthdate == null) {
             return - 1;
         } else {
-            int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+            int currentYear = SystemClock.getInstance().today().getYear();
             return (short) (currentYear - birthdate.getYear());
         }
     }
@@ -201,8 +200,6 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
     /**
      * Void Operation
      * 
-     * @param in the method's input structure
-     * 
      * @return the method's result structure
      * 
      * @see test.openmdx.app1.cci2.Person#voidOp()
@@ -277,7 +274,7 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
     @Override
     @SuppressWarnings("unchecked")
     protected C newContext() {
-        return (C) new Date();
+        return (C) SystemClock.getInstance().now();
     }
 
     /* (non-Javadoc)

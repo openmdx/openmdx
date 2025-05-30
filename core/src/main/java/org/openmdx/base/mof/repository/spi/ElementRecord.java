@@ -44,8 +44,8 @@
  */
 package org.openmdx.base.mof.repository.spi;
 
+import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -66,6 +66,7 @@ import org.openmdx.base.resource.cci.SetRecord;
 import org.openmdx.base.rest.spi.AbstractMappedRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
+import org.w3c.time.ChronoTypes;
 
 /**
  * org::omg::model1::Element Record
@@ -93,7 +94,7 @@ abstract class ElementRecord<M extends Enum<M>>
     private IndexedRecord stereotype;
     private Path container;
 
-    private final static long NULL_DATE = Long.MIN_VALUE;
+    private final static long NULL_DATE_TIME = Long.MIN_VALUE;
     
     /**
      * Implements {@code Serializable}
@@ -169,13 +170,13 @@ abstract class ElementRecord<M extends Enum<M>>
         return this.objectId;
     }
 
-    protected Date getCreatedAt(){
-        return this.createdAt == NULL_DATE ? null : new Date(this.createdAt);
+    protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getCreatedAt(){
+        return this.createdAt == NULL_DATE_TIME ? null : ChronoTypes.ofEpochMilliseconds(this.createdAt);
     }
 
-    protected void setCreatedAt(Date newValue){
+    protected void setCreatedAt(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif createdAt){
         assertMutability();
-        this.createdAt = newValue == null ? NULL_DATE : newValue.getTime();
+        this.createdAt = createdAt == null ? NULL_DATE_TIME : ChronoTypes.getEpochMilliseconds(createdAt);
     }
 
     protected IndexedRecord createdBy() {
@@ -211,13 +212,13 @@ abstract class ElementRecord<M extends Enum<M>>
         this.createdBy = internalize(firstOfSet(createdBy));
     }
     
-    protected Date getModifiedAt(){
-        return this.modifiedAt == NULL_DATE ? null : new Date(this.modifiedAt);
+    protected #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getModifiedAt(){
+        return this.modifiedAt == NULL_DATE_TIME ? null : ChronoTypes.ofEpochMilliseconds(this.modifiedAt);
     }
 
-    protected void setModifiedAt(Date newValue){
+    protected void setModifiedAt(#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif modifiedAt){
         assertMutability();
-        this.modifiedAt = newValue == null ? NULL_DATE : newValue.getTime();
+        this.modifiedAt = modifiedAt == null ? NULL_DATE_TIME : ChronoTypes.getEpochMilliseconds(modifiedAt);
     }
 
     protected IndexedRecord modifiedBy(){

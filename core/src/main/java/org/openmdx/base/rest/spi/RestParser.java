@@ -53,7 +53,6 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +70,6 @@ import jakarta.resource.cci.MappedRecord;
 import jakarta.resource.cci.Record;
 #endif
 
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -106,7 +104,9 @@ import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
+#if CLASSIC_CHRONO_TYPES
 import org.w3c.format.DateTimeFormat;
+#endif
 import org.w3c.spi2.Datatypes;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -601,8 +601,8 @@ public class RestParser {
                         PrimitiveTypes.DECIMAL.equals(featureType) ? Datatypes.create(BigDecimal.class,text.trim()) : 
                         PrimitiveTypes.BOOLEAN.equals(featureType) ? Datatypes.create(Boolean.class, text.trim()) : 
                         PrimitiveTypes.OBJECT_ID.equals(featureType) ? Datatypes.create(Path.class, text.trim()) :
-                        PrimitiveTypes.DATETIME.equals(featureType) ? Datatypes.create(Date.class,text.trim()) : 
-                        PrimitiveTypes.DATE.equals(featureType) ? Datatypes.create(XMLGregorianCalendar.class, text.trim()) : 
+                        PrimitiveTypes.DATETIME.equals(featureType) ? Datatypes.create(Datatypes.DATE_TIME_CLASS,text.trim()) :
+                        PrimitiveTypes.DATE.equals(featureType) ? Datatypes.create(Datatypes.DATE_CLASS, text.trim()) :
                         PrimitiveTypes.ANYURI.equals(featureType) ? Datatypes.create(URI.class, text.trim()) : 
                         PrimitiveTypes.BINARY.equals(featureType) ? Base64.decode(text.trim()) : 
                         featureType != null && isClassType() ? new Path(text.trim()) : text;
@@ -1074,7 +1074,7 @@ public class RestParser {
                         this.exceptionDomain,
                         Integer.parseInt(this.exceptionCode),
                         this.exceptionClass,
-                        this.exceptionTime == null ? null : DateTimeFormat.EXTENDED_UTC_FORMAT.parse(exceptionTime),
+                        this.exceptionTime == null ? null : #if CLASSIC_CHRONO_TYPES DateTimeFormat.EXTENDED_UTC_FORMAT #else java.time.Instant#endif.parse(exceptionTime),
                         this.methodName,
                         this.lineNumber == null ? null : Integer.valueOf(this.lineNumber),
                         this.description,

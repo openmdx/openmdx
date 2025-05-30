@@ -47,20 +47,34 @@ package org.openmdx.kernel.text.parsing;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
-import java.util.Date;
 
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.text.spi.Parser;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Standard Primitive Type Parser Test 
  */
 public class StandardPrimitiveTypeParserTest {
+
+	/**
+	 * org::openmdx::state2
+	 */
+	@Test
+	public void whenStateAuthorityThenParseAsPath(){
+		// Arrange
+		final Parser testee = StandardPrimitiveTypeParser.getInstance();
+		// Act
+		final Path value = testee.parse(Path.class, "xri://@openmdx*org.openmdx.state2");
+		// Assert
+		Assertions.assertEquals(new Path("org::openmdx::state2"), value);
+	}
 
 	@Test
 	public void whenTrueThenParseAsBoolean(){
@@ -173,16 +187,15 @@ public class StandardPrimitiveTypeParserTest {
 	@Test
 	public void whenValueClassIsDateThenThrowParseException(){
 		// Arrange
-		final Parser testee = StandardPrimitiveTypeParser.getInstance(); 
-		try {
-			// Act
-			testee.parse(Date.class, "20000401T000000.000Z");
-			Assertions.fail("IllegalArgumentException expected");
-		} catch (IllegalArgumentException expected) {
-			// Assert
-			final BasicException cause = Throwables.getCause(expected, null);
-			Assertions.assertEquals(ParseException.class.getName(), cause.getExceptionClass());
-		}
+		final Parser testee = StandardPrimitiveTypeParser.getInstance();
+		final String value = "20000401T000000.000Z";
+		// Act & Assert
+		final IllegalArgumentException expected = Assertions.assertThrows(
+			IllegalArgumentException.class,
+			() -> testee.parse(Datatypes.DATE_CLASS, value)
+		);
+		final BasicException cause = Throwables.getCause(expected, null);
+		Assertions.assertEquals(ParseException.class.getName(), cause.getExceptionClass());
 	}
 	
 }

@@ -47,7 +47,6 @@ package org.openmdx.application.mof.mapping.xmi;
 
 import java.io.OutputStream;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +61,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.wbxml.cci.StringTable;
 import org.openmdx.base.xml.stream.XMLOutputFactories;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.spi2.Datatypes;
 
 /**
  * XMI Model Mapper
@@ -70,12 +70,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Constructor 
-     *
-     * @param os
-     * @param mimeType
-     * @param allFeatures 
-     * 
-     * @throws ServiceException
      */
     public XMIModelMapper(
         OutputStream os,
@@ -95,9 +89,6 @@ public class XMIModelMapper implements StringTable {
     private final boolean derivedFeatures;
     private final boolean emptyFeatures;
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.wbxml.cci.StringTable#isStringTablePopulatedExplicitely()
-     */
     @Override
     public boolean isStringTablePopulatedExplicitely() {
         if(this.pw instanceof StringTable) {
@@ -107,9 +98,6 @@ public class XMIModelMapper implements StringTable {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.wbxml.cci.StringTable#addString(java.lang.String)
-     */
     @Override
     public void addString(String string) {
         if(this.pw instanceof StringTable) {
@@ -118,11 +106,8 @@ public class XMIModelMapper implements StringTable {
     }
 
     /**
-     * In case of a multi-valued element write it in the form 
-     * <elementName>{<_item >value</_item>}</elementName>.
-     * 
-     * @param elementName
-     * @param elementValues
+     * In case of a multi-valued element write it in the form
+     * &lt;&lsaquo;elementName&rsaquo;&gt;&lt;_item&gt;&lsaquo;value&rsaquo;&lt;/_item&gt;…&lt;/&lsaquo;elementName&rsaquo;&gt;.
      */
     void writeElement(
         String elementName,
@@ -145,10 +130,7 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * In case of a map element write it in the form 
-     * <elementName>{<_item key="key">value</_item>}</elementName>.
-     * 
-     * @param elementName
-     * @param elementValues
+     * &lt;&lsaquo;elementName&rsaquo;&gt;&lt;_item key="&lsaquo;key&rsaquo;"&gt;&lsaquo;value&rsaquo;&lt;/_item&gt;…&lt;/&lsaquo;elementName&rsaquo;&gt;.
      */
     void writeElement(
         String elementName,
@@ -172,10 +154,8 @@ public class XMIModelMapper implements StringTable {
 
     
     /**
-     * Otherwise write it in the form <elementName>value</elementName>
-     *
-     * @param elementName
-     * @param elementValue
+     * Otherwise write it in the form
+     * &lt;&lsaquo;elementName&rsaquo;&gt;&lsaquo;value&rsaquo;&lt;/&lsaquo;elementName&rsaquo;&gt;.
      */
     void writeElement(
         String elementName,
@@ -190,9 +170,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Externalize an element value
-     * 
-     * @param elementValue
-     * @throws XMLStreamException
      */
     void writeValue(
         Object elementValue
@@ -208,21 +185,12 @@ public class XMIModelMapper implements StringTable {
         }
     }
 
-    /**
-     * @param xri
-     * @throws XMLStreamException
-     */
     private void writeValue(
         final Path xri
     ) throws XMLStreamException {
         this.pw.writeCharacters(xri.toXRI());
     }
     
-   /**
-     * @param pos
-     * @param elementName
-     * @param elementValue
-     */
     void writeElement(
         int pos,
         String elementName,
@@ -240,15 +208,12 @@ public class XMIModelMapper implements StringTable {
     } 
 
     /**
-     * Translate a string of the form 20020406T082623.930Z to a string of the
-     * form 2002-04-06T08:26:23Z.
-     * 
-     * @param elementName
-     * @param elementValue
+     * Translate a string of the form {@code 20020406T082623.930Z} to a string of the
+     * form {@code 2002-04-06T08:26:23Z}.
      */
     void writeElementAsDateTime(
         String elementName,
-        Date elementValue
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif elementValue
     ) throws XMLStreamException {
         this.writeElementAsDateTime(
             44,
@@ -259,15 +224,11 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write element as date time.
-     * 
-     * @param pos
-     * @param elementName
-     * @param elementValue
      */
     void writeElementAsDateTime(
         int pos,
         String elementName,
-        Date elementValue
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif elementValue
     ) throws XMLStreamException {
         this.pw.writeStartElement(elementName);
         this.pw.writeCharacters(DateTimeFormat.EXTENDED_UTC_FORMAT.format(elementValue));
@@ -276,9 +237,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write element with XML-encoded element values.
-     * 
-     * @param elementName
-     * @param elementValues
      */
     void writeElementEncoded(
         String elementName,
@@ -293,9 +251,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write model package definition.
-     * 
-     * @param packageDef
-     * @throws ServiceException
      */
     public void writePackage(
         ModelElement_1_0 packageDef
@@ -306,9 +261,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, packageDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)packageDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(packageDef.objGetValue(SystemAttributes.CREATED_AT)));
                 this.writeElement(SystemAttributes.CREATED_BY, packageDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)packageDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(packageDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, packageDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("container", packageDef.getContainer());
@@ -337,9 +292,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write primitive type definition.
-     * 
-     * @param primitiveTypeDef
-     * @throws ServiceException
      */
     public void writePrimitiveType(
         ModelElement_1_0 primitiveTypeDef
@@ -350,9 +302,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, primitiveTypeDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)primitiveTypeDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(primitiveTypeDef.objGetValue(SystemAttributes.CREATED_AT)));
                 this.writeElement(SystemAttributes.CREATED_BY, primitiveTypeDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)primitiveTypeDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(primitiveTypeDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, primitiveTypeDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("container", primitiveTypeDef.getContainer());
@@ -381,9 +333,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write attribute definition.
-     * 
-     * @param attributeDef
-     * @throws ServiceException
      */
     public void writeAttribute(
         ModelElement_1_0 attributeDef
@@ -394,9 +343,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, attributeDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)attributeDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(attributeDef.objGetValue(SystemAttributes.CREATED_AT)));
                 this.writeElement(SystemAttributes.CREATED_BY, attributeDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)attributeDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(attributeDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, attributeDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("isDerived", attributeDef.isDerived());
@@ -422,9 +371,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write structure field definition.
-     * 
-     * @param structureFieldDef
-     * @throws ServiceException
      */
     public void writeStructureField(
         ModelElement_1_0 structureFieldDef
@@ -435,9 +381,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, structureFieldDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)structureFieldDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(structureFieldDef.objGetValue(SystemAttributes.CREATED_AT)));
                 this.writeElement(SystemAttributes.CREATED_BY, structureFieldDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)structureFieldDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(structureFieldDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, structureFieldDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("maxLength", structureFieldDef.objGetValue("maxLength"));
@@ -459,9 +405,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write operation definition.
-     * 
-     * @param operationDef
-     * @throws ServiceException
      */
     public void writeOperation(
         ModelElement_1_0 operationDef
@@ -472,9 +415,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, operationDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)operationDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(operationDef.objGetValue(SystemAttributes.CREATED_AT)));
                 this.writeElement(SystemAttributes.CREATED_BY, operationDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)operationDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(operationDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, operationDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             if(this.derivedFeatures) {
@@ -504,9 +447,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write exception definition.
-     * 
-     * @param exceptionDef
-     * @throws ServiceException
      */
     public void writeException(
         ModelElement_1_0 exceptionDef
@@ -517,9 +457,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, exceptionDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)exceptionDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(exceptionDef.objGetValue(SystemAttributes.CREATED_AT)));
                 this.writeElement(SystemAttributes.CREATED_BY, exceptionDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)exceptionDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(exceptionDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, exceptionDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             if(this.derivedFeatures) {
@@ -546,9 +486,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write parameter definition.
-     * 
-     * @param parameterDef
-     * @throws ServiceException
      */
     public void writeParameter(
         ModelElement_1_0 parameterDef
@@ -559,9 +496,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, parameterDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)parameterDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(parameterDef.objGetValue(SystemAttributes.CREATED_AT)));
                 this.writeElement(SystemAttributes.CREATED_BY, parameterDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)parameterDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(parameterDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, parameterDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("container", parameterDef.getContainer());
@@ -583,9 +520,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write association definition.
-     * 
-     * @param associationDef
-     * @throws ServiceException
      */
     public void writeAssociation(
         ModelElement_1_0 associationDef
@@ -596,9 +530,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, associationDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)associationDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(associationDef.objGetValue(SystemAttributes.CREATED_AT)));
                 this.writeElement(SystemAttributes.CREATED_BY, associationDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)associationDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(associationDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, associationDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("container", associationDef.getContainer());
@@ -628,9 +562,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write association end definition.
-     * 
-     * @param associationEndDef
-     * @throws ServiceException
      */
     public void writeAssociationEnd(
         ModelElement_1_0 associationEndDef
@@ -641,9 +572,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, associationEndDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)associationEndDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(associationEndDef.objGetValue(SystemAttributes.CREATED_AT)));
                 this.writeElement(SystemAttributes.CREATED_BY, associationEndDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)associationEndDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(associationEndDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, associationEndDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("aggregation", associationEndDef.getAggregation());
@@ -669,9 +600,6 @@ public class XMIModelMapper implements StringTable {
   
     /**
      * Write reference definition.
-     * 
-     * @param referenceDef
-     * @throws ServiceException
      */
     public void writeReference(
         ModelElement_1_0 referenceDef
@@ -682,9 +610,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, referenceDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)referenceDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(referenceDef.objGetValue(SystemAttributes.CREATED_AT)));
                 this.writeElement(SystemAttributes.CREATED_BY, referenceDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)referenceDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(referenceDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, referenceDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("container", referenceDef.getContainer());
@@ -713,9 +641,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write class definition.
-     * 
-     * @param classDef
-     * @throws ServiceException
      */
     public void writeClass(
         ModelElement_1_0 classDef
@@ -726,9 +651,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, classDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)classDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(classDef.objGetValue(SystemAttributes.CREATED_AT)));
                 this.writeElement(SystemAttributes.CREATED_BY, classDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)classDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(classDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, classDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("isSingleton", classDef.objGetValue("isSingleton"));
@@ -769,9 +694,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write structure type definition.
-     * 
-     * @param structDef
-     * @throws ServiceException
      */
     public void writeStructureType(
         ModelElement_1_0 structDef
@@ -782,9 +704,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, structDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)structDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(structDef.objGetValue(SystemAttributes.CREATED_AT)));
                 this.writeElement(SystemAttributes.CREATED_BY, structDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)structDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(structDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, structDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             if(this.derivedFeatures) {
@@ -822,9 +744,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write alias type definition.
-     * 
-     * @param aliasTypeDef
-     * @throws ServiceException
      */
     public void writeAliasType(
         ModelElement_1_0 aliasTypeDef
@@ -835,9 +754,9 @@ public class XMIModelMapper implements StringTable {
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, aliasTypeDef.jdoGetObjectId().toXRI());
-                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)aliasTypeDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, Datatypes.DATE_TIME_CLASS.cast(aliasTypeDef.objGetValue(SystemAttributes.CREATED_AT)));
                 this.writeElement(SystemAttributes.CREATED_BY, aliasTypeDef.objGetSet(SystemAttributes.CREATED_BY));
-                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)aliasTypeDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, Datatypes.DATE_TIME_CLASS.cast(aliasTypeDef.objGetValue(SystemAttributes.MODIFIED_AT)));
                 this.writeElement(SystemAttributes.MODIFIED_BY, aliasTypeDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             if(this.derivedFeatures) {
@@ -870,10 +789,6 @@ public class XMIModelMapper implements StringTable {
 
     /**
      * Write model header.
-     * 
-     * @param providerName
-     * @param segmentName
-     * @param schemaFileName
      */
     public void writeModelHeader(
         String providerName,
@@ -951,5 +866,3 @@ public class XMIModelMapper implements StringTable {
     }
 
 }
-
-//---------------------------------------------------------------------------

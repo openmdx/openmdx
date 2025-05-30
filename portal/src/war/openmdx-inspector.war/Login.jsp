@@ -65,7 +65,7 @@ org.openmdx.portal.servlet.*
 	else {
 		request.setCharacterEncoding("UTF-8");
 		String requestURL = request.getRequestURL().toString();
-		System.out.println(new Date() + ": Login: requestURL=" + requestURL + "; isRequestedSessionIdFromCookie=" + request.isRequestedSessionIdFromCookie() + "; servletPath=" + request.getServletPath() + "; remoteUser=" + request.getRemoteUser());
+		System.out.println(SystemClock.getInstance().now() + ": Login: requestURL=" + requestURL + "; isRequestedSessionIdFromCookie=" + request.isRequestedSessionIdFromCookie() + "; servletPath=" + request.getServletPath() + "; remoteUser=" + request.getRemoteUser());
 
 		// Locale
 		if(request.getParameter(org.openmdx.portal.servlet.WebKeys.LOCALE_KEY) != null) {

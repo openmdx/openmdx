@@ -59,6 +59,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openmdx.application.mof.repository.accessor.ModelBuilder_1;
@@ -86,6 +87,7 @@ public class TestModelRepository {
 	/**
      * CR20020284
      */
+//    @Disabled
     @Test
     public void loadAndSaveModelAsWBXML() throws ServiceException, IOException{
         Model_1_0 model = Model_1Factory.getModel();
@@ -131,8 +133,8 @@ public class TestModelRepository {
     /**
      * Compare two model contents for equality
      * 
-     * @param r1Model element XRI
-     * @param r2
+     * @param r1 element XRI
+     * @param r2 element XRI
      * @throws ServiceException 
      */
     private void assertRepositoryEquality(
@@ -147,8 +149,8 @@ public class TestModelRepository {
             ModelElement_1_0 e1 = r1.get(k);
             ModelElement_1_0 e2 = r2.get(k);
             Assertions.assertEquals(e1.objGetClass(), e2.objGetClass(), "Model element class: " + k.toXRI());
-            Set<String> f1 = new TreeSet<String>(e1.objDefaultFetchGroup());
-            Set<String> f2 = new TreeSet<String>(e2.objDefaultFetchGroup());
+            Set<String> f1 = new TreeSet<>(e1.objDefaultFetchGroup());
+            Set<String> f2 = new TreeSet<>(e2.objDefaultFetchGroup());
             if(!e1.jdoGetObjectId().getLastSegment().toClassicRepresentation().contains("$UNNAMED$")){ 
                 f1.remove(SystemAttributes.CREATED_BY);
                 f1.remove(SystemAttributes.MODIFIED_BY);

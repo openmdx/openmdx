@@ -45,7 +45,6 @@
 package org.openmdx.application.rest.adapter;
 
 #if JAVA_8
-import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
@@ -66,7 +65,6 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 #else
-import jakarta.resource.NotSupportedException;
 import jakarta.resource.ResourceException;
 import jakarta.resource.cci.Connection;
 import jakarta.resource.cci.Interaction;
@@ -254,15 +252,13 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
                         BasicException.newEmbeddedExceptionStack(exception)
                     )
                 );
-            } catch (NotSupportedException exception) {
+            } catch (#if JAVA_8 javax. #else jakarta. #endif transaction.NotSupportedException exception) {
             	throw ResourceExceptions.initHolder(
-                    new #if JAVA_8 javax #else jakarta #endif.resource.NotSupportedException(
+                    new #if JAVA_8 javax. #else jakarta. #endif resource.NotSupportedException(
 	                    "Unable to start the current transaction",
                         BasicException.newEmbeddedExceptionStack(exception)
                     )
                 );
-            } catch (#if JAVA_8 javax #else jakarta #endif.transaction.NotSupportedException exception) {
-                	// TODO: handle exception
             }
         }
 

@@ -52,6 +52,7 @@ import java.util.Set;
 
 import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.RefBaseObject;
+import javax.jmi.reflect.RefObject;
 import #if JAVA_8 javax.resource.cci.Record #else jakarta.resource.cci.Record #endif;
 
 import org.oasisopen.jmi1.RefContainer;
@@ -110,7 +111,7 @@ public class StandardMarshaller implements Marshaller {
         try {
             return 
                 source instanceof RefStruct_1_0 ? ((RefStruct_1_0)source).refDelegate() :  
-                source instanceof Object[] ? unmarshal((Object[])source) : 
+                source instanceof Object[] ? unmarshal((Object[]) source) :
             	this.outermostPackage.unmarshal(source);
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
@@ -238,7 +239,7 @@ public class StandardMarshaller implements Marshaller {
 	/**
 	 * Validate a given object
 	 * 
-	 * @param candidate
+	 * @param value
 	 * 
 	 * @throws ServiceException 
 	 */

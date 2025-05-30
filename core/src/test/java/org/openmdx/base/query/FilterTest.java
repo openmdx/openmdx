@@ -49,9 +49,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Date;
-
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -62,6 +59,7 @@ import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.SystemClock;
 
 /**
  * Test Filter
@@ -172,7 +170,9 @@ public class FilterTest {
         //
         try(
             XMLDecoder decoder = new XMLDecoder(
-                new URL(null, Resources.toResourceXRI("org/openmdx/base/query/CR20018833.xml"), new org.openmdx.kernel.url.protocol.xri.Handler()).openStream()
+                new URL(null,
+                        Resources.toResourceXRI("org/openmdx/base/query/CR20018833.xml"),
+                        new org.openmdx.kernel.url.protocol.xri.Handler()).openStream()
             )
         ){
             Filter filter1 = (Filter) decoder.readObject();
@@ -190,13 +190,10 @@ public class FilterTest {
                 "org:openmdx:base:BasicObject"
             )
         );
-        extension.setDateParam(
-            Datatypes.create(
-                XMLGregorianCalendar.class, 
-                "2000-02-29"
-            )
-        );
-        extension.setDateTimeParam(new Date());
+//        extension.setDateParam(
+//                Datatypes.create(Datatypes.DATE_CLASS, "2000-02-29")
+//        );
+        extension.setDateTimeParam(SystemClock.getInstance().now());
         extension.setDecimalParam(BigDecimal.ONE, BigDecimal.TEN);
         extension.setStringParam("String parameter 0", "String parameter 1");
         String xml = JavaBeans.toXML(filter);

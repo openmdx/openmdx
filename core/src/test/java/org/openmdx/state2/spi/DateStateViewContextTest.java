@@ -44,12 +44,12 @@
  */
 package org.openmdx.state2.spi;
 
-import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openmdx.state2.cci.DateStateContext;
+import org.w3c.time.ChronoTypes;
 import org.w3c.spi.DatatypeFactories;
 
 /**
@@ -86,32 +86,12 @@ public class DateStateViewContextTest {
     public void dateStateContext(
     ){
         DateStateContext c1 = DateStateViewContext.newTimeRangeViewContext(
-            DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-                2000,
-                4,
-                1,
-                DatatypeConstants.FIELD_UNDEFINED
-            ),
-            DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-                2000,
-                4,
-                30,
-                DatatypeConstants.FIELD_UNDEFINED
-            )
+            ChronoTypes.createDate(2000, 4, 1),
+            ChronoTypes.createDate(2000, 4, 30)
         );
         DateStateContext c2 = DateStateViewContext.newTimeRangeViewContext(
-            DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-                2000,
-                4,
-                1,
-                DatatypeConstants.FIELD_UNDEFINED
-            ),
-            DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-                2000,
-                4,
-                30,
-                DatatypeConstants.FIELD_UNDEFINED
-            )
+            ChronoTypes.createDate(2000, 4, 1),
+            ChronoTypes.createDate(2000, 4, 30)
        );
        DateStateContext c3 = DateStateViewContext.newTimeRangeViewContext(null,null);
        Assertions.assertNotSame(c1,  c2, "identitiy"); 
@@ -119,20 +99,10 @@ public class DateStateViewContextTest {
        Assertions.assertEquals(c1.hashCode(),  c2.hashCode(), "hashCode"); 
        DateStateContext c4 = DateStateViewContext.newTimeRangeViewContext(
            null,
-           DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-               2000,
-               4,
-               30,
-               DatatypeConstants.FIELD_UNDEFINED
-           )
+           ChronoTypes.createDate(2000, 4, 30)
        );
        DateStateContext c5 = DateStateViewContext.newTimeRangeViewContext(
-           DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-               2000,
-               4,
-               1,
-               DatatypeConstants.FIELD_UNDEFINED
-           ),
+               ChronoTypes.createDate(2000, 4, 1),
            null
        );
        Assertions.assertEquals(C1,  c1.toString(), "toString"); 
@@ -141,7 +111,8 @@ public class DateStateViewContextTest {
        Assertions.assertEquals(C4,  c4.toString(), "toString"); 
        Assertions.assertEquals(C5,  c5.toString(), "toString");        
     }
-    
+
+    #if CLASSIC_CHRONO_TYPES
     @Test  
     public void noDate(
     ){
@@ -149,5 +120,6 @@ public class DateStateViewContextTest {
         XMLGregorianCalendar null2= DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar();
         Assertions.assertEquals(null1,  null2, "NULL");
     }
+    #endif // CLASSIC_CHRONO_TYPES
     
 }

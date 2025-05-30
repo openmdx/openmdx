@@ -99,7 +99,7 @@ public class CallbacksTest {
         this.entityManager.currentTransaction().commit();
         System.out.println(c4.refClass().refMofId() + " Callback Order: " + c4.getCallback());
     }
-    
+
     @Test
     public void testConcreteCallbackOrder(){
         this.entityManager.currentTransaction().begin();
@@ -111,8 +111,7 @@ public class CallbacksTest {
         this.entityManager.currentTransaction().commit();
         System.out.println(c4.refClass().refMofId() + " Callback Order: " + c4.getCallback());
     }
-    
-    
+
     /**
      * Retrieve the Test segment
      * 

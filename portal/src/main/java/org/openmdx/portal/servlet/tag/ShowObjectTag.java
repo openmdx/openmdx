@@ -48,9 +48,16 @@ package org.openmdx.portal.servlet.tag;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 
+
+#if JAVA_8
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspException;
+#else
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.JspException;
+#endif
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.naming.Path;

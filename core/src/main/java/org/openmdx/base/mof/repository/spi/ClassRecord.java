@@ -45,7 +45,6 @@
 package org.openmdx.base.mof.repository.spi;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -60,6 +59,7 @@ import org.openmdx.base.mof.repository.cci.ElementRecord;
 import org.openmdx.base.mof.repository.cci.FeatureRecord;
 import org.openmdx.base.mof.repository.cci.StructuralFeatureRecord;
 import org.openmdx.base.naming.Path;
+import org.w3c.spi2.Datatypes;
 
 /**
  * org::omg::model1::Class Record
@@ -153,7 +153,7 @@ public class ClassRecord
                  setIdentity(value);
                  break;
              case modifiedAt:
-                 setModifiedAt((Date)value);
+                 setModifiedAt(Datatypes.DATE_TIME_CLASS.cast(value));
                  break;
              case createdBy:
                  setCreatedBy((Collection<?>)value);
@@ -162,7 +162,7 @@ public class ClassRecord
                  setStereotype((Collection<?>)value);
                  break;
              case createdAt:
-                 setCreatedAt((Date)value);
+                 setCreatedAt(Datatypes.DATE_TIME_CLASS.cast(value));
                  break;
              case modifiedBy:
                  setModifiedBy((Collection<?>)value);

@@ -49,8 +49,13 @@ package org.openmdx.portal.servlet.action;
 import java.io.IOException;
 import java.util.Map;
 
+#if JAVA_8
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+#else
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+#endif
 
 import org.openmdx.portal.servlet.ApplicationContext;
 

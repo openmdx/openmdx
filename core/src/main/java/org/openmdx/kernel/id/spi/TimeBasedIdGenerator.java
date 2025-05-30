@@ -45,12 +45,11 @@
 package org.openmdx.kernel.id.spi;
 
 import java.security.SecureRandom;
-import java.util.Date;
 import java.util.logging.Level;
+import java.time.Instant;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-import org.w3c.format.DateTimeFormat;
 
 /**
  * Time Based Id Provider 
@@ -113,7 +112,7 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
      * <p>
      * This method may be overridden by a subclass.
      * <p>
-     * The 60 bit timestamp value is used to set the the time_low, time_mid, 
+     * The 60 bit timestamp value is used to set the time_low, time_mid,
      * and time_hi fields of the UUID. 
      * 
      * @return the timestamp for the next UUID
@@ -234,10 +233,12 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
      ) {
         int clockSequence = (TimeBasedIdGenerator.clockSequence + 1) & 0x3FFF;
         SysLog.log(
-            Level.WARNING, 
+            Level.WARNING,
             "Sys|Clock has been set back from {0} to {1}|Clock sequence will be changed from {2} to {3}",
-            DateTimeFormat.EXTENDED_UTC_FORMAT.format(new Date(lastReservation)), DateTimeFormat.EXTENDED_UTC_FORMAT.format(new Date(nextReservation)), 
-            Long.valueOf(TimeBasedIdGenerator.clockSequence), Long.valueOf(clockSequence)
+            Instant.ofEpochMilli(lastReservation),
+            Instant.ofEpochMilli(nextReservation),
+            (long) TimeBasedIdGenerator.clockSequence,
+            (long) clockSequence
         );
         TimeBasedIdGenerator.clockSequence = clockSequence;
     }
@@ -277,7 +278,7 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
     }
     
     /**
-     * @return
+     * @return a random clock sequence
      */
     private static int createClockSequence() {
         int clockSequence = getRandom().nextInt(0x4000);
@@ -330,12 +331,9 @@ public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
             return this.currentTimeStamp++;
         }
         
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
         @Override
         public String toString() {
-            return DateTimeFormat.EXTENDED_UTC_FORMAT.format(new Date(millisecond)) + "/P0.001S";
+            return Instant.ofEpochMilli(millisecond) + "/P0.001S";
         }
         
     }

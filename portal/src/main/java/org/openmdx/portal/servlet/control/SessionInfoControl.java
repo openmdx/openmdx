@@ -52,7 +52,6 @@ package org.openmdx.portal.servlet.control;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.openmdx.kernel.exception.Throwables;
@@ -64,6 +63,7 @@ import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.attribute.DateValue;
 import org.openmdx.portal.servlet.component.ShowObjectView;
 import org.openmdx.portal.servlet.component.View;
+import org.w3c.time.SystemClock;
 
 /**
  * SessionInfoControl
@@ -247,7 +247,7 @@ public class SessionInfoControl extends Control implements Serializable {
                 true, 
                 app
             );
-            String formattedDateTime = dateTimeFormat.format(new Date());
+            String formattedDateTime = dateTimeFormat.format(SystemClock.getInstance().now());
             p.write(
                 formattedDateTime.replace(" ", separator), 
                 separator, 

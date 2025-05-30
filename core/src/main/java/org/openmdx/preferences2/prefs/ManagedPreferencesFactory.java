@@ -159,7 +159,7 @@ public class ManagedPreferencesFactory implements PreferencesFactory {
      * Provide a root node
      * 
      * @param segment
-     * @param preferences
+     * @param optionalRoot
      * @param type
      * @param name
      * 

@@ -47,16 +47,20 @@ package org.openmdx.base.accessor.jmi.spi;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
 import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.RefBaseObject;
+import javax.jmi.reflect.RefObject;
 
 import org.oasisopen.jmi1.RefContainer;
+import org.oasisopen.jmi1.RefQualifier;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.collection.MarshallingConsumer;
@@ -64,6 +68,8 @@ import org.openmdx.base.collection.MarshallingSpliterator;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
+import org.oasisopen.cci2.QualifierType;
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.Container;
@@ -118,22 +124,25 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
             );
         } else if(declaringClass == RefContainer.class) {
             if("refAdd".equals(methodName)) {
-                ReferenceDef.getInstance(proxy.getClass()).add.invoke(
-                    this.cciDelegate, 
-                    (Object[]) this.marshaller.unmarshal(args[0])
+                final Method cciAdd = ReferenceDef.getInstance(proxy.getClass()).add;
+                cciAdd.invoke(
+                    this.cciDelegate,
+                    toCciArguments(args, cciAdd.getParameterCount())
                 );
                 return null;
             } else if("refGet".equals(methodName)) {
+                final Method cciGet = ReferenceDef.getInstance(proxy.getClass()).get;
                 return this.marshaller.marshal(
-                    ReferenceDef.getInstance(proxy.getClass()).get.invoke(
-                        this.cciDelegate, 
-                        (Object[]) this.marshaller.unmarshal(args[0])
+                        cciGet.invoke(
+                        this.cciDelegate,
+                        toCciArguments(args, cciGet.getParameterCount())
                     )
                 );
             } else if("refRemove".equals(methodName)) {
-                ReferenceDef.getInstance(proxy.getClass()).remove.invoke(
-                    this.cciDelegate, 
-                    (Object[]) this.marshaller.unmarshal(args[0])
+                final Method cciRemove = ReferenceDef.getInstance(proxy.getClass()).remove;
+                cciRemove.invoke(
+                    this.cciDelegate,
+                    toCciArguments(args, cciRemove.getParameterCount())
                 );
                 return null;
             } else if("refGetAll".equals(methodName)) {
@@ -149,7 +158,7 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
                         predicate
                     );
                 } else if (predicate instanceof RefQuery_1_0) {
-                    value = ((Container<?>)this.cciDelegate).getAll(
+                    value = this.cciDelegate.getAll(
                         ((RefQuery_1_0)predicate).refGetFilter()
                     );
                 } else {
@@ -266,5 +275,69 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
             )
         );
     }
+
+    #if CLASSIC_CHRONO_TYPES
+
+    private Object[] toCciArguments(Object[] refArgs, int parameterCount) throws ServiceException {
+        return (Object[]) this.marshaller.unmarshal(refArgs[0]);
+    }
+
+    #else
+
+    private Object[] toCciArguments(Object[] refArgs, int parameterCount) throws ServiceException {
+        final Object[] cciArgs = new Object[parameterCount];
+        if(refArgs[0] instanceof QualifierType) {
+            switch (refArgs.length) {
+                case 2:
+                    return toCciArguments(cciArgs, refArgs);
+                case 3:
+                    if(refArgs[2] instanceof RefObject) {
+                        return toCciArguments(cciArgs, refArgs);
+                    }
+                    break;
+            }
+        } else if (refArgs[0] instanceof List<?>) {
+            switch (refArgs.length) {
+                case 1:
+                    return toCciQualifiers(cciArgs, (List<RefQualifier>) refArgs[0]);
+                case 2:
+                    if(refArgs[1] instanceof RefObject) {
+                        return toCciQualifiers(cciArgs, (List<RefQualifier>) refArgs[0], (RefObject) refArgs[1]);
+                    }
+                    break;
+            }
+        }
+        throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.ASSERTION_FAILURE,
+            "Unexpected combination of arguments",
+            new BasicException.Parameter("refArgs", refArgs)
+        );
+    }
+
+    private Object[] toCciArguments(Object[] cciArgs, Object[] refArgs) throws ServiceException {
+        System.arraycopy(refArgs, 0, cciArgs, 0, 2);
+        if(refArgs.length == 3) {
+            cciArgs[2] = this.marshaller.unmarshal(refArgs[2]);
+        }
+        return cciArgs;
+    }
+
+    private Object[] toCciQualifiers(Object[] target, List<RefQualifier> source) {
+        int i = 0;
+        for (RefQualifier refQualifier : source) {
+            target[i++] = refQualifier.qualifierType;
+            target[i++] = refQualifier.qualifierValue;
+        }
+        return target;
+    }
+
+    private Object[] toCciQualifiers(Object[] target, List<RefQualifier> source, RefObject value)  throws ServiceException {
+        toCciQualifiers(target, source);
+        target[target.length - 1] = this.marshaller.unmarshal(value);
+        return target;
+    }
+
+    #endif
 
 }

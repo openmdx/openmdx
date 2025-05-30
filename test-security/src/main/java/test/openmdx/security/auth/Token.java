@@ -50,11 +50,11 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
-import java.util.Date;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
+import org.w3c.time.ChronoTypes;
 
 /**
  * Token
@@ -155,8 +155,8 @@ final class Token
     			BasicException.Code.ILLEGAL_STATE,
     			"The token has expired",
 				new BasicException.Parameter(
-					"expiration", 
-					new Date(this.expiration)
+					"expiration",
+					ChronoTypes.ofEpochMilliseconds(this.expiration)
 				)
 			);
 		}
@@ -174,7 +174,7 @@ final class Token
 	public String toString() {
         return IndentingFormatter.toString(
             this.getClass().getName() + 
-            " (exires " + new Date(this.expiration) + "): " + 
+            " (exires " + ChronoTypes.ofEpochMilliseconds(this.expiration) + "): " +
             this.value
         );
 	}

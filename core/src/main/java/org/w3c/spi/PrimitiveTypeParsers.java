@@ -51,11 +51,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import org.openmdx.base.text.parsing.ImmutablePrimitiveTypeParser;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.loading.Resources;
+import org.openmdx.kernel.text.parsing.ChronoTypeParser;
 import org.openmdx.kernel.text.parsing.DelegatingParser;
 import org.openmdx.kernel.text.parsing.StandardPrimitiveTypeParser;
 import org.openmdx.kernel.text.spi.Decoder;
@@ -78,7 +78,7 @@ public class PrimitiveTypeParsers {
 	 */
 	private static final Parser[] STANDARD_PARSERS = {
         StandardPrimitiveTypeParser.getInstance(),  
-        ImmutablePrimitiveTypeParser.getInstance()
+        ChronoTypeParser.getInstance()
 	};
 	
 	/**

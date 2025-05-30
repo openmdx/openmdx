@@ -45,12 +45,13 @@
 package org.openmdx.kernel.exception;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
@@ -62,6 +63,8 @@ import java.util.logging.Logger;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.log.ForeignLogRecord;
 import org.openmdx.kernel.log.LoggerFactory;
+import org.w3c.format.DateTimeFormat;
+import org.w3c.time.ChronoTypes;
 
 /**
  * An exception stack is a linked list of {@code BasicException}s.
@@ -87,6 +90,9 @@ import org.openmdx.kernel.log.LoggerFactory;
  */
 public final class BasicException extends Exception {
 
+    private static final long NULL_DATE_TIME = Long.MIN_VALUE;
+    private static final int NULL_LINE_NUMBER = -1;
+
     /**
      * Creates a stand-alone exception stack
      *
@@ -106,7 +112,6 @@ public final class BasicException extends Exception {
         String description,
         Parameter... parameters
     ){
-        super();
         this.source = null;
         this.domain = exceptionDomain;
         this.code = exceptionCode;
@@ -135,7 +140,6 @@ public final class BasicException extends Exception {
         int exceptionCode,
         Parameter... parameters
     ){
-        super();
         this.source = null;
         this.domain = exceptionDomain;
         this.code = exceptionCode;
@@ -178,21 +182,12 @@ public final class BasicException extends Exception {
 
     /**
      * Constructor for the XML parser
-     *
-     * @param exceptionDomain
-     * @param exceptionCode
-     * @param exceptionClass
-     * @param exceptionTime
-     * @param exceptionMethod
-     * @param exceptionLine
-     * @param description
-     * @param parameters
      */
     public BasicException(
         String exceptionDomain,
         int exceptionCode,
         String exceptionClass,
-        Date exceptionTime,
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif exceptionTime,
         String exceptionMethod,
         Integer exceptionLine,
         String description,
@@ -203,22 +198,19 @@ public final class BasicException extends Exception {
         this.domain = exceptionDomain;
         this.code = exceptionCode;
         this.exceptionClass = exceptionClass;
-        this.timestamp = exceptionTime == null ? Long.MIN_VALUE : exceptionTime.getTime();
+        this.timestamp = exceptionTime == null ? NULL_DATE_TIME : ChronoTypes.getEpochMilliseconds(exceptionTime);
         this.methodName = exceptionMethod;
-        this.lineNumber = exceptionLine == null ? -1 : exceptionLine.intValue();
+        this.lineNumber = exceptionLine == null ? NULL_LINE_NUMBER : exceptionLine.intValue();
         this.description = description;
         this.parameter = parameters;
     }
 
     /**
      * Constructor 
-     *
-     * @param throwable
      */
     private BasicException(
         Throwable throwable
     ){
-        super();
         this.source = throwable;
         this.domain = Code.DEFAULT_DOMAIN;
         this.code = Code.GENERIC;
@@ -281,7 +273,7 @@ public final class BasicException extends Exception {
     /**
      * 
      */
-    private int lineNumber = -1;
+    private int lineNumber = NULL_LINE_NUMBER;
     
     /**
      * The stack trace is lazily retrieved from the throwable
@@ -293,11 +285,6 @@ public final class BasicException extends Exception {
      */
     private static final long serialVersionUID = -1081067273393341482L;
 
-    /**
-     * To format the timestamp
-     */
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    
     /**
      * Exception Mappers
      */
@@ -316,20 +303,11 @@ public final class BasicException extends Exception {
     /**
      * The environment specific line separator
      */
-    static final String lineSeparator;
-    
-    static {
-        dateFormat.setLenient(false);
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        lineSeparator = getProperty("line.separator", "\n");
-    }
+    private static final String LINE_SEPARATOR = getProperty("line.separator", "\n");
 
     /**
      * Lenient System Property retrieval
-     * 
-     * @param key
-     * @param defaultValue
-     * 
+     *
      * @return the system property value or its default value
      */
     private static final String getProperty(
@@ -345,8 +323,6 @@ public final class BasicException extends Exception {
     	
     /**
      * Log a {@code BasicException.Holder}
-     * 
-     * @param holder
      */
     public static <T extends Holder> T log(
         T holder
@@ -462,7 +438,6 @@ public final class BasicException extends Exception {
     /**
      * Creates an exception stack for kernel classes.
      *
-     * @param cause An embedded exception
      * @param exceptionDomain An exception domain. A null objects references
      * the default exception domain with negative exception codes only.
      * @param exceptionCode  An exception code. Negative codes describe common
@@ -486,9 +461,6 @@ public final class BasicException extends Exception {
         );
     }
     
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.exception.ExceptionStack#getStackTrace()
-     */
     @Override
     public final StackTraceElement[] getStackTrace() {
         if(this.stackTrace == null) {
@@ -510,16 +482,14 @@ public final class BasicException extends Exception {
     ) {
         return this.stackTrace == null && lazily ? NO_STACK_TRACE : getStackTrace();
     }
-    
+
     /**
-     * Associate the cause, a {@code BasicExcpetion} with its holder
-     * 
+     * Associate the cause, a {@code BasicException} with its holder
+     *
      * @param throwable
-     * 
+     *
      * @return the throwable
-     * 
-     * @throws NullPointerExceptionn if either the throwable or its cause is {@code null}
-     * @throws InvalidArgumentException if the throwable's cause is not a {@code BasicException}
+     *
      * @throws IllegalStateException if the {@code BasicException} is already connected with a holder
      */
     public static <T extends Throwable> T initHolder(
@@ -576,21 +546,15 @@ public final class BasicException extends Exception {
         return this;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#fillInStackTrace()
-     */
     @Override
     public synchronized Throwable fillInStackTrace() {
         return this; // No stack trace required
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#getCause()
-     */
     @Override
     public final synchronized BasicException getCause() {
         BasicException cause = (BasicException) super.getCause();
-        if(cause == null && this.source != null && this.timestamp == Long.MIN_VALUE) {
+        if(cause == null && this.source != null && this.timestamp == NULL_DATE_TIME) {
             Throwable source = this.source.getCause();
             if(source != null) {
                 return initCauseInternal(source);
@@ -603,8 +567,6 @@ public final class BasicException extends Exception {
      * Maps a {@code Throwable} to a {@code BasicException} using the 
      * registered exception mappers
      *
-     * @param throwable
-     * 
      * @return a {@code BasicException} or {@code null} if there is 
      * no mapping
      */
@@ -625,14 +587,8 @@ public final class BasicException extends Exception {
     /**
      * Create a {@code BasicException} representing a {@code cause} 
      * wrapped into a {@code wrapper}.
-     * 
-     * @param cause
-     * @param holder
-     * @param exceptionDomain 
-     * @param exceptionCode 
-     * @param description 
      *
-     * @return a {@code BasicException} representing the {@code cause} 
+     * @return a {@code BasicException} representing the {@code cause}
      * wrapped into {@code wrapper}
      */
     public static BasicException toStackedException(
@@ -670,10 +626,7 @@ public final class BasicException extends Exception {
         }
         return initialCause;
     }
-    
-    /* (non-Javadoc)
-     * @see Holder#getCause(java.lang.String)
-     */
+
     public BasicException getCause(String exceptionDomain) {
         if(exceptionDomain == null) {
             return getInitialCause();
@@ -691,9 +644,6 @@ public final class BasicException extends Exception {
         }
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#getMessage()
-     */
     @Override
     public String getMessage() {
         if(this.message == null) {
@@ -702,9 +652,6 @@ public final class BasicException extends Exception {
         return this.message;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.exception.ExceptionStack#getDescription()
-     */
     public String getDescription() {
         if(this.description == null && this.source != null && !(source instanceof Holder)) {
             this.description = this.source.getMessage();
@@ -712,16 +659,10 @@ public final class BasicException extends Exception {
         return this.description;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.exception.ExceptionStack#getExceptionCode()
-     */
     public int getExceptionCode() {
         return this.code;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.exception.ExceptionStack#getExceptionDomain()
-     */
     public String getExceptionDomain() {
         return this.domain;
     }
@@ -780,7 +721,7 @@ public final class BasicException extends Exception {
     ){
         if(this.lineNumber < 0) {
             StackTraceElement[] stackTrace = getStackTrace(lazily);
-            this.lineNumber = stackTrace.length > 0 ? stackTrace[0].getLineNumber() : -1;
+            this.lineNumber = stackTrace.length > 0 ? stackTrace[0].getLineNumber() : NULL_LINE_NUMBER;
         }
         return this.lineNumber < 0 ? null : Integer.valueOf(this.lineNumber);
     }
@@ -791,9 +732,9 @@ public final class BasicException extends Exception {
      *
      * @return the timestamp
      */
-    public Date getTimestamp(
+    public #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getTimestamp(
     ){
-        return this.timestamp == Long.MIN_VALUE ? null : new Date(this.timestamp);
+        return this.timestamp == NULL_DATE_TIME ? null : #if CLASSIC_CHRONO_TYPES new java.util.Date #else Instant.ofEpochMilli#endif(this.timestamp);
     }
 
     public Parameter[] getParameters(){
@@ -812,9 +753,6 @@ public final class BasicException extends Exception {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.exception.ExceptionStackElement#getExceptionStack()
-     */
     public Iterable<BasicException> getExceptionStack() {
         if(this.exceptionStack == null) {
             this.exceptionStack = new Iterable<BasicException>() {
@@ -828,9 +766,6 @@ public final class BasicException extends Exception {
         return this.exceptionStack;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#toString()
-     */
     @Override
     public String toString() {
     	final StringBuilder out = new StringBuilder(getExceptionClass());
@@ -840,7 +775,7 @@ public final class BasicException extends Exception {
 
 	        		@Override
 	                void println() {
-	        			out.append(lineSeparator);
+	        			out.append(LINE_SEPARATOR);
 	                }
 	        		
 	        	}
@@ -869,9 +804,9 @@ public final class BasicException extends Exception {
             out.append("\tDescription = ").append(description);
             out.println(); 
         }       
-        Date thrownAt = this.getTimestamp();
-        if(thrownAt != null) synchronized(BasicException.dateFormat) {
-            out.append("\tTimestamp = ").append(BasicException.dateFormat.format(thrownAt));
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif thrownAt = this.getTimestamp();
+        if(thrownAt != null) {
+            out.append("\tTimestamp = ").append(DateTimeFormat.EXTENDED_UTC_FORMAT.format(thrownAt));
             out.println();
         }
         int i = 0;
@@ -934,9 +869,6 @@ public final class BasicException extends Exception {
         }
     }
     
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
-     */
     @Override
     public void printStackTrace(final PrintStream s) {
         printStackTrace(null, s);
@@ -967,9 +899,6 @@ public final class BasicException extends Exception {
         }
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
-     */
     @Override
     public void printStackTrace(final PrintWriter s) {
         printStackTrace(null, s);
@@ -1000,20 +929,18 @@ public final class BasicException extends Exception {
         }
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#setStackTrace(java.lang.StackTraceElement[])
-     */
     @Override
     public void setStackTrace(StackTraceElement[] stackTrace) {
         this.stackTrace = stackTrace;
     }    
+
 
     //------------------------------------------------------------------------
     // Implements {@code Serializable}
     //------------------------------------------------------------------------
 
     private void writeObject(
-        java.io.ObjectOutputStream out
+        ObjectOutputStream out
     ) throws IOException {
         this.getCause();
         this.getMessage();
@@ -1421,7 +1348,7 @@ public final class BasicException extends Exception {
         /**
          * Selects a domain specific exception stack element
          * 
-         * @param the requested domain, or {@code null} ti retrieve the initial cause.
+         * @param exceptionDomain requested domain, or {@code null} to retrieve the initial cause.
          *
          * @return the first exception stack element for the requested domain, 
          * or {@code null} if no such element exists

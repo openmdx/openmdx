@@ -1,29 +1,29 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: PostgreSQL Interval Marshaller 
+ * Description: PostgreSQL Interval Marshaller
  * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -37,9 +37,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
@@ -48,15 +48,16 @@ package org.openmdx.base.dataprovider.layer.persistence.jdbc.postgresql;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Period;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.datatype.Duration;
+import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time#endif.Duration;
 
+import org.openmdx.base.Version;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
-import org.w3c.spi.DatatypeFactories;
 
 /**
  * PostgreSQL Interval Marshaller
@@ -81,20 +82,20 @@ public class PGIntervalMarshaller {
 		}
 		return PG_INTERVAL_CLASS.equals(interval.getClass().getName());
 	}
-	
+
 	public Object marshal(
-		int signum, 
-		int years, 
-		int months, 
-		int days, 
-		int hours, 
-		int minutes, 
+		int signum,
+		int years,
+		int months,
+		int days,
+		int hours,
+		int minutes,
 		double seconds
 	) throws ServiceException {
 		try {
 			return signum < 0 ? Classes.newApplicationInstance(
-				Object.class, 
-				PG_INTERVAL_CLASS, 
+				Object.class,
+				PG_INTERVAL_CLASS,
 				-years,
 				-months,
 				-days,
@@ -102,8 +103,8 @@ public class PGIntervalMarshaller {
 				-minutes,
 				-seconds
 			) : Classes.newApplicationInstance(
-				Object.class, 
-				PG_INTERVAL_CLASS, 
+				Object.class,
+				PG_INTERVAL_CLASS,
 				years,
 				months,
 				days,
@@ -128,8 +129,8 @@ public class PGIntervalMarshaller {
 			);
 		}
 	}
-	
-	public Duration unmarshal(Object interval) throws ServiceException {
+
+	public Object unmarshal(Object interval) throws ServiceException {
 		final Matcher matcher = PG_INTERVAL_PATTERN.matcher(interval.toString());
 		if(matcher.matches()) {
 			BigInteger years = new BigInteger(matcher.group(1));
@@ -146,6 +147,7 @@ public class PGIntervalMarshaller {
 						BasicException.Code.DEFAULT_DOMAIN,
 						BasicException.Code.TRANSFORMATION_FAILURE,
 						"Unable to convert the PGInterval: Duration does not allow mixing of positive and negative fields",
+						new BasicException.Parameter("flavour", Version.getFlavourVersion()),
 						new BasicException.Parameter("interval", interval)
 					);
 				} else {
@@ -177,7 +179,9 @@ public class PGIntervalMarshaller {
 				months = values[1];
 				years = years.add(values[0]);
 			}
-			if(years.signum() == 0 && months.signum() == 0) {
+
+			#if CLASSIC_CHRONO_TYPES
+			if (years.signum() == 0 && months.signum() == 0) {
 				years = null;
 				months = null;
 			} else if (days.signum() == 0 && hours.signum() == 0 && minutes.signum() == 0 && seconds.signum() == 0){
@@ -186,24 +190,55 @@ public class PGIntervalMarshaller {
 				minutes = null;
 				seconds = null;
 			}
-			return DatatypeFactories.xmlDatatypeFactory().newDuration(
-				!negative, 
-				years, 
-				months, 
+			return org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newDuration(
+				!negative,
+				years,
+				months,
 				days,
 				hours,
 				minutes,
 				seconds
 			);
+			#else
+			if (years.signum() == 0 && months.signum() == 0) {
+				// Handle seconds properly by separating whole seconds and nanoseconds
+				final long wholeSeconds = seconds.longValue();
+				final int nanos = seconds.subtract(new BigDecimal(wholeSeconds))
+					.movePointRight(9)
+					.intValue();
+				final Duration duration = Duration
+						.ofDays(days.longValue())
+						.plusHours(hours.longValue())
+						.plusMinutes(minutes.longValue())
+						.plusSeconds(wholeSeconds)
+						.plusNanos(nanos);
+				return negative ? duration.negated() : duration;
+            } else if (hours.signum() == 0 && minutes.signum() == 0 && seconds.signum() == 0) {
+				return Period.of(
+						years.intValue(),
+						months.intValue(),
+						days.intValue()
+				);
+			} else {
+				throw new ServiceException(
+					BasicException.Code.DEFAULT_DOMAIN,
+					BasicException.Code.TRANSFORMATION_FAILURE,
+					"Unable to convert the PGInterval: years/monnths and time values are mutually exclusive",
+					new BasicException.Parameter("flavour", Version.getFlavourVersion()),
+					new BasicException.Parameter("interval", interval)
+				);
+			}
+			#endif
 		} else {
 			throw new ServiceException(
 				BasicException.Code.DEFAULT_DOMAIN,
 				BasicException.Code.TRANSFORMATION_FAILURE,
 				"Unable to parse the PGInterval",
+				new BasicException.Parameter("flavour", Version.getFlavourVersion()),
 				new BasicException.Parameter("interval", interval),
 				new BasicException.Parameter("expected", PG_INTERVAL_PATTERN)
 			);
 		}
 	}
-	
+
 }

@@ -44,8 +44,8 @@
  */
 package org.openmdx.audit2.spi;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +54,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.XRISegment;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Qualifiers
@@ -62,7 +63,6 @@ public class Qualifiers {
 
     /**
      * Constructor 
-     *
      */
     private Qualifiers(
     ) {
@@ -71,25 +71,19 @@ public class Qualifiers {
 
     /**
      * Build an org::openmdx::audit2 compliant after image qualifier
-     * 
-     * @param qualifier
-     * @param version
-     * 
+     *
      * @return an audit2 compliant after image qualifier
      */
     public static String toAudit2AfterImageQualifier(
         String qualifier,
-        Date version
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif version
     ){
         return qualifier + '*' + (version == null ? "%" : DateTimeFormat.BASIC_UTC_FORMAT.format(version));
     }
 
     /**
      * Build an org::openmdx::audit2 compliant before image qualifier
-     * 
-     * @param qualifier
-     * @param unitOfWorkId
-     * 
+     *
      * @return an audit2 compliant before image qualifier
      */
     public static String toAudit2BeforeImageQualifier(
@@ -101,8 +95,6 @@ public class Qualifiers {
     
     /**
      * Extract the base from an audit2 qualifier
-     * 
-     * @param segment
      * 
      * @return the base from an audit2 qualifier
      */
@@ -118,14 +110,7 @@ public class Qualifiers {
     /**
      * Create a before or after image identifier
      * 
-     * @param configuration
-     * @param objectId
-     * @param modifiedAt
-     * @param unitIfWorkId
-     * 
      * @return the object's before or after image id
-     * 
-     * @throws ServiceException
      */
     public static Path getAudit2BeforeImageId(
         Configuration configuration, 
@@ -134,7 +119,7 @@ public class Qualifiers {
     ) throws ServiceException{
         for (Map.Entry<Path, Path> entry : configuration.getMapping().entrySet()) {
             if (objectId.startsWith(entry.getKey())) {
-            	List<String> imageId = new ArrayList<String>();
+            	List<String> imageId = new ArrayList<>();
             	for(XRISegment c : entry.getValue().getSegments()) {
             		imageId.add(c.toString());
             	}
@@ -165,12 +150,7 @@ public class Qualifiers {
 
     /**
      * Create a before or after image identifier
-     * 
-     * @param configuration
-     * @param objectId
-     * @param modifiedAt
-     * @param unitIfWorkId
-     * 
+     *
      * @return the object's before or after image id
      * 
      * @throws ServiceException
@@ -178,7 +158,7 @@ public class Qualifiers {
     public static Path getAudit2AfterImageId(
         Configuration configuration, 
         Path objectId, 
-        Date modifiedAt
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif modifiedAt
     ) throws ServiceException{
         for (Map.Entry<Path, Path> entry : configuration.getMapping().entrySet()) {
             if (objectId.startsWith(entry.getKey())) {

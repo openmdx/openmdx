@@ -49,97 +49,108 @@ import org.junit.jupiter.api.Test;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.postgresql.PGIntervalMarshaller;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
-
+import org.w3c.spi2.Datatypes;
 
 public class DurationMarshallerTest {
 
 	@Test
 	public void postgresZero() throws ServiceException {
-		// Arrange
+		// Arrange
 		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
+		// Act
 		Object duration = testee.unmarshal("0 years 0 mons 0 days 0 hours 0 mins 0.0 secs");
-		// Assert
-		assertEquals("P0DT0H0M0.0S", duration);
+		// Assert
+		assertDuration("P0DT0H0M0.0S", duration);
 	}
 	
 	@Test
 	public void postgresPositiveDays() throws ServiceException {
-		// Arrange
+		// Arrange
 		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
+		// Act
 		Object duration = testee.unmarshal("0 years 0 mons 30 days 0 hours 0 mins 0.0 secs");
-		// Assert
-		assertEquals("P30DT0H0M0.0S", duration);
+		// Assert
+		assertDuration("P30DT0H0M0.0S", duration);
 	}
 
 	@Test
 	public void postgresPositiveMonths() throws ServiceException {
-		// Arrange
+		// Arrange
 		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
+		// Act
 		Object duration = testee.unmarshal("0 years 14 mons 0 days 0 hours 0 mins 0.0 secs");
-		// Assert
-		assertEquals("P1Y2M", duration);
+		// Assert
+		assertDuration("P1Y2M", duration);
 	}
 
 	@Test
 	public void postgresPositiveTime() throws ServiceException {
-		// Arrange
+		// Arrange
 		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
+		// Act
 		Object duration = testee.unmarshal("0 years 0 mons 0 days 0 hours 1 mins 2.5 secs");
-		// Assert
-		assertEquals("P0DT0H1M2.5S", duration);
+		// Assert
+		assertDuration("P0DT0H1M2.5S", duration);
 	}
 
 	@Test
 	public void postgresNegativeTime() throws ServiceException {
-		// Arrange
+		// Arrange
 		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
+		// Act
 		Object duration = testee.unmarshal("0 years 0 mons 0 days 0 hours -1 mins -2.5 secs");
-		// Assert
-		assertEquals("-P0DT0H1M2.5S", duration);
+		// Assert
+		assertDuration("-P0DT0H1M2.5S", duration);
 	}
 
 	@Test
 	public void postgresPositiveMonthTime() throws ServiceException {
-		// Arrange
-		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
-		Object duration = testee.unmarshal("0 years 1 mons 0 days 0 hours 2 mins 3.5 secs");
-		// Assert
-		assertEquals("P0Y1M0DT0H2M3.5S", duration);
+		// Arrange
+		final PGIntervalMarshaller testee = new PGIntervalMarshaller();
+		final String value = "0 years 1 mons 0 days 0 hours 2 mins 3.5 secs";
+		#if CLASSIC_CHRONO_TYPES
+		// Act
+		final Object duration = testee.unmarshal(value);
+		// Assert
+		assertDuration("P0Y1M0DT0H2M3.5S", duration);
+		#else
+		// Assert & Assert
+		final ServiceException expected = Assertions.assertThrows(ServiceException.class, () -> testee.unmarshal(value));
+		Assertions.assertEquals(BasicException.Code.TRANSFORMATION_FAILURE, expected.getExceptionCode());
+		#endif
 	}
 
 	@Test
 	public void postgresNegativeMonthTime() throws ServiceException {
-		// Arrange
-		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
-		Object duration = testee.unmarshal("0 years -1 mons 0 days 0 hours -2 mins -3.5 secs");
-		// Assert
-		assertEquals("-P0Y1M0DT0H2M3.5S", duration);
+		// Arrange
+		final PGIntervalMarshaller testee = new PGIntervalMarshaller();
+		final String value = "0 years -1 mons 0 days 0 hours -2 mins -3.5 secs";
+		#if CLASSIC_CHRONO_TYPES
+		// Act
+		final Object duration = testee.unmarshal(value);
+		// Assert
+		assertDuration("-P0Y1M0DT0H2M3.5S", duration);
+		#else
+		// Assert & Assert
+		final ServiceException expected = Assertions.assertThrows(ServiceException.class, () -> testee.unmarshal(value));
+		Assertions.assertEquals(BasicException.Code.TRANSFORMATION_FAILURE, expected.getExceptionCode());
+		#endif
 	}
 
 	@Test
 	public void postgresPositiveYearNegativeTime() throws ServiceException {
-		// Arrange
-		PGIntervalMarshaller testee = new PGIntervalMarshaller();
-		// Act
-		try {
-			testee.unmarshal("1 years 0 mons 0 days 0 hours -2 mins -3.5 secs");
-			Assertions.fail();
-		} catch (ServiceException expected) {
-			Assertions.assertEquals(BasicException.Code.TRANSFORMATION_FAILURE, expected.getExceptionCode());
-		}
+		// Arrange
+		final PGIntervalMarshaller testee = new PGIntervalMarshaller();
+		final String value = "1 years 0 mons 0 days 0 hours -2 mins -3.5 secs";
+		// Assert & Assert
+		final ServiceException expected = Assertions.assertThrows(ServiceException.class, () -> testee.unmarshal(value));
+		Assertions.assertEquals(BasicException.Code.TRANSFORMATION_FAILURE, expected.getExceptionCode());
 	}
 	
-	private void assertEquals(
+	private void assertDuration(
 		String expected, Object actual	
     ) throws ServiceException {
-		Assertions.assertEquals(expected, actual.toString());
+		Assertions.assertEquals(Datatypes.create(Datatypes.DURATION_CLASS, expected), actual);
 	}
 	
 }
