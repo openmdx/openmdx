@@ -826,8 +826,8 @@ public class DatatypesTest {
         Assertions.assertEquals((Long)source[VALUE4],   data.getValue4(), "value4");
         Assertions.assertEquals(((BigDecimal) source[VALUE5]).doubleValue(),  data.getValue5().doubleValue(), 0.0, "value5");
         Assertions.assertEquals((String)source[VALUE6],  data.getValue6(), "value6");
-        Assertions.assertEquals((Date)source[VALUE7],  data.getValue7(), "value7");
-        Assertions.assertEquals((XMLGregorianCalendar)source[VALUE8],  data.getValue8(), "value8");
+        Assertions.assertTrue(ChronoTypes.equals((Date)source[VALUE7],  data.getValue7()), "value7");
+        Assertions.assertTrue(ChronoTypes.equals((XMLGregorianCalendar)source[VALUE8],  data.getValue8()), "value8");
         Assertions.assertEquals((URI)
                 source[VALUE9],  data.getValue9(), "value9");
         byte[] expected10 = (byte[]) source[VALUE10];
