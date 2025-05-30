@@ -47,8 +47,8 @@ plugins {
 }
 
 val projectFlavour = providers.gradleProperty("flavour").getOrElse("3")
-val projectSpecificationVersion = "19"
-val projectMaintenanceVersion = "5"
+val projectSpecificationVersion = "20"
+val projectMaintenanceVersion = "0"
 val runtimeCompatibility = if (projectFlavour < "4") JavaVersion.VERSION_1_8 else JavaVersion.VERSION_21
 val classicChronoTypes = projectFlavour == "2" || projectFlavour == "4"
 
