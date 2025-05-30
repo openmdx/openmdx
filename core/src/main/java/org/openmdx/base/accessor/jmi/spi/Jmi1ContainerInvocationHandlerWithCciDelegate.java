@@ -47,7 +47,6 @@ package org.openmdx.base.accessor.jmi.spi;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -73,6 +72,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.Container;
+import org.w3c.spi2.Datatypes;
 
 /**
  * ContainerInvocationHandler
@@ -127,7 +127,7 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
                 final Method cciAdd = ReferenceDef.getInstance(proxy.getClass()).add;
                 cciAdd.invoke(
                     this.cciDelegate,
-                    toCciArguments(args, cciAdd.getParameterCount())
+                    toCciArguments(args, cciAdd.getParameterTypes())
                 );
                 return null;
             } else if("refGet".equals(methodName)) {
@@ -135,14 +135,14 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
                 return this.marshaller.marshal(
                         cciGet.invoke(
                         this.cciDelegate,
-                        toCciArguments(args, cciGet.getParameterCount())
+                        toCciArguments(args, cciGet.getParameterTypes())
                     )
                 );
             } else if("refRemove".equals(methodName)) {
                 final Method cciRemove = ReferenceDef.getInstance(proxy.getClass()).remove;
                 cciRemove.invoke(
                     this.cciDelegate,
-                    toCciArguments(args, cciRemove.getParameterCount())
+                    toCciArguments(args, cciRemove.getParameterTypes())
                 );
                 return null;
             } else if("refGetAll".equals(methodName)) {
@@ -278,31 +278,34 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
 
     #if CLASSIC_CHRONO_TYPES
 
-    private Object[] toCciArguments(Object[] refArgs, int parameterCount) throws ServiceException {
+    private Object[] toCciArguments(Object[] refArgs, Class<?>[] parameterTypes) throws ServiceException {
         return (Object[]) this.marshaller.unmarshal(refArgs[0]);
     }
 
     #else
 
-    private Object[] toCciArguments(Object[] refArgs, int parameterCount) throws ServiceException {
-        final Object[] cciArgs = new Object[parameterCount];
+    private Object[] toCciArguments(
+        Object[] refArgs,
+        Class<?>[] parameterTypes
+    ) throws ServiceException {
+        final Object[] cciArgs = new Object[parameterTypes.length];
         if(refArgs[0] instanceof QualifierType) {
             switch (refArgs.length) {
                 case 2:
-                    return toCciArguments(cciArgs, refArgs);
+                    return toCciArguments(cciArgs, refArgs, parameterTypes);
                 case 3:
                     if(refArgs[2] instanceof RefObject) {
-                        return toCciArguments(cciArgs, refArgs);
+                        return toCciArguments(cciArgs, refArgs, parameterTypes);
                     }
                     break;
             }
         } else if (refArgs[0] instanceof List<?>) {
             switch (refArgs.length) {
                 case 1:
-                    return toCciQualifiers(cciArgs, (List<RefQualifier>) refArgs[0]);
+                    return toCciQualifiers(cciArgs, (List<RefQualifier>) refArgs[0], parameterTypes);
                 case 2:
                     if(refArgs[1] instanceof RefObject) {
-                        return toCciQualifiers(cciArgs, (List<RefQualifier>) refArgs[0], (RefObject) refArgs[1]);
+                        return toCciQualifiers(cciArgs, (List<RefQualifier>) refArgs[0], parameterTypes, (RefObject) refArgs[1]);
                     }
                     break;
             }
@@ -315,27 +318,56 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
         );
     }
 
-    private Object[] toCciArguments(Object[] cciArgs, Object[] refArgs) throws ServiceException {
-        System.arraycopy(refArgs, 0, cciArgs, 0, 2);
+    private Object[] toCciArguments(
+        Object[] cciArgs,
+        Object[] refArgs,
+        Class<?>[] parameterTypes
+    ) throws ServiceException {
+        cciArgs[0] = refArgs[0];
+        cciArgs[1] = toQualifierValue(refArgs[1], parameterTypes[1]);
         if(refArgs.length == 3) {
             cciArgs[2] = this.marshaller.unmarshal(refArgs[2]);
         }
         return cciArgs;
     }
 
-    private Object[] toCciQualifiers(Object[] target, List<RefQualifier> source) {
+    private Object[] toCciQualifiers(
+        Object[] target,
+        List<RefQualifier> source,
+        Class<?>[] parameterTypes
+    ) {
         int i = 0;
         for (RefQualifier refQualifier : source) {
             target[i++] = refQualifier.qualifierType;
-            target[i++] = refQualifier.qualifierValue;
+            Object qualifierValue = toQualifierValue(refQualifier.qualifierValue, parameterTypes[i]);
+            target[i++] = qualifierValue;
         }
         return target;
     }
 
-    private Object[] toCciQualifiers(Object[] target, List<RefQualifier> source, RefObject value)  throws ServiceException {
-        toCciQualifiers(target, source);
+    private Object[] toCciQualifiers(
+        Object[] target,
+        List<RefQualifier> source,
+        Class<?>[] parameterTypes,
+        RefObject value
+    )  throws ServiceException {
+        toCciQualifiers(target, source, parameterTypes);
         target[target.length - 1] = this.marshaller.unmarshal(value);
         return target;
+    }
+
+    private Object toQualifierValue(
+        Object value,
+        Class<?> valueType
+    ){
+        if(value == null || valueType.isInstance(value)) {
+            return value;
+        } else {
+            return Datatypes.create(
+                valueType,
+                (String)value
+            );
+        }
     }
 
     #endif

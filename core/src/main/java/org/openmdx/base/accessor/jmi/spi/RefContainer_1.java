@@ -625,7 +625,7 @@ public class RefContainer_1
     public void refAdd(QualifierType qualifierType, Object qualifierValue, RefObject_1_0 refObject) {
         this.refAdd(
             qualifierType == null ? Collections.emptyList() : Collections.singletonList(
-                new RefQualifier(qualifierType, refObject)
+                new RefQualifier(qualifierType, qualifierValue)
             ),
             refObject
         );
