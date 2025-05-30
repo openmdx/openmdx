@@ -47,6 +47,7 @@ package org.openmdx.base.query.lenient;
 import java.util.Date;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.ChronoTypes;
 
 /**
  * Allows comparison of XML Datatype classes
@@ -74,12 +75,12 @@ class LenientClassicDateComparator implements LenientComparator {
         Object second
     ) {
         if(second instanceof XMLGregorianCalendar) {
-            return Datatypes.compare(
+            return ChronoTypes.compare(
                 (XMLGregorianCalendar) first,
                 (XMLGregorianCalendar) second
             );
         } else {
-            return Datatypes.compare(
+            return ChronoTypes.compare(
                 (XMLGregorianCalendar) first,
                 Datatypes.create(XMLGregorianCalendar.class, second.toString())
             );

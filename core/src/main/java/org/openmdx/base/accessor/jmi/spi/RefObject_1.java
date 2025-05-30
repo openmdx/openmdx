@@ -123,7 +123,6 @@ import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.time.SystemClock;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 //---------------------------------------------------------------------------
 /**

@@ -80,6 +80,7 @@ import org.w3c.cci2.MutableDatatypeFactory;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
 import org.w3c.time.SystemClock;
+import org.w3c.time.ChronoTypes;
 
 /**
  * Performance Test
@@ -328,13 +329,13 @@ public class PerformanceTest {
                     out.writeUTF("identity");
                     out.writeUTF(v.identity);
                     out.writeUTF("field1");
-                    out.writeLong(toEpochMillis(v.field1));
+                    out.writeLong(ChronoTypes.getEpochMilliseconds(v.field1));
                     out.writeUTF("field2");
                     out.writeInt(v.field2.size());
                     for (Iterator<String> k = v.field2.iterator(); k.hasNext();)
                         out.writeUTF(k.next());
                     out.writeUTF("field3");
-                    out.writeLong(toEpochMillis(v.field3));
+                    out.writeLong(ChronoTypes.getEpochMilliseconds(v.field3));
                     out.writeUTF("field4");
                     out.writeInt(v.field4.size());
                     for (Iterator<String> k = v.field4.iterator(); k.hasNext();)
@@ -377,14 +378,14 @@ public class PerformanceTest {
                     out.writeUTF("identity");
                     out.writeUTF((String) v.get("identity"));
                     out.writeUTF("field1");
-                    out.writeLong(toEpochMillis(Datatypes.DATE_TIME_CLASS.cast(v.get("field1"))));
+                    out.writeLong(ChronoTypes.getEpochMilliseconds(Datatypes.DATE_TIME_CLASS.cast(v.get("field1"))));
                     out.writeUTF("field2");
                     Set<String> f2 = (Set<String>) v.get("field2");
                     out.writeInt(f2.size());
                     for (Iterator<String> k = f2.iterator(); k.hasNext();)
                         out.writeUTF(k.next());
                     out.writeUTF("field3");
-                    out.writeLong(toEpochMillis(Datatypes.DATE_TIME_CLASS.cast(v.get("field3"))));
+                    out.writeLong(ChronoTypes.getEpochMilliseconds(Datatypes.DATE_TIME_CLASS.cast(v.get("field3"))));
                     out.writeUTF("field4");
                     Set<String> f4 = (Set<String>) v.get("field4");
                     out.writeInt(f4.size());
@@ -428,13 +429,13 @@ public class PerformanceTest {
                     out.writeUTF("identity");
                     out.writeUTF(v.getIdentity());
                     out.writeUTF("field1");
-                    out.writeLong(toEpochMillis(v.getField1()));
+                    out.writeLong(ChronoTypes.getEpochMilliseconds(v.getField1()));
                     out.writeUTF("field2");
                     out.writeInt(v.getField2().size());
                     for (Iterator<String> k = v.getField2().iterator(); k.hasNext();)
                         out.writeUTF(k.next());
                     out.writeUTF("field3");
-                    out.writeLong(toEpochMillis(v.getField3()));
+                    out.writeLong(ChronoTypes.getEpochMilliseconds(v.getField3()));
                     out.writeUTF("field4");
                     out.writeInt(v.getField4().size());
                     for (Iterator<String> k = v.getField4().iterator(); k.hasNext();)
@@ -485,14 +486,14 @@ public class PerformanceTest {
                     out.writeUTF("identity");
                     out.writeUTF((String) g0.invoke(v, (Object[]) null));
                     out.writeUTF("field1");
-                    out.writeLong(toEpochMillis(Datatypes.DATE_TIME_CLASS.cast(g1.invoke(v, (Object[]) null))));
+                    out.writeLong(ChronoTypes.getEpochMilliseconds(Datatypes.DATE_TIME_CLASS.cast(g1.invoke(v, (Object[]) null))));
                     out.writeUTF("field2");
                     Set<String> f2 = (Set<String>) g2.invoke(v, (Object[]) null);
                     out.writeInt(f2.size());
                     for (Iterator<String> k = f2.iterator(); k.hasNext();)
                         out.writeUTF(k.next());
                     out.writeUTF("field3");
-                    out.writeLong(toEpochMillis(Datatypes.DATE_TIME_CLASS.cast(g3.invoke(v, (Object[]) null))));
+                    out.writeLong(ChronoTypes.getEpochMilliseconds(Datatypes.DATE_TIME_CLASS.cast(g3.invoke(v, (Object[]) null))));
                     out.writeUTF("field4");
                     Set<String> f4 = (Set<String>) g4.invoke(v, (Object[]) null);
                     out.writeInt(f4.size());
@@ -689,12 +690,12 @@ public class PerformanceTest {
                             out.writeUTF(p.getSegment(k).toClassicRepresentation());
                         ValueObject v = e.getValue();
                         out.writeUTF(v.getIdentity());
-                        out.writeLong(toEpochMillis(v.getField1()));
+                        out.writeLong(ChronoTypes.getEpochMilliseconds(v.getField1()));
                         Set<String> f2 = v.getField2();
                         out.writeInt(f2.size());
                         for (Iterator<String> k = f2.iterator(); k.hasNext();)
                             out.writeUTF(k.next());
-                        out.writeLong(toEpochMillis(v.getField3()));
+                        out.writeLong(ChronoTypes.getEpochMilliseconds(v.getField3()));
                         Set<String> f4 = v.getField4();
                         out.writeInt(f4.size());
                         for (Iterator<String> k = f4.iterator(); k.hasNext();)
@@ -768,11 +769,11 @@ public class PerformanceTest {
                         out.writeUTF(p.getSegment(k).toClassicRepresentation());
                     ValueObject v = e.getValue();
                     out.writeUTF(v.identity);
-                    out.writeLong(toEpochMillis(v.field1));
+                    out.writeLong(ChronoTypes.getEpochMilliseconds(v.field1));
                     out.writeInt(v.field2.size());
                     for (Iterator<String> k = v.field2.iterator(); k.hasNext();)
                         out.writeUTF(k.next());
-                    out.writeLong(toEpochMillis(v.field3));
+                    out.writeLong(ChronoTypes.getEpochMilliseconds(v.field3));
                     out.writeInt(v.field4.size());
                     for (Iterator<String> k = v.field4.iterator(); k.hasNext();)
                         out.writeUTF(k.next());
@@ -850,12 +851,12 @@ public class PerformanceTest {
                             out.writeUTF(p.getSegment(k).toClassicRepresentation());
                         ValueObject v = e.getValue();
                         out.writeUTF((String) g0.get(v));
-                        out.writeLong(toEpochMillis((Datatypes.DATE_TIME_CLASS.cast(g1.get(v)))));
+                        out.writeLong(ChronoTypes.getEpochMilliseconds((Datatypes.DATE_TIME_CLASS.cast(g1.get(v)))));
                         Set<String> f2 = (Set<String>) g2.get(v);
                         out.writeInt(f2.size());
                         for (Iterator<String> k = f2.iterator(); k.hasNext();)
                             out.writeUTF(k.next());
-                        out.writeLong(toEpochMillis((Datatypes.DATE_TIME_CLASS.cast(g3.get(v)))));
+                        out.writeLong(ChronoTypes.getEpochMilliseconds((Datatypes.DATE_TIME_CLASS.cast(g3.get(v)))));
                         Set<String> f4 = (Set<String>) g4.get(v);
                         out.writeInt(f4.size());
                         for (Iterator<String> k = f4.iterator(); k.hasNext();)
@@ -929,12 +930,12 @@ public class PerformanceTest {
                             out.writeUTF(p.getSegment(k).toClassicRepresentation());
                         Map<String, Object> v = e.getValue();
                         out.writeUTF((String) v.get("identity"));
-                        out.writeLong(toEpochMillis((Datatypes.DATE_TIME_CLASS.cast(v.get("field1")))));
+                        out.writeLong(ChronoTypes.getEpochMilliseconds((Datatypes.DATE_TIME_CLASS.cast(v.get("field1")))));
                         Set<String> f2 = (Set<String>) v.get("field2");
                         out.writeInt(f2.size());
                         for (Iterator<String> k = f2.iterator(); k.hasNext();)
                             out.writeUTF(k.next());
-                        out.writeLong(toEpochMillis((Datatypes.DATE_TIME_CLASS.cast(v.get("field3")))));
+                        out.writeLong(ChronoTypes.getEpochMilliseconds((Datatypes.DATE_TIME_CLASS.cast(v.get("field3")))));
                         Set<String> f4 = (Set<String>) v.get("field4");
                         out.writeInt(f4.size());
                         for (Iterator<String> k = f4.iterator(); k.hasNext();)
@@ -1078,18 +1079,6 @@ public class PerformanceTest {
         out.writeUTF("field4");
         out.writeUTF("field5");
         out.writeUTF("field6");
-    }
-
-    private static long toEpochMillis(
-            Date date
-    ) {
-        return date.getTime();
-    }
-
-    private static long toEpochMillis(
-            Instant date
-    ) {
-        return date.getEpochSecond() * 1000 + date.getNano() / 1000000;
     }
 
 }

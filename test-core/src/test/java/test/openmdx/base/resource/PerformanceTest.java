@@ -69,7 +69,6 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.io.UTF8Writer;
@@ -89,6 +88,7 @@ import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.state2.cci.DateStateViews;
 import org.w3c.time.SystemClock;
 import org.xml.sax.InputSource;
+import org.w3c.time.ChronoTypes;
 
 public class PerformanceTest {
 
@@ -248,7 +248,6 @@ public class PerformanceTest {
 	}
 	};
 
-//	@Disabled
 	@Test
 	public void testSerialization() throws Exception {
 		for (SerializationTest test : tests) {
@@ -292,7 +291,7 @@ public class PerformanceTest {
 				entry.put("value5", value5);
 				UUID value6 = UUIDs.newUUID();
 				entry.put("value6", value6.toString());
-				entry.put("value7", #if CLASSIC_CHRONO_TYPES new java.util.Date #else java.time.Instant.ofEpochMilli#endif(value4));
+				entry.put("value7", ChronoTypes.ofEpochMilliseconds(value4));
 				entry.put("value8", today);
 				entry.put("value9", UUIDConversion.toURI(value6));
 				BigInteger value10 = BigInteger.valueOf(1000000 * i);

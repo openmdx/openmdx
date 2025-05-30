@@ -99,8 +99,8 @@ public class Order {
     /**
      * Tests whether validTo is greater than or equal to validFrom
      * 
-     * @param validFrom
-     * @param validTo
+     * @param validFrom the first value
+     * @param validTo the second value
      * 
      * @throws IllegalArgumentException if validTo is less than validFrom 
      */
@@ -109,9 +109,11 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo
     ){
         if(
-            validFrom != null &&
-            validTo != null &&
-            ChronoTypes.compare(validTo, validFrom) < 0
+            ChronoTypes.compare(
+                validFrom,
+                validTo,
+                ChronoTypes.NullRepresents.NEGATIVE_AND_POSITIVE_INFINITY_RESPECTIVELY
+            ) > 0
         ) throw BasicException.initHolder(
             new IllegalArgumentException(
                 "validTo must be greater than or equal to validFrom",
@@ -146,8 +148,8 @@ public class Order {
      * Compare two XMLGregorianCalendar values where {@code null} is
      * considered to be greater than every other value.
      * 
-     * @param d1
-     * @param d2
+     * @param d1 the first value
+     * @param d2 the second value
      * 
      * @return a negative integer, zero, or a positive integer as d1 is less 
      * than, equal to, or greater than d2. 
@@ -164,8 +166,8 @@ public class Order {
      * considered to be lesser than every other value for {@code from}
      * and greater than every other value for {@code to}.
      * 
-     * @param from
-     * @param to
+     * @param from the first value
+     * @param to the second value
      * 
      * @return a negative integer, zero, or a positive integer as {@code from} 
      * is less than, equal to, or greater than {@code to}. 
@@ -174,7 +176,7 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif from,
         #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif to
     ){
-        return ChronoTypes.compare(from, to, ChronoTypes.NullRepresents.NEGATIVE_AND_POSITIVE_INFINITY);
+        return ChronoTypes.compare(from, to, ChronoTypes.NullRepresents.NEGATIVE_AND_POSITIVE_INFINITY_RESPECTIVELY);
     }
 
     //------------------------------------------------------------------------
@@ -184,8 +186,8 @@ public class Order {
     /**
      * Tests whether invalidFrom is greater than validFrom
      * 
-     * @param validFrom
-     * @param invalidFrom
+     * @param validFrom the first value
+     * @param invalidFrom the second value
      * 
      * @throws IllegalArgumentException if invalidFrom is less than or equal to validFrom 
      */
@@ -194,9 +196,11 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif invalidFrom
     ){
         if(
-            validFrom != null &&
-            invalidFrom != null &&
-            ChronoTypes.compare(invalidFrom, validFrom) <= 0
+            ChronoTypes.compare(
+                validFrom,
+                invalidFrom,
+                ChronoTypes.NullRepresents.NEGATIVE_AND_POSITIVE_INFINITY_RESPECTIVELY
+            ) >= 0
         ) throw BasicException.initHolder(
             new IllegalArgumentException(
                 "invalidFrom must be greater than validFrom",
@@ -214,8 +218,8 @@ public class Order {
      * Compare two Date values where {@code null} is
      * considered to be smaller than every other value.
      * 
-     * @param d1
-     * @param d2
+     * @param d1 the first value
+     * @param d2 the second value
      * 
      * @return a negative integer, zero, or a positive integer as d1 is less 
      * than, equal to, or greater than d2. 
@@ -224,19 +228,15 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d1,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d2
     ){
-        return d1 == null ? (
-            d2 == null ? 0 : -1
-        ) : (
-            d2 == null ? 1 : ChronoTypes.compare(d1, d2)
-        );
+        return ChronoTypes.compare(d1, d2, ChronoTypes.NullRepresents.NEGATIVE_INFINITY);
     }
 
     /**
      * Compare two Date values where {@code null} is
      * considered to be greater than every other value.
      * 
-     * @param d1
-     * @param d2
+     * @param d1 the first value
+     * @param d2 the second value
      * 
      * @return a negative integer, zero, or a positive integer as d1 is less 
      * than, equal to, or greater than d2. 
@@ -245,11 +245,7 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d1,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d2
     ){
-        return d1 == null ? (
-            d2 == null ? 0 : 1
-        ) : (
-            d2 == null ? -1 : ChronoTypes.compare(d1, d2)
-        );
+        return ChronoTypes.compare(d1, d2, ChronoTypes.NullRepresents.POSITIVE_INFINITY);
     }
 
     /**
@@ -257,8 +253,8 @@ public class Order {
      * considered to be lesser than every other value for {@code from}
      * and greater than every other value for {@code to}.
      * 
-     * @param from
-     * @param to
+     * @param from the first value
+     * @param to the second value
      * 
      * @return a negative integer, zero, or a positive integer as {@code from} 
      * is less than, equal to, or greater than {@code to}. 
@@ -267,7 +263,7 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to
     ){
-        return from == null || to == null ? -1 : ChronoTypes.compare(from, to);
+        return ChronoTypes.compare(from, to, ChronoTypes.NullRepresents.NEGATIVE_AND_POSITIVE_INFINITY_RESPECTIVELY);
     }
     
     
@@ -279,8 +275,8 @@ public class Order {
      * Compare two Date values where {@code null} is
      * considered to be greater than every other value.
      * 
-     * @param d1
-     * @param d2
+     * @param d1 the first value
+     * @param d2 the second value
      * 
      * @return a negative integer, zero, or a positive integer as d1 is less 
      * than, equal to, or greater than d2. 
@@ -289,11 +285,7 @@ public class Order {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d1,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d2
     ){
-        return d1 == null ? (
-            d2 == null ? 0 : 1
-        ) : (
-            d2 == null ? -1 : ChronoTypes.compare(d1, d2)
-        );
+        return ChronoTypes.compare(d1, d2, ChronoTypes.NullRepresents.POSITIVE_INFINITY);
     }
     
     
@@ -304,7 +296,7 @@ public class Order {
     /**
      * Retrieve the previous day
      * 
-     * @param date
+     * @param date a day
      * 
      * @return the previous day
      */
@@ -320,7 +312,7 @@ public class Order {
     /**
      * Retrieve the next day
      * 
-     * @param date
+     * @param date a day
      * 
      * @return the next day
      */

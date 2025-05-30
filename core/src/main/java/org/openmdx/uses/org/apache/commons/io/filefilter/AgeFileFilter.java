@@ -27,6 +27,7 @@ package org.openmdx.uses.org.apache.commons.io.filefilter;
 
 import java.io.File;
 import java.io.Serializable;
+import org.w3c.time.ChronoTypes;
 
 import org.openmdx.uses.org.apache.commons.io.FileUtils;
 
@@ -110,7 +111,7 @@ public class AgeFileFilter extends AbstractFileFilter implements Serializable {
             final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif cutoffDate,
             final boolean acceptOlder
     ) {
-        this(cutoffDate.#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli()#endif, acceptOlder);
+        this(ChronoTypes.getEpochMilliseconds(cutoffDate), acceptOlder);
     }
 
     /**

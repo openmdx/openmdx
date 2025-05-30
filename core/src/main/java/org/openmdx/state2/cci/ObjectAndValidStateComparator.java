@@ -749,8 +749,7 @@ public class ObjectAndValidStateComparator {
                 id.append(
                     '['
                 ).append(
-            		validFrom.#if CLASSIC_CHRONO_TYPES toXMLFormat() #else format(DateTimeFormatter.ISO_LOCAL_DATE)#endif
-
+            		validFrom
                 );
             }
             id.append(',');
@@ -758,7 +757,7 @@ public class ObjectAndValidStateComparator {
                 id.append("\u221E)");
             } else {
                 id.append(
-            		validTo.#if CLASSIC_CHRONO_TYPES toXMLFormat() #else format(DateTimeFormatter.ISO_LOCAL_DATE)#endif
+            		validTo
                 ).append(
                     ']'
                 );

@@ -427,211 +427,223 @@ publishing {
                 }
             }
         }
-        if(projectFlavour == "2") { // will become projectFlavour != "3" with MDX-2
-	        create<MavenPublication>("openmdxClient") {
-	            artifactId = "openmdx-client"
-	            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/client/lib/openmdx-client.jar")) { type = "jar" })
-	            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/client/lib/openmdx-client-sources.jar")) { type = "jar"; classifier = "sources" })
-	            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-client-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
-	            pom {
-	                name.set("openmdx-client")
-	                description.set("openMDX/Client Library")
-	                url.set("http://www.openmdx.org")
-	                licenses {
-	                    license {
-	                        name.set("The Apache License, Version 2.0")
-	                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-	                    }
-	                }
-	                developers {
-	                    developer {
-	                        id.set("wfro")
-	                        name.set("Werner Froidevaux")
-	                        email.set("wfro64@users.noreply.github.com")
-	                    }
-	                    developer {
-	                        id.set("dirty-harry")
-	                        name.set("Harry")
-	                        email.set("dirty-harry@users.sourceforge.net")
-	                    }
-	                }
-	                scm {
-	                    connection.set("scm:git:https://github.com/openmdx/openmdx.git")
-	                    developerConnection.set("scm:git:ssh://github.com/openmdx/openmdx.git")
-	                    url.set("https://github.com/openmdx/openmdx/tree/master")
-	                }
-	            }
-	        }
-	        create<MavenPublication>("openmdxDalvik") {
-	            artifactId = "openmdx-dalvik"
-	            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/client/lib/openmdx-dalvik.jar")) { type = "jar" })
-	            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/client/lib/openmdx-dalvik-sources.jar")) { type = "jar"; classifier = "sources" })
-	            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-dalvik-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
-	            pom {
-	                name.set("openmdx-dalvik")
-	                description.set("openMDX/Dalvik Library")
-	                url.set("http://www.openmdx.org")
-	                licenses {
-	                    license {
-	                        name.set("The Apache License, Version 2.0")
-	                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-	                    }
-	                }
-	                developers {
-	                    developer {
-	                        id.set("wfro")
-	                        name.set("Werner Froidevaux")
-	                        email.set("wfro64@users.noreply.github.com")
-	                    }
-	                    developer {
-	                        id.set("dirty-harry")
-	                        name.set("Harry")
-	                        email.set("dirty-harry@users.sourceforge.net")
-	                    }
-	                }
-	                scm {
-	                    connection.set("scm:git:https://github.com/openmdx/openmdx.git")
-	                    developerConnection.set("scm:git:ssh://github.com/openmdx/openmdx.git")
-	                    url.set("https://github.com/openmdx/openmdx/tree/master")
-	                }
-	            }
-	        }
-	        create<MavenPublication>("openmdxPortal") {
-	            artifactId = "openmdx-portal"
-	            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/portal/lib/openmdx-portal.jar")) { type = "jar" })
-	            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/portal/lib/openmdx-portal-sources.jar")) { type = "jar"; classifier = "sources" })
-	            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-portal-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
-	            pom {
-	                name.set("openmdx-portal")
-	                description.set("openMDX/Portal Library")
-	                url.set("http://www.openmdx.org")
-	                licenses {
-	                    license {
-	                        name.set("The Apache License, Version 2.0")
-	                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-	                    }
-	                }
-	                developers {
-	                    developer {
-	                        id.set("wfro")
-	                        name.set("Werner Froidevaux")
-	                        email.set("wfro64@users.noreply.github.com")
-	                    }
-	                    developer {
-	                        id.set("dirty-harry")
-	                        name.set("Harry")
-	                        email.set("dirty-harry@users.sourceforge.net")
-	                    }
-	                }
-	                scm {
-	                    connection.set("scm:git:https://github.com/openmdx/openmdx.git")
-	                    developerConnection.set("scm:git:ssh://github.com/openmdx/openmdx.git")
-	                    url.set("https://github.com/openmdx/openmdx/tree/master")
-	                }
-	            }
-	        }
-	        create<MavenPublication>("openmdxPortalModels") {
-	            artifactId = "openmdx-portal-models"
-	            artifact(project.artifacts.add("archives", File("${rootDir}/portal/build/openmdx-${projectFlavour}/generated/sources/model/openmdx-portal.openmdx-emf.zip")) { type = "jar" })
-	            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-portal-models-sources.jar")) { type = "jar"; classifier = "sources" })
-	            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-portal-models-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
-	            pom {
-	                name.set("openmdx-portal-models")
-	                description.set("openMDX/Portal Models Library")
-	                url.set("http://www.openmdx.org")
-	                licenses {
-	                    license {
-	                        name.set("The Apache License, Version 2.0")
-	                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-	                    }
-	                }
-	                developers {
-	                    developer {
-	                        id.set("wfro")
-	                        name.set("Werner Froidevaux")
-	                        email.set("wfro64@users.noreply.github.com")
-	                    }
-	                    developer {
-	                        id.set("dirty-harry")
-	                        name.set("Harry")
-	                        email.set("dirty-harry@users.sourceforge.net")
-	                    }
-	                }
-	                scm {
-	                    connection.set("scm:git:https://github.com/openmdx/openmdx.git")
-	                    developerConnection.set("scm:git:ssh://github.com/openmdx/openmdx.git")
-	                    url.set("https://github.com/openmdx/openmdx/tree/master")
-	                }
-	            }
-	        }
-	        create<MavenPublication>("openmdxInspector") {
-	            artifactId = "openmdx-inspector"
-	            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/portal/deployment-unit/openmdx-inspector.war")) { type = "war" })
-	            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-inspector-sources.jar")) { type = "jar"; classifier = "sources" })
-	            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-inspector-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
-	            pom {
-	                name.set("openmdx-inspector")
-	                description.set("openMDX/Inspector Library")
-	                url.set("http://www.openmdx.org")
-	                licenses {
-	                    license {
-	                        name.set("The Apache License, Version 2.0")
-	                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-	                    }
-	                }
-	                developers {
-	                    developer {
-	                        id.set("wfro")
-	                        name.set("Werner Froidevaux")
-	                        email.set("wfro64@users.noreply.github.com")
-	                    }
-	                    developer {
-	                        id.set("dirty-harry")
-	                        name.set("Harry")
-	                        email.set("dirty-harry@users.sourceforge.net")
-	                    }
-	                }
-	                scm {
-	                    connection.set("scm:git:https://github.com/openmdx/openmdx.git")
-	                    developerConnection.set("scm:git:ssh://github.com/openmdx/openmdx.git")
-	                    url.set("https://github.com/openmdx/openmdx/tree/master")
-	                }
-	            }
-	        }
-	        create<MavenPublication>("openmdxCatalina") {
-	            artifactId = "catalina-openmdx"
-	            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/tomcat/lib/catalina-openmdx.jar")) { type = "war" })
-	            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/tomcat/lib/catalina-openmdx-sources.jar")) { type = "jar"; classifier = "sources" })
-	            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/catalina-openmdx-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
-	            pom {
-	                name.set("catalina-openmdx")
-	                description.set("openMDX/Catalina Library")
-	                url.set("http://www.openmdx.org")
-	                licenses {
-	                    license {
-	                        name.set("The Apache License, Version 2.0")
-	                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-	                    }
-	                }
-	                developers {
-	                    developer {
-	                        id.set("wfro")
-	                        name.set("Werner Froidevaux")
-	                        email.set("wfro64@users.noreply.github.com")
-	                    }
-	                    developer {
-	                        id.set("dirty-harry")
-	                        name.set("Harry")
-	                        email.set("dirty-harry@users.sourceforge.net")
-	                    }
-	                }
-	                scm {
-	                    connection.set("scm:git:https://github.com/openmdx/openmdx.git")
-	                    developerConnection.set("scm:git:ssh://github.com/openmdx/openmdx.git")
-	                    url.set("https://github.com/openmdx/openmdx/tree/master")
-	                }
-	            }
-	        }
+        create<MavenPublication>("openmdxClient") {
+            artifactId = "openmdx-client"
+            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/client/lib/openmdx-client.jar")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/client/lib/openmdx-client-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-client-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
+            pom {
+                name.set("openmdx-client")
+                description.set("openMDX/Client Library")
+                url.set("http://www.openmdx.org")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("wfro")
+                        name.set("Werner Froidevaux")
+                        email.set("wfro64@users.noreply.github.com")
+                    }
+                    developer {
+                        id.set("dirty-harry")
+                        name.set("Harry")
+                        email.set("dirty-harry@users.sourceforge.net")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:https://github.com/openmdx/openmdx.git")
+                    developerConnection.set("scm:git:ssh://github.com/openmdx/openmdx.git")
+                    url.set("https://github.com/openmdx/openmdx/tree/master")
+                }
+            }
+        }
+        if(projectFlavour != "3") {
+            create<MavenPublication>("openmdxDalvik") {
+                artifactId = "openmdx-dalvik"
+                artifact(
+                    project.artifacts.add(
+                        "archives",
+                        File("${rootDir}/build/openmdx-${projectFlavour}/client/lib/openmdx-dalvik.jar")
+                    ) { type = "jar" })
+                artifact(
+                    project.artifacts.add(
+                        "archives",
+                        File("${rootDir}/build/openmdx-${projectFlavour}/client/lib/openmdx-dalvik-sources.jar")
+                    ) { type = "jar"; classifier = "sources" })
+                artifact(
+                    project.artifacts.add(
+                        "archives",
+                        File("$projectDir/src/main/maven/openmdx-dalvik-javadoc.jar")
+                    ) { type = "jar"; classifier = "javadoc" })
+                pom {
+                    name.set("openmdx-dalvik")
+                    description.set("openMDX/Dalvik Library")
+                    url.set("http://www.openmdx.org")
+                    licenses {
+                        license {
+                            name.set("The Apache License, Version 2.0")
+                            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("wfro")
+                            name.set("Werner Froidevaux")
+                            email.set("wfro64@users.noreply.github.com")
+                        }
+                        developer {
+                            id.set("dirty-harry")
+                            name.set("Harry")
+                            email.set("dirty-harry@users.sourceforge.net")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:https://github.com/openmdx/openmdx.git")
+                        developerConnection.set("scm:git:ssh://github.com/openmdx/openmdx.git")
+                        url.set("https://github.com/openmdx/openmdx/tree/master")
+                    }
+                }
+            }
+        }
+        create<MavenPublication>("openmdxPortal") {
+            artifactId = "openmdx-portal"
+            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/portal/lib/openmdx-portal.jar")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/portal/lib/openmdx-portal-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-portal-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
+            pom {
+                name.set("openmdx-portal")
+                description.set("openMDX/Portal Library")
+                url.set("http://www.openmdx.org")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("wfro")
+                        name.set("Werner Froidevaux")
+                        email.set("wfro64@users.noreply.github.com")
+                    }
+                    developer {
+                        id.set("dirty-harry")
+                        name.set("Harry")
+                        email.set("dirty-harry@users.sourceforge.net")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:https://github.com/openmdx/openmdx.git")
+                    developerConnection.set("scm:git:ssh://github.com/openmdx/openmdx.git")
+                    url.set("https://github.com/openmdx/openmdx/tree/master")
+                }
+            }
+        }
+        create<MavenPublication>("openmdxPortalModels") {
+            artifactId = "openmdx-portal-models"
+            artifact(project.artifacts.add("archives", File("${rootDir}/portal/build/openmdx-${projectFlavour}/generated/sources/model/openmdx-portal.openmdx-emf.zip")) { type = "jar" })
+            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-portal-models-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-portal-models-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
+            pom {
+                name.set("openmdx-portal-models")
+                description.set("openMDX/Portal Models Library")
+                url.set("http://www.openmdx.org")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("wfro")
+                        name.set("Werner Froidevaux")
+                        email.set("wfro64@users.noreply.github.com")
+                    }
+                    developer {
+                        id.set("dirty-harry")
+                        name.set("Harry")
+                        email.set("dirty-harry@users.sourceforge.net")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:https://github.com/openmdx/openmdx.git")
+                    developerConnection.set("scm:git:ssh://github.com/openmdx/openmdx.git")
+                    url.set("https://github.com/openmdx/openmdx/tree/master")
+                }
+            }
+        }
+        create<MavenPublication>("openmdxInspector") {
+            artifactId = "openmdx-inspector"
+            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/portal/deployment-unit/openmdx-inspector.war")) { type = "war" })
+            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-inspector-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/openmdx-inspector-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
+            pom {
+                name.set("openmdx-inspector")
+                description.set("openMDX/Inspector Library")
+                url.set("http://www.openmdx.org")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("wfro")
+                        name.set("Werner Froidevaux")
+                        email.set("wfro64@users.noreply.github.com")
+                    }
+                    developer {
+                        id.set("dirty-harry")
+                        name.set("Harry")
+                        email.set("dirty-harry@users.sourceforge.net")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:https://github.com/openmdx/openmdx.git")
+                    developerConnection.set("scm:git:ssh://github.com/openmdx/openmdx.git")
+                    url.set("https://github.com/openmdx/openmdx/tree/master")
+                }
+            }
+        }
+        create<MavenPublication>("openmdxCatalina") {
+            artifactId = "catalina-openmdx"
+            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/tomcat/lib/catalina-openmdx.jar")) { type = "war" })
+            artifact(project.artifacts.add("archives", File("${rootDir}/build/openmdx-${projectFlavour}/tomcat/lib/catalina-openmdx-sources.jar")) { type = "jar"; classifier = "sources" })
+            artifact(project.artifacts.add("archives", File("$projectDir/src/main/maven/catalina-openmdx-javadoc.jar")) { type = "jar"; classifier = "javadoc" })
+            pom {
+                name.set("catalina-openmdx")
+                description.set("openMDX/Catalina Library")
+                url.set("http://www.openmdx.org")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("wfro")
+                        name.set("Werner Froidevaux")
+                        email.set("wfro64@users.noreply.github.com")
+                    }
+                    developer {
+                        id.set("dirty-harry")
+                        name.set("Harry")
+                        email.set("dirty-harry@users.sourceforge.net")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:https://github.com/openmdx/openmdx.git")
+                    developerConnection.set("scm:git:ssh://github.com/openmdx/openmdx.git")
+                    url.set("https://github.com/openmdx/openmdx/tree/master")
+                }
+            }
        }
     }
 }

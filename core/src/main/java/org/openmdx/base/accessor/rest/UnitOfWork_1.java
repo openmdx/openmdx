@@ -1141,7 +1141,7 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
             this.taskId = null;
             this.aspectSpecificContexts.clear();
             if (status == Status.STATUS_COMMITTED) {
-                // § SharedObjects.getPlugInObject(this.dataObjectManager, DataStoreCache_2_0.class).evictAll();
+                // TODO SharedObjects.getPlugInObject(this.dataObjectManager, DataStoreCache_2_0.class).evictAll();
             }
             if (!this.dataObjectManager.isRetainValues()) {
                 this.dataObjectManager.evictAll();

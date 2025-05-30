@@ -50,6 +50,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.ChronoTypes;
 
 
 /**
@@ -78,12 +79,12 @@ class LenientClassicDurationComparator extends LenientNumberComparator {
         Object second
     ) {
         if(second instanceof Duration) {
-            return Datatypes.compare(
+            return ChronoTypes.compare(
                 (Duration) first,
                 (Duration) second
             );
         } else {
-            return Datatypes.compare(
+            return ChronoTypes.compare(
                 (Duration) first,
                 Datatypes.create(Duration.class, second.toString())
             );

@@ -103,14 +103,16 @@ public class DateState_1
     }
 
     /**
-     * To distinguish bewteen the {@code NULL} value and {@code null} for "not yet set"
+     * The null date value<ul>
+     *     <li>All fields undefined for classic chrono types</li>
+     *     <li>A magic number for contemporary chrono types </li>
+     * </ul>
      */
     private static final
     #if CLASSIC_CHRONO_TYPES
-    javax.xml.datatype.XMLGregorianCalendar NULL = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory()
-        .newXMLGregorianCalendar(java.time.LocalDate.MIN.toString());
+    javax.xml.datatype.XMLGregorianCalendar NULL_DATE = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar();
     #else
-    java.time.LocalDate NULL = java.time.LocalDate.MIN;
+    java.time.LocalDate NULL_DATE = java.time.LocalDate.MIN;
     #endif
 
     private static final List<String> IGNORABLE_ATTRIBUTES = Arrays.asList(
@@ -123,16 +125,7 @@ public class DateState_1
      * Compare two XMLGregorianCalendar values where {@code null} is
      * considered to be smaller than every other value.
      */
-    private static final Comparator<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> VALID_FROM_COMPARATOR = new Comparator<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> () {
-
-        @Override
-        public int compare(
-            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif o1,
-            #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif o2
-        ) {
-            return Order.compareValidFrom(o1, o2);
-        }
-    };
+    private static final Comparator<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif> VALID_FROM_COMPARATOR = Order::compareValidFrom;
 
     //------------------------------------------------------------------------
     // Extends AbstractState_1
@@ -208,7 +201,7 @@ public class DateState_1
                     addState(states, predecessor);
                 }
             } else {
-                validFrom = NULL;
+                validFrom = NULL_DATE;
             }
             //
             // Handle the period which is no longer involved
@@ -225,17 +218,17 @@ public class DateState_1
                     addState(states, successor);
                 }
             } else {
-                validTo = NULL;
+                validTo = NULL_DATE;
                 
             }
             //
             // Handle the period which is involved
             //
             DataObject_1_0 target = PersistenceHelper.clone(source);
-            if(validFrom != NULL) {
+            if(validFrom != NULL_DATE) {
                 target.objSetValue(STATE_VALID_FROM, validFrom);
             }
-            if(validTo != NULL) {
+            if(validTo != NULL_DATE) {
                 target.objSetValue(STATE_VALID_TO, validTo);
             }
             if(!target.jdoIsNew()) {

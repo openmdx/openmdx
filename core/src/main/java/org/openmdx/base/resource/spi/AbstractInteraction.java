@@ -73,12 +73,6 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.time.SystemClock;
 
-#if CLASSIC_CHRONO_TYPES
-import org.w3c.cci2.ImmutableDateTime;
-#else
-import java.time.LocalDate;
-#endif
-
 /**
  * Abstract Interaction
  * <p>

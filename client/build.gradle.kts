@@ -55,7 +55,7 @@ val projectSpecificationVersion = project.extra["projectSpecificationVersion"] a
 val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
 val runtimeCompatibility = project.extra["runtimeCompatibility"] as JavaVersion
 
-if (projectFlavour == "2"  && System.getenv("JRE_18") == null) {
+if (runtimeCompatibility.isJava8()  && System.getenv("JRE_18") == null) {
     throw GradleException("ERROR: JRE_18 not set " +
             "(e.g. export JRE_18=/usr/lib/jvm/java-8-openjdk-amd64/jre)")
 }
@@ -198,29 +198,50 @@ tasks {
         useJUnitPlatform()
         maxHeapSize = "4G"
     }
-    distTar {
-        dependsOn(
-            "openmdx-client.jar",
-//            "openmdx-dalvik.jar",
-            "openmdx-client-sources.jar",
-//            "openmdx-dalvik-sources.jar"
-        )
-    }
-    distZip {
-        dependsOn(
-            "openmdx-client.jar",
-//            "openmdx-dalvik.jar",
-            "openmdx-client-sources.jar",
-//            "openmdx-dalvik-sources.jar"
-        )
-    }
-    assemble {
-        dependsOn(
-            "openmdx-client.jar",
-            "openmdx-client-sources.jar",
-//            "openmdx-dalvik.jar",
-//            "openmdx-dalvik-sources.jar"
-        )
+    if(projectFlavour == "3") {
+        distTar {
+            dependsOn(
+                "openmdx-client.jar",
+                "openmdx-client-sources.jar",
+            )
+        }
+        distZip {
+            dependsOn(
+                "openmdx-client.jar",
+                "openmdx-client-sources.jar",
+            )
+        }
+        assemble {
+            dependsOn(
+                "openmdx-client.jar",
+                "openmdx-client-sources.jar",
+            )
+        }
+    } else {
+        distTar {
+            dependsOn(
+                "openmdx-client.jar",
+                "openmdx-dalvik.jar",
+                "openmdx-client-sources.jar",
+                "openmdx-dalvik-sources.jar"
+            )
+        }
+        distZip {
+            dependsOn(
+                "openmdx-client.jar",
+                "openmdx-dalvik.jar",
+                "openmdx-client-sources.jar",
+                "openmdx-dalvik-sources.jar"
+            )
+        }
+        assemble {
+            dependsOn(
+                "openmdx-client.jar",
+                "openmdx-client-sources.jar",
+                "openmdx-dalvik.jar",
+                "openmdx-dalvik-sources.jar"
+            )
+        }
     }
     register<org.openmdx.gradle.ArchiveTask>("openmdx-client.jar") {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE

@@ -44,10 +44,13 @@
  */
 package org.openmdx.state2.spi;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openmdx.state2.cci.DateStateContext;
 import org.w3c.time.ChronoTypes;
+import org.w3c.spi.DatatypeFactories;
 
 /**
  * Date State Context Test
@@ -108,19 +111,15 @@ public class DateStateViewContextTest {
        Assertions.assertEquals(C4,  c4.toString(), "toString"); 
        Assertions.assertEquals(C5,  c5.toString(), "toString");        
     }
-    
+
+    #if CLASSIC_CHRONO_TYPES
     @Test  
     public void noDate(
     ){
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif null1 =
-                #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar()
-				#else java.time.LocalDate.now()
-				#endif;
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif null2 =
-                #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar()
-				#else java.time.LocalDate.now()
-				#endif;
+        XMLGregorianCalendar null1 = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar();
+        XMLGregorianCalendar null2= DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar();
         Assertions.assertEquals(null1,  null2, "NULL");
     }
+    #endif // CLASSIC_CHRONO_TYPES
     
 }

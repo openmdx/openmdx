@@ -103,8 +103,7 @@ public class CacheTest {
             #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif now = SystemClock.getInstance().now();
             Cache<String,#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> cache1 = cacheManager.createCache("testCache", configuration);
             cache1.put("created", now);
-            #if CLASSIC_CHRONO_TYPES now = new java.util.Date(now.getTime() + 1000) #else now = now.plusMillis(1000) #endif;
-//            now = new Date(now.getTime() + 1000);
+            now = #if CLASSIC_CHRONO_TYPES new java.util.Date(now.getTime() + 1000) #else now.plusMillis(1000) #endif;
             Cache<String,#if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif> cache2 = cacheManager.createCache("testCache", configuration);
             cache2.put("created", now);
             System.out.println(cache1.getClass().getName() + '@' + System.identityHashCode(cache1) + " created at " + cache1.get("created"));

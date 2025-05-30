@@ -48,8 +48,7 @@ import org.w3c.time.ChronoTypes;
 
 import java.text.ParseException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
+import org.w3c.spi2.Datatypes;
 
 /**
  * Date
@@ -93,10 +92,8 @@ public class Date {
         } catch (ParseException exception) {
             throw new IllegalArgumentException(exception);
         }
-        if(ChronoTypes.BASIC_DATE_PATTERN.matcher(value).matches()) {
-            return #if CLASSIC_CHRONO_TYPES new org.w3c.cci2.ImmutableDate(value) #else LocalDate.parse(value, DateTimeFormatter.BASIC_ISO_DATE)#endif;
-        } else if(ChronoTypes.EXTENDED_DATE_PATTERN.matcher(value).matches()) {
-            return #if CLASSIC_CHRONO_TYPES new org.w3c.cci2.ImmutableDate(value.replaceAll("-", "")) #else LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE)#endif;
+        if(ChronoTypes.BASIC_DATE_PATTERN.matcher(value).matches() || ChronoTypes.EXTENDED_DATE_PATTERN.matcher(value).matches()) {
+            return Datatypes.create(Datatypes.DATE_CLASS, value);
         } else {
             throw new IllegalArgumentException(
                 "The value does not match the org::w3c::date pattern. Pattern=YYYY[...]-MM-DD. Value=" + value

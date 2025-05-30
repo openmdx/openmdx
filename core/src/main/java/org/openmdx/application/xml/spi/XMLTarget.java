@@ -244,8 +244,6 @@ public class XMLTarget implements ExportTarget {
         final String stringValue;
         if(PrimitiveTypes.DATETIME.equals(typeName)) {
             stringValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value));
-        } else if(PrimitiveTypes.DATE.equals(typeName)) {
-            stringValue = Datatypes.DATE_CLASS.cast(value).#if CLASSIC_CHRONO_TYPES toXMLFormat() #else toString()#endif;
         } else if(PrimitiveTypes.LONG.equals(typeName) || PrimitiveTypes.INTEGER.equals(typeName) || PrimitiveTypes.SHORT.equals(typeName)) {
             stringValue = String.valueOf(((Number) value).longValue());
         } else if(PrimitiveTypes.BINARY.equals(typeName)) {

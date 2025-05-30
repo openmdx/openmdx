@@ -185,9 +185,6 @@ import org.w3c.cci2.RegularExpressionFlag;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 import org.w3c.format.DateTimeFormat;
-#if CLASSIC_CHRONO_TYPES
-import org.w3c.spi.DatatypeFactories;
-#endif
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
@@ -497,12 +494,13 @@ public class Database_2
     }
 
     /**
-     * Get calendar marshaller.
+     * Get date and time marshaller
      *
-     * @return the XMLGregorianCalendar marshaller
+     * @return the date and time marshaller
+     *
      * @throws ServiceException in case of failure
      */
-    protected DateAndTimeMarshaller getCalendarMarshaller()
+    protected DateAndTimeMarshaller getDateAndTimeMarshaller()
         throws ServiceException {
         if (this.calendarMarshaller == null) {
             this.calendarMarshaller = DateAndTimeMarshaller.newInstance(
@@ -510,8 +508,7 @@ public class Database_2
                 this.dateType,
                 this.dateTimeType,
                 this.dateTimeZone,
-                this.dateTimeDaylightZone == null ? dateTimeZone
-                    : this.dateTimeDaylightZone,
+                this.dateTimeDaylightZone == null ? dateTimeZone : this.dateTimeDaylightZone,
                 this.dateTimePrecision,
                 this
             );
@@ -3349,7 +3346,8 @@ public class Database_2
                 ps.setObject(position, sqlValue);
             }
         } else if(Datatypes.DATE_CLASS.isInstance(normalizedValue)) {
-            Object sqlValue = this.getCalendarMarshaller().marshal(normalizedValue, conn);
+            // With classic chrono types XMLGregorianCalendar handles org::w3c:date as well as org::w3c::dateTime (on this layer only!)
+            Object sqlValue = this.getDateAndTimeMarshaller().marshal(normalizedValue, conn);
             if (sqlValue instanceof Time) {
                 ps.setTime(position, (Time) sqlValue);
             } else if (sqlValue instanceof Timestamp) {
@@ -4399,7 +4397,7 @@ public class Database_2
             this.setValue(
                 target,
                 index,
-                #if CLASSIC_CHRONO_TYPES this.getCalendarMarshaller().unmarshal(val.toString().substring(0, 10))
+                #if CLASSIC_CHRONO_TYPES this.getDateAndTimeMarshaller().unmarshal(val.toString().substring(0, 10))
                 #else java.time.LocalDate.parse(val.toString().substring(0, 10), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
                 #endif,
                 isEmbedded
@@ -4414,7 +4412,7 @@ public class Database_2
             this.setValue(
                 target,
                 index,
-                this.getCalendarMarshaller().unmarshal(val),
+                this.getDateAndTimeMarshaller().unmarshal(val),
                 isEmbedded
             );
         } else if (PrimitiveTypes.DURATION.equals(featureType)) {
