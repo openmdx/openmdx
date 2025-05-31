@@ -93,6 +93,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core")
     testImplementation("org.mockito:mockito-junit-jupiter")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	if(runtimeCompatibility.isJava8()) {
 		testRuntimeOnly(group = "com.atomikos", name = "transactions-jta")
 		testRuntimeOnly(group = "com.atomikos", name = "transactions-jdbc")

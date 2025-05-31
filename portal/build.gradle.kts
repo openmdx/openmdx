@@ -90,6 +90,7 @@ dependencies {
 	// test
     testImplementation("org.junit.jupiter:junit-jupiter-api")
 	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	// manifold preprocessor
 	compileOnly("systems.manifold:manifold-preprocessor")
 	annotationProcessor(platform(project(projectPlatform)))
