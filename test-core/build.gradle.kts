@@ -93,6 +93,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core")
     testImplementation("org.mockito:mockito-junit-jupiter")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testRuntimeOnly("org.postgresql:postgresql")
     testRuntimeOnly("jakarta.servlet:jakarta.servlet-api")
 	if(runtimeCompatibility.isJava8()) {
