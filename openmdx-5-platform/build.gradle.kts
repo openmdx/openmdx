@@ -64,7 +64,7 @@ dependencies {
         val junitVersion = "5.13.0"
         val junitPlatformVersion = "1.13.0"
         val ldapVersion = "2.1.+"
-        val manifoldVersion = "2025.1.11"
+        val manifoldVersion = "2025.1.17"
         val mockitoVersion = "5.18.0"
         val oracleVersion = "23.8.0.25.04"
         val postgresVersion = "42.7.+"
