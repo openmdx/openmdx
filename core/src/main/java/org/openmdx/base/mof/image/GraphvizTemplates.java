@@ -509,7 +509,7 @@ public class GraphvizTemplates {
 			throw new ServiceException(
 				BasicException.Code.DEFAULT_DOMAIN,
 				BasicException.Code.PARSE_FAILURE,
-				placeholder + " place holder is not properly closed",
+				placeholder + " placeholder is not properly closed",
 				new BasicException.Parameter("dot", dot.substring(startPos))
 			);
 		}

@@ -498,7 +498,7 @@ public class Model_1DiagramDrawer {
                                     throw new ServiceException(
                                         BasicException.Code.DEFAULT_DOMAIN,
                                         BasicException.Code.PARSE_FAILURE,
-                                        "${CLASS[...]} place holder is not properly closed",
+                                        "${CLASS[...]} placeholder is not properly closed",
                                         new BasicException.Parameter("dot", dot.substring(startPos))
                                     );
                                 }
@@ -559,7 +559,7 @@ public class Model_1DiagramDrawer {
                                     throw new ServiceException(
                                         BasicException.Code.DEFAULT_DOMAIN,
                                         BasicException.Code.PARSE_FAILURE,
-                                        "${ASSOCIATION[...]} place holder is not properly closed",
+                                        "${ASSOCIATION[...]} placeholder is not properly closed",
                                         new BasicException.Parameter("dot", dot.substring(startPos))
                                     );
                                 }
