@@ -166,14 +166,14 @@ public class SegmentReferencesForeignPersonImpl
     /* (non-Javadoc)
      * @see org.w3c.cci2.Container#getAll(org.w3c.cci2.AnyTypePredicate)
      */
-    public List<Person> getAll(AnyTypePredicate<Person> predicate) {
+    public List<Person> getAll(AnyTypePredicate<? extends Person> predicate) {
         return this.segment.<Person>getPerson().getAll(predicate);
     }
 
     /* (non-Javadoc)
      * @see org.w3c.cci2.Container#removeAll(org.w3c.cci2.AnyTypePredicate)
      */
-    public void removeAll(AnyTypePredicate<Person> predicate) {
+    public void removeAll(AnyTypePredicate<? extends Person> predicate) {
         this.segment.<Person>getPerson().removeAll(predicate);
     }
 
@@ -182,7 +182,7 @@ public class SegmentReferencesForeignPersonImpl
      */
     @Override
     public void processAll(
-        AnyTypePredicate<Person> predicate,
+        AnyTypePredicate<? extends Person> predicate,
         Consumer<Person> consumer
     ) {
         this.segment.<Person>getPerson().processAll(predicate, consumer);

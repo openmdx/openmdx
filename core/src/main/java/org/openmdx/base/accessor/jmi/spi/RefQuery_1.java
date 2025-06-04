@@ -162,7 +162,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-----------------------------------------------------------------------
-    public abstract class RefPredicate implements AnyTypePredicate<RefQuery_1> {
+    public abstract class RefPredicate<V> implements AnyTypePredicate<V> {
 
         public RefPredicate(
             Quantifier quantifier,
@@ -234,7 +234,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.AnyTypePredicate#equalTo(V)
          */
         public void equalTo(
-                RefQuery_1 operand
+                V operand
         ) {
             this.elementOf(
                 Collections.singleton(operand));
@@ -246,7 +246,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.AnyTypePredicate#elementOf(V...)
          */
         public void elementOf(
-                RefQuery_1... operand
+                V... operand
         ) {
             this.elementOf(
                 Arrays.asList(operand));
@@ -280,7 +280,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.AnyTypePredicate#notEqual(V)
          */
         public void notEqualTo(
-                RefQuery_1 operand
+                V operand
         ) {
             this.notAnElementOf(
                 Collections.singleton(operand));
@@ -291,12 +291,12 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * 
          * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(V...)
          */
-        public void notAnElementOf(
-                RefQuery_1... operand
-        ) {
-            this.notAnElementOf(
-                Arrays.asList(operand));
-        }
+//        public void notAnElementOf(
+//                RefQuery_1... operand
+//        ) {
+//            this.notAnElementOf(
+//                Arrays.asList(operand));
+//        }
 
         /*
          * (non-Javadoc)
@@ -304,7 +304,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(Collection<V>)
          */
         public void notAnElementOf(
-            Collection<?> operand
+            Collection<? extends V> operand
         ) {
             if (operand instanceof ExtentCollection<?>) {
                 Path pattern = ((ExtentCollection<?>) operand).getPattern();
@@ -413,7 +413,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    public class RefSimpleTypePredicate extends RefPredicate {
+    public class RefSimpleTypePredicate<V> extends RefPredicate<V> {
 
         public RefSimpleTypePredicate(
             Quantifier quantifier,
@@ -429,7 +429,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          */
         @Override
         public void equalTo(
-                RefQuery_1 operand
+                V operand
         ) {
             this.elementOf(
                 Collections.singleton(operand));
@@ -442,7 +442,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          */
         @Override
         public void elementOf(
-                RefQuery_1... operand
+                V... operand
         ) {
             this.elementOf(
                 Arrays.asList(operand));
@@ -455,7 +455,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          */
         @Override
         public void elementOf(
-            Collection<?> operand
+            Collection<? extends V> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -470,7 +470,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          */
         @Override
         public void notEqualTo(
-                RefQuery_1 operand
+                V operand
         ) {
             this.notAnElementOf(
                 Collections.singleton(operand));
@@ -481,13 +481,13 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * 
          * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(V...)
          */
-        @Override
-        public void notAnElementOf(
-                RefQuery_1... operand
-        ) {
-            this.notAnElementOf(
-                Arrays.asList(operand));
-        }
+//        @Override
+//        public void notAnElementOf(
+//                V... operand
+//        ) {
+//            this.notAnElementOf(
+//                Arrays.asList(operand));
+//        }
 
         /*
          * (non-Javadoc)
@@ -496,7 +496,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          */
         @Override
         public void notAnElementOf(
-            Collection<?> operand
+            Collection<? extends V> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -508,7 +508,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     //-------------------------------------------------------------------------
     public class RefComparableTypePredicate<V extends Comparable<?>>
-        extends RefSimpleTypePredicate
+        extends RefSimpleTypePredicate<V>
         implements ComparableTypePredicate<V> {
 
         public RefComparableTypePredicate(
@@ -948,7 +948,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     //-------------------------------------------------------------------------
     public class RefPartiallyOrderedTypePredicate<V>
-        extends RefSimpleTypePredicate
+        extends RefSimpleTypePredicate<V>
         implements PartiallyOrderedTypePredicate<V> {
 
         public RefPartiallyOrderedTypePredicate(

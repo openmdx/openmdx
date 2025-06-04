@@ -65,24 +65,24 @@ public interface AnyTypePredicate<V> {
     /**
      * &lsaquo;attribute value&rsaquo; &isin; &lsaquo;operands&rsaquo;
      * <p>
-     * Matches if the attribute's value is equal to one the operands.
+     * Matches if the attribute's value is equal to one of the operands.
      * 
      * @param operands the operands the attribute value is compared to
      */
     void elementOf(
-        Collection(? extends V) operands
+        Collection<? extends V> operands
     );
 
     /**
      * &lsaquo;attribute value&rsaquo; &isin; &lsaquo;operands&rsaquo;
      * <p>
-     * Matches if the attribute's value is equal to one the operands.
+     * Matches if the attribute's value is equal to one of the operands.
      * 
      * @param operands the operand the attribute value is compared to
      */
-    void elementOf(
-        Collection<?> operands
-    );
+//    void elementOf(
+//        Collection<?> operands
+//    );
 
     /**
      * &lsaquo;attribute value&rsaquo; &ne; &lsaquo;operand&rsaquo;
@@ -98,7 +98,7 @@ public interface AnyTypePredicate<V> {
     /**
      * &lsaquo;attribute value&rsaquo; &notin; &lsaquo;operands&rsaquo;
      * <p>
-     * Matches if the attribute's value is not equal to any the operands.
+     * Matches if the attribute's value is not equal to any of the operands.
      * 
      * @param operands the operand the attribute value is compared to
      */
@@ -109,16 +109,16 @@ public interface AnyTypePredicate<V> {
     /**
      * &lsaquo;attribute value&rsaquo; &notin; &lsaquo;operands&rsaquo;
      * <p>
-     * Matches if the attribute's value is not equal to any the operands.
+     * Matches if the attribute's value is not equal to any of the operands.
      * 
      * @param operands the operand the attribute value is compared to
      */
-    void notAnElementOf(
-        Collection<?> operands
-    );
+//    void notAnElementOf(
+//        Collection<?> operands
+//    );
 
     /**
-     * This method is deprecated in order to avoid its erroneous use in lieu 
+     * This method is deprecated to avoid its erroneous use in lieu
      * of {@link #equalTo(Object)}.
      * 
      * @deprecated to avoid erroneous use 

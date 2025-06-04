@@ -234,20 +234,20 @@ public class QueryFilterRecord
     /* (non-Javadoc)
      * @see org.w3c.cci2.AnyTypePredicate#elementOf(java.lang.Object[])
      */
-    @Override
-    public void elementOf(Object... operands) {
-        throw new UnsupportedOperationException();
-    }
+//    @Override
+//    public void elementOf(Object... operands) {
+//        throw new UnsupportedOperationException();
+//    }
 
     /* (non-Javadoc)
      * @see org.w3c.cci2.AnyTypePredicate#elementOf(java.util.Collection)
      */
     @Override
-    public void elementOf(Collection<?> operands) {
+    public void elementOf(Collection operands) {
         throw new UnsupportedOperationException();
     }
 
-    /* (non-Javadoc)
+	/* (non-Javadoc)
      * @see org.w3c.cci2.AnyTypePredicate#equalTo(java.lang.Object)
      */
     @Override
@@ -258,16 +258,16 @@ public class QueryFilterRecord
     /* (non-Javadoc)
      * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(java.lang.Object[])
      */
-    @Override
-    public void notAnElementOf(Object... operands) {
-        throw new UnsupportedOperationException();
-    }
+//    @Override
+//    public void notAnElementOf(Object... operands) {
+//        throw new UnsupportedOperationException();
+//    }
 
     /* (non-Javadoc)
      * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(java.util.Collection)
      */
     @Override
-    public void notAnElementOf(Collection<?> operands) {
+    public void notAnElementOf(Collection operands) {
         throw new UnsupportedOperationException();
     }
 

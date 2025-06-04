@@ -78,7 +78,7 @@ public interface Container<E>
      *            all matching elements are offered to the consumer
      */
     <T extends E> void processAll(
-        AnyTypePredicate<T> predicate,
+        AnyTypePredicate predicate,
         Consumer<T> consumer
     );
 
@@ -89,7 +89,7 @@ public interface Container<E>
      *            the predicate to be applied to the elements
      */
     void removeAll(
-        AnyTypePredicate<E> predicate
+        AnyTypePredicate<? extends E> predicate
     );
 
     /**

@@ -304,7 +304,7 @@ public class RefContainer_1
      * @see org.w3c.cci2.Container#getAll(org.w3c.cci2.AnyTypePredicate)
      */
     @Override
-    public List<RefObject_1_0> getAll(AnyTypePredicate<RefObject_1_0> predicate) {
+    public List<RefObject_1_0> getAll(AnyTypePredicate predicate) {
         return this.refGetAll(predicate);
     }
 
@@ -312,9 +312,9 @@ public class RefContainer_1
      * @see Container#processAll(AnyTypePredicate, Consumer)
      */
     @Override
-    public void processAll(
-        AnyTypePredicate<RefObject_1_0> predicate,
-        Consumer<RefObject_1_0> action
+    public <T extends RefObject_1_0> void processAll(
+        AnyTypePredicate predicate,
+        Consumer<T> action
     ) {
         final QueryComponents queryComponents = toQueryComponents(predicate);
         queryComponents.getSource().processAll(
@@ -328,7 +328,7 @@ public class RefContainer_1
      * @see org.w3c.cci2.Container#removeAll(org.w3c.cci2.AnyTypePredicate)
      */
     @Override
-    public void removeAll(AnyTypePredicate<RefObject_1_0> predicate) {
+    public void removeAll(AnyTypePredicate predicate) {
         this.refRemoveAll(predicate);
     }
 

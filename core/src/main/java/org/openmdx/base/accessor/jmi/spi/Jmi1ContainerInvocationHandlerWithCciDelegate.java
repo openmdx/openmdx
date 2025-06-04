@@ -239,7 +239,7 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
             } else if("getAll".equals(methodName) && args.length == 1) {
                 return this.marshaller.marshal(
                     this.cciDelegate.getAll(
-                        (AnyTypePredicate<>)this.marshaller.unmarshal(args[0])
+                        (AnyTypePredicate)this.marshaller.unmarshal(args[0])
                     )
                 );
             } else if("removeAll".equals(methodName) && args.length == 1) {
