@@ -52,8 +52,13 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
+#if JAVA_8
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
+#else
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
+#endif
 
 import org.apache.catalina.Manager;
 import org.apache.catalina.Realm;
@@ -277,7 +282,7 @@ public class RemoteUserAuthenticator extends ValveBase {
         Session session = request.getSessionInternal(false);
         if(session != null) {
             Manager manager = request.getContext().getManager();
-            manager.changeSessionId(session);
+            manager.changeSessionId(session, "newId");
             request.changeSessionId(session.getId());
         } 
         if(session != null) {
@@ -292,7 +297,7 @@ public class RemoteUserAuthenticator extends ValveBase {
     }
 
     /**
-     * Get principal in realm for given user name.
+     * Get principal in realm for given username.
      * 
      * @param realm
      * @param username
