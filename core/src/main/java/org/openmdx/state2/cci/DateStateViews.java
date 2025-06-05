@@ -2346,25 +2346,9 @@ public class DateStateViews {
         final RefContainer<? super T> refContainer = (RefContainer<? super T>) container;
         final Container<? super T> coreContainer = getTimeIndependentContainer(refContainer);
         final AnyTypePredicate<? extends T> statePredicate = getStatePredicate(refContainer, predicate);
-        final Consumer<T> marshallingConsumer = new MarshallingStateConsumer<>(consumer);
-//        coreContainer.processAll(statePredicate, marshallingConsumer);
-        coreContainer.processAll(statePredicate, adaptConsumer(marshallingConsumer));
+        final Consumer marshallingConsumer = new MarshallingStateConsumer(consumer);
+        coreContainer.processAll(statePredicate, marshallingConsumer);
     }
-
-    /**
-     * Creates a consumer that can be passed to a processAll method
-     *
-     * @param <S> the source type
-     * @param <T> the target type
-     * @param consumer the target consumer
-     * @return a consumer compatible with the source type
-     */
-    private static <S, T extends DateState> Consumer<? super S> adaptConsumer(
-            final Consumer<T> consumer
-    ) {
-        return object -> consumer.accept((T)object);
-    }
-
 
     //------------------------------------------------------------------------
     // Class StateList
