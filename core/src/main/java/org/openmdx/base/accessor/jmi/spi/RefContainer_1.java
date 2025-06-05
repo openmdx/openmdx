@@ -312,9 +312,9 @@ public class RefContainer_1
      * @see Container#processAll(AnyTypePredicate, Consumer)
      */
     @Override
-    public <T extends RefObject_1_0> void processAll(
+    public void processAll(
         AnyTypePredicate predicate,
-        Consumer<T> action
+        Consumer<? super RefObject_1_0> action
     ) {
         final QueryComponents queryComponents = toQueryComponents(predicate);
         queryComponents.getSource().processAll(

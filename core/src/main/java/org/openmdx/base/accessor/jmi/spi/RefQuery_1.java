@@ -246,7 +246,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.AnyTypePredicate#elementOf(V...)
          */
         public void elementOf(
-                V... operand
+            V... operand
         ) {
             this.elementOf(
                 Arrays.asList(operand));
@@ -442,7 +442,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          */
         @Override
         public void elementOf(
-                V... operand
+            V... operand
         ) {
             this.elementOf(
                 Arrays.asList(operand));

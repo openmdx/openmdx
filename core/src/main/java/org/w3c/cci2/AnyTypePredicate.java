@@ -80,9 +80,9 @@ public interface AnyTypePredicate<V> {
      * 
      * @param operands the operand the attribute value is compared to
      */
-//    void elementOf(
-//        Collection<?> operands
-//    );
+    void elementOf(
+        V... operands
+    );
 
     /**
      * &lsaquo;attribute value&rsaquo; &ne; &lsaquo;operand&rsaquo;
@@ -113,9 +113,9 @@ public interface AnyTypePredicate<V> {
      * 
      * @param operands the operand the attribute value is compared to
      */
-//    void notAnElementOf(
-//        Collection<?> operands
-//    );
+    void notAnElementOf(
+        V... operands
+    );
 
     /**
      * This method is deprecated to avoid its erroneous use in lieu

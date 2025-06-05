@@ -44,11 +44,8 @@
  */
 package org.w3c.cci2;
 
-import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-
 import java.util.Collection;
 import java.util.List;
-
 import java.util.function.Consumer;
 
 /**
@@ -79,9 +76,9 @@ public interface Container<E>
      * @param consumer
      *            all matching elements are offered to the consumer
      */
-    <T extends E> void processAll(
+    void processAll(
         AnyTypePredicate predicate,
-        Consumer<T> consumer
+        Consumer<? super E> consumer
     );
 
     /**
@@ -91,7 +88,7 @@ public interface Container<E>
      *            the predicate to be applied to the elements
      */
     void removeAll(
-        AnyTypePredicate<? extends E> predicate
+        AnyTypePredicate predicate
     );
 
     /**
@@ -100,7 +97,7 @@ public interface Container<E>
      * <em>Note:<br>
      * It can never be used to remove an object by specifying its qualifier!
      * 
-     * @deprecated validate, whether the argument is really the object and not its qualifier!
+     * @deprecated validate whether the argument is really the object and not its qualifier!
      */
     @Override
     @Deprecated
