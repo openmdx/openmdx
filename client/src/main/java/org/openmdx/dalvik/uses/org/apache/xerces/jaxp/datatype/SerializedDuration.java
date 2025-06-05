@@ -17,8 +17,6 @@
 
 package org.openmdx.dalvik.uses.org.apache.xerces.jaxp.datatype;
 
-import com.sun.org.apache.xerces.internal.jaxp.datatype.DatatypeFactoryImpl;
-
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 
