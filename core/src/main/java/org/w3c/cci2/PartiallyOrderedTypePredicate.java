@@ -48,7 +48,7 @@ package org.w3c.cci2;
  * Partially Ordered Type Predicate
  */
 public interface PartiallyOrderedTypePredicate<V>
-    extends AnyTypePredicate
+    extends AnyTypePredicate<V>
 {
 
     /**

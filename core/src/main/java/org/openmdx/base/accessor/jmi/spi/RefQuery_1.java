@@ -258,7 +258,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.AnyTypePredicate#elementOf(Collection<V>)
          */
         public void elementOf(
-            Collection<?> operand
+            Collection<? extends V> operand
         ) {
             if (operand instanceof ExtentCollection<?>) {
                 Path pattern = ((ExtentCollection<?>) operand).getPattern();
@@ -291,12 +291,12 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * 
          * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(V...)
          */
-//        public void notAnElementOf(
-//                RefQuery_1... operand
-//        ) {
-//            this.notAnElementOf(
-//                Arrays.asList(operand));
-//        }
+        public void notAnElementOf(
+            V... operand
+        ) {
+            this.notAnElementOf(
+                Arrays.asList(operand));
+        }
 
         /*
          * (non-Javadoc)
@@ -481,13 +481,13 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * 
          * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(V...)
          */
-//        @Override
-//        public void notAnElementOf(
-//                V... operand
-//        ) {
-//            this.notAnElementOf(
-//                Arrays.asList(operand));
-//        }
+        @Override
+        public void notAnElementOf(
+            V... operand
+        ) {
+            this.notAnElementOf(
+                Arrays.asList(operand));
+        }
 
         /*
          * (non-Javadoc)
@@ -692,7 +692,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.StringTypePredicate#unlike(Collection<String>)
          */
         public void unlike(
-            Collection<String> operand
+            Collection<? extends String> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -856,7 +856,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * org.w3c.cci2.MatchableTypePredicate#startsWith(java.util.Collection)
          */
         public void startsWith(
-            Collection<String> operand
+            Collection<? extends String> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -896,7 +896,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * org.w3c.cci2.MatchableTypePredicate#endsNotWith(java.util.Collection)
          */
         public void endsNotWith(
-            Collection<String> operand
+            Collection<? extends String> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -1219,7 +1219,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * org.w3c.query.ResourceIdentifierTypePredicate#unlike(Collection<V>)
          */
         public void unlike(
-            Collection<V> operand
+            Collection<? extends V> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -1297,7 +1297,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * org.w3c.cci2.MatchableTypePredicate#startsWith(java.util.Collection)
          */
         public void startsWith(
-            Collection<V> operand
+            Collection<? extends V> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -1337,7 +1337,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * org.w3c.cci2.MatchableTypePredicate#endsNotWith(java.util.Collection)
          */
         public void endsNotWith(
-            Collection<V> operand
+            Collection<? extends V> operand
         ) {
             this.refAddValue(
                 this.quantifier,

@@ -44,6 +44,8 @@
  */
 package org.w3c.cci2;
 
+import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -64,7 +66,7 @@ public interface Container<E>
      * @return all elements for which the predicate evaluates to true
      */
     <T extends E> List<T> getAll(
-         AnyTypePredicate<T> predicate
+         AnyTypePredicate predicate
     );
 
     /**

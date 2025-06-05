@@ -53,7 +53,7 @@ import java.util.Collection;
  */
 @SuppressWarnings("unchecked")
 public interface MatchableTypePredicate<V>
-    extends AnyTypePredicate
+    extends AnyTypePredicate<V>
 {
 
     /**
@@ -107,7 +107,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void unlike(
-        Collection<V> operand
+        Collection<? extends V> operand
     );
 
     /**
@@ -134,7 +134,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void startsWith(
-        Collection<V> operand
+        Collection<? extends V> operand
     );
 
     /**
@@ -215,7 +215,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void endsNotWith(
-        Collection<V> operand
+        Collection<? extends V> operand
     );
 
 }

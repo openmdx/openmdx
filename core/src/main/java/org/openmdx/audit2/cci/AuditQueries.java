@@ -668,7 +668,8 @@ public class AuditQueries {
         String... taskId
     ){
         UnitOfWorkQuery query = (UnitOfWorkQuery) persistenceManager.newQuery(UnitOfWork.class);
-        query.thereExistsTaskId().elementOf((Object[])taskId);
+//        query.thereExistsTaskId().elementOf((Object[])taskId);
+        query.thereExistsTaskId().elementOf(List.of(taskId));
         query.orderByCreatedAt();
         return getAuditSegment(persistenceManager).getUnitOfWork(query);
     }

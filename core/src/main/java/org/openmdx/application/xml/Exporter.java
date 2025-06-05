@@ -905,8 +905,8 @@ public class Exporter {
                         }
                         if(stated) {
                         	DateStateQuery query = (DateStateQuery) ReducedJDOHelper.getPersistenceManager(current).newQuery(DateState.class);
-                            for(RefObject referenced : container.getAll(query)) {
-                                probe(referenced, distance);
+                            for(Object referenced : container.getAll(query)) {
+                                probe((RefObject) referenced, distance);
                             }
                         }
                     }

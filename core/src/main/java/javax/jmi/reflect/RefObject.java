@@ -1,9 +1,9 @@
 package javax.jmi.reflect;
 
 public interface RefObject extends RefFeatured {
-    public boolean refIsInstanceOf(RefObject objType, boolean considerSubtypes);
-    public RefClass refClass();
-    public RefFeatured refImmediateComposite();
-    public RefFeatured refOutermostComposite();
-    public void refDelete();
+    boolean refIsInstanceOf(RefObject objType, boolean considerSubtypes);
+    RefClass refClass();
+    RefFeatured refImmediateComposite();
+    RefFeatured refOutermostComposite();
+    void refDelete();
 }
