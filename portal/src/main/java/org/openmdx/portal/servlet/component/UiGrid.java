@@ -1128,7 +1128,7 @@ public abstract class UiGrid extends Grid implements Serializable {
     		if(i == null) {
     			i = Collections.<RefObject_1_0>emptyList().iterator();
     		}
-    		this.currentPage = new Double(Math.ceil((double)firstRow / (double)newPageSize)).intValue();    
+    		this.currentPage = (int) Math.ceil((double)firstRow / (double)newPageSize);
     		this.currentPageSize = newPageSize;
     		int nCols = Math.min(
 				control.getObjectContainer().getMember().size(),
