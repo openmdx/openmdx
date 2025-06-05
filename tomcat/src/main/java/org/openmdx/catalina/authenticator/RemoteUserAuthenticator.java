@@ -282,9 +282,8 @@ public class RemoteUserAuthenticator extends ValveBase {
         Session session = request.getSessionInternal(false);
         if(session != null) {
             Manager manager = request.getContext().getManager();
-            manager.changeSessionId(session, "newId");
-            request.changeSessionId(session.getId());
-        } 
+            request.changeSessionId(manager.rotateSessionId(session));
+        }
         if(session != null) {
             session.setAuthType(authType);
             session.setPrincipal(principal);
