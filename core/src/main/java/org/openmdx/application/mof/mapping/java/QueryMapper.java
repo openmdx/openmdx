@@ -275,13 +275,9 @@ public class QueryMapper extends AbstractMapper {
         );
         printLine(" */");
         this.mapGeneratedAnnotation();
-        printLine(
-        	"public interface ", 
-        	Identifier.CLASS_PROXY_NAME.toIdentifier(MapperUtils.getElementName(qualifiedName), null, null,null, "Query")
-        );
-        print("  extends ");
+        String supertype = "";
         if(classifierDef.getSupertypes().isEmpty()) {
-            printLine("org.w3c.cci2.AnyTypePredicate");
+            supertype = "org.w3c.cci2.AnyTypePredicate"#if !CLASSIC_CHRONO_TYPES + "<T>"#endif;
         } else {
             String prefix = "";
             for (
@@ -290,16 +286,24 @@ public class QueryMapper extends AbstractMapper {
                 prefix = ",\n    "
             ) {
                 ClassifierDef supertypeDef = (ClassifierDef) i.next();
-                print(
+                supertype =
                     prefix + getNamespace(
                         MapperUtils.getNameComponents(MapperUtils.getPackageName(supertypeDef.getQualifiedName())) 
-                    ) + '.' + Identifier.CLASS_PROXY_NAME.toIdentifier(supertypeDef.getName(), null, null, null, "Query")
-                );
+                    ) + '.' + Identifier.CLASS_PROXY_NAME.toIdentifier(supertypeDef.getName(), null, null, null, "Query");
             }
-            newLine();
         }
+
+        printLine(
+                "public interface ",
+                Identifier.CLASS_PROXY_NAME.toIdentifier(MapperUtils.getElementName(qualifiedName), null, null,null, "Query")
+                #if !CLASSIC_CHRONO_TYPES ,"<T extends " + supertype + ">"#endif
+        );
+        #if CLASSIC_CHRONO_TYPES
+        print("  extends ");
+        print(supertype);
+        newLine();
+        #endif
         printLine("{");
         newLine();
     }
-        
 }

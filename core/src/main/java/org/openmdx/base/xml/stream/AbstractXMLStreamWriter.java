@@ -109,17 +109,17 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     }
 
     /**
-     * Retrieve the namespace URI of the currrent element
+     * Retrieve the namespace URI of the current element
      * 
-     * @return the namespace URI of the currrent element
+     * @return the namespace URI of the current element
      */
     protected String getCurrentNamespaceURI(){
         return this.namespaceContext.getCurrentNamespaceURI();
     }
 
     /**
-     * Retrieve the local name of the currrent element
-     * @return the local name of the currrent element
+     * Retrieve the local name of the current element
+     * @return the local name of the current element
      */
     protected String getCurrentElementName(){
         return this.namespaceContext.getCurrentElementName();
