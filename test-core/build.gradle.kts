@@ -81,6 +81,7 @@ dependencies {
     implementation("jakarta.platform:jakarta.jakartaee-api")
     if(runtimeCompatibility.isJava8()) {
         implementation(group= "javax.jdo", name = "jdo-api")
+        openmdxBootstrap("jakarta.resource:jakarta.resource-api:2.1.0")
     } else {
         implementation(group= "javax.jdo", name = "jdo-api"){
             exclude(group = "javax.transaction", module = "transaction-api")

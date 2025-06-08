@@ -168,6 +168,7 @@ dependencies {
 		implementation(group= "javax.jdo", name = "jdo-api")
 		implementation(group = "com.atomikos", name = "transactions-jta")
 		implementation(group = "com.atomikos", name = "transactions-jdbc")
+		openmdxBootstrap("jakarta.resource:jakarta.resource-api:2.1.0")
 	} else {
 		implementation(group= "javax.jdo", name = "jdo-api") {
 			exclude(group = "javax.transaction", module = "transaction-api")

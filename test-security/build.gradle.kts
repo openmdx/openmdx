@@ -97,7 +97,8 @@ dependencies {
 	if(runtimeCompatibility.isJava8()) {
 		testRuntimeOnly(group = "com.atomikos", name = "transactions-jta")
 		testRuntimeOnly(group = "com.atomikos", name = "transactions-jdbc")
-	} else {
+        openmdxBootstrap("jakarta.resource:jakarta.resource-api:2.1.0")
+    } else {
 		testRuntimeOnly(group = "com.atomikos", name = "transactions-jta", classifier = "jakarta")
 		testRuntimeOnly(group = "com.atomikos", name = "transactions-jdbc", classifier = "jakarta")
 	}
