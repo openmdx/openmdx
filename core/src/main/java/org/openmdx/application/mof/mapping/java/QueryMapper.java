@@ -277,7 +277,10 @@ public class QueryMapper extends AbstractMapper {
         this.mapGeneratedAnnotation();
         StringBuilder supertype = new StringBuilder();
         if (classifierDef.getSupertypes().isEmpty()) {
-            supertype = new StringBuilder("org.w3c.cci2.AnyTypePredicate<T>");
+            supertype = new StringBuilder("org.w3c.cci2.AnyTypePredicate");
+             if (!configuration.chronoFlavour.isClassic()) {
+                 supertype.append("<T>");
+             }
         } else {
             String prefix = "";
             for (
@@ -286,28 +289,30 @@ public class QueryMapper extends AbstractMapper {
                     prefix = ",\n    "
             ) {
                 ClassifierDef supertypeDef = (ClassifierDef) i.next();
-                supertype.append(prefix)
-                        .append(
-                                getNamespace(MapperUtils.getNameComponents(
-                                        MapperUtils.getPackageName(supertypeDef.getQualifiedName())
-                                ))
-                        )
-                        .append('.')
-                        .append(
-                                Identifier.CLASS_PROXY_NAME.toIdentifier(supertypeDef.getName(),
+                String singleSupertypeName = getNamespace(
+                        MapperUtils.getNameComponents(
+                                MapperUtils.getPackageName(supertypeDef.getQualifiedName()))) + '.' + Identifier.CLASS_PROXY_NAME.toIdentifier(
+                                        supertypeDef.getName(),
                                         null,
                                         null,
                                         null,
-                                        "Query"))
-                        .append("<T>");
+                                        "Query");
+                supertype.append(prefix).append(singleSupertypeName);
+                if (!configuration.chronoFlavour.isClassic()) {
+                    supertype.append("<T>");
+                }
             }
         }
 
-        final String queryType = Identifier.CLASS_PROXY_NAME.toIdentifier(MapperUtils.getElementName(qualifiedName), null, null, null, "Query");
+        final String queryType = Identifier.CLASS_PROXY_NAME.toIdentifier(MapperUtils.getElementName(qualifiedName),
+                null,
+                null,
+                null,
+                "Query");
         printLine(
                 "public interface ",
                 queryType,
-                "<T extends " + queryType + "<?>>",
+                configuration.chronoFlavour.isClassic() ? "" : "<T extends " + queryType + "<?>>",
                 "\n  extends " + supertype
         );
 
