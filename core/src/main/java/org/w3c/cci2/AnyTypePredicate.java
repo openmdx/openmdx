@@ -70,7 +70,7 @@ public interface AnyTypePredicate #if CLASSIC_CHRONO_TYPES #else <V> #endif {
      * @param operands the operands the attribute value is compared to
      */
     void elementOf(
-        Collection#if CLASSIC_CHRONO_TYPES #else <? extends V> #endif operands
+        Collection<? #if CLASSIC_CHRONO_TYPES #else extends V #endif> operands
     );
 
     /**
@@ -103,7 +103,7 @@ public interface AnyTypePredicate #if CLASSIC_CHRONO_TYPES #else <V> #endif {
      * @param operands the operand the attribute value is compared to
      */
     void notAnElementOf(
-        Collection#if CLASSIC_CHRONO_TYPES #else <? extends V> #endif operands
+        Collection<? #if CLASSIC_CHRONO_TYPES #else extends V #endif> operands
     );
 
     /**

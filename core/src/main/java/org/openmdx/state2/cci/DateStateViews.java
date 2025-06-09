@@ -612,7 +612,7 @@ public class DateStateViews {
      */
     public static <T extends DateState> List<T> getStates(
         Container<? super T> container,
-        AnyTypePredicate<#if CLASSIC_CHRONO_TYPES #else ? extends #endif T> predicate
+        AnyTypePredicate #if CLASSIC_CHRONO_TYPES #else <? extends T> #endif predicate
     ) {
         RefContainer<? super T> refContainer = (RefContainer<? super T>) container;
         Container<? super T> coreContainer = getTimeIndependentContainer(refContainer);
@@ -633,7 +633,7 @@ public class DateStateViews {
      */
     public static <T extends DateState> List<T> getValidStates(
         Container<? super T> container,
-        AnyTypePredicate<#if CLASSIC_CHRONO_TYPES #else ? extends #endif T> predicate
+        AnyTypePredicate #if CLASSIC_CHRONO_TYPES #else <? extends T> #endif predicate
     ) {
         RefContainer<? super T> refContainer = (RefContainer<? super T>) container;
         Container<T> coreContainer = getTimeIndependentContainer(refContainer);
