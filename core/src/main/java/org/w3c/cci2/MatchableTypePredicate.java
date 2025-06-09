@@ -53,7 +53,7 @@ import java.util.Collection;
  */
 @SuppressWarnings("unchecked")
 public interface MatchableTypePredicate<V>
-    extends AnyTypePredicate<V>
+    extends AnyTypePredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif
 {
 
     /**

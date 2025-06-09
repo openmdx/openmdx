@@ -162,7 +162,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-----------------------------------------------------------------------
-    public abstract class RefPredicate<V> implements AnyTypePredicate<V> {
+    public abstract class RefPredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif
+            implements AnyTypePredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif {
 
         public RefPredicate(
             Quantifier quantifier,
@@ -234,7 +235,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.AnyTypePredicate#equalTo(V)
          */
         public void equalTo(
-                V operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif operand
         ) {
             this.elementOf(
                 Collections.singleton(operand));
@@ -246,7 +247,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.AnyTypePredicate#elementOf(V...)
          */
         public void elementOf(
-            V... operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif... operand
         ) {
             this.elementOf(
                 Arrays.asList(operand));
@@ -258,7 +259,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.AnyTypePredicate#elementOf(Collection<V>)
          */
         public void elementOf(
-            Collection<? extends V> operand
+            Collection<?#if CLASSIC_CHRONO_TYPES #else extends V #endif> operand
         ) {
             if (operand instanceof ExtentCollection<?>) {
                 Path pattern = ((ExtentCollection<?>) operand).getPattern();
@@ -280,7 +281,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.AnyTypePredicate#notEqual(V)
          */
         public void notEqualTo(
-                V operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif operand
         ) {
             this.notAnElementOf(
                 Collections.singleton(operand));
@@ -292,7 +293,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(V...)
          */
         public void notAnElementOf(
-            V... operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif... operand
         ) {
             this.notAnElementOf(
                 Arrays.asList(operand));
@@ -304,7 +305,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(Collection<V>)
          */
         public void notAnElementOf(
-            Collection<? extends V> operand
+            Collection<?#if CLASSIC_CHRONO_TYPES #else extends V #endif> operand
         ) {
             if (operand instanceof ExtentCollection<?>) {
                 Path pattern = ((ExtentCollection<?>) operand).getPattern();
@@ -413,7 +414,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    public class RefSimpleTypePredicate<V> extends RefPredicate<V> {
+    public class RefSimpleTypePredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif
+            extends RefPredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif {
 
         public RefSimpleTypePredicate(
             Quantifier quantifier,
@@ -429,7 +431,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          */
         @Override
         public void equalTo(
-                V operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif operand
         ) {
             this.elementOf(
                 Collections.singleton(operand));
@@ -442,7 +444,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          */
         @Override
         public void elementOf(
-            V... operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif... operand
         ) {
             this.elementOf(
                 Arrays.asList(operand));
@@ -455,7 +457,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          */
         @Override
         public void elementOf(
-            Collection<? extends V> operand
+            Collection<?#if CLASSIC_CHRONO_TYPES #else extends V #endif> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -470,7 +472,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          */
         @Override
         public void notEqualTo(
-                V operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif operand
         ) {
             this.notAnElementOf(
                 Collections.singleton(operand));
@@ -483,7 +485,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          */
         @Override
         public void notAnElementOf(
-            V... operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif... operand
         ) {
             this.notAnElementOf(
                 Arrays.asList(operand));
@@ -496,7 +498,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          */
         @Override
         public void notAnElementOf(
-            Collection<? extends V> operand
+            Collection<?#if CLASSIC_CHRONO_TYPES #else extends V #endif> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -508,7 +510,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     //-------------------------------------------------------------------------
     public class RefComparableTypePredicate<V extends Comparable<?>>
-        extends RefSimpleTypePredicate<V>
+        extends RefSimpleTypePredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif
         implements ComparableTypePredicate<V> {
 
         public RefComparableTypePredicate(
@@ -856,7 +858,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * org.w3c.cci2.MatchableTypePredicate#startsWith(java.util.Collection)
          */
         public void startsWith(
-            Collection<? extends String> operand
+            Collection<#if CLASSIC_CHRONO_TYPES #else ? extends #endif String> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -896,7 +898,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * org.w3c.cci2.MatchableTypePredicate#endsNotWith(java.util.Collection)
          */
         public void endsNotWith(
-            Collection<? extends String> operand
+            Collection<#if CLASSIC_CHRONO_TYPES #else ? extends #endif String> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -948,7 +950,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     //-------------------------------------------------------------------------
     public class RefPartiallyOrderedTypePredicate<V>
-        extends RefSimpleTypePredicate<V>
+        extends RefSimpleTypePredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif
         implements PartiallyOrderedTypePredicate<V> {
 
         public RefPartiallyOrderedTypePredicate(
@@ -1297,7 +1299,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * org.w3c.cci2.MatchableTypePredicate#startsWith(java.util.Collection)
          */
         public void startsWith(
-            Collection<? extends V> operand
+            Collection<#if CLASSIC_CHRONO_TYPES #else ? extends #endif V> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -1337,7 +1339,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * org.w3c.cci2.MatchableTypePredicate#endsNotWith(java.util.Collection)
          */
         public void endsNotWith(
-            Collection<? extends V> operand
+            Collection<#if CLASSIC_CHRONO_TYPES #else ? extends #endif V> operand
         ) {
             this.refAddValue(
                 this.quantifier,
