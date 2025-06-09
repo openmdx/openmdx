@@ -57,6 +57,7 @@ import groovy.util.ScriptException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -121,7 +122,10 @@ public abstract class Control implements Serializable {
                     for(int i = 0; i < this.roots.length; i++) {
                         URL scriptURL = new URL(this.roots[i] + "/" + scriptName);
                         try {
-                            entry.scriptClass = this.groovyClassLoader.parseClass(scriptURL.openStream(), scriptName);
+                            entry.scriptClass = this.groovyClassLoader.parseClass(
+                                    new InputStreamReader(scriptURL.openStream()),
+                                    scriptName
+                            );
                             break;
                         }
                         catch(IOException e) {}
