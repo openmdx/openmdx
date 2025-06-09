@@ -105,7 +105,7 @@ public class Base64 {
             obuf[wp] = (byte)(b2 << 6 & 0xc0 | b3 & 0x3f);
             return 3;
           default:
-            throw new RuntimeException("Internal Errror");
+            throw new RuntimeException("Internal Error");
         }
     }
 

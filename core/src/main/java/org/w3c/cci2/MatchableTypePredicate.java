@@ -53,7 +53,7 @@ import java.util.Collection;
  */
 @SuppressWarnings("unchecked")
 public interface MatchableTypePredicate<V>
-    extends AnyTypePredicate<V>
+    extends AnyTypePredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif
 {
 
     /**
@@ -107,7 +107,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void unlike(
-        Collection<? extends V> operand
+        Collection<V> operand
     );
 
     /**
@@ -134,7 +134,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void startsWith(
-        Collection<? extends V> operand
+        Collection<V> operand
     );
 
     /**
@@ -215,7 +215,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void endsNotWith(
-        Collection<? extends V> operand
+        Collection<V> operand
     );
 
 }

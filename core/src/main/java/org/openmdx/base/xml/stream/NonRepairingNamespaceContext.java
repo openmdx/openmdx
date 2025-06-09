@@ -128,9 +128,9 @@ class NonRepairingNamespaceContext implements NamespaceContext {
     }
     
     /**
-     * Retrieve the namespace URI of the currrent element
+     * Retrieve the namespace URI of the current element
      * 
-     * @return the namespace URI of the currrent element
+     * @return the namespace URI of the current element
      */
     String getCurrentNamespaceURI(){
         return 
@@ -140,8 +140,8 @@ class NonRepairingNamespaceContext implements NamespaceContext {
 
     
     /**
-     * Retrieve the local name of the currrent element
-     * @return the local name of the currrent element
+     * Retrieve the local name of the current element
+     * @return the local name of the current element
      */
     String getCurrentElementName(){
         return this.localName;

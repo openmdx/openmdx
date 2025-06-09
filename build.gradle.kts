@@ -71,7 +71,7 @@ allprojects {
 	        url = uri("https://datura.econoffice.ch/maven2")
 	    }
         maven {
-	       url = uri("file:" + File(project.rootDir, "publish/build/openmdx-${projectFlavour}/repos/releases"))
+	       url = uri("file:" + File(project.rootDir, "publish/build/openmdx-4/repos/releases"))
         }
 	}
 
