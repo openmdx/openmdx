@@ -49,7 +49,7 @@ import java.util.Collection;
 /**
  * Any Type Predicate
  */
-public interface AnyTypePredicate<V> {
+public interface AnyTypePredicate #if CLASSIC_CHRONO_TYPES #else <V> #endif {
 
     /**
      * &lsaquo;attribute value&rsaquo; = &lsaquo;operand&rsaquo;
@@ -59,7 +59,7 @@ public interface AnyTypePredicate<V> {
      * @param operand the operand the attribute value is compared to
      */
     void equalTo(
-        V operand
+        #if CLASSIC_CHRONO_TYPES Object #else V #endif operand
     );
 
     /**
@@ -70,7 +70,7 @@ public interface AnyTypePredicate<V> {
      * @param operands the operands the attribute value is compared to
      */
     void elementOf(
-        Collection<? extends V> operands
+        Collection#if CLASSIC_CHRONO_TYPES #else <? extends V> #endif operands
     );
 
     /**
@@ -81,7 +81,7 @@ public interface AnyTypePredicate<V> {
      * @param operands the operand the attribute value is compared to
      */
     void elementOf(
-        V... operands
+         #if CLASSIC_CHRONO_TYPES Object #else V #endif... operands
     );
 
     /**
@@ -92,7 +92,7 @@ public interface AnyTypePredicate<V> {
      * @param operand the operand the attribute value is compared to
      */
     void notEqualTo(
-        V operand
+         #if CLASSIC_CHRONO_TYPES Object #else V #endif operand
     );
 
     /**
@@ -103,7 +103,7 @@ public interface AnyTypePredicate<V> {
      * @param operands the operand the attribute value is compared to
      */
     void notAnElementOf(
-        Collection<? extends V> operands
+        Collection#if CLASSIC_CHRONO_TYPES #else <? extends V> #endif operands
     );
 
     /**
@@ -114,12 +114,13 @@ public interface AnyTypePredicate<V> {
      * @param operands the operand the attribute value is compared to
      */
     void notAnElementOf(
-        V... operands
+         #if CLASSIC_CHRONO_TYPES Object #else V #endif... operands
     );
 
     /**
      * This method is deprecated to avoid its erroneous use in lieu
-     * of {@link #equalTo(Object)}.
+     * of {@code #equalTo(Object)}—in case of flavour 2 and 4—or
+     * {@code #equalTo(V)}—in case of flavour 3 and 5—, respectively.
      * 
      * @deprecated to avoid erroneous use 
      * 
