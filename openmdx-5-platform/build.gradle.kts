@@ -58,11 +58,11 @@ dependencies {
         val bootstrapVersion = "4.21.0"
         val cacheVersion = "1.1.1"
         val flexmarkVersion = "0.64.8"
-        val groovyVersion = "3.0.+"
+        val groovyVersion = "4.0.+"
         val jdoVersion = "3.1"
         val jakartaVersion = "10.0.0"
-        val junitVersion = "5.13.0"
-        val junitPlatformVersion = "1.13.0"
+        val junitVersion = "5.13.1"
+        val junitPlatformVersion = "1.13.1"
         val ldapVersion = "2.1.+"
         val manifoldVersion = "2025.1.19"
         val mockitoVersion = "5.18.0"
@@ -81,7 +81,7 @@ dependencies {
         api("javax.jdo:jdo-api:$jdoVersion")
         api("org.apache.directory.api:apache-ldap-api:$ldapVersion")
         api("org.apache.tomcat:tomcat-catalina:$tomcatVersion")
-        api("org.codehaus.groovy:groovy:$groovyVersion")
+        api("org.apache.groovy:groovy:$groovyVersion")
         api("org.junit.jupiter:junit-jupiter-api:$junitVersion")
         api("org.mockito:mockito-core:$mockitoVersion")
         api("org.mockito:mockito-junit-jupiter:$mockitoVersion")
@@ -90,7 +90,7 @@ dependencies {
         api("systems.manifold:manifold-preprocessor:$manifoldVersion")
 
         runtime("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
-        runtime("org.junit.platform:junit-platform-launcher:$junitPlatformVersion")
+            runtime("org.junit.platform:junit-platform-launcher:$junitPlatformVersion")
         runtime("com.oracle.database.jdbc:ojdbc17:$oracleVersion")
         runtime("org.postgresql:postgresql:$postgresVersion")
     }
