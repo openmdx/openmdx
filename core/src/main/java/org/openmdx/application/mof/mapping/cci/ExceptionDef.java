@@ -88,7 +88,8 @@ extends FeatureDef {
         Model_1_0 model 
     ) throws ServiceException {  
 
-        HashMap<String,ModelElement_1_0> params = new HashMap<String,ModelElement_1_0>();
+        #if CLASSIC_CHRONO_TYPES
+        HashMap<String,ModelElement_1_0> params = new HashMap<>();
         for(
             Iterator<?> i = exceptionDef.objGetList("content").iterator();
             i.hasNext();
@@ -99,20 +100,12 @@ extends FeatureDef {
                 param
             );
         }
-        if(params.get("in") == null) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "no parameter with name \"in\" defined for exception",
-                new BasicException.Parameter("exception", exceptionDef.jdoGetObjectId()),
-                new BasicException.Parameter("params", params)
-            );
-        }
-        // set exeption parameters (as attributes)
+
+        // set exception parameters (as attributes)
         ModelElement_1_0 inParamType = model.getElementType(
             params.get("in")
         );
-        List<AttributeDef> parameters = new ArrayList<AttributeDef>();
+        List<AttributeDef> parameters = new ArrayList<>();
         for(
             Iterator<?> i = inParamType.objGetList("content").iterator();
             i.hasNext();
@@ -128,6 +121,25 @@ extends FeatureDef {
             }
         }
         return parameters;
+
+        #else
+
+        List<AttributeDef> parameters = new ArrayList<>();
+        for(
+            Iterator<?> i = exceptionDef.objGetList("content").iterator();
+            i.hasNext();
+        ) {
+            ModelElement_1_0 param = model.getElement(i.next());
+            parameters.add(
+                    new AttributeDef(
+                            param,
+                            model
+                    )
+            );
+        }
+        return parameters;
+
+        #endif
     }
 
     //-------------------------------------------------------------------------
