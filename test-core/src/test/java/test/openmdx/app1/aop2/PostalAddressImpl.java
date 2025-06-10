@@ -47,11 +47,9 @@ package test.openmdx.app1.aop2;
 import java.util.Arrays;
 
 import org.openmdx.base.jmi1.Void;
-import test.openmdx.app1.jmi1.AddressFormatAsParams;
 import test.openmdx.app1.jmi1.AddressFormatAsResult;
 import test.openmdx.app1.jmi1.App1Package;
 import test.openmdx.app1.jmi1.PostalAddress;
-import test.openmdx.app1.jmi1.PostalAddressSendMessageParams;
 
 /**
  * Postal Address
@@ -79,14 +77,21 @@ public class PostalAddressImpl<S extends test.openmdx.app1.jmi1.PostalAddress,N 
      * @param in the method's input structure
      * 
      * @return the method's result structure
-     * 
-     * @see test.openmdx.app1.jmi1.Address#formatAs(test.openmdx.app1.jmi1.AddressFormatAsParams)
      */
     @Override
-    public AddressFormatAsResult formatAs(AddressFormatAsParams in) {
+    public AddressFormatAsResult formatAs(
+            #if CLASSIC_CHRONO_TYPES
+            test.openmdx.app1.jmi1.AddressFormatAsParams in
+            #else
+            String type
+            #endif
+    ) {
+        #if CLASSIC_CHRONO_TYPES
+        String type = in.getType();
+        #endif
         PostalAddress same = sameObject();
         App1Package app1Package = (App1Package) same.refImmediatePackage();
-        if(STANDARD.equals(in.getType())) {
+        if(STANDARD.equals(type)) {
             StringBuilder formattedAddress = new StringBuilder();
             formattedAddress.append(
                 same.getAddressLine().get(0)
@@ -125,11 +130,18 @@ public class PostalAddressImpl<S extends test.openmdx.app1.jmi1.PostalAddress,N 
      * @param in the method's input structure
      * 
      * @return the method's result structure
-     * 
-     * @see test.openmdx.app1.cci2.PostalAddress#sendMessage(test.openmdx.app1.cci2.PostalAddressSendMessageParams)
      */
-    public Void sendMessage(PostalAddressSendMessageParams in) {
-        System.out.println("sending message " + Arrays.toString(in.getDocument()));
+    public Void sendMessage(
+            #if CLASSIC_CHRONO_TYPES
+            test.openmdx.app1.jmi1.PostalAddressSendMessageParams in
+            #else
+            byte[] document
+            #endif
+    ){
+        #if CLASSIC_CHRONO_TYPES
+        byte[] document = in.getDocument();
+        #endif
+        System.out.println("sending message " + Arrays.toString(document));
         return newVoid();
     }
 

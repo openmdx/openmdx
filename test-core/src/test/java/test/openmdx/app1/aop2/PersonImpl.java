@@ -44,15 +44,14 @@
  */
 package test.openmdx.app1.aop2;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
 import javax.jdo.listener.StoreCallback;
 import javax.jmi.reflect.RefObject;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.aop2.AbstractObject;
@@ -67,10 +66,7 @@ import test.openmdx.app1.jmi1.App1Package;
 import test.openmdx.app1.jmi1.CanNotFormatNameException;
 import test.openmdx.app1.jmi1.InternationalPostalAddress;
 import test.openmdx.app1.jmi1.Person;
-import test.openmdx.app1.jmi1.PersonAssignAddressParams;
-import test.openmdx.app1.jmi1.PersonDateOpParams;
 import test.openmdx.app1.jmi1.PersonDateOpResult;
-import test.openmdx.app1.jmi1.PersonFormatNameAsParams;
 import test.openmdx.app1.jmi1.PersonFormatNameAsResult;
 
 
@@ -129,21 +125,23 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
 
     /**
      * Format Name Operation
-     * 
-     * @param in the method's input structure
-     * 
+     *
      * @return the method's result structure
      * 
      * @throws CanNotFormatNameException
-     * 
-     * @see test.openmdx.app1.cci2.Person#formatNameAs(test.openmdx.app1.cci2.PersonFormatNameAsParams)
      */
     public PersonFormatNameAsResult formatNameAs(
-        PersonFormatNameAsParams in
+        #if CLASSIC_CHRONO_TYPES
+        test.openmdx.app1.jmi1.PersonFormatNameAsParams in
+        #else
+        String formatType
+        #endif
     ) throws CanNotFormatNameException {
+        #if CLASSIC_CHRONO_TYPES
+        String formatType = in.getType();
+        #endif
         // default format "Standard"
         Person same = sameObject();
-        String formatType = in.getType();
         App1Package app1Package = samePackage();
         if((formatType == null) || "Standard".equals(formatType)) {
             StringBuilder formattedName = new StringBuilder(
@@ -176,19 +174,23 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
 
     /**
      * Assign Address Operation Doing Nothing
-     * 
-     * @param in the method's input structure
-     * 
+     *
      * @return the method's result structure
-     * 
-     * @see test.openmdx.app1.cci2.Person#assignAddress(test.openmdx.app1.cci2.PersonAssignAddressParams)
      */
-    public Void assignAddress(PersonAssignAddressParams in) {
+    public Void assignAddress(
+            #if CLASSIC_CHRONO_TYPES
+            test.openmdx.app1.jmi1.PersonAssignAddressParams in
+            #else
+            List<test.openmdx.app1.jmi1.Address> address
+            #endif
+            ) {
+        #if CLASSIC_CHRONO_TYPES
+        List<test.openmdx.app1.jmi1.Address> address = in.getAddress();
+        #endif
         RefPackage_1_0 nextPackage = (RefPackage_1_0) ((RefObject)nextObject()).refOutermostPackage();
-        @SuppressWarnings("unused")
-        test.openmdx.app1.cci2.PersonAssignAddressParams nextInput = (test.openmdx.app1.cci2.PersonAssignAddressParams) nextPackage.refCreateStruct(in.refDelegate());
+//        test.openmdx.app1.cci2.PersonAssignAddressParams nextInput = (test.openmdx.app1.cci2.PersonAssignAddressParams) nextPackage.refCreateStruct(in.refDelegate());
 //        nextObject().assignAddress(nextInput);
-        System.out.println("Assigning addresses to " + sameObject().refMofId() + ": " + in.getAddress());
+        System.out.println("Assigning addresses to " + sameObject().refMofId() + ": " + address);
 //        List<Address> target = this.same.getAssignedAddress();
 //        List<Address> source = in.getAddress();
 //        List<Address> set = new ArrayList<Address>(source);
@@ -232,19 +234,25 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
      * @param in the method's input structure
      * 
      * @return the method's result structure
-     * 
-     * @see test.openmdx.app1.jmi1.Person#dateOp(test.openmdx.app1.cci2.PersonDateOpParams)
      */
-    public PersonDateOpResult dateOp(PersonDateOpParams in) {
+    public PersonDateOpResult dateOp(
+            #if CLASSIC_CHRONO_TYPES
+            test.openmdx.app1.jmi1.PersonDateOpParams in
+            #else
+            LocalDate dateIn,
+            Instant dateTimeIn
+            #endif
+        ) {
+        #if CLASSIC_CHRONO_TYPES
+            LocalDate dateIn = in.getDateIn();
+            Instant dateTimeIn = in.getDateTimeIn();
+        #endif
         App1Package app1Package = samePackage();
-        System.out.println("dateOp.dateIn=" + in.getDateIn());
-        System.out.println("dateOp.dateTimeIn=" + in.getDateTimeIn());
-        return app1Package.createPersonDateOpResult(in.getDateIn(), in.getDateTimeIn());        
+        System.out.println("dateOp.dateIn=" + dateIn);
+        System.out.println("dateOp.dateTimeIn=" + dateTimeIn);
+        return app1Package.createPersonDateOpResult(dateIn, dateTimeIn);
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.aop2.AbstractObject#jdoPreStore()
-     */
     @Override
     public void jdoPreStore() {
       //System.out.println(this.getClass().getName() + ".objPreStore"); 

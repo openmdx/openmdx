@@ -48,7 +48,6 @@ import javax.jdo.JDOHelper;
 
 import org.openmdx.base.aop2.AbstractObject;
 import org.openmdx.base.naming.Path;
-import test.openmdx.app1.jmi1.AddressFormatAsParams;
 import test.openmdx.app1.jmi1.AddressFormatAsResult;
 import test.openmdx.app1.jmi1.EmailAddress;
 import test.openmdx.app1.jmi1.PostalAddress;
@@ -84,10 +83,14 @@ public class AddressImpl<S extends test.openmdx.app1.jmi1.Address,N extends test
      * @param in the method's input structure
      * 
      * @return the method's result structure
-     * 
-     * @see test.openmdx.app1.jmi1.Address#formatAs(test.openmdx.app1.jmi1.AddressFormatAsParams)
      */
-    public AddressFormatAsResult formatAs(AddressFormatAsParams in) {
+    public AddressFormatAsResult formatAs(
+        #if CLASSIC_CHRONO_TYPES
+        test.openmdx.app1.jmi1.AddressFormatAsParams in
+        #else
+        String type
+        #endif
+    ) {
        throw new UnsupportedOperationException(
             "Address type not supported. Supported are [" +
             EmailAddress.class.getSimpleName() + ", " +

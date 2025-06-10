@@ -215,7 +215,6 @@ import test.openmdx.app1.cci2.SegmentHasPerson;
 import test.openmdx.app1.cci2.SegmentQuery;
 import test.openmdx.app1.jmi1.Address;
 import test.openmdx.app1.jmi1.AddressFormat;
-import test.openmdx.app1.jmi1.AddressFormatAsParams;
 import test.openmdx.app1.jmi1.AddressFormatAsResult;
 import test.openmdx.app1.jmi1.App1Package;
 import test.openmdx.app1.jmi1.CanNotFormatNameException;
@@ -227,8 +226,6 @@ import test.openmdx.app1.jmi1.Document;
 import test.openmdx.app1.jmi1.DocumentClass;
 import test.openmdx.app1.jmi1.EmailAddress;
 import test.openmdx.app1.jmi1.EmailAddressClass;
-import test.openmdx.app1.jmi1.EmailAddressSendMessageParams;
-import test.openmdx.app1.jmi1.EmailAddressSendMessageTemplateParams;
 import test.openmdx.app1.jmi1.EmailAddressSendMessageTemplateResult;
 import test.openmdx.app1.jmi1.GenericAddress;
 import test.openmdx.app1.jmi1.InternationalPostalAddress;
@@ -241,16 +238,12 @@ import test.openmdx.app1.jmi1.MessageTemplate;
 import test.openmdx.app1.jmi1.MessageTemplateClass;
 import test.openmdx.app1.jmi1.NameFormat;
 import test.openmdx.app1.jmi1.Person;
-import test.openmdx.app1.jmi1.PersonAssignAddressParams;
 import test.openmdx.app1.jmi1.PersonClass;
-import test.openmdx.app1.jmi1.PersonDateOpParams;
 import test.openmdx.app1.jmi1.PersonDateOpResult;
-import test.openmdx.app1.jmi1.PersonFormatNameAsParams;
 import test.openmdx.app1.jmi1.PersonFormatNameAsResult;
 import test.openmdx.app1.jmi1.PersonGroup;
 import test.openmdx.app1.jmi1.PersonGroupClass;
 import test.openmdx.app1.jmi1.PostalAddress;
-import test.openmdx.app1.jmi1.PostalAddressSendMessageParams;
 import test.openmdx.app1.jmi1.Product;
 import test.openmdx.app1.jmi1.TextDocument;
 import test.openmdx.app1.mof1.EmailAddressFeatures;
@@ -260,6 +253,16 @@ import test.openmdx.app1.mof1.SegmentFeatures;
 import test.openmdx.application.rest.http.ServletPort;
 import test.openmdx.model1.jmi1.ClassContainingOperations;
 import test.openmdx.model1.jmi1.Model1Package;
+
+#if CLASSIC_CHRONO_TYPES
+import test.openmdx.app1.jmi1.AddressFormatAsParams;
+import test.openmdx.app1.jmi1.EmailAddressSendMessageParams;
+import test.openmdx.app1.jmi1.EmailAddressSendMessageTemplateParams;
+import test.openmdx.app1.jmi1.PersonAssignAddressParams;
+import test.openmdx.app1.jmi1.PersonDateOpParams;
+import test.openmdx.app1.jmi1.PersonFormatNameAsParams;
+import test.openmdx.app1.jmi1.PostalAddressSendMessageParams;
+#endif
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -1978,6 +1981,7 @@ public class TestMain {
 			segment.addMessageTemplate(false, "template0", messageTemplate);
 			this.commit();
 			this.begin();
+			#if CLASSIC_CHRONO_TYPES
 			EmailAddressSendMessageTemplateParams emailAddressSendMessageTemplateParams;
 			switch (this.nextStructureCreation()) {
 			case BY_PACKAGE:
@@ -1997,6 +2001,7 @@ public class TestMain {
 			default:
 				emailAddressSendMessageTemplateParams = null;
 			}
+			#endif
 			//
 			// CR20020011 PersistenceHelper.clone()
 			//
@@ -2007,8 +2012,13 @@ public class TestMain {
 			} finally {
 				super.taskId = null;
 			}
-			EmailAddressSendMessageTemplateResult sendResult = emailAddress
-					.sendMessageTemplate(emailAddressSendMessageTemplateParams);
+			EmailAddressSendMessageTemplateResult sendResult = emailAddress.sendMessageTemplate(
+			#if CLASSIC_CHRONO_TYPES
+				emailAddressSendMessageTemplateParams
+			#else
+				messageTemplate, 0, "hello world"
+			#endif
+			);
 			assertNotNull(sendResult, "Send result");
 			{
 				PersistenceManager targetManager = ReducedJDOHelper.getPersistenceManager(emailAddress);
@@ -2552,6 +2562,7 @@ public class TestMain {
 			// perform an assign. It is just there to see whether the operation
 			// invocation works.
 			this.begin();
+			#if CLASSIC_CHRONO_TYPES
 			PersonAssignAddressParams personAssignAddressParams;
 			switch (this.nextStructureCreation()) {
 			case BY_MEMBER:
@@ -2570,22 +2581,29 @@ public class TestMain {
 			default:
 				personAssignAddressParams = null;
 			}
+			#endif
 			//
 			// CR20020140 Non-query operation
 			//
 			try {
 				super.taskId = "CR20020140";
 				assertFalse(ReducedJDOHelper.isDirty(person), "Person is clean before the address is assigned");
+				#if CLASSIC_CHRONO_TYPES
 				person.assignAddress(personAssignAddressParams);
-				Object oldVersion = person.getModifiedAt();
-				assertTrue(ReducedJDOHelper.isDirty(person), "Person is dirty after the address has been assigned");
-				this.commit();
-				Object newVersion = person.getModifiedAt();
-				assertFalse(ReducedJDOHelper.isDirty(person), "Person is clean after commit");
-				if(this instanceof TransientProviderTest) {
-					// Assertion fails with openMDX 4
-				} else {
-                    assertNotEquals(oldVersion, newVersion, "Person has been touched");
+				#else // TODO MDX-2: enable for contemporary chrono types
+				// person.assignAddress(personAssignAddressParams(Arrays.asList(postalAddress, emailAddress));
+				#endif
+				if(isClassicChronoType()) { // TODO MDX-2: enable for contemporary chrono types
+					Object oldVersion = person.getModifiedAt();
+					assertTrue(ReducedJDOHelper.isDirty(person), "Person is dirty after the address has been assigned");
+					this.commit();
+					Object newVersion = person.getModifiedAt();
+					assertFalse(ReducedJDOHelper.isDirty(person), "Person is clean after commit");
+					if (this instanceof TransientProviderTest) {
+						// Assertion fails with openMDX 4
+					} else {
+						assertNotEquals(oldVersion, newVersion, "Person has been touched");
+					}
 				}
 			} finally {
 				super.taskId = null;
@@ -3559,6 +3577,7 @@ public class TestMain {
 				}
 			// person.formatAs
 			this.begin(); // isQuery() is false
+			#if CLASSIC_CHRONO_TYPES
 			PersonFormatNameAsParams personFormatNameAsParams;
 			switch (this.nextStructureCreation()) {
 			case BY_MEMBER:
@@ -3573,9 +3592,15 @@ public class TestMain {
 				break;
 			default:
 				personFormatNameAsParams = null;
-
 			}
-			PersonFormatNameAsResult formattedName = person.formatNameAs(personFormatNameAsParams);
+			#endif
+			PersonFormatNameAsResult formattedName = person.formatNameAs(
+					#if CLASSIC_CHRONO_TYPES
+					personFormatNameAsParams
+					#else
+					STANDARD_FORMAT
+					#endif
+			);
 			this.commit(); // result available after commit only
 			final String formattedNameString = formattedName.getFormattedName();
 			assertNotNull(formattedNameString, "formattedNameString must not be null");
@@ -3593,6 +3618,7 @@ public class TestMain {
 
 			// test optional argument
 			this.begin(); // isQuery() is false
+			#if CLASSIC_CHRONO_TYPES
 			switch (this.nextStructureCreation()) {
 			case BY_MEMBER:
 				personFormatNameAsParams = Datatypes.create(PersonFormatNameAsParams.class,
@@ -3608,13 +3634,21 @@ public class TestMain {
 			default:
 				personFormatNameAsParams = null;
 			}
-			formattedName = person.formatNameAs(personFormatNameAsParams);
+			#endif
+			formattedName = person.formatNameAs(
+					#if CLASSIC_CHRONO_TYPES
+					personFormatNameAsParams
+					#else
+					(String) null
+					#endif
+			);
 			this.commit(); // result available after commit only
 			System.out.println("formatted name=" + formattedNameString);
 			if (this instanceof ProxyConnectionTest && !isJava8Flavour()) {
 				// raises java.lang.reflect.UndeclaredThrowableException
 			} else {
 				try {
+					#if CLASSIC_CHRONO_TYPES
 					switch (this.nextStructureCreation()) {
 					case BY_MEMBER:
 						personFormatNameAsParams = Datatypes.create(PersonFormatNameAsParams.class,
@@ -3629,7 +3663,14 @@ public class TestMain {
 					default:
 						personFormatNameAsParams = null;
 					}
-					person.formatNameAs(app1Package.createPersonFormatNameAsParams("InvalidFormat"));
+					#endif
+					person.formatNameAs(
+						#if CLASSIC_CHRONO_TYPES
+						personFormatNameAsParams
+						#else
+						"InvalidFormat"
+						#endif
+					);
 					fail("CanNotFormatNameException expected");
 				} catch (CanNotFormatNameException e) {
 					System.out.println("formatNameAs() raised exception as expected: " + e.getMessage());
@@ -3647,8 +3688,9 @@ public class TestMain {
 			// test dateOp (date and dateTime in operation parameter)
 			// Test for non-query operation with result
 			this.begin();
-			#if CLASSIC_CHRONO_TYPES Date #else Instant #endif dateTimeNow = SystemClock.getInstance().now();
-			#if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif dateIn = SystemClock.getInstance().today();
+			#if CLASSIC_CHRONO_TYPES
+			Date dateTimeNow = SystemClock.getInstance().now();
+			XMLGregorianCalendar dateIn = SystemClock.getInstance().today();
 			PersonDateOpParams personDateOpParams;
 			switch (nextStructureCreation()) {
 			case BY_MEMBER:
@@ -3665,7 +3707,17 @@ public class TestMain {
 			default:
 				personDateOpParams = null;
 			}
-			PersonDateOpResult dateOpResult = person.dateOp(personDateOpParams);
+			#else
+			Instant dateTimeNow = SystemClock.getInstance().now();
+			LocalDate dateIn = SystemClock.getInstance().today();
+			#endif
+			PersonDateOpResult dateOpResult = person.dateOp(
+					#if CLASSIC_CHRONO_TYPES
+					personDateOpParams
+					#else
+					dateIn, dateTimeNow
+					#endif
+			);
 			this.commit();
 			System.out.println("dateOp.dateResult=" + dateOpResult.getDateResult());
 			System.out.println("dateOp.dateTimeResult=" + dateOpResult.getDateTimeResult());
@@ -3768,6 +3820,7 @@ public class TestMain {
 
 				// postalAddress.formatAs
 				AddressFormatAsResult formattedAddress;
+				#if CLASSIC_CHRONO_TYPES
 				AddressFormatAsParams addressFormatAsParams;
 				switch (nextStructureCreation()) {
 				case BY_MEMBER:
@@ -3783,11 +3836,25 @@ public class TestMain {
 				default:
 					addressFormatAsParams = null;
 				}
-				formattedAddress = postalAddress.formatAs(addressFormatAsParams);
+				#endif
+				formattedAddress = postalAddress.formatAs(
+					#if CLASSIC_CHRONO_TYPES
+					addressFormatAsParams
+					#else
+					STANDARD_FORMAT
+					#endif
+				);
 				System.out.println("formatted address=" + formattedAddress.getFormattedAddress());
 
 				// emailAddress.formatAs
-				formattedAddress = emailAddress.formatAs(addressFormatAsParams);
+				formattedAddress = emailAddress.formatAs(
+					#if CLASSIC_CHRONO_TYPES
+					addressFormatAsParams
+					#else
+						STANDARD_FORMAT
+					#endif
+
+				);
 				System.out.println("formatted address=" + formattedAddress.getFormattedAddress());
 
 				// get addresses by iterator
@@ -3801,6 +3868,7 @@ public class TestMain {
 						if (address instanceof PostalAddress) {
 							this.begin(); // isQuery() is false
 							byte[] document = new byte[] { 'h', 'e', 'l', 'l', 'o' };
+							#if CLASSIC_CHRONO_TYPES
 							PostalAddressSendMessageParams postalAddressSendMessageParams;
 							switch (nextStructureCreation()) {
 							case BY_MEMBER:
@@ -3818,10 +3886,18 @@ public class TestMain {
 							default:
 								postalAddressSendMessageParams = null;
 							}
-							((PostalAddress) address).sendMessage(postalAddressSendMessageParams);
+							#endif
+							((PostalAddress) address).sendMessage(
+									#if CLASSIC_CHRONO_TYPES
+									postalAddressSendMessageParams
+									#else
+									document
+									#endif
+							);
 							this.commit();
 						} else if (address instanceof EmailAddress) {
 							this.begin(); // isQuery() is false
+							#if CLASSIC_CHRONO_TYPES
 							EmailAddressSendMessageParams emailAddressSendMessageParams;
 							switch (nextStructureCreation()) {
 							case BY_MEMBER:
@@ -3833,13 +3909,19 @@ public class TestMain {
 										.createEmailAddressSendMessageParams("hello");
 								break;
 							case BY_POSITION:
-								emailAddressSendMessageParams = Datatypes.create(EmailAddressSendMessageParams.class,
-										"hello");
+								emailAddressSendMessageParams = Datatypes.create(EmailAddressSendMessageParams.class, "hello");
 								break;
 							default:
 								emailAddressSendMessageParams = null;
 							}
-							((EmailAddress) address).sendMessage(emailAddressSendMessageParams);
+							#endif
+							((EmailAddress) address).sendMessage(
+								#if CLASSIC_CHRONO_TYPES
+								emailAddressSendMessageParams
+								#else
+								"hello"
+								#endif
+							);
 							this.commit();
 						} else if (address instanceof GenericAddress) {
 							SysLog.detail("Generic addresses are not sent");
@@ -5257,6 +5339,11 @@ public class TestMain {
 	private static boolean isJava8Flavour() {
 		String flavourVersion = Version.getFlavourVersion();
 		return "2".equals(flavourVersion) || "3".equals(flavourVersion);
+	}
+
+	private static boolean isClassicChronoType(){
+		String flavourVersion = Version.getFlavourVersion();
+		return "2".equals(flavourVersion) || "4".equals(flavourVersion);
 	}
 
 }
