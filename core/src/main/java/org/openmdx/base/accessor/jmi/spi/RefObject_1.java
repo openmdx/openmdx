@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -73,10 +72,14 @@ import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 #if JAVA_8
 import javax.resource.ResourceException;
+import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.MappedRecord;
 #else
 import jakarta.resource.ResourceException;
+import jakarta.resource.cci.IndexedRecord;
 import jakarta.resource.cci.InteractionSpec;
+import jakarta.resource.cci.MappedRecord;
 #endif
 
 import org.oasisopen.cci2.QualifierType;
@@ -113,6 +116,7 @@ import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.resource.InteractionSpecs;
+import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
@@ -121,7 +125,6 @@ import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
-import org.w3c.format.DateTimeFormat;
 import org.w3c.time.SystemClock;
 
 //---------------------------------------------------------------------------
@@ -770,7 +773,7 @@ class RefObject_1
     }
 
     /**
-     * Tells, whether an operation must be invoked immediately or not
+     * Tells whether an operation must be invoked immediately or not
      *
      * @return {@code SYNC_SEND_RECEIVE} if an operation must be invoked immediately
      *
@@ -1250,10 +1253,7 @@ class RefObject_1
                 args
             );
         }
-        catch (ServiceException e) {
-            throw new JmiServiceException(e, this);
-        }
-        catch (RuntimeServiceException e) {
+        catch (ServiceException | RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
     }
@@ -1308,6 +1308,7 @@ class RefObject_1
         String operationName,
         List args
     ) throws RefException {
+        #if CLASSIC_CHRONO_TYPES
         try {
             return this.invokeOperation(
                 this.getFeature(operationName),
@@ -1318,7 +1319,61 @@ class RefObject_1
         } catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
+
+        #else
+
+        try {
+            ModelElement_1_0 operationDef = this.getFeature(operationName);
+
+            if (isClassicChronoSignature(operationDef)) {
+                return this.invokeOperation(operationDef, args);
+            }
+
+            if (args == null || args.isEmpty()) {
+                return this.invokeOperation(operationDef, args);
+
+            } else if (args.size() == 1 && args.get(0) instanceof MappedRecord) {
+                return this.invokeOperation(operationDef, args);
+
+            } else {
+                IndexedRecord boxedParams = Records.getRecordFactory().createIndexedRecord(operationName);
+                boxedParams.addAll(args);
+                return this.invokeOperation(operationDef, Arrays.asList(boxedParams));
+            }
+
+        } catch (ServiceException exception) {
+            throw this.toRefException(exception);
+        } catch (RuntimeServiceException e) {
+            throw new JmiServiceException(e, this);
+        } catch (ResourceException e) {
+            throw new RuntimeException(e);
+        }
+
+        #endif
     }
+
+    #if CLASSIC_CHRONO_TYPES #else
+    private boolean isClassicChronoSignature(ModelElement_1_0 operationDef) throws ServiceException {
+        try {
+            Collection<?> content = operationDef.objGetList("content");
+
+            for (Object paramObj : content) {
+                ModelElement_1_0 param = (ModelElement_1_0) paramObj;
+                String direction = (String) param.objGetValue("direction");
+
+                if ("in_dir".equals(direction)) {
+                    String paramName = param.getName();
+                    return "in".equals(paramName);
+                }
+            }
+            return false;
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+#endif
+
 
     // -------------------------------------------------------------------------
     // RefBaseObject

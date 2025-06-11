@@ -6,23 +6,23 @@
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,9 +36,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
@@ -126,7 +126,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             this.errors
         );
     }
-    
+
     //---------------------------------------------------------------------------
     public short getXMIFormat(
     ) {
@@ -164,7 +164,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             this.endImport();
         } catch(Exception e) {
             e.printStackTrace();
-        }        
+        }
     }
 
     //---------------------------------------------------------------------------
@@ -218,7 +218,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                         this.pathMap,
                         this.infos,
                         this.warnings,
-                        this.errors, 
+                        this.errors,
                         new HashMap<String, UML1AssociationEnd>()
                     );
                     resolver.parse(this.modelUrl.toString());
@@ -232,7 +232,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                         this.pathMap,
                         this.infos,
                         this.warnings,
-                        this.errors, 
+                        this.errors,
                         null
                     );
                     resolver.parse(this.modelUrl.toString());
@@ -326,7 +326,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationDef, "visibility", VisibilityKind.PUBLIC_VIS);
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationDef, "isDerived", Boolean.valueOf(umlAssociation.isDerived()));
         this.createModelElement(
-            null, 
+            null,
             associationDef
         );
         ObjectRecord associationEnd1Def = this.processAssociationEnd(
@@ -394,11 +394,11 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             null
         );
         this.createModelElement(
-            null, 
+            null,
             associationEnd1Def
         );
         this.createModelElement(
-            null, 
+            null,
             associationEnd2Def
         );
     }
@@ -672,8 +672,8 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         );
         // container
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-        	aliasTypeDef, 
-        	"container", 
+        	aliasTypeDef,
+        	"container",
         	toElementPath(
         		nameToPathComponent(getScope(umlClass.getQualifiedName())),
         		getName(getScope(umlClass.getQualifiedName()))
@@ -696,18 +696,18 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         // type
         List attributes = umlClass.getAttributes();
         this.verifyAliasAttributeNumber(
-            aliasTypeDef, 
+            aliasTypeDef,
             attributes.size()
         );
 
         UML1Attribute attribute = (UML1Attribute)umlClass.getAttributes().get(0);
         this.verifyAliasAttributeName(
-            aliasTypeDef, 
+            aliasTypeDef,
             attribute.getName()
         );
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-        	aliasTypeDef, 
-        	"type", 
+        	aliasTypeDef,
+        	"type",
         	toElementPath(
         		nameToPathComponent(getScope(attribute.getName())),
 		    	getName(attribute.getName())
@@ -779,7 +779,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         SysLog.detail("Class", classDef.getResourceIdentifier());
         this.createModelElement(
-            null, 
+            null,
             classDef
         );
 
@@ -797,7 +797,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             it.hasNext();
         ) {
             this.processBehaviouralFeature(
-                (UML1Operation)it.next(), 
+                (UML1Operation)it.next(),
                 classDef
             );
         }
@@ -862,7 +862,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         SysLog.detail("Attribute", attributeDef.getResourceIdentifier());
         this.createModelElement(
-            null, 
+            null,
             attributeDef
         );
     }
@@ -883,7 +883,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             behaviouralFeatureId,
             isException ? ModelAttributes.EXCEPTION : ModelAttributes.OPERATION
         );
-        
+
         // container
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(behaviouralFeatureDef, "container", aContainer.getResourceIdentifier());
 
@@ -918,25 +918,25 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
          *
          */
 
-//        final List<String> toIsolate = List.of(
-        final String[] toIsolate = new String[]{
-                "currentDateAndTime",
+//        final List<String> handleWithModernChronoInIsolation = List.of(
+        final String[] handleWithModernChronoInIsolation = new String[]{
+//                "currentDateAndTime",
 //                "testBinary0_1",
 //                "testBinary1_1",
 //                "testBoolean1_1",
 //                "testDecimal0_1",
 //                "testDecimal0_n",
-//                "testDecimal1_1",
+                "testDecimal1_1",
 //                "testDecimalList",
 //                "testDecimalSet",
 //                "testDecimalSparseArray",
 //                "testDecimalStream",
 //                "testParams1_1",
         };
-        final boolean doIsolate = Arrays.asList(toIsolate).contains(behaviouralFeatureName);
+        final boolean doHandleInIsolation = Arrays.asList(handleWithModernChronoInIsolation).contains(behaviouralFeatureName);
 
-//        if (!doIsolate) {
-        if (doIsolate) {
+        if (!doHandleInIsolation) {
+//        if (doHandleInIsolation) {
 
             if(!parameters.isEmpty()) {
 
@@ -1110,7 +1110,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                 while(exceptions.hasMoreTokens()) {
                     String qualifiedExceptionName = exceptions.nextToken().trim();
                     if(!qualifiedExceptionName.isEmpty()) {
-                        if (qualifiedExceptionName.indexOf("::") == -1) {
+                        if (!qualifiedExceptionName.contains("::")) {
                             this.errors.println("Found invalid exception declaration <" + qualifiedExceptionName + "> for the operation " + umlBehaviouralFeature.getQualifiedName() + "; this exception is ignored unless a valid qualified exception name is specified.");
                         }
                         else {
@@ -1141,35 +1141,24 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         } else { // WHAT WE NEED HERE (testDecimal1_1) - everything else will be handled above
 
-            // how CLASSIC flavours are generating this method
-//            public test.openmdx.model1.jmi1.TestDecimal1_1Result testDecimal1_1(
-//                    test.openmdx.model1.jmi1.ClassContainingOperationsTestDecimal1_1Params in
-//            );
-
-            // how CLASSIC flavours should be generating this method
-            // tbd
-
 
             #if !CLASSIC_CHRONO_TYPES
 
 
             if(!parameters.isEmpty()) {
 
-                // Point 1: Process each UML parameter directly as MOF parameter
                 for(Iterator it = parameters.iterator(); it.hasNext();) {
 
                     UML1Parameter aParameter = (UML1Parameter)it.next();
 
-                    // Point 2: Create MOF parameter directly (not as wrapper class field)
                     ObjectRecord parameterDef = this.channel.newObjectRecord(
                             newFeaturePath(
                                     behaviouralFeatureDef.getResourceIdentifier(),
-                                    aParameter.getName()  // Use actual parameter name
+                                    aParameter.getName()
                             ),
                             ModelAttributes.PARAMETER
                     );
 
-                    // Point 3: Set parameter properties
                     DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
                             parameterDef, "container", behaviouralFeatureDef.getResourceIdentifier()
                     );
@@ -1177,24 +1166,22 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                             parameterDef, "direction", DirectionKind.IN_DIR
                     );
                     DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-//                            parameterDef, "multiplicity", aParameter.getMultiplicity() // Use actual multiplicity
-                            parameterDef, "multiplicity", "1..1" // Use actual multiplicity
+                            parameterDef, "multiplicity",
+                            !aParameter.getStereotypes().isEmpty() ?
+                                    aParameter.getStereotypes().iterator().next() :
+                                    DEFAULT_PARAMETER_MULTIPLICITY
                     );
 
-                    // IMPORTANT: Get the type as a Path, not String
                     DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
                             parameterDef, "type", new Path(aParameter.getType())  // Must be Path, not String
                     );
 
-                    // Point 4: Create the parameter in the model
                     this.createModelElement(null, parameterDef);
                 }
 
 
             }
             else {
-                // Point 5: For void operations, create single "void" parameter
-                // (similar to original void handling but maybe with different name)
                 ObjectRecord voidParameterDef = this.channel.newObjectRecord(
                         newFeaturePath(behaviouralFeatureDef.getResourceIdentifier(), "void"),
                         ModelAttributes.PARAMETER
@@ -1208,11 +1195,9 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                         voidParameterDef, "direction", DirectionKind.IN_DIR
                 );
                 DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-//                            parameterDef, "multiplicity", aParameter.getMultiplicity() // Use actual multiplicity
-                        voidParameterDef, "multiplicity", "1..1" // Use actual multiplicity
+                        voidParameterDef, "multiplicity", DEFAULT_PARAMETER_MULTIPLICITY
                 );
 
-                // IMPORTANT: Get the type as a Path, not String
                 DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
                         voidParameterDef, "type", toElementPath(
                                 nameToPathComponent("org::openmdx::base"),
@@ -1233,7 +1218,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                 );
                 DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "container", behaviouralFeatureDef.getResourceIdentifier());
                 DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "direction", DirectionKind.RETURN_DIR);
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "multiplicity", "1..1");
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "multiplicity", DEFAULT_PARAMETER_MULTIPLICITY);
 
                 if(umlBehaviouralFeature.getReturnParameter().getType() == null) {
                     this.error("Undefined return type for operation " + umlBehaviouralFeature.getQualifiedName());
@@ -1254,11 +1239,11 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             String allExceptions = this.getOperationExceptions(umlBehaviouralFeature);
             if (allExceptions != null) {
                 final StringTokenizer exceptions = new StringTokenizer(allExceptions, ",; ");
-                final List<Path> exceptionPaths = new ArrayList<Path>();
+                final List<Path> exceptionPaths = new ArrayList<>();
                 while(exceptions.hasMoreTokens()) {
                     String qualifiedExceptionName = exceptions.nextToken().trim();
                     if(!qualifiedExceptionName.isEmpty()) {
-                        if (qualifiedExceptionName.indexOf("::") == -1) {
+                        if (!qualifiedExceptionName.contains("::")) {
                             this.errors.println("Found invalid exception declaration <" + qualifiedExceptionName + "> for the operation " + umlBehaviouralFeature.getQualifiedName() + "; this exception is ignored unless a valid qualified exception name is specified.");
                         }
                         else {
@@ -1527,7 +1512,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 			    nameToPathComponent(getScope(umlParameter.getType())),
 			    getName(umlParameter.getType())
 			));
-            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterDef, "multiplicity", umlParameter.getStereotypes().size() > 0 ?
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterDef, "multiplicity", !umlParameter.getStereotypes().isEmpty() ?
 			umlParameter.getStereotypes().iterator().next() :
 			    DEFAULT_PARAMETER_MULTIPLICITY);
         }
@@ -1577,7 +1562,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         SysLog.detail("Primitive type", primitiveTypeDef.getResourceIdentifier());
         createModelElement(
-            null, 
+            null,
             primitiveTypeDef
         );
     }
@@ -1629,8 +1614,8 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         ).append(
             ".."
         ).append(
-            "-1".equals(range.getUpper()) || "*".equals(range.getUpper()) ? 
-                "n" : 
+            "-1".equals(range.getUpper()) || "*".equals(range.getUpper()) ?
+                "n" :
                 range.getUpper()
         ).toString();
     }
@@ -1702,7 +1687,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                 return comment.substring(THROWS_EXCEPTION_PREFIX.length());
             }
         }
-        for(           
+        for(
                 Iterator it = operation.getTaggedValues().iterator();
                 it.hasNext();
         ) {

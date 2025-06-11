@@ -216,7 +216,7 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
     /**
      * Retrieve a structure field value
      * 
-     * @param fieldName the structure field name
+     * @param fieldDef the structure field definition
      * 
      * @return the structure field value
      */
