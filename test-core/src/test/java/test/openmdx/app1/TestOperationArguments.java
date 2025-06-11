@@ -306,8 +306,8 @@ public class TestOperationArguments {
                 new SimpleStructSparseArray[]{} // simpleStructSparseArrayField
         );
         #if CLASSIC_CHRONO_TYPES
-        ClassContainingOperationsTestComplexStruct0_n_0_1Params in = Structures.create(
-            ClassContainingOperationsTestComplexStruct0_n_0_1Params.class,
+        test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_n_0_1Params in = Structures.create(
+            test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_n_0_1Params.class,
             complexStruct
         );
         #endif

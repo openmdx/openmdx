@@ -114,7 +114,7 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
      */
     public short getAge() {
         Person same = sameObject();
-        #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif birthdate = same.getBirthdate();
+        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif birthdate = same.getBirthdate();
         if(birthdate == null) {
             return - 1;
         } else {
@@ -244,8 +244,8 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
             #endif
         ) {
         #if CLASSIC_CHRONO_TYPES
-            LocalDate dateIn = in.getDateIn();
-            Instant dateTimeIn = in.getDateTimeIn();
+            javax.xml.datatype.XMLGregorianCalendar dateIn = in.getDateIn();
+            java.util.Date dateTimeIn = in.getDateTimeIn();
         #endif
         App1Package app1Package = samePackage();
         System.out.println("dateOp.dateIn=" + dateIn);
