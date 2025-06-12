@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Straucture Interface 1.0
+ * Description: Marshalling List Interface Interface 1.0
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,24 +42,22 @@
  * This product includes or is based on software developed by other
  * organizations as listed in the NOTICE file.
  */
-package org.openmdx.base.accessor.jmi.cci;
+package org.openmdx.base.accessor.jmi.spi;
 
-import javax.jmi.reflect.RefStruct;
-import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
+import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
+import java.util.List;
 
 /**
- * This interface extends the javax.jmi.reflect.RefStruct interface by openMDX
- * specific helpers. These methods must not be used by 100% JMI-compliant 
- * applications.
+ * This interface is used for operation dispatching
  */
-public interface RefStruct_1_0 extends RefStruct {
+public interface RefList_1_0 extends List<Object> {
 
     /**
-     * Retrieve the record containing the data structure
+     * Retrieve the record containing the argument values
      * 
-     * @return the record containing the data structure
+     * @return the record containing the argument values
      */
-    MappedRecord refDelegate(
+    IndexedRecord refDelegate(
     );
 
 }

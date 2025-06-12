@@ -102,10 +102,6 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
 
     /**
      * Constructor 
-     *
-     * @param qualifiedPackageName
-     * @param outermostPackage
-     * @param immediatePackage
      */
     public RefPackage_1(
         String qualifiedPackageName,
@@ -129,7 +125,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /**
      * Asserts that the associated persistence manager is open
      * 
-     * @exception JDOFatalUserException
+     * @throws JDOFatalUserException if the persistence manager is closed
      */
     protected void assertOpen(
     ){
@@ -252,9 +248,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
                 refOutermostPackage(),
                 record
             );
-        } catch (ServiceException exception) {
-            throw new JmiServiceException(exception);
-        } catch (ResourceException exception) {
+        } catch (ServiceException | ResourceException exception) {
             throw new JmiServiceException(exception);
         }
     }
@@ -277,8 +271,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
             return target;
         } else if (source instanceof SparseArray<?>) {
             MappedRecord target = Records.getRecordFactory().createMappedRecord(Multiplicity.SPARSEARRAY.code());
-            for(Object e : ((SparseArray<?>)source).entrySet()) {
-                Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
+            for(Map.Entry<?, ?> entry : ((SparseArray<?>)source).entrySet()) {
                 target.put(
                     entry.getKey(),
                     toStructValue(entry.getValue())
@@ -293,7 +286,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /**
      * Create a structure proxy based on the record name
      * 
-     * @param record
+     * @param record the deleage in case of a {@code MappedRecord}, the values to be copied in case of an {@code IndexedRecord}
      * 
      * @return the structure proxy based on the record name
      */
@@ -309,6 +302,13 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
         } catch (ServiceException exception) {
             throw new JmiServiceException(exception);
         }
+    }
+
+    //-------------------------------------------------------------------------
+
+    @Override
+    public RefList_1_0 refCreateList(IndexedRecord delegate) {
+        return this.refMapping().newList(this.refOutermostPackage(), delegate);
     }
 
     //-------------------------------------------------------------------------
@@ -394,7 +394,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
 
     //-------------------------------------------------------------------------
     /**
-     * @param qualifedClassName qualified name of the returned class.
+     * @param qualifiedClassName qualified name of the returned class.
      * @param immediatePackage passed as package when constructing the class, i.e.
      *        refImmediatePackage() of the returned class is equal to immediatePackage.
      */
