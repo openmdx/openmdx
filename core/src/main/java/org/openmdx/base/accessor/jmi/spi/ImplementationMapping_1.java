@@ -85,9 +85,6 @@ class ImplementationMapping_1 implements Mapping_1_0 {
 
     /**
      * Constructor 
-     *
-     * @param next
-     * @param aspectImplementationPackageNames
      */
     ImplementationMapping_1(
         Mapping_1_0 next,
@@ -147,18 +144,14 @@ class ImplementationMapping_1 implements Mapping_1_0 {
 
     /**
      * Re-package the record
-     * 
-     * @param keys
-     * @param values
-     * 
+     *
      * @return a mapped record
-     * @throws ServiceException 
      */
     @SuppressWarnings("unchecked")
     private static MappedRecord asMappedRecord(
         String[] keys,
         IndexedRecord values
-    ) throws ServiceException{
+    ){
         return Records.getRecordFactory().asMappedRecord(
 		    values.getRecordName(),
 		    null,
@@ -204,6 +197,11 @@ class ImplementationMapping_1 implements Mapping_1_0 {
             new BasicException.Parameter("supported", MappedRecord.class.getName(), IndexedRecord.class.getName()),
             new BasicException.Parameter("actual", delegate.getClass().getName())
         );
+    }
+
+    @Override
+    public RefList_1_0 newList(Jmi1Package_1_0 outermostPackage, IndexedRecord delegate) {
+        return new RefList_1(delegate, outermostPackage);
     }
 
     @Override
@@ -290,9 +288,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
                 combinedInterfaces.add(DelegatingRefObject_1_0.class);
             }
             // Mixed-In
-            for(Class<?> mixedInInterface : mixedInInterfaces){
-                combinedInterfaces.add(mixedInInterface);
-            }
+            combinedInterfaces.addAll(mixedInInterfaces);
             ImplementationDescriptor concurrent = this.implementationDescriptors.put(
                 key,
                 implementationDescriptor = new ImplementationDescriptor(
@@ -311,7 +307,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     /**
      * Find a class' aspect descriptor
      * 
-     * @param qualifiedClassName
+     * @param qualifiedClassName the qualified class name
      * 
      * @return the class' aspect descriptor
      */
@@ -373,7 +369,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         for (String aspectImplementationPackageName : aspectImplementationPackageNames.split(",")) {
             try {
                 Class<?> implementationClass = Classes.getApplicationClass(
-                        aspectImplementationPackageNames + '.' + interfaceDescriptor.simpleClassName + "Impl"
+                        aspectImplementationPackageName + '.' + interfaceDescriptor.simpleClassName + "Impl"
                 );
                 Constructor<?> aspectImplementationConstructor;
                 try {
@@ -436,11 +432,6 @@ class ImplementationMapping_1 implements Mapping_1_0 {
 
         /**
          * Constructor 
-         *
-         * @param interfaceDescriptor
-         * @param aspectDescriptors
-         * @param mixedInInterfaces
-         * @param combinedInterfaces
          */
         ImplementationDescriptor(
             SpecificationMapping_1.SpecificationDescriptor interfaceDescriptor,
@@ -524,7 +515,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
          * 
          * @return the class interfaces
          * 
-         * @throws ServiceException 
+         * @throws ServiceException in case of failure
          */
         private Class<?>[] getClassInterfaces(
         ) throws ServiceException{
@@ -542,7 +533,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
          */
         @Override
         public Class<? extends AbstractObject> getInstanceClass(
-        ) throws ServiceException {
+        ){
             return this.interfaceDescriptor.jpa3Class;
         }
 
@@ -591,9 +582,6 @@ class ImplementationMapping_1 implements Mapping_1_0 {
 
         /**
          * Canonical add operation
-         * 
-         * @param newClass
-         * @param to
          */
         static void add(
             Class<?> newClass,
@@ -624,9 +612,6 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         
         /**
          * Canonical add operation
-         * 
-         * @param newDescriptor
-         * @param to
          */
         static void add(
             AspectImplementationDescriptor newDescriptor,

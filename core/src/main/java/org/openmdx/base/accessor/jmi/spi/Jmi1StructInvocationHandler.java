@@ -45,9 +45,6 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -79,8 +76,6 @@ import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.collection.TreeSparseArray;
 import org.openmdx.kernel.exception.BasicException;
-import org.w3c.cci2.BinaryLargeObject;
-import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 
@@ -92,9 +87,6 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
     //-----------------------------------------------------------------------
     /**
      * Constructor
-     *
-     * @param refPackage
-     * @param delegate
      */
     public Jmi1StructInvocationHandler(
         Jmi1Package_1_0 refPackage,
@@ -196,12 +188,12 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
                     InvocationHandler invocationHandler = Proxy.getInvocationHandler(args[0]);
                     if(invocationHandler instanceof Jmi1StructInvocationHandler) {
                         Jmi1StructInvocationHandler that = (Jmi1StructInvocationHandler) invocationHandler;
-                        return Boolean.valueOf(this.delegate.equals(that.delegate));
+                        return this.delegate.equals(that.delegate);
                     }
                 }
                 return Boolean.FALSE;
             } else if("hashCode".equals(methodName)) {
-                return Integer.valueOf(this.delegate.hashCode());
+                return this.delegate.hashCode();
             } else if("toString".equals(methodName)) {
                 return this.delegate.toString();
             }
@@ -246,9 +238,8 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
 	                return SortedMaps.emptySparseArray();
 	            } else if (value instanceof Map<?,?>){
 	                SparseArray<Object> target = new TreeSparseArray<>();
-	                for(Object e : ((Map<?,?>)value).entrySet()) {
-	                    Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
-	                    target.put((Integer)entry.getKey(), marshal(entry.getValue()));
+	                for(Map.Entry<?, ?> entry : ((Map<?,?>)value).entrySet()) {
+                        target.put((Integer) entry.getKey(), marshal(entry.getValue()));
 	                }
 	                return target;
 	            } else {
@@ -282,64 +273,6 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
             source;
     }
     
-    //-----------------------------------------------------------------------
-    class Jmi1BinaryLargeObject implements BinaryLargeObject {
-
-        public Jmi1BinaryLargeObject(            
-            String fieldName,
-            InputStream value
-        ) {
-            this.fieldName = fieldName;
-            this.initialValue = value;
-        }
-
-        protected transient InputStream initialValue = null;
-        protected final String fieldName;
-        protected transient Long length = null;
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.BinaryLargeObject#getContent()
-         */
-        public InputStream getContent(
-        ) throws IOException {
-            InputStream value = this.initialValue == null
-            ? (InputStream)Jmi1StructInvocationHandler.this.delegate.get(this.fieldName)
-                : this.initialValue;
-            this.initialValue = null;
-            return value;
-        }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.LargeObject#getLength()
-         */
-        public Long getLength(
-        ) throws IOException {
-            return this.length;
-        }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.BinaryLargeObject#getContent(java.io.OutputStream, long)
-         */
-        public void getContent(
-            OutputStream stream, 
-            long position
-        ) throws IOException {
-            this.length = Long.valueOf(
-                Jmi1StructInvocationHandler.this.delegate instanceof RefObject_1_0 ?
-                ((RefObject_1_0)Jmi1StructInvocationHandler.this.delegate).refGetValue(
-                    this.fieldName, 
-                    stream, 
-                    position
-                ) : position + BinaryLargeObjects.streamCopy(
-                    getContent(), 
-                    position,
-                    stream
-                )
-            );            
-        }
-
-    }
-
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------

@@ -95,14 +95,10 @@ public interface RefPackage_1_0 extends RefPackage {
 
   /**
     * Create a query
-    * 
-    * @param filterClassName
-    * @param subclasses 
-    * @param filter
     *
     * @return a new query
     * 
-    * @exception ServiceException
+    * @throws ServiceException in case of failure
     */
    RefQuery_1_0 refCreateQuery(
        String filterClassName,
@@ -112,13 +108,10 @@ public interface RefPackage_1_0 extends RefPackage {
 
    /**
     * Create a structure proxy based on the record name
-    * 
-    * @param structName
-    * @param delegate
-    * 
+    *
     * @return the structure proxy based on the record name
     */
-   public RefStruct refCreateStruct(
+   RefStruct refCreateStruct(
        Record record
    );
 
@@ -133,9 +126,6 @@ public interface RefPackage_1_0 extends RefPackage {
    /**
     * Retrieve a container specified by its resource identifier
     * 
-    * @param resourceIdentifier
-    * @param containerClass
-    * 
     * @return the container specified by its resource identifier
     */
    <C extends RefContainer<?>> C refContainer(
@@ -145,9 +135,7 @@ public interface RefPackage_1_0 extends RefPackage {
 
    /**
     * Create a context specific RefPackage
-    * 
-    * @param viewContext
-    * 
+    *
     * @return a context specific RefPackage
     */
    RefPackage_1_0 refPackage(

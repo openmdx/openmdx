@@ -71,14 +71,12 @@ import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefBaseObject;
 import javax.jmi.reflect.RefClass;
-import javax.jmi.reflect.RefException;
 import javax.jmi.reflect.RefFeatured;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
-import org.oasisopen.cci2.QualifierType;
+import javax.jmi.reflect.RefStruct;
 import org.oasisopen.jmi1.RefContainer;
-import org.oasisopen.jmi1.RefQualifier;
 import org.omg.mof.spi.Identifier;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
@@ -175,7 +173,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
      * 
      * @return the feature mapper
      * 
-     * @throws ServiceException 
+     * @throws ServiceException in case of failure
      */
     protected FeatureMapper getFeatureMapper(
     ) throws ServiceException {
@@ -209,7 +207,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     /**
      * Retrieve the proxy's invocation handler
      *
-     * @returne the proxy's invocation handler
+     * @return the proxy's invocation handler
      */
     private static Jmi1ObjectInvocationHandler getInstance(
         Object proxy
@@ -289,11 +287,11 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 int i = 0;
                 if(source instanceof Collection) {
                     for(Object value : (Collection)source){
-                        target.put(Integer.valueOf(i++), value);
+                        target.put(i++, value);
                     }
                 } else if (source.getClass().isArray()) {
                     for(Object value : ArraysExtension.asList(source)){
-                        target.put(Integer.valueOf(i++), value);
+                        target.put(i++, value);
                     }
                 } else {
                     throw new JmiServiceException(
@@ -319,11 +317,8 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
 
     /**
      * Replace the content of the target map
-     * 
-     * @param target
-     * @param source
-     * 
-     * @exception JmiServiceException
+     *
+     * @exception JmiServiceException in case of an incompatible value
      */
     @SuppressWarnings({
         "unchecked", "rawtypes"
@@ -828,7 +823,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         try {
             if (declaringClass == Object.class) {
                 if("hashCode".equals(methodName)) {
-                    return Integer.valueOf(System.identityHashCode(this));
+                    return System.identityHashCode(this);
                 }
                 if("toString".equals(methodName)) {
                     return this.refDelegate.toString();
@@ -850,7 +845,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                         thisId = ReducedJDOHelper.getTransactionalObjectId(proxy);
                         thatId = ReducedJDOHelper.getTransactionalObjectId(args[0]);
                     }
-                    return Boolean.valueOf(thisId != null && thisId.equals(thatId));
+                    return thisId != null && thisId.equals(thatId);
                 }
             }
             //
@@ -938,7 +933,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                             } else {
                                 final Object qualifier;
                                 if(args.length == 2 && args[0] instanceof Boolean) {
-                                    qualifier = ((Boolean)args[0]).booleanValue() ? "!" + args[1] : validateSubSegment(args[1]);
+                                    qualifier = (Boolean) args[0] ? "!" + args[1] : validateSubSegment(args[1]);
                                 } else {
                                     qualifier = validateSubSegment(args[0]);
                                 }
@@ -991,7 +986,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                             null, // removableSuffix
                                             null // appendableSuffix
                                     ),
-                                    ((Boolean)args[0]).booleanValue() ? "!" + args[1] : args[1], // qualifier
+                                    (Boolean) args[0] ? "!" + args[1] : args[1], // qualifier
                                     args[2] // value
                             );
                             return null;
@@ -1118,7 +1113,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                             this.refClass.getMarshaller(),
                                             Kind.METHOD
                                     );
-                                    long position = args[2] == null ? 0l : ((Long)args[2]).longValue();
+                                    long position = args[2] == null ? 0L : (Long) args[2];
                                     if(largeObject instanceof BinaryLargeObject) {
                                         ((BinaryLargeObject)largeObject).getContent(
                                                 (OutputStream)args[1],
@@ -1370,8 +1365,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     /**
      * Validate an XRI sub-segment
      *
-     * @param subSegment
-     *
      * @return the validated XRI sub-segment
      *
      * @exception JmiException BAD_PARAMETER if the sub-segment is {@code null}Y
@@ -1454,7 +1447,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             Object[] args,
             StandardMarshaller marshaller,
             Kind kind
-    ) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, ServiceException, SecurityException, NoSuchMethodException{
+    ) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, ServiceException, SecurityException {
         DelegatingRefObject_1_0 delegate = (DelegatingRefObject_1_0)this.refDelegate;
         Object next = delegate.openmdxjdoGetDelegate();
         InvocationTarget invocationTarget = this.getImpl(
@@ -1468,28 +1461,34 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                         (args[0] instanceof org.openmdx.base.cci2.Void);
         if(invocationTarget == null) {
             if(
-                    kind != Kind.METHOD &&
-                            next instanceof RefObject &&
-                            args != null &&
-                            args.length == 1 &&
-                            args[0] instanceof RefStruct_1_0
+                kind != Kind.METHOD &&
+                next instanceof RefObject &&
+                args != null &&
+                args.length == 1 &&
+                args[0] instanceof RefStruct_1_0
             ) {
-                RefStruct_1_0 in = (RefStruct_1_0) args[0];
-                RefStruct_1_0 out;
-                if(hasVoidArg) {
-                    out =  (RefStruct_1_0) method.invoke(next);
+                final RefStruct_1_0 in = (RefStruct_1_0) args[0];
+                final RefStruct_1_0 out;
+                if (hasVoidArg) {
+                    out = (RefStruct_1_0) method.invoke(next);
                 } else {
-                    if(in != null) {
-                        RefPackage_1_0 refPackage = (RefPackage_1_0) ((RefObject)next).refOutermostPackage();
-                        in = (RefStruct_1_0) refPackage.refCreateStruct(in.refDelegate());
-                    }
-                    out =  (RefStruct_1_0) method.invoke(next, in);
+                    RefPackage_1_0 refPackage = (RefPackage_1_0) ((RefObject) next).refOutermostPackage();
+                    RefStruct refStruct = refPackage.refCreateStruct(in.refDelegate());
+                    out = (RefStruct_1_0) method.invoke(next, refStruct);
                 }
-                if(out == null) {
-                    return null;
-                } else {
-                    return ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
-                }
+                return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
+            } else if(
+                kind != Kind.METHOD &&
+                next instanceof RefObject &&
+                args != null &&
+                args.length == 1 &&
+                args[0] instanceof RefList_1_0
+            ) {
+                final RefList_1_0 in = (RefList_1_0) args[0];
+                Jmi1Package_1_0 refPackage = (Jmi1Package_1_0) ((RefObject)next).refOutermostPackage();
+                RefList_1_0 refArguments = refPackage.refCreateList(in.refDelegate());
+                final RefStruct_1_0 out =  (RefStruct_1_0) method.invoke(next, refArguments.toArray());
+                return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
             } else {
                 final Object[] arguments;
                 if(hasVoidArg){
@@ -1538,10 +1537,8 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                             if(arguments[i] == null) {
                                 actualArgumentClass[i] = null;
                                 actualArgumentInterfaces[i] = null;
-                                matchingArgumentTypes[i] = Boolean.valueOf(
-                                        i < parameterTypes.length &&
-                                                !parameterTypes[i].isPrimitive()
-                                );
+                                matchingArgumentTypes[i] = i < parameterTypes.length &&
+                                        !parameterTypes[i].isPrimitive();
                             } else {
                                 Class<?> argumentClass = arguments[i].getClass();
                                 actualArgumentClass[i] = argumentClass.getName();
@@ -1550,10 +1547,8 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                     interfaces.add(actualInterface.getName());
                                 }
                                 actualArgumentInterfaces[i] = interfaces.toString();
-                                matchingArgumentTypes[i] = Boolean.valueOf(
-                                        i < parameterTypes.length &&
-                                                parameterTypes[i].isInstance(arguments[i])
-                                );
+                                matchingArgumentTypes[i] = i < parameterTypes.length &&
+                                        parameterTypes[i].isInstance(arguments[i]);
                             }
                         }
                         Throwables.initCause(
@@ -1603,8 +1598,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
 
     /**
      * Determine the actual class by parsing the ClassCastException message
-     *
-     * @param cause
      *
      * @return the class found at the beginning of the ClassCastException message
      */
@@ -1674,7 +1667,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
         public InputStream getContent(
-        ) throws IOException {
+        ) {
             InputStream value = this.initialValue == null ?
                 (InputStream)Jmi1ObjectInvocationHandler.this.refDelegate.refGetValue(this.featureName) :
                 this.initialValue;
@@ -1686,11 +1679,11 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
          * @see org.w3c.cci2.LargeObject#getLength()
          */
         public Long getLength(
-        ) throws IOException {
+        ) {
             return this.length;
         }
 
-        protected transient InputStream initialValue = null;
+        protected transient InputStream initialValue;
         protected final String featureName;
         protected transient Long length = null;
 
@@ -1701,12 +1694,10 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             OutputStream stream,
             long position
         ) throws IOException {
-            this.length = Long.valueOf(
-                position + BinaryLargeObjects.streamCopy(
+            this.length = position + BinaryLargeObjects.streamCopy(
                     getContent(),
                     position,
                     stream
-                )
             );
         }
 
@@ -1733,13 +1724,13 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             this.initialValue = value;
         }
 
-        protected transient Reader initialValue = null;
+        protected transient Reader initialValue;
         protected final String featureName;
         protected transient Long length = null;
 
         @Override
         public Reader getContent(
-        ) throws IOException {
+        ) {
             Reader value = this.initialValue == null ?
                 (Reader)Jmi1ObjectInvocationHandler.this.refDelegate.refGetValue(this.featureName) :
                 this.initialValue;
@@ -1749,7 +1740,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
 
         @Override
         public Long getLength(
-        ) throws IOException {
+        ) {
             return this.length;
         }
 
@@ -1758,12 +1749,10 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             Writer stream,
             long position
         ) throws IOException {
-            this.length = Long.valueOf(
-                position + CharacterLargeObjects.streamCopy(
+            this.length = position + CharacterLargeObjects.streamCopy(
                     getContent(),
                     position,
                     stream
-                )
             );
         }
 
@@ -1839,7 +1828,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
          */
         private static final long serialVersionUID = 8761679181457452801L;
 
-        private Object cciDelegate;
+        private final Object cciDelegate;
         private final RefClass refClass;
         private RefObject metaObject = null;
 
@@ -1901,9 +1890,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                     );
                 }
             }
-            catch (ServiceException e) {
-                throw new JmiServiceException(e, this);
-            } catch (RuntimeServiceException e) {
+            catch (ServiceException | RuntimeServiceException e) {
                 throw new JmiServiceException(e, this);
             }
         }
@@ -1939,7 +1926,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         public Object refInvokeOperation(
             RefObject requestedOperation,
             List args
-        ) throws RefException {
+        ) {
             throw newUnsupportedOperationException(REFLECTIVE, requestedOperation);
         }
 
@@ -1948,7 +1935,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         public Object refInvokeOperation(
             String requestedOperation,
             List args
-        ) throws RefException {
+        ) {
             throw newUnsupportedOperationException(REFLECTIVE, requestedOperation);
         }
 
