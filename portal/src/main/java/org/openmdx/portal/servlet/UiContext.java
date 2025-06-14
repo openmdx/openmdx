@@ -269,9 +269,10 @@ public class UiContext
         try {
         	SysLog.trace("Asserting inspector", forClass);
             synchronized(this.allAssertedInspectors) {
-                this.getUiSegment(perspective).assertInspector(
-                    #if CLASSIC_CHRONO_TYPES this.uiPackage.createSegmentAssertInspectorParams(forClass) #else forClass #endif
-                );
+                #if CLASSIC_CHRONO_TYPES
+                this.getUiSegment(perspective).assertInspector(this.uiPackage.createSegmentAssertInspectorParams(forClass));
+                #else this.getUiSegment(perspective).assertInspector(forClass);
+                #endif
                 this.allAssertedInspectors.get(perspective).add(forClass);
             }
         }

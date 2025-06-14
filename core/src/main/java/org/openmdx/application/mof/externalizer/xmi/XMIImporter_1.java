@@ -920,13 +920,21 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
 //        final List<String> handleWithModernChronoInIsolation = List.of(
         final String[] handleWithModernChronoInIsolation = new String[]{
+                "assertInspector",
 //                "currentDateAndTime",
+                "dateOp",
+                "formatAs",
+                "formatNameAs",
+                "sendMessage",
+                "sendMessageTemplate",
 //                "testBinary0_1",
 //                "testBinary1_1",
 //                "testBoolean1_1",
+                "testComplexStruct0_1_0_1",
+                "testComplexStruct0_n_0_1",
 //                "testDecimal0_1",
 //                "testDecimal0_n",
-                "testDecimal1_1",
+//                "testDecimal1_1",
 //                "testDecimalList",
 //                "testDecimalSet",
 //                "testDecimalSparseArray",

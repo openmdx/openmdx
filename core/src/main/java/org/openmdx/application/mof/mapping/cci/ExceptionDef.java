@@ -100,7 +100,15 @@ extends FeatureDef {
                 param
             );
         }
-
+        if(params.get("in") == null) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "no parameter with name \"in\" defined for exception",
+                new BasicException.Parameter("exception", exceptionDef.jdoGetObjectId()),
+                new BasicException.Parameter("params", params)
+            );
+        }
         // set exception parameters (as attributes)
         ModelElement_1_0 inParamType = model.getElementType(
             params.get("in")
@@ -129,13 +137,16 @@ extends FeatureDef {
             Iterator<?> i = exceptionDef.objGetList("content").iterator();
             i.hasNext();
         ) {
-            ModelElement_1_0 param = model.getElement(i.next());
-            parameters.add(
-                    new AttributeDef(
-                            param,
-                            model
-                    )
-            );
+            ModelElement_1_0 field = model.getElement(i.next());
+            if(model.isStructureFieldType(field)) {
+                parameters.add(
+                        new AttributeDef(
+                                field,
+                                model
+                        )
+                );
+            }
+
         }
         return parameters;
 

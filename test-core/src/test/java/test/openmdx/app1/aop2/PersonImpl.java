@@ -56,6 +56,7 @@ import javax.jmi.reflect.RefObject;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.aop2.AbstractObject;
 import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Void;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.SortedMaps;
@@ -164,12 +165,25 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
                 Collections.singleton(asString),
                 SortedMaps.singletonSparseArray(asString)
             );
-        } else throw new CanNotFormatNameException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE,
-            "name format not supported. Supported are [Standard]",
-            formatType
-        );
+        } else {
+            #if CLASSIC_CHRONO_TYPES
+            throw new CanNotFormatNameException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "name format not supported. Supported are [Standard]",
+                formatType
+            );
+            #else
+            throw new CanNotFormatNameException(
+                    new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "name format not supported. Supported are [Standard]",
+                        new BasicException.Parameter(formatType, "formatType")
+                    )
+            );
+            #endif
+        }
     }
 
     /**

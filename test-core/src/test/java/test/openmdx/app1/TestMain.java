@@ -3678,7 +3678,18 @@ public class TestMain {
 			}
 			try {
 				super.taskId = "CR20019666";
+				#if CLASSIC_CHRONO_TYPES
 				throw new CanNotFormatNameException(super.taskId);
+				#else
+				throw new CanNotFormatNameException(
+						new ServiceException(
+								BasicException.Code.DEFAULT_DOMAIN,
+								BasicException.Code.ASSERTION_FAILURE,
+								"name format not supported. Supported are [Standard]",
+								new BasicException.Parameter(super.taskId, "taskId")
+						)
+				);
+				#endif
 			} catch (CanNotFormatNameException e) {
 				System.out.println("TestMain raised exception as expected: " + e.getMessage());
 			} finally {

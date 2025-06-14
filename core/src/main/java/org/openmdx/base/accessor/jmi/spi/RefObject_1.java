@@ -117,6 +117,7 @@ import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.resource.cci.ExtendedRecordFactory;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
@@ -711,64 +712,247 @@ class RefObject_1
      */
     private Object invokeOperation(
             ModelElement_1_0 featureDef,
+//            List<?> args
+            Object args
+    ) throws ServiceException {
+
+        if (args instanceof RefList_1_0) {
+            RefList_1_0 refList = (RefList_1_0) args;
+
+            // Use the enhanced list interface for processing
+            Object[] processedArgs = new Object[refList.size()];
+            for (int i = 0; i < refList.size(); i++) {
+                processedArgs[i] = refList.get(i);  // Automatic transformation applied
+            }
+
+            // Access delegate when needed for JCA operations
+            IndexedRecord delegate = refList.refDelegate();
+
+            // Continue with your existing operation invocation logic
+            return invokeWithProcessedArgs(featureDef, processedArgs, delegate);
+
+        } else if (args instanceof List) {
+            // Handle classic case
+            List<?> argsList = (List<?>) args;
+            // Your existing logic for List handling
+            return invokeWithClassicArgs(featureDef, argsList);
+        }
+
+        throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                "Unsupported argument type",
+                new BasicException.Parameter("args", args.getClass())
+        );
+
+
+//        SysLog.log(Level.FINEST, "Sys|refMofId={0},featureDef={1}|args={2}", this.object.jdoGetObjectId(), featureDef, args);
+//        this.assertOperation(featureDef);
+//
+//        // get the type names of 'in' parameter and 'result'
+//        String qualifiedNameResultType = null;
+//        String qualifiedNameInParamType = null;
+//        for (
+//            Iterator<?> i = featureDef.objGetList("content").iterator();
+//            i.hasNext();
+//        ) {
+//            ModelElement_1_0 paramDef = this.object.getModel().getElement(i.next());
+//            ModelElement_1_0 paramDefType = this.getType(paramDef);
+//            if ("in".equals(paramDef.getName())) {
+//                qualifiedNameInParamType = paramDefType.getQualifiedName();
+//            }
+//            else if ("result".equals(paramDef.getName())) {
+//                qualifiedNameResultType = paramDefType.getQualifiedName();
+//            }
+//        }
+//        if (qualifiedNameInParamType == null) {
+//            throw new ServiceException(
+//                BasicException.Code.DEFAULT_DOMAIN,
+//                BasicException.Code.ASSERTION_FAILURE,
+//                "no parameter with name \"in\" defined for operation",
+//                new BasicException.Parameter("operation", featureDef)
+//            );
+//        }
+//        if (qualifiedNameResultType == null) {
+//            throw new ServiceException(
+//                BasicException.Code.DEFAULT_DOMAIN,
+//                BasicException.Code.ASSERTION_FAILURE,
+//                "no parameter with name \"result\" defined for operation",
+//                new BasicException.Parameter("operation", featureDef)
+//            );
+//        }
+//        RefPackage_1_0 refPackage = this.refOutermostPackage();
+//        RefStruct_1_0 input = (RefStruct_1_0) (
+//            args.size() == 1 && args.get(0) instanceof RefStruct_1_0 ? args.get(0) :
+//            this.refOutermostPackage().refCreateStruct(qualifiedNameInParamType,args)
+//        );
+//        RefStruct_1_0 output = (RefStruct_1_0) refPackage.refCreateStruct(
+//            qualifiedNameResultType,
+//            (List<?>)null // output record will be updated by method invocation
+//        );
+//        try {
+//            this.object.execute(
+//                InteractionSpecs.newMethodInvocationSpec(
+//                    featureDef.getName(),
+//                    this.getInteractionVerb(Boolean.TRUE.equals(featureDef.objGetValue("isQuery")))
+//                ),
+//                input.refDelegate(),
+//                output.refDelegate()
+//              );
+//        } catch (ResourceException exception) {
+//            throw new ServiceException(exception);
+//        }
+//        return output;
+    }
+
+    /**
+     * Handle classic argument processing (original logic)
+     */
+    private Object invokeWithClassicArgs(
+            ModelElement_1_0 featureDef,
             List<?> args
     ) throws ServiceException {
-        SysLog.log(Level.FINEST, "Sys|refMofId={0},featureDef={1}|args={2}", this.object.jdoGetObjectId(), featureDef, args);
-        this.assertOperation(featureDef);
 
-        // get the type names of 'in' parameter and 'result'
+        SysLog.log(Level.FINEST, "Sys|refMofId={0},featureDef={1}|args={2}", this.object.jdoGetObjectId(), featureDef, args);
+
+        // Get the type names of 'in' parameter and 'result'
         String qualifiedNameResultType = null;
         String qualifiedNameInParamType = null;
-        for (
-            Iterator<?> i = featureDef.objGetList("content").iterator();
-            i.hasNext();
-        ) {
+
+        for (Iterator<?> i = featureDef.objGetList("content").iterator(); i.hasNext();) {
             ModelElement_1_0 paramDef = this.object.getModel().getElement(i.next());
             ModelElement_1_0 paramDefType = this.getType(paramDef);
             if ("in".equals(paramDef.getName())) {
                 qualifiedNameInParamType = paramDefType.getQualifiedName();
-            }
-            else if ("result".equals(paramDef.getName())) {
+            } else if ("result".equals(paramDef.getName())) {
                 qualifiedNameResultType = paramDefType.getQualifiedName();
             }
         }
+
         if (qualifiedNameInParamType == null) {
             throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "no parameter with name \"in\" defined for operation",
-                new BasicException.Parameter("operation", featureDef)
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "no parameter with name \"in\" defined for operation",
+                    new BasicException.Parameter("operation", featureDef)
             );
         }
+
         if (qualifiedNameResultType == null) {
             throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "no parameter with name \"result\" defined for operation",
-                new BasicException.Parameter("operation", featureDef)
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "no parameter with name \"result\" defined for operation",
+                    new BasicException.Parameter("operation", featureDef)
             );
         }
+
         RefPackage_1_0 refPackage = this.refOutermostPackage();
+
+        // Create input struct - classic way
         RefStruct_1_0 input = (RefStruct_1_0) (
-            args.size() == 1 && args.get(0) instanceof RefStruct_1_0 ? args.get(0) :
-            this.refOutermostPackage().refCreateStruct(qualifiedNameInParamType,args)
+                args.size() == 1 && args.get(0) instanceof RefStruct_1_0 ? args.get(0) :
+                        this.refOutermostPackage().refCreateStruct(qualifiedNameInParamType, args)
         );
+
+        // Create output struct
         RefStruct_1_0 output = (RefStruct_1_0) refPackage.refCreateStruct(
-            qualifiedNameResultType,
-            (List<?>)null // output record will be updated by method invocation
+                qualifiedNameResultType,
+                (List<?>)null // output record will be updated by method invocation
         );
+
         try {
             this.object.execute(
-                InteractionSpecs.newMethodInvocationSpec(
-                    featureDef.getName(),
-                    this.getInteractionVerb(Boolean.TRUE.equals(featureDef.objGetValue("isQuery")))
-                ),
-                input.refDelegate(),
-                output.refDelegate()
-              );
+                    InteractionSpecs.newMethodInvocationSpec(
+                            featureDef.getName(),
+                            this.getInteractionVerb(Boolean.TRUE.equals(featureDef.objGetValue("isQuery")))
+                    ),
+                    input.refDelegate(),
+                    output.refDelegate()
+            );
         } catch (ResourceException exception) {
             throw new ServiceException(exception);
         }
+
+        return output;
+    }
+
+    /**
+     * Handle modern argument processing with RefList_1_0 delegation
+     */
+    private Object invokeWithProcessedArgs(
+            ModelElement_1_0 featureDef,
+            Object[] processedArgs,
+            IndexedRecord delegate
+    ) throws ServiceException {
+
+        SysLog.log(Level.FINEST, "Sys|refMofId={0},featureDef={1}|processedArgs={2}",
+                this.object.jdoGetObjectId(), featureDef, Arrays.toString(processedArgs));
+
+        // Get the type names of 'in' parameter and 'result'
+        String qualifiedNameResultType = null;
+        String qualifiedNameInParamType = null;
+
+        for (Iterator<?> i = featureDef.objGetList("content").iterator(); i.hasNext();) {
+            ModelElement_1_0 paramDef = this.object.getModel().getElement(i.next());
+            ModelElement_1_0 paramDefType = this.getType(paramDef);
+            if ("in".equals(paramDef.getName())) {
+                qualifiedNameInParamType = paramDefType.getQualifiedName();
+            } else if ("result".equals(paramDef.getName())) {
+                qualifiedNameResultType = paramDefType.getQualifiedName();
+            }
+        }
+
+        if (qualifiedNameInParamType == null) {
+            throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "no parameter with name \"in\" defined for operation",
+                    new BasicException.Parameter("operation", featureDef)
+            );
+        }
+
+        if (qualifiedNameResultType == null) {
+            throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "no parameter with name \"result\" defined for operation",
+                    new BasicException.Parameter("operation", featureDef)
+            );
+        }
+
+        RefPackage_1_0 refPackage = this.refOutermostPackage();
+
+        // Create input for modern signatures
+        RefStruct_1_0 input;
+        if (processedArgs.length == 1 && processedArgs[0] instanceof RefStruct_1_0) {
+            // Single struct argument (compatible with classic)
+            input = (RefStruct_1_0) processedArgs[0];
+        } else {
+            // Multiple arguments - use the delegate directly for JCA compliance
+            // The delegate already contains the properly formatted arguments
+            input = (RefStruct_1_0) refPackage.refCreateStruct(qualifiedNameInParamType, delegate);
+        }
+
+        // Create output struct
+        RefStruct_1_0 output = (RefStruct_1_0) refPackage.refCreateStruct(
+                qualifiedNameResultType,
+                (List<?>)null // output record will be updated by method invocation
+        );
+
+        try {
+            this.object.execute(
+                    InteractionSpecs.newMethodInvocationSpec(
+                            featureDef.getName(),
+                            this.getInteractionVerb(Boolean.TRUE.equals(featureDef.objGetValue("isQuery")))
+                    ),
+                    input.refDelegate(),
+                    output.refDelegate()
+            );
+        } catch (ResourceException exception) {
+            throw new ServiceException(exception);
+        }
+
         return output;
     }
 
@@ -1328,31 +1512,36 @@ class RefObject_1
             if (isClassicChronoSignature(operationDef)) {
                 return this.invokeOperation(operationDef, args);
             }
-
-            if (args == null || args.isEmpty()) {
-                return this.invokeOperation(operationDef, args);
-
-            } else if (args.size() == 1 && args.get(0) instanceof MappedRecord) {
-                return this.invokeOperation(operationDef, args);
-
-            } else {
-                IndexedRecord boxedParams = Records.getRecordFactory().createIndexedRecord(operationName);
-                boxedParams.addAll(args);
-                return this.invokeOperation(operationDef, Arrays.asList(boxedParams));
+            else {
+                // Modern signature: convert args to RefList_1 for enhanced processing
+                RefList_1_0 enhancedArgs = createRefList(args);
+                return this.invokeOperation(operationDef, enhancedArgs);
             }
 
-        } catch (ServiceException exception) {
-            throw this.toRefException(exception);
+//            if (args == null || args.isEmpty()) {
+//                return this.invokeOperation(operationDef, args);
+//
+//            } else if (args.size() == 1 && args.get(0) instanceof MappedRecord) {
+//                return this.invokeOperation(operationDef, args);
+//
+//            } else {
+//                IndexedRecord boxedParams = Records.getRecordFactory().createIndexedRecord(operationName);
+//                boxedParams.addAll(args);
+//                return this.invokeOperation(operationDef, boxedParams);
+//            }
+
+        } catch (ResourceException | ServiceException e) {
+            throw new RuntimeException(e);
         } catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
-        } catch (ResourceException e) {
-            throw new RuntimeException(e);
         }
 
         #endif
     }
 
+
     #if CLASSIC_CHRONO_TYPES #else
+
     private boolean isClassicChronoSignature(ModelElement_1_0 operationDef) throws ServiceException {
         try {
             Collection<?> content = operationDef.objGetList("content");
@@ -1372,6 +1561,52 @@ class RefObject_1
             return false;
         }
     }
+
+    /**
+     * Create RefList_1 instance for enhanced argument processing
+     */
+    private RefList_1_0 createRefList(List<?> args) throws ServiceException, ResourceException {
+        // Convert List to IndexedRecord
+        IndexedRecord argsRecord = Records.getRecordFactory().createIndexedRecord("Arguments");
+        for (Object arg : args) {
+            // Convert objects to proper JCA format (e.g., RefObject to Path)
+            Object convertedArg = convertToJcaFormat(arg);
+            argsRecord.add(convertedArg);
+        }
+
+        // Get the JMI package for object transformation
+        Jmi1Package_1_0 jmiPackage = (Jmi1Package_1_0) this.refOutermostPackage();
+
+        // Create RefList_1 with delegation
+        return new RefList_1(argsRecord, jmiPackage);
+    }
+
+
+    /**
+     * Convert List to IndexedRecord for delegation
+     */
+//    private IndexedRecord createIndexedRecord(List<?> args) throws ServiceException, ResourceException {
+//        IndexedRecord record = Records.getRecordFactory().createIndexedRecord("Arguments");
+//        for (Object arg : args) {
+//            // Convert objects to proper JCA format (e.g., RefObject to Path)
+//            Object convertedArg = convertToJcaFormat(arg);
+//            record.add(convertedArg);
+//        }
+//        return record;
+//    }
+
+    /**
+     * Convert object to JCA-compliant format
+     */
+    private Object convertToJcaFormat(Object arg) {
+        if (arg instanceof RefObject_1_0) {
+            return ((RefObject_1_0) arg).refGetPath();
+        }
+        // Add other conversions as needed
+        return arg;
+    }
+
+
 #endif
 
 
