@@ -286,7 +286,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /**
      * Create a structure proxy based on the record name
      * 
-     * @param record the deleage in case of a {@code MappedRecord}, the values to be copied in case of an {@code IndexedRecord}
+     * @param record the delegate in case of a {@code MappedRecord}, the values to be copied in case of an {@code IndexedRecord}
      * 
      * @return the structure proxy based on the record name
      */

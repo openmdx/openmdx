@@ -2593,17 +2593,15 @@ public class TestMain {
 				#else // TODO MDX-2: enable for contemporary chrono types
 				// person.assignAddress(personAssignAddressParams(Arrays.asList(postalAddress, emailAddress));
 				#endif
-				if(isClassicChronoType()) { // TODO MDX-2: enable for contemporary chrono types
-					Object oldVersion = person.getModifiedAt();
-					assertTrue(ReducedJDOHelper.isDirty(person), "Person is dirty after the address has been assigned");
-					this.commit();
-					Object newVersion = person.getModifiedAt();
-					assertFalse(ReducedJDOHelper.isDirty(person), "Person is clean after commit");
-					if (this instanceof TransientProviderTest) {
-						// Assertion fails with openMDX 4
-					} else {
-						assertNotEquals(oldVersion, newVersion, "Person has been touched");
-					}
+				Object oldVersion = person.getModifiedAt();
+				assertTrue(ReducedJDOHelper.isDirty(person), "Person is dirty after the address has been assigned");
+				this.commit();
+				Object newVersion = person.getModifiedAt();
+				assertFalse(ReducedJDOHelper.isDirty(person), "Person is clean after commit");
+				if (this instanceof TransientProviderTest) {
+					// Assertion fails with openMDX 4
+				} else {
+					assertNotEquals(oldVersion, newVersion, "Person has been touched");
 				}
 			} finally {
 				super.taskId = null;
@@ -5350,11 +5348,6 @@ public class TestMain {
 	private static boolean isJava8Flavour() {
 		String flavourVersion = Version.getFlavourVersion();
 		return "2".equals(flavourVersion) || "3".equals(flavourVersion);
-	}
-
-	private static boolean isClassicChronoType(){
-		String flavourVersion = Version.getFlavourVersion();
-		return "2".equals(flavourVersion) || "4".equals(flavourVersion);
 	}
 
 }

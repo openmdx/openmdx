@@ -91,8 +91,8 @@ public interface Jmi1Package_1_0 extends RefPackage_1_0 {
     
     /**
      * Get object with the given object id. 
-     *  
-     * @param objectId unique id of {@code }RefObject}.
+     *
+     * @param objectId unique id of {@code RefObject}.
      * 
      * @return RefObject
      */

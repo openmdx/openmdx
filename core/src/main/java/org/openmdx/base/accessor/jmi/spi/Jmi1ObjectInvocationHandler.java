@@ -76,6 +76,7 @@ import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
 import javax.jmi.reflect.RefStruct;
+import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord#endif;
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.Identifier;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
@@ -1669,6 +1670,26 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                     arguments = new Object[]{
                             marshaller.getOutermostPackage().unmarshalUnchecked(args[0])
                     };
+
+                } else if (
+                    args != null &&
+//                    args.length == 1 &&
+//                    args[0] instanceof IndexedRecord &&
+                                kind != Kind.METHOD
+                ) {
+                    // For Flavour 3/5 operations with IndexedRecord
+                    IndexedRecord boxedParams = (IndexedRecord) args[0];
+
+                    // Check if the target method expects a single parameter that matches the IndexedRecord type
+                    Class<?>[] parameterTypes = method.getParameterTypes();
+                    if (parameterTypes.length == 1) {
+                        // Try to pass the IndexedRecord directly first
+                        arguments = new Object[]{boxedParams};
+                    } else {
+                        // Unbox IndexedRecord for methods expecting multiple parameters
+                        arguments = marshaller.unmarshal(boxedParams.toArray());
+                    }
+
                 } else {
                     arguments = marshaller.unmarshal(args);
                 }
