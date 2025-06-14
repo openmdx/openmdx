@@ -79,14 +79,12 @@ import javax.resource.cci.MappedRecord;
 import jakarta.resource.ResourceException;
 import jakarta.resource.cci.IndexedRecord;
 import jakarta.resource.cci.InteractionSpec;
-import jakarta.resource.cci.MappedRecord;
 #endif
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.accessor.cci.Container_1_0;
-import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
@@ -117,7 +115,6 @@ import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
-import org.openmdx.base.resource.cci.ExtendedRecordFactory;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
@@ -194,7 +191,7 @@ class RefObject_1
     /**
      * @serial
      */
-    private ObjectView_1_0 object;
+    private final ObjectView_1_0 object;
 
     /**
      * @serial
@@ -333,11 +330,10 @@ class RefObject_1
         String qualifiedTypeName = type.getQualifiedName();
         String featureName = featureDef.getName();
 
-        /**
-         * Attribute or Reference stored as attribute. Don't care about
-         * qualifier which can anyway only an index. The caller is responsible
-         * to get the required element from the collection.
-         */
+        // Attribute or Reference stored as attribute. Don't care about
+        // qualifier which can anyway only an index. The caller is responsible
+        // to get the required element from the collection.
+
         if (isAttribute || isReferenceStoredAsAttribute) {
             if (qualifier != null) {
                 throw new ServiceException(
@@ -396,21 +392,19 @@ class RefObject_1
                     );
             }
         }
-
-        /**
-         * TODO multi-valued qualifier support, if necessary
-         * Reference (not stored as attribute)
-         */
+        //
+        // TODO multi-valued qualifier support, if necessary
+        // Reference (not stored as attribute)
+        //
         else if (isReference) {
             // Class type qualifier
             if (qualifier instanceof RefObject) {
-
-                /**
-                 * TODO multi-valued qualifier support 
-                 *
-                 * Get qualifier of exposing association end. This qualifier is
-                 * used to construct the reference filter:
-                 */
+//
+//                 TODO multi-valued qualifier support
+//
+//                 Get qualifier of exposing association end. This qualifier is
+//                 used to construct the reference filter:
+//
                 String exposedEndName = model.getElement(
                     featureDef.getExposedEnd()
                 ).getName();
@@ -453,7 +447,7 @@ class RefObject_1
                         (((String) qualifier).indexOf(';') >= 0)
                     ) {
                         return rootPkg.marshal(
-                            ((DataObjectManager_1_0) rootPkg.refDelegate()).getObjectById(
+                            rootPkg.refDelegate().getObjectById(
                                 this.refGetPath().getDescendant(
                                     featureDef.getName(),
                                     (String) qualifier
@@ -512,11 +506,11 @@ class RefObject_1
                 if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
                     CharacterLargeObject largeObject = (CharacterLargeObject) this.object.objGetValue(featureName);
                     largeObject.getContent((java.io.Writer) value, position);
-                    return largeObject.getLength().longValue();
+                    return largeObject.getLength();
                 } else if (PrimitiveTypes.BINARY.equals(qualifiedTypeName)) {
                     BinaryLargeObject largeObject = (BinaryLargeObject) this.object.objGetValue(featureName);
                     largeObject.getContent((java.io.OutputStream) value, position);
-                    return largeObject.getLength().longValue();
+                    return largeObject.getLength();
                 } else {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
@@ -551,9 +545,9 @@ class RefObject_1
         String qualifiedTypeName = type.getQualifiedName();
         String featureName = featureDef.getName();
 
-        /**
-         * Attribute or Reference stored as attribute.
-         */
+        //
+        // Attribute or Reference stored as attribute.
+        //
         if (this.isAttributeOrReferenceStoredAsAttribute(featureDef)) {
             Multiplicity multiplicity = ModelHelper.getMultiplicity(featureDef);
             if (multiplicity.isSingleValued() || multiplicity.isStreamValued()) {
@@ -571,11 +565,11 @@ class RefObject_1
                 }
             }
 
-            /**
-             * In case of multi-valued attributes clear() and addAll()
-             */
+            //
+            // In case of multi-valued attributes clear() and addAll()
+            //
             else {
-                Object newValue = null;
+                final Object newValue;
                 if (
                         (value != null) &&
                         (value.getClass().isArray())
@@ -601,14 +595,8 @@ class RefObject_1
                             ((SortedMap) values).clear();
                             if (newValue instanceof Collection) {
                                 int i = 0;
-                                for(
-                                        Iterator j = ((Collection) newValue).iterator();
-                                        j.hasNext();
-                                ) {
-                                    ((SortedMap) values).put(
-                                        Integer.valueOf(i++),
-                                        j.next()
-                                    );
+                                for (Object o : (Collection) newValue) {
+                                    ((SortedMap) values).put(i++, o);
                                 }
                             }
                             else {
@@ -633,9 +621,9 @@ class RefObject_1
             }
         }
 
-        /**
-         * References (not supported)
-         */
+        //
+        // References (not supported)
+        //
         else {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -711,39 +699,14 @@ class RefObject_1
      * args contains one element which is of type RefStruct
      */
     private Object invokeOperation(
-            ModelElement_1_0 featureDef,
-//            List<?> args
-            Object args
+        ModelElement_1_0 featureDef,
+        List<?> arguments
     ) throws ServiceException {
-
-        if (args instanceof RefList_1_0) {
-            RefList_1_0 refList = (RefList_1_0) args;
-
-            // Use the enhanced list interface for processing
-            Object[] processedArgs = new Object[refList.size()];
-            for (int i = 0; i < refList.size(); i++) {
-                processedArgs[i] = refList.get(i);  // Automatic transformation applied
-            }
-
-            // Access delegate when needed for JCA operations
-            IndexedRecord delegate = refList.refDelegate();
-
-            // Continue with your existing operation invocation logic
-            return invokeWithProcessedArgs(featureDef, processedArgs, delegate);
-
-        } else if (args instanceof List) {
-            // Handle classic case
-            List<?> argsList = (List<?>) args;
-            // Your existing logic for List handling
-            return invokeWithClassicArgs(featureDef, argsList);
+        if (arguments instanceof RefList_1_0) {
+            return invokeWithContemporaryArguments(featureDef, ((RefList_1_0) arguments).refDelegate());
+        } else {
+            return invokeWithClassicArguments(featureDef, arguments);
         }
-
-        throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.BAD_PARAMETER,
-                "Unsupported argument type",
-                new BasicException.Parameter("args", args.getClass())
-        );
 
 
 //        SysLog.log(Level.FINEST, "Sys|refMofId={0},featureDef={1}|args={2}", this.object.jdoGetObjectId(), featureDef, args);
@@ -808,7 +771,7 @@ class RefObject_1
     /**
      * Handle classic argument processing (original logic)
      */
-    private Object invokeWithClassicArgs(
+    private Object invokeWithClassicArguments(
             ModelElement_1_0 featureDef,
             List<?> args
     ) throws ServiceException {
@@ -819,8 +782,8 @@ class RefObject_1
         String qualifiedNameResultType = null;
         String qualifiedNameInParamType = null;
 
-        for (Iterator<?> i = featureDef.objGetList("content").iterator(); i.hasNext();) {
-            ModelElement_1_0 paramDef = this.object.getModel().getElement(i.next());
+        for (Object o : featureDef.objGetList("content")) {
+            ModelElement_1_0 paramDef = this.object.getModel().getElement(o);
             ModelElement_1_0 paramDefType = this.getType(paramDef);
             if ("in".equals(paramDef.getName())) {
                 qualifiedNameInParamType = paramDefType.getQualifiedName();
@@ -858,7 +821,7 @@ class RefObject_1
         // Create output struct
         RefStruct_1_0 output = (RefStruct_1_0) refPackage.refCreateStruct(
                 qualifiedNameResultType,
-                (List<?>)null // output record will be updated by method invocation
+                null // output record will be updated by method invocation
         );
 
         try {
@@ -880,36 +843,22 @@ class RefObject_1
     /**
      * Handle modern argument processing with RefList_1_0 delegation
      */
-    private Object invokeWithProcessedArgs(
+    private Object invokeWithContemporaryArguments(
             ModelElement_1_0 featureDef,
-            Object[] processedArgs,
-            IndexedRecord delegate
+            IndexedRecord arguments
     ) throws ServiceException {
-
         SysLog.log(Level.FINEST, "Sys|refMofId={0},featureDef={1}|processedArgs={2}",
-                this.object.jdoGetObjectId(), featureDef, Arrays.toString(processedArgs));
+                this.object.jdoGetObjectId(), featureDef, arguments);
 
-        // Get the type names of 'in' parameter and 'result'
+        // Get the type names of 'result'
         String qualifiedNameResultType = null;
-        String qualifiedNameInParamType = null;
 
-        for (Iterator<?> i = featureDef.objGetList("content").iterator(); i.hasNext();) {
-            ModelElement_1_0 paramDef = this.object.getModel().getElement(i.next());
+        for (Object o : featureDef.objGetList("content")) {
+            ModelElement_1_0 paramDef = this.object.getModel().getElement(o);
             ModelElement_1_0 paramDefType = this.getType(paramDef);
-            if ("in".equals(paramDef.getName())) {
-                qualifiedNameInParamType = paramDefType.getQualifiedName();
-            } else if ("result".equals(paramDef.getName())) {
+            if ("result".equals(paramDef.getName())) {
                 qualifiedNameResultType = paramDefType.getQualifiedName();
             }
-        }
-
-        if (qualifiedNameInParamType == null) {
-            throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE,
-                    "no parameter with name \"in\" defined for operation",
-                    new BasicException.Parameter("operation", featureDef)
-            );
         }
 
         if (qualifiedNameResultType == null) {
@@ -923,21 +872,10 @@ class RefObject_1
 
         RefPackage_1_0 refPackage = this.refOutermostPackage();
 
-        // Create input for modern signatures
-        RefStruct_1_0 input;
-        if (processedArgs.length == 1 && processedArgs[0] instanceof RefStruct_1_0) {
-            // Single struct argument (compatible with classic)
-            input = (RefStruct_1_0) processedArgs[0];
-        } else {
-            // Multiple arguments - use the delegate directly for JCA compliance
-            // The delegate already contains the properly formatted arguments
-            input = (RefStruct_1_0) refPackage.refCreateStruct(qualifiedNameInParamType, delegate);
-        }
-
         // Create output struct
         RefStruct_1_0 output = (RefStruct_1_0) refPackage.refCreateStruct(
                 qualifiedNameResultType,
-                (List<?>)null // output record will be updated by method invocation
+                null // output record will be updated by method invocation
         );
 
         try {
@@ -946,7 +884,7 @@ class RefObject_1
                             featureDef.getName(),
                             this.getInteractionVerb(Boolean.TRUE.equals(featureDef.objGetValue("isQuery")))
                     ),
-                    input.refDelegate(),
+                    arguments,
                     output.refDelegate()
             );
         } catch (ResourceException exception) {
@@ -985,7 +923,7 @@ class RefObject_1
             String featureName,
             int index
     ) {
-        Object value = null;
+        final Object value;
         try {
             value = this.getValue(this.getFeature(featureName), null);
         } catch (ServiceException e) {
@@ -996,7 +934,7 @@ class RefObject_1
                 return ((List<?>) value).get(index);
             }
             else if (value instanceof SortedMap) {
-                return ((SortedMap<Integer,?>) value).get(Integer.valueOf(index));
+                return ((SortedMap<Integer,?>) value).get(index);
             }
             else {
                 throw new JmiServiceException(
@@ -1067,7 +1005,7 @@ class RefObject_1
         try {
             Model_1_0 model = this.object.getModel();
             ModelElement_1_0 featureDef = this.getFeature(featureName);
-            Object value = null;
+            final Object value;
             if (
                     model.isAttributeType(featureDef) ||
                     model.referenceIsStoredAsAttribute(featureDef)
@@ -1089,10 +1027,7 @@ class RefObject_1
             }
             return value;
         }
-        catch (ServiceException e) {
-            throw new JmiServiceException(e, this);
-        }
-        catch (RuntimeServiceException e) {
+        catch (ServiceException | RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
     }
@@ -1107,10 +1042,7 @@ class RefObject_1
             ModelElement_1_0 featureDef = this.getFeature(featureName);
             return this.getValue(featureDef, value, position);
         }
-        catch (ServiceException e) {
-            throw new JmiServiceException(e, this);
-        }
-        catch (RuntimeServiceException e) {
+        catch (ServiceException | RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
     }
@@ -1138,7 +1070,7 @@ class RefObject_1
                     }
                 }
                 else if (values instanceof SortedMap) {
-                    ((SortedMap<Integer,Object>) values).put(Integer.valueOf(index), value);
+                    ((SortedMap<Integer,Object>) values).put(index, value);
                 }
                 else {
                     throw new JmiServiceException(
@@ -1168,10 +1100,7 @@ class RefObject_1
                 );
             }
         }
-        catch (ServiceException e) {
-            throw new JmiServiceException(e, this);
-        }
-        catch (RuntimeServiceException e) {
+        catch (ServiceException | RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
     }
@@ -1186,10 +1115,7 @@ class RefObject_1
             ModelElement_1_0 featureDef = this.getFeature(featureName);
             this.setValue(featureDef, newValue, length);
         }
-        catch (ServiceException e) {
-            throw new JmiServiceException(e, this);
-        }
-        catch (RuntimeServiceException e) {
+        catch (ServiceException | RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
     }
@@ -1200,7 +1126,7 @@ class RefObject_1
         int index,
         Object value
     ) {
-        Object values = null;
+        final Object values;
         try {
             values = this.getValue(this.getFeature(featureName), null);
         }
@@ -1227,7 +1153,7 @@ class RefObject_1
         String featureName,
         Object value
     ) {
-        Object values = null;
+        final Object values;
         try {
             values = this.getValue(this.getFeature(featureName), null);
         }
@@ -1239,7 +1165,7 @@ class RefObject_1
         }
         else if (value instanceof SortedMap) {
             ((SortedMap<Integer,Object>) values).put(
-                Integer.valueOf(((Integer) ((SortedMap<?,?>) values).lastKey()).intValue() + 1),
+                    (Integer) ((SortedMap<?, ?>) values).lastKey() + 1,
                 value
             );
         }
@@ -1269,7 +1195,7 @@ class RefObject_1
         String featureName,
         int index
     ) {
-        Object values = null;
+        final Object values;
         try {
             values = this.getValue(this.getFeature(featureName), null);
         }
@@ -1280,7 +1206,7 @@ class RefObject_1
             ((List<Object>) values).remove(index);
         }
         else if (values instanceof SortedMap) {
-            ((SortedMap<Integer,Object>) values).remove(Integer.valueOf(index));
+            ((SortedMap<Integer,Object>) values).remove(index);
         }
         else {
             throw new JmiServiceException(
@@ -1314,10 +1240,7 @@ class RefObject_1
             }
             return this.object.getModel().isInstanceof(this.object, objType);
         }
-        catch (ServiceException e) {
-            throw new JmiServiceException(e, this);
-        }
-        catch (RuntimeServiceException e) {
+        catch (ServiceException | RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
     }
@@ -1367,13 +1290,9 @@ class RefObject_1
         RefObject feature
     ) {
         try {
-            Object value = this.getValue(((RefMetaObject_1) feature).getElementDef(), null);
-            return value;
+            return this.getValue(((RefMetaObject_1) feature).getElementDef(), null);
         }
-        catch (ServiceException e) {
-            throw new JmiServiceException(e, this);
-        }
-        catch (RuntimeServiceException e) {
+        catch (ServiceException | RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
     }
@@ -1386,10 +1305,7 @@ class RefObject_1
         try {
             return this.getValue(this.getFeature(featureName), null);
         }
-        catch (ServiceException e) {
-            throw new JmiServiceException(e, this);
-        }
-        catch (RuntimeServiceException e) {
+        catch (ServiceException | RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
     }
@@ -1403,10 +1319,7 @@ class RefObject_1
         try {
             this.setValue(((RefMetaObject_1) feature).getElementDef(), value);
         }
-        catch (ServiceException e) {
-            throw new JmiServiceException(e, this);
-        }
-        catch (RuntimeServiceException e) {
+        catch (ServiceException | RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
     }
@@ -1419,9 +1332,7 @@ class RefObject_1
     ) {
         try {
             this.setValue(this.getFeature(featureName), value);
-        } catch (ServiceException e) {
-            throw new JmiServiceException(e, this);
-        } catch (RuntimeServiceException e) {
+        } catch (ServiceException | RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
     }
@@ -1446,7 +1357,7 @@ class RefObject_1
     /**
      * Convert a ServiceException to a RefException
      *
-     * @param exception
+     * @param exception the ServiceException to be wrapped
      *
      * @return the corresponding RefException
      *
@@ -1511,8 +1422,7 @@ class RefObject_1
 
             if (isClassicChronoSignature(operationDef)) {
                 return this.invokeOperation(operationDef, args);
-            }
-            else {
+            } else {
                 // Modern signature: convert args to RefList_1 for enhanced processing
                 RefList_1_0 enhancedArgs = createRefList(args);
                 return this.invokeOperation(operationDef, enhancedArgs);
@@ -1575,7 +1485,7 @@ class RefObject_1
         }
 
         // Get the JMI package for object transformation
-        Jmi1Package_1_0 jmiPackage = (Jmi1Package_1_0) this.refOutermostPackage();
+        Jmi1Package_1_0 jmiPackage = this.refOutermostPackage();
 
         // Create RefList_1 with delegation
         return new RefList_1(argsRecord, jmiPackage);
@@ -1742,30 +1652,27 @@ class RefObject_1
     ) {
         try {
             ModelElement_1_0 elementDef = ((RefMetaObject_1)this.refMetaObject()).getElementDef();
-            for (
-                Iterator<ModelElement_1_0> i = elementDef.objGetMap("allFeature").values().iterator();
-                i.hasNext();
-            ) {
-                ModelElement_1_0 featureDef = i.next();
-                if(
-                    this.isAttributeOrReferenceStoredAsAttribute(featureDef) &&
-                    Persistency.getInstance().isPersistentAttribute(featureDef)
+            for (ModelElement_1_0 featureDef : elementDef.objGetMap("allFeature").values()) {
+                if (
+                        this.isAttributeOrReferenceStoredAsAttribute(featureDef) &&
+                                Persistency.getInstance().isPersistentAttribute(featureDef)
                 ) {
                     ModelElement_1_0 type = this.object.getModel().getElementType(featureDef);
-                    switch(ModelHelper.getMultiplicity(featureDef)) {
+                    switch (ModelHelper.getMultiplicity(featureDef)) {
                         case OPTIONAL: {
-                            if(setOptionalToNull) {
+                            if (setOptionalToNull) {
                                 this.setValue(featureDef, null);
                             }
-                        } break;
+                        }
+                        break;
                         case SINGLE_VALUE: {
                             if (setRequiredToNull) {
                                 this.setValue(featureDef, null);
                             } else {
                                 String qualifiedTypeName = type.getQualifiedName();
                                 // only initialize if null
-                                if(this.object.objGetValue(featureDef.getName()) == null) {
-                                    if(PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
+                                if (this.object.objGetValue(featureDef.getName()) == null) {
+                                    if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
                                         this.setValue(featureDef, "");
                                     } else if (PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) {
                                         this.setValue(featureDef, Boolean.FALSE);
@@ -1780,22 +1687,22 @@ class RefObject_1
                                         );
                                     } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
                                         this.setValue(
-                                            featureDef,
-                                            DateMarshaller.NORMALIZE.marshal("20000101")
+                                                featureDef,
+                                                DateMarshaller.NORMALIZE.marshal("20000101")
                                         );
                                     } else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
                                         this.setValue(featureDef, URI.create("xri://+null"));
                                     } else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
                                         this.setValue(
-                                            featureDef,
-                                            DurationMarshaller.NORMALIZE.marshal("P0M")
+                                                featureDef,
+                                                DurationMarshaller.NORMALIZE.marshal("P0M")
                                         );
-                                    } else if (PrimitiveTypes.SHORT .equals(qualifiedTypeName)) {
-                                        this.setValue(featureDef, Short.valueOf((short) 0));
+                                    } else if (PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
+                                        this.setValue(featureDef, (short) 0);
                                     } else if (PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-                                        this.setValue(featureDef, Integer.valueOf(0));
+                                        this.setValue(featureDef, 0);
                                     } else if (PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-                                        this.setValue(featureDef, Long.valueOf(0L));
+                                        this.setValue(featureDef, 0L);
                                     } else if (PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) {
                                         this.setValue(featureDef, BigDecimal.ZERO);
                                     } else if (PrimitiveTypes.BINARY.equals(qualifiedTypeName)) {
@@ -1806,42 +1713,47 @@ class RefObject_1
                                         SysLog.detail("Initialization of object references not supported", featureDef);
                                     } else if (PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)) {
                                         this.setValue(featureDef, ROOT_PATH);
-                                    } else if(
-                                        "org:omg:model1:PrimitiveType".equals(qualifiedTypeName)
+                                    } else if (
+                                            "org:omg:model1:PrimitiveType".equals(qualifiedTypeName)
                                     ) {
                                         SysLog.detail("Initialization of user defined primitive types not supported", featureDef);
                                     } else {
                                         throw new UnsupportedOperationException(
-                                            "unsupported type " + type
+                                                "unsupported type " + type
                                         );
                                     }
                                 }
                             }
-                        } break;
+                        }
+                        break;
                         case SET: {
                             final Set<Object> values = this.object.objGetSet(featureDef.getName());
-                            if(emptyMultivalued) {
+                            if (emptyMultivalued) {
                                 values.clear();
                             }
-                        } break;
+                        }
+                        break;
                         case LIST: {
                             final List<Object> values = this.object.objGetList(featureDef.getName());
-                            if(emptyMultivalued) {
+                            if (emptyMultivalued) {
                                 values.clear();
                             }
-                        } break;
+                        }
+                        break;
                         case SPARSEARRAY: {
                             final SortedMap<Integer, Object> values = this.object.objGetSparseArray(featureDef.getName());
-                            if(emptyMultivalued) {
+                            if (emptyMultivalued) {
                                 values.clear();
                             }
-                        } break;
+                        }
+                        break;
                         case MAP: {
                             final Map values = this.object.objGetMap(featureDef.getName());
-                            if(emptyMultivalued) {
+                            if (emptyMultivalued) {
                                 values.clear();
                             }
-                        } break;
+                        }
+                        break;
                         case STREAM:
                             // not initialized
                             break;
@@ -1903,10 +1815,7 @@ class RefObject_1
                     );
                 }
             }
-        } catch (ServiceException e) {
-            throw new JmiServiceException(e, this);
-        }
-        catch (RuntimeServiceException e) {
+        } catch (ServiceException | RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
     }
