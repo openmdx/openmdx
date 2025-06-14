@@ -2590,8 +2590,8 @@ public class TestMain {
 				assertFalse(ReducedJDOHelper.isDirty(person), "Person is clean before the address is assigned");
 				#if CLASSIC_CHRONO_TYPES
 				person.assignAddress(personAssignAddressParams);
-				#else // TODO MDX-2: enable for contemporary chrono types
-				// person.assignAddress(personAssignAddressParams(Arrays.asList(postalAddress, emailAddress));
+				#else
+				person.assignAddress((List<test.openmdx.app1.jmi1.Address>) Arrays.asList(postalAddress, emailAddress));
 				#endif
 				Object oldVersion = person.getModifiedAt();
 				assertTrue(ReducedJDOHelper.isDirty(person), "Person is dirty after the address has been assigned");

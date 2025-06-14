@@ -133,6 +133,10 @@ extends FeatureDef {
         #else
 
         List<AttributeDef> parameters = new ArrayList<>();
+//        System.out.println(">>>>>>>>>> ExceptionDef.getDelegate: " + exceptionDef.getDelegate().toString());
+//        System.out.println(">>>>>>>>>> ExceptionDef.getModel.toString: " + exceptionDef.getModel().toString());
+//        System.out.println(">>>>>>>>>> ExceptionDef.getContainer: " + exceptionDef.getContainer());
+//        System.out.println(">>>>>>>>>> ExceptionDef.getQualifiedName: " + exceptionDef.getQualifiedName());
         for(
             Iterator<?> i = exceptionDef.objGetList("content").iterator();
             i.hasNext();
@@ -140,14 +144,24 @@ extends FeatureDef {
             ModelElement_1_0 field = model.getElement(i.next());
             if(model.isStructureFieldType(field)) {
                 parameters.add(
-                        new AttributeDef(
-                                field,
-                                model
-                        )
+                    new AttributeDef(
+                        field,
+                        model
+                    )
                 );
+            }
+            else {
+                parameters.add(
+                    new AttributeDef(
+                        field,
+                        model
+                    )
+                );
+
             }
 
         }
+        System.out.printf(">>>>>>>>> parameters: %s%n", parameters);
         return parameters;
 
         #endif

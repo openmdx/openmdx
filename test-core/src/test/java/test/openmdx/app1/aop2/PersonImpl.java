@@ -166,23 +166,12 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
                 SortedMaps.singletonSparseArray(asString)
             );
         } else {
-            #if CLASSIC_CHRONO_TYPES
             throw new CanNotFormatNameException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
                 "name format not supported. Supported are [Standard]",
                 formatType
             );
-            #else
-            throw new CanNotFormatNameException(
-                    new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ASSERTION_FAILURE,
-                        "name format not supported. Supported are [Standard]",
-                        new BasicException.Parameter(formatType, "formatType")
-                    )
-            );
-            #endif
         }
     }
 

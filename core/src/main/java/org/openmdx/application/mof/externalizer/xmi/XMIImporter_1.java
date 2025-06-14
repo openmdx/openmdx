@@ -940,10 +940,19 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 //                "testDecimalSparseArray",
 //                "testDecimalStream",
 //                "testParams1_1",
+                "CanNotFormatNameException",
+                "CanNotCreateInspector",
+                "CanNotCreateInspectorException",
+                "UserDefinedException1Exception",
+                "UserDefinedException2Exception",
+                "ExceptionsUserDefinedException1Params",
+                "ExceptionsUserDefinedException2Params",
+                "getIn",
         };
         final boolean doHandleInIsolation = Arrays.asList(handleWithModernChronoInIsolation).contains(behaviouralFeatureName);
 
-        if (!doHandleInIsolation) {
+        if (false) {
+//        if (!doHandleInIsolation) {
 //        if (doHandleInIsolation) {
 
             if(!parameters.isEmpty()) {
@@ -954,7 +963,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                  * 1) p0:t0, p1:t1, ..., pn:tn. In this case a class with stereotype <parameter> is created
                  *    and p0, ..., pn are added as class attributes. Finally, a parameter with name 'in'
                  *    is created with the created parameter type.
-                 * 2) in:t. In this case the parameter with name 'in' is created with the specified type.
+                 * 2) in:t. In this case, the parameter with name 'in' is created with the specified type.
                  */
 
                 /**
@@ -1114,7 +1123,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             String allExceptions = this.getOperationExceptions(umlBehaviouralFeature);
             if (allExceptions != null) {
                 final StringTokenizer exceptions = new StringTokenizer(allExceptions, ",; ");
-                final List<Path> exceptionPaths = new ArrayList<Path>();
+                final List<Path> exceptionPaths = new ArrayList<>();
                 while(exceptions.hasMoreTokens()) {
                     String qualifiedExceptionName = exceptions.nextToken().trim();
                     if(!qualifiedExceptionName.isEmpty()) {
