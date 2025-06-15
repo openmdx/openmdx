@@ -242,7 +242,7 @@ public abstract class AbstractMapper extends MapperTemplate {
                 org.openmdx.application.mof.mapping.java.metadata.Visibility.CCI,
                 !multiValued && returnValue
             );
-            if(returnValue) {
+            if(returnValue.booleanValue()) {
                 return "<T extends " + javaType + "> " + (
                     multiValued ? qualified(collectionClass,qualifiedTypeName,true) + "<T>" : "T"
                 );
@@ -394,7 +394,7 @@ public abstract class AbstractMapper extends MapperTemplate {
     ) throws ServiceException {
         return this.getFeatureType(
             featureDef,
-            null,
+            Boolean.FALSE,
             TypeMode.PARAMETER
         );
     }
