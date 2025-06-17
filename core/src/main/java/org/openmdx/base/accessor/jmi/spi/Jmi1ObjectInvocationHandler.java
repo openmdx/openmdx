@@ -71,6 +71,7 @@ import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefBaseObject;
 import javax.jmi.reflect.RefClass;
+import javax.jmi.reflect.RefException;
 import javax.jmi.reflect.RefFeatured;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
@@ -85,8 +86,9 @@ import jakarta.resource.cci.IndexedRecord;
 import jakarta.resource.cci.MappedRecord;
 #endif
 
-import javax.jmi.reflect.RefStruct;
+import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
+import org.oasisopen.jmi1.RefQualifier;
 import org.omg.mof.spi.Identifier;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
@@ -1452,14 +1454,13 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
      *
      * @return the methods return value
      */
-    #if CLASSIC_CHRONO_TYPES
     protected Object invokeCci(
             Object proxy,
             Method method,
             Object[] args,
             StandardMarshaller marshaller,
             Kind kind
-    ) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, ServiceException, SecurityException {
+    ) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, ServiceException, SecurityException, NoSuchMethodException{
         DelegatingRefObject_1_0 delegate = (DelegatingRefObject_1_0)this.refDelegate;
         Object next = delegate.openmdxjdoGetDelegate();
         InvocationTarget invocationTarget = this.getImpl(
@@ -1479,192 +1480,21 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 args.length == 1 &&
                 args[0] instanceof RefStruct_1_0
             ) {
-                final RefStruct_1_0 in = (RefStruct_1_0) args[0];
+                final RefStruct_1_0 in;
                 final RefStruct_1_0 out;
                 if (hasVoidArg) {
+                    in = (RefStruct_1_0) args[0];
                     out = (RefStruct_1_0) method.invoke(next);
                 } else {
                     RefPackage_1_0 refPackage = (RefPackage_1_0) ((RefObject) next).refOutermostPackage();
-                    RefStruct refStruct = refPackage.refCreateStruct(in.refDelegate());
-                    out = (RefStruct_1_0) method.invoke(next, refStruct);
+                    in = (RefStruct_1_0) refPackage.refCreateStruct(((RefStruct_1_0) args[0]).refDelegate());
+                    out =  (RefStruct_1_0) method.invoke(next, in);
                 }
-                return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
-            } else if(
-                kind != Kind.METHOD &&
-                next instanceof RefObject &&
-                args != null &&
-                args.length == 1 &&
-                args[0] instanceof RefList_1_0
-            ) {
-                final RefList_1_0 in = (RefList_1_0) args[0];
-                Jmi1Package_1_0 refPackage = (Jmi1Package_1_0) ((RefObject)next).refOutermostPackage();
-                RefList_1_0 refArguments = refPackage.refCreateList(in.refDelegate());
-                final RefStruct_1_0 out =  (RefStruct_1_0) method.invoke(next, refArguments.toArray());
-                return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
-            } else {
-                final Object[] arguments;
-                if(hasVoidArg){
-                    arguments = null;
-                } else if(
-                        args != null &&
-                                args.length == 1 &&
-                                "setCore".equals(method.getName()) && (
-                                method.getDeclaringClass() == Aspect.class ||
-                                        method.getDeclaringClass() == org.openmdx.base.jmi1.Aspect.class
-                        )
-                ){
-                    arguments = new Object[]{
-                            marshaller.getOutermostPackage().unmarshalUnchecked(args[0])
-                    };
+                if(out == null) {
+                    return null;
                 } else {
-                    arguments = marshaller.unmarshal(args);
+                    return ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
                 }
-                try {
-                    return marshaller.marshal(
-                            method.invoke(
-                                    next,
-                                    arguments
-                            )
-                    );
-                } catch (InvocationTargetException exception) {
-                    Throwable cause = exception.getCause();
-                    if(cause.getCause() == null) try{
-                        //
-                        // initCause() might succeed
-                        //
-                        Class<?> insufficientClass = this.getActualClass(cause);
-                        List<String> insufficientInterfaces = new ArrayList<>();
-                        for(Class<?> implemented : insufficientClass.getInterfaces()) {
-                            insufficientInterfaces.add(implemented.getName());
-                        }
-                        Class<?>[] parameterTypes = method.getParameterTypes();
-                        Object[] formalArgumentTypes = new String[parameterTypes.length];
-                        for(int i = 0; i < formalArgumentTypes.length; i++) {
-                            formalArgumentTypes[i] = parameterTypes[i].getName();
-                        }
-                        Object[] actualArgumentClass = new String[arguments == null ? 0 : arguments.length];
-                        Object[] actualArgumentInterfaces = new String[actualArgumentClass.length];
-                        Object[] matchingArgumentTypes = new Boolean[actualArgumentClass.length];
-                        for(int i = 0; i < actualArgumentClass.length; i++) {
-                            if(arguments[i] == null) {
-                                actualArgumentClass[i] = null;
-                                actualArgumentInterfaces[i] = null;
-                                matchingArgumentTypes[i] = i < parameterTypes.length &&
-                                        !parameterTypes[i].isPrimitive();
-                            } else {
-                                Class<?> argumentClass = arguments[i].getClass();
-                                actualArgumentClass[i] = argumentClass.getName();
-                                List<String> interfaces = new ArrayList<>();
-                                for(Class<?> actualInterface : argumentClass.getInterfaces()) {
-                                    interfaces.add(actualInterface.getName());
-                                }
-                                actualArgumentInterfaces[i] = interfaces.toString();
-                                matchingArgumentTypes[i] = i < parameterTypes.length &&
-                                        parameterTypes[i].isInstance(arguments[i]);
-                            }
-                        }
-                        Throwables.initCause(
-                                cause,
-                                null,
-                                BasicException.Code.DEFAULT_DOMAIN,
-                                BasicException.Code.ASSERTION_FAILURE,
-                                new BasicException.Parameter("method", method.getDeclaringClass().getName() + "." + method.getName()),
-                                new BasicException.Parameter("kind", kind),
-                                new BasicException.Parameter("insufficient-class", insufficientClass.getName()),
-                                new BasicException.Parameter("insufficient-interfaces", insufficientInterfaces),
-                                new BasicException.Parameter("formal-argument-types", formalArgumentTypes),
-                                new BasicException.Parameter("actual-argument-classes", actualArgumentClass),
-                                new BasicException.Parameter("actual-argument-interfaces", actualArgumentInterfaces),
-                                new BasicException.Parameter("matching-argument-types", matchingArgumentTypes),
-                                new BasicException.Parameter("return-type", method.getReturnType().getName()),
-                                new BasicException.Parameter("generic-return-type", method.getGenericReturnType())
-                        );
-                    } catch(Exception ignore) {
-                        //
-                        // initCause() didn't succeed, the cause might have been initialized to null explicitly
-                        //
-                    }
-                    throw exception;
-                }
-            }
-        }  else {
-            final Object reply = invocationTarget.invoke(hasVoidArg ? null : args);
-            if(kind == Kind.NON_QUERY_OPERATION) {
-                final Object refObject = delegate.openmdxjdoGetDataObject();
-                if(refObject instanceof RefObject_1_0) {
-                    ((RefObject_1_0)refObject).refDelegate().objGetDelegate().touch();
-                }
-            }
-            return reply instanceof Container<?> && !(reply instanceof RefContainer<?>) ? Classes.newProxyInstance(
-                    new Jmi1ContainerInvocationHandlerWithCciDelegate(
-                            this.getValidator(), // marshaller
-                            (Container<?>) reply
-                    ),
-                    method.getReturnType(),
-                    RefContainer.class,
-                    PersistenceCapableCollection.class,
-                    Serializable.class
-            ) : reply;
-        }
-    }
-    #else
-    protected Object invokeCci(
-            Object proxy,
-            Method method,
-            Object[] args,
-            StandardMarshaller marshaller,
-            Kind kind
-    ) throws
-            IllegalArgumentException,
-            IllegalAccessException,
-            InvocationTargetException,
-            ServiceException,
-            SecurityException {
-
-        DelegatingRefObject_1_0 delegate = (DelegatingRefObject_1_0) this.refDelegate;
-        Object next = delegate.openmdxjdoGetDelegate();
-        InvocationTarget invocationTarget = this.getImpl(
-                proxy,
-                next,
-                method
-        );
-        boolean hasVoidArg =
-                (method.getParameterTypes().length == 0) &&
-                        (args != null) && (args.length == 1) &&
-                        (args[0] instanceof org.openmdx.base.cci2.Void);
-        if (invocationTarget == null) {
-            if (
-                kind != Kind.METHOD &&
-                next instanceof RefObject &&
-                args != null &&
-                args.length == 1 &&
-                args[0] instanceof RefStruct_1_0
-            ) {
-                final RefStruct_1_0 in = (RefStruct_1_0) args[0];
-                final RefStruct_1_0 out;
-                if (hasVoidArg) {
-                    out = (RefStruct_1_0) method.invoke(next);
-                } else {
-                    RefPackage_1_0 refPackage = (RefPackage_1_0) ((RefObject) next).refOutermostPackage();
-                    RefStruct refStruct = refPackage.refCreateStruct(in.refDelegate());
-                    out = (RefStruct_1_0) method.invoke(next, refStruct);
-                }
-                return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
-
-            } else if(
-                kind != Kind.METHOD &&
-                next instanceof RefObject &&
-                args != null &&
-                args.length == 1 &&
-                args[0] instanceof RefList_1_0
-            ) {
-                // For Flavour 3/5 operations with IndexedRecord
-                final RefList_1_0 in = (RefList_1_0) args[0];
-                Jmi1Package_1_0 refPackage = (Jmi1Package_1_0) ((RefObject)next).refOutermostPackage();
-                RefList_1_0 refArguments = refPackage.refCreateList(in.refDelegate());
-                final RefStruct_1_0 out =  (RefStruct_1_0) method.invoke(next, refArguments.toArray());
-                return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
-
             } else {
                 final Object[] arguments;
                 if (hasVoidArg) {
@@ -1716,8 +1546,10 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                             if(arguments[i] == null) {
                                 actualArgumentClass[i] = null;
                                 actualArgumentInterfaces[i] = null;
-                                matchingArgumentTypes[i] = i < parameterTypes.length &&
-                                        !parameterTypes[i].isPrimitive();
+                                matchingArgumentTypes[i] = Boolean.valueOf(
+                                        i < parameterTypes.length &&
+                                                !parameterTypes[i].isPrimitive()
+                                );
                             } else {
                                 Class<?> argumentClass = arguments[i].getClass();
                                 actualArgumentClass[i] = argumentClass.getName();
@@ -1726,8 +1558,10 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                     interfaces.add(actualInterface.getName());
                                 }
                                 actualArgumentInterfaces[i] = interfaces.toString();
-                                matchingArgumentTypes[i] = i < parameterTypes.length &&
-                                        parameterTypes[i].isInstance(arguments[i]);
+                                matchingArgumentTypes[i] = Boolean.valueOf(
+                                        i < parameterTypes.length &&
+                                                parameterTypes[i].isInstance(arguments[i])
+                                );
                             }
                         }
                         Throwables.initCause(
@@ -1775,7 +1609,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             ) : reply;
         }
     }
-    #endif
 
     /**
      * Determine the actual class by parsing the ClassCastException message
