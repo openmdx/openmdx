@@ -1674,8 +1674,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                             argMappedRecord.put(arg.getClass().getName(), arg);
                         }
                     }
-                    RefStruct refStruct = ((RefPackage_1_0) ((RefObject) next).refOutermostPackage()).refCreateStruct(argMappedRecord.values().toArray());
-                    out = (RefStruct_1_0) method.invoke(next, refStruct);
+                    out = (RefStruct_1_0) method.invoke(next, argMappedRecord.values().toArray());
 
                 }
                 return out == null ? null : ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
