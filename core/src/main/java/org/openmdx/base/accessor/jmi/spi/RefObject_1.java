@@ -1491,20 +1491,6 @@ class RefObject_1
         return new RefList_1(argsRecord, jmiPackage);
     }
 
-
-    /**
-     * Convert List to IndexedRecord for delegation
-     */
-//    private IndexedRecord createIndexedRecord(List<?> args) throws ServiceException, ResourceException {
-//        IndexedRecord record = Records.getRecordFactory().createIndexedRecord("Arguments");
-//        for (Object arg : args) {
-//            // Convert objects to proper JCA format (e.g., RefObject to Path)
-//            Object convertedArg = convertToJcaFormat(arg);
-//            record.add(convertedArg);
-//        }
-//        return record;
-//    }
-
     /**
      * Convert object to JCA-compliant format
      */

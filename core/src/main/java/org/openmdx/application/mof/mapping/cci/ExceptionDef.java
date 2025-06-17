@@ -133,10 +133,6 @@ extends FeatureDef {
         #else
 
         List<AttributeDef> parameters = new ArrayList<>();
-//        System.out.println(">>>>>>>>>> ExceptionDef.getDelegate: " + exceptionDef.getDelegate().toString());
-//        System.out.println(">>>>>>>>>> ExceptionDef.getModel.toString: " + exceptionDef.getModel().toString());
-//        System.out.println(">>>>>>>>>> ExceptionDef.getContainer: " + exceptionDef.getContainer());
-//        System.out.println(">>>>>>>>>> ExceptionDef.getQualifiedName: " + exceptionDef.getQualifiedName());
         for(
             Iterator<?> i = exceptionDef.objGetList("content").iterator();
             i.hasNext();
