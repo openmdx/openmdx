@@ -200,11 +200,6 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     }
 
     @Override
-    public RefList_1_0 newList(Jmi1Package_1_0 outermostPackage, IndexedRecord delegate) {
-        return new RefList_1(delegate, outermostPackage);
-    }
-
-    @Override
     public FeatureMapper getFeatureMapper(
         String qualifiedClassName,
         FeatureMapper.Type type

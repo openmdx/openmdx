@@ -93,18 +93,6 @@ public interface Mapping_1_0 {
     ) throws ServiceException;
 
     /**
-     * Create a marshalling argument list
-     *
-     * @param delegate a JCA record containing the argument values where {@code RefObject} instances are represented by {@code Path} objects
-     *
-     * @return an argument list, where {@code RefObject} instances are (lazily) represented by proxies
-     */
-    RefList_1_0 newList(
-        Jmi1Package_1_0 outermostPackage,
-        IndexedRecord delegate
-    );
-
-    /**
      * Retrieve the per RefClass mapping
      * 
      * @param qualifiedClassName the qualified name of the class

@@ -1479,18 +1479,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                     out = (RefStruct_1_0) method.invoke(next, refStruct);
                 }
                 return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
-            } else if(
-                kind != Kind.METHOD &&
-                next instanceof RefObject &&
-                args != null &&
-                args.length == 1 &&
-                args[0] instanceof RefList_1_0
-            ) {
-                final RefList_1_0 in = (RefList_1_0) args[0];
-                Jmi1Package_1_0 refPackage = (Jmi1Package_1_0) ((RefObject)next).refOutermostPackage();
-                RefList_1_0 refArguments = refPackage.refCreateList(in.refDelegate());
-                final RefStruct_1_0 out =  (RefStruct_1_0) method.invoke(next, refArguments.toArray());
-                return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
             } else {
                 final Object[] arguments;
                 if(hasVoidArg){
@@ -1639,20 +1627,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                     RefStruct refStruct = refPackage.refCreateStruct(in.refDelegate());
                     out = (RefStruct_1_0) method.invoke(next, refStruct);
                 }
-                return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
-
-            } else if(
-                kind != Kind.METHOD &&
-                next instanceof RefObject &&
-                args != null &&
-                args.length == 1 &&
-                args[0] instanceof RefList_1_0
-            ) {
-                // For Flavour 3/5 operations with IndexedRecord
-                final RefList_1_0 in = (RefList_1_0) args[0];
-                Jmi1Package_1_0 refPackage = (Jmi1Package_1_0) ((RefObject)next).refOutermostPackage();
-                RefList_1_0 refArguments = refPackage.refCreateList(in.refDelegate());
-                final RefStruct_1_0 out =  (RefStruct_1_0) method.invoke(next, refArguments.toArray());
                 return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
 
             } else {

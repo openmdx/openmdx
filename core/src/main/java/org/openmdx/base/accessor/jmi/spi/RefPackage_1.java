@@ -305,13 +305,6 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-
-    @Override
-    public RefList_1_0 refCreateList(IndexedRecord delegate) {
-        return this.refMapping().newList(this.refOutermostPackage(), delegate);
-    }
-
-    //-------------------------------------------------------------------------
     @Override
     public RefQuery_1_0 refCreateQuery(
         String type,

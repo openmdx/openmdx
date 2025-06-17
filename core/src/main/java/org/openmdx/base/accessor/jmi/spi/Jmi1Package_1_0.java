@@ -109,15 +109,4 @@ public interface Jmi1Package_1_0 extends RefPackage_1_0 {
     	Object source
     );
 
-    /**
-     * Create a marshalling argument list
-     *
-     * @param delegate a JCA record containing the argument values where {@code RefObject} instances are represented by {@code Path} objects
-     *
-     * @return an argument list, where {@code RefObject} instances are (lazily) represented by proxies
-     */
-    RefList_1_0 refCreateList(
-            IndexedRecord delegate
-    );
-
 }
