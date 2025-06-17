@@ -75,8 +75,17 @@ import javax.jmi.reflect.RefFeatured;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
+#if JAVA_8
+import javax.resource.ResourceException;
+import javax.resource.cci.IndexedRecord;
+import javax.resource.cci.MappedRecord;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.MappedRecord;
+#endif
+
 import javax.jmi.reflect.RefStruct;
-import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord#endif;
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.Identifier;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
@@ -94,6 +103,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.Cloneable;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
+import org.openmdx.base.resource.Records;
 import org.openmdx.jdo.listener.ConstructCallback;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
@@ -1479,6 +1489,18 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                     out = (RefStruct_1_0) method.invoke(next, refStruct);
                 }
                 return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
+            } else if(
+                kind != Kind.METHOD &&
+                next instanceof RefObject &&
+                args != null &&
+                args.length == 1 &&
+                args[0] instanceof RefList_1_0
+            ) {
+                final RefList_1_0 in = (RefList_1_0) args[0];
+                Jmi1Package_1_0 refPackage = (Jmi1Package_1_0) ((RefObject)next).refOutermostPackage();
+                RefList_1_0 refArguments = refPackage.refCreateList(in.refDelegate());
+                final RefStruct_1_0 out =  (RefStruct_1_0) method.invoke(next, refArguments.toArray());
+                return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
             } else {
                 final Object[] arguments;
                 if(hasVoidArg){
@@ -1627,6 +1649,20 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                     RefStruct refStruct = refPackage.refCreateStruct(in.refDelegate());
                     out = (RefStruct_1_0) method.invoke(next, refStruct);
                 }
+                return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
+
+            } else if(
+                kind != Kind.METHOD &&
+                next instanceof RefObject &&
+                args != null &&
+                args.length == 1 &&
+                args[0] instanceof RefList_1_0
+            ) {
+                // For Flavour 3/5 operations with IndexedRecord
+                final RefList_1_0 in = (RefList_1_0) args[0];
+                Jmi1Package_1_0 refPackage = (Jmi1Package_1_0) ((RefObject)next).refOutermostPackage();
+                RefList_1_0 refArguments = refPackage.refCreateList(in.refDelegate());
+                final RefStruct_1_0 out =  (RefStruct_1_0) method.invoke(next, refArguments.toArray());
                 return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
 
             } else {

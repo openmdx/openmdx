@@ -191,7 +191,7 @@ class RefObject_1
     /**
      * @serial
      */
-    private ObjectView_1_0 object;
+    private final ObjectView_1_0 object;
 
     /**
      * @serial
@@ -706,14 +706,12 @@ class RefObject_1
         SysLog.log(Level.FINEST, "Sys|refMofId={0},featureDef={1}|args={2}", this.object.jdoGetObjectId(), featureDef, args);
         this.assertOperation(featureDef);
 
-        // get the type names of 'in' parameter and 'result'
+        // Get the type names of 'in' parameter and 'result'
         String qualifiedNameResultType = null;
         String qualifiedNameInParamType = null;
-        for (
-            Iterator<?> i = featureDef.objGetList("content").iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 paramDef = this.object.getModel().getElement(i.next());
+
+        for (Object o : featureDef.objGetList("content")) {
+            ModelElement_1_0 paramDef = this.object.getModel().getElement(o);
             ModelElement_1_0 paramDefType = this.getType(paramDef);
             if ("in".equals(paramDef.getName())) {
                 qualifiedNameInParamType = paramDefType.getQualifiedName();
@@ -1284,7 +1282,7 @@ class RefObject_1
         } catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
-            }
+    }
 
     // -------------------------------------------------------------------------
     // RefBaseObject
