@@ -126,14 +126,14 @@ public class DelegatingMappedRecord
     }
 
     /**
-     * @param string
+     * @param recordName
      */
     public void setRecordName(String recordName) {
         this.recordName = recordName;
     }
 
     /**
-     * @param string
+     * @param recordShortDescription
      */
     public void setRecordShortDescription(String recordShortDescription) {
         this.recordShortDescription = recordShortDescription;

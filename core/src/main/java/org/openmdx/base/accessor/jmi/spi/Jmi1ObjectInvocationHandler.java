@@ -76,7 +76,10 @@ import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
 import javax.jmi.reflect.RefStruct;
+
+import jakarta.resource.ResourceException;
 import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord#endif;
+import jakarta.resource.cci.MappedRecord;
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.Identifier;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
@@ -94,6 +97,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.Cloneable;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
+import org.openmdx.base.resource.Records;
 import org.openmdx.jdo.listener.ConstructCallback;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
@@ -1609,7 +1613,8 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             IllegalAccessException,
             InvocationTargetException,
             ServiceException,
-            SecurityException {
+            SecurityException,
+            ResourceException {
 
         DelegatingRefObject_1_0 delegate = (DelegatingRefObject_1_0) this.refDelegate;
         Object next = delegate.openmdxjdoGetDelegate();
@@ -1630,30 +1635,50 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 args.length == 1 &&
                 args[0] instanceof RefStruct_1_0
             ) {
+
                 final RefStruct_1_0 in = (RefStruct_1_0) args[0];
                 final RefStruct_1_0 out;
+
                 if (hasVoidArg) {
                     out = (RefStruct_1_0) method.invoke(next);
+                } else if (in.refDelegate().get("in") != null) {
+                    out = (RefStruct_1_0) method.invoke(next, in);
                 } else {
                     RefPackage_1_0 refPackage = (RefPackage_1_0) ((RefObject) next).refOutermostPackage();
                     RefStruct refStruct = refPackage.refCreateStruct(in.refDelegate());
                     out = (RefStruct_1_0) method.invoke(next, refStruct);
+
                 }
-                return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
+                return out == null ? null : ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
 
             } else if(
                 kind != Kind.METHOD &&
                 next instanceof RefObject &&
                 args != null &&
-                args.length == 1 &&
-                args[0] instanceof RefList_1_0
+                args.length > 1
             ) {
-                // For Flavour 3/5 operations with IndexedRecord
-                final RefList_1_0 in = (RefList_1_0) args[0];
-                Jmi1Package_1_0 refPackage = (Jmi1Package_1_0) ((RefObject)next).refOutermostPackage();
-                RefList_1_0 refArguments = refPackage.refCreateList(in.refDelegate());
-                final RefStruct_1_0 out =  (RefStruct_1_0) method.invoke(next, refArguments.toArray());
-                return out == null ? null :  ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
+
+                final RefStruct_1_0 in = (RefStruct_1_0) args[0];
+                final RefStruct_1_0 out;
+
+                if (in.refDelegate().get("in") != null) {
+                    out = (RefStruct_1_0) method.invoke(next, in);
+
+                } else {
+
+                    final MappedRecord<Object, Object> argMappedRecord = Records.getRecordFactory().createMappedRecord("Arguments");
+                    for (Object arg : args) {
+                        if (arg instanceof RefObject_1_0) {
+                            argMappedRecord.put(((RefObject_1_0)arg).refGetPath(), arg);
+                        } else {
+                            argMappedRecord.put(arg.getClass().getName(), arg);
+                        }
+                    }
+                    RefStruct refStruct = ((RefPackage_1_0) ((RefObject) next).refOutermostPackage()).refCreateStruct(argMappedRecord.values().toArray());
+                    out = (RefStruct_1_0) method.invoke(next, refStruct);
+
+                }
+                return out == null ? null : ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
 
             } else {
                 final Object[] arguments;
