@@ -47,9 +47,7 @@ package org.openmdx.application.mof.externalizer.xmi;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -219,7 +217,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                         this.infos,
                         this.warnings,
                         this.errors,
-                        new HashMap<String, UML1AssociationEnd>()
+                        new HashMap<>()
                     );
                     resolver.parse(this.modelUrl.toString());
                 }
@@ -324,7 +322,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationDef, "isAbstract", Boolean.FALSE);
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationDef, "visibility", VisibilityKind.PUBLIC_VIS);
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationDef, "isDerived", Boolean.valueOf(umlAssociation.isDerived()));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationDef, "isDerived", umlAssociation.isDerived());
         this.createModelElement(
             null,
             associationDef
@@ -338,7 +336,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             associationDef
         );
         if(XMI_FORMAT_POSEIDON == this.xmiFormat) {
-            /**
+            /*
              * Poseidon XMI/UML format
              * NOTE:
              * To comply with our MOF model implementation we change aggregation and 
@@ -364,7 +362,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         }
         else if (XMI_FORMAT_MAGICDRAW == this.xmiFormat)
         {
-            /**
+            /*
              * MagicDraw XMI/UML format
              * NOTE:
              * To comply with our MOF model implementation we must change the 
@@ -426,11 +424,8 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             // Poseidon and MagicDraw use UMLAttributes for their internal qualifier 
             // representation, therefore the internal qualifier representation has 
             // to be mapped
-            for(
-                Iterator it = this.toAssociationEndQualifiers(associationEndName).iterator();
-                it.hasNext();
-            ) {
-                Qualifier qualifier = (Qualifier)it.next();
+            for (Object o : this.toAssociationEndQualifiers(associationEndName)) {
+                Qualifier qualifier = (Qualifier) o;
                 UML1Attribute attribute = new UML1Attribute("", qualifier.getName());
                 attribute.setType(qualifier.getType());
                 umlAssociationEnd.getQualifier().add(attribute);
@@ -474,27 +469,22 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         // container
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "container", associationDef.getResourceIdentifier());
         // isChangeable
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "isChangeable", Boolean.valueOf(
-		    this.toMOFChangeability(umlAssociationEnd.getChangeability())
-		));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "isChangeable", this.toMOFChangeability(umlAssociationEnd.getChangeability()));
         // aggregation
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "aggregation", this.toMOFAggregation(umlAssociationEnd.getAggregation()));
         // isNavigable
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "isNavigable", Boolean.valueOf(umlAssociationEnd.isNavigable()));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "isNavigable", umlAssociationEnd.isNavigable());
         // qualifiers
-        final List<String> qualifierNames = new ArrayList<String>();
-        final List<Path> qualifierTypes = new ArrayList<Path>();
-        for (
-            Iterator it = umlAssociationEnd.getQualifier().iterator();
-            it.hasNext();
-        ) {
-            UML1Attribute qualifier = (UML1Attribute)it.next();
+        final List<String> qualifierNames = new ArrayList<>();
+        final List<Path> qualifierTypes = new ArrayList<>();
+        for (Object o : umlAssociationEnd.getQualifier()) {
+            UML1Attribute qualifier = (UML1Attribute) o;
             qualifierNames.add(qualifier.getName());
             try {
                 qualifierTypes.add(
                     toElementPath(nameToPathComponent(getScope(qualifier.getType())), getName(qualifier.getType()))
-				);
-            } catch(Exception e) {
+                );
+            } catch (Exception e) {
                 throw new ServiceException(
                     e,
                     ModelExceptions.MODEL_DOMAIN,
@@ -547,7 +537,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 		    getName(getScope(umlClass.getQualifiedName()))
 		));
 
-        /**
+        /*
          * skip stereotype because its value 'Struct'
          * was marked to note the difference between
          * ordinary classes and structure types
@@ -560,11 +550,8 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         }
         // supertype
         SortedSet superTypePaths = new TreeSet();
-        for (
-            Iterator it = umlClass.getSuperclasses().iterator();
-            it.hasNext();
-        ) {
-            String superclass = (String)it.next();
+        for (Object o : umlClass.getSuperclasses()) {
+            String superclass = (String) o;
             superTypePaths.add(
                 toElementPath(
                     nameToPathComponent(getScope(superclass)),
@@ -576,7 +563,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         DataproviderMode.DATAPROVIDER_2.addAllToAttributeValuesAsList(structureTypeDef, "supertype", superTypePaths);
 
         // isAbstract attribute
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureTypeDef, "isAbstract", Boolean.valueOf(umlClass.isAbstract()));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureTypeDef, "isAbstract", umlClass.isAbstract());
 
         // visibility attribute
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureTypeDef, "visibility", VisibilityKind.PUBLIC_VIS);
@@ -586,12 +573,9 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             structureTypeDef
         );
 
-        for(
-            Iterator it = umlClass.getAttributes().iterator();
-            it.hasNext();
-        ) {
+        for (Object o : umlClass.getAttributes()) {
             this.processStructureField(
-                (UML1Attribute)it.next(),
+                (UML1Attribute) o,
                 structureTypeDef
             );
         }
@@ -616,7 +600,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureFieldDef, "container", aContainer.getResourceIdentifier());
 
         // maxLength attribute
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureFieldDef, "maxLength", Integer.valueOf(this.getAttributeMaxLength(umlAttribute)));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureFieldDef, "maxLength", this.getAttributeMaxLength(umlAttribute));
 
         // multiplicity attribute
         // openMDX uses attribute stereotype to indicate multiplicity
@@ -688,7 +672,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         }
 
         // isAbstract attribute
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(aliasTypeDef, "isAbstract", Boolean.valueOf(umlClass.isAbstract()));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(aliasTypeDef, "isAbstract", umlClass.isAbstract());
 
         // visibility attribute
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(aliasTypeDef, "visibility", VisibilityKind.PUBLIC_VIS);
@@ -753,11 +737,8 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         // supertype
         SortedSet superTypePaths = new TreeSet();
-        for (
-            Iterator it = umlClass.getSuperclasses().iterator();
-            it.hasNext();
-        ) {
-            String superclass = (String)it.next();
+        for (Object o : umlClass.getSuperclasses()) {
+            String superclass = (String) o;
             superTypePaths.add(
                 toElementPath(
                     nameToPathComponent(getScope(superclass)),
@@ -769,7 +750,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         DataproviderMode.DATAPROVIDER_2.addAllToAttributeValuesAsList(classDef, "supertype", superTypePaths);
 
         // isAbstract attribute
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(classDef, "isAbstract", Boolean.valueOf(umlClass.isAbstract()));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(classDef, "isAbstract", umlClass.isAbstract());
 
         // visibility attribute
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(classDef, "visibility", VisibilityKind.PUBLIC_VIS);
@@ -784,20 +765,14 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         );
 
         // process attributes of this class
-        for (
-            Iterator it = umlClass.getAttributes().iterator();
-            it.hasNext();
-        ) {
-            this.processAttribute((UML1Attribute)it.next());
+        for (Object o : umlClass.getAttributes()) {
+            this.processAttribute((UML1Attribute) o);
         }
 
         // process operations of this class
-        for (
-            Iterator it = umlClass.getOperations().iterator();
-            it.hasNext();
-        ) {
+        for (Object o : umlClass.getOperations()) {
             this.processBehaviouralFeature(
-                (UML1Operation)it.next(),
+                (UML1Operation) o,
                 classDef
             );
         }
@@ -824,7 +799,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "container", containerPath);
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "visibility", this.toMOFVisibility(umlAttribute.getVisiblity()));
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "maxLength", Integer.valueOf(this.getAttributeMaxLength(umlAttribute)));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "maxLength", this.getAttributeMaxLength(umlAttribute));
 
         boolean isDerived = this.isAttributeDerived(umlAttribute);
         boolean isChangeable = this.toMOFChangeability(umlAttribute.getChangeability());
@@ -845,14 +820,14 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         // openMDX uses attribute stereotype to indicate multiplicity
         // this allows to use multiplicities like set, list, ...
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "multiplicity", umlAttribute.getStereotypes().size() > 0
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "multiplicity", !umlAttribute.getStereotypes().isEmpty()
 		? umlAttribute.getStereotypes().iterator().next()
 		    : umlAttribute.getMultiplicityRange() != null
 		    ? this.toMOFMultiplicity(umlAttribute.getMultiplicityRange())
 		        : DEFAULT_ATTRIBUTE_MULTIPLICITY);
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "scope", ScopeKind.INSTANCE_LEVEL);
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "isDerived", Boolean.valueOf(isDerived));
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "isChangeable", Boolean.valueOf(isChangeable));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "isDerived", isDerived);
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "isChangeable", isChangeable);
 
         // annotation
         String annotation = this.getAnnotation(umlAttribute);
@@ -891,7 +866,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             // stereotype
             DataproviderMode.DATAPROVIDER_2.addAllToAttributeValuesAsList(behaviouralFeatureDef, "stereotype", umlBehaviouralFeature.getStereotypes());
             // isQuery
-            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(behaviouralFeatureDef, "isQuery", Boolean.valueOf(umlBehaviouralFeature.isQuery()));
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(behaviouralFeatureDef, "isQuery", umlBehaviouralFeature.isQuery());
         }
 
         // annotation
@@ -906,597 +881,273 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         // scope
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(behaviouralFeatureDef, "scope", ScopeKind.INSTANCE_LEVEL);
 
-
         // parameters
         List parameters = umlBehaviouralFeature.getParametersWithoutReturnParameter();
 
-        /**
-         *
-         *
-         *
-         *
-         *
-         */
+        if(!parameters.isEmpty()) {
 
-//        final List<String> handleWithModernChronoInIsolation = List.of(
-        final String[] handleWithModernChronoInIsolation = new String[]{
-                "assertInspector",
-//                "currentDateAndTime",
-                "dateOp",
-                "formatAs",
-                "formatNameAs",
-                "sendMessage",
-                "sendMessageTemplate",
-//                "testBinary0_1",
-//                "testBinary1_1",
-//                "testBoolean1_1",
-                "testComplexStruct0_1_0_1",
-                "testComplexStruct0_n_0_1",
-//                "testDecimal0_1",
-//                "testDecimal0_n",
-//                "testDecimal1_1",
-//                "testDecimalList",
-//                "testDecimalSet",
-//                "testDecimalSparseArray",
-//                "testDecimalStream",
-//                "testParams1_1",
-                "CanNotFormatNameException",
-                "CanNotCreateInspector",
-                "CanNotCreateInspectorException",
-                "UserDefinedException1Exception",
-                "UserDefinedException2Exception",
-                "ExceptionsUserDefinedException1Params",
-                "ExceptionsUserDefinedException2Params",
-                "getIn",
-        };
-        final boolean doHandleInIsolation = Arrays.asList(handleWithModernChronoInIsolation).contains(behaviouralFeatureName);
+            /*
+             * In openMDX all operations have exactly one parameter with name 'in'. The importer
+             * supports two forms how parameters may be specified:
+             * 1) p0:t0, p1:t1, ..., pn:tn. In this case a class with stereotype <parameter> is created
+             *    and p0, ..., pn are added as class attributes. Finally, a parameter with name 'in'
+             *    is created with the created parameter type.
+             * 2) in:t. In this case, the parameter with name 'in' is created with the specified type.
+             */
 
-        if (false) {
-//        if (!doHandleInIsolation) {
-//        if (doHandleInIsolation) {
+            /*
+             * Create the parameter type class. We need this class only in case 1. Because we only know
+             * at the end whether we really need it, create it anyway but do not add it to the repository.
+             */
+            String capOperationName =
+                    behaviouralFeatureName.substring(0,1).toUpperCase() +
+                            behaviouralFeatureName.substring(1);
 
-            if(!parameters.isEmpty()) {
-
-                /**
-                 * In openMDX all operations have exactly one parameter with name 'in'. The importer
-                 * supports two forms how parameters may be specified:
-                 * 1) p0:t0, p1:t1, ..., pn:tn. In this case a class with stereotype <parameter> is created
-                 *    and p0, ..., pn are added as class attributes. Finally, a parameter with name 'in'
-                 *    is created with the created parameter type.
-                 * 2) in:t. In this case, the parameter with name 'in' is created with the specified type.
-                 */
-
-                /**
-                 * Create the parameter type class. We need this class only in case 1. Because we only know
-                 * at the end whether we really need it, create it anyway but do not add it to the repository.
-                 */
-                String capOperationName =
-                        behaviouralFeatureName.substring(0,1).toUpperCase() +
-                                behaviouralFeatureName.substring(1);
-
-                ObjectRecord parameterType = this.channel.newObjectRecord(
-                        new Path(
-                                aContainer.getResourceIdentifier() + capOperationName + "Params"
-                        ),
-                        ModelAttributes.STRUCTURE_TYPE
-                );
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterType, "visibility", VisibilityKind.PUBLIC_VIS);
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterType, "isAbstract", Boolean.FALSE);
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterType, "container",DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(aContainer, "container"));
-
-                /**
-                 * Create parameters either as STRUCTURE_FIELD of parameterType (case 1)
-                 * or as PARAMETER of modelOperation (case 2)
-                 */
-                boolean createParameterType = true;
-                boolean parametersCreated = false;
-                for(
-                        Iterator it = parameters.iterator();
-                        it.hasNext();
-                ) {
-                    UML1Parameter aParameter = (UML1Parameter)it.next();
-                    ObjectRecord parameterDef = this.processParameter(
-                            aParameter,
-                            parameterType
-                    );
-                    /**
-                     * Case 2: Parameter with name 'in'. Create object as PARAMETER.
-                     */
-                    String fullQualifiedParameterName = parameterDef.getResourceIdentifier().getLastSegment().toClassicRepresentation();
-                    if("in".equals(fullQualifiedParameterName.substring(fullQualifiedParameterName.lastIndexOf(':') + 1))) {
-                        // 'in' is the only allowed parameter
-                        if(parametersCreated) {
-                            SysLog.error("Parameter format must be [p0:T0...pn:Tn | in:T], where T must be a class with stereotype " + Stereotypes.STRUCT);
-                            throw new ServiceException(
-                                    ModelExceptions.MODEL_DOMAIN,
-                                    ModelExceptions.INVALID_PARAMETER_DECLARATION,
-                                    "Parameter format must be [p0:T0...pn:Tn | in:T], where T must be a class with stereotype " + Stereotypes.STRUCT,
-                                    new BasicException.Parameter("operation", behaviouralFeatureDef.getResourceIdentifier())
-                            );
-                        }
-                        parameterType = this.channel.newObjectRecord(
-                                (Path)DataproviderMode.DATAPROVIDER_2.attributeValue(parameterDef, "type"),
-                                "org:omg:model1:Parameter"
-                        );
-                        createParameterType = false;
-                    }
-                    /**
-                     * Case 1: Parameter is attribute of parameter type. Create object as ATTRIBUTE.
-                     */
-                    else {
-                        // 'in' is the only allowed parameter
-                        if(!createParameterType) {
-                            SysLog.error("Parameter format must be [p0:T0, ... ,pn:Tn | in:T], where T must be a class with stereotype " + ModelAttributes.STRUCTURE_TYPE);
-                            throw new ServiceException(
-                                    ModelExceptions.MODEL_DOMAIN,
-                                    ModelExceptions.INVALID_PARAMETER_DECLARATION,
-                                    "Parameter format must be [p0:T0, ... ,pn:Tn | in:T], where T must be a class with stereotype " + ModelAttributes.STRUCTURE_TYPE,
-                                    new BasicException.Parameter("operation", behaviouralFeatureDef.getResourceIdentifier())
-                            );
-                        }
-                        this.createModelElement(
-                                null,
-                                parameterDef
-                        );
-                        parametersCreated = true;
-                    }
-
-                }
-                /**
-                 * Case 1: parameter type must be created
-                 */
-                if(createParameterType) {
-                    this.createModelElement(
-                            null,
-                            parameterType
-                    );
-                }
-                // in-parameter
-                ObjectRecord inParameterDef = this.channel.newObjectRecord(
-                        newFeaturePath(
-                                behaviouralFeatureDef.getResourceIdentifier(),
-                                "in"
-                        ),
-                        ModelAttributes.PARAMETER
-                );
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "container", behaviouralFeatureDef.getResourceIdentifier());
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "direction", DirectionKind.IN_DIR);
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "multiplicity", "1..1");
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "type", parameterType.getResourceIdentifier());
-                this.createModelElement(
-                        null,
-                        inParameterDef
-                );
-            }
-
-            // void in-parameter
-            else {
-                ObjectRecord inParameterDef = this.channel.newObjectRecord(
-                        newFeaturePath(
-                                behaviouralFeatureDef.getResourceIdentifier(),
-                                "in"
-                        ),
-                        ModelAttributes.PARAMETER
-                );
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "container", behaviouralFeatureDef.getResourceIdentifier());
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "direction", DirectionKind.IN_DIR);
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "multiplicity", "1..1");
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "type", toElementPath(
-                        nameToPathComponent("org::openmdx::base"),
-                        "Void"
-                ));
-                this.createModelElement(
-                        null,
-                        inParameterDef
-                );
-            }
-            // Note:
-            // return parameter is ignored for exceptions (operations with stereotype exception)
-            if(!isException) {
-                ObjectRecord resultDef = this.channel.newObjectRecord(
-                        newFeaturePath(
-                                behaviouralFeatureDef.getResourceIdentifier(),
-                                "result"
-                        ),
-                        ModelAttributes.PARAMETER
-                );
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "container", behaviouralFeatureDef.getResourceIdentifier());
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "direction", DirectionKind.RETURN_DIR);
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "multiplicity", "1..1");
-
-                if(umlBehaviouralFeature.getReturnParameter().getType() == null) {
-                    this.error("Undefined return type for operation " + umlBehaviouralFeature.getQualifiedName());
-                }
-                else {
-                    DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "type", toElementPath(
-                            nameToPathComponent(getScope(umlBehaviouralFeature.getReturnParameter().getType())),
-                            getName(umlBehaviouralFeature.getReturnParameter().getType())
-                    ));
-                    this.createModelElement(
-                            null,
-                            resultDef
-                    );
-                }
-            }
-
-            // exceptions
-            String allExceptions = this.getOperationExceptions(umlBehaviouralFeature);
-            if (allExceptions != null) {
-                final StringTokenizer exceptions = new StringTokenizer(allExceptions, ",; ");
-                final List<Path> exceptionPaths = new ArrayList<>();
-                while(exceptions.hasMoreTokens()) {
-                    String qualifiedExceptionName = exceptions.nextToken().trim();
-                    if(!qualifiedExceptionName.isEmpty()) {
-                        if (!qualifiedExceptionName.contains("::")) {
-                            this.errors.println("Found invalid exception declaration <" + qualifiedExceptionName + "> for the operation " + umlBehaviouralFeature.getQualifiedName() + "; this exception is ignored unless a valid qualified exception name is specified.");
-                        }
-                        else {
-                            String qualifiedClassName = qualifiedExceptionName.substring(0, qualifiedExceptionName.lastIndexOf("::"));
-                            String scope = getScope(qualifiedClassName);
-                            String name = getName(qualifiedClassName);
-                            if (scope.isEmpty() || name.isEmpty()) {
-                                this.errors.println("Found invalid exception declaration <" + qualifiedExceptionName + "> for the operation " + umlBehaviouralFeature.getQualifiedName() + "; this exception is ignored unless a valid qualified exception name is specified.");
-                            } else {
-                                exceptionPaths.add(
-                                        newFeaturePath(
-                                                toElementPath(nameToPathComponent(scope), name),
-                                                getName(qualifiedExceptionName)
-                                        )
-                                );
-                            }
-                        }
-                    }
-                }
-                DataproviderMode.DATAPROVIDER_2.replaceAttributeValuesAsList(behaviouralFeatureDef, "exception", exceptionPaths);
-            }
-            this.createModelElement(
-                    null,
-                    behaviouralFeatureDef
+            ObjectRecord parameterType = this.channel.newObjectRecord(
+                    new Path(
+                            aContainer.getResourceIdentifier() + capOperationName + "Params"
+                    ),
+                    ModelAttributes.STRUCTURE_TYPE
+            );
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterType, "visibility", VisibilityKind.PUBLIC_VIS);
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterType, "isAbstract", Boolean.FALSE);
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterType,
+                    "container",
+                    DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(aContainer, "container")
             );
 
-
-
-        } else { // WHAT WE NEED HERE (testDecimal1_1) - everything else will be handled above
-
-
-            #if !CLASSIC_CHRONO_TYPES
-
-
-            if(!parameters.isEmpty()) {
-
-                for(Iterator it = parameters.iterator(); it.hasNext();) {
-
-                    UML1Parameter aParameter = (UML1Parameter)it.next();
-
-                    ObjectRecord parameterDef = this.channel.newObjectRecord(
-                            newFeaturePath(
-                                    behaviouralFeatureDef.getResourceIdentifier(),
-                                    aParameter.getName()
-                            ),
-                            ModelAttributes.PARAMETER
+            /*
+             * Create parameters either as STRUCTURE_FIELD of parameterType (case 1)
+             * or as PARAMETER of modelOperation (case 2)
+             */
+            boolean createParameterType = true;
+            boolean parametersCreated = false;
+            /*
+             * Case 1: Parameter is attribute of parameter type. Create object as ATTRIBUTE.
+             */
+            for (Object parameter : parameters) {
+                UML1Parameter aParameter = (UML1Parameter) parameter;
+                ObjectRecord parameterDef = this.processParameter(
+                    aParameter,
+                    parameterType
+                );
+                /*
+                 * Case 2: Parameter with name 'in'. Create object as PARAMETER.
+                 */
+                String fullQualifiedParameterName = parameterDef.getResourceIdentifier().getLastSegment().toClassicRepresentation();
+                if ("in".equals(fullQualifiedParameterName.substring(fullQualifiedParameterName.lastIndexOf(':') + 1))) {
+                    // 'in' is the only allowed parameter
+                    if (parametersCreated) {
+                        SysLog.error("Parameter format must be [p0:T0...pn:Tn | in:T], where T must be a class with stereotype " + Stereotypes.STRUCT);
+                        throw new ServiceException(
+                            ModelExceptions.MODEL_DOMAIN,
+                            ModelExceptions.INVALID_PARAMETER_DECLARATION,
+                            "Parameter format must be [p0:T0...pn:Tn | in:T], where T must be a class with stereotype " + Stereotypes.STRUCT,
+                            new BasicException.Parameter("operation", behaviouralFeatureDef.getResourceIdentifier())
+                        );
+                    }
+                    parameterType = this.channel.newObjectRecord(
+                        (Path) DataproviderMode.DATAPROVIDER_2.attributeValue(parameterDef, "type"),
+                        "org:omg:model1:Parameter"
                     );
-
-                    DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-                            parameterDef, "container", behaviouralFeatureDef.getResourceIdentifier()
-                    );
-                    DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-                            parameterDef, "direction", DirectionKind.IN_DIR
-                    );
-                    DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-                            parameterDef, "multiplicity",
-                            !aParameter.getStereotypes().isEmpty() ?
-                                    aParameter.getStereotypes().iterator().next() :
-                                    DEFAULT_PARAMETER_MULTIPLICITY
-                    );
-
-                    DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-                            parameterDef, "type", new Path(aParameter.getType())  // Must be Path, not String
-                    );
-
-                    this.createModelElement(null, parameterDef);
+                    createParameterType = false;
                 }
-
-
-            }
-            else {
-                ObjectRecord voidParameterDef = this.channel.newObjectRecord(
-                        newFeaturePath(behaviouralFeatureDef.getResourceIdentifier(), "void"),
-                        ModelAttributes.PARAMETER
-                );
-
-                // Set void parameter properties...
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-                        voidParameterDef, "container", behaviouralFeatureDef.getResourceIdentifier()
-                );
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-                        voidParameterDef, "direction", DirectionKind.IN_DIR
-                );
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-                        voidParameterDef, "multiplicity", DEFAULT_PARAMETER_MULTIPLICITY
-                );
-
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-                        voidParameterDef, "type", toElementPath(
-                                nameToPathComponent("org::openmdx::base"),
-                                "Void"
-                        )
-                );
-
-                this.createModelElement(null, voidParameterDef);
-            }
-
-            if(!isException) {
-                ObjectRecord resultDef = this.channel.newObjectRecord(
-                        newFeaturePath(
-                                behaviouralFeatureDef.getResourceIdentifier(),
-                                "result"
-                        ),
-                        ModelAttributes.PARAMETER
-                );
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "container", behaviouralFeatureDef.getResourceIdentifier());
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "direction", DirectionKind.RETURN_DIR);
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "multiplicity", DEFAULT_PARAMETER_MULTIPLICITY);
-
-                if(umlBehaviouralFeature.getReturnParameter().getType() == null) {
-                    this.error("Undefined return type for operation " + umlBehaviouralFeature.getQualifiedName());
-                }
+                /*
+                 * Case 1: Parameter is attribute of parameter type. Create object as ATTRIBUTE.
+                 */
                 else {
-                    DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "type", toElementPath(
-                            nameToPathComponent(getScope(umlBehaviouralFeature.getReturnParameter().getType())),
-                            getName(umlBehaviouralFeature.getReturnParameter().getType())
-                    ));
-                    this.createModelElement(
-                            null,
-                            resultDef
-                    );
-                }
-            }
-
-            // exceptions
-            String allExceptions = this.getOperationExceptions(umlBehaviouralFeature);
-            if (allExceptions != null) {
-                final StringTokenizer exceptions = new StringTokenizer(allExceptions, ",; ");
-                final List<Path> exceptionPaths = new ArrayList<>();
-                while(exceptions.hasMoreTokens()) {
-                    String qualifiedExceptionName = exceptions.nextToken().trim();
-                    if(!qualifiedExceptionName.isEmpty()) {
-                        if (!qualifiedExceptionName.contains("::")) {
-                            this.errors.println("Found invalid exception declaration <" + qualifiedExceptionName + "> for the operation " + umlBehaviouralFeature.getQualifiedName() + "; this exception is ignored unless a valid qualified exception name is specified.");
-                        }
-                        else {
-                            String qualifiedClassName = qualifiedExceptionName.substring(0, qualifiedExceptionName.lastIndexOf("::"));
-                            String scope = getScope(qualifiedClassName);
-                            String name = getName(qualifiedClassName);
-                            if (scope.isEmpty() || name.isEmpty()) {
-                                this.errors.println("Found invalid exception declaration <" + qualifiedExceptionName + "> for the operation " + umlBehaviouralFeature.getQualifiedName() + "; this exception is ignored unless a valid qualified exception name is specified.");
-                            } else {
-                                exceptionPaths.add(
-                                        newFeaturePath(
-                                                toElementPath(nameToPathComponent(scope), name),
-                                                getName(qualifiedExceptionName)
-                                        )
-                                );
-                            }
-                        }
-                    }
-                }
-                DataproviderMode.DATAPROVIDER_2.replaceAttributeValuesAsList(behaviouralFeatureDef, "exception", exceptionPaths);
-            }
-
-            this.createModelElement(
-                    null,
-                    behaviouralFeatureDef
-            );
-
-
-            #else // make sure classic is below not to stay in the way
-
-            if(!parameters.isEmpty()) {
-
-                /**
-                 * In openMDX all operations have exactly one parameter with name 'in'. The importer
-                 * supports two forms how parameters may be specified:
-                 * 1) p0:t0, p1:t1, ..., pn:tn. In this case a class with stereotype <parameter> is created
-                 *    and p0, ..., pn are added as class attributes. Finally, a parameter with name 'in'
-                 *    is created with the created parameter type.
-                 * 2) in:t. In this case the parameter with name 'in' is created with the specified type.
-                 */
-
-                /**
-                 * Create the parameter type class. We need this class only in case 1. Because we only know
-                 * at the end whether we really need it, create it anyway but do not add it to the repository.
-                 */
-                String capOperationName =
-                        behaviouralFeatureName.substring(0,1).toUpperCase() +
-                                behaviouralFeatureName.substring(1);
-
-                ObjectRecord parameterType = this.channel.newObjectRecord(
-                        new Path(
-                                aContainer.getResourceIdentifier() + capOperationName + "Params"
-                        ),
-                        ModelAttributes.STRUCTURE_TYPE
-                );
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterType, "visibility", VisibilityKind.PUBLIC_VIS);
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterType, "isAbstract", Boolean.FALSE);
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterType, "container",DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(aContainer, "container"));
-
-                /**
-                 * Create parameters either as STRUCTURE_FIELD of parameterType (case 1)
-                 * or as PARAMETER of modelOperation (case 2)
-                 */
-                boolean createParameterType = true;
-                boolean parametersCreated = false;
-                for(
-                        Iterator it = parameters.iterator();
-                        it.hasNext();
-                ) {
-                    UML1Parameter aParameter = (UML1Parameter)it.next();
-                    ObjectRecord parameterDef = this.processParameter(
-                            aParameter,
-                            parameterType
-                    );
-                    /**
-                     * Case 2: Parameter with name 'in'. Create object as PARAMETER.
-                     */
-                    String fullQualifiedParameterName = parameterDef.getResourceIdentifier().getLastSegment().toClassicRepresentation();
-                    if("in".equals(fullQualifiedParameterName.substring(fullQualifiedParameterName.lastIndexOf(':') + 1))) {
-                        // 'in' is the only allowed parameter
-                        if(parametersCreated) {
-                            SysLog.error("Parameter format must be [p0:T0...pn:Tn | in:T], where T must be a class with stereotype " + Stereotypes.STRUCT);
-                            throw new ServiceException(
-                                    ModelExceptions.MODEL_DOMAIN,
-                                    ModelExceptions.INVALID_PARAMETER_DECLARATION,
-                                    "Parameter format must be [p0:T0...pn:Tn | in:T], where T must be a class with stereotype " + Stereotypes.STRUCT,
-                                    new BasicException.Parameter("operation", behaviouralFeatureDef.getResourceIdentifier())
-                            );
-                        }
-                        parameterType = this.channel.newObjectRecord(
-                                (Path)DataproviderMode.DATAPROVIDER_2.attributeValue(parameterDef, "type"),
-                                "org:omg:model1:Parameter"
+                    // 'in' is the only allowed parameter
+                    if (!createParameterType) {
+                        SysLog.error("Parameter format must be [p0:T0, ... ,pn:Tn | in:T], where T must be a class with stereotype " + ModelAttributes.STRUCTURE_TYPE);
+                        throw new ServiceException(
+                            ModelExceptions.MODEL_DOMAIN,
+                            ModelExceptions.INVALID_PARAMETER_DECLARATION,
+                            "Parameter format must be [p0:T0, ... ,pn:Tn | in:T], where T must be a class with stereotype " + ModelAttributes.STRUCTURE_TYPE,
+                            new BasicException.Parameter("operation", behaviouralFeatureDef.getResourceIdentifier())
                         );
-                        createParameterType = false;
                     }
-                    /**
-                     * Case 1: Parameter is attribute of parameter type. Create object as ATTRIBUTE.
-                     */
-                    else {
-                        // 'in' is the only allowed parameter
-                        if(!createParameterType) {
-                            SysLog.error("Parameter format must be [p0:T0, ... ,pn:Tn | in:T], where T must be a class with stereotype " + ModelAttributes.STRUCTURE_TYPE);
-                            throw new ServiceException(
-                                    ModelExceptions.MODEL_DOMAIN,
-                                    ModelExceptions.INVALID_PARAMETER_DECLARATION,
-                                    "Parameter format must be [p0:T0, ... ,pn:Tn | in:T], where T must be a class with stereotype " + ModelAttributes.STRUCTURE_TYPE,
-                                    new BasicException.Parameter("operation", behaviouralFeatureDef.getResourceIdentifier())
-                            );
-                        }
-                        this.createModelElement(
-                                null,
-                                parameterDef
-                        );
-                        parametersCreated = true;
-                    }
-
-                }
-                /**
-                 * Case 1: parameter type must be created
-                 */
-                if(createParameterType) {
                     this.createModelElement(
-                            null,
-                            parameterType
+                        null,
+                        parameterDef
                     );
+                    parametersCreated = true;
                 }
-                // in-parameter
-                ObjectRecord inParameterDef = this.channel.newObjectRecord(
-                        newFeaturePath(
-                                behaviouralFeatureDef.getResourceIdentifier(),
-                                "in"
-                        ),
-                        ModelAttributes.PARAMETER
-                );
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "container", behaviouralFeatureDef.getResourceIdentifier());
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "direction", DirectionKind.IN_DIR);
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "multiplicity", "1..1");
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "type", parameterType.getResourceIdentifier());
+
+            }
+            /*
+             * Case 1: parameter type must be created
+             */
+            if(createParameterType) {
                 this.createModelElement(
                         null,
-                        inParameterDef
+                        parameterType
                 );
             }
 
-            // void in-parameter
-            else {
-                ObjectRecord inParameterDef = this.channel.newObjectRecord(
-                        newFeaturePath(
-                                behaviouralFeatureDef.getResourceIdentifier(),
-                                "in"
-                        ),
-                        ModelAttributes.PARAMETER
-                );
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "container", behaviouralFeatureDef.getResourceIdentifier());
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "direction", DirectionKind.IN_DIR);
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "multiplicity", "1..1");
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "type", toElementPath(
-                        nameToPathComponent("org::openmdx::base"),
-                        "Void"
-                ));
-                this.createModelElement(
-                        null,
-                        inParameterDef
-                );
-            }
-            // Note:
-            // return parameter is ignored for exceptions (operations with stereotype exception)
-            if(!isException) {
-                ObjectRecord resultDef = this.channel.newObjectRecord(
-                        newFeaturePath(
-                                behaviouralFeatureDef.getResourceIdentifier(),
-                                "result"
-                        ),
-                        ModelAttributes.PARAMETER
-                );
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "container", behaviouralFeatureDef.getResourceIdentifier());
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "direction", DirectionKind.RETURN_DIR);
-                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "multiplicity", "1..1");
+            #if CLASSIC_CHRONO_TYPES
 
-                if(umlBehaviouralFeature.getReturnParameter().getType() == null) {
-                    this.error("Undefined return type for operation " + umlBehaviouralFeature.getQualifiedName());
-                }
-                else {
-                    DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "type", toElementPath(
-                            nameToPathComponent(getScope(umlBehaviouralFeature.getReturnParameter().getType())),
-                            getName(umlBehaviouralFeature.getReturnParameter().getType())
-                    ));
-                    this.createModelElement(
-                            null,
-                            resultDef
-                    );
-                }
-            }
-
-            // exceptions
-            String allExceptions = this.getOperationExceptions(umlBehaviouralFeature);
-            if (allExceptions != null) {
-                final StringTokenizer exceptions = new StringTokenizer(allExceptions, ",; ");
-                final List<Path> exceptionPaths = new ArrayList<Path>();
-                while(exceptions.hasMoreTokens()) {
-                    String qualifiedExceptionName = exceptions.nextToken().trim();
-                    if(!qualifiedExceptionName.isEmpty()) {
-                        if (qualifiedExceptionName.indexOf("::") == -1) {
-                            this.errors.println("Found invalid exception declaration <" + qualifiedExceptionName + "> for the operation " + umlBehaviouralFeature.getQualifiedName() + "; this exception is ignored unless a valid qualified exception name is specified.");
-                        }
-                        else {
-                            String qualifiedClassName = qualifiedExceptionName.substring(0, qualifiedExceptionName.lastIndexOf("::"));
-                            String scope = getScope(qualifiedClassName);
-                            String name = getName(qualifiedClassName);
-                            if (scope.isEmpty() || name.isEmpty()) {
-                                this.errors.println("Found invalid exception declaration <" + qualifiedExceptionName + "> for the operation " + umlBehaviouralFeature.getQualifiedName() + "; this exception is ignored unless a valid qualified exception name is specified.");
-                            } else {
-                                exceptionPaths.add(
-                                        newFeaturePath(
-                                                toElementPath(nameToPathComponent(scope), name),
-                                                getName(qualifiedExceptionName)
-                                        )
-                                );
-                            }
-                        }
-                    }
-                }
-                DataproviderMode.DATAPROVIDER_2.replaceAttributeValuesAsList(behaviouralFeatureDef, "exception", exceptionPaths);
-            }
+            // in-parameter
+            ObjectRecord inParameterDef = this.channel.newObjectRecord(
+                    newFeaturePath(
+                            behaviouralFeatureDef.getResourceIdentifier(),
+                            "in"
+                    ),
+                    ModelAttributes.PARAMETER
+            );
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "container", behaviouralFeatureDef.getResourceIdentifier());
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "direction", DirectionKind.IN_DIR);
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "multiplicity", DEFAULT_PARAMETER_MULTIPLICITY);
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "type", parameterType.getResourceIdentifier());
             this.createModelElement(
                     null,
-                    behaviouralFeatureDef
+                    inParameterDef
             );
 
+            #else
+
+            for (Object parameter : parameters) {
+
+                UML1Parameter aParameter = (UML1Parameter) parameter;
+                ObjectRecord parameterDef = this.channel.newObjectRecord(
+                    newFeaturePath(
+                        behaviouralFeatureDef.getResourceIdentifier(),
+                        aParameter.getName()
+                    ),
+                    ModelAttributes.PARAMETER
+                );
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                    parameterDef, "container", behaviouralFeatureDef.getResourceIdentifier()
+                );
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                    parameterDef, "direction", DirectionKind.IN_DIR
+                );
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                    parameterDef, "multiplicity",
+                    !aParameter.getStereotypes().isEmpty() ?
+                        aParameter.getStereotypes().iterator().next() :
+                        DEFAULT_PARAMETER_MULTIPLICITY
+                );
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                    parameterDef, "type", new Path(aParameter.getType())  // Must be Path, not String
+                );
+                this.createModelElement(null, parameterDef);
+            }
 
             #endif
 
+        } else {
+
+            #if CLASSIC_CHRONO_TYPES
+
+            // void in-parameter
+            ObjectRecord inParameterDef = this.channel.newObjectRecord(
+                    newFeaturePath(
+                            behaviouralFeatureDef.getResourceIdentifier(),
+                            "in"
+                    ),
+                    ModelAttributes.PARAMETER
+            );
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "container", behaviouralFeatureDef.getResourceIdentifier());
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "direction", DirectionKind.IN_DIR);
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "multiplicity", DEFAULT_PARAMETER_MULTIPLICITY);
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "type", toElementPath(
+                    nameToPathComponent("org::openmdx::base"),
+                    "Void"
+            ));
+            this.createModelElement(
+                    null,
+                    inParameterDef
+            );
+
+            #else
+
+            ObjectRecord voidParameterDef = this.channel.newObjectRecord(
+                    newFeaturePath(behaviouralFeatureDef.getResourceIdentifier(), "void"),
+                    ModelAttributes.PARAMETER
+            );
+            // Set void parameter properties...
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                    voidParameterDef, "container", behaviouralFeatureDef.getResourceIdentifier()
+            );
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                    voidParameterDef, "direction", DirectionKind.IN_DIR
+            );
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                    voidParameterDef, "multiplicity", DEFAULT_PARAMETER_MULTIPLICITY
+            );
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                    voidParameterDef, "type", toElementPath(
+                            nameToPathComponent("org::openmdx::base"),
+                            "Void"
+                    )
+            );
+            this.createModelElement(null, voidParameterDef);
+
+            #endif
         }
 
+        // Note:
+        // return parameter is ignored for exceptions (operations with stereotype exception)
+        if (!isException) {
+            ObjectRecord resultDef = this.channel.newObjectRecord(
+                    newFeaturePath(
+                            behaviouralFeatureDef.getResourceIdentifier(),
+                            "result"
+                    ),
+                    ModelAttributes.PARAMETER
+            );
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "container", behaviouralFeatureDef.getResourceIdentifier());
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "direction", DirectionKind.RETURN_DIR);
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "multiplicity", DEFAULT_PARAMETER_MULTIPLICITY);
 
+            if (umlBehaviouralFeature.getReturnParameter().getType() == null) {
+                this.error("Undefined return type for operation " + umlBehaviouralFeature.getQualifiedName());
+            } else {
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "type", toElementPath(
+                        nameToPathComponent(getScope(umlBehaviouralFeature.getReturnParameter().getType())),
+                        getName(umlBehaviouralFeature.getReturnParameter().getType())
+                ));
+                this.createModelElement(
+                        null,
+                        resultDef
+                );
+            }
+        }
 
+        // exceptions
+        String allExceptions = this.getOperationExceptions(umlBehaviouralFeature);
+        if (allExceptions != null) {
+            final StringTokenizer exceptions = new StringTokenizer(allExceptions, ",; ");
+            final List<Path> exceptionPaths = new ArrayList<>();
+            while(exceptions.hasMoreTokens()) {
+                String qualifiedExceptionName = exceptions.nextToken().trim();
+                if(!qualifiedExceptionName.isEmpty()) {
+                    if (!qualifiedExceptionName.contains("::")) {
+                        this.errors.println("Found invalid exception declaration <" + qualifiedExceptionName + "> for the operation " + umlBehaviouralFeature.getQualifiedName() + "; this exception is ignored unless a valid qualified exception name is specified.");
+                    }
+                    else {
+                        String qualifiedClassName = qualifiedExceptionName.substring(0, qualifiedExceptionName.lastIndexOf("::"));
+                        String scope = getScope(qualifiedClassName);
+                        String name = getName(qualifiedClassName);
+                        if (scope.isEmpty() || name.isEmpty()) {
+                            this.errors.println("Found invalid exception declaration <" + qualifiedExceptionName + "> for the operation " + umlBehaviouralFeature.getQualifiedName() + "; this exception is ignored unless a valid qualified exception name is specified.");
+                        } else {
+                            exceptionPaths.add(
+                                    newFeaturePath(
+                                            toElementPath(nameToPathComponent(scope), name),
+                                            getName(qualifiedExceptionName)
+                                    )
+                            );
+                        }
+                    }
+                }
+            }
+            DataproviderMode.DATAPROVIDER_2.replaceAttributeValuesAsList(behaviouralFeatureDef, "exception", exceptionPaths);
+        }
+        this.createModelElement(
+                null,
+                behaviouralFeatureDef
+        );
 
 
     }
@@ -1505,7 +1156,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
     private ObjectRecord processParameter(
         UML1Parameter umlParameter,
         ObjectRecord parameterType
-    ) throws ServiceException, ResourceException{
+    ) throws ResourceException{
         SysLog.detail("Processing parameter", umlParameter.getName());
 
         ObjectRecord parameterDef = this.channel.newObjectRecord(
@@ -1519,7 +1170,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         // container
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterDef, "container", parameterType.getResourceIdentifier());
 
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterDef, "maxLength", Integer.valueOf(DEFAULT_PARAMETER_MAX_LENGTH));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterDef, "maxLength", DEFAULT_PARAMETER_MAX_LENGTH);
 
         if(umlParameter.getType() == null) {
             this.error("Undefined type for parameter " + umlParameter.getQualifiedName());
@@ -1559,7 +1210,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 		    getName(getScope(umlDataType.getQualifiedName()))
 		));
 
-        /**
+        /*
          * skip stereotype because its value 'Primitive'
          * was marked to note the difference between
          * ordinary classes and primitive types
@@ -1572,7 +1223,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         }
 
         // isAbstract attribute
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(primitiveTypeDef, "isAbstract", Boolean.valueOf(umlDataType.isAbstract()));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(primitiveTypeDef, "isAbstract", umlDataType.isAbstract());
 
         // visibility attribute
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(primitiveTypeDef, "visibility", VisibilityKind.PUBLIC_VIS);
@@ -1650,15 +1301,12 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
     ) {
         // if feature isDerived is set return it
         if(attribute.isDerived() != null) {
-            return attribute.isDerived().booleanValue();
+            return attribute.isDerived();
         }
         // otherwise try to retrieve the isDerived information from tagged values
-        for(
-                Iterator it = attribute.getTaggedValues().iterator();
-                it.hasNext();
-        ) {
-            UML1TaggedValue taggedValue = (UML1TaggedValue)it.next();
-            if("derived".equals(taggedValue.getType().getName()) && "true".equals(taggedValue.getDataValue())) {
+        for (Object o : attribute.getTaggedValues()) {
+            UML1TaggedValue taggedValue = (UML1TaggedValue) o;
+            if ("derived".equals(taggedValue.getType().getName()) && "true".equals(taggedValue.getDataValue())) {
                 return true;
             }
         }
@@ -1682,13 +1330,9 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
     ) {
         // the information about the maxLength of an attribute is stored as a
         // tagged value  (openMDX choice)
-        for(
-                Iterator it = attribute.getTaggedValues().iterator();
-                it.hasNext();
-        ) {
-            UML1TaggedValue taggedValue = (UML1TaggedValue)it.next();
-            if ("maxLength".equals(taggedValue.getType().getName()))
-            {
+        for (Object o : attribute.getTaggedValues()) {
+            UML1TaggedValue taggedValue = (UML1TaggedValue) o;
+            if ("maxLength".equals(taggedValue.getType().getName())) {
                 return Integer.parseInt(taggedValue.getDataValue());
             }
         }
@@ -1704,11 +1348,8 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                 return comment.substring(THROWS_EXCEPTION_PREFIX.length());
             }
         }
-        for(
-                Iterator it = operation.getTaggedValues().iterator();
-                it.hasNext();
-        ) {
-            UML1TaggedValue taggedValue = (UML1TaggedValue)it.next();
+        for (Object o : operation.getTaggedValues()) {
+            UML1TaggedValue taggedValue = (UML1TaggedValue) o;
             if ("exceptions".equals(taggedValue.getType().getName())) {
                 return taggedValue.getDataValue();
             }
@@ -1736,7 +1377,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
     //---------------------------------------------------------------------------
     private List toAssociationEndQualifiers(
         String assEndNameWithQualifier
-    ) throws ServiceException, ResourceException {
+    ) throws ResourceException {
         List qualifiers = new ArrayList();
         if (assEndNameWithQualifier != null && assEndNameWithQualifier.indexOf('[') != -1)
         {
@@ -1775,9 +1416,9 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
     public static final short XMI_FORMAT_EMF = 4;
     public static final String THROWS_EXCEPTION_PREFIX = "@throws";
 
-    private PrintStream infos = null;
-    private PrintStream errors = null;
-    private PrintStream warnings = null;
+    private final PrintStream infos;
+    private final PrintStream errors;
+    private final PrintStream warnings;
     private final URL modelUrl;
     private final short xmiFormat;
     private final Map pathMap;

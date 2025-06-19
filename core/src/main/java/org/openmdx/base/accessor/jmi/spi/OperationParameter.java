@@ -96,9 +96,10 @@ class OperationParameter {
         StringBuilder parameterType = new StringBuilder();
         int i = 0;
         for (String component : components) {
-            if (i++ > 0) parameterType.append(":");
-            if (i < components.size()) {
+            if(i++ == 0) {
                 parameterType.append(component);
+            } else if (i < components.size()) {
+                parameterType.append(':').append(component);
             } else {
                 parameterType.append(component.substring(0, 1).toUpperCase()).append(component.substring(1));
             }

@@ -56,7 +56,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.logging.Level;
@@ -65,8 +64,6 @@ import javax.jdo.JDOException;
 import javax.jdo.JDOUserException;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
-import javax.jmi.model.DirectionKind;
-import javax.jmi.model.DirectionKindEnum;
 import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefClass;
 import javax.jmi.reflect.RefException;
@@ -75,9 +72,7 @@ import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 #if JAVA_8
 import javax.resource.ResourceException;
-import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.InteractionSpec;
-import javax.resource.cci.MappedRecord;
 #else
 import jakarta.resource.ResourceException;
 import jakarta.resource.cci.InteractionSpec;
@@ -125,9 +120,6 @@ import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.time.SystemClock;
-
-import static javax.jmi.model.DirectionKindEnum.IN_DIR;
-import static javax.jmi.model.DirectionKindEnum.RETURN_DIR;
 
 /**
  * Implementation of RefObject_1_0.
@@ -178,8 +170,8 @@ class RefObject_1
     private static final long serialVersionUID = -276854474114899063L;
 
     private static final Collection<String> EXCEPTION_WRAPPERS = Arrays.asList(
-        "org.openmdx.kernel.exception.BasicException",
-        "javax.resource.ResourceException"
+        BasicException.class.getName(),
+        ResourceException.class.getName()
     );
 
     private transient RefObject metaObject = null;
@@ -708,20 +700,6 @@ class RefObject_1
         }
         return (RefStruct_1_0)this.refOutermostPackage().refCreateStruct(operationStructs.inDirection.parameterType, arguments);
     }
-
-    private static void assertOperation(
-        ModelElement_1_0 elementDef
-    ) throws ServiceException {
-        if (!elementDef.getModel().isOperationType(elementDef)) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "model element not of type " + ModelAttributes.OPERATION,
-                new BasicException.Parameter("model element", elementDef.getQualifiedName())
-            );
-        }
-    }
-
 
     /**
      * Tells, whether an operation must be invoked immediately or not

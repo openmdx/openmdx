@@ -138,8 +138,10 @@ public class StandardMarshaller implements Marshaller {
                 new MarshallingSortedMap(this, (SparseArray<Object>)source)
             ) : source instanceof Iterator<?> ? new MarshallingIterator(
                 (Iterator<?>)source
+            ) : source instanceof RefStruct_1_0 ? this.outermostPackage.refCreateStruct(
+                ((RefStruct_1_0)source).refDelegate()
             ) : source instanceof MappedRecord ? this.outermostPackage.refCreateStruct(
-                    (MappedRecord)source
+                (MappedRecord)source
             ) : source instanceof PersistenceCapable ? this.outermostPackage.marshal(
                 source
             ) : source;

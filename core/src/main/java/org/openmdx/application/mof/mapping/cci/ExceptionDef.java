@@ -157,7 +157,6 @@ extends FeatureDef {
             }
 
         }
-        System.out.printf(">>>>>>>>> parameters: %s%n", parameters);
         return parameters;
 
         #endif

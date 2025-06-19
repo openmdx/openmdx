@@ -52,6 +52,7 @@ import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
+import org.openmdx.base.rest.cci.VoidRecord;
 import org.openmdx.kernel.exception.BasicException;
 
 import static javax.jmi.model.DirectionKindEnum.IN_DIR;
@@ -69,6 +70,7 @@ class OperationStructs {
 
     private static final String CLASSIC_IN_DIRECTION_PARAMETER_NAME = "in";
     private static final String CLASSIC_RETURN_DIRECTION_PARAMETER_NAME = "result";
+    private static final String CLASSIC_VOID_PARAMETER_NAME = "void";
 
     final OperationParameter inDirection;
     final OperationParameter returnDirection;
@@ -108,28 +110,36 @@ class OperationStructs {
             }
         }
         if(inParameter == null){
-            #if CLASSIC_CHRONO_TYPES
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "no parameter with name \"" + CLASSIC_IN_DIRECTION_PARAMETER_NAME + "\" defined for operation",
-                new BasicException.Parameter("operation", operationDef.getQualifiedName())
-            );
-            #else
-            inParameter = OperationParameter.createBoxingParameter(IN_DIR, operationDef.getQualifiedName());
-            #endif
+            if(inCount == 0){
+                inParameter = OperationParameter.createExplicitParameter(VoidRecord.NAME);
+            } else {
+                #if CLASSIC_CHRONO_TYPES
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "no parameter with name \"" + CLASSIC_IN_DIRECTION_PARAMETER_NAME + "\" defined for operation",
+                    new BasicException.Parameter("operation", operationDef.getQualifiedName())
+                );
+                #else
+                    inParameter = OperationParameter.createBoxingParameter(IN_DIR, operationDef.getQualifiedName());
+                #endif
+            }
         }
         if(returnParameter == null){
-            #if CLASSIC_CHRONO_TYPES
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "no parameter with name \"" + CLASSIC_RETURN_DIRECTION_PARAMETER_NAME + "\" defined for operation",
-                new BasicException.Parameter("operation", operationDef.getQualifiedName())
-            );
-            #else
-            returnParameter = OperationParameter.createBoxingParameter(RETURN_DIR, operationDef.getQualifiedName());
-            #endif
+            if(returnCount == 0){
+                returnParameter = OperationParameter.createExplicitParameter(VoidRecord.NAME);
+            } else {
+                #if CLASSIC_CHRONO_TYPES
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "no parameter with name \"" + CLASSIC_RETURN_DIRECTION_PARAMETER_NAME + "\" defined for operation",
+                    new BasicException.Parameter("operation", operationDef.getQualifiedName())
+                );
+                #else
+                returnParameter = OperationParameter.createBoxingParameter(RETURN_DIR, operationDef.getQualifiedName());
+                #endif
+            }
         }
         return new OperationStructs(inParameter, returnParameter);
     }
@@ -154,7 +164,9 @@ class OperationStructs {
     }
 
     private static boolean isClassicParameterName(DirectionKind direction, String parameterName) {
-        if(direction == DirectionKindEnum.IN_DIR) {
+        if(CLASSIC_VOID_PARAMETER_NAME.equals(parameterName)){
+            return true;
+        } else if(direction == DirectionKindEnum.IN_DIR) {
             return CLASSIC_IN_DIRECTION_PARAMETER_NAME.equals(parameterName);
         } else if(direction == DirectionKindEnum.RETURN_DIR) {
             return CLASSIC_RETURN_DIRECTION_PARAMETER_NAME.equals(parameterName);

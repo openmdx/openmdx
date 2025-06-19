@@ -2025,7 +2025,7 @@ public class TestMain {
 				assertSame(this.entityManager, targetManager, "Operation Target Manager");
 				targetManager.flush();
 				MessageTemplate deliveredBody = sendResult.getDeliveredBody();
-				assertNotNull(messageTemplate, "messageTemplate");
+				assertNotNull(deliveredBody, "deliveredBody");
 				PersistenceManager resultManager = ReducedJDOHelper.getPersistenceManager(deliveredBody);
 				assertSame(targetManager, resultManager, "Operation Result Manager");
 				assertEquals("hello world",  deliveredBody.getText(), "Body");
@@ -4637,7 +4637,7 @@ public class TestMain {
 		}
 
 		/**
-		 * getModelTestProvider Retrieve the Test segment
+		 * getTransientProvider Retrieve the Test segment
 		 * 
 		 * @return the Test segment
 		 */
