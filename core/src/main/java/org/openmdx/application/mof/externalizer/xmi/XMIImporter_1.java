@@ -1027,8 +1027,19 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                         aParameter.getStereotypes().iterator().next() :
                         DEFAULT_PARAMETER_MULTIPLICITY
                 );
+
+                final String aParamType = aParameter.getType().replace("::", ":");
+                final int idx = aParamType.lastIndexOf(":");
+                final String name = aParamType.substring(0, idx);
+                final String elementName = aParamType.substring(idx + 1);
+
                 DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-                    parameterDef, "type", new Path(aParameter.getType())  // Must be Path, not String
+                    parameterDef,
+                    "type",
+                    toElementPath(
+                        nameToPathComponent(name),
+                        elementName
+                    )
                 );
                 this.createModelElement(null, parameterDef);
             }
