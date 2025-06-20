@@ -51,9 +51,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.jdo.spi.PersistenceCapable;
-import javax.jmi.reflect.RefBaseObject;
-import javax.jmi.reflect.RefObject;
-import #if JAVA_8 javax.resource.cci.Record #else jakarta.resource.cci.Record #endif;
+import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
@@ -65,7 +63,6 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
-import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 import org.w3c.cci2.Container;
 import org.w3c.cci2.SortedMaps;
@@ -80,7 +77,7 @@ public class StandardMarshaller implements Marshaller {
 	/**
 	 * Constructor
 	 *  
-	 * @param outermostPackage
+	 * @param outermostPackage the marshaller's target package
 	 */
 	StandardMarshaller(
 		RefRootPackage_1 outermostPackage
@@ -89,22 +86,20 @@ public class StandardMarshaller implements Marshaller {
     }
 
 	/**
-	 * The outermost package this marshaller belongs to
+	 * The marshaller's target package
 	 */
 	private final RefRootPackage_1 outermostPackage;
 	
     /**
-     * Retrieve the marshaller's delegate
+     * Retrieve the marshaller's target package
      * 
-     * @return the outermost package
+     * @return the marshaller's target package
      */
     Jmi1Package_1_0 getOutermostPackage(){
         return this.outermostPackage;
     }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.base.persistence.spi.Marshaller#unmarshal(java.lang.Object)
-     */
+
+    @Override
     public Object unmarshal(
         Object source
     ){
@@ -118,9 +113,7 @@ public class StandardMarshaller implements Marshaller {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.persistence.spi.Marshaller#marshal(java.lang.Object)
-     */
+    @Override
     public Object marshal(
         Object source
     ){
@@ -142,8 +135,10 @@ public class StandardMarshaller implements Marshaller {
                 new MarshallingSortedMap(this, (SparseArray<Object>)source)
             ) : source instanceof Iterator<?> ? new MarshallingIterator(
                 (Iterator<?>)source
-            ) : source instanceof Record ? this.outermostPackage.refCreateStruct(
-                (Record)source
+            ) : source instanceof RefStruct_1_0 ? this.outermostPackage.refCreateStruct(
+                ((RefStruct_1_0)source).refDelegate()
+            ) : source instanceof MappedRecord ? this.outermostPackage.refCreateStruct(
+                (MappedRecord)source
             ) : source instanceof PersistenceCapable ? this.outermostPackage.marshal(
                 source
             ) : source;
@@ -167,7 +162,7 @@ public class StandardMarshaller implements Marshaller {
     /**
      * Unmarshal an array of objects
      * 
-     * @param source
+     * @param source the array of objects to be unmarshalled
      * 
      * @return an array containing the unmarshalled objects
      */
@@ -203,7 +198,7 @@ public class StandardMarshaller implements Marshaller {
     /**
      * Marshal an array of objects
      * 
-     * @param source
+     * @param source the array of objects to be marshalled
      * 
      * @return an array containing the marshalled objects
      */
@@ -236,36 +231,15 @@ public class StandardMarshaller implements Marshaller {
         return source;
     }
 
-	/**
-	 * Validate a given object
-	 * 
-	 * @param value
-	 * 
-	 * @throws ServiceException 
-	 */
-	void validate(
-		Object value
-	) throws ServiceException{
-		if(value instanceof RefBaseObject) {
-			if(this.outermostPackage !=  ((RefBaseObject)value).refOutermostPackage()){
-				throw new ServiceException(
-					BasicException.Code.DEFAULT_DOMAIN,
-					BasicException.Code.ASSERTION_FAILURE,
-					"RefPackage mismatch, the object does not have the expected outermost package"
-				);
-			}
-		}
-	}
-    
     /**
-     * MarshallingIterator
+     * Marshalling Iterator
      */
     class MarshallingIterator<T> implements Iterator<T> {
 
         /**
          * Constructor 
          *
-         * @param delegate
+         * @param delegate the delegate iterator
          */
         MarshallingIterator(
             Iterator<?> delegate
@@ -275,23 +249,17 @@ public class StandardMarshaller implements Marshaller {
 
         private final Iterator<?> delegate;
 
-        /* (non-Javadoc)
-         * @see java.util.Iterator#hasNext()
-         */
+        @Override
         public boolean hasNext() {
             return this.delegate.hasNext();
         }
 
-        /* (non-Javadoc)
-         * @see java.util.Iterator#next()
-         */
+        @Override
         public T next() {
             return (T) marshal(this.delegate.next());
         }
 
-        /* (non-Javadoc)
-         * @see java.util.Iterator#remove()
-         */
+        @Override
         public void remove() {
             this.delegate.remove();
         }

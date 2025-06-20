@@ -763,6 +763,9 @@ extends AbstractClassMapper {
         }
         printLine("   */");
         mapDeprecatedAnnotation(operationDef);
+        if(this.format.isJPA3()) {
+            printLine("  @Override");
+        }
         printLine("  public ", this.getReturnType(operationDef), " ", this.getMethodName(operationDef.getName()), "(");
         int ii = 0;
         for(StructuralFeatureDef param: operationDef.getParameters()) {

@@ -44,7 +44,6 @@
  */
 package test.openmdx.app1.aop2;
 
-import test.openmdx.app1.jmi1.AddressFormatAsParams;
 import test.openmdx.app1.jmi1.AddressFormatAsResult;
 import test.openmdx.app1.jmi1.App1Package;
 import test.openmdx.app1.jmi1.InternationalPostalAddress;
@@ -76,16 +75,29 @@ public class InternationalPostalAddressImpl extends PostalAddressImpl<test.openm
      * @param in the method's input structure
      * 
      * @return the method's result structure
-     * 
-     * @see test.openmdx.app1.jmi1.Address#formatAs(test.openmdx.app1.jmi1.AddressFormatAsParams)
      */
     @Override
-    public AddressFormatAsResult formatAs(AddressFormatAsParams in) {
+    public AddressFormatAsResult formatAs(
+            #if CLASSIC_CHRONO_TYPES
+            test.openmdx.app1.jmi1.AddressFormatAsParams in
+            #else
+            String type
+            #endif
+    ) {
+        #if CLASSIC_CHRONO_TYPES
+        String type = in.getType();
+        #endif
         InternationalPostalAddress same = sameObject();
         App1Package app1Package = (App1Package) same.refImmediatePackage();
-        if(STANDARD.equals(in.getType())) {
+        if(STANDARD.equals(type)) {
             StringBuilder formattedAddress = new StringBuilder(
-                super.formatAs(in).getFormattedAddress()
+                super.formatAs(
+                    #if CLASSIC_CHRONO_TYPES
+                    in
+                    #else
+                    type
+                    #endif
+                ).getFormattedAddress()
             ).append(
                 '\n'
             ).append(
