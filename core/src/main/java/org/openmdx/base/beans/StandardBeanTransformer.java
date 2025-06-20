@@ -154,9 +154,9 @@ public class StandardBeanTransformer implements BeanTransformer {
                         URIPersistenceDelegate.INSTANCE
                 );
                 #if CLASSIC_CHRONO_TYPES
-                        encoder.setPersistenceDelegate(
-                        org.w3c.cci2.ImmutableDate.class,
-                        ClassicDatePersistenceDelegate.INSTANCE
+                encoder.setPersistenceDelegate(
+                org.w3c.cci2.ImmutableDate.class,
+                ClassicDatePersistenceDelegate.INSTANCE
                 );
                 encoder.setPersistenceDelegate(
                         org.w3c.cci2.ImmutableDateTime.class,
@@ -529,9 +529,7 @@ public class StandardBeanTransformer implements BeanTransformer {
     }
 
     #if CLASSIC_CHRONO_TYPES
-
     private static class ImmutableDateTimePersistenceDelegate extends DefaultPersistenceDelegate {
-
         static final PersistenceDelegate INSTANCE = new ImmutableDateTimePersistenceDelegate();
 
         @Override
@@ -549,9 +547,7 @@ public class StandardBeanTransformer implements BeanTransformer {
                     }
             );
         }
-
     }
-
     #endif
 
 }

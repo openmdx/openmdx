@@ -203,12 +203,12 @@ public class DurationMarshaller {
 								BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
 								BigDecimal seconds = getValue(duration, DatatypeConstants.SECONDS);
 								return PG_INTERVAL_MARSHALLER.marshal(
-									signum, 
-									0, 
-									0, 
-									days.intValue(), 
-									hours.intValue(), 
-									minutes.intValue(), 
+									signum,
+									0,
+									0,
+									days.intValue(),
+									hours.intValue(),
+									minutes.intValue(),
 									seconds.doubleValue()
 								);
 							}
@@ -220,12 +220,12 @@ public class DurationMarshaller {
 								BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
 								BigDecimal seconds = getValue(duration, DatatypeConstants.SECONDS);
 								return PG_INTERVAL_MARSHALLER.marshal(
-									signum, 
-									years.intValue(), 
-									months.intValue(), 
-									days.intValue(), 
-									hours.intValue(), 
-									minutes.intValue(), 
+									signum,
+									years.intValue(),
+									months.intValue(),
+									days.intValue(),
+									hours.intValue(),
+									minutes.intValue(),
 									seconds.doubleValue()
 								);
 							default:
@@ -694,16 +694,16 @@ public class DurationMarshaller {
         YEAR_MONTH, YEAR_MONTH_DAY_TIME, DAY_TIME;
 
         static ValueType of(Duration duration) {
-			if(duration == null) {
-				return null;
-			}
+            if(duration == null) {
+                return null;
+            }
 			#if CLASSIC_CHRONO_TYPES
 				boolean yearMonth = duration.isSet(DatatypeConstants.YEARS) || duration.isSet(DatatypeConstants.MONTHS);
 				boolean dayTime = duration.isSet(DatatypeConstants.DAYS) || duration.isSet(DatatypeConstants.HOURS)
 					|| duration.isSet(DatatypeConstants.MINUTES) || duration.isSet(DatatypeConstants.SECONDS);
 				return yearMonth ? (dayTime ? YEAR_MONTH_DAY_TIME : YEAR_MONTH) : (dayTime ? DAY_TIME : null);
 			#else
-                return DAY_TIME;
+            return DAY_TIME;
 			#endif
         }
     }

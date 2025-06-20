@@ -59,10 +59,17 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
-import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
-import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
-import #if JAVA_8 javax.resource.spi.ResourceAllocationException #else jakarta.resource.spi.ResourceAllocationException #endif;
+#if JAVA_8
+import javax.resource.ResourceException;
+import javax.resource.cci.IndexedRecord;
+import javax.resource.cci.MappedRecord;
+import javax.resource.spi.ResourceAllocationException;
+#else
+import jakarta.resource.ResourceException;
+import jakarta.resource.cci.IndexedRecord;
+import jakarta.resource.cci.MappedRecord;
+import jakarta.resource.spi.ResourceAllocationException;
+#endif
 
 import org.ietf.jgss.Oid;
 import org.openmdx.base.accessor.rest.spi.ControlObjects_2;
