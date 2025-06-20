@@ -49,6 +49,7 @@ import #if JAVA_8 javax.resource.cci.InteractionSpec #else jakarta.resource.cci.
 import org.openmdx.state2.cci.StateContext;
 import org.openmdx.state2.cci.ViewKind;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.time.ChronoTypes;
 
 /**
  * AbstractStateContext
@@ -171,8 +172,8 @@ public abstract class StateViewContext<V>
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif removedAt
     ){
         return existsAt == null ? removedAt == null : (
-             (createdAt != null && !existsAt.#if CLASSIC_CHRONO_TYPES before #else isBefore #endif(createdAt)) &&
-             (removedAt == null || existsAt.#if CLASSIC_CHRONO_TYPES before #else isBefore #endif(removedAt))
+             (createdAt != null && !ChronoTypes.isBefore(existsAt, createdAt)) &&
+             (removedAt == null || ChronoTypes.isBefore(existsAt, removedAt))
         );
             
     }

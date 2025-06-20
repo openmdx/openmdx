@@ -107,6 +107,7 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.ChronoTypes;
 
 /**
  * Rest Interaction
@@ -1119,7 +1120,7 @@ public class RestInteraction extends AbstractRestInteraction {
                             new BasicException.Parameter(BasicException.Parameter.XRI, object.getResourceIdentifier()),
                             new BasicException.Parameter("expected", readLock),
                             new BasicException.Parameter("actual"));
-                    } else if (transactionTime.#if CLASSIC_CHRONO_TYPES before #else isBefore #endif(modifiedAt)) {
+                    } else if (ChronoTypes.isBefore(transactionTime, modifiedAt)) {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.CONCURRENT_ACCESS_FAILURE,

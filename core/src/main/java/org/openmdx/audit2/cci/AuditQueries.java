@@ -70,6 +70,7 @@ import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
+import org.w3c.time.ChronoTypes;
 
 /**
  * Audit Queries
@@ -202,8 +203,8 @@ public class AuditQueries {
                     try {
                         UnitOfWork unitOfWork = involvement.getUnitOfWork();
                         if(
-                            (from == null || !from.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(unitOfWork.getCreatedAt())) &&
-                            (to == null || to.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(unitOfWork.getCreatedAt()))
+                            (from == null || !ChronoTypes.isAfter(from, unitOfWork.getCreatedAt().toInstant())) &&
+                                (to == null || ChronoTypes.isAfter(to, unitOfWork.getCreatedAt().toInstant()))
                         ){
                             unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
                         }
@@ -279,8 +280,8 @@ public class AuditQueries {
                         if(ReducedJDOHelper.isPersistent(involvement)) try {
                             UnitOfWork unitOfWork = involvement.getUnitOfWork();
                             if(
-                                (from == null || !from.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(unitOfWork.getCreatedAt())) &&
-                                (to == null || to.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(unitOfWork.getCreatedAt()))
+                                (from == null || !ChronoTypes.isAfter(from, unitOfWork.getCreatedAt().toInstant())) &&
+                                    (to == null || ChronoTypes.isAfter(to, unitOfWork.getCreatedAt().toInstant()))
                             ){
                                 unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
                             }
@@ -567,7 +568,7 @@ public class AuditQueries {
         Configuration configuration = getConfiguration(persistenceManager);
         switch(configuration.getPersistenceMode()) {
             case EMBEDDED: {
-                Collection<UnitOfWork> unitsOfWork = new ArrayList<UnitOfWork>();
+                Collection<UnitOfWork> unitsOfWork = new ArrayList<>();
                 Candidate: for(UnitOfWork candidate : getUnitOfWorkInvolvingObject(from, to, removedObjects)) {
                     for(Modifiable touchedObject : removedObjects) {
                         Involvement involvement = candidate.getInvolvement(touchedObject.refGetPath().toClassicRepresentation());
@@ -617,7 +618,7 @@ public class AuditQueries {
             Path pattern = extentCollection.getPattern();
             switch(configuration.getPersistenceMode()) {
                 case EMBEDDED: {
-                    Collection<UnitOfWork> unitsOfWork = new ArrayList<UnitOfWork>();
+                    Collection<UnitOfWork> unitsOfWork = new ArrayList<>();
                     Candidate: for(UnitOfWork candidate : getUnitOfWorkInvolvingObject(from, to, modifiable)) {
                         for(Involvement involvement : candidate.<Involvement>getInvolvement()) {
                             if(
