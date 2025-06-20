@@ -56,7 +56,6 @@ import javax.jmi.reflect.RefObject;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.aop2.AbstractObject;
 import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Void;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.SortedMaps;
@@ -129,7 +128,7 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
      *
      * @return the method's result structure
      * 
-     * @throws CanNotFormatNameException
+     * @throws CanNotFormatNameException if the name format is not supported
      */
     public PersonFormatNameAsResult formatNameAs(
         #if CLASSIC_CHRONO_TYPES
@@ -181,18 +180,16 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
      * @return the method's result structure
      */
     public Void assignAddress(
-            #if CLASSIC_CHRONO_TYPES
-            test.openmdx.app1.jmi1.PersonAssignAddressParams in
-            #else
-            List<test.openmdx.app1.jmi1.Address> address
-            #endif
-            ) {
+        #if CLASSIC_CHRONO_TYPES
+        test.openmdx.app1.jmi1.PersonAssignAddressParams in
+        #else
+        List<test.openmdx.app1.jmi1.Address> address
+        #endif
+    ) {
         #if CLASSIC_CHRONO_TYPES
         List<test.openmdx.app1.jmi1.Address> address = in.getAddress();
         #endif
         RefPackage_1_0 nextPackage = (RefPackage_1_0) ((RefObject)nextObject()).refOutermostPackage();
-        @SuppressWarnings("unused")
-        test.openmdx.app1.cci2.PersonAssignAddressParams nextInput = (test.openmdx.app1.cci2.PersonAssignAddressParams) nextPackage.refCreateStruct(in.refDelegate());
         System.out.println("Assigning addresses to " + sameObject().refMofId() + ": " + address);
         return newVoid();
     }
@@ -228,9 +225,7 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
     
     /**
      * Date Operation
-     * 
-     * @param in the method's input structure
-     * 
+     *
      * @return the method's result structure
      */
     public PersonDateOpResult dateOp(
