@@ -63,6 +63,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
+#if JAVA_8
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Constructor;
+#endif
+
 import java.util.TreeSet;
 import javax.jdo.listener.ClearCallback;
 import javax.jdo.listener.DeleteCallback;
@@ -134,7 +139,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         this.aspectImplementationDescriptors = mapping.getAspectImplementationDescriptors();
         this.aspectImplementationInstances = new Object[
             this.aspectImplementationDescriptors.length
-            ];
+        ];
     }
 
     /**
@@ -355,7 +360,11 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         Object[] args
     ) throws Throwable {
         if(method.isDefault()) {
+            #if JAVA_8
+            return Jmi1ObjectInvocationHandler.invokeDefault(proxy, method, args);
+            #else
             return InvocationHandler.invokeDefault(proxy, method, args);
+            #endif
         }
         String methodName = method.getName();
         Class<?> declaringClass = method.getDeclaringClass();
@@ -1630,6 +1639,19 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         }
     }
 
+    #if JAVA_8
+    private static Object invokeDefault(Object proxy, Method method, Object[] args) throws Throwable {
+        final Class<?> declaringClass = method.getDeclaringClass();
+        Constructor<MethodHandles.Lookup> constructor =
+            MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+        constructor.setAccessible(true);
+        return constructor
+            .newInstance(declaringClass, MethodHandles.Lookup.PRIVATE)
+            .unreflectSpecial(method, declaringClass)
+            .bindTo(proxy)
+            .invokeWithArguments(args == null ? new Object[0] : args);
+    }
+    #endif
 
     //------------------------------------------------------------------------
     // Class Jmi1BinaryLargeObject
