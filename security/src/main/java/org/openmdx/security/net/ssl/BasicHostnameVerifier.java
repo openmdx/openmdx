@@ -44,24 +44,18 @@
  */
 package org.openmdx.security.net.ssl;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.net.ssl.HostnameVerifier;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.HostnameVerifier;
 
 /**
  * The basic host name verifier does not support wildcard certificates.
  */
 public class BasicHostnameVerifier implements HostnameVerifier {
-
-	/**
-     * Constructor
-     */
-    public BasicHostnameVerifier() {
-	    super();
-    }
 
 	/**
 	 * String form according to RFC 4514
@@ -79,24 +73,27 @@ public class BasicHostnameVerifier implements HostnameVerifier {
     
 	@Override
 	public boolean verify(
-		String hostname, 
+		String hostname,
 		SSLSession session
 	) {
-        try {
-            return verify(
-            	hostname, 
-            	session.getPeerCertificateChain()[0].getSubjectDN().getName()
-            );            
-        } catch (Exception exception) {
-            return false;
-        }
+		try {
+			Certificate[] certs = session.getPeerCertificates();
+			if (certs.length == 0) {
+				return false;
+			}
+			X509Certificate x509 = (X509Certificate) certs[0];
+			String subjectDN = x509.getSubjectX500Principal().getName();
+			return verify(hostname, subjectDN);
+		} catch (Exception ignored) {
+			return false;
+		}
 	}
 
 	/**
 	 * Verify a hostname against a distinguished name
 	 * 
-	 * @param hostName
-	 * @param distinguishedName
+	 * @param hostName the host name to be verified
+	 * @param distinguishedName the distinguished name
 	 * 
 	 * @return {@code true} in case of success
 	 */
@@ -130,12 +127,8 @@ public class BasicHostnameVerifier implements HostnameVerifier {
         				){
         					utf8[i] = (byte) Integer.parseInt(utf8Escape.substring(i * 3 + 1, (i + 1) * 3), 0x10);
         				}
-        				try {
-	                        commonNameBuilder.append(new String(utf8, "UTF-8"));
-                        } catch (UnsupportedEncodingException exception) {
-                        	throw new RuntimeException("Assertion failure: UTF-8 should be supported", exception);
-                        }
-        			}
+                        commonNameBuilder.append(new String(utf8, StandardCharsets.UTF_8));
+                    }
         		}
         		commonName = commonNameBuilder.toString();
         	}
@@ -147,8 +140,8 @@ public class BasicHostnameVerifier implements HostnameVerifier {
 	/**
 	 * Tests whether the host name matches the comment name
 	 * 
-	 * @param hostName
-	 * @param commonName
+	 * @param hostName the host name to be compared
+	 * @param commonName the common name to be compared
 	 * 
 	 * @return {@code true} in case of success
 	 */
