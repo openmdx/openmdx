@@ -2281,8 +2281,7 @@ extends AbstractClassMapper {
 
         final String getterMethodName = this.getMethodName(attributeDef.getBeanGetterName());
         if (this.format.isJMI1()) {
-            int substringIdx = getterMethodName.startsWith("get") ? 3 : 2;
-            final String methodName = getterMethodName.substring(substringIdx);
+            final String methodName = getterMethodName.substring(getterMethodName.startsWith("get") ? 3 : 2);
             printLine("  default ", typeParamDeclaration, "java.util.Optional<", returnType, "> ", "optional" + methodName, "(");
             printLine("  ){");
             print("    return java.util.Optional.ofNullable(");
