@@ -2279,16 +2279,18 @@ extends AbstractClassMapper {
         String typeParamDeclaration = isGenericType ? featureType.substring(0, featureType.lastIndexOf(' ')) + " " : "";
         String returnType = isGenericType ? featureType.substring(featureType.lastIndexOf(' ') + 1) : featureType;
 
+        final String getterMethodName = this.getMethodName(attributeDef.getBeanGetterName());
         if (this.format.isJMI1()) {
-            final String methodName = this.getMethodName(attributeDef.getBeanGetterName()).substring(3);
+            int substringIdx = getterMethodName.startsWith("get") ? 3 : 2;
+            final String methodName = getterMethodName.substring(substringIdx);
             printLine("  default ", typeParamDeclaration, "java.util.Optional<", returnType, "> ", "optional" + methodName, "(");
             printLine("  ){");
             print("    return java.util.Optional.ofNullable(");
-            print("this." + this.getMethodName(attributeDef.getBeanGetterName()) + "()");
+            print("this." + getterMethodName + "()");
             print(");");
             printLine("  }");
         } else {
-            printLine("  public ", featureType, " ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
+            printLine("  public ", featureType, " ", getterMethodName, "(");
         }
 
         if(this.format.isJPA3()) {
@@ -2297,7 +2299,7 @@ extends AbstractClassMapper {
             if(this.mapValueType(modelType)) {
                 print(getMappingExpression(modelType, JavaExportFormat.JPA3, JavaExportFormat.CCI2, "this." + attributeName));
             } else {
-                print(cast + "this." + attributeName);                    
+                print(cast + "this." + attributeName);
             }
             printLine(";");
             printLine("  }");
