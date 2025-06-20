@@ -56,38 +56,22 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
 
 /**
  * openMDX JCA
- * 
+ * <p/>
  * Delegating Mapped Record
  */
 @SuppressWarnings({"rawtypes","unchecked"})
 public class DelegatingMappedRecord 
 	implements MappedRecord, MultiLineStringRepresentation
 {
-    
-    
-    /**
-     * 
-     */
+
     private static final long serialVersionUID = 4049643382001316409L;
 
-    /**
-     * 
-     */
     private String recordShortDescription;
 
-    /**
-     * 
-     */
     private String recordName;
-    
-    /**
-     * 
-     */
+
     private Map source;
 
-    /**
-     * 
-     */
     public DelegatingMappedRecord(
         String recordName,
         String recordShortDescription,
@@ -111,29 +95,23 @@ public class DelegatingMappedRecord
     // Implements Record
     //------------------------------------------------------------------------
 
-    /**
-     *
-     */
     public String getRecordName() {
         return this.recordName;
     }
 
-    /**
-     *
-     */
     public String getRecordShortDescription() {
         return this.recordShortDescription;
     }
 
     /**
-     * @param recordName
+     * @param recordName the fully qualified name of the record, e.g. "test:openmdx:app1:AddressFormatAsResult"
      */
     public void setRecordName(String recordName) {
         this.recordName = recordName;
     }
 
     /**
-     * @param recordShortDescription
+     * @param recordShortDescription an optional short description of the record
      */
     public void setRecordShortDescription(String recordShortDescription) {
         this.recordShortDescription = recordShortDescription;
@@ -144,86 +122,50 @@ public class DelegatingMappedRecord
     // Implements Map
     //------------------------------------------------------------------------
 
-    /* (non-Javadoc)
-     * @see java.util.Map#clear()
-     */
     public void clear() {
         this.source.clear();
     }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#containsKey(java.lang.Object)
-     */
     public boolean containsKey(Object key) {
         return this.source.containsKey(key);
     }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#containsValue(java.lang.Object)
-     */
     public boolean containsValue(Object value) {
         return this.source.containsValue(value);
     }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#entrySet()
-     */
     public Set entrySet() {
         return this.source.entrySet();
     }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#get(java.lang.Object)
-     */
     public Object get(Object key) {
         return this.source.get(key);
     }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#isEmpty()
-     */
     public boolean isEmpty() {
         return this.source.isEmpty();
     }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#keySet()
-     */
     public Set keySet() {
         return this.source.keySet();
     }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#put(java.lang.Object, java.lang.Object)
-     */
     public Object put(Object key, Object value) {
         return this.source.put(key, value);
     }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#putAll(java.util.Map)
-     */
     public void putAll(Map t) {
         this.source.putAll(t);
     }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#remove(java.lang.Object)
-     */
     public Object remove(Object key) {
         return this.source.remove(key);
     }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#size()
-     */
     public int size() {
         return this.source.size();
     }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#values()
-     */
     public Collection values() {
         return this.source.values();
     }
@@ -233,9 +175,6 @@ public class DelegatingMappedRecord
     // Implements Cloneable
     //------------------------------------------------------------------------
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
-     */
     @Override
     public Object clone() {
         return new DelegatingMappedRecord(
@@ -268,17 +207,11 @@ public class DelegatingMappedRecord
         return IndentingFormatter.toString(this);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object that) {
         return this.source.equals(that);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         return this.source.hashCode();

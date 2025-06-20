@@ -46,21 +46,21 @@
 package org.openmdx.application.mof.mapping.cci;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+
+#if CLASSIC_CHRONO_TYPES
+import java.util.HashMap;
 import org.openmdx.kernel.exception.BasicException;
+#endif
 
-public class ExceptionDef 
-extends FeatureDef {
+public class ExceptionDef extends FeatureDef {
 
-    //-------------------------------------------------------------------------
     public ExceptionDef(
         ModelElement_1_0 exceptionDef,
         Model_1_0 model 
@@ -75,14 +75,14 @@ extends FeatureDef {
         );
     }
 
-    //-------------------------------------------------------------------------
+    private final List<AttributeDef> parameters;
+
     private static String mapName(
         String modelName
     ){
         return modelName.endsWith("Exception") ? modelName :  modelName + "Exception";  
     }
 
-    //-------------------------------------------------------------------------
     private static List<AttributeDef> getParameters(
         ModelElement_1_0 exceptionDef,
         Model_1_0 model 
@@ -90,11 +90,8 @@ extends FeatureDef {
 
         #if CLASSIC_CHRONO_TYPES
         HashMap<String,ModelElement_1_0> params = new HashMap<>();
-        for(
-            Iterator<?> i = exceptionDef.objGetList("content").iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 param = model.getElement(i.next());
+        for(Object p : exceptionDef.objGetList("content")){
+            ModelElement_1_0 param = model.getElement(p);
             params.put(
                 param.getName(),
                 param
@@ -113,52 +110,29 @@ extends FeatureDef {
         ModelElement_1_0 inParamType = model.getElementType(
             params.get("in")
         );
-        List<AttributeDef> parameters = new ArrayList<>();
-        for(
-            Iterator<?> i = inParamType.objGetList("content").iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 field = model.getElement(i.next());
-            if(model.isStructureFieldType(field)) {
-                parameters.add(
-                    new AttributeDef(
-                        field,
-                        model 
-                    )
-                );
-            }
-        }
-        return parameters;
+
+        final List<Object> fields = inParamType.objGetList("content");
 
         #else
 
+        final List<Object> fields = exceptionDef.objGetList("content");
+
+        #endif
+
         List<AttributeDef> parameters = new ArrayList<>();
-        for (Object o : exceptionDef.objGetList("content")) {
-            ModelElement_1_0 field = model.getElement(o);
-            if (model.isStructureFieldType(field)) {
-                parameters.add(
-                    new AttributeDef(
-                        field,
-                        model
-                    )
-                );
-            } else {
-                parameters.add(
-                    new AttributeDef(
-                        field,
-                        model
-                    )
-                );
-
-            }
-
+        for (Object o : fields) {
+            final ModelElement_1_0 field = model.getElement(o);
+            parameters.add(
+                new AttributeDef(
+                    field,
+                    model
+                )
+            );
         }
         return parameters;
 
-        #endif
     }
 
-    //-------------------------------------------------------------------------
     public ExceptionDef(
         String name,
         String qualifiedName,
@@ -177,15 +151,9 @@ extends FeatureDef {
         this.parameters = parameters;
     }
 
-    //-------------------------------------------------------------------------
     public List<AttributeDef> getParameters(
     ) {
         return this.parameters;
     }
-
-    //-------------------------------------------------------------------------
-    // Variables
-    //-------------------------------------------------------------------------
-    private final List<AttributeDef> parameters;
 
 }

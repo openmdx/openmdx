@@ -191,14 +191,9 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
         List<test.openmdx.app1.jmi1.Address> address = in.getAddress();
         #endif
         RefPackage_1_0 nextPackage = (RefPackage_1_0) ((RefObject)nextObject()).refOutermostPackage();
-//        test.openmdx.app1.cci2.PersonAssignAddressParams nextInput = (test.openmdx.app1.cci2.PersonAssignAddressParams) nextPackage.refCreateStruct(in.refDelegate());
-//        nextObject().assignAddress(nextInput);
+        @SuppressWarnings("unused")
+        test.openmdx.app1.cci2.PersonAssignAddressParams nextInput = (test.openmdx.app1.cci2.PersonAssignAddressParams) nextPackage.refCreateStruct(in.refDelegate());
         System.out.println("Assigning addresses to " + sameObject().refMofId() + ": " + address);
-//        List<Address> target = this.same.getAssignedAddress();
-//        List<Address> source = in.getAddress();
-//        List<Address> set = new ArrayList<Address>(source);
-//        set.removeAll(target);
-//        target.addAll(set);
         return newVoid();
     }
 
