@@ -354,6 +354,9 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         Method method,
         Object[] args
     ) throws Throwable {
+        if(method.isDefault()) {
+            return InvocationHandler.invokeDefault(proxy, method, args);
+        }
         String methodName = method.getName();
         Class<?> declaringClass = method.getDeclaringClass();
         try {
