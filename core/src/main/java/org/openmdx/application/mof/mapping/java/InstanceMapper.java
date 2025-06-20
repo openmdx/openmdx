@@ -2239,7 +2239,10 @@ extends AbstractClassMapper {
     public void mapAttributeGet0_1(
         AttributeDef attributeDef
     ) throws ServiceException {
-        if(this.format.isJMI1()) return;
+
+        final boolean isClassicChronoFlavour = configuration.chronoFlavour.isClassic();
+        if (isClassicChronoFlavour && this.format.isJMI1()) return;
+
         String attributeName = getFeatureName(attributeDef);
         String modelType = attributeDef.getQualifiedTypeName();
         if(this.format.isJPA3()) {
@@ -2253,19 +2256,41 @@ extends AbstractClassMapper {
         this.trace("Instance/AttributeGet0_1");
         printLine("  /**");
         MapperUtils
-            .wrapText(
-                "   * ",
-                "Retrieves the possibly null value for the optional attribute {@code " + attributeDef.getName() + "}.", this::printLine);
+                .wrapText(
+                        "   * ",
+                        (this.format.isJMI1() ? "Accessor" : "Retrieves the possibly null value")
+                                + " for the optional attribute {@code " + attributeDef.getName() + "}.",
+                        this::printLine);
         if (attributeDef.getAnnotation() != null) {
             printLine("   * <p>");
             MapperUtils.wrapText("   * ", attributeDef.getAnnotation(), this::printLine);
         }
-        printLine("   * @return The possibly null value for attribute {@code ", attributeDef.getName(), "}.");
+        printLine(
+                "   * @return ",
+                this.format.isJMI1() ? "The optional" : "The possibly null",
+                " value for attribute {@code ", attributeDef.getName(), "}."
+        );
         printLine("   */");
         this.mapDeprecatedAnnotation(attributeDef);
         String cast =  printAnnotationAndReturnCast(attributeDef, null);
-        String featureType = this.getType(attributeDef, null, Boolean.TRUE, TypeMode.MEMBER, Boolean.TRUE);        
-        printLine("  public ", featureType, " ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
+
+        String featureType = this.getType(attributeDef, null, Boolean.TRUE, TypeMode.MEMBER, Boolean.TRUE);
+        final boolean isGenericType = featureType.indexOf(' ') > 0;
+        String typeParamDeclaration = isGenericType ? featureType.substring(0, featureType.lastIndexOf(' ')) + " " : "";
+        String returnType = isGenericType ? featureType.substring(featureType.lastIndexOf(' ') + 1) : featureType;
+
+        if (this.format.isJMI1()) {
+            final String methodName = this.getMethodName(attributeDef.getBeanGetterName()).substring(3);
+            printLine("  default ", typeParamDeclaration, "java.util.Optional<", returnType, "> ", "optional" + methodName, "(");
+            printLine("  ){");
+            print("    return java.util.Optional.ofNullable(");
+            print("this." + this.getMethodName(attributeDef.getBeanGetterName()) + "()");
+            print(");");
+            printLine("  }");
+        } else {
+            printLine("  public ", featureType, " ", this.getMethodName(attributeDef.getBeanGetterName()), "(");
+        }
+
         if(this.format.isJPA3()) {
             printLine("  ){");
             print("    return ");
@@ -2276,6 +2301,8 @@ extends AbstractClassMapper {
             }
             printLine(";");
             printLine("  }");
+        } else if (this.format.isJMI1()) {
+
         } else {
             printLine("  );");
         }
