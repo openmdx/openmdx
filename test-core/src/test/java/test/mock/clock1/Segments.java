@@ -1,28 +1,28 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Segments 
+ * Description: Segments
  * Owner:       the original authors.
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,9 +36,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
@@ -72,17 +72,16 @@ import test.openmdx.clock1.jmi1.Time;
  */
 public class Segments {
 
-    private static final long ONE_AND_HALF_AN_HOUR = 90*60*1000L; 
-    
+    private static final long ONE_AND_HALF_AN_HOUR = 90 * 60 * 1000L;
+
     /**
      * Retrieve the named segment
-     * 
+     *
      * @param entityManager the entity manager
-     * @param segmentName the name of the segment
-     * 
+     * @param segmentName   the name of the segment
      * @return the requested Segment
      */
-   private static Segment getSegment(
+    private static Segment getSegment(
         PersistenceManager entityManager,
         String segmentName
     ) {
@@ -95,26 +94,26 @@ public class Segments {
         Segment segment
     ) {
         Provider provider = segment.getProvider();
-        Assertions.assertEquals("xri://@openmdx*test.openmdx.clock1/provider/Mocked",  provider.refMofId(), getMockedSegmentName() + " segment's provider");
-        Assertions.assertSame(JDOHelper.getPersistenceManager(segment),  JDOHelper.getPersistenceManager(provider), "Persistence Managers");
+        Assertions.assertEquals("xri://@openmdx*test.openmdx.clock1/provider/Mocked", provider.refMofId(), getMockedSegmentName() + " segment's provider");
+        Assertions.assertSame(JDOHelper.getPersistenceManager(segment), JDOHelper.getPersistenceManager(provider), "Persistence Managers");
     }
 
     static void validateChangedTimePoint(Segment segment) {
         final Transaction transaction = JDOHelper.getPersistenceManager(segment).currentTransaction();
         transaction.begin();
         final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif expected = tryToChangeDateAndTime(segment);
-        Assertions.assertEquals(expected,  segment.currentDateAndTime().getUtc(), "Time set back");
-        transaction.commit();	
+        Assertions.assertEquals(expected, segment.currentDateAndTime().getUtc(), "Time set back");
+        transaction.commit();
     }
 
     static void validateChangedTimePointReflectively(Segment segment) throws RefException {
         final Transaction transaction = JDOHelper.getPersistenceManager(segment).currentTransaction();
         transaction.begin();
         final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif expected = tryToChangeDateAndTimeReflectively(segment);
-        Assertions.assertEquals(expected,  segment.currentDateAndTime().getUtc(), "Time set back");
+        Assertions.assertEquals(expected, segment.currentDateAndTime().getUtc(), "Time set back");
         transaction.commit();
     }
-    
+
     private static #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif tryToChangeDateAndTime(
         Segment segment
     ) {
@@ -134,16 +133,16 @@ public class Segments {
             System.currentTimeMillis() - ONE_AND_HALF_AN_HOUR
         );
         final RefStruct param = segment.refImmediatePackage().refCreateStruct(
-            "test:openmdx:clock1:Time", 
+            "test:openmdx:clock1:Time",
             Collections.singletonList(mockTimePoint)
         );
         segment.refInvokeOperation(
-            "setDateAndTime", 
+            "setDateAndTime",
             Arrays.asList(param)
         );
         return mockTimePoint;
     }
-    
+
     static void validateUnchangedTimePoint(Segment segment) {
         final Transaction transaction = JDOHelper.getPersistenceManager(segment).currentTransaction();
         transaction.begin();
@@ -155,22 +154,24 @@ public class Segments {
     static void validateMockedTimePoint(
         Segment segment
     ) throws ParseException {
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = getTimePoint(segment);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else
+        java.time.Instant #endif utc = getTimePoint(segment);
         validateMockedTimePoint(utc, "");
     }
 
     static void validateMockedTimePointReflectively(
         Segment segment
     ) throws ParseException, RefException {
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = getTimePointReflectively(segment);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else
+        java.time.Instant #endif utc = getTimePointReflectively(segment);
         validateMockedTimePoint(utc, "-reflectively");
     }
-    
+
     private static void validateMockedTimePoint(
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc,
-        String mode
+                                                      String mode
     ) throws ParseException {
-        Assertions.assertEquals(DateTimeFormat.BASIC_UTC_FORMAT.parse("20000401T120000.000Z"),  utc, "High Noon");
+        Assertions.assertEquals(DateTimeFormat.BASIC_UTC_FORMAT.parse("20000401T120000.000Z"), utc, "High Noon");
         System.out.println(getMockedSegmentName() + mode + ": " + DateTimeFormat.BASIC_UTC_FORMAT.format(utc)); // xri://@openmdx*test.openmdx.clock1/provider/Mocked
     }
 
@@ -200,13 +201,14 @@ public class Segments {
         final Segment segment
     ) {
         Provider provider = segment.getProvider();
-        Assertions.assertEquals("xri://@openmdx*test.openmdx.clock1/provider/Java",  provider.refMofId(), getNormalSegmentName() + " segment's provider");
+        Assertions.assertEquals("xri://@openmdx*test.openmdx.clock1/provider/Java", provider.refMofId(), getNormalSegmentName() + " segment's provider");
     }
 
     static void validateNormalTimePoint(
         final Segment segment
     ) {
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = getTimePoint(segment);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else
+        java.time.Instant #endif utc = getTimePoint(segment);
         validateNormalTimePoint(utc, "");
     }
 
@@ -220,37 +222,41 @@ public class Segments {
         final Segment segment
     ) throws RefException {
         final RefStruct param = segment.refImmediatePackage().refCreateStruct(
-            VoidRecord.NAME, 
+            VoidRecord.NAME,
             Collections.emptyList()
         );
-        final RefStruct result = (RefStruct)segment.refInvokeOperation(
-            "currentDateAndTime", 
+        final RefStruct result = (RefStruct) segment.refInvokeOperation(
+            "currentDateAndTime",
             Arrays.asList(param)
         );
         final #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = Datatypes.DATE_TIME_CLASS.cast(result.refGetValue("utc"));
         return utc;
     }
-    
+
     static void validateNormalTimePointReflectively(
         final Segment segment
     ) throws RefException {
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc = getTimePointReflectively(segment);
+        #if CLASSIC_CHRONO_TYPES java.util.Date #else
+        java.time.Instant #endif utc = getTimePointReflectively(segment);
         validateNormalTimePoint(utc, "-reflectively");
     }
-    
+
     private static void validateNormalTimePoint(
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif utc,
-        String mode
+                                                      String mode
     ) {
         long now = System.currentTimeMillis();
-        Assertions.assertTrue(Math.abs(now - utc.#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli()#endif) < 1000, "Time window < 1 s");
+        Assertions.assertTrue(Math.abs(now - utc.#if CLASSIC_CHRONO_TYPES getTime() #else toEpochMilli()#endif ) < 1000, "Time window < 1 s");
         System.out.println(getNormalSegmentName() + mode + ": " + DateTimeFormat.BASIC_UTC_FORMAT.format(utc));
     }
 
     static void validateNormalDescription(
         final Segment segment
     ) {
-        Assertions.assertEquals("clock1 segment",  segment.getDescription(), "description");
+        final String expected = "clock1 segment";
+        Assertions.assertTrue(segment.optionalDescription().isPresent(), "Description not present");
+        Assertions.assertEquals(expected, segment.optionalDescription().orElseThrow(), "wrong description");
+        Assertions.assertEquals(expected, segment.getDescription(), "wrong description");
     }
 
     static Segment getNormalSegment(
