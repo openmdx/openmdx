@@ -35,8 +35,8 @@ class OperationParameterTest {
     @Test
     void testCreateBoxingParameterUnsupportedDirection() {
         String qualifiedOpName = "org.openmdx.test:TestOp";
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            OperationParameter.createBoxingParameter(null, qualifiedOpName);
-        });
+        Assertions.assertThrows(IllegalArgumentException.class, () ->
+            OperationParameter.createBoxingParameter(null, qualifiedOpName)
+        );
     }
 }

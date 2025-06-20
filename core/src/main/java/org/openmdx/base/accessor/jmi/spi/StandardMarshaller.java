@@ -51,8 +51,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.jdo.spi.PersistenceCapable;
-import javax.jmi.reflect.RefBaseObject;
-import #if JAVA_8 javax.resource.cci.IndexedRecord #else jakarta.resource.cci.IndexedRecord #endif;
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 
 import org.oasisopen.jmi1.RefContainer;
@@ -65,7 +63,6 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
-import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 import org.w3c.cci2.Container;
 import org.w3c.cci2.SortedMaps;
@@ -234,27 +231,6 @@ public class StandardMarshaller implements Marshaller {
         return source;
     }
 
-	/**
-	 * Validate a given object
-	 * 
-	 * @param value the object to be validated
-	 * 
-	 * @throws ServiceException if the object belongs to the wrong {@code }PersistenceManager}
-	 */
-	void validate(
-		Object value
-	) throws ServiceException{
-		if(value instanceof RefBaseObject) {
-			if(this.outermostPackage !=  ((RefBaseObject)value).refOutermostPackage()){
-				throw new ServiceException(
-					BasicException.Code.DEFAULT_DOMAIN,
-					BasicException.Code.ASSERTION_FAILURE,
-					"RefPackage mismatch, the object does not have the expected outermost package"
-				);
-			}
-		}
-	}
-    
     /**
      * Marshalling Iterator
      */

@@ -69,7 +69,7 @@ extends FeatureDef {
             mapName(exceptionDef.getName()),
             exceptionDef.getQualifiedName(),
             (String)exceptionDef.objGetValue("annotation"),
-            new HashSet<Object>(exceptionDef.objGetList("stereotype")),
+            new HashSet<>(exceptionDef.objGetList("stereotype")),
             (String)exceptionDef.objGetValue("visibility"),
             getParameters(exceptionDef, model)
         );
@@ -133,20 +133,16 @@ extends FeatureDef {
         #else
 
         List<AttributeDef> parameters = new ArrayList<>();
-        for(
-            Iterator<?> i = exceptionDef.objGetList("content").iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 field = model.getElement(i.next());
-            if(model.isStructureFieldType(field)) {
+        for (Object o : exceptionDef.objGetList("content")) {
+            ModelElement_1_0 field = model.getElement(o);
+            if (model.isStructureFieldType(field)) {
                 parameters.add(
                     new AttributeDef(
                         field,
                         model
                     )
                 );
-            }
-            else {
+            } else {
                 parameters.add(
                     new AttributeDef(
                         field,

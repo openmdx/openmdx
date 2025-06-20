@@ -2098,7 +2098,7 @@ public class TestMain {
 				super.taskId = null;
 			}
 
-			#if CLASSIC_CHRONO_TYPES
+			#if CLASSIC_CHRONO_TYPES // § TODO re-enable for contemporary chrono types
 			try {
 				super.taskId = "CR20019721";
 				this.begin();
@@ -5184,11 +5184,15 @@ public class TestMain {
 				}
 				currentUnitOfWork().afterCompletion(Status.STATUS_COMMITTED);
 			} finally {
-				try {
-					this.userTransaction.begin();
-				} catch (Exception exception) {
-					throw new RuntimeException("Could not start container managed read-only transaction", exception);
-				}
+				restartTransaction();
+			}
+		}
+
+		private void restartTransaction() {
+			try {
+				this.userTransaction.begin();
+			} catch (Exception exception) {
+				throw new RuntimeException("Could not start container managed read-only transaction", exception);
 			}
 		}
 

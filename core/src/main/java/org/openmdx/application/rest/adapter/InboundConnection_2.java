@@ -257,7 +257,7 @@ public class InboundConnection_2 extends AbstractConnection {
      * <li>an {@code @openmdx} XRI in case of a persistent object
      * </ul>
      * 
-     * @param object
+     * @param object a persistent capable object
      * @return the object's resource identifier
      */
     protected static Path getResourceIdentifier(
@@ -317,8 +317,7 @@ public class InboundConnection_2 extends AbstractConnection {
     }
 
     @Override
-    public Interaction createInteraction()
-        throws ResourceException {
+    public Interaction createInteraction() {
         return new InboundInteraction(this);
     }
 
@@ -409,11 +408,6 @@ public class InboundConnection_2 extends AbstractConnection {
 
         /**
          * Test the transaction state and id
-         * 
-         * @param path
-         * @param existence
-         * 
-         * @throws ResourceException
          */
         private void validateTransactionStateAndId(
             Path path,
@@ -492,9 +486,6 @@ public class InboundConnection_2 extends AbstractConnection {
          *            the JMI collection
          * 
          * @return the next JCA value
-         * 
-         * @throws ServiceException
-         * @throws ResourceException
          */
         @SuppressWarnings("unchecked")
         private IndexedRecord toJcaValue(
@@ -524,9 +515,6 @@ public class InboundConnection_2 extends AbstractConnection {
          *            the JMI map
          * 
          * @return the next JCA value
-         * 
-         * @throws ServiceException
-         * @throws ResourceException
          */
         @SuppressWarnings("unchecked")
         private MappedRecord toJcaValue(
@@ -559,9 +547,6 @@ public class InboundConnection_2 extends AbstractConnection {
          *            the JMI structure
          * 
          * @return the next JCA value
-         * 
-         * @throws ServiceException
-         * @throws ResourceException
          */
         @SuppressWarnings("unchecked")
         private MappedRecord toJcaValue(
@@ -604,8 +589,6 @@ public class InboundConnection_2 extends AbstractConnection {
          * @param featureDef the feature definition
          * 
          * @return the requested feature
-         * 
-         * @throws ServiceException
          */
         private Object getJcaValue(
             RefObject source,
@@ -633,9 +616,6 @@ public class InboundConnection_2 extends AbstractConnection {
          *            the {@code RefObject} value
          * 
          * @return its {@code MappedRecord} value representation
-         * 
-         * @throws ResourceException
-         * @throws ServiceException
          */
         private Object toJcaValue(
             Object refValue
@@ -663,10 +643,9 @@ public class InboundConnection_2 extends AbstractConnection {
          * @param jcaValue
          *            the JCA value
          * @param featureDef
+         *           the feature definition
          * 
          * @return the JMI value
-         * 
-         * @throws ResourceException
          */
         private Object toRefValue(
             Object jcaValue,
@@ -713,8 +692,6 @@ public class InboundConnection_2 extends AbstractConnection {
          *            the requested getch groups maybe {@code null}
          * 
          * @return its {@code MappedRecord} representation
-         * 
-         * @throws ResourceException
          */
         @SuppressWarnings("unchecked")
         private MappedRecord toJcaRecord(
@@ -798,12 +775,10 @@ public class InboundConnection_2 extends AbstractConnection {
          * @param input the Query
          * 
          * @return a new query object
-         * 
-         * @throws ResourceException
          */
         private Query toRefQuery(
             QueryRecord input
-        ) throws ResourceException {
+        ) {
             Query query = getPersistenceManager().newQuery(Queries.QUERY_LANGUAGE, input);
             //
             // Fetch Plan
@@ -887,10 +862,10 @@ public class InboundConnection_2 extends AbstractConnection {
                                     } else if (rawValue instanceof SparseArray<?>) {
                                         SparseArray<?> source = (SparseArray<?>) rawValue;
                                         for (ListIterator<?> i = source.populationIterator(); i.hasNext();) {
-                                            target.put(Integer.valueOf(i.nextIndex()), this.toRefValue(i.next(), featureDef));
+                                            target.put(i.nextIndex(), this.toRefValue(i.next(), featureDef));
                                         }
                                     } else {
-                                        target.put(Integer.valueOf(0), this.toRefValue(rawValue, featureDef));
+                                        target.put(0, this.toRefValue(rawValue, featureDef));
                                     }
                                 }
                             }
@@ -926,18 +901,15 @@ public class InboundConnection_2 extends AbstractConnection {
         }
 
         /**
-         * Propagate the {@code RefObject} to indexed {@code IndexedRecord{@code 
+         * Propagate the {@code RefObject} to indexed {@code IndexedRecord}
          * 
-         * &#64;param refObject
-         * &#64;param output
+         * @param refObject the source
+         * @param output the target
          * @param requestedFeatures the requested features, may be {@code null}
-         * 
          * @param fetchGroups
          *            the requested fetch groups, may be {@code null}
-         * 
          * @return {@code true}
-         * 
-         * @throws ResourceException
+         * @throws ResourceException in case of failure
          */
         @SuppressWarnings("unchecked")
         private boolean propagate(
@@ -951,12 +923,6 @@ public class InboundConnection_2 extends AbstractConnection {
             return true;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#get(org.openmdx.base.resource.spi.RestInteractionSpec,
-         * org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
-         */
         @SuppressWarnings("unchecked")
         @Override
         public boolean get(
@@ -988,7 +954,7 @@ public class InboundConnection_2 extends AbstractConnection {
                     Set<String> features = input.getFeatureName();
                     final QueryFilterRecord queryFilter = input.getQueryFilter();
                     if (queryFilter != null) {
-                        features = features == null ? new HashSet<String>() : new HashSet<String>(features);
+                        features = features == null ? new HashSet<>() : new HashSet<>(features);
                         for (FeatureOrderRecord orderSpecifier : queryFilter.getOrderSpecifier()) {
                             features.add(orderSpecifier.featureName());
                         }
@@ -1072,17 +1038,16 @@ public class InboundConnection_2 extends AbstractConnection {
             }
         }
 
+        #if CLASSIC_CHRONO_TYPES
         /**
          * Provide the {@code add()} argument list
          *
-         * @param argumentClasses
-         * @param qualifier
-         * @param object
+         * @param argumentClasses the argument classes
+         * @param qualifier the qualifier
+         * @param object the persistence capable object
          * 
-         * @return the {@code add()} argument list
-         * @throws ServiceException
+         * @return the {@code add()} arguments
          */
-        @SuppressWarnings("rawtypes")
         private Object[] toAddArguments(
                 Class<?>[] argumentClasses,
                 String qualifier,
@@ -1093,13 +1058,9 @@ public class InboundConnection_2 extends AbstractConnection {
                     persistent
                 ), Datatypes.create(argumentClasses[1], persistent ? qualifier.substring(1) : qualifier), object };
         }
+        #endif
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#move(org.openmdx.base.resource.spi.RestInteractionSpec,
-         * org.openmdx.base.naming.Path, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
-         */
+        @SuppressWarnings("unchecked")
         @Override
         public boolean move(
             RestInteractionSpec ispec,
@@ -1288,7 +1249,7 @@ public class InboundConnection_2 extends AbstractConnection {
                     if (output != null) {
                         output.setResourceIdentifier(xri);
                         output.setBody(
-                            reply instanceof RefStruct_1_0 ? (MappedRecord) ((RefStruct_1_0) reply).refDelegate() : (MappedRecord) reply
+                            reply instanceof RefStruct_1_0 ? ((RefStruct_1_0) reply).refDelegate() : (MappedRecord) reply
                         );
                     }
                 }
