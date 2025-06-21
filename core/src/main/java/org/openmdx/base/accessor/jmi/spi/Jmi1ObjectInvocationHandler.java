@@ -64,7 +64,9 @@ import java.util.Set;
 import java.util.SortedMap;
 
 #if JAVA_8
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 #endif
 
@@ -361,7 +363,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     ) throws Throwable {
         if(method.isDefault()) {
             #if JAVA_8
-            return Jmi1ObjectInvocationHandler.invokeDefault(proxy, method, args);
+            return invokeDefaultMethod(proxy, method, args);
             #else
             return InvocationHandler.invokeDefault(proxy, method, args);
             #endif
@@ -1640,18 +1642,29 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     }
 
     #if JAVA_8
-    private static Object invokeDefault(Object proxy, Method method, Object[] args) throws Throwable {
-        final Class<?> declaringClass = method.getDeclaringClass();
-        Constructor<MethodHandles.Lookup> constructor =
-            MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
-        constructor.setAccessible(true);
-        return constructor
-            .newInstance(declaringClass, MethodHandles.Lookup.PRIVATE)
-            .unreflectSpecial(method, declaringClass)
-            .bindTo(proxy)
-            .invokeWithArguments(args == null ? new Object[0] : args);
+    private Object invokeDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable {
+            // This is the special logic for Java 8
+            final Class<?> declaringClass = method.getDeclaringClass();
+
+            // Get the internal constructor of MethodHandles.Lookup
+            Constructor<MethodHandles.Lookup> constructor =
+                MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+
+            // Make it accessible despite being package-private
+            constructor.setAccessible(true);
+
+            // Create a lookup instance with private access for the interface
+            MethodHandles.Lookup lookup = constructor.newInstance(declaringClass, MethodHandles.Lookup.PRIVATE);
+
+            // Use the lookup to create a handle for the special invocation of the default method
+            MethodHandle handle = lookup
+                .unreflectSpecial(method, declaringClass)
+                .bindTo(proxy);
+
+            // Invoke the default method
+            return handle.invokeWithArguments(args);
     }
-    #endif
+#endif
 
     //------------------------------------------------------------------------
     // Class Jmi1BinaryLargeObject
