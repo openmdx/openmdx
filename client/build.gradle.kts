@@ -101,13 +101,24 @@ dependencies {
     jakartaeeApi("jakarta.platform:jakarta.jakartaee-api")
 }
 
-sourceSets {
-    main {
-        java {
-            srcDir("src/main/java")
-            srcDir("src/main/openmdx-${projectFlavour}/java")
-            exclude("org/ietf/jgss/**")
-            exclude("org/openmdx/dalvik/**")
+if(projectFlavour == "3") {
+    sourceSets {
+        main {
+            java {
+                srcDir("src/main/java")
+                srcDir("src/main/openmdx-${projectFlavour}/java")
+                exclude("org/ietf/jgss/**")
+                exclude("org/openmdx/dalvik/**")
+            }
+        }
+    }
+} else {
+    sourceSets {
+        main {
+            java {
+                srcDir("src/main/java")
+                srcDir("src/main/openmdx-${projectFlavour}/java")
+            }
         }
     }
 }
