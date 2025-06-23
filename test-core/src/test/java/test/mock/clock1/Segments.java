@@ -49,6 +49,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
 
+import java.util.Optional;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
@@ -66,6 +67,7 @@ import org.w3c.time.ChronoTypes;
 import test.openmdx.clock1.jmi1.Clock1Package;
 import test.openmdx.clock1.jmi1.Segment;
 import test.openmdx.clock1.jmi1.Time;
+import org.opentest4j.AssertionFailedError;
 
 /**
  * Segments
@@ -254,8 +256,11 @@ public class Segments {
         final Segment segment
     ) {
         final String expected = "clock1 segment";
-        Assertions.assertTrue(segment.optionalDescription().isPresent(), "Description not present");
-        Assertions.assertEquals(expected, segment.optionalDescription().orElseThrow(), "wrong description");
+        #if CLASSIC_CHRONO_TYPES #else
+        final Optional<String> optionalDescription = segment.optionalDescription();
+        Assertions.assertTrue(optionalDescription.isPresent(), "Description not present");
+        Assertions.assertEquals(expected, optionalDescription.orElseThrow(AssertionFailedError::new), "wrong description");
+        #endif
         Assertions.assertEquals(expected, segment.getDescription(), "wrong description");
     }
 

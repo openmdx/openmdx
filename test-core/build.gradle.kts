@@ -146,9 +146,23 @@ tasks.named<AbstractCompile>("compileOpenmdxDatatypeJava") {
     classpath = configurations["openmdxBootstrap"]
 }
 
-tasks.withType<Test> {
-    this.classpath.forEach { println(it) }
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
+
+tasks.withType<Test> {
+    this.classpath.forEach {
+        println(it)
+    }
+    javaLauncher.set(
+        javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(runtimeCompatibility.majorVersion))
+        }
+    )
+}
+
 tasks.test {
     useJUnitPlatform()
     maxHeapSize = "4G"
