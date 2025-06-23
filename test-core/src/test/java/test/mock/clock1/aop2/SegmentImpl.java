@@ -74,7 +74,7 @@ public class SegmentImpl extends AbstractObject<test.openmdx.clock1.jmi1.Segment
 
     static class Context {
 
-        private long epochMillis = java.time.Instant.parse("2000-04-01T12:00:00Z").toEpochMilli();
+        private long epochMillis = ChronoTypes.getEpochMilliseconds(java.time.Instant.parse("2000-04-01T12:00:00Z"));
 
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif getDateTime() {
             return ChronoTypes.ofEpochMilliseconds(this.epochMillis);

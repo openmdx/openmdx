@@ -793,7 +793,7 @@ public class DerValue {
      * encoding, so that bitwise equality of the encoded values is an
      * efficient way to establish equivalence of the unencoded values.
      *
-     * @param other the object being compared with this one
+     * @param o the object being compared with this one
      */
     @Override
     public boolean equals(Object o) {

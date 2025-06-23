@@ -203,8 +203,8 @@ public class AuditQueries {
                     try {
                         UnitOfWork unitOfWork = involvement.getUnitOfWork();
                         if(
-                            (from == null || !ChronoTypes.isAfter(from, unitOfWork.getCreatedAt().toInstant())) &&
-                                (to == null || ChronoTypes.isAfter(to, unitOfWork.getCreatedAt().toInstant()))
+                            (from == null || !ChronoTypes.isAfter(from, unitOfWork.getCreatedAt())) &&
+                                (to == null || ChronoTypes.isAfter(to, unitOfWork.getCreatedAt()))
                         ){
                             unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
                         }
@@ -280,8 +280,8 @@ public class AuditQueries {
                         if(ReducedJDOHelper.isPersistent(involvement)) try {
                             UnitOfWork unitOfWork = involvement.getUnitOfWork();
                             if(
-                                (from == null || !ChronoTypes.isAfter(from, unitOfWork.getCreatedAt().toInstant())) &&
-                                    (to == null || ChronoTypes.isAfter(to, unitOfWork.getCreatedAt().toInstant()))
+                                (from == null || !ChronoTypes.isAfter(from, unitOfWork.getCreatedAt())) &&
+                                    (to == null || ChronoTypes.isAfter(to, unitOfWork.getCreatedAt()))
                             ){
                                 unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
                             }

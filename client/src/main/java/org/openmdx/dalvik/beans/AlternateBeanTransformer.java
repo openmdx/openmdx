@@ -75,7 +75,7 @@ import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
 /**
- * Alternate Java Bean Transfomer
+ * Alternate Java Bean Transformer
  *
  * @since openMDX 2.12
  */

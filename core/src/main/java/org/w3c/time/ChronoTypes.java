@@ -164,7 +164,7 @@ public class ChronoTypes {
     /**
      * Create a org::w3c::dateTime instance from epoch milliseconds
      *
-     * @param epochMilliSeconds the number of milliseconds since the begin of the epoch
+     * @param epochMilliSeconds the number of milliseconds since the beginning of the epoch
      * @return a org::w3c::dateTime instance initialized with the given timestamp
      */
     public static #if CLASSIC_CHRONO_TYPES java.util.Date #else Instant #endif ofEpochMilliseconds(long epochMilliSeconds) {
