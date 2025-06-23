@@ -149,7 +149,7 @@ class DataObjectFilter extends ObjectFilter {
                 } else {
                     ModelElement_1_0 featureDef = classifier.getModel().getFeatureDef(classifier, attribute, false);
 					if(featureDef == null) {
-						classifier.getModel().getFeatureDef(classifier, attribute, true); // Solves issue 131
+						featureDef = classifier.getModel().getFeatureDef(classifier, attribute, true); // Solves issue 131
 					}
                     switch(ModelHelper.getMultiplicity(featureDef)) {
                         case LIST:
