@@ -57,7 +57,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import #if JAVA_8 javax#else jakarta#endif.servlet.ServletContext;
+import #if JAVA_8 javax.servlet.ServletContext #else jakarta.servlet.ServletContext #endif;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;

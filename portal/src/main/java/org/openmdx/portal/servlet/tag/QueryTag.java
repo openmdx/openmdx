@@ -45,7 +45,7 @@
  */
 package org.openmdx.portal.servlet.tag;
 
-import #if JAVA_8 javax #else jakarta#endif.servlet.jsp.JspException;
+import #if JAVA_8 javax.servlet.jsp.JspException #else jakarta.servlet.jsp.JspException #endif;
 
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.rest.cci.QueryFilterRecord;

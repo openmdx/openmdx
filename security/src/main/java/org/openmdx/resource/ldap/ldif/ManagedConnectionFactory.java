@@ -152,7 +152,7 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
         }
     }
     @Override
-    protected #if JAVA_8 javax #else jakarta #endif.resource.spi.ManagedConnection newManagedConnection(
+    protected #if JAVA_8 javax.resource.spi.ManagedConnection #else jakarta.resource.spi.ManagedConnection #endif newManagedConnection(
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
