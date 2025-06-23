@@ -446,7 +446,7 @@ public class AlternateRestFormatter implements RestFormatter {
 	                    writer.writeCData((String) value);
 	                } else if (Datatypes.DATE_TIME_CLASS.isInstance(value)) {
                         writer.writeCharacters(
-                            org.w3c.spi2.Datatypes.EXTENDED_FORMATTER_DT_UTC_TZ.format(Datatypes.DATE_TIME_CLASS.cast(value))
+                            DateTimeFormat.EXTENDED_UTC_FORMAT.format(Datatypes.DATE_TIME_CLASS.cast(value))
                         );
 	                } else if (value instanceof char[]) {
 	                    char[] text = (char[]) value;

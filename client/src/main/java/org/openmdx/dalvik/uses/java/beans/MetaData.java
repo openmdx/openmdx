@@ -51,6 +51,7 @@ import java.util.TreeSet;
 import java.util.Vector;
 import java.util.WeakHashMap;
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.ChronoTypes;
 
 /*
  * Like the {@code Intropector}, the {@code MetaData} class
@@ -279,12 +280,12 @@ class java_util_Date_PersistenceDelegate extends PersistenceDelegate {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif oldDate = Datatypes.DATE_TIME_CLASS.cast(oldInstance);
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif newDate = Datatypes.DATE_TIME_CLASS.cast(newInstance);
 
-        return oldDate.getTime() == newDate.getTime();
+        return ChronoTypes.getEpochMilliseconds(oldDate) == ChronoTypes.getEpochMilliseconds(newDate);
     }
 
     protected Expression instantiate(Object oldInstance, Encoder out) {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif date = Datatypes.DATE_TIME_CLASS.cast(oldInstance);
-        return new Expression(date, date.getClass(), "new", new Object[] {date.getTime()});
+        return new Expression(date, date.getClass(), "new", new Object[] {ChronoTypes.getEpochMilliseconds(date)});
     }
 }
 

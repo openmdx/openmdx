@@ -44,6 +44,8 @@ final class SerializedXMLGregorianCalendar implements Serializable {
     }
     
     private Object readResolve() throws ObjectStreamException {
-        return new DatatypeFactoryImpl().newXMLGregorianCalendar(lexicalValue);
+        return #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(lexicalValue);
+        #else java.time.Instant.parse(lexicalValue);
+        #endif
     }
 }

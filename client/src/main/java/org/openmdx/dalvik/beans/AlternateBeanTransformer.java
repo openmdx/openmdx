@@ -54,6 +54,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Optional;
 import java.math.BigInteger;
@@ -98,7 +100,7 @@ public class AlternateBeanTransformer implements BeanTransformer {
             try(XMLEncoder encoder = new XMLEncoder(out)){
                 if(exceptionListener != null) {
                     encoder.setExceptionListener(
-                            new ExceptionListenerAdapter(exceptionListener)
+                        (ExceptionListener) new ExceptionListenerAdapter(exceptionListener)
                     );
                 }
                 encoder.setPersistenceDelegate(

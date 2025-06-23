@@ -3,7 +3,7 @@
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
  
-package org.ietf.jgss;
+package org.openmdx.jgss;
 
 import java.io.InputStream;
 import java.io.IOException;
