@@ -54,6 +54,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.w3c.time.ChronoTypes;
 import org.w3c.time.SystemClock;
 
 /**
@@ -399,14 +401,16 @@ class ClassicDateTimeFormatter extends ThreadLocal<SimpleDateFormat> implements 
             Matcher matcher = wideRangePattern.matcher(withoutTimeZone);
             if(matcher.matches()) {
                 return new Date (
-                    Instant.parse(
-                    matcher.group(1) + '-' +
-                        matcher.group(2) + '-' +
-                        matcher.group(3) + 'T' +
-                        matcher.group(4) + ':' +
-                        matcher.group(5) + ':' +
-                        matcher.group(6) + 'Z'
-                    ).toEpochMilli()
+                    ChronoTypes.getEpochMilliseconds(
+                        Instant.parse(
+                                matcher.group(1) + '-' +
+                                        matcher.group(2) + '-' +
+                                        matcher.group(3) + 'T' +
+                                        matcher.group(4) + ':' +
+                                        matcher.group(5) + ':' +
+                                        matcher.group(6) + 'Z'
+                        )
+                    )
                 );
             } else {
                 return super.parse(

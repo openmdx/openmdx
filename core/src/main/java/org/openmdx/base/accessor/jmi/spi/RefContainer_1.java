@@ -61,9 +61,11 @@ import javax.jdo.spi.StateManager;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
-#if !CLASSIC_CHRONO_TYPES import org.oasisopen.cci2.QualifierType;#endif
+#if !CLASSIC_CHRONO_TYPES
+import org.oasisopen.cci2.QualifierType;
+import org.oasisopen.jmi1.RefQualifier;
+#endif
 import org.oasisopen.jmi1.RefContainer;
-#if !CLASSIC_CHRONO_TYPES import org.oasisopen.jmi1.RefQualifier;#endif
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;

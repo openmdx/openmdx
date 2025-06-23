@@ -277,11 +277,9 @@ public class Jmi1ContainerInvocationHandlerWithCciDelegate extends AbstractJmi1C
     }
 
     #if CLASSIC_CHRONO_TYPES
-
     private Object[] toCciArguments(Object[] refArgs, Class<?>[] parameterTypes) throws ServiceException {
         return (Object[]) this.marshaller.unmarshal(refArgs[0]);
     }
-
     #else
 
     private Object[] toCciArguments(

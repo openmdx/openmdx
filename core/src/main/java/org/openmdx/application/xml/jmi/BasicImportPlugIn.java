@@ -73,7 +73,6 @@ public class BasicImportPlugIn implements ImportPlugIn {
     /**
      * Constructor 
      *
-     * @param target the target {@code PersistenceManager}
      */
     public BasicImportPlugIn(
     ) {

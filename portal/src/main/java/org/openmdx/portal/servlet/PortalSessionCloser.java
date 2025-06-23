@@ -46,7 +46,6 @@
 
 package org.openmdx.portal.servlet;
 
-
 #if JAVA_8
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;

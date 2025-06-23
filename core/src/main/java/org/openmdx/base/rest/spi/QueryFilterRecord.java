@@ -247,7 +247,7 @@ public class QueryFilterRecord
         throw new UnsupportedOperationException();
     }
 
-	/* (non-Javadoc)
+    /* (non-Javadoc)
      * @see org.w3c.cci2.AnyTypePredicate#equalTo(java.lang.Object)
      */
     @Override
