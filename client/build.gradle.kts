@@ -51,13 +51,15 @@ plugins {
 }
 
 val projectFlavour = project.extra["projectFlavour"] as String
-val projectSpecificationVersion = project.extra["projectSpecificationVersion"] as String
-val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
+// val projectSpecificationVersion = project.extra["projectSpecificationVersion"] as String
+// val projectMaintenanceVersion = project.extra["projectMaintenanceVersion"] as String
 val runtimeCompatibility = project.extra["runtimeCompatibility"] as JavaVersion
 
-if (runtimeCompatibility.isJava8()  && System.getenv("JRE_18") == null) {
-    throw GradleException("ERROR: JRE_18 not set " +
-            "(e.g. export JRE_18=/usr/lib/jvm/java-8-openjdk-amd64/jre)")
+if (runtimeCompatibility.isJava8() && System.getenv("JRE_18") == null) {
+    throw GradleException(
+        "ERROR: JRE_18 not set " +
+                "(e.g. export JRE_18=/usr/lib/jvm/java-8-openjdk-amd64/jre)"
+    )
 }
 
 eclipse {
@@ -75,10 +77,44 @@ fun touch(file: File) {
     ant.withGroovyBuilder { "touch"("file" to file, "mkdirs" to true) }
 }
 
-project.configurations.maybeCreate("openmdxBootstrap")
-val openmdxBootstrap by configurations
 project.configurations.maybeCreate("jakartaeeApi")
 val jakartaeeApi by configurations
+
+sourceSets {
+    main {
+        java {
+            srcDir("src/main/java")
+            srcDir("src/main/openmdx-${projectFlavour}/java")
+        }
+        resources {
+            srcDir("src/main/resources")
+            srcDir("src/main/openmdx-${projectFlavour}/resources")
+        }
+    }
+}
+
+val dalvik by sourceSets.creating {
+    java {
+        srcDir("src/main/java")
+        srcDir("src/main/openmdx-${projectFlavour}/java")
+    }
+    resources {
+        srcDir("src/main/resources")
+        srcDir("src/main/openmdx-${projectFlavour}/resources")
+    }
+}
+
+configurations {
+    named(dalvik.implementationConfigurationName) {
+        extendsFrom(configurations.implementation.get())
+    }
+    named(dalvik.runtimeOnlyConfigurationName) {
+        extendsFrom(configurations.runtimeOnly.get())
+    }
+    named(dalvik.compileOnlyConfigurationName) {
+        extendsFrom(configurations.compileOnly.get())
+    }
+}
 
 dependencies {
     val projectPlatform = ":openmdx-${projectFlavour}-platform"
@@ -94,33 +130,9 @@ dependencies {
     compileOnly("systems.manifold:manifold-preprocessor")
     annotationProcessor(platform(project(projectPlatform)))
     annotationProcessor("systems.manifold:manifold-preprocessor")
-    // openmdxBootstrap
-    openmdxBootstrap(project(":core"))
     // jakartaee-api
     jakartaeeApi(platform(project(projectPlatform)))
     jakartaeeApi("jakarta.platform:jakarta.jakartaee-api")
-}
-
-if(projectFlavour == "3") {
-    sourceSets {
-        main {
-            java {
-                srcDir("src/main/java")
-                srcDir("src/main/openmdx-${projectFlavour}/java")
-                exclude("org/openmdx/jgss/**")
-                exclude("org/openmdx/dalvik/**")
-            }
-        }
-    }
-} else {
-    sourceSets {
-        main {
-            java {
-                srcDir("src/main/java")
-                srcDir("src/main/openmdx-${projectFlavour}/java")
-            }
-        }
-    }
 }
 
 tasks {
@@ -209,48 +221,48 @@ tasks {
         useJUnitPlatform()
         maxHeapSize = "4G"
     }
-    if(projectFlavour == "3") {
+    if (projectFlavour < "4") {
         distTar {
             dependsOn(
                 "openmdx-client.jar",
+                "openmdx-dalvik.jar",
                 "openmdx-client-sources.jar",
+                "openmdx-dalvik-sources.jar"
             )
         }
         distZip {
             dependsOn(
                 "openmdx-client.jar",
+                "openmdx-dalvik.jar",
                 "openmdx-client-sources.jar",
+                "openmdx-dalvik-sources.jar"
             )
         }
         assemble {
             dependsOn(
                 "openmdx-client.jar",
                 "openmdx-client-sources.jar",
+                "openmdx-dalvik.jar",
+                "openmdx-dalvik-sources.jar"
             )
         }
     } else {
         distTar {
             dependsOn(
                 "openmdx-client.jar",
-                "openmdx-dalvik.jar",
                 "openmdx-client-sources.jar",
-                "openmdx-dalvik-sources.jar"
             )
         }
         distZip {
             dependsOn(
                 "openmdx-client.jar",
-                "openmdx-dalvik.jar",
                 "openmdx-client-sources.jar",
-                "openmdx-dalvik-sources.jar"
             )
         }
         assemble {
             dependsOn(
                 "openmdx-client.jar",
                 "openmdx-client-sources.jar",
-                "openmdx-dalvik.jar",
-                "openmdx-dalvik-sources.jar"
             )
         }
     }
@@ -299,7 +311,7 @@ tasks {
             },
             copySpec {
                 from(configurations["jakartaeeApi"].filter { it.name.endsWith("jar") }.map { zipTree(it) }).include(
-                    "javax/transaction/Synchronization.*"
+                    "*/transaction/Synchronization.*"
                 )
             }
         )
@@ -336,8 +348,18 @@ tasks {
             copySpec {
                 from(
                     zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/core/lib/openmdx-base-sources.jar")),
-                    zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/core/lib/openmdx-system-sources.jar")),
-                    zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/security/lib/openmdx-security-sources.jar"))
+                    zipTree(
+                        File(
+                            project.rootDir,
+                            "build/openmdx-${projectFlavour}/core/lib/openmdx-system-sources.jar"
+                        )
+                    ),
+                    zipTree(
+                        File(
+                            project.rootDir,
+                            "build/openmdx-${projectFlavour}/security/lib/openmdx-security-sources.jar"
+                        )
+                    )
                 ).include(
                     openmdxCommonIncludes
                 ).exclude(
@@ -409,7 +431,12 @@ tasks {
                 from(
                     "src/main/java",
                     File(buildDirAsFile, "generated/sources/java/main"),
-                    zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/client/lib/openmdx-client-sources.jar"))
+                    zipTree(
+                        File(
+                            project.rootDir,
+                            "build/openmdx-${projectFlavour}/client/lib/openmdx-client-sources.jar"
+                        )
+                    )
                 ).include(
                     openmdxDalvikIncludes
                 ).exclude(
