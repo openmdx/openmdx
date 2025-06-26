@@ -93,28 +93,71 @@ sourceSets {
     }
 }
 
-val dalvik by sourceSets.creating {
-    java {
-        srcDir("src/main/java")
-        srcDir("src/main/openmdx-${projectFlavour}/java")
+//if(projectFlavour < "4") {
+
+    val dalvik by sourceSets.creating {
+
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+
+        java {
+            srcDir("src/dalvik/java")
+            srcDir("src/dalvik/openmdx-${projectFlavour}/java")
+        }
+
+        resources {
+            srcDir("src/dalvik/resources")
+            srcDir("src/dalvik/openmdx-${projectFlavour}/resources")
+        }
+
+//        output.classesDirs.from(file("${layout.buildDirectory}/classes/java/dalvik"))
+
     }
-    resources {
-        srcDir("src/main/resources")
-        srcDir("src/main/openmdx-${projectFlavour}/resources")
-    }
-}
+
+
+//    val dalvik by sourceSets.creating {
+//        java {
+//            srcDir("src/dalvik/java")
+//            srcDir("src/dalvik/openmdx-${projectFlavour}/java")
+//            // Set specific output directory for dalvik classes
+//            destinationDirectory.set(layout.buildDirectory.dir("classes/java/dalvik"))
+//        }
+//        compileClasspath += sourceSets.main.get().output
+//        runtimeClasspath += sourceSets.main.get().output
+//        resources {
+//            srcDir("src/dalvik/resources")
+//            srcDir("src/dalvik/openmdx-${projectFlavour}/resources")
+//            destinationDirectory.set(layout.buildDirectory.dir("resources/dalvik"))
+//        }
+//    }
+
+//    val dalvik by sourceSets.creating {
+//        java {
+//            srcDir("src/dalvik/java")
+//            srcDir("src/dalvik/openmdx-${projectFlavour}/java")
+//        }
+//        compileClasspath += sourceSets.main.output + configurations.dalvikCompileClasspath
+//        runtimeClasspath += output + compileClasspath + configurations.dalvikRuntimeClasspath
+//    }
+
+
+sourceSets.get("dalvik").output.classesDirs.from(
+    "${layout.buildDirectory}/classes/java/dalvik",
+    "${layout.buildDirectory}/classes/java/main"
+)
 
 configurations {
-    named(dalvik.implementationConfigurationName) {
-        extendsFrom(configurations.implementation.get())
+        named(dalvik.implementationConfigurationName) {
+            extendsFrom(configurations.implementation.get())
+        }
+        named(dalvik.runtimeOnlyConfigurationName) {
+            extendsFrom(configurations.runtimeOnly.get())
+        }
+        named(dalvik.compileOnlyConfigurationName) {
+            extendsFrom(configurations.compileOnly.get())
+        }
     }
-    named(dalvik.runtimeOnlyConfigurationName) {
-        extendsFrom(configurations.runtimeOnly.get())
-    }
-    named(dalvik.compileOnlyConfigurationName) {
-        extendsFrom(configurations.compileOnly.get())
-    }
-}
+//}
 
 dependencies {
     val projectPlatform = ":openmdx-${projectFlavour}-platform"
@@ -187,6 +230,26 @@ tasks {
         "**/xmi1",
         "org/omg/primitivetypes/**"
     )
+
+
+
+    // Configure compileDalvikJava task
+    named("compileDalvikJava") {
+        val task = this as JavaCompile
+        task.source = sourceSets["dalvik"].java
+        task.classpath = sourceSets["dalvik"].compileClasspath
+        task.destinationDirectory.set(sourceSets["dalvik"].java.destinationDirectory)
+        task.sourceCompatibility = runtimeCompatibility.toString()
+        task.targetCompatibility = runtimeCompatibility.toString()
+    }
+
+    // Make classes task include compileDalvikJava
+    named("classes") {
+        dependsOn("compileDalvikJava")
+    }
+
+
+
 
     named("processResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
     named("processTestResources", Copy::class.java) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
@@ -390,8 +453,8 @@ tasks {
                     zipTree(File(project.rootDir, "build/openmdx-${projectFlavour}/client/lib/openmdx-client.jar"))
                 ).include(
                     "META-INF/*.properties"
-                ).exclude(
-                    "META-INF/openmdx-xml-outputfactory.properties"
+//                ).exclude(
+//                    "META-INF/openmdx-xml-outputfactory.properties"
                 ).eachFile {
                     path = "org/openmdx/dalvik/metainf/$name"
                 }
@@ -405,7 +468,7 @@ tasks {
                 )
             }, copySpec {
                 from(
-                    File(buildDirAsFile, "classes/main/java"), File(buildDirAsFile, "resources/main"), "src/main/dalvik"
+                    File(buildDirAsFile, "classes/main/java"), File(buildDirAsFile, "resources/main"), "src/dalvik/java"
                 ).exclude(
                     "META-INF/**"
                 )
