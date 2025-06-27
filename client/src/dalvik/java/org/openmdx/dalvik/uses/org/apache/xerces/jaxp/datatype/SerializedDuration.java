@@ -44,8 +44,6 @@ final class SerializedDuration implements Serializable {
     }
     
     private Object readResolve() throws ObjectStreamException {
-        return #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(lexicalValue);
-        #else java.time.Instant.parse(lexicalValue);
-        #endif
+        return new DatatypeFactoryImpl().newDuration(lexicalValue);
     }
 }
