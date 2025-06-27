@@ -49,8 +49,6 @@ import org.w3c.format.DateTimeFormat;
 import java.io.ObjectStreamException;
 import java.util.Date;
 
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
-
 /**
  * Unmodifiable Date-Time
  */

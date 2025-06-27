@@ -266,7 +266,7 @@ public class RestInteraction extends AbstractRestInteraction {
             final Map<String, AttributeSpecifier> attributeSpecifiersAsMap = AttributeSpecifier.getAttributeSpecifierAsMap(
                 request.getQueryFilter());
             final DbObject dbObject;
-            /**
+            /*
              * prepare SELECT statement
              */
             SysLog.trace("ITERATION_START");
@@ -521,7 +521,7 @@ public class RestInteraction extends AbstractRestInteraction {
                 excludingClausesValues,
                 context
             );
-            /**
+            /*
              * get all slices of objects which match the reference and attribute
              * filter
              */
@@ -584,7 +584,7 @@ public class RestInteraction extends AbstractRestInteraction {
             // Positive attribute filter
             for (int i = 0; i < includingClauses.size(); i++) {
                 String filterClause = includingClauses.get(i);
-                if (filterClause.length() > 0) {
+                if (!filterClause.isEmpty()) {
                     statement += " AND ";
                     statement += filterClause;
                     statementParameters.addAll(
@@ -593,10 +593,10 @@ public class RestInteraction extends AbstractRestInteraction {
             }
             // Negative attribute filter
             ExcludingClauses: for (String exludingClause : exludingClauses) {
-                if (exludingClause.length() > 0) {
+                if (!exludingClause.isEmpty()) {
                     for (int i = 0; i < exludingClauses.size(); i++) {
                         String filterClause = exludingClauses.get(i);
-                        if (filterClause.length() > 0) {
+                        if (!filterClause.isEmpty()) {
                             statement += " AND ";
                             statement += filterClause;
                             statementParameters.addAll(
@@ -723,9 +723,9 @@ public class RestInteraction extends AbstractRestInteraction {
                         target
                     );
                     SysLog.log(
-                        Level.FINE, "Sys|*** hasMore={0}|objects.size()={1}", 
-                        Boolean.valueOf(hasMore), 
-                        Integer.valueOf(target.count())
+                        Level.FINE, "Sys|*** hasMore={0}|objects.size()={1}",
+                        hasMore,
+                        target.count()
                     );
                 }
             }
