@@ -2153,8 +2153,7 @@ public class DataObject_1
      */
     private void detectConcurrentModification(
         DataObject_1_0 beforeImage
-    )
-        throws ServiceException {
+    ) throws ServiceException {
         String writeLockAssertion = getWriteLockAssertion();
         if (writeLockAssertion != null) {
             assertWriteLock(beforeImage, writeLockAssertion);
@@ -2175,11 +2174,10 @@ public class DataObject_1
     private void assertReadLock(
         DataObject_1_0 beforeImage,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif lockValue
-    )
-        throws ServiceException {
+    ) throws ServiceException {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = Datatypes.DATE_TIME_CLASS.cast(beforeImage.objGetValue(SystemAttributes.MODIFIED_AT));
         if (currentValue != null) {
-            if (ChronoTypes.isBefore(currentValue, lockValue)) {
+            if (ChronoTypes.isAfter(currentValue, lockValue)) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.CONCURRENT_ACCESS_FAILURE,
@@ -2203,8 +2201,7 @@ public class DataObject_1
     private void assertWriteLock(
         DataObject_1_0 beforeImage,
         String lockAssertion
-    )
-        throws ServiceException {
+    ) throws ServiceException {
         Matcher lockMatcher = WRITE_LOCK_PATTERN.matcher(lockAssertion);
         if (lockMatcher.matches()) {
             try {
