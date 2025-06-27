@@ -44,44 +44,6 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Serializable;
-import java.io.Writer;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-
-#if JAVA_8
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.Constructor;
-#endif
-
-import java.util.TreeSet;
-import javax.jdo.listener.ClearCallback;
-import javax.jdo.listener.DeleteCallback;
-import javax.jdo.listener.LoadCallback;
-import javax.jdo.listener.StoreCallback;
-import javax.jdo.spi.PersistenceCapable;
-import javax.jmi.reflect.JmiException;
-import javax.jmi.reflect.RefBaseObject;
-import javax.jmi.reflect.RefClass;
-import javax.jmi.reflect.RefFeatured;
-import javax.jmi.reflect.RefObject;
-import javax.jmi.reflect.RefPackage;
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.Identifier;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
@@ -115,6 +77,37 @@ import org.w3c.cci2.Container;
 import org.w3c.cci2.LargeObject;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
+
+import javax.jdo.listener.ClearCallback;
+import javax.jdo.listener.DeleteCallback;
+import javax.jdo.listener.LoadCallback;
+import javax.jdo.listener.StoreCallback;
+import javax.jdo.spi.PersistenceCapable;
+import javax.jmi.reflect.JmiException;
+import javax.jmi.reflect.RefBaseObject;
+import javax.jmi.reflect.RefClass;
+import javax.jmi.reflect.RefFeatured;
+import javax.jmi.reflect.RefObject;
+import javax.jmi.reflect.RefPackage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Serializable;
+import java.io.Writer;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeSet;
 
 /**
  * JMI 1 Object Invocation Handler
@@ -362,456 +355,11 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         Object[] args
     ) throws Throwable {
         if(method.isDefault()) {
-            #if JAVA_8
-            return invokeDefaultMethod(proxy, method, args);
-            #else
             return InvocationHandler.invokeDefault(proxy, method, args);
-            #endif
         }
         String methodName = method.getName();
         Class<?> declaringClass = method.getDeclaringClass();
         try {
-    #if CLASSIC_CHRONO_TYPES
-        if (declaringClass == Object.class) {
-            if ("hashCode".equals(methodName)) {
-                    return Integer.valueOf(System.identityHashCode(this));
-            }
-            if ("toString".equals(methodName)) {
-                return this.refDelegate.toString();
-            }
-            if ("equals".equals(methodName)) {
-                if (proxy == args[0]) {
-                    return Boolean.TRUE;
-                }
-                boolean persistent = ReducedJDOHelper.isPersistent(proxy);
-                if (persistent != ReducedJDOHelper.isPersistent(args[0])) {
-                    return Boolean.FALSE;
-                }
-                final Object thisId;
-                final Object thatId;
-                if (persistent) {
-                    thisId = ReducedJDOHelper.getObjectId(proxy);
-                    thatId = ReducedJDOHelper.getObjectId(args[0]);
-                } else {
-                    thisId = ReducedJDOHelper.getTransactionalObjectId(proxy);
-                    thatId = ReducedJDOHelper.getTransactionalObjectId(args[0]);
-                }
-                    return Boolean.valueOf(thisId != null && thisId.equals(thatId));
-            }
-        }
-            //
-            // ref delegation
-            //
-            else {
-        this.refClass.assertOpen();
-                if (this.refClass.isTerminal()) {
-                    if(
-                        declaringClass == PersistenceCapable.class ||
-                        declaringClass == org.openmdx.base.persistence.spi.Cloneable.class
-                    ) {
-                        return method.invoke(
-                            this.refDelegate,
-                            args
-                        );
-                    }
-                    else if(
-                        declaringClass == LoadCallback.class ||
-                        declaringClass == StoreCallback.class ||
-                        declaringClass == ClearCallback.class ||
-                        declaringClass == DeleteCallback.class ||
-                        declaringClass == ConstructCallback.class
-                    ) {
-                        throw new UnsupportedOperationException("Callbacks not supported for non-cci delegates. Callback was " + method);
-                    }
-                    else if (
-                        declaringClass == RefFeatured.class &&
-                        "refGetValue".equals(methodName)
-                    ){
-                        return marshal(
-                            method.invoke(
-                                this.refDelegate,
-                                args
-                            ),
-                            getFeatureName(args[0]),
-                            null
-                        );
-                    }
-                    else if (
-                        (declaringClass == RefBaseObject.class) ||
-                        (declaringClass == RefObject.class) ||
-                        (declaringClass == RefFeatured.class) ||
-                        (declaringClass == RefObject_1_0.class) ||
-                        (declaringClass == Jmi1Object_1_0.class)
-                    ) {
-                        return method.invoke(
-                            this.refDelegate,
-                            args
-                        );
-                    }
-                    else {
-                        // Dispatch cci method to generic ref-methods
-                        ModelElement_1_0 feature = getFeatureMapper().getFeature(
-                            methodName,
-                            method.getReturnType() == void.class ?
-                                FeatureMapper.MethodSignature.RETURN_IS_VOID :
-                                FeatureMapper.MethodSignature.DEFAULT
-                        );
-                        boolean operation = feature.isOperationType();
-                        String featureName = feature.getName();
-                        // Getters
-                        if (!operation && methodName.startsWith("get")) {
-                            if ((args == null) || (args.length == 0)) {
-                                return marshal(
-                                    this.refDelegate.refGetValue(featureName),
-                                    featureName,
-                                    method.getReturnType()
-                                );
-                            } else if (args.length == 1 && AnyTypePredicate.class.isAssignableFrom(method.getParameterTypes()[0])) {
-                                //
-                                // Query
-                                //
-                                final RefContainer<?> container = (RefContainer<?>) this.refDelegate.refGetValue(featureName);
-                                return container.refGetAll(args[0]);
-                            } else if (args.length == 1 && args[0] instanceof RefObject) {
-                                //
-                                // Qualifier
-                                //
-                                final Container<?> collection = (Container<?>) ((Jmi1Object_1_0) this.refDelegate).refGetValue(
-                                    featureName,
-                                    args[0]
-                                );
-                                return collection.getAll(null);
-                            } else {
-                                Object qualifier;
-                                if(args.length == 2 && args[0] instanceof Boolean) {
-                                    qualifier = ((Boolean)args[0]).booleanValue() ? "!" + args[1] : validateSubSegment(args[1]);
-                                } else {
-                                    qualifier = validateSubSegment(args[0]);
-                                }
-                                return ((Jmi1Object_1_0)this.refDelegate).refGetValue(
-                                    featureName,
-                                    qualifier
-                                );
-                            }
-                        }
-                        // Boolean getters
-                        else if (!operation && methodName.startsWith("is")) {
-                            if((args == null) || (args.length == 0)) {
-                                return this.refDelegate.refGetValue(featureName);
-                            }
-                        }
-                        // Setters
-                        else if (!operation && methodName.startsWith("set")) {
-                            if ((args != null) && (args.length == 1)) {
-                                switch(ModelHelper.getMultiplicity(feature)){
-                                    case OPTIONAL: case SINGLE_VALUE: case STREAM:
-                                        this.refDelegate.refSetValue(featureName, args[0]);
-                                        return null;
-                                    case LIST: case SET:
-                                        return setMultivalue((Collection) this.refDelegate.refGetValue(featureName), args[0]);
-                                    case MAP: case SPARSEARRAY:
-                                        return setMultivalue((Map)this.refDelegate.refGetValue(featureName), args[0]);
-                                }
-                            }
-                        }
-                        // Adders with signature (boolean idIsPersistent, PrimitiveType qualifier, Object object)
-                        else if(
-                            methodName.startsWith("add") &&
-                            (args != null) &&
-                            (args.length == 3) &&
-                            (args[0].getClass() == Boolean.class) &&
-                            (
-                                args[1] instanceof String ||
-                                args[1] instanceof Number ||
-                                args[1].getClass().isPrimitive()
-                            ) &&
-                            (args[2] instanceof RefObject_1_0)
-                        ) {
-                            ((Jmi1Object_1_0)this.refDelegate).refAddValue(
-                                Identifier.ATTRIBUTE_NAME.toIdentifier(
-                                    featureName,
-                                    "add", // removablePrefix
-                                    null, // prependablePrefix
-                                    null, // removableSuffix
-                                    null // appendableSuffix
-                                ),
-                                ((Boolean)args[0]).booleanValue() ? "!" + args[1] : args[1], // qualifier
-                                args[2] // value
-                            );
-                            return null;
-                            }
-                        // Adders with signature (PrimitiveType qualifier, Object object)
-                        else if(
-                            methodName.startsWith("add") &&
-                            (args != null) &&
-                            (args.length == 2) &&
-                            (
-                                args[0] instanceof String ||
-                                args[0] instanceof Number ||
-                                args[0].getClass().isPrimitive()
-                            ) &&
-                            (args[1] instanceof RefObject_1_0)
-                        ) {
-                            ((Jmi1Object_1_0)this.refDelegate).refAddValue(
-                                Identifier.ATTRIBUTE_NAME.toIdentifier(
-                                    featureName,
-                                    "add", // removablePrefix
-                                    null, // prependablePrefix
-                                    null, // removableSuffix
-                                    null // appendableSuffix
-                                ),
-                                args[0], // qualifier
-                                args[1] // value
-                            );
-                            return null;
-                        }
-                        // Adders with signature (Object object)
-                        else if(
-                            methodName.startsWith("add") &&
-                            (args != null) &&
-                            (args.length == 1) &&
-                            (args[0] instanceof RefObject_1_0)
-                        ) {
-                            ((Jmi1Object_1_0)this.refDelegate).refAddValue(
-                                Identifier.ATTRIBUTE_NAME.toIdentifier(
-                                    featureName,
-                                    "add", // removablePrefix
-                                    null, // prependablePrefix
-                                    null, // removableSuffix
-                                    null // appendableSuffix
-                                ),
-                                null, // qualifier
-                                args[0] // value
-                            );
-                            return null;
-                        }
-                            // Operations
-                        else {
-                            return this.refDelegate.refInvokeOperation(
-                                featureName,
-                                args == null ? Collections.EMPTY_LIST : Arrays.asList(args)
-                            );
-                        }
-                    }
-                }
-                //
-                // cci delegation
-                //
-                else {
-                    if (declaringClass == PersistenceCapable.class) {
-                        if ("jdoGetPersistenceManager".equals(methodName)) {
-                            return ((RefPackage_1_0) this.refClass.refOutermostPackage()).refPersistenceManager();
-                        } else {
-                            return method.invoke(
-                                ((DelegatingRefObject_1_0) this.refDelegate).openmdxjdoGetDataObject(),
-                                args
-                            );
-                        }
-                    } else if (
-                        declaringClass == DelegatingRefObject_1_0.class ||
-                            declaringClass == org.openmdx.base.persistence.spi.Cloneable.class
-                    ) {
-                        return method.invoke(
-                            this.refDelegate,
-                            args
-                        );
-                    }
-                    else if(
-                        declaringClass == LoadCallback.class ||
-                        declaringClass == StoreCallback.class ||
-                        declaringClass == ClearCallback.class ||
-                        declaringClass == DeleteCallback.class ||
-                        declaringClass == ConstructCallback.class
-                    ) {
-                        for (
-                            int i = 0;
-                            i < this.aspectImplementationDescriptors.length;
-                            i++
-                        ) {
-                            if (declaringClass.isAssignableFrom(this.aspectImplementationDescriptors[i].implementationClass)) {
-                                method.invoke(
-                                    this.getAspectImplementationInstance(i, proxy, ((DelegatingRefObject_1_0) this.refDelegate).openmdxjdoGetDelegate())
-                                );
-                            }
-                        }
-                        return declaringClass.isInstance(this.refDelegate) ? method.invoke(this.refDelegate, args) : null;
-                    } else if (
-                        declaringClass == RefBaseObject.class ||
-                            declaringClass == RefFeatured.class ||
-                            declaringClass == RefObject.class ||
-                            declaringClass == RefObject_1_0.class
-                    ) {
-                        if ("refGetValue".equals(methodName)) {
-                            switch (args.length) {
-                                case 1:
-                                    return this.invokeCci(
-                                        proxy,
-                                        getFeatureMapper().getAccessor(args[0]),
-                                        null,
-                                        this.refClass.getMarshaller(),
-                                        FeatureMapper.Kind.METHOD
-                                    );
-                                case 3:
-                                    LargeObject largeObject = (LargeObject) this.invokeCci(
-                                        proxy,
-                                        getFeatureMapper().getAccessor(args[0]),
-                                        null,
-                                        this.refClass.getMarshaller(),
-                                        FeatureMapper.Kind.METHOD
-                                    );
-                                    long position = args[2] == null ? 0l : ((Long)args[2]).longValue();
-                                    if (largeObject instanceof BinaryLargeObject) {
-                                        ((BinaryLargeObject) largeObject).getContent(
-                                            (OutputStream) args[1],
-                                            position
-                                        );
-                                    } else {
-                                        ((CharacterLargeObject) largeObject).getContent(
-                                            (Writer) args[1],
-                                            position
-                                        );
-                                    }
-                                    return largeObject.getLength();
-                            }
-                        } else if ("refSetValue".equals(methodName) && args.length == 2) {
-                            switch (getFeatureMapper().getMultiplicity(args[0])) {
-                                case OPTIONAL:
-                                case SINGLE_VALUE:
-                                case STREAM:
-                                    return this.invokeCci(
-                                        proxy,
-                                        getFeatureMapper().getMutator(args[0]),
-                                        new Object[]{args[1]},
-                                        this.refClass.getMarshaller(),
-                                        FeatureMapper.Kind.METHOD
-                                    );
-                                case LIST:
-                                case SET:
-                                    return setMultivalue(
-                                        (Collection) this.invokeCci(
-                                            proxy,
-                                            getFeatureMapper().getAccessor(args[0]),
-                                            null,
-                                            this.refClass.getMarshaller(),
-                                            FeatureMapper.Kind.METHOD
-                                        ),
-                                        args[1]
-                                    );
-                                case MAP:
-                                case SPARSEARRAY:
-                                    return setMultivalue(
-                                        (Map) this.invokeCci(
-                                            proxy,
-                                            getFeatureMapper().getAccessor(args[0]),
-                                            null,
-                                            this.refClass.getMarshaller(),
-                                            FeatureMapper.Kind.METHOD
-                                        ),
-                                        args[1]
-                                    );
-                            }
-                        } else if ("refInvokeOperation".equals(methodName) && args.length == 2) {
-                            Object feature = args[0];
-                            return this.invokeCci(
-                                proxy,
-                                getFeatureMapper().getOperation(feature),
-                                ((List<?>) args[1]).toArray(),
-                                this.refClass.getMarshaller(),
-                                getFeatureMapper().getKind(feature)
-                            );
-                        } else {
-                            StandardMarshaller marshaller = this.refClass.getMarshaller();
-                            return marshaller.marshal(
-                                method.invoke(
-                                    this.refDelegate,
-                                    marshaller.unmarshal(args)
-                                )
-                            );
-                        }
-                    } else {
-                        if (this.mapping.isMixedInInterfaces(declaringClass)) {
-                            return this.invokeCci(
-                                proxy,
-                                method,
-                                args,
-                                this.refClass.getMarshaller(),
-                                FeatureMapper.Kind.METHOD
-                            );
-                        } else {
-                            ModelElement_1_0 feature = getFeatureMapper().getFeature(
-                                methodName,
-                                method.getReturnType() == void.class ?
-                                    FeatureMapper.MethodSignature.RETURN_IS_VOID :
-                                    FeatureMapper.MethodSignature.DEFAULT
-                            );
-                            boolean operation = feature.isOperationType();
-                            if (
-                                !operation &&
-                                    methodName.length() > 3 &&
-                                    args != null &&
-                                    args.length > 0
-                            ) {
-                                if (methodName.startsWith("add")) {
-                                    RefContainer<?> container = (RefContainer<?>) this.invokeCci(
-                                        proxy,
-                                        getFeatureMapper().getAccessor(feature.getName()),
-                                        null,
-                                        this.refClass.getMarshaller(),
-                                        FeatureMapper.Kind.METHOD
-                                    );
-                                    container.refAdd(jmiToRef(args));
-                                    return null;
-                                } else if (methodName.startsWith("get")) {
-                                    if (args.length != 1 || !(args[0] instanceof RefObject)) {
-                                        RefContainer<?> container = (RefContainer<?>) this.invokeCci(
-                                            proxy,
-                                            getFeatureMapper().getAccessor(feature.getName()),
-                                            null,
-                                            this.refClass.getMarshaller(),
-                                            FeatureMapper.Kind.METHOD
-                                        );
-                                        if (AnyTypePredicate.class.isAssignableFrom(method.getParameterTypes()[0])) {
-                                            return container.refGetAll(args[0]);
-                                        } else {
-                                            return container.refGet(jmiToRef(args));
-                                        }
-                                    }
-                                } else if (methodName.startsWith("set")) {
-                                    boolean array = args[0] instanceof Object[];
-                                    if (array || args[0] instanceof Collection<?>) {
-                                        //
-                                        // Replace collection content
-                                        //
-                                        Collection collection = (Collection) this.invokeCci(
-                                            proxy,
-                                            getFeatureMapper().getCollection(methodName),
-                                            null,
-                                            this.refClass.getMarshaller(),
-                                            FeatureMapper.Kind.METHOD
-                                        );
-                                        collection.clear();
-                                        collection.addAll(
-                                            array ? Arrays.asList((Object[]) args[0]) : (Collection) args[0]
-                                        );
-                                        return null;
-                                    }
-                                }
-                            }
-                            Kind kind = operation ? (
-                                Boolean.TRUE.equals(feature.objGetValue("isQuery")) ? Kind.QUERY_OPERATION : Kind.NON_QUERY_OPERATION
-                            ) : Kind.METHOD;
-                            return this.invokeCci(
-                                proxy,
-                                getFeatureMapper().getMethod(method),
-                                args,
-                                this.refClass.getMarshaller(),
-                                kind
-                            );
-                        }
-                    }
-                }
-            }
-            #else
             if (declaringClass == Object.class) {
                 if ("hashCode".equals(methodName)) {
                     return System.identityHashCode(this);
@@ -1254,7 +802,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                     }
                 }
             }
-    #endif
         } catch (InvocationTargetException e) {
             throw e.getTargetException();
         }
@@ -1366,57 +913,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             return subSegment;
         }
     }
-
-    #if CLASSIC_CHRONO_TYPES
-    /**
-     * Convert JMI's non-reflective arguments to RefContainer arguments
-     *
-     * @param source non-reflective JMI arguments
-     *
-     * @return the corresponding RefContainer arguments
-     */
-        private static Object[] jmiToRef(
-        Object[] source
-    ){
-        if(source == null) {
-            return null;
-        }
-        else {
-            int size = source.length;
-            if(
-                (size == 1) &&
-                (source[0] instanceof RefObject_1_0)
-            ){
-                return new Object[]{RefContainer.REASSIGNABLE, null, source[0]};
-            }
-            else if(
-                (size == 1) &&
-                (source[0] instanceof String || source[0] instanceof Number)
-            ){
-                return new Object[]{RefContainer.REASSIGNABLE, source[0]};
-            }
-            else if(
-                size == 2 &&
-                (source[0] instanceof String)
-            ){
-                return new Object[]{RefContainer.REASSIGNABLE, source[0], source[1]};
-            }
-            else {
-                Object[] target = new Object[size];
-                for(
-                    int i = 0, iLimit = size - 1;
-                    i <= iLimit;
-                    i++
-                ){
-                    target[i] = i % 2 == 1 || i == iLimit ?
-                		validateSubSegment(source[i]) :
-                        ((Boolean)source[i]).booleanValue() ? RefContainer.PERSISTENT : RefContainer.REASSIGNABLE;
-                }
-                return target;
-            }
-        }
-    }
-    #endif
 
     /**
      * Apply the given method to the next layer's CCI API
@@ -1640,31 +1136,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             return null;
         }
     }
-
-    #if JAVA_8
-    private Object invokeDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable {
-            // This is the special logic for Java 8
-            final Class<?> declaringClass = method.getDeclaringClass();
-
-            // Get the internal constructor of MethodHandles.Lookup
-            Constructor<MethodHandles.Lookup> constructor =
-                MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
-
-            // Make it accessible despite being package-private
-            constructor.setAccessible(true);
-
-            // Create a lookup instance with private access for the interface
-            MethodHandles.Lookup lookup = constructor.newInstance(declaringClass, MethodHandles.Lookup.PRIVATE);
-
-            // Use the lookup to create a handle for the special invocation of the default method
-            MethodHandle handle = lookup
-                .unreflectSpecial(method, declaringClass)
-                .bindTo(proxy);
-
-            // Invoke the default method
-            return handle.invokeWithArguments(args);
-    }
-#endif
 
     //------------------------------------------------------------------------
     // Class Jmi1BinaryLargeObject
