@@ -52,7 +52,11 @@ import java.time.Period;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time#endif.Duration;
+#if CLASSIC_CHRONO_TYPES
+import javax.xml.datatype.Duration;
+#else
+import java.time#endif.Duration;
+#endif
 
 import org.openmdx.base.Version;
 import org.openmdx.base.exception.ServiceException;
