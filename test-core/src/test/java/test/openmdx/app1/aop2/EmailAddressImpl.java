@@ -44,16 +44,13 @@
  */
 package test.openmdx.app1.aop2;
 
-import org.openmdx.base.jmi1.Void;
 import org.openmdx.kernel.log.SysLog;
 
-import test.openmdx.app1.jmi1.AddressFormatAsParams;
 import test.openmdx.app1.jmi1.AddressFormatAsResult;
 import test.openmdx.app1.jmi1.App1Package;
 import test.openmdx.app1.jmi1.EmailAddress;
-import test.openmdx.app1.jmi1.EmailAddressSendMessageParams;
-import test.openmdx.app1.jmi1.EmailAddressSendMessageTemplateParams;
 import test.openmdx.app1.jmi1.EmailAddressSendMessageTemplateResult;
+import test.openmdx.app1.jmi1.MessageTemplate;
 
 /**
  * E-Mail Address
@@ -75,20 +72,23 @@ public class EmailAddressImpl extends AddressImpl<test.openmdx.app1.jmi1.EmailAd
 
     /**
      * Format address
-     * 
-     * @param in the method's input structure
-     * 
+     *
      * @return the method's result structure
-     * 
-     * @see test.openmdx.app1.cci2.Address#formatAs(test.openmdx.app1.cci2.AddressFormatAsParams)
      */
     @Override
     public AddressFormatAsResult formatAs(
-        AddressFormatAsParams in
+            #if CLASSIC_CHRONO_TYPES
+            final test.openmdx.app1.jmi1.AddressFormatAsParams in
+            #else
+            final String type
+            #endif
     ) {
-        EmailAddress same = sameObject();
-        App1Package app1Package = (App1Package) same.refImmediatePackage();
-        if(STANDARD.equals(in.getType())) {
+            #if CLASSIC_CHRONO_TYPES
+            final String type = in.getType();
+            #endif
+        final EmailAddress same = sameObject();
+        final App1Package app1Package = (App1Package) same.refImmediatePackage();
+        if(STANDARD.equals(type)) {
             return app1Package.createAddressFormatAsResult(
                 same.getAddress()
             );
@@ -99,37 +99,45 @@ public class EmailAddressImpl extends AddressImpl<test.openmdx.app1.jmi1.EmailAd
 
     /**
      * Send message
-     * 
-     * @param in the method's input structure
-     * 
+     *
      * @return the method's result structure
-     * 
-     * @see test.openmdx.app1.cci2.EmailAddress#sendMessage(test.openmdx.app1.cci2.EmailAddressSendMessageParams)
      */
-    public Void sendMessage(
-        EmailAddressSendMessageParams in
+    public org.openmdx.base.cci2.Void sendMessage(
+            #if CLASSIC_CHRONO_TYPES
+            final test.openmdx.app1.jmi1.EmailAddressSendMessageParams in
+            #else
+            final String text
+            #endif
     ) {
-        EmailAddress same = sameObject();
-        System.out.println("sending message " + in.getText() + " to " + same.refMofId());
+        #if CLASSIC_CHRONO_TYPES
+        final String text = in.getText();
+        #endif
+        final EmailAddress same = sameObject();
+        System.out.println("sending message " + text + " to " + same.refMofId());
         return null;
     }
 
     /**
      * Send message with template
-     * 
-     * @param in the method's input structure
-     * 
+     *
      * @return the method's result structure
-     * 
-     * @see test.openmdx.app1.cci2.EmailAddress#sendMessageTemplate(test.openmdx.app1.cci2.EmailAddressSendMessageTemplateParams)
      */
     public EmailAddressSendMessageTemplateResult sendMessageTemplate(
-        EmailAddressSendMessageTemplateParams in
+            #if CLASSIC_CHRONO_TYPES
+            final test.openmdx.app1.jmi1.EmailAddressSendMessageTemplateParams in
+            #else
+            final MessageTemplate body,
+            final int priority,
+            final String subject
+            #endif
      ) {
-        SysLog.detail("sending message " + in.getBody().getText() + " with template to " + sameObject().refMofId());
-        return this.<App1Package>samePackage().createEmailAddressSendMessageTemplateResult(
-            in.getBody()
-        );
+        #if CLASSIC_CHRONO_TYPES
+        final MessageTemplate body = in.getBody();
+        final int priority = in.getPriority();
+        final String subject = in.getSubject();
+        #endif
+        SysLog.detail("sending message " + body.getText() + " with template to " + sameObject().refMofId());
+        return this.<App1Package>samePackage().createEmailAddressSendMessageTemplateResult(body);
     }
 
 }

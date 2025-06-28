@@ -48,7 +48,6 @@ package org.openmdx.portal.servlet.tag;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 
-
 #if JAVA_8
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;

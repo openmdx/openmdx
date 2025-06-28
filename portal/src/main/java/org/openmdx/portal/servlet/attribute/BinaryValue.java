@@ -63,7 +63,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import #if JAVA_8 javax #else jakarta#endif.servlet.http.HttpServletRequest;
+import #if JAVA_8 javax.servlet.http.HttpServletRequest #else jakarta.servlet.http.HttpServletRequest #endif;
 
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;

@@ -78,7 +78,7 @@ public interface StringTypePredicate
 {
 
     /**
-     * Enables (database specific) JSON query processing of the pattern.
+     * Enables (database-specific) JSON query processing of the pattern.
      * <p>
      * No other flag must be specified in combination with JSON_QUERY 
      * <p> 

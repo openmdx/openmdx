@@ -92,6 +92,7 @@ import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.ChronoTypes;
 import org.w3c.time.SystemClock;
 
 /**
@@ -605,9 +606,9 @@ public final class Codes implements Serializable {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFrom = codeEntry.getValidFrom();
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validTo = codeEntry.getValidTo();
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif current = SystemClock.getInstance().now();
-        return 
-	        ((validFrom == null) || validFrom.#if CLASSIC_CHRONO_TYPES before #else isBefore #endif(current)) &&
-	        ((validTo == null) || validTo.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(current));
+        return
+            ((validFrom == null) || ChronoTypes.isBefore(validFrom, current)) &&
+            ((validTo == null) || ChronoTypes.isAfter(validTo, current));
     }
 
     /**

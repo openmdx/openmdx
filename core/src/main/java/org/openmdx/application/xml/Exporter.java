@@ -919,7 +919,6 @@ public class Exporter {
          * Determine the closure
          * 
          * @param persistenceManager
-         * @param writer
          * @param objectIds
          * 
          * @throws ServiceException
@@ -931,8 +930,8 @@ public class Exporter {
             //
             // 1st pass
             //
-            SortedMap<Path,RefObject> tree = new TreeMap<Path,RefObject>();
-            List<Path> pendingIds = new ArrayList<Path>(Arrays.asList(objectIds));
+            SortedMap<Path,RefObject> tree = new TreeMap<>();
+            List<Path> pendingIds = new ArrayList<>(Arrays.asList(objectIds));
             for(
                 int distance = 0;
                 !pendingIds.isEmpty();

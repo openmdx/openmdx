@@ -100,7 +100,7 @@ public class QueryFilterRecord
     }
     
     /**
-     * Allows to share the member information among the instances
+     * Allows sharing the member information among the instances
      */
     private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
 
@@ -138,7 +138,7 @@ public class QueryFilterRecord
 	/**
      * Tests whether a collection exists and contains at least one element
      * 
-     * @return {@code true} if the collection is neither {@code null} nore empty
+     * @return {@code true} if the collection is neither {@code null} nor empty
      */
     private static boolean has(Collection<?> collection) {
     	return collection != null && !collection.isEmpty();
@@ -243,7 +243,7 @@ public class QueryFilterRecord
      * @see org.w3c.cci2.AnyTypePredicate#elementOf(java.util.Collection)
      */
     @Override
-    public void elementOf(Collection<?> operands) {
+    public void elementOf(Collection operands) {
         throw new UnsupportedOperationException();
     }
 
@@ -267,7 +267,7 @@ public class QueryFilterRecord
      * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(java.util.Collection)
      */
     @Override
-    public void notAnElementOf(Collection<?> operands) {
+    public void notAnElementOf(Collection operands) {
         throw new UnsupportedOperationException();
     }
 

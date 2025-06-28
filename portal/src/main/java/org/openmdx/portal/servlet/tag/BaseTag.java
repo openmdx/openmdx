@@ -46,7 +46,6 @@
  */
 package org.openmdx.portal.servlet.tag;
 
-
 #if JAVA_8
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;

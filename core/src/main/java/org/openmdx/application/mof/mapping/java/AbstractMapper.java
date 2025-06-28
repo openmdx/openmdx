@@ -107,7 +107,11 @@ public abstract class AbstractMapper extends MapperTemplate {
             this.model
         );
         ClassType resultType = this.getClassType(resultTypeDef);
-        return resultType.getType(resultTypeDef, this.format, TypeMode.RESULT);
+        return resultType.getType(
+            resultTypeDef,
+            this.format.isJPA3() ? JavaExportFormat.CCI2 : this.format,
+            TypeMode.RESULT
+        );
     }
 
     protected String getType(
@@ -155,11 +159,12 @@ public abstract class AbstractMapper extends MapperTemplate {
     	if(multiplicity == null) {
         	return this.getType(featureDef, "java.util.List", returnValue, featureUsage, null); // TODO verify whether this branch is really necessary
         } else {
+            JavaExportFormat javaExportFormat = this.format.isJPA3() ? JavaExportFormat.CCI2 : this.format;
 	        switch(multiplicity) {
 		        case OPTIONAL: {
 		            String type = featureDef.getQualifiedTypeName();
                     if (this.model.isPrimitiveType(type)) {
-                        return this.getType(type, this.format, true);
+                        return this.getType(type, javaExportFormat, true);
                     } else {
                         return getFeatureType(type, null, returnValue, featureUsage, "", Boolean.TRUE, null);
                     }
@@ -167,7 +172,7 @@ public abstract class AbstractMapper extends MapperTemplate {
 		        case SINGLE_VALUE: {
 		            String type = featureDef.getQualifiedTypeName();
                     if (this.model.isPrimitiveType(type)) {
-                        return this.getType(type, this.format, false);
+                        return this.getType(type, javaExportFormat, false);
                     } else {
                         return getFeatureType(type, null, returnValue, featureUsage, "", Boolean.FALSE, null);
                     }
@@ -209,9 +214,9 @@ public abstract class AbstractMapper extends MapperTemplate {
     ) throws ServiceException {
         boolean multiValued = collectionClass != null;
         if(this.model.isPrimitiveType(qualifiedTypeName)) {
-            JavaExportFormat format = this.format;
+            JavaExportFormat javaExportFormat = this.format;
             boolean asObject = multiValued || Boolean.TRUE.equals(optional);
-            if(format.isJPA3()){
+            if(javaExportFormat.isJPA3()){
                 String javaType = this.getType(qualifiedTypeName, Boolean.TRUE.equals(slice) ? JavaExportFormat.JPA3 : JavaExportFormat.CCI2, asObject);
                 return (
                     Boolean.TRUE.equals(returnValue) ? "final " : ""
@@ -219,14 +224,15 @@ public abstract class AbstractMapper extends MapperTemplate {
                    multiValued ? collectionClass + '<' + javaType + amendment + '>' : javaType
                 );
             } else {
-                String javaType = this.getType(qualifiedTypeName, format, asObject);
+                String javaType = this.getType(qualifiedTypeName, javaExportFormat, asObject);
                 return multiValued ? collectionClass + '<' + javaType + amendment + '>' : javaType;
             }
         } else if(returnValue == null) {
             ClassDef classDef = this.getClassDef(qualifiedTypeName);
+            JavaExportFormat javaExportFormat = this.format.isJPA3() ? JavaExportFormat.CCI2 : this.format;
             String javaType = this.getClassType(classDef).getType(
                 classDef,
-                this.format.isJPA3() ? JavaExportFormat.CCI2 : this.format,
+                    javaExportFormat,
                 featureUsage
             );
             return multiValued ? qualified(collectionClass,qualifiedTypeName,false) + '<' + javaType + amendment + '>' : javaType;
@@ -236,7 +242,7 @@ public abstract class AbstractMapper extends MapperTemplate {
                 org.openmdx.application.mof.mapping.java.metadata.Visibility.CCI,
                 !multiValued && returnValue
             );
-            if(returnValue) {
+            if(returnValue.booleanValue()) {
                 return "<T extends " + javaType + "> " + (
                     multiValued ? qualified(collectionClass,qualifiedTypeName,true) + "<T>" : "T"
                 );
@@ -388,7 +394,7 @@ public abstract class AbstractMapper extends MapperTemplate {
     ) throws ServiceException {
         return this.getFeatureType(
             featureDef,
-            null,
+            Boolean.FALSE,
             TypeMode.PARAMETER
         );
     }

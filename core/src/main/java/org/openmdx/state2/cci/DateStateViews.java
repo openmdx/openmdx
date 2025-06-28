@@ -520,16 +520,16 @@ public class DateStateViews {
     }
 
     /**
-     * Retrieve the state context aware predicate
+     * Retrieve the state-context-aware predicate
      * 
      * @param refContainer
      * @param predicate
      * 
-     * @return the state context aware predicate
+     * @return the state-context-aware predicate
      */
-    private static AnyTypePredicate getStatePredicate(
-        RefContainer<?> refContainer,
-        AnyTypePredicate predicate
+    private static <T extends DateState> AnyTypePredicate#if CLASSIC_CHRONO_TYPES #else <T> #endif getStatePredicate(
+        RefContainer<? super T> refContainer,
+        AnyTypePredicate#if CLASSIC_CHRONO_TYPES #else <T> #endif predicate
     ) {
         if (predicate == null)
             return null;
@@ -564,8 +564,8 @@ public class DateStateViews {
      * 
      * @return the valid state predicate
      */
-    private static AnyTypePredicate getValidStatePredicate(
-        AnyTypePredicate predicate
+    private static #if CLASSIC_CHRONO_TYPES #else <T extends DateState> #endif AnyTypePredicate#if CLASSIC_CHRONO_TYPES #else <T> #endif getValidStatePredicate(
+        AnyTypePredicate#if CLASSIC_CHRONO_TYPES #else <T> #endif predicate
     ) {
         Filter newFilter;
         if (predicate == null) {
@@ -612,10 +612,10 @@ public class DateStateViews {
      */
     public static <T extends DateState> List<T> getStates(
         Container<? super T> container,
-        AnyTypePredicate predicate
+        AnyTypePredicate #if CLASSIC_CHRONO_TYPES #else <? extends T> #endif predicate
     ) {
         RefContainer<? super T> refContainer = (RefContainer<? super T>) container;
-        Container<T> coreContainer = getTimeIndependentContainer(refContainer);
+        Container<? super T> coreContainer = getTimeIndependentContainer(refContainer);
         return new StateList<T>(
             coreContainer.getAll(
                 getStatePredicate(refContainer, predicate)
@@ -633,7 +633,7 @@ public class DateStateViews {
      */
     public static <T extends DateState> List<T> getValidStates(
         Container<? super T> container,
-        AnyTypePredicate predicate
+        AnyTypePredicate #if CLASSIC_CHRONO_TYPES #else <? extends T> #endif predicate
     ) {
         RefContainer<? super T> refContainer = (RefContainer<? super T>) container;
         Container<T> coreContainer = getTimeIndependentContainer(refContainer);
@@ -2340,17 +2340,16 @@ public class DateStateViews {
      */
     public static <T extends DateState> void forEachState(
         Container<? super T> container,
-        AnyTypePredicate predicate,
+        AnyTypePredicate#if CLASSIC_CHRONO_TYPES #else <? extends T> #endif predicate,
         Consumer<T> consumer
     ) {
         final RefContainer<? super T> refContainer = (RefContainer<? super T>) container;
-        final Container<T> coreContainer = getTimeIndependentContainer(refContainer);
-        final AnyTypePredicate statePredicate = getStatePredicate(refContainer, predicate);
-        final Consumer<T> marshallingConsumer = new MarshallingStateConsumer<>(consumer);
+        final Container<? super T> coreContainer = getTimeIndependentContainer(refContainer);
+        final AnyTypePredicate#if CLASSIC_CHRONO_TYPES #else <? extends T> #endif statePredicate = getStatePredicate(refContainer, predicate);
+        final Consumer marshallingConsumer = new MarshallingStateConsumer(consumer);
         coreContainer.processAll(statePredicate, marshallingConsumer);
     }
 
-    
     //------------------------------------------------------------------------
     // Class StateList
     //------------------------------------------------------------------------

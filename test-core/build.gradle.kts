@@ -81,6 +81,7 @@ dependencies {
     implementation("jakarta.platform:jakarta.jakartaee-api")
     if(runtimeCompatibility.isJava8()) {
         implementation(group= "javax.jdo", name = "jdo-api")
+        openmdxBootstrap("jakarta.resource:jakarta.resource-api:2.1.0")
     } else {
         implementation(group= "javax.jdo", name = "jdo-api"){
             exclude(group = "javax.transaction", module = "transaction-api")
@@ -145,9 +146,23 @@ tasks.named<AbstractCompile>("compileOpenmdxDatatypeJava") {
     classpath = configurations["openmdxBootstrap"]
 }
 
-tasks.withType<Test> {
-    this.classpath.forEach { println(it) }
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
+
+tasks.withType<Test> {
+    this.classpath.forEach {
+        println(it)
+    }
+    javaLauncher.set(
+        javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(runtimeCompatibility.majorVersion))
+        }
+    )
+}
+
 tasks.test {
     useJUnitPlatform()
     maxHeapSize = "4G"

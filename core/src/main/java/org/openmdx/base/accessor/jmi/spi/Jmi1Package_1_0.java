@@ -44,9 +44,16 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
+#if JAVA_8
+import javax.resource.cci.IndexedRecord;
+#else
+import jakarta.resource.cci.IndexedRecord;
+#endif
+
 import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefObject;
 
+import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.naming.Path;
 
@@ -80,13 +87,12 @@ public interface Jmi1Package_1_0 extends RefPackage_1_0 {
      * 
      * @return the associated implementation mapper
      */
-    Mapping_1_0 refMapping(
-    );
+    Mapping_1_0 refMapping();
     
     /**
      * Get object with the given object id. 
-     *  
-     * @param objectId unique id of RefObject.
+     *
+     * @param objectId unique id of {@code RefObject}.
      * 
      * @return RefObject
      */
@@ -96,10 +102,8 @@ public interface Jmi1Package_1_0 extends RefPackage_1_0 {
 
     /**
      * Avoid outermost RefPackage validation
-     * 
-     * @param source
-     * 
-     * @return the unmarshaled object
+     *
+     * @return the unmarshalled object
      */
     Object unmarshalUnchecked(
     	Object source

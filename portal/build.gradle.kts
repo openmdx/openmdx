@@ -81,12 +81,13 @@ dependencies {
 	implementation("jakarta.platform:jakarta.jakartaee-api")
 	if(runtimeCompatibility.isJava8()) {
 		implementation(group= "javax.jdo", name = "jdo-api")
+		implementation("org.codehaus.groovy:groovy")
 	} else {
 		implementation(group= "javax.jdo", name = "jdo-api"){
 			exclude(group = "javax.transaction", module = "transaction-api")
 		}
+		implementation("org.apache.groovy:groovy")
 	}
-	implementation("org.codehaus.groovy:groovy")
 	// test
     testImplementation("org.junit.jupiter:junit-jupiter-api")
 	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")

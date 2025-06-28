@@ -1598,6 +1598,9 @@
           <ownedOperation xmi:type="uml:Operation" xmi:id="_3C7B8A60016D3DB924AE001B" name="testDateTimeList">
             <ownedParameter xmi:type="uml:Parameter" xmi:id="_qqv8y97CEdmkJO73lqONhA" type="_3C7B8A60016D3DB8F7CD03A0" direction="return"/>
             <ownedParameter xmi:type="uml:Parameter" xmi:id="_3C7B8A60016D3DB924C40333" name="arg">
+              <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_r7REyt7CEdmkJO73lqONhA" source="http://www.eclipse.org/uml2/2.0.0/UML">
+                <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_r7REy97CEdmkJO73lqONhA" key="list"/>
+              </eAnnotations>
               <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B630802BB"/>
             </ownedParameter>
           </ownedOperation>

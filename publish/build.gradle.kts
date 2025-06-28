@@ -461,7 +461,7 @@ publishing {
                 }
             }
         }
-        if(projectFlavour != "3") {
+        if(runtimeCompatibility.isJava8()) {
             create<MavenPublication>("openmdxDalvik") {
                 artifactId = "openmdx-dalvik"
                 artifact(

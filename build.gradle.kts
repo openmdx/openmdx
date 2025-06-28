@@ -46,7 +46,7 @@ plugins {
     kotlin("jvm") version "2.1.0"
 }
 
-val projectFlavour = providers.gradleProperty("flavour").getOrElse("5")
+val projectFlavour = providers.gradleProperty("flavour").getOrElse("4")
 val projectSpecificationVersion = "21"
 val projectMaintenanceVersion = "0"
 val runtimeCompatibility = if (projectFlavour < "4") JavaVersion.VERSION_1_8 else JavaVersion.VERSION_21
@@ -71,7 +71,16 @@ allprojects {
 	        url = uri("https://datura.econoffice.ch/maven2")
 	    }
         maven {
-	       url = uri("file:" + File(project.rootDir, "publish/build/openmdx-${projectFlavour}/repos/releases"))
+            url = uri("file:" + File(project.rootDir, "publish/build/openmdx-2/repos/releases"))
+        }
+        maven {
+            url = uri("file:" + File(project.rootDir, "publish/build/openmdx-3/repos/releases"))
+        }
+        maven {
+            url = uri("file:" + File(project.rootDir, "publish/build/openmdx-4/repos/releases"))
+        }
+        maven {
+            url = uri("file:" + File(project.rootDir, "publish/build/openmdx-5/repos/releases"))
         }
 	}
 

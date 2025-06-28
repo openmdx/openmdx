@@ -1883,7 +1883,7 @@ public class Ui_1 extends AbstractRestPort {
 		            // three columns
 		            int defaultColumnHeight = 
 		                java.lang.Math.max(
-		                    new Double(java.lang.Math.ceil(groupFacade.attributeValuesAsList("member").size() / 3.0)).intValue(),  
+                            (int) java.lang.Math.ceil(groupFacade.attributeValuesAsList("member").size() / 3.0),
 		                    7
 		                );
 		            for(

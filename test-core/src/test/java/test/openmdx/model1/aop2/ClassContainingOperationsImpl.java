@@ -47,12 +47,12 @@ package test.openmdx.model1.aop2;
 import org.openmdx.base.aop2.AbstractObject;
 import org.w3c.spi2.Structures;
 
-import test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_1_0_1Params;
-import test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_n_0_1Params;
 import test.openmdx.model1.jmi1.ComplexStruct0_1;
 import test.openmdx.model1.jmi1.ComplexStruct0_n;
+import test.openmdx.model1.jmi1.ComplexStruct1_1;
 import test.openmdx.model1.jmi1.TestComplexStruct0_1_0_1Result;
 import test.openmdx.model1.jmi1.TestComplexStruct0_n_0_1Result;
+import test.openmdx.model1.jmi1.TestComplexStruct1_1_1_1Result;
 
 /**
  * ClassContainingOperationsImpl
@@ -64,8 +64,8 @@ public class ClassContainingOperationsImpl<S extends test.openmdx.model1.jmi1.Cl
     /**
      * Constructor 
      *
-     * @param same
-     * @param next
+     * @param same instance of the same layer
+     * @param next instance of the next layer
      */
     public ClassContainingOperationsImpl(
         S same,
@@ -75,9 +75,15 @@ public class ClassContainingOperationsImpl<S extends test.openmdx.model1.jmi1.Cl
     }
 
     public TestComplexStruct0_1_0_1Result testComplexStruct0_1_0_1(
-        ClassContainingOperationsTestComplexStruct0_1_0_1Params in
+        #if CLASSIC_CHRONO_TYPES
+        final test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_1_0_1Params in
+        #else
+        final ComplexStruct0_1 arg
+        #endif
     ){
-        ComplexStruct0_1 arg = in.getArg();
+        #if CLASSIC_CHRONO_TYPES
+        final ComplexStruct0_1 arg = in.getArg();
+        #endif
         return Structures.create(
             TestComplexStruct0_1_0_1Result.class,
             arg
@@ -85,13 +91,35 @@ public class ClassContainingOperationsImpl<S extends test.openmdx.model1.jmi1.Cl
     }
 
     public TestComplexStruct0_n_0_1Result testComplexStruct0_n_0_1(
-        ClassContainingOperationsTestComplexStruct0_n_0_1Params in
+        #if CLASSIC_CHRONO_TYPES
+        final test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_n_0_1Params in
+        #else
+        final ComplexStruct0_n arg
+        #endif
     ){
-        ComplexStruct0_n arg = in.getArg();
+        #if CLASSIC_CHRONO_TYPES
+        final ComplexStruct0_n arg = in.getArg();
+        #endif
         return Structures.create(
             TestComplexStruct0_n_0_1Result.class,
             arg
         );
     }
-    
+
+    public TestComplexStruct1_1_1_1Result testComplexStruct1_1_1_1(
+        #if CLASSIC_CHRONO_TYPES
+        final test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct1_1_1_1Params in
+        #else
+        final ComplexStruct1_1 arg
+        #endif
+    ){
+        #if CLASSIC_CHRONO_TYPES
+        final ComplexStruct1_1 arg = in.getArg();
+        #endif
+        return Structures.create(
+            TestComplexStruct1_1_1_1Result.class,
+            arg
+        );
+    }
+
 }

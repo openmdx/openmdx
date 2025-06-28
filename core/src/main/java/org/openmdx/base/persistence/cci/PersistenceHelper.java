@@ -217,7 +217,7 @@ public class PersistenceHelper {
      * @return the new query extension 
      */
     public static QueryExtensionRecord newQueryExtension(
-        AnyTypePredicate query
+        AnyTypePredicate#if CLASSIC_CHRONO_TYPES #else <?> #endif query
     ){
         QueryExtensionRecord queryExtension = new QueryExtension();
         ((RefQuery_1_0)query).refGetFilter().getExtension().add(queryExtension);
@@ -303,7 +303,7 @@ public class PersistenceHelper {
      * RefPRedicate_1_0.
      */
     public static <E> Collection<E> asSubquery(
-        AnyTypePredicate predicate
+        AnyTypePredicate#if CLASSIC_CHRONO_TYPES #else <? extends E> #endif predicate
     ){
         if (predicate instanceof RefQuery_1_0) {
             return new FilterCollection<>(((RefQuery_1_0) predicate).refGetFilter());

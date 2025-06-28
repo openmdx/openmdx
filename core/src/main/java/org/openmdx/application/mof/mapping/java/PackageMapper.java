@@ -206,7 +206,8 @@ public class PackageMapper extends AbstractMapper {
                 : "    , ";
             this.mapParameter(
                 separator,
-                fieldDef, ""
+                fieldDef,
+                ""
             );
         }
         printLine("  );");        

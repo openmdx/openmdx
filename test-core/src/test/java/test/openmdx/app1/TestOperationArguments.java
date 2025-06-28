@@ -50,7 +50,6 @@ import java.util.Collections;
 import javax.jdo.PersistenceManager;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -65,8 +64,6 @@ import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.spi2.Structures;
 
 import test.openmdx.model1.jmi1.ClassContainingOperations;
-import test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_1_0_1Params;
-import test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_n_0_1Params;
 import test.openmdx.model1.jmi1.ComplexStruct0_1;
 import test.openmdx.model1.jmi1.ComplexStruct0_n;
 import test.openmdx.model1.jmi1.Model1Package;
@@ -98,35 +95,44 @@ public class TestOperationArguments {
     public void invokeOperationWithNestedStructs(){
     	begin();
         ClassContainingOperations operations = getModelTestOperations();
-        ClassContainingOperationsTestComplexStruct0_1_0_1Params in = Structures.create(
-            ClassContainingOperationsTestComplexStruct0_1_0_1Params.class,
-            Structures.create(
+        ComplexStruct0_1 complexStruct = Structures.create(
                 ComplexStruct0_1.class,
                 Structures.create(
-                    SimpleStruct0_1.class, 
-                    null, // binaryField
-                    null, // booleanField
-                    null, // dateTimeField
-                    null, // decimalField
-                    null, // durationField
-                    null, // integerField
-                    null, // longField
-                    null, // shortField
-                    "CR10011193" // stringField
+                        SimpleStruct0_1.class,
+                        null, // binaryField
+                        null, // booleanField
+                        null, // dateTimeField
+                        null, // decimalField
+                        null, // durationField
+                        null, // integerField
+                        null, // longField
+                        null, // shortField
+                        "CR10011193" // stringField
                 ),
                 null, // simpleStruct0_nField
                 null, // simpleStruct1_1Field
                 null, // simpleStructListField
                 null, // simpleStructSetField
                 null // simpleStructSparseArrayField
-            )
         );
-        TestComplexStruct0_1_0_1Result out = operations.testComplexStruct0_1_0_1(in);
+        #if CLASSIC_CHRONO_TYPES
+        test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_1_0_1Params in = Structures.create(
+            test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_1_0_1Params.class,
+            complexStruct
+        );
+        #endif
+        TestComplexStruct0_1_0_1Result out = operations.testComplexStruct0_1_0_1(
+            #if CLASSIC_CHRONO_TYPES
+            in
+            #else
+            complexStruct
+            #endif
+        );
         this.commit();
         Assertions.assertNotNull(out, "CR10011193");
         Assertions.assertNotNull(out.getResult(), "CR10011193");
         Assertions.assertNotNull(out.getResult().getSimpleStruct0_1Field(), "CR10011193");
-        Assertions.assertEquals(out.getResult().getSimpleStruct0_1Field().getStringField(), "CR10011193");
+        Assertions.assertEquals("CR10011193", out.getResult().getSimpleStruct0_1Field().getStringField());
     }
 
     /**
@@ -136,174 +142,192 @@ public class TestOperationArguments {
     public void callOperationWithListOfStructs(){
         this.begin();
         ClassContainingOperations operations = getModelTestOperations();
-        ClassContainingOperationsTestComplexStruct0_n_0_1Params in = Structures.create(
-            ClassContainingOperationsTestComplexStruct0_n_0_1Params.class,
-            Structures.create(
+        ComplexStruct0_n complexStruct = Structures.create(
                 ComplexStruct0_n.class,
                 new SimpleStruct0_1[]{
-                    Structures.create(
-                        SimpleStruct0_1.class, 
-                        null, // binaryField
-                        null, // booleanField
-                        null, // dateTimeField
-                        null, // decimalField
-                        null, // durationField
-                        Integer.valueOf(0), // integerField
-                        null, // longField
-                        null, // shortField
-                        "CR10011473" // stringField
-                    ),
-                    Structures.create(
-                        SimpleStruct0_1.class, 
-                        null, // binaryField
-                        null, // booleanField
-                        null, // dateTimeField
-                        null, // decimalField
-                        null, // durationField
-                        Integer.valueOf(1), // integerField
-                        null, // longField
-                        null, // shortField
-                        "CR10011473bis" // stringField
-                    ),
+                        Structures.create(
+                                SimpleStruct0_1.class,
+                                null, // binaryField
+                                null, // booleanField
+                                null, // dateTimeField
+                                null, // decimalField
+                                null, // durationField
+                                0, // integerField
+                                null, // longField
+                                null, // shortField
+                                "CR10011473" // stringField
+                        ),
+                        Structures.create(
+                                SimpleStruct0_1.class,
+                                null, // binaryField
+                                null, // booleanField
+                                null, // dateTimeField
+                                null, // decimalField
+                                null, // durationField
+                                1, // integerField
+                                null, // longField
+                                null, // shortField
+                                "CR10011473bis" // stringField
+                        ),
                 }, // SimpleStruct0_1Field
                 new SimpleStruct0_n[]{}, // simpleStruct0_nField
                 new SimpleStruct1_1[]{}, // simpleStruct1_1Field
                 new SimpleStructList[]{}, // simpleStructListField
                 new SimpleStructSet[]{
-                    Structures.create(
-                        SimpleStructSet.class,
-                        new Boolean[]{}, // booleanField
-                        new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif []{}, // dateTimeField
-                        new BigDecimal[]{}, // decimalField
-                        new #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.Duration #endif []{}, // durationField
-                        new Integer[]{
-                           Integer.valueOf(0)
-                        }, // integerField
-                        new Long[]{}, // longField
-                        new Short[]{}, // shortField
-                        new String[]{
-                            "CR10011473a",
-                            "CR10011473b"
-                        } // stringField
-                    ),
-                    Structures.create(
-                        SimpleStructSet.class,
-                        new Boolean[]{}, // booleanField
-                        new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif []{}, // dateTimeField
-                        new BigDecimal[]{}, // decimalField
-                        new #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.Duration #endif []{}, // durationField
-                        new Integer[]{
-                            Integer.valueOf(1)
-                         }, // integerField
-                         new Long[]{}, // longField
-                         new Short[]{}, // shortField
-                         new String[]{
-                            "CR10011473bis"
-                        } // stringField
-                    )
+                        Structures.create(
+                                SimpleStructSet.class,
+                                new Boolean[]{}, // booleanField
+                                new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif []{}, // dateTimeField
+                                new BigDecimal[]{}, // decimalField
+                                new #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.Duration #endif []{}, // durationField
+                                new Integer[]{
+                                        0
+                                }, // integerField
+                                new Long[]{}, // longField
+                                new Short[]{}, // shortField
+                                new String[]{
+                                        "CR10011473a",
+                                        "CR10011473b"
+                                } // stringField
+                        ),
+                        Structures.create(
+                                SimpleStructSet.class,
+                                new Boolean[]{}, // booleanField
+                                new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif []{}, // dateTimeField
+                                new BigDecimal[]{}, // decimalField
+                                new #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.Duration #endif []{}, // durationField
+                                new Integer[]{
+                                        1
+                                }, // integerField
+                                new Long[]{}, // longField
+                                new Short[]{}, // shortField
+                                new String[]{
+                                        "CR10011473bis"
+                                } // stringField
+                        )
                 }, // simpleStructSetField
                 new SimpleStructSparseArray[]{} // simpleStructSparseArrayField
-            )
         );
-        TestComplexStruct0_n_0_1Result out = operations.testComplexStruct0_n_0_1(in);
+        #if CLASSIC_CHRONO_TYPES
+        test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_n_0_1Params in = Structures.create(
+            test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_n_0_1Params.class,
+            complexStruct
+        );
+        #endif
+        TestComplexStruct0_n_0_1Result out = operations.testComplexStruct0_n_0_1(
+            #if CLASSIC_CHRONO_TYPES
+            in
+            #else
+            complexStruct
+            #endif
+        );
         this.commit();
         Assertions.assertNotNull(out, "CR10011473");
         Assertions.assertNotNull(out.getResult(), "CR10011473");
         Assertions.assertNotNull(out.getResult().getSimpleStruct0_1Field(), "CR10011473");
-        Assertions.assertEquals(out.getResult().getSimpleStruct0_1Field().get(0).getStringField(), "CR10011473");
-        Assertions.assertEquals(out.getResult().getSimpleStruct0_1Field().get(1).getStringField(), "CR10011473bis");
+        Assertions.assertEquals("CR10011473", out.getResult().getSimpleStruct0_1Field().get(0).getStringField());
+        Assertions.assertEquals("CR10011473bis", out.getResult().getSimpleStruct0_1Field().get(1).getStringField());
         Assertions.assertEquals(Integer.valueOf(0), out.getResult().getSimpleStruct0_1Field().get(0).getIntegerField());
         Assertions.assertEquals(Integer.valueOf(1), out.getResult().getSimpleStruct0_1Field().get(1).getIntegerField());
         Assertions.assertEquals(Sets.asSet("CR10011473a","CR10011473b"), out.getResult().getSimpleStructSetField().get(0).getStringField());
-        Assertions.assertEquals(Collections.singleton(Integer.valueOf(1)), out.getResult().getSimpleStructSetField().get(1).getIntegerField());
+        Assertions.assertEquals(Collections.singleton(1), out.getResult().getSimpleStructSetField().get(1).getIntegerField());
         Assertions.assertTrue(out.getResult().getSimpleStructSetField().get(1).getShortField().isEmpty());
     }
 
 	@Test
     public void callOperationWithSetArgument(
-    ) throws Exception {
+    ) {
         this.begin();
         ClassContainingOperations operations = getModelTestOperations();
-        ClassContainingOperationsTestComplexStruct0_n_0_1Params in = Structures.create(
-            ClassContainingOperationsTestComplexStruct0_n_0_1Params.class,
-            Structures.create(
+        ComplexStruct0_n complexStruct = Structures.create(
                 ComplexStruct0_n.class,
                 new SimpleStruct0_1[]{
-                    Structures.create(
-                        SimpleStruct0_1.class, 
-                        null, // binaryField
-                        null, // booleanField
-                        null, // dateTimeField
-                        null, // decimalField
-                        null, // durationField
-                        Integer.valueOf(0), // integerField
-                        null, // longField
-                        null, // shortField
-                        "CR10011473" // stringField
-                    ),
-                    Structures.create(
-                        SimpleStruct0_1.class, 
-                        null, // binaryField
-                        null, // booleanField
-                        null, // dateTimeField
-                        null, // decimalField
-                        null, // durationField
-                        Integer.valueOf(1), // integerField
-                        null, // longField
-                        null, // shortField
-                        "CR10011473bis" // stringField
-                    ),
+                        Structures.create(
+                                SimpleStruct0_1.class,
+                                null, // binaryField
+                                null, // booleanField
+                                null, // dateTimeField
+                                null, // decimalField
+                                null, // durationField
+                                0, // integerField
+                                null, // longField
+                                null, // shortField
+                                "CR10011473" // stringField
+                        ),
+                        Structures.create(
+                                SimpleStruct0_1.class,
+                                null, // binaryField
+                                null, // booleanField
+                                null, // dateTimeField
+                                null, // decimalField
+                                null, // durationField
+                                1, // integerField
+                                null, // longField
+                                null, // shortField
+                                "CR10011473bis" // stringField
+                        ),
                 }, // SimpleStruct0_1Field
                 new SimpleStruct0_n[]{}, // simpleStruct0_nField
                 new SimpleStruct1_1[]{}, // simpleStruct1_1Field
                 new SimpleStructList[]{}, // simpleStructListField
                 new SimpleStructSet[]{
-                    Structures.create(
-                        SimpleStructSet.class,
-                        new Boolean[]{}, // booleanField
-                        new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif []{}, // dateTimeField
-                        new BigDecimal[]{}, // decimalField
-                        new #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.Duration #endif []{}, // durationField
-                        new Integer[]{
-                           Integer.valueOf(0)
-                        }, // integerField
-                        new Long[]{}, // longField
-                        new Short[]{}, // shortField
-                        new String[]{
-                            "CR10011473a",
-                            "CR10011473b"
-                        } // stringField
-                    ),
-                    Structures.create(
-                        SimpleStructSet.class,
-                        new Boolean[]{}, // booleanField
-                        new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif []{}, // dateTimeField
-                        new BigDecimal[]{}, // decimalField
-                        new #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.Duration #endif []{}, // durationField
-                        new Integer[]{
-                            Integer.valueOf(1)
-                         }, // integerField
-                         new Long[]{}, // longField
-                         new Short[]{}, // shortField
-                         new String[]{
-                            "CR10011473bis"
-                        } // stringField
-                    )
+                        Structures.create(
+                                SimpleStructSet.class,
+                                new Boolean[]{}, // booleanField
+                                new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif []{}, // dateTimeField
+                                new BigDecimal[]{}, // decimalField
+                                new #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.Duration #endif []{}, // durationField
+                                new Integer[]{
+                                        0
+                                }, // integerField
+                                new Long[]{}, // longField
+                                new Short[]{}, // shortField
+                                new String[]{
+                                        "CR10011473a",
+                                        "CR10011473b"
+                                } // stringField
+                        ),
+                        Structures.create(
+                                SimpleStructSet.class,
+                                new Boolean[]{}, // booleanField
+                                new #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant#endif []{}, // dateTimeField
+                                new BigDecimal[]{}, // decimalField
+                                new #if CLASSIC_CHRONO_TYPES javax.xml.datatype.Duration #else java.time.Duration #endif []{}, // durationField
+                                new Integer[]{
+                                        1
+                                }, // integerField
+                                new Long[]{}, // longField
+                                new Short[]{}, // shortField
+                                new String[]{
+                                        "CR10011473bis"
+                                } // stringField
+                        )
                 }, // simpleStructSetField
                 new SimpleStructSparseArray[]{} // simpleStructSparseArrayField
-            )
         );
-        TestComplexStruct0_n_0_1Result out = operations.testComplexStruct0_n_0_1(in);
+        #if CLASSIC_CHRONO_TYPES
+        test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_n_0_1Params in = Structures.create(
+            test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_n_0_1Params.class,
+            complexStruct
+        );
+        #endif
+        TestComplexStruct0_n_0_1Result out = operations.testComplexStruct0_n_0_1(
+            #if CLASSIC_CHRONO_TYPES
+            in
+            #else
+            complexStruct
+            #endif
+        );
         this.commit();
         Assertions.assertNotNull(out, "CR10011473");
         Assertions.assertNotNull(out.getResult(), "CR10011473");
         Assertions.assertNotNull(out.getResult().getSimpleStruct0_1Field(), "CR10011473");
-        Assertions.assertEquals(out.getResult().getSimpleStruct0_1Field().get(0).getStringField(), "CR10011473");
-        Assertions.assertEquals(out.getResult().getSimpleStruct0_1Field().get(1).getStringField(), "CR10011473bis");
+        Assertions.assertEquals("CR10011473", out.getResult().getSimpleStruct0_1Field().get(0).getStringField());
+        Assertions.assertEquals("CR10011473bis", out.getResult().getSimpleStruct0_1Field().get(1).getStringField());
         Assertions.assertEquals(Integer.valueOf(0), out.getResult().getSimpleStruct0_1Field().get(0).getIntegerField());
         Assertions.assertEquals(Integer.valueOf(1), out.getResult().getSimpleStruct0_1Field().get(1).getIntegerField());
         Assertions.assertEquals(Sets.asSet("CR10011473a","CR10011473b"), out.getResult().getSimpleStructSetField().get(0).getStringField());
-        Assertions.assertEquals(                                     Collections.singleton(Integer.valueOf(1)), out.getResult().getSimpleStructSetField().get(1).getIntegerField());
+        Assertions.assertEquals(                                     Collections.singleton(1), out.getResult().getSimpleStructSetField().get(1).getIntegerField());
         Assertions.assertTrue(out.getResult().getSimpleStructSetField().get(1).getShortField().isEmpty());
     }
 

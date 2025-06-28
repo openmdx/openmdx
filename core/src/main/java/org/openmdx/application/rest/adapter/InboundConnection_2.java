@@ -161,14 +161,13 @@ public class InboundConnection_2 extends AbstractConnection {
      * @param persistenceManager
      *            the JDO persistence manager
      * 
-     * @throws ResourceException
+     * @throws ResourceException in case of failure
      */
     public InboundConnection_2(
         ConnectionFactory connectionFactory,
         RestConnectionSpec connectionSpec,
         PersistenceManager persistenceManager
-    )
-        throws ResourceException {
+    ) throws ResourceException {
         super(connectionFactory, connectionSpec);
         this.persistenceManager = persistenceManager;
         this.localTransaction = createLocalTransaction(persistenceManager);
@@ -201,8 +200,7 @@ public class InboundConnection_2 extends AbstractConnection {
 
     private LocalTransaction createLocalTransaction(
         PersistenceManager persistenceManager
-    )
-        throws ResourceException {
+    ) throws ResourceException {
         return isResourceLocalTransaction(persistenceManager) ? LocalTransactions.getLocalTransaction(persistenceManager)
             : new TransitionalTransactionAdapter();
     }
@@ -259,7 +257,7 @@ public class InboundConnection_2 extends AbstractConnection {
      * <li>an {@code @openmdx} XRI in case of a persistent object
      * </ul>
      * 
-     * @param object
+     * @param object a persistent capable object
      * @return the object's resource identifier
      */
     protected static Path getResourceIdentifier(
@@ -272,8 +270,8 @@ public class InboundConnection_2 extends AbstractConnection {
     }
 
     @Override
-    public void close()
-        throws ResourceException {
+    public void close(
+    ) throws ResourceException {
         super.close();
         try {
             this.persistenceManager.close();
@@ -306,10 +304,10 @@ public class InboundConnection_2 extends AbstractConnection {
      * transaction.
      * </em>
      * 
-     * @throws NotSupportedException
+     * @throws NotSupportedException if the transaction type is not {@code RESOURCE_LOCAL}
      */
-    private void assertResourceLocalTransaction()
-        throws NotSupportedException {
+    private void assertResourceLocalTransaction(
+    ) throws NotSupportedException {
         if (!isResourceLocalTransaction(this.persistenceManager)) {
             throw new NotSupportedException(
                 "Local transaction demarcation is supported if and only if "
@@ -319,8 +317,7 @@ public class InboundConnection_2 extends AbstractConnection {
     }
 
     @Override
-    public Interaction createInteraction()
-        throws ResourceException {
+    public Interaction createInteraction() {
         return new InboundInteraction(this);
     }
 
@@ -411,17 +408,11 @@ public class InboundConnection_2 extends AbstractConnection {
 
         /**
          * Test the transaction state and id
-         * 
-         * @param path
-         * @param existence
-         * 
-         * @throws ResourceException
          */
         private void validateTransactionStateAndId(
             Path path,
             boolean existence
-        )
-            throws ResourceException {
+        ) throws ResourceException {
             boolean active = currentUnitOfWork().isActive();
             if (active != existence) {
                 throw ResourceExceptions.initHolder(
@@ -495,16 +486,12 @@ public class InboundConnection_2 extends AbstractConnection {
          *            the JMI collection
          * 
          * @return the next JCA value
-         * 
-         * @throws ServiceException
-         * @throws ResourceException
          */
         @SuppressWarnings("unchecked")
         private IndexedRecord toJcaValue(
             Multiplicity type,
             Collection<?> source
-        )
-            throws ServiceException,
+        ) throws ServiceException,
             ResourceException {
             IndexedRecord target = Records.getRecordFactory().createIndexedRecord(type.toString());
             for (Iterator<?> i = source.iterator(); i.hasNext();) {
@@ -528,16 +515,12 @@ public class InboundConnection_2 extends AbstractConnection {
          *            the JMI map
          * 
          * @return the next JCA value
-         * 
-         * @throws ServiceException
-         * @throws ResourceException
          */
         @SuppressWarnings("unchecked")
         private MappedRecord toJcaValue(
             Multiplicity type,
             Map<?, ?> source
-        )
-            throws ServiceException,
+        ) throws ServiceException,
             ResourceException {
             MappedRecord target = Records.getRecordFactory().createMappedRecord(type.code());
             for (Iterator<?> i = source.keySet().iterator(); i.hasNext();) {
@@ -564,21 +547,15 @@ public class InboundConnection_2 extends AbstractConnection {
          *            the JMI structure
          * 
          * @return the next JCA value
-         * 
-         * @throws ServiceException
-         * @throws ResourceException
          */
         @SuppressWarnings("unchecked")
         private MappedRecord toJcaValue(
             String type,
             RefStruct source
-        )
-            throws ServiceException,
-            ResourceException {
+        ) throws ServiceException, ResourceException {
             MappedRecord target = Records.getRecordFactory().createMappedRecord(type);
-            for (Iterator<?> i = source.refFieldNames().iterator(); i.hasNext();) {
+            for (String fieldName : (List<String>) source.refFieldNames()) {
                 try {
-                    String fieldName = (String) i.next();
                     try {
                         target.put(fieldName, toJcaValue(source.refGetValue(fieldName)));
                     } catch (InvalidObjectException exception) {
@@ -608,19 +585,15 @@ public class InboundConnection_2 extends AbstractConnection {
         /**
          * Guarded feature retrieval
          * 
-         * @param source
-         * @param feature
+         * @param source the {@code RefObject} from which to retrieve the feature
+         * @param featureDef the feature definition
          * 
          * @return the requested feature
-         * 
-         * @throws ServiceException
          */
         private Object getJcaValue(
             RefObject source,
             ModelElement_1_0 featureDef
-        )
-            throws ServiceException,
-            ResourceException {
+        ) throws ServiceException, ResourceException {
             try {
                 Model_1_0 model = featureDef.getModel();
                 String featureName = featureDef.getName();
@@ -643,14 +616,10 @@ public class InboundConnection_2 extends AbstractConnection {
          *            the {@code RefObject} value
          * 
          * @return its {@code MappedRecord} value representation
-         * 
-         * @throws ResourceException
-         * @throws ServiceException
          */
         private Object toJcaValue(
             Object refValue
-        )
-            throws ResourceException,
+        ) throws ResourceException,
             ServiceException {
             if (refValue instanceof RefObject) {
                 return getResourceIdentifier(refValue);
@@ -674,16 +643,14 @@ public class InboundConnection_2 extends AbstractConnection {
          * @param jcaValue
          *            the JCA value
          * @param featureDef
+         *           the feature definition
          * 
          * @return the JMI value
-         * 
-         * @throws ResourceException
          */
         private Object toRefValue(
             Object jcaValue,
             ModelElement_1_0 featureDef
-        )
-            throws ResourceException {
+        ) throws ResourceException {
             try {
                 ModelElement_1_0 featureType = this.model.getDereferencedType(featureDef.getType());
                 if (ModelHelper.getMultiplicity(featureDef) == Multiplicity.STREAM) {
@@ -725,16 +692,13 @@ public class InboundConnection_2 extends AbstractConnection {
          *            the requested getch groups maybe {@code null}
          * 
          * @return its {@code MappedRecord} representation
-         * 
-         * @throws ResourceException
          */
         @SuppressWarnings("unchecked")
         private MappedRecord toJcaRecord(
             RefObject object,
             Set<String> requestedFeatures,
             Set<String> fetchGroups
-        )
-            throws ResourceException {
+        ) throws ResourceException {
             try {
                 RefObject_1_0 refObject = (RefObject_1_0) object;
                 ObjectRecord reply = newObject(getResourceIdentifier(object));
@@ -811,13 +775,10 @@ public class InboundConnection_2 extends AbstractConnection {
          * @param input the Query
          * 
          * @return a new query object
-         * 
-         * @throws ResourceException
          */
         private Query toRefQuery(
             QueryRecord input
-        )
-            throws ResourceException {
+        ) {
             Query query = getPersistenceManager().newQuery(Queries.QUERY_LANGUAGE, input);
             //
             // Fetch Plan
@@ -901,10 +862,10 @@ public class InboundConnection_2 extends AbstractConnection {
                                     } else if (rawValue instanceof SparseArray<?>) {
                                         SparseArray<?> source = (SparseArray<?>) rawValue;
                                         for (ListIterator<?> i = source.populationIterator(); i.hasNext();) {
-                                            target.put(Integer.valueOf(i.nextIndex()), this.toRefValue(i.next(), featureDef));
+                                            target.put(i.nextIndex(), this.toRefValue(i.next(), featureDef));
                                         }
                                     } else {
-                                        target.put(Integer.valueOf(0), this.toRefValue(rawValue, featureDef));
+                                        target.put(0, this.toRefValue(rawValue, featureDef));
                                     }
                                 }
                             }
@@ -931,8 +892,7 @@ public class InboundConnection_2 extends AbstractConnection {
             InteractionSpec ispec,
             Record input,
             Record output
-        )
-            throws ResourceException {
+        ) throws ResourceException {
             try {
                 return super.execute(ispec, input, output);
             } catch (JDOException|JmiException exception) {
@@ -941,18 +901,15 @@ public class InboundConnection_2 extends AbstractConnection {
         }
 
         /**
-         * Propagate the {@code RefObject} to indexed {@code IndexedRecord{@code 
+         * Propagate the {@code RefObject} to indexed {@code IndexedRecord}
          * 
-         * &#64;param refObject
-         * &#64;param output
+         * @param refObject the source
+         * @param output the target
          * @param requestedFeatures the requested features, may be {@code null}
-         * 
          * @param fetchGroups
          *            the requested fetch groups, may be {@code null}
-         * 
          * @return {@code true}
-         * 
-         * @throws ResourceException
+         * @throws ResourceException in case of failure
          */
         @SuppressWarnings("unchecked")
         private boolean propagate(
@@ -960,27 +917,19 @@ public class InboundConnection_2 extends AbstractConnection {
             IndexedRecord output,
             Set<String> requestedFeatures,
             Set<String> fetchGroups
-        )
-            throws ResourceException {
+        ) throws ResourceException {
             if (output != null)
                 output.add(this.toJcaRecord(refObject, requestedFeatures, fetchGroups));
             return true;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#get(org.openmdx.base.resource.spi.RestInteractionSpec,
-         * org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
-         */
         @SuppressWarnings("unchecked")
         @Override
         public boolean get(
             RestInteractionSpec ispec,
             QueryRecord input,
             ResultRecord output
-        )
-            throws ResourceException {
+        ) throws ResourceException {
             Path xri = input.getResourceIdentifier();
             if (isTransactionObjectIdentifier(xri)) {
                 Path transactionId = getTransactionId(xri);
@@ -1005,7 +954,7 @@ public class InboundConnection_2 extends AbstractConnection {
                     Set<String> features = input.getFeatureName();
                     final QueryFilterRecord queryFilter = input.getQueryFilter();
                     if (queryFilter != null) {
-                        features = features == null ? new HashSet<String>() : new HashSet<String>(features);
+                        features = features == null ? new HashSet<>() : new HashSet<>(features);
                         for (FeatureOrderRecord orderSpecifier : queryFilter.getOrderSpecifier()) {
                             features.add(orderSpecifier.featureName());
                         }
@@ -1027,8 +976,7 @@ public class InboundConnection_2 extends AbstractConnection {
             RestInteractionSpec ispec,
             ObjectRecord input,
             ResultRecord output
-        )
-            throws ResourceException {
+        ) throws ResourceException {
             Path xri = input.getResourceIdentifier();
             if (isTransactionObjectIdentifier(xri)) {
                 validateTransactionStateAndId(xri, false);
@@ -1090,17 +1038,16 @@ public class InboundConnection_2 extends AbstractConnection {
             }
         }
 
+        #if CLASSIC_CHRONO_TYPES
         /**
          * Provide the {@code add()} argument list
          *
-         * @param argumentClasses
-         * @param qualifier
-         * @param object
+         * @param argumentClasses the argument classes
+         * @param qualifier the qualifier
+         * @param object the persistence capable object
          * 
-         * @return the {@code add()} argument list
-         * @throws ServiceException
+         * @return the {@code add()} arguments
          */
-        @SuppressWarnings("rawtypes")
         private Object[] toAddArguments(
                 Class<?>[] argumentClasses,
                 String qualifier,
@@ -1111,20 +1058,15 @@ public class InboundConnection_2 extends AbstractConnection {
                     persistent
                 ), Datatypes.create(argumentClasses[1], persistent ? qualifier.substring(1) : qualifier), object };
         }
+        #endif
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#move(org.openmdx.base.resource.spi.RestInteractionSpec,
-         * org.openmdx.base.naming.Path, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
-         */
+        @SuppressWarnings("unchecked")
         @Override
         public boolean move(
             RestInteractionSpec ispec,
             ObjectRecord input,
             ResultRecord output
-        )
-            throws ResourceException {
+        ) throws ResourceException {
             RefObject_1_0 newObject = (RefObject_1_0) getObjectByResourceIdentifier(input.getTransientObjectId());
             this.toRefObject(input.getTransientObjectId(), input.getResourceIdentifier(), newObject, input.getValue());
             Path newResourceIdentifier = input.getResourceIdentifier();
@@ -1149,8 +1091,7 @@ public class InboundConnection_2 extends AbstractConnection {
         public boolean delete(
             RestInteractionSpec ispec,
             ObjectRecord input
-        )
-            throws ResourceException {
+        ) throws ResourceException {
             Path xri = input.getResourceIdentifier();
             if (isTransactionObjectIdentifier(xri)) {
                 validateTransactionStateAndId(xri, true);
@@ -1172,8 +1113,7 @@ public class InboundConnection_2 extends AbstractConnection {
             RestInteractionSpec ispec,
             ObjectRecord input,
             ResultRecord output
-        )
-            throws ResourceException {
+        ) throws ResourceException {
             final Path xri = input.getResourceIdentifier();
             final UUID transientObjectId = input.getTransientObjectId();
             RefObject refObject = getObjectByResourceIdentifier(transientObjectId == null ? xri : transientObjectId);
@@ -1193,8 +1133,7 @@ public class InboundConnection_2 extends AbstractConnection {
             RestInteractionSpec ispec,
             QueryRecord input,
             ResultRecord output
-        )
-            throws ResourceException {
+        ) throws ResourceException {
             Query query = this.toRefQuery(input);
             List<RefObject> objects = (List<RefObject>) query.execute();
             if (output != null) {
@@ -1245,8 +1184,7 @@ public class InboundConnection_2 extends AbstractConnection {
         public boolean delete(
             RestInteractionSpec ispec,
             QueryRecord input
-        )
-            throws ResourceException {
+        ) throws ResourceException {
             Path xri = input.getResourceIdentifier();
             if (xri.size() % 2 == 0 || xri.isPattern()) {
                 try {
@@ -1288,8 +1226,7 @@ public class InboundConnection_2 extends AbstractConnection {
             RestInteractionSpec ispec,
             MessageRecord input,
             MessageRecord output
-        )
-            throws ResourceException {
+        ) throws ResourceException {
             try {
                 Path xri = input.getResourceIdentifier();
                 if (isTransactionCommitIdentifier(xri)) {
@@ -1312,7 +1249,7 @@ public class InboundConnection_2 extends AbstractConnection {
                     if (output != null) {
                         output.setResourceIdentifier(xri);
                         output.setBody(
-                            reply instanceof RefStruct_1_0 ? (MappedRecord) ((RefStruct_1_0) reply).refDelegate() : (MappedRecord) reply
+                            reply instanceof RefStruct_1_0 ? ((RefStruct_1_0) reply).refDelegate() : (MappedRecord) reply
                         );
                     }
                 }

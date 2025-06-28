@@ -203,6 +203,8 @@ import org.openmdx.ui1.jmi1.ElementDefinition;
 import org.openmdx.ui1.jmi1.FeatureDefinition;
 import org.openmdx.ui1.jmi1.StructuralFeatureDefinition;
 import org.w3c.cci2.MutableDatatypeFactory;
+import org.w3c.time.ChronoTypes;
+import org.w3c.time.SystemClock;
 
 /**
  * DefaultPortalExtension
@@ -367,7 +369,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
             PortalExtension_1_0.ControlFactory controlFactory,
             WizardDefinitionFactory wizardDefinitionFactory,
             org.openmdx.ui1.jmi1.Inspector inspectorDef,
-            String forClass	    			    		
+            String forClass
 	    ) {
 	    	return new ShowInspectorControl(
 	    		id,
@@ -1758,13 +1760,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												// date
 												if(PrimitiveTypes.DATE.equals(featureTypeName)) {
 													#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif mappedNewValueDate =
-															            #if CLASSIC_CHRONO_TYPES DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-																			cal.get(Calendar.YEAR),
-																			cal.get(Calendar.MONTH) + 1,
-																			cal.get(Calendar.DAY_OF_MONTH),
-																			DatatypeConstants.FIELD_UNDEFINED)
-																		#else java.time.LocalDate.of(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH))
-																		#endif;
+															ChronoTypes.createDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH));
 													if(target instanceof RefObject) {
 														Object value = this.getValue(
 															valueHolder, 
@@ -1868,17 +1864,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											if(dateTime != null) {
 												cal.setTime(#if CLASSIC_CHRONO_TYPES dateTime #else Date.from(dateTime) #endif);
 												if(PrimitiveTypes.DATE.equals(featureTypeName)) {
-													#if CLASSIC_CHRONO_TYPES
-													final java.util.GregorianCalendar calendar = new java.util.GregorianCalendar();
-													javax.xml.datatype.XMLGregorianCalendar date = org.w3c.spi.DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-														calendar.get(java.util.Calendar.YEAR),
-														calendar.get(java.util.Calendar.MONTH) + 1,
-														calendar.get(java.util.Calendar.DAY_OF_MONTH),
-														javax.xml.datatype.DatatypeConstants.FIELD_UNDEFINED
-													);
-													#else
-													java.time.LocalDate date = java.time.LocalDate.now();
-													#endif
+													#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate #endif date = SystemClock.getInstance().today();
 													mappedNewValues.add(date);
 												} else if(PrimitiveTypes.DATETIME.equals(featureTypeName)) {
 													mappedNewValues.add(dateTime);
@@ -1940,7 +1926,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 														int parameterPos = -1;
 														if((parameterPos = query.indexOf(WebKeys.REQUEST_PARAMETER + "=")) >= 0) {
 															String parameter = query.substring(parameterPos + 10);
-															if(parameter.indexOf("xri:@openmdx:") >= 0 || parameter.indexOf("xri://@openmdx:") > 0) {
+															if(parameter.contains("xri:@openmdx:") || parameter.indexOf("xri://@openmdx:") > 0) {
 																xri = Action.getParameter(
 																	parameter,
 																	Action.PARAMETER_OBJECTXRI

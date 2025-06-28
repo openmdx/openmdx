@@ -50,7 +50,14 @@ import javax.jmi.reflect.RefException;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import javax.jmi.reflect.RefStruct;
-import #if JAVA_8 javax.resource.cci.Record #else jakarta.resource.cci.Record #endif;
+
+#if JAVA_8
+import javax.resource.cci.Record;
+import javax.resource.cci.IndexedRecord;
+#else
+import jakarta.resource.cci.Record;
+import jakarta.resource.cci.IndexedRecord;
+#endif
 
 import org.openmdx.base.exception.ServiceException;
 
@@ -62,11 +69,11 @@ public interface Mapping_1_0 {
     /**
      * Create a package proxy
      * 
-     * @param qualifiedName
+     * @param qualifiedName the qualified name of the package
      * 
      * @return a new package proxy
      * 
-     * @throws ServiceException
+     * @throws ServiceException in case of failure
      */
     RefPackage newPackage(
         Jmi1Package_1_0 outermostPackage,
@@ -75,25 +82,22 @@ public interface Mapping_1_0 {
 
     /**
      * Create a struct proxy
-     * 
-     * @param outermostPackage
-     * @param qualifiedName
-     * 
+     *
      * @return a new struct proxy
      * 
-     * @throws ServiceException
+     * @throws ServiceException in case of failure
      */
     RefStruct newStruct(
         Jmi1Package_1_0 outermostPackage,
         Record delegate
     ) throws ServiceException;
-    
+
     /**
      * Retrieve the per RefClass mapping
      * 
-     * @param qualifiedClassName
+     * @param qualifiedClassName the qualified name of the class
      * 
-     * @return
+     * @return the class mapping
      */
     ClassMapping_1_0 getClassMapping(
         String qualifiedClassName
@@ -105,8 +109,8 @@ public interface Mapping_1_0 {
      * @param javaInterface a Java interface
      * 
      * @return the interface's MOF class
-     * 
-     * @throws ServiceException
+     *
+     * @throws ServiceException in case of failure
      */
     String getModelClassName(
         Class<?> javaInterface
@@ -115,7 +119,7 @@ public interface Mapping_1_0 {
     /**
      * Retrieve instance interface
      * 
-     * @param the JPA class
+     * @param javaClass the Java class
      * 
      * @return the instance interface
      */
@@ -125,13 +129,10 @@ public interface Mapping_1_0 {
     
     /**
      * Retrieve the feature mapper
-     * 
-     * @param qualifiedClassName
-     * @param type
-     * 
+     *
      * @return the feature mapper
      * 
-     * @throws ServiceException
+     * @throws ServiceException in case of failure
      */
     FeatureMapper getFeatureMapper(
         String qualifiedClassName,

@@ -81,7 +81,7 @@ public class LocalTransactions {
      *
      * @throws ResourceException
      */
-    public static #if JAVA_8 javax #else jakarta #endif.resource.spi.LocalTransaction getLocalTransaction(
+    public static #if JAVA_8 javax.resource.spi.LocalTransaction #else jakarta.resource.spi.LocalTransaction #endif getLocalTransaction(
         LocalTransaction delegate
     ) throws ResourceException {
         return new LocalTransactionWrapper(delegate);
@@ -179,7 +179,7 @@ public class LocalTransactions {
     /**
      * Adapter delegating to the connector's transaction
      */
-    static class LocalTransactionWrapper implements #if JAVA_8 javax #else jakarta #endif.resource.spi.LocalTransaction {
+    static class LocalTransactionWrapper implements #if JAVA_8 javax.resource.spi.LocalTransaction #else jakarta.resource.spi.LocalTransaction #endif {
 
         /**
          * Constructor

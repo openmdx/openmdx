@@ -367,7 +367,7 @@ public abstract class JsfWizardController extends AbstractWizardController {
    	 * @throws ServiceException
    	 */
    	public void doRefresh(
-   		#if JAVA_8 javax #else jakarta#endif.faces.event.AjaxBehaviorEvent event
+   		#if JAVA_8 javax.faces.event.AjaxBehaviorEvent #else jakarta.faces.event.AjaxBehaviorEvent #endif event
    	) throws ServiceException {
    	}
    	
@@ -378,7 +378,7 @@ public abstract class JsfWizardController extends AbstractWizardController {
    	 * @throws ServiceException
    	 */
    	public void doCancel(
-   		#if JAVA_8 javax #else jakarta#endif.faces.event.AjaxBehaviorEvent event
+   		#if JAVA_8 javax.faces.event.AjaxBehaviorEvent #else jakarta.faces.event.AjaxBehaviorEvent #endif event
    	) throws ServiceException {
    		try {
    			Action exitAction = new ObjectReference(this.getObject(), this.getApp()).getSelectObjectAction();

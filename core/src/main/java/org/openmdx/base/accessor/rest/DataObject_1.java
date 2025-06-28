@@ -168,6 +168,7 @@ import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
+import org.w3c.time.ChronoTypes;
 
 import static org.openmdx.base.mof.cci.PrimitiveTypes.DATE;
 import static org.openmdx.base.mof.cci.PrimitiveTypes.DATETIME;
@@ -2152,8 +2153,7 @@ public class DataObject_1
      */
     private void detectConcurrentModification(
         DataObject_1_0 beforeImage
-    )
-        throws ServiceException {
+    ) throws ServiceException {
         String writeLockAssertion = getWriteLockAssertion();
         if (writeLockAssertion != null) {
             assertWriteLock(beforeImage, writeLockAssertion);
@@ -2174,11 +2174,10 @@ public class DataObject_1
     private void assertReadLock(
         DataObject_1_0 beforeImage,
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif lockValue
-    )
-        throws ServiceException {
+    ) throws ServiceException {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif currentValue = Datatypes.DATE_TIME_CLASS.cast(beforeImage.objGetValue(SystemAttributes.MODIFIED_AT));
         if (currentValue != null) {
-            if (currentValue.#if CLASSIC_CHRONO_TYPES after #else isAfter #endif(lockValue)) {
+            if (ChronoTypes.isAfter(currentValue, lockValue)) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.CONCURRENT_ACCESS_FAILURE,
@@ -2202,8 +2201,7 @@ public class DataObject_1
     private void assertWriteLock(
         DataObject_1_0 beforeImage,
         String lockAssertion
-    )
-        throws ServiceException {
+    ) throws ServiceException {
         Matcher lockMatcher = WRITE_LOCK_PATTERN.matcher(lockAssertion);
         if (lockMatcher.matches()) {
             try {

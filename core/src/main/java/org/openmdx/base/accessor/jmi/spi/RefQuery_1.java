@@ -67,7 +67,11 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefObject;
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
+#if CLASSIC_CHRONO_TYPES
+import javax.xml.datatype.Duration;
+#else
+import java.time.Duration;
+#endif
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.mof.cci.ModelAttributes;
@@ -121,11 +125,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     /**
      * Constructor
-     *
-     * @param filter
-     * @param mapping
-     * @param filterType
-     * @param subclasses
      */
     RefQuery_1(
         QueryFilterRecord filter,
@@ -161,8 +160,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
         this.persistenceManager = that.persistenceManager;
     }
 
-    //-----------------------------------------------------------------------
-    public abstract class RefPredicate implements AnyTypePredicate {
+    public abstract class RefPredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif
+            implements AnyTypePredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif {
 
         public RefPredicate(
             Quantifier quantifier,
@@ -174,8 +173,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
         /**
          * Adding value to the filter
-         * 
-         * @param sortOrder
          */
         protected void refAddValue(
             SortOrder sortOrder
@@ -188,7 +185,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         /**
          * Adding value to the filter
          * 
-         * @param sortOrder
          * @param pointer
          *            e.g. a JSON pointer according to RFC 6901 or an XPath
          */
@@ -204,11 +200,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
         /**
          * Adding value to the filter
-         * 
-         * @param quantifier
-         * @param conditionType
-         * @param operand
-         * 
+         *
          * @exception NullPointerException
          *                if quantifier or operand is null
          */
@@ -228,37 +220,25 @@ public class RefQuery_1 implements RefQuery_1_0 {
             return RefQuery_1.this;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.AnyTypePredicate#equalTo(V)
-         */
+        @Override
         public void equalTo(
-            Object operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif operand
         ) {
             this.elementOf(
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.AnyTypePredicate#elementOf(V...)
-         */
+        @Override
         public void elementOf(
-            Object... operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif... operand
         ) {
             this.elementOf(
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.AnyTypePredicate#elementOf(Collection<V>)
-         */
+        @Override
         public void elementOf(
-            Collection<?> operand
+            Collection<?#if CLASSIC_CHRONO_TYPES #else extends V #endif> operand
         ) {
             if (operand instanceof ExtentCollection<?>) {
                 Path pattern = ((ExtentCollection<?>) operand).getPattern();
@@ -274,37 +254,25 @@ public class RefQuery_1 implements RefQuery_1_0 {
             }
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.AnyTypePredicate#notEqual(V)
-         */
+        @Override
         public void notEqualTo(
-            Object operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif operand
         ) {
             this.notAnElementOf(
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(V...)
-         */
+        @Override
         public void notAnElementOf(
-            Object... operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif... operand
         ) {
             this.notAnElementOf(
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(Collection<V>)
-         */
+        @Override
         public void notAnElementOf(
-            Collection<?> operand
+            Collection<?#if CLASSIC_CHRONO_TYPES #else extends V #endif> operand
         ) {
             if (operand instanceof ExtentCollection<?>) {
                 Path pattern = ((ExtentCollection<?>) operand).getPattern();
@@ -346,7 +314,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
             }
         }
 
-        //-----------------------------------------------------------------------
         public String getFeatureName() {
             return this.featureName;
         }
@@ -356,7 +323,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     }
 
-    //-------------------------------------------------------------------------
+
     public class RefObjectTypePredicate extends RefPredicate {
 
         public RefObjectTypePredicate(
@@ -368,7 +335,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     }
 
-    //-------------------------------------------------------------------------
     public class RefBooleanTypePredicate extends RefPredicate implements BooleanTypePredicate {
 
         public RefBooleanTypePredicate(
@@ -392,28 +358,20 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 operand ? TRUE : FALSE);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.BooleanTypePredicate#isFalse()
-         */
+        @Override
         public void isFalse() {
             this.equalTo(false);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.BooleanTypePredicate#isTrue()
-         */
+        @Override
         public void isTrue() {
             this.equalTo(true);
         }
 
     }
 
-    //-------------------------------------------------------------------------
-    public class RefSimpleTypePredicate extends RefPredicate implements AnyTypePredicate {
+    public class RefSimpleTypePredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif
+            extends RefPredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif {
 
         public RefSimpleTypePredicate(
             Quantifier quantifier,
@@ -422,40 +380,25 @@ public class RefQuery_1 implements RefQuery_1_0 {
             super(quantifier, featureName);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.AnyTypePredicate#equalTo(V)
-         */
         @Override
         public void equalTo(
-            Object operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif operand
         ) {
             this.elementOf(
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.AnyTypePredicate#elementOf(V...)
-         */
         @Override
         public void elementOf(
-            Object... operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif... operand
         ) {
             this.elementOf(
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.AnyTypePredicate#elementOf(Collection<V>)
-         */
         @Override
         public void elementOf(
-            Collection<?> operand
+            Collection<?#if CLASSIC_CHRONO_TYPES #else extends V #endif> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -463,40 +406,25 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 operand);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.AnyTypePredicate#notEqual(V)
-         */
         @Override
         public void notEqualTo(
-            Object operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif operand
         ) {
             this.notAnElementOf(
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(V...)
-         */
         @Override
         public void notAnElementOf(
-            Object... operand
+            #if CLASSIC_CHRONO_TYPES Object #else V #endif... operand
         ) {
             this.notAnElementOf(
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(Collection<V>)
-         */
         @Override
         public void notAnElementOf(
-            Collection<?> operand
+            Collection<?#if CLASSIC_CHRONO_TYPES #else extends V #endif> operand
         ) {
             this.refAddValue(
                 this.quantifier,
@@ -506,9 +434,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     }
 
-    //-------------------------------------------------------------------------
     public class RefComparableTypePredicate<V extends Comparable<?>>
-        extends RefSimpleTypePredicate
+        extends RefSimpleTypePredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif
         implements ComparableTypePredicate<V> {
 
         public RefComparableTypePredicate(
@@ -518,11 +445,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
             super(quantifier, featureName);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.ComparableTypePredicate#between(V, V)
-         */
+        @Override
         public void between(
             V lowerBound,
             V upperBound
@@ -536,11 +459,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     }));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.ComparableTypePredicate#outside(V, V)
-         */
+        @Override
         public void outside(
             V lowerBound,
             V upperBound
@@ -554,11 +473,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     }));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.ComparableTypePredicate#lessThan(V)
-         */
+        @Override
         public void lessThan(
             V operand
         ) {
@@ -568,11 +483,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.ComparableTypePredicate#lessThanOrEqual(V)
-         */
+        @Override
         public void lessThanOrEqualTo(
             V operand
         ) {
@@ -582,11 +493,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.ComparableTypePredicate#greaterThanOrEqual(V)
-         */
+        @Override
         public void greaterThanOrEqualTo(
             V operand
         ) {
@@ -596,11 +503,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.ComparableTypePredicate#greaterThan(V)
-         */
+        @Override
         public void greaterThan(
             V operand
         ) {
@@ -612,7 +515,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     }
 
-    //-------------------------------------------------------------------------
     public class RefStringTypePredicate
         extends RefComparableTypePredicate<String>
         implements StringTypePredicate {
@@ -624,11 +526,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
             super(quantifier, featureName);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.StringTypePredicate#like(java.lang.String)
-         */
+        @Override
         public void like(
             String operand
         ) {
@@ -636,11 +534,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.StringTypePredicate#like(java.lang.String...)
-         */
+        @Override
         public void like(
             String... operand
         ) {
@@ -648,11 +542,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.StringTypePredicate#like(Collection<String>)
-         */
+        @Override
         public void like(
             Collection<String> operand
         ) {
@@ -662,11 +552,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 operand);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.StringTypePredicate#unlike(java.lang.String)
-         */
+        @Override
         public void unlike(
             String operand
         ) {
@@ -674,11 +560,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.StringTypePredicate#unlike(java.lang.String...)
-         */
+        @Override
         public void unlike(
             String... operand
         ) {
@@ -686,11 +568,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.StringTypePredicate#unlike(Collection<String>)
-         */
+        @Override
         public void unlike(
             Collection<String> operand
         ) {
@@ -700,11 +578,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 operand);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.StringTypePredicate#like(int,java.lang.String)
-         */
+        @Override
         public void like(
             int flags,
             String operand
@@ -714,11 +588,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.StringTypePredicate#like(java.lang.String...)
-         */
+        @Override
         public void like(
             int flags,
             String... operand
@@ -728,11 +598,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.StringTypePredicate#like(Collection<String>)
-         */
+        @Override
         public void like(
             int flags,
             Collection<String> operand
@@ -743,11 +609,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 embedFlags(RegularExpressionFlag.toFlagSet(flags), operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.StringTypePredicate#unlike(java.lang.String)
-         */
+        @Override
         public void unlike(
             int flags,
             String operand
@@ -757,11 +619,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.ci2.StringTypePredicate#unlike(java.lang.String...)
-         */
+        @Override
         public void unlike(
             int flags,
             String... operand
@@ -771,11 +629,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.StringTypePredicate#unlike(Collection<String>)
-         */
+        @Override
         public void unlike(
             int flags,
             Collection<String> operand
@@ -786,11 +640,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 embedFlags(RegularExpressionFlag.toFlagSet(flags), operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#endsWith(java.lang.Object)
-         */
+        @Override
         public void endsWith(
             String operand
         ) {
@@ -798,11 +648,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#endsWith(V[])
-         */
+        @Override
         public void endsWith(
             String... operand
         ) {
@@ -810,12 +656,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.w3c.cci2.MatchableTypePredicate#endsWith(java.util.Collection)
-         */
+        @Override
         public void endsWith(
             Collection<String> operand
         ) {
@@ -825,11 +666,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 this.jdoWildcard(operand, true));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#startsWith(java.lang.Object)
-         */
+        @Override
         public void startsWith(
             String operand
         ) {
@@ -837,11 +674,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#startsWith(V[])
-         */
+        @Override
         public void startsWith(
             String... operand
         ) {
@@ -849,12 +682,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.w3c.cci2.MatchableTypePredicate#startsWith(java.util.Collection)
-         */
+        @Override
         public void startsWith(
             Collection<String> operand
         ) {
@@ -864,12 +692,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 this.jdoWildcard(operand, false));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.w3c.cci2.MatchableTypePredicate#endsNotWith(java.lang.Object)
-         */
+        @Override
         public void endsNotWith(
             String operand
         ) {
@@ -877,11 +700,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#endsNotWith(V[])
-         */
+        @Override
         public void endsNotWith(
             String... operand
         ) {
@@ -889,12 +708,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.w3c.cci2.MatchableTypePredicate#endsNotWith(java.util.Collection)
-         */
+        @Override
         public void endsNotWith(
             Collection<String> operand
         ) {
@@ -904,12 +718,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 this.jdoWildcard(operand, true));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.w3c.cci2.MatchableTypePredicate#startsNotWith(java.lang.Object)
-         */
+        @Override
         public void startsNotWith(
             String operand
         ) {
@@ -917,11 +726,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#startsNotWith(V[])
-         */
+        @Override
         public void startsNotWith(
             String... operand
         ) {
@@ -929,12 +734,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#startsNotWith(java.util.
-         * Collection)
-         */
+        @Override
         public void startsNotWith(
             Collection<String> operand
         ) {
@@ -946,9 +746,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     }
 
-    //-------------------------------------------------------------------------
     public class RefPartiallyOrderedTypePredicate<V>
-        extends RefSimpleTypePredicate
+        extends RefSimpleTypePredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif
         implements PartiallyOrderedTypePredicate<V> {
 
         public RefPartiallyOrderedTypePredicate(
@@ -958,11 +757,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
             super(quantifier, featureName);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.query.PartiallyOrderedTypePredicate#between(V, V)
-         */
+        @Override
         public void between(
             V lowerBound,
             V upperBound
@@ -975,11 +770,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     upperBound));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.query.PartiallyOrderedTypePredicate#outside(V, V)
-         */
+        @Override
         public void outside(
             V lowerBound,
             V upperBound
@@ -992,11 +783,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     upperBound));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.query.PartiallyOrderedTypePredicate#lessThan(V)
-         */
+        @Override
         public void lessThan(
             V operand
         ) {
@@ -1006,11 +793,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.query.PartiallyOrderedTypePredicate#lessThanOrEqual(V)
-         */
+        @Override
         public void lessThanOrEqualTo(
             V operand
         ) {
@@ -1020,12 +803,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.w3c.query.PartiallyOrderedTypePredicate#greaterThanOrEqual(V)
-         */
+        @Override
         public void greaterThanOrEqualTo(
             V operand
         ) {
@@ -1035,11 +813,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.query.PartiallyOrderedTypePredicate#greaterThan(V)
-         */
+        @Override
         public void greaterThan(
             V operand
         ) {
@@ -1051,7 +825,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     }
 
-    //-------------------------------------------------------------------------
     public class RefOptionalFeaturePredicate
         extends RefPredicate
         implements OptionalFeaturePredicate {
@@ -1063,11 +836,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
             super(quantifier, featureName);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.OptionalAttributePredicate#isNull()
-         */
+        @Override
         public void isNull() {
             this.refAddValue(
                 Quantifier.FOR_ALL,
@@ -1075,11 +844,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.EMPTY_SET);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.OptionalAttributePredicate#isNonNull()
-         */
+        @Override
         public void isNonNull() {
             this.refAddValue(
                 Quantifier.THERE_EXISTS,
@@ -1089,7 +854,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     }
 
-    //-------------------------------------------------------------------------
     public class RefMultiValuedAttributePredicate
         extends RefPredicate
         implements MultivaluedFeaturePredicate {
@@ -1101,11 +865,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
             super(quantifier, featureName);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MultiValuedAttributePredicate#isEmpty()
-         */
+        @Override
         public void isEmpty() {
             this.refAddValue(
                 Quantifier.FOR_ALL,
@@ -1113,11 +873,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.EMPTY_SET);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MultiValuedAttributePredicate#isNonEmpty()
-         */
+        @Override
         public void isNonEmpty() {
             this.refAddValue(
                 Quantifier.THERE_EXISTS,
@@ -1125,11 +881,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.EMPTY_SET);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MultivaluedFeaturePredicate#size()
-         */
+        @Override
         public ComparableTypePredicate<Integer> size() {
             throw new UnsupportedOperationException(
                 "The only collection size predicates supported in compatibility mode are isEmpty() and isNonEmty()");
@@ -1137,7 +889,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     }
 
-    //-------------------------------------------------------------------------
     public class RefResourceIdentifierTypePredicate<V extends Comparable<?>>
         extends RefComparableTypePredicate<V>
         implements ResourceIdentifierTypePredicate<V> {
@@ -1149,11 +900,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
             super(quantifier, featureName);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.query.ResourceIdentifierTypePredicate#like(V)
-         */
+        @Override
         public void like(
             V operand
         ) {
@@ -1161,11 +908,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.query.ResourceIdentifierTypePredicate#like(V...)
-         */
+        @Override
         public void like(
             V... operand
         ) {
@@ -1173,12 +916,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.w3c.query.ResourceIdentifierTypePredicate#like(Collection<V>)
-         */
+        @Override
         public void like(
             Collection<V> operand
         ) {
@@ -1188,11 +926,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 operand);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.query.ResourceIdentifierTypePredicate#unlike(V)
-         */
+        @Override
         public void unlike(
             V operand
         ) {
@@ -1200,11 +934,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.query.ResourceIdentifierTypePredicate#unlike(V...)
-         */
+        @Override
         public void unlike(
             V... operand
         ) {
@@ -1212,12 +942,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.w3c.query.ResourceIdentifierTypePredicate#unlike(Collection<V>)
-         */
+        @Override
         public void unlike(
             Collection<V> operand
         ) {
@@ -1227,11 +952,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 operand);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#endsWith(java.lang.Object)
-         */
+        @Override
         public void endsWith(
             V operand
         ) {
@@ -1239,11 +960,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#endsWith(V[])
-         */
+        @Override
         public void endsWith(
             V... operand
         ) {
@@ -1251,12 +968,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.w3c.cci2.MatchableTypePredicate#endsWith(java.util.Collection)
-         */
+        @Override
         public void endsWith(
             Collection<V> operand
         ) {
@@ -1266,11 +978,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 this.jdoWildcard(operand, true));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#startsWith(java.lang.Object)
-         */
+        @Override
         public void startsWith(
             V operand
         ) {
@@ -1278,11 +986,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#startsWith(V[])
-         */
+        @Override
         public void startsWith(
             V... operand
         ) {
@@ -1290,12 +994,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.w3c.cci2.MatchableTypePredicate#startsWith(java.util.Collection)
-         */
+        @Override
         public void startsWith(
             Collection<V> operand
         ) {
@@ -1305,12 +1004,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 this.jdoWildcard(operand, false));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.w3c.cci2.MatchableTypePredicate#endsNotWith(java.lang.Object)
-         */
+        @Override
         public void endsNotWith(
             V operand
         ) {
@@ -1318,11 +1012,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#endsNotWith(V[])
-         */
+        @Override
         public void endsNotWith(
             V... operand
         ) {
@@ -1330,12 +1020,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.w3c.cci2.MatchableTypePredicate#endsNotWith(java.util.Collection)
-         */
+        @Override
         public void endsNotWith(
             Collection<V> operand
         ) {
@@ -1345,12 +1030,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 this.jdoWildcard(operand, true));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.w3c.cci2.MatchableTypePredicate#startsNotWith(java.lang.Object)
-         */
+        @Override
         public void startsNotWith(
             V operand
         ) {
@@ -1358,11 +1038,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#startsNotWith(V[])
-         */
+        @Override
         public void startsNotWith(
             V... operand
         ) {
@@ -1370,12 +1046,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.MatchableTypePredicate#startsNotWith(java.util.
-         * Collection)
-         */
+        @Override
         public void startsNotWith(
             Collection<V> operand
         ) {
@@ -1402,11 +1073,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
             super(featureName);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.StringTypeOrder#ascending(java.lang.String)
-         */
         @Override
         public void ascending(
             String pointer
@@ -1414,11 +1080,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
             this.refAddValue(SortOrder.ASCENDING, pointer);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.StringTypeOrder#descending(java.lang.String)
-         */
         @Override
         public void descending(
             String pointer
@@ -1441,21 +1102,13 @@ public class RefQuery_1 implements RefQuery_1_0 {
             super(null, featureName);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.SimpleTypeOrder#ascending()
-         */
+        @Override
         public void ascending() {
             this.refAddValue(
                 SortOrder.ASCENDING);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.w3c.cci2.SimpleTypeOrder#descending()
-         */
+        @Override
         public void descending() {
             this.refAddValue(
                 SortOrder.DESCENDING);
@@ -1463,12 +1116,10 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     }
 
-    //-------------------------------------------------------------------------
     protected final Model_1_0 getModel() {
         return Model_1Factory.getModel();
     }
 
-    // -------------------------------------------------------------------------
     final protected ModelElement_1_0 getFeature(
         String featureName
     )
@@ -1496,7 +1147,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    //-------------------------------------------------------------------------
     protected void assertAttributeType(
         ModelElement_1_0 elementDef
     )
@@ -1523,7 +1173,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    //-------------------------------------------------------------------------
         @Override
     public void refAddValue(
         ModelElement_1_0 featureDef,
@@ -1619,7 +1268,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public void refAddValue(
         ModelElement_1_0 featureDef,
@@ -1642,7 +1290,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /**
      * Add a sort order
      * 
-     * @param the
+     * @param featureDef
      *            feature's model element
      * @param order
      *            the sort order
@@ -1691,7 +1339,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 new BasicException.Parameter("featurePointer", featurePointer));
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public void refAddValue(
         String featureName,
@@ -1741,14 +1388,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    //-------------------------------------------------------------------------
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.openmdx.base.accessor.jmi.cci.RefFilter_1_0#refAddValue(java.lang.
-     * String, short)
-     */
     @Override
     public void refAddValue(
         String featureName,
@@ -1767,7 +1406,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /**
      * Add a sort order
      * 
-     * @param the
+     * @param featureName
      *            feature
      * @param order
      *            the sort order
@@ -1790,7 +1429,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    //-------------------------------------------------------------------------
     protected static Object[] unmarshalValues(
         Marshaller marshaller,
         Collection<?> source
@@ -1804,7 +1442,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         return target;
     }
 
-    //-------------------------------------------------------------------------
     Object refGetOrder(
         String featureName
     ) {
@@ -1816,7 +1453,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    //-------------------------------------------------------------------------
     private Object refGetOrder(
         ModelElement_1_0 featureDef
     )
@@ -1838,7 +1474,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    //-------------------------------------------------------------------------
     Object refGetPredicate(
         String featureName
     ) {
@@ -1850,7 +1485,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    //-------------------------------------------------------------------------
     private Object refGetPredicate(
         ModelElement_1_0 featureDef
     )
@@ -1871,7 +1505,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    //-------------------------------------------------------------------------
     Object refGetPredicate(
         Quantifier quantifier,
         String featureName
@@ -1885,7 +1518,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    //-------------------------------------------------------------------------
     private Object refGetPredicate(
         Quantifier quantifier,
         ModelElement_1_0 featureDef
@@ -1965,30 +1597,21 @@ public class RefQuery_1 implements RefQuery_1_0 {
     // RefFilter_1_0
     //-------------------------------------------------------------------------
 
-    //-------------------------------------------------------------------------
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.base.accessor.jmi.cci.RefFilter_1_0#refMofId()
-     */
     @Override
     public String refMofId() {
         return this.filterType + "Query";
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public QueryFilterRecord refGetFilter() {
         return this.filter;
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public String toString() {
         return "filter=" + this.filter;
     }
 
-    //------------------------------------------------------------------------
     public FeatureMapper getFeatureMapper()
         throws ServiceException {
         return getMapping().getFeatureMapper(
@@ -2028,11 +1651,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#addExtension(java.lang.String, java.lang.Object)
-     */
     @Override
     public void addExtension(
         String key, Object value
@@ -2040,11 +1658,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         this.assertModifiable();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#close(java.lang.Object)
-     */
     @Override
     public void close(
         Object queryResult
@@ -2052,38 +1665,16 @@ public class RefQuery_1 implements RefQuery_1_0 {
         // nothing to do
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#closeAll()
-     */
     @Override
     public void closeAll() {
         // nothing to do
     }
 
-    /**
-     * @throws Exception
-     */
-    public void close() throws Exception {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#compile()
-     */
     @Override
     public void compile() {
         // nothing to do
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#declareImports(java.lang.String)
-     */
     @Override
     public void declareImports(
         String imports
@@ -2091,11 +1682,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#declareParameters(java.lang.String)
-     */
     @Override
     public void declareParameters(
         String parameters
@@ -2103,11 +1689,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#declareVariables(java.lang.String)
-     */
     @Override
     public void declareVariables(
         String variables
@@ -2115,11 +1696,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#deletePersistentAll()
-     */
     @Override
     public long deletePersistentAll() {
         if (this.pcs instanceof RefContainer<?>) {
@@ -2134,11 +1710,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#deletePersistentAll(java.util.Map)
-     */
     @Override
     public long deletePersistentAll(
         Map parameters
@@ -2146,11 +1717,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#deletePersistentAll(java.lang.Object[])
-     */
     @Override
     public long deletePersistentAll(
         Object... parameters
@@ -2158,11 +1724,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#execute()
-     */
     @Override
     public Object execute() {
         if (this.pcs instanceof RefContainer<?>) {
@@ -2179,12 +1740,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
             this.pcs == null ? "No candidates set" : "Unsupported candidate class: " + this.pcs.getClass().getName());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#execute(java.lang.Object, java.lang.Object,
-     * java.lang.Object)
-     */
     @Override
     public Object execute(
         Object p1, Object p2, Object p3
@@ -2192,11 +1747,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#execute(java.lang.Object, java.lang.Object)
-     */
     @Override
     public Object execute(
         Object p1, Object p2
@@ -2204,11 +1754,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#execute(java.lang.Object)
-     */
     @Override
     public Object execute(
         Object p1
@@ -2216,11 +1761,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#executeWithArray(java.lang.Object[])
-     */
     @Override
     public Object executeWithArray(
         Object... parameters
@@ -2228,11 +1768,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#executeWithMap(java.util.Map)
-     */
     @Override
     public Object executeWithMap(
         Map parameters
@@ -2240,11 +1775,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#getFetchPlan()
-     */
     @Override
     public FetchPlan getFetchPlan() {
         if (this.fetchPlan == null) {
@@ -2254,41 +1784,21 @@ public class RefQuery_1 implements RefQuery_1_0 {
         return this.fetchPlan;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#getIgnoreCache()
-     */
     @Override
     public boolean getIgnoreCache() {
         return false; // ignore-cache is not supported by openMDX
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#getPersistenceManager()
-     */
     @Override
     public PersistenceManager getPersistenceManager() {
         return this.persistenceManager;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#isUnmodifiable()
-     */
     @Override
     public boolean isUnmodifiable() {
         return this.unmodifiable;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setCandidates(java.util.Collection)
-     */
     @Override
     public void setCandidates(
         Collection pcs
@@ -2314,11 +1824,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setCandidates(javax.jdo.Extent)
-     */
     @Override
     public void setCandidates(
         Extent pcs
@@ -2328,12 +1833,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setClass(java.lang.Class)
-     */
-    @Override
+   @Override
     public void setClass(
         Class cls
     ) {
@@ -2352,11 +1852,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setExtensions(java.util.Map)
-     */
     @Override
     public void setExtensions(
         Map extensions
@@ -2364,11 +1859,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         this.assertModifiable();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setFilter(java.lang.String)
-     */
     @Override
     public void setFilter(
         String filter
@@ -2376,11 +1866,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setGrouping(java.lang.String)
-     */
     @Override
     public void setGrouping(
         String group
@@ -2388,25 +1873,15 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setIgnoreCache(boolean)
-     */
     @Override
     public void setIgnoreCache(
         boolean ignoreCache
     ) {
         if (ignoreCache) {
-            throw new javax.jdo.JDOUnsupportedOptionException("Ignore cache is not supported by openMDX");
+            throw new JDOUnsupportedOptionException("Ignore cache is not supported by openMDX");
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setOrdering(java.lang.String)
-     */
     @Override
     public void setOrdering(
         String ordering
@@ -2414,11 +1889,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setRange(long, long)
-     */
     @Override
     public void setRange(
         long fromIncl,
@@ -2428,11 +1898,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
             "set range operations are not supported. Use listIterator(position) instead");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setRange(java.lang.String)
-     */
     @Override
     public void setRange(
         String fromInclToExcl
@@ -2441,11 +1906,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
             "set range operations are not supported. Use listIterator(position) instead");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setResult(java.lang.String)
-     */
     @Override
     public void setResult(
         String data
@@ -2454,11 +1914,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
             "Result classes, projections and aggregate function results not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setResultClass(java.lang.Class)
-     */
     @Override
     public void setResultClass(
         Class cls
@@ -2467,11 +1922,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
             "Result classes, projections and aggregate function results not supported");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setUnique(boolean)
-     */
     @Override
     public void setUnique(
         boolean unique
@@ -2480,22 +1930,11 @@ public class RefQuery_1 implements RefQuery_1_0 {
         this.unique = unique;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#setUnmodifiable()
-     */
     @Override
     public void setUnmodifiable() {
         this.unmodifiable = true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String,
-     * java.lang.String)
-     */
     @Override
     public void addSubquery(
         Query arg0, String arg1, String arg2
@@ -2503,12 +1942,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Operation not supported by RefQuery_1");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String,
-     * java.lang.String, java.lang.String)
-     */
     @Override
     public void addSubquery(
         Query arg0, String arg1, String arg2, String arg3
@@ -2516,12 +1949,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Operation not supported by RefQuery_1");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String,
-     * java.lang.String, java.lang.String[])
-     */
     @Override
     public void addSubquery(
         Query arg0,
@@ -2532,12 +1959,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException("Operation not supported by RefQuery_1");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String,
-     * java.lang.String, java.util.Map)
-     */
     @Override
     public void addSubquery(
         Query arg0, String arg1, String arg2, Map arg3
@@ -2547,10 +1968,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     /**
      * Convert flags to the corresponding condition type
-     * 
-     * @param flags
-     * @param fulfils
-     * 
+     *
      * @return the corresponding condition type
      * 
      * @throws IllegalArgumentException
@@ -2586,11 +2004,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#clone()
-     */
     @Override
     public RefQuery_1 clone() {
         return new RefQuery_1(this);
@@ -2639,42 +2052,27 @@ public class RefQuery_1 implements RefQuery_1_0 {
      * The number of milliseconds allowed for write operations to complete
      */
     private Integer datastoreWriteTimeoutMillis;
-    
-    /* (non-Javadoc)
-     * @see javax.jdo.Query#setDatastoreReadTimeoutMillis(java.lang.Integer)
-     */
+
     @Override
     public void setDatastoreReadTimeoutMillis(Integer interval) {
         this.datastoreReadTimeoutMillis = interval;
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.Query#getDatastoreReadTimeoutMillis()
-     */
     @Override
     public Integer getDatastoreReadTimeoutMillis() {
         return this.datastoreReadTimeoutMillis;
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.Query#setDatastoreWriteTimeoutMillis(java.lang.Integer)
-     */
     @Override
     public void setDatastoreWriteTimeoutMillis(Integer interval) {
         this.datastoreWriteTimeoutMillis = interval;
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.Query#getDatastoreWriteTimeoutMillis()
-     */
     @Override
     public Integer getDatastoreWriteTimeoutMillis() {
         return this.datastoreWriteTimeoutMillis;
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.Query#cancelAll()
-     */
     @Override
     public void cancelAll() {
         throw new JDOUnsupportedOptionException(
@@ -2682,9 +2080,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         );
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.Query#cancel(java.lang.Thread)
-     */
     @Override
     public void cancel(Thread thread) {
         throw new JDOUnsupportedOptionException(
@@ -2692,140 +2087,16 @@ public class RefQuery_1 implements RefQuery_1_0 {
         );
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.Query#setSerializeRead(java.lang.Boolean)
-     */
     @Override
     public void setSerializeRead(Boolean serialize) {
         if(Boolean.TRUE.equals(serialize)) {
-            throw new JDOFatalDataStoreException("openMDX does not support read serialization");
+            throw new JDOFatalDataStoreException("openMDX does not support read serialization");
         }
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.Query#getSerializeRead()
-     */
     @Override
     public Boolean getSerializeRead() {
         return null;
     }
 
-    public Query saveAsNamedQuery(String s) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query filter(String s) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query orderBy(String s) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query groupBy(String s) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query result(String s) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query range(long l, long l1) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query range(String s) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query subquery(Query query, String s, String s1) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query subquery(Query query, String s, String s1, String s2) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query subquery(Query query, String s, String s1, String... strings) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query subquery(Query query, String s, String s1, Map map) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query imports(String s) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query parameters(String s) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query variables(String s) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query datastoreReadTimeoutMillis(Integer integer) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query datastoreWriteTimeoutMillis(Integer integer) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query serializeRead(Boolean aBoolean) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query unmodifiable() {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query ignoreCache(boolean b) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query extension(String s, Object o) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query extensions(Map map) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query setParameters(Object... objects) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public List executeList() {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Object executeUnique() {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public List<Object> executeResultList() {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Object executeResultUnique() {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Object executeResultUnique(Class aClass) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public List executeResultList(Class aClass) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
-    public Query setNamedParameters(Map map) {
-        throw new UnsupportedOperationException("Will be implemented from openMDX from x.20.0 on");
-    }
-
 }
-
-//--- End of File -----------------------------------------------------------

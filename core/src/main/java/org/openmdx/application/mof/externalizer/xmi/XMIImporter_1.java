@@ -6,23 +6,23 @@
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  *   contributors may be used to endorse or promote products derived
  *   from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -36,9 +36,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
@@ -48,7 +48,6 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +56,7 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
-import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif;
+import #if JAVA_8 javax.resource.ResourceException #else jakarta.resource.ResourceException #endif ;
 
 import org.omg.mof.cci.DirectionKind;
 import org.omg.mof.cci.ScopeKind;
@@ -92,7 +91,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.BasicException.Code;
 import org.openmdx.kernel.log.SysLog;
 
-@SuppressWarnings({"rawtypes","unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
     XMIImporter_1(
@@ -103,7 +102,6 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         PrintStream warnings,
         PrintStream errors
     ) {
-    	super();
         this.modelUrl = modelUrl;
         this.xmiFormat = xmiFormat;
         this.pathMap = pathMap;
@@ -113,10 +111,23 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         this.hasErrors = false;
     }
 
+    public static final short XMI_FORMAT_POSEIDON = 1;
+    public static final short XMI_FORMAT_MAGICDRAW = 2;
+    public static final short XMI_FORMAT_RSM = 3;
+    public static final short XMI_FORMAT_EMF = 4;
+    public static final String THROWS_EXCEPTION_PREFIX = "@throws";
+
+    private final PrintStream infos;
+    private final PrintStream errors;
+    private final PrintStream warnings;
+    private final URL modelUrl;
+    private final short xmiFormat;
+    private final Map pathMap;
+
     XMIImporter_1 newNestedImporter(
-		URL packageURL
-    ){
-    	return new XMIImporter_1(
+        URL packageURL
+    ) {
+        return new XMIImporter_1(
             packageURL,
             this.getXMIFormat(),
             this.getPathMap(),
@@ -125,30 +136,25 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             this.errors
         );
     }
-    
-    //---------------------------------------------------------------------------
+
     public short getXMIFormat(
     ) {
         return this.xmiFormat;
     }
 
-    //---------------------------------------------------------------------------
     public Map getPathMap(
     ) {
         return this.pathMap;
     }
 
-    /* (non-Javadoc)
-	 * @see org.openmdx.application.mof.externalizer.cci.ModelImporter_1_0#process(org.openmdx.base.dataprovider.cci.Channel)
-	 */
-	@Override
-	public void process(
-		Channel target
-	) throws ResourceException {
+    @Override
+    public void process(
+        Channel target
+    ) throws ResourceException {
         this.channel = target;
         try {
             this.beginImport();
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         try {
@@ -156,17 +162,16 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                 null,
                 new Stack()
             );
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         try {
             this.endImport();
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        }        
+        }
     }
 
-    //---------------------------------------------------------------------------
     public void processNested(
         XMIImporter_1 importer,
         XMIReferenceResolver resolver,
@@ -180,14 +185,12 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         );
     }
 
-    //---------------------------------------------------------------------------
     private void info(
         String message
     ) {
         this.infos.println("INFO:    " + message);
     }
 
-    //---------------------------------------------------------------------------
     private void invokeParser(
         XMIReferenceResolver _resolver,
         Stack scope
@@ -196,62 +199,61 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         try {
             XMIParser xmiParser = null;
             this.info("Parsing url=" + this.modelUrl);
-            if(XMI_FORMAT_POSEIDON == this.xmiFormat) {
+            if (XMI_FORMAT_POSEIDON == this.xmiFormat) {
                 xmiParser = new XMI1Parser(this.infos, this.warnings, this.errors);
-                if(resolver == null) {
+                if (resolver == null) {
                     resolver = new XMI1ReferenceResolver(new HashMap(), this.errors);
                     resolver.parse(this.modelUrl.toString());
                 }
-            } else if(XMI_FORMAT_MAGICDRAW == this.xmiFormat) {
+            } else if (XMI_FORMAT_MAGICDRAW == this.xmiFormat) {
                 xmiParser = new XMI1Parser(this.infos, this.warnings, this.errors);
-                if(resolver == null) {
+                if (resolver == null) {
                     resolver = new XMI1ReferenceResolver(new HashMap(), this.errors);
                     resolver.parse(this.modelUrl.toString());
                 }
-            } else if(XMI_FORMAT_RSM == this.xmiFormat) {
+            } else if (XMI_FORMAT_RSM == this.xmiFormat) {
                 xmiParser = new XMI20Parser(this.infos, this.warnings, this.errors);
-                if(resolver == null) {
+                if (resolver == null) {
                     resolver = new XMI2ReferenceResolver(
                         new HashMap(),
                         new Stack(),
                         this.pathMap,
                         this.infos,
                         this.warnings,
-                        this.errors, 
-                        new HashMap<String, UML1AssociationEnd>()
+                        this.errors,
+                        new HashMap<>()
                     );
                     resolver.parse(this.modelUrl.toString());
                 }
-            } else if(XMI_FORMAT_EMF == this.xmiFormat) {
+            } else if (XMI_FORMAT_EMF == this.xmiFormat) {
                 xmiParser = new XMI2Parser(this.infos, this.warnings, this.errors);
-                if(resolver == null) {
+                if (resolver == null) {
                     resolver = new XMI2ReferenceResolver(
                         new HashMap(),
                         new Stack(),
                         this.pathMap,
                         this.infos,
                         this.warnings,
-                        this.errors, 
+                        this.errors,
                         null
                     );
                     resolver.parse(this.modelUrl.toString());
                 }
             }
-            if(resolver.hasErrors()) {
+            if (resolver.hasErrors()) {
                 throw new ServiceException(
                     ModelExceptions.MODEL_DOMAIN,
                     Code.ABORT,
                     "Parsing reported errors"
                 );
-            }
-            else {
+            } else {
                 xmiParser.parse(
                     this.modelUrl.toString(),
                     this,
                     resolver,
                     scope
                 );
-                if(this.hasErrors) {
+                if (this.hasErrors) {
                     throw new ServiceException(
                         ModelExceptions.MODEL_DOMAIN,
                         Code.ABORT,
@@ -259,39 +261,36 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                     );
                 }
             }
-        }
-        catch(Exception ex) {
+        } catch (Exception ex) {
             throw new ServiceException(ex);
         }
     }
 
-    //---------------------------------------------------------------------------
     public void processUMLPackage(
         UML1Package umlPackage
     ) throws ResourceException {
-    	SysLog.detail("Processing package", umlPackage.getQualifiedName());
-    	final ObjectRecord modelPackage = this.channel.newObjectRecord(
-			toElementPath(
-				nameToPathComponent(umlPackage.getQualifiedName()),
-				umlPackage.getName()
-			),
-			ModelAttributes.PACKAGE
-		);
-    	DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(modelPackage, "isAbstract", Boolean.FALSE);
-		DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(modelPackage, "visibility", VisibilityKind.PUBLIC_VIS);
+        SysLog.detail("Processing package", umlPackage.getQualifiedName());
+        final ObjectRecord modelPackage = this.channel.newObjectRecord(
+            toElementPath(
+                nameToPathComponent(umlPackage.getQualifiedName()),
+                umlPackage.getName()
+            ),
+            ModelAttributes.PACKAGE
+        );
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(modelPackage, "isAbstract", Boolean.FALSE);
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(modelPackage, "visibility", VisibilityKind.PUBLIC_VIS);
 
-		// annotation
-		String annotation = this.getAnnotation(umlPackage);
-		if (!annotation.isEmpty()) {
-		    DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(modelPackage, "annotation", annotation);
-		}
+        // annotation
+        String annotation = this.getAnnotation(umlPackage);
+        if (!annotation.isEmpty()) {
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(modelPackage, "annotation", annotation);
+        }
         this.createModelElement(
             null,
             modelPackage
         );
     }
 
-    //---------------------------------------------------------------------------
     public void processUMLAssociation(
         UML1Association umlAssociation
     ) throws Exception {
@@ -308,46 +307,46 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         );
         // container
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationDef, "container", toElementPath(
-		    nameToPathComponent(getScope(umlAssociation.getQualifiedName())),
-		    getName(getScope(umlAssociation.getQualifiedName()))
-		));
+            nameToPathComponent(getScope(umlAssociation.getQualifiedName())),
+            getName(getScope(umlAssociation.getQualifiedName()))
+        ));
 
         // annotation
         String annotation = this.getAnnotation(umlAssociation);
         if (!annotation.isEmpty()) {
-        	DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationDef, "annotation", annotation);
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationDef, "annotation", annotation);
         }
 
         // stereotype
-        DataproviderMode.DATAPROVIDER_2.addAllToAttributeValuesAsList(associationDef, "stereotype",umlAssociation.getStereotypes());
+        DataproviderMode.DATAPROVIDER_2.addAllToAttributeValuesAsList(associationDef, "stereotype", umlAssociation.getStereotypes());
 
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationDef, "isAbstract", Boolean.FALSE);
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationDef, "visibility", VisibilityKind.PUBLIC_VIS);
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationDef, "isDerived", Boolean.valueOf(umlAssociation.isDerived()));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationDef, "isDerived", umlAssociation.isDerived());
         this.createModelElement(
-            null, 
+            null,
             associationDef
         );
         ObjectRecord associationEnd1Def = this.processAssociationEnd(
-            (UML1AssociationEnd)umlAssociation.getConnection().get(0),
+            (UML1AssociationEnd) umlAssociation.getConnection().get(0),
             associationDef
         );
         ObjectRecord associationEnd2Def = this.processAssociationEnd(
-            (UML1AssociationEnd)umlAssociation.getConnection().get(1),
+            (UML1AssociationEnd) umlAssociation.getConnection().get(1),
             associationDef
         );
-        if(XMI_FORMAT_POSEIDON == this.xmiFormat) {
-            /**
+        if (XMI_FORMAT_POSEIDON == this.xmiFormat) {
+            /*
              * Poseidon XMI/UML format
              * NOTE:
-             * To comply with our MOF model implementation we change aggregation and 
-             * qualifier assignments. Client aggregation and qualifier attributes 
-             * now belong to the supplier side and supplier aggregation and qualifier 
+             * To comply with our MOF model implementation we change aggregation and
+             * qualifier assignments. Client aggregation and qualifier attributes
+             * now belong to the supplier side and supplier aggregation and qualifier
              * attributes now belong to the client side.
              */
 
             // swap 'aggregation' to comply with our MOF model
-            String temp = (String)DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(associationEnd1Def, "aggregation");
+            String temp = (String) DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(associationEnd1Def, "aggregation");
             DataproviderMode.DATAPROVIDER_2.replaceAttributeValuesAsListBySingleton(associationEnd1Def, "aggregation", DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(associationEnd2Def, "aggregation"));
             DataproviderMode.DATAPROVIDER_2.replaceAttributeValuesAsListBySingleton(associationEnd2Def, "aggregation", temp);
 
@@ -360,18 +359,16 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             tempQualifier = new ArrayList(DataproviderMode.DATAPROVIDER_2.getAttributeValuesAsReadOnlyList(associationEnd1Def, "qualifierType"));
             DataproviderMode.DATAPROVIDER_2.replaceAttributeValuesAsList(associationEnd1Def, "qualifierType", DataproviderMode.DATAPROVIDER_2.getAttributeValuesAsReadOnlyList(associationEnd2Def, "qualifierType"));
             DataproviderMode.DATAPROVIDER_2.replaceAttributeValuesAsList(associationEnd2Def, "qualifierType", tempQualifier);
-        }
-        else if (XMI_FORMAT_MAGICDRAW == this.xmiFormat)
-        {
-            /**
+        } else if (XMI_FORMAT_MAGICDRAW == this.xmiFormat) {
+            /*
              * MagicDraw XMI/UML format
              * NOTE:
-             * To comply with our MOF model implementation we must change the 
+             * To comply with our MOF model implementation we must change the
              * aggregation assignments for association ends.
              */
 
             // swap 'aggregation' to comply with our MOF model
-            String temp = (String)DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(associationEnd1Def, "aggregation");
+            String temp = (String) DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(associationEnd1Def, "aggregation");
             DataproviderMode.DATAPROVIDER_2.replaceAttributeValuesAsListBySingleton(associationEnd1Def, "aggregation", DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(associationEnd2Def, "aggregation"));
             DataproviderMode.DATAPROVIDER_2.replaceAttributeValuesAsListBySingleton(associationEnd2Def, "aggregation", temp);
         }
@@ -393,26 +390,25 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             null
         );
         this.createModelElement(
-            null, 
+            null,
             associationEnd1Def
         );
         this.createModelElement(
-            null, 
+            null,
             associationEnd2Def
         );
     }
 
-    //---------------------------------------------------------------------------
     private ObjectRecord processAssociationEnd(
         UML1AssociationEnd umlAssociationEnd,
         ObjectRecord associationDef
     ) throws Exception {
         final String associationEndName = umlAssociationEnd.getName();
-		this.verifyAssociationEndName(
+        this.verifyAssociationEndName(
             associationDef,
             associationEndName
         );
-        if(XMI_FORMAT_POSEIDON == this.xmiFormat) {
+        if (XMI_FORMAT_POSEIDON == this.xmiFormat) {
             // Note: 
             // In the Poseidon XMI/UML format qualifiers are entered by using 
             // the association end name. The association end names consist of the
@@ -425,11 +421,8 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             // Poseidon and MagicDraw use UMLAttributes for their internal qualifier 
             // representation, therefore the internal qualifier representation has 
             // to be mapped
-            for(
-                Iterator it = this.toAssociationEndQualifiers(associationEndName).iterator();
-                it.hasNext();
-            ) {
-                Qualifier qualifier = (Qualifier)it.next();
+            for (Object o : this.toAssociationEndQualifiers(associationEndName)) {
+                Qualifier qualifier = (Qualifier) o;
                 UML1Attribute attribute = new UML1Attribute("", qualifier.getName());
                 attribute.setType(qualifier.getType());
                 umlAssociationEnd.getQualifier().add(attribute);
@@ -453,47 +446,42 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "annotation", annotation);
         }
         // type
-        if(umlAssociationEnd.getParticipant() == null) {
+        if (umlAssociationEnd.getParticipant() == null) {
             throw new ServiceException(
                 ModelExceptions.MODEL_DOMAIN,
                 ModelExceptions.INVALID_ATTRIBUTE_TYPE,
                 "type is null for association",
                 new BasicException.Parameter("association", umlAssociationEnd.getQualifiedName()),
-        		new BasicException.Parameter("id", umlAssociationEnd.getId()),
-        		new BasicException.Parameter("name", associationEndName),
-        		new BasicException.Parameter("qualifiedName", umlAssociationEnd.getQualifiedName())
+                new BasicException.Parameter("id", umlAssociationEnd.getId()),
+                new BasicException.Parameter("name", associationEndName),
+                new BasicException.Parameter("qualifiedName", umlAssociationEnd.getQualifiedName())
             );
         }
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "type", toElementPath(
-		    nameToPathComponent(getScope(umlAssociationEnd.getParticipant())),
-		    getName(umlAssociationEnd.getParticipant())
-		));
+            nameToPathComponent(getScope(umlAssociationEnd.getParticipant())),
+            getName(umlAssociationEnd.getParticipant())
+        ));
         // multiplicity
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "multiplicity", this.toMOFMultiplicity(umlAssociationEnd.getMultiplicityRange()));
         // container
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "container", associationDef.getResourceIdentifier());
         // isChangeable
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "isChangeable", Boolean.valueOf(
-		    this.toMOFChangeability(umlAssociationEnd.getChangeability())
-		));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "isChangeable", this.toMOFChangeability(umlAssociationEnd.getChangeability()));
         // aggregation
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "aggregation", this.toMOFAggregation(umlAssociationEnd.getAggregation()));
         // isNavigable
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "isNavigable", Boolean.valueOf(umlAssociationEnd.isNavigable()));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(associationEndDef, "isNavigable", umlAssociationEnd.isNavigable());
         // qualifiers
-        final List<String> qualifierNames = new ArrayList<String>();
-        final List<Path> qualifierTypes = new ArrayList<Path>();
-        for (
-            Iterator it = umlAssociationEnd.getQualifier().iterator();
-            it.hasNext();
-        ) {
-            UML1Attribute qualifier = (UML1Attribute)it.next();
+        final List<String> qualifierNames = new ArrayList<>();
+        final List<Path> qualifierTypes = new ArrayList<>();
+        for (Object o : umlAssociationEnd.getQualifier()) {
+            UML1Attribute qualifier = (UML1Attribute) o;
             qualifierNames.add(qualifier.getName());
             try {
                 qualifierTypes.add(
                     toElementPath(nameToPathComponent(getScope(qualifier.getType())), getName(qualifier.getType()))
-				);
-            } catch(Exception e) {
+                );
+            } catch (Exception e) {
                 throw new ServiceException(
                     e,
                     ModelExceptions.MODEL_DOMAIN,
@@ -509,23 +497,19 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         return associationEndDef;
     }
 
-    //---------------------------------------------------------------------------
     public void processUMLClass(
         UML1Class umlClass
     ) throws Exception {
         // depending on stereotype, the given class must be treated differently
         if (umlClass.getStereotypes().contains(Stereotypes.STRUCT)) {
             this.processStructureType(umlClass);
-        }
-        else if (umlClass.getStereotypes().contains(Stereotypes.ALIAS)) {
+        } else if (umlClass.getStereotypes().contains(Stereotypes.ALIAS)) {
             this.processAliasType(umlClass);
-        }
-        else {
+        } else {
             this.processClass(umlClass);
         }
     }
 
-    //---------------------------------------------------------------------------
     private void processStructureType(
         UML1Class umlClass
     ) throws Exception {
@@ -542,11 +526,11 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         );
         // container
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureTypeDef, "container", toElementPath(
-		    nameToPathComponent(getScope(umlClass.getQualifiedName())),
-		    getName(getScope(umlClass.getQualifiedName()))
-		));
+            nameToPathComponent(getScope(umlClass.getQualifiedName())),
+            getName(getScope(umlClass.getQualifiedName()))
+        ));
 
-        /**
+        /*
          * skip stereotype because its value 'Struct'
          * was marked to note the difference between
          * ordinary classes and structure types
@@ -559,11 +543,8 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         }
         // supertype
         SortedSet superTypePaths = new TreeSet();
-        for (
-            Iterator it = umlClass.getSuperclasses().iterator();
-            it.hasNext();
-        ) {
-            String superclass = (String)it.next();
+        for (Object o : umlClass.getSuperclasses()) {
+            String superclass = (String) o;
             superTypePaths.add(
                 toElementPath(
                     nameToPathComponent(getScope(superclass)),
@@ -575,7 +556,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         DataproviderMode.DATAPROVIDER_2.addAllToAttributeValuesAsList(structureTypeDef, "supertype", superTypePaths);
 
         // isAbstract attribute
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureTypeDef, "isAbstract", Boolean.valueOf(umlClass.isAbstract()));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureTypeDef, "isAbstract", umlClass.isAbstract());
 
         // visibility attribute
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureTypeDef, "visibility", VisibilityKind.PUBLIC_VIS);
@@ -585,18 +566,14 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             structureTypeDef
         );
 
-        for(
-            Iterator it = umlClass.getAttributes().iterator();
-            it.hasNext();
-        ) {
+        for (Object o : umlClass.getAttributes()) {
             this.processStructureField(
-                (UML1Attribute)it.next(),
+                (UML1Attribute) o,
                 structureTypeDef
             );
         }
     }
 
-    //---------------------------------------------------------------------------
     private void processStructureField(
         UML1Attribute umlAttribute,
         ObjectRecord aContainer
@@ -615,7 +592,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureFieldDef, "container", aContainer.getResourceIdentifier());
 
         // maxLength attribute
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureFieldDef, "maxLength", Integer.valueOf(this.getAttributeMaxLength(umlAttribute)));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureFieldDef, "maxLength", this.getAttributeMaxLength(umlAttribute));
 
         // multiplicity attribute
         // openMDX uses attribute stereotype to indicate multiplicity
@@ -623,9 +600,9 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         // if no multiplicity has been modeled, the default multiplicity is taken
         final String multiplicity;
         final Set stereotypes = umlAttribute.getStereotypes();
-        if(stereotypes.isEmpty()) {
+        if (stereotypes.isEmpty()) {
             final UML1MultiplicityRange multiplicityRange = umlAttribute.getMultiplicityRange();
-            if(multiplicityRange == null) {
+            if (multiplicityRange == null) {
                 multiplicity = DEFAULT_ATTRIBUTE_MULTIPLICITY;
             } else {
                 multiplicity = toMOFMultiplicity(multiplicityRange);
@@ -639,14 +616,13 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         if (!annotation.isEmpty()) {
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureFieldDef, "annotation", annotation);
         }
-        if(umlAttribute.getType() == null) {
+        if (umlAttribute.getType() == null) {
             this.error("Undefined type for field " + umlAttribute.getQualifiedName());
-        }
-        else {
+        } else {
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(structureFieldDef, "type", toElementPath(
-			    nameToPathComponent(getScope(umlAttribute.getType())),
-			    getName(umlAttribute.getType())
-			));
+                nameToPathComponent(getScope(umlAttribute.getType())),
+                getName(umlAttribute.getType())
+            ));
             this.createModelElement(
                 null,
                 structureFieldDef
@@ -654,7 +630,6 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         }
     }
 
-    //---------------------------------------------------------------------------
     private void processAliasType(
         UML1Class umlClass
     ) throws Exception {
@@ -671,14 +646,13 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         );
         // container
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-        	aliasTypeDef, 
-        	"container", 
-        	toElementPath(
-        		nameToPathComponent(getScope(umlClass.getQualifiedName())),
-        		getName(getScope(umlClass.getQualifiedName()))
-        	)
-		);
-
+            aliasTypeDef,
+            "container",
+            toElementPath(
+                nameToPathComponent(getScope(umlClass.getQualifiedName())),
+                getName(getScope(umlClass.getQualifiedName()))
+            )
+        );
 
         // annotation
         String annotation = this.getAnnotation(umlClass);
@@ -687,7 +661,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         }
 
         // isAbstract attribute
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(aliasTypeDef, "isAbstract", Boolean.valueOf(umlClass.isAbstract()));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(aliasTypeDef, "isAbstract", umlClass.isAbstract());
 
         // visibility attribute
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(aliasTypeDef, "visibility", VisibilityKind.PUBLIC_VIS);
@@ -695,22 +669,22 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         // type
         List attributes = umlClass.getAttributes();
         this.verifyAliasAttributeNumber(
-            aliasTypeDef, 
+            aliasTypeDef,
             attributes.size()
         );
 
-        UML1Attribute attribute = (UML1Attribute)umlClass.getAttributes().get(0);
+        UML1Attribute attribute = (UML1Attribute) umlClass.getAttributes().get(0);
         this.verifyAliasAttributeName(
-            aliasTypeDef, 
+            aliasTypeDef,
             attribute.getName()
         );
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
-        	aliasTypeDef, 
-        	"type", 
-        	toElementPath(
-        		nameToPathComponent(getScope(attribute.getName())),
-		    	getName(attribute.getName())
-        	)
+            aliasTypeDef,
+            "type",
+            toElementPath(
+                nameToPathComponent(getScope(attribute.getName())),
+                getName(attribute.getName())
+            )
         );
 
         // create element
@@ -720,7 +694,6 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         );
     }
 
-    //---------------------------------------------------------------------------
     private void processClass(
         UML1Class umlClass
     ) throws Exception {
@@ -737,12 +710,12 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         // container
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(classDef, "container", toElementPath(
-		    nameToPathComponent(getScope(umlClass.getQualifiedName())),
-		    getName(getScope(umlClass.getQualifiedName()))
-		));
+            nameToPathComponent(getScope(umlClass.getQualifiedName())),
+            getName(getScope(umlClass.getQualifiedName()))
+        ));
 
         // stereotype
-        DataproviderMode.DATAPROVIDER_2.addAllToAttributeValuesAsList(classDef, "stereotype",umlClass.getStereotypes());
+        DataproviderMode.DATAPROVIDER_2.addAllToAttributeValuesAsList(classDef, "stereotype", umlClass.getStereotypes());
 
         // annotation
         String annotation = this.getAnnotation(umlClass);
@@ -752,11 +725,8 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         // supertype
         SortedSet superTypePaths = new TreeSet();
-        for (
-            Iterator it = umlClass.getSuperclasses().iterator();
-            it.hasNext();
-        ) {
-            String superclass = (String)it.next();
+        for (Object o : umlClass.getSuperclasses()) {
+            String superclass = (String) o;
             superTypePaths.add(
                 toElementPath(
                     nameToPathComponent(getScope(superclass)),
@@ -768,7 +738,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         DataproviderMode.DATAPROVIDER_2.addAllToAttributeValuesAsList(classDef, "supertype", superTypePaths);
 
         // isAbstract attribute
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(classDef, "isAbstract", Boolean.valueOf(umlClass.isAbstract()));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(classDef, "isAbstract", umlClass.isAbstract());
 
         // visibility attribute
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(classDef, "visibility", VisibilityKind.PUBLIC_VIS);
@@ -778,31 +748,24 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         SysLog.detail("Class", classDef.getResourceIdentifier());
         this.createModelElement(
-            null, 
+            null,
             classDef
         );
 
         // process attributes of this class
-        for (
-            Iterator it = umlClass.getAttributes().iterator();
-            it.hasNext();
-        ) {
-            this.processAttribute((UML1Attribute)it.next());
+        for (Object o : umlClass.getAttributes()) {
+            this.processAttribute((UML1Attribute) o);
         }
 
         // process operations of this class
-        for (
-            Iterator it = umlClass.getOperations().iterator();
-            it.hasNext();
-        ) {
+        for (Object o : umlClass.getOperations()) {
             this.processBehaviouralFeature(
-                (UML1Operation)it.next(), 
+                (UML1Operation) o,
                 classDef
             );
         }
     }
 
-    //---------------------------------------------------------------------------
     private void processAttribute(
         UML1Attribute umlAttribute
     ) throws Exception {
@@ -823,35 +786,34 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "container", containerPath);
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "visibility", this.toMOFVisibility(umlAttribute.getVisiblity()));
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "maxLength", Integer.valueOf(this.getAttributeMaxLength(umlAttribute)));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "maxLength", this.getAttributeMaxLength(umlAttribute));
 
         boolean isDerived = this.isAttributeDerived(umlAttribute);
         boolean isChangeable = this.toMOFChangeability(umlAttribute.getChangeability());
-        if(isDerived && isChangeable) {
+        if (isDerived && isChangeable) {
             this.warning("Attribute <" + attributeDef.getResourceIdentifier() + "> is derived AND changeable. Derived attributes MUST NOT be changeable. Continuing with isChangeable=false!");
             isChangeable = false;
         }
 
-        if(umlAttribute.getType() == null) {
+        if (umlAttribute.getType() == null) {
             this.error("Undefined type for attribute " + umlAttribute.getQualifiedName());
-        }
-        else {
+        } else {
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "type", toElementPath(
-			    nameToPathComponent(getScope(umlAttribute.getType())),
-			    getName(umlAttribute.getType())
-			));
+                nameToPathComponent(getScope(umlAttribute.getType())),
+                getName(umlAttribute.getType())
+            ));
         }
 
         // openMDX uses attribute stereotype to indicate multiplicity
         // this allows to use multiplicities like set, list, ...
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "multiplicity", umlAttribute.getStereotypes().size() > 0
-		? umlAttribute.getStereotypes().iterator().next()
-		    : umlAttribute.getMultiplicityRange() != null
-		    ? this.toMOFMultiplicity(umlAttribute.getMultiplicityRange())
-		        : DEFAULT_ATTRIBUTE_MULTIPLICITY);
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "multiplicity", !umlAttribute.getStereotypes().isEmpty()
+            ? umlAttribute.getStereotypes().iterator().next()
+            : umlAttribute.getMultiplicityRange() != null
+            ? this.toMOFMultiplicity(umlAttribute.getMultiplicityRange())
+            : DEFAULT_ATTRIBUTE_MULTIPLICITY);
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "scope", ScopeKind.INSTANCE_LEVEL);
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "isDerived", Boolean.valueOf(isDerived));
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "isChangeable", Boolean.valueOf(isChangeable));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "isDerived", isDerived);
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(attributeDef, "isChangeable", isChangeable);
 
         // annotation
         String annotation = this.getAnnotation(umlAttribute);
@@ -861,16 +823,15 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         SysLog.detail("Attribute", attributeDef.getResourceIdentifier());
         this.createModelElement(
-            null, 
+            null,
             attributeDef
         );
     }
 
-    //---------------------------------------------------------------------------
     private void processBehaviouralFeature(
         UML1Operation umlBehaviouralFeature,
         ObjectRecord aContainer
-    ) throws ServiceException, ResourceException{
+    ) throws ServiceException, ResourceException {
         SysLog.detail("Processing behavioural feature", umlBehaviouralFeature.getName());
         final String behaviouralFeatureName = umlBehaviouralFeature.getName();
         final Path behaviouralFeatureId = newFeaturePath(
@@ -882,15 +843,15 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             behaviouralFeatureId,
             isException ? ModelAttributes.EXCEPTION : ModelAttributes.OPERATION
         );
-        
+
         // container
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(behaviouralFeatureDef, "container", aContainer.getResourceIdentifier());
 
-        if(!isException) {
+        if (!isException) {
             // stereotype
             DataproviderMode.DATAPROVIDER_2.addAllToAttributeValuesAsList(behaviouralFeatureDef, "stereotype", umlBehaviouralFeature.getStereotypes());
             // isQuery
-            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(behaviouralFeatureDef, "isQuery", Boolean.valueOf(umlBehaviouralFeature.isQuery()));
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(behaviouralFeatureDef, "isQuery", umlBehaviouralFeature.isQuery());
         }
 
         // annotation
@@ -905,61 +866,63 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         // scope
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(behaviouralFeatureDef, "scope", ScopeKind.INSTANCE_LEVEL);
 
-
         // parameters
         List parameters = umlBehaviouralFeature.getParametersWithoutReturnParameter();
 
-        if(!parameters.isEmpty()) {
+        if (!parameters.isEmpty()) {
 
-            /**
+            /*
              * In openMDX all operations have exactly one parameter with name 'in'. The importer
              * supports two forms how parameters may be specified:
              * 1) p0:t0, p1:t1, ..., pn:tn. In this case a class with stereotype <parameter> is created
              *    and p0, ..., pn are added as class attributes. Finally, a parameter with name 'in'
              *    is created with the created parameter type.
-             * 2) in:t. In this case the parameter with name 'in' is created with the specified type.
+             * 2) in:t. In this case, the parameter with name 'in' is created with the specified type.
              */
 
-            /**
+            /*
              * Create the parameter type class. We need this class only in case 1. Because we only know
              * at the end whether we really need it, create it anyway but do not add it to the repository.
              */
             String capOperationName =
-                behaviouralFeatureName.substring(0,1).toUpperCase() +
-                behaviouralFeatureName.substring(1);
+                behaviouralFeatureName.substring(0, 1).toUpperCase() +
+                    behaviouralFeatureName.substring(1);
 
             ObjectRecord parameterType = this.channel.newObjectRecord(
                 new Path(
-                	aContainer.getResourceIdentifier() + capOperationName + "Params"
+                    aContainer.getResourceIdentifier() + capOperationName + "Params"
                 ),
                 ModelAttributes.STRUCTURE_TYPE
             );
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterType, "visibility", VisibilityKind.PUBLIC_VIS);
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterType, "isAbstract", Boolean.FALSE);
-            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterType, "container",DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(aContainer, "container"));
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterType,
+                "container",
+                DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(aContainer, "container")
+            );
 
-            /**
-             * Create parameters either as STRUCTURE_FIELD of parameterType (case 1) 
+            /*
+             * Create parameters either as STRUCTURE_FIELD of parameterType (case 1)
              * or as PARAMETER of modelOperation (case 2)
              */
             boolean createParameterType = true;
             boolean parametersCreated = false;
-            for(
-                Iterator it = parameters.iterator();
-                it.hasNext();
-            ) {
-                UML1Parameter aParameter = (UML1Parameter)it.next();
+            /*
+             * Case 1: Parameter is attribute of parameter type. Create object as ATTRIBUTE.
+             */
+            for (Object parameter : parameters) {
+                UML1Parameter aParameter = (UML1Parameter) parameter;
                 ObjectRecord parameterDef = this.processParameter(
                     aParameter,
                     parameterType
                 );
-                /**
+                /*
                  * Case 2: Parameter with name 'in'. Create object as PARAMETER.
                  */
                 String fullQualifiedParameterName = parameterDef.getResourceIdentifier().getLastSegment().toClassicRepresentation();
-                if("in".equals(fullQualifiedParameterName.substring(fullQualifiedParameterName.lastIndexOf(':') + 1))) {
+                if ("in".equals(fullQualifiedParameterName.substring(fullQualifiedParameterName.lastIndexOf(':') + 1))) {
                     // 'in' is the only allowed parameter
-                    if(parametersCreated) {
+                    if (parametersCreated) {
                         SysLog.error("Parameter format must be [p0:T0...pn:Tn | in:T], where T must be a class with stereotype " + Stereotypes.STRUCT);
                         throw new ServiceException(
                             ModelExceptions.MODEL_DOMAIN,
@@ -969,17 +932,17 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                         );
                     }
                     parameterType = this.channel.newObjectRecord(
-                        (Path)DataproviderMode.DATAPROVIDER_2.attributeValue(parameterDef, "type"),
+                        (Path) DataproviderMode.DATAPROVIDER_2.attributeValue(parameterDef, "type"),
                         "org:omg:model1:Parameter"
                     );
                     createParameterType = false;
                 }
-                /**
+                /*
                  * Case 1: Parameter is attribute of parameter type. Create object as ATTRIBUTE.
                  */
                 else {
                     // 'in' is the only allowed parameter
-                    if(!createParameterType) {
+                    if (!createParameterType) {
                         SysLog.error("Parameter format must be [p0:T0, ... ,pn:Tn | in:T], where T must be a class with stereotype " + ModelAttributes.STRUCTURE_TYPE);
                         throw new ServiceException(
                             ModelExceptions.MODEL_DOMAIN,
@@ -996,15 +959,18 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                 }
 
             }
-            /**
+            /*
              * Case 1: parameter type must be created
              */
-            if(createParameterType) {
+            if (createParameterType) {
                 this.createModelElement(
                     null,
                     parameterType
                 );
             }
+
+            #if CLASSIC_CHRONO_TYPES
+
             // in-parameter
             ObjectRecord inParameterDef = this.channel.newObjectRecord(
                 newFeaturePath(
@@ -1015,16 +981,61 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             );
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "container", behaviouralFeatureDef.getResourceIdentifier());
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "direction", DirectionKind.IN_DIR);
-            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "multiplicity", "1..1");
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "multiplicity", DEFAULT_PARAMETER_MULTIPLICITY);
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "type", parameterType.getResourceIdentifier());
             this.createModelElement(
                 null,
                 inParameterDef
             );
-        }
 
-        // void in-parameter
-        else {
+            #else
+
+            for (Object parameter : parameters) {
+
+                UML1Parameter aParameter = (UML1Parameter) parameter;
+                ObjectRecord parameterDef = this.channel.newObjectRecord(
+                    newFeaturePath(
+                        behaviouralFeatureDef.getResourceIdentifier(),
+                        aParameter.getName()
+                    ),
+                    ModelAttributes.PARAMETER
+                );
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                    parameterDef, "container", behaviouralFeatureDef.getResourceIdentifier()
+                );
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                    parameterDef, "direction", DirectionKind.IN_DIR
+                );
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                    parameterDef, "multiplicity",
+                    !aParameter.getStereotypes().isEmpty() ?
+                        aParameter.getStereotypes().iterator().next() :
+                        DEFAULT_PARAMETER_MULTIPLICITY
+                );
+
+                final String aParamType = aParameter.getType().replace("::", ":");
+                final int idx = aParamType.lastIndexOf(":");
+                final String name = aParamType.substring(0, idx);
+                final String elementName = aParamType.substring(idx + 1);
+
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                    parameterDef,
+                    "type",
+                    toElementPath(
+                        nameToPathComponent(name),
+                        elementName
+                    )
+                );
+                this.createModelElement(null, parameterDef);
+            }
+
+            #endif
+
+        } else {
+
+            #if CLASSIC_CHRONO_TYPES
+
+            // void in-parameter
             ObjectRecord inParameterDef = this.channel.newObjectRecord(
                 newFeaturePath(
                     behaviouralFeatureDef.getResourceIdentifier(),
@@ -1034,19 +1045,50 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             );
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "container", behaviouralFeatureDef.getResourceIdentifier());
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "direction", DirectionKind.IN_DIR);
-            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "multiplicity", "1..1");
-            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "type", toElementPath(
-			    nameToPathComponent("org::openmdx::base"),
-			    "Void"
-			));
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(inParameterDef, "multiplicity", DEFAULT_PARAMETER_MULTIPLICITY);
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                inParameterDef,
+                "type",
+                toElementPath(
+                    nameToPathComponent("org::openmdx::base"),
+                    "Void"
+                )
+            );
             this.createModelElement(
                 null,
                 inParameterDef
             );
+
+            #else
+
+            ObjectRecord voidParameterDef = this.channel.newObjectRecord(
+                newFeaturePath(behaviouralFeatureDef.getResourceIdentifier(), "void"),
+                ModelAttributes.PARAMETER
+            );
+            // Set void parameter properties...
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                voidParameterDef, "container", behaviouralFeatureDef.getResourceIdentifier()
+            );
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                voidParameterDef, "direction", DirectionKind.IN_DIR
+            );
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                voidParameterDef, "multiplicity", DEFAULT_PARAMETER_MULTIPLICITY
+            );
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(
+                voidParameterDef, "type", toElementPath(
+                    nameToPathComponent("org::openmdx::base"),
+                    "Void"
+                )
+            );
+            this.createModelElement(null, voidParameterDef);
+
+            #endif
         }
+
         // Note:
         // return parameter is ignored for exceptions (operations with stereotype exception)
-        if(!isException) {
+        if (!isException) {
             ObjectRecord resultDef = this.channel.newObjectRecord(
                 newFeaturePath(
                     behaviouralFeatureDef.getResourceIdentifier(),
@@ -1056,19 +1098,18 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             );
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "container", behaviouralFeatureDef.getResourceIdentifier());
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "direction", DirectionKind.RETURN_DIR);
-            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "multiplicity", "1..1");
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "multiplicity", DEFAULT_PARAMETER_MULTIPLICITY);
 
-            if(umlBehaviouralFeature.getReturnParameter().getType() == null) {
+            if (umlBehaviouralFeature.getReturnParameter().getType() == null) {
                 this.error("Undefined return type for operation " + umlBehaviouralFeature.getQualifiedName());
-            }
-            else {
+            } else {
                 DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(resultDef, "type", toElementPath(
-				    nameToPathComponent(getScope(umlBehaviouralFeature.getReturnParameter().getType())),
-				    getName(umlBehaviouralFeature.getReturnParameter().getType())
-				));
+                    nameToPathComponent(getScope(umlBehaviouralFeature.getReturnParameter().getType())),
+                    getName(umlBehaviouralFeature.getReturnParameter().getType())
+                ));
                 this.createModelElement(
                     null,
-                    resultDef                   
+                    resultDef
                 );
             }
         }
@@ -1077,14 +1118,13 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         String allExceptions = this.getOperationExceptions(umlBehaviouralFeature);
         if (allExceptions != null) {
             final StringTokenizer exceptions = new StringTokenizer(allExceptions, ",; ");
-            final List<Path> exceptionPaths = new ArrayList<Path>();
-            while(exceptions.hasMoreTokens()) {
+            final List<Path> exceptionPaths = new ArrayList<>();
+            while (exceptions.hasMoreTokens()) {
                 String qualifiedExceptionName = exceptions.nextToken().trim();
-                if(!qualifiedExceptionName.isEmpty()) {
-                    if (qualifiedExceptionName.indexOf("::") == -1) {
+                if (!qualifiedExceptionName.isEmpty()) {
+                    if (!qualifiedExceptionName.contains("::")) {
                         this.errors.println("Found invalid exception declaration <" + qualifiedExceptionName + "> for the operation " + umlBehaviouralFeature.getQualifiedName() + "; this exception is ignored unless a valid qualified exception name is specified.");
-                    }
-                    else {
+                    } else {
                         String qualifiedClassName = qualifiedExceptionName.substring(0, qualifiedExceptionName.lastIndexOf("::"));
                         String scope = getScope(qualifiedClassName);
                         String name = getName(qualifiedClassName);
@@ -1107,13 +1147,14 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
             null,
             behaviouralFeatureDef
         );
+
+
     }
 
-    //---------------------------------------------------------------------------
     private ObjectRecord processParameter(
         UML1Parameter umlParameter,
         ObjectRecord parameterType
-    ) throws ServiceException, ResourceException{
+    ) throws ResourceException {
         SysLog.detail("Processing parameter", umlParameter.getName());
 
         ObjectRecord parameterDef = this.channel.newObjectRecord(
@@ -1127,26 +1168,24 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         // container
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterDef, "container", parameterType.getResourceIdentifier());
 
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterDef, "maxLength", Integer.valueOf(DEFAULT_PARAMETER_MAX_LENGTH));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterDef, "maxLength", DEFAULT_PARAMETER_MAX_LENGTH);
 
-        if(umlParameter.getType() == null) {
+        if (umlParameter.getType() == null) {
             this.error("Undefined type for parameter " + umlParameter.getQualifiedName());
-        }
-        else {
+        } else {
             DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterDef, "type", toElementPath(
-			    nameToPathComponent(getScope(umlParameter.getType())),
-			    getName(umlParameter.getType())
-			));
-            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterDef, "multiplicity", umlParameter.getStereotypes().size() > 0 ?
-			umlParameter.getStereotypes().iterator().next() :
-			    DEFAULT_PARAMETER_MULTIPLICITY);
+                nameToPathComponent(getScope(umlParameter.getType())),
+                getName(umlParameter.getType())
+            ));
+            DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(parameterDef, "multiplicity", !umlParameter.getStereotypes().isEmpty() ?
+                umlParameter.getStereotypes().iterator().next() :
+                DEFAULT_PARAMETER_MULTIPLICITY);
         }
 
         return parameterDef;
 
     }
 
-    //---------------------------------------------------------------------------
     public void processUMLDataType(
         UML1DataType umlDataType
     ) throws Exception {
@@ -1163,11 +1202,11 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
 
         // container
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(primitiveTypeDef, "container", toElementPath(
-		    nameToPathComponent(getScope(umlDataType.getQualifiedName())),
-		    getName(getScope(umlDataType.getQualifiedName()))
-		));
+            nameToPathComponent(getScope(umlDataType.getQualifiedName())),
+            getName(getScope(umlDataType.getQualifiedName()))
+        ));
 
-        /**
+        /*
          * skip stereotype because its value 'Primitive'
          * was marked to note the difference between
          * ordinary classes and primitive types
@@ -1180,56 +1219,46 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         }
 
         // isAbstract attribute
-        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(primitiveTypeDef, "isAbstract", Boolean.valueOf(umlDataType.isAbstract()));
+        DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(primitiveTypeDef, "isAbstract", umlDataType.isAbstract());
 
         // visibility attribute
         DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(primitiveTypeDef, "visibility", VisibilityKind.PUBLIC_VIS);
 
         SysLog.detail("Primitive type", primitiveTypeDef.getResourceIdentifier());
         createModelElement(
-            null, 
+            null,
             primitiveTypeDef
         );
     }
 
-    //---------------------------------------------------------------------------
     public void processUMLGeneralization(UML1Generalization genDef) {
         //
     }
 
-    //---------------------------------------------------------------------------
     private String toMOFVisibility(
         UML1VisibilityKind umlVisibility
     ) {
-        if(UML1VisibilityKind.PRIVATE.equals(umlVisibility)) {
+        if (UML1VisibilityKind.PRIVATE.equals(umlVisibility)) {
             return VisibilityKind.PRIVATE_VIS;
-        }
-        else if(UML1VisibilityKind.PUBLIC.equals(umlVisibility)) {
+        } else if (UML1VisibilityKind.PUBLIC.equals(umlVisibility)) {
             return VisibilityKind.PUBLIC_VIS;
-        }
-        else
-        {
+        } else {
             return VisibilityKind.PUBLIC_VIS;
         }
     }
 
-    //---------------------------------------------------------------------------
     private String toMOFAggregation(
         UML1AggregationKind umlAggregation
     ) {
-        if(UML1AggregationKind.COMPOSITE.equals(umlAggregation)) {
+        if (UML1AggregationKind.COMPOSITE.equals(umlAggregation)) {
             return AggregationKind.COMPOSITE;
-        }
-        else if(UML1AggregationKind.AGGREGATE.equals(umlAggregation)) {
+        } else if (UML1AggregationKind.AGGREGATE.equals(umlAggregation)) {
             return AggregationKind.SHARED;
-        }
-        else
-        {
+        } else {
             return AggregationKind.NONE;
         }
     }
 
-    //---------------------------------------------------------------------------
     private String toMOFMultiplicity(
         UML1MultiplicityRange range
     ) {
@@ -1239,84 +1268,69 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         ).append(
             ".."
         ).append(
-            "-1".equals(range.getUpper()) || "*".equals(range.getUpper()) ? 
-                "n" : 
+            "-1".equals(range.getUpper()) || "*".equals(range.getUpper()) ?
+                "n" :
                 range.getUpper()
         ).toString();
     }
 
-    //---------------------------------------------------------------------------
     private boolean toMOFChangeability(
         UML1ChangeableKind umlChangeability
     ) {
         return UML1ChangeableKind.CHANGEABLE.equals(umlChangeability);
     }
 
-    //---------------------------------------------------------------------------
     private boolean isAttributeDerived(
         UML1Attribute attribute
     ) {
         // if feature isDerived is set return it
-        if(attribute.isDerived() != null) {
-            return attribute.isDerived().booleanValue();
+        if (attribute.isDerived() != null) {
+            return attribute.isDerived();
         }
         // otherwise try to retrieve the isDerived information from tagged values
-        for(
-                Iterator it = attribute.getTaggedValues().iterator();
-                it.hasNext();
-        ) {
-            UML1TaggedValue taggedValue = (UML1TaggedValue)it.next();
-            if("derived".equals(taggedValue.getType().getName()) && "true".equals(taggedValue.getDataValue())) {
+        for (Object o : attribute.getTaggedValues()) {
+            UML1TaggedValue taggedValue = (UML1TaggedValue) o;
+            if ("derived".equals(taggedValue.getType().getName()) && "true".equals(taggedValue.getDataValue())) {
                 return true;
             }
         }
         return false;
     }
 
-    //---------------------------------------------------------------------------
     private String getAnnotation(
         UML1ModelElement modelElement
     ) {
         StringBuilder annotation = new StringBuilder();
-        for(String comment: modelElement.getComment()) {
+        for (String comment : modelElement.getComment()) {
             annotation.append(comment);
         }
         return annotation.toString();
     }
 
-    //---------------------------------------------------------------------------
     private int getAttributeMaxLength(
         UML1Attribute attribute
     ) {
         // the information about the maxLength of an attribute is stored as a
         // tagged value  (openMDX choice)
-        for(
-                Iterator it = attribute.getTaggedValues().iterator();
-                it.hasNext();
-        ) {
-            UML1TaggedValue taggedValue = (UML1TaggedValue)it.next();
-            if ("maxLength".equals(taggedValue.getType().getName()))
-            {
+        for (Object o : attribute.getTaggedValues()) {
+            UML1TaggedValue taggedValue = (UML1TaggedValue) o;
+            if ("maxLength".equals(taggedValue.getType().getName())) {
                 return Integer.parseInt(taggedValue.getDataValue());
             }
         }
         return DEFAULT_ATTRIBUTE_MAX_LENGTH;
     }
 
-    //---------------------------------------------------------------------------
     private String getOperationExceptions(
         UML1Operation operation
     ) {
-        for(String comment: operation.getComment()) {
-            if(comment.startsWith(THROWS_EXCEPTION_PREFIX)) {
+        for (String comment : operation.getComment()) {
+            if (comment.startsWith(THROWS_EXCEPTION_PREFIX)) {
                 return comment.substring(THROWS_EXCEPTION_PREFIX.length());
             }
         }
-        for(           
-                Iterator it = operation.getTaggedValues().iterator();
-                it.hasNext();
-        ) {
-            UML1TaggedValue taggedValue = (UML1TaggedValue)it.next();
+        for (Object o : operation.getTaggedValues()) {
+            UML1TaggedValue taggedValue = (UML1TaggedValue) o;
             if ("exceptions".equals(taggedValue.getType().getName())) {
                 return taggedValue.getDataValue();
             }
@@ -1324,30 +1338,24 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         return null;
     }
 
-    //---------------------------------------------------------------------------
     private String toAssociationEndName(
         String assEndNameWithQualifier
     ) {
-        if (assEndNameWithQualifier != null && assEndNameWithQualifier.indexOf((char)10) != -1)
-        {
+        if (assEndNameWithQualifier != null && assEndNameWithQualifier.indexOf((char) 10) != -1) {
             return assEndNameWithQualifier.substring(
                 0,
-                assEndNameWithQualifier.indexOf((char)10)
+                assEndNameWithQualifier.indexOf((char) 10)
             );
-        }
-        else
-        {
+        } else {
             return assEndNameWithQualifier;
         }
     }
 
-    //---------------------------------------------------------------------------
     private List toAssociationEndQualifiers(
         String assEndNameWithQualifier
-    ) throws ServiceException, ResourceException {
+    ) throws ResourceException {
         List qualifiers = new ArrayList();
-        if (assEndNameWithQualifier != null && assEndNameWithQualifier.indexOf('[') != -1)
-        {
+        if (assEndNameWithQualifier != null && assEndNameWithQualifier.indexOf('[') != -1) {
             String qualifierText = assEndNameWithQualifier.substring(
                 assEndNameWithQualifier.indexOf('[') + 1,
                 assEndNameWithQualifier.indexOf(']')
@@ -1357,7 +1365,6 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         return qualifiers;
     }
 
-    //---------------------------------------------------------------------------
     private void warning(
         String text
     ) {
@@ -1365,7 +1372,6 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         this.warnings.println("WARNING: " + text);
     }
 
-    //---------------------------------------------------------------------------
     private void error(
         String text
     ) {
@@ -1374,22 +1380,4 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
         this.hasErrors = true;
     }
 
-    //---------------------------------------------------------------------------
-    // Variables
-    //---------------------------------------------------------------------------
-    public static final short XMI_FORMAT_POSEIDON = 1;
-    public static final short XMI_FORMAT_MAGICDRAW = 2;
-    public static final short XMI_FORMAT_RSM = 3;
-    public static final short XMI_FORMAT_EMF = 4;
-    public static final String THROWS_EXCEPTION_PREFIX = "@throws";
-
-    private PrintStream infos = null;
-    private PrintStream errors = null;
-    private PrintStream warnings = null;
-    private final URL modelUrl;
-    private final short xmiFormat;
-    private final Map pathMap;
-
 }
-
-//--- End of File -----------------------------------------------------------

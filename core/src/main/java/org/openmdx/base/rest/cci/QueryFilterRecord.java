@@ -48,7 +48,9 @@ import java.util.List;
 
 import #if JAVA_8 javax.resource.cci.MappedRecord #else jakarta.resource.cci.MappedRecord #endif;
 
+import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.w3c.cci2.AnyTypePredicate;
+import org.w3c.cci2.Container;
 
 /**
  * {@code org::openmdx::kernel::QueryFilter}

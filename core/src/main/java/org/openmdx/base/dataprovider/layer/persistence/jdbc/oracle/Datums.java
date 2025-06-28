@@ -46,7 +46,6 @@ package org.openmdx.base.dataprovider.layer.persistence.jdbc.oracle;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -57,7 +56,9 @@ import java.util.TimeZone;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Classes;
+
 #if CLASSIC_CHRONO_TYPES
+import java.math.BigDecimal;
 import org.w3c.spi.DatatypeFactories;
 #endif
 

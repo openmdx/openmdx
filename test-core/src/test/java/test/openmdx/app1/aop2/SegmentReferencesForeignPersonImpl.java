@@ -173,6 +173,7 @@ public class SegmentReferencesForeignPersonImpl
     /* (non-Javadoc)
      * @see org.w3c.cci2.Container#removeAll(org.w3c.cci2.AnyTypePredicate)
      */
+
     public void removeAll(AnyTypePredicate predicate) {
         this.segment.<Person>getPerson().removeAll(predicate);
     }
@@ -183,7 +184,7 @@ public class SegmentReferencesForeignPersonImpl
     @Override
     public void processAll(
         AnyTypePredicate predicate,
-        Consumer<Person> consumer
+        Consumer<? super Person> consumer
     ) {
         this.segment.<Person>getPerson().processAll(predicate, consumer);
     }

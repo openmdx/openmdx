@@ -48,7 +48,7 @@ package org.w3c.cci2;
  * Comparable Type Predicate
  */
 public interface ComparableTypePredicate<V extends Comparable<?>>
-    extends AnyTypePredicate
+    extends AnyTypePredicate#if CLASSIC_CHRONO_TYPES #else <V> #endif
 {
 
     /**

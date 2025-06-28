@@ -49,7 +49,7 @@ import java.util.Collection;
 /**
  * Any Type Predicate
  */
-public interface AnyTypePredicate {
+public interface AnyTypePredicate #if CLASSIC_CHRONO_TYPES #else <V> #endif {
 
     /**
      * &lsaquo;attribute value&rsaquo; = &lsaquo;operand&rsaquo;
@@ -59,29 +59,29 @@ public interface AnyTypePredicate {
      * @param operand the operand the attribute value is compared to
      */
     void equalTo(
-        Object operand
+        #if CLASSIC_CHRONO_TYPES Object #else V #endif operand
     );
 
     /**
      * &lsaquo;attribute value&rsaquo; &isin; &lsaquo;operands&rsaquo;
      * <p>
-     * Matches if the attribute's value is equal to one the operands.
+     * Matches if the attribute's value is equal to one of the operands.
      * 
      * @param operands the operands the attribute value is compared to
      */
     void elementOf(
-        Object... operands
+        Collection<? #if CLASSIC_CHRONO_TYPES #else extends V #endif> operands
     );
 
     /**
      * &lsaquo;attribute value&rsaquo; &isin; &lsaquo;operands&rsaquo;
      * <p>
-     * Matches if the attribute's value is equal to one the operands.
+     * Matches if the attribute's value is equal to one of the operands.
      * 
      * @param operands the operand the attribute value is compared to
      */
     void elementOf(
-        Collection<?> operands
+         #if CLASSIC_CHRONO_TYPES Object #else V #endif... operands
     );
 
     /**
@@ -92,34 +92,35 @@ public interface AnyTypePredicate {
      * @param operand the operand the attribute value is compared to
      */
     void notEqualTo(
-        Object operand
+         #if CLASSIC_CHRONO_TYPES Object #else V #endif operand
     );
 
     /**
      * &lsaquo;attribute value&rsaquo; &notin; &lsaquo;operands&rsaquo;
      * <p>
-     * Matches if the attribute's value is not equal to any the operands.
+     * Matches if the attribute's value is not equal to any of the operands.
      * 
      * @param operands the operand the attribute value is compared to
      */
     void notAnElementOf(
-        Object... operands
+        Collection<? #if CLASSIC_CHRONO_TYPES #else extends V #endif> operands
     );
 
     /**
      * &lsaquo;attribute value&rsaquo; &notin; &lsaquo;operands&rsaquo;
      * <p>
-     * Matches if the attribute's value is not equal to any the operands.
+     * Matches if the attribute's value is not equal to any of the operands.
      * 
      * @param operands the operand the attribute value is compared to
      */
     void notAnElementOf(
-        Collection<?> operands
+         #if CLASSIC_CHRONO_TYPES Object #else V #endif... operands
     );
 
     /**
-     * This method is deprecated in order to avoid its erroneous use in lieu 
-     * of {@link #equalTo(Object)}.
+     * This method is deprecated to avoid its erroneous use in lieu
+     * of {@code #equalTo(Object)}—in case of flavour 2 and 4—or
+     * {@code #equalTo(V)}—in case of flavour 3 and 5—, respectively.
      * 
      * @deprecated to avoid erroneous use 
      * 
