@@ -607,8 +607,8 @@ public final class Codes implements Serializable {
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validTo = codeEntry.getValidTo();
         #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif current = SystemClock.getInstance().now();
         return
-			((validFrom == null) || ChronoTypes.isBefore(validFrom, current) &&
-				((validTo == null) || ChronoTypes.isAfter(validTo, current)));
+            ((validFrom == null) || ChronoTypes.isBefore(validFrom, current)) &&
+            ((validTo == null) || ChronoTypes.isAfter(validTo, current));
     }
 
     /**
