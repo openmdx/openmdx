@@ -5,7 +5,7 @@
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 
-package org.openmdx.jgss;
+package org.ietf.jgss;
 
 /**
  * This exception is thrown whenever a GSS-API error occurs, including
