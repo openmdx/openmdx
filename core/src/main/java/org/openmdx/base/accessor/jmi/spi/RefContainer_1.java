@@ -643,9 +643,6 @@ public class RefContainer_1
     #endif
 
     #if CLASSIC_CHRONO_TYPES
-    /* (non-Javadoc)
-     * @see org.oasisopen.jmi1.RefContainer#refGet(java.lang.Object[])
-     */
     @Override
     public RefObject_1_0 refGet(Object... arguments) {
         return get(
@@ -688,9 +685,6 @@ public class RefContainer_1
     }
 
     #if CLASSIC_CHRONO_TYPES
-    /* (non-Javadoc)
-     * @see org.oasisopen.jmi1.RefContainer#refRemove(java.lang.Object[])
-     */
     @Override
     public void refRemove(Object... arguments) {
         RefObject_1_0 object = this.get(RefContainer_1.toQualifier(arguments.length, arguments));
@@ -703,9 +697,6 @@ public class RefContainer_1
         }
     }
     #else
-    /* (non-Javadoc)
-     * @see org.oasisopen.jmi1.RefContainer#refRemove(org.oasisopen.cci2.QualifierType, java.lang.Object)
-     */
     @Override
     public void refRemove(QualifierType qualifierType, Object qualifierValue) {
         this.refRemove(Collections.singletonList(new RefQualifier(qualifierType, qualifierValue)));

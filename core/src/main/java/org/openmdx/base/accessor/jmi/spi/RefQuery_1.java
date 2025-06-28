@@ -67,7 +67,11 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefObject;
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
+#if CLASSIC_CHRONO_TYPES
+import javax.xml.datatype.Duration;
+#else
+import java.time.Duration;
+#endif
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.mof.cci.ModelAttributes;

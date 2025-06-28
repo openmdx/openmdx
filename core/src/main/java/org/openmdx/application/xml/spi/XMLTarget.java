@@ -71,7 +71,6 @@ import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Resources;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * XML Target

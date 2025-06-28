@@ -1926,7 +1926,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 														int parameterPos = -1;
 														if((parameterPos = query.indexOf(WebKeys.REQUEST_PARAMETER + "=")) >= 0) {
 															String parameter = query.substring(parameterPos + 10);
-															if(parameter.indexOf("xri:@openmdx:") >= 0 || parameter.indexOf("xri://@openmdx:") > 0) {
+															if(parameter.contains("xri:@openmdx:") || parameter.indexOf("xri://@openmdx:") > 0) {
 																xri = Action.getParameter(
 																	parameter,
 																	Action.PARAMETER_OBJECTXRI

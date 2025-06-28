@@ -3304,11 +3304,11 @@ public class Database_2
         if(normalizedValue instanceof URI) {
             ps.setString(position, normalizedValue.toString());
         } else if(normalizedValue instanceof Short) {
-            ps.setShort(position, ((Short) normalizedValue).shortValue());
+            ps.setShort(position, (Short) normalizedValue);
         } else if(normalizedValue instanceof Integer) {
-            ps.setInt(position, ((Integer) normalizedValue).intValue());
+            ps.setInt(position, (Integer) normalizedValue);
         } else if(normalizedValue instanceof Long) {
-            ps.setLong(position, ((Long) normalizedValue).longValue());
+            ps.setLong(position, (Long) normalizedValue);
         } else if(normalizedValue instanceof BigDecimal) {
             ps.setBigDecimal(
                 position,
@@ -3325,7 +3325,7 @@ public class Database_2
         } else if(normalizedValue instanceof Boolean) {
             Object sqlValue = this.getBooleanMarshaller().marshal(normalizedValue, conn);
             if (sqlValue instanceof Boolean) {
-                ps.setBoolean(position, ((Boolean) sqlValue).booleanValue());
+                ps.setBoolean(position, (Boolean) sqlValue);
             } else if (sqlValue instanceof Number) {
                 ps.setInt(position, ((Number) sqlValue).intValue());
             } else {
@@ -3525,10 +3525,6 @@ public class Database_2
 
     /**
      * Lookup a feature's meta-data
-     * 
-     * @param objectClass
-     * 
-     * @param featureName
      * @return the feature's meta-data
      */
     private ModelElement_1_0 getFeatureDef(
@@ -3549,12 +3545,6 @@ public class Database_2
      * Touch object feature (set empty value). The feature must be a modeled
      * feature which are either non-derived or system attributes (otherwise the
      * feature is not touched).
-     * 
-     * @param object
-     * @param featureName
-     * @param multiplicity
-     * 
-     * @throws ServiceException
      */
     private void touchAttributes(
         MappedRecord object,
@@ -3597,13 +3587,6 @@ public class Database_2
      *            requests attribute selector.
      * @param attributeSpecifiers
      *            as map.
-     * @param reference
-     *            object reference used to create path of returned objects.
-     *            objectPath = reference + objectId.
-     * @param objectList
-     *            a list of DataproviderObjects contained in the result set rs.
-     * @param attributeType
-     *            attribute type [T_STRING|T_DECIMAL|T_BINARY].
      * @return true, if there are more rows in rs which are not read yet.
      *
      */
@@ -4078,11 +4061,6 @@ public class Database_2
         return false;
     }
 
-    /**
-     * @param featureType
-     * @return
-     * @throws ServiceException
-     */
     private boolean isObjectId(String featureType)
         throws ServiceException {
         return (featureType != null)
@@ -4092,11 +4070,6 @@ public class Database_2
                     .isClassType(featureType));
     }
 
-    /**
-     * @param featureType
-     * @param val
-     * @return
-     */
     private boolean isOpenmdxResourceIdentifier(
         String featureType,
         Object val
@@ -4129,12 +4102,6 @@ public class Database_2
         objects.clear();
     }
 
-    /**
-     * @param attributeSelector
-     * @param attributeSpecifiers
-     * @param facade2
-     * @return
-     */
     private boolean fetchAll(
         short attributeSelector,
         Set<String> attributeSpecifierNames,
@@ -4154,12 +4121,6 @@ public class Database_2
 
     /**
      * Complete requested attributes.
-     * 
-     * @param conn
-     * @param attributeSelector
-     * @param attributeSpecifierNames
-     * @param objects
-     * @throws ServiceException
      */
     private void completeRequestedAttributes(
         Connection conn,
@@ -4289,11 +4250,6 @@ public class Database_2
 
     /**
      * Determine whether multi-valued attributes requested
-     * 
-     * @param attributeSpecifiers
-     * @param featureDefs
-     * 
-     * @throws ServiceException
      */
     private boolean areMultivaluedAttributesRequested(
         Map<String, AttributeSpecifier> attributeSpecifiers,
@@ -4635,21 +4591,8 @@ public class Database_2
      * place holders. The corresponding values are stored in filterValues. The
      * type of a filter property is determined of its first value (get(0)).
      * 
-     * @param conn
-     * @param dbObject
-     * @param statedObject
-     * @param viewAliasName
      * @param fixedViewAliasName
      *            avoid mix-in view alias references
-     * @param view
-     * @param viewIsPrimary
-     * @param viewIsIndexed
-     * @param joinType
-     * @param joinColumn
-     * @param referencedType
-     * @param filterProperties
-     * @param negate
-     * @param statementParameters
      * @return the SQL clause
      * 
      * @throws ServiceException
@@ -4675,7 +4618,7 @@ public class Database_2
         List<Object> clauseValues = new ArrayList<Object>();
         boolean hasProperties = false;
         String operator = "";
-        /**
+        /*
          * Generate clause for all filter properties: If negate -->
          * negate(expr0) OR negate(expr1) ... If !negate --> expr0 AND expr1 ...
          */
@@ -4683,7 +4626,7 @@ public class Database_2
         for(int i = 0; i < filterProperties.size(); i++) {
             FilterProperty filterProperty = filterProperties.get(i);
             ModelElement_1_0 filterPropertyDef = filterPropertyDefs.get(i);
-            /**
+            /*
              * FOR_ALL --> all attribute values must match --> all slices must
              * match THERE_EXISTS --> at least one attribute value must match
              * --> at least one row must match --> subtract all rows which do
@@ -4836,14 +4779,6 @@ public class Database_2
 
     /**
      * Handling of format 0 for EQUALS.CLAUSE.LARGE.STRINGSET
-     * 
-     * @param conn
-     * @param equalsClauseLargeStringSet
-     * @param externalizedValues
-     * @param clauseValues
-     * @param context
-     * @return
-     * @throws ServiceException
      */
     protected String isInToSqlClauseLargeStringSet0(
         Connection conn,
@@ -4859,14 +4794,6 @@ public class Database_2
 
     /**
      * Handling of format 1 for EQUALS.CLAUSE.LARGE.STRINGSET
-     * 
-     * @param conn
-     * @param equalsClauseLargeStringSet
-     * @param externalizedValues
-     * @param clauseValues
-     * @param context
-     * @return
-     * @throws ServiceException
      */
     protected String isInToSqlClauseLargeStringSet1(
         Connection conn,
@@ -4890,15 +4817,7 @@ public class Database_2
     /**
      * Add an IS_IN or IS_NOT_IN clause
      * 
-     * @param conn
-     * @param dbObject
-     * @param columnName
      * @param negation true for IS_NOT_IN, false for IS_IN,
-     * @param filterPropertyDef
-     * @param clause
-     * @param clauseValues
-     * @param values
-     * @param context
      */
     protected void isInToSqlClause(
         Connection conn,
@@ -4982,16 +4901,6 @@ public class Database_2
 
     /**
      * Fill IS_LIKE or IS_UNLIKE clause
-     * 
-     * @param connection
-     * @param dbObject
-     * @param like
-     * @param filterPropertyDef
-     * @param clause
-     * @param clauseValues
-     * @param value
-     * @param parent
-     * @param matchingPatterns
      */
     protected void isLikeToSqlClause(
         Connection connection,
@@ -5051,16 +4960,6 @@ public class Database_2
 
     /**
      * Fill IS_LIKE or IS_UNLIKE clause
-     * 
-     * @param connection
-     * @param dbObject
-     * @param like
-     * @param filterPropertyDef
-     * @param clause
-     * @param clauseValues
-     * @param path
-     * @param value
-     * @param matchingPatterns
      */
     protected void isLikeToSqlClause(
         Connection connection,
@@ -5131,10 +5030,6 @@ public class Database_2
 
     /**
      * Apply a context provider to a provider indifferent XRI
-     * 
-     * @param xri
-     * @param context
-     * 
      * @return the (optional) provider
      */
     protected Path applyProvider(
@@ -5164,9 +5059,6 @@ public class Database_2
      * statement using ? as place holders. The corresponding values are added to
      * filterValues. The generated clause is of the form (columnName operator
      * literal). ANY or EACH are not handled by this method.
-     * 
-     * @param statedObject
-     * @param referencedType
      */
     private String filterPropertyToSqlClause(
         Connection conn,
@@ -5195,7 +5087,7 @@ public class Database_2
         }
         switch (operator) {
 
-            /**
+            /*
              * Evaluate the following: THERE_EXISTS v IN A: v NOT IN Q (Special:
              * if Q={} ==> true, iff A<>{}, false otherwise) FOR_ALL v IN A: v
              * NOT IN Q (Special: if Q={} ==> true)
@@ -5805,12 +5697,6 @@ public class Database_2
         );
     }
 
-    /**
-     * @param filterPropertyDef
-     * @param referencedType
-     * @return
-     * @throws ServiceException
-     */
     protected ModelElement_1_0 getReferenceType(
         ModelElement_1_0 filterPropertyDef
     )
@@ -5833,20 +5719,6 @@ public class Database_2
         }
     }
 
-    /**
-     * @param conn
-     * @param dbObject
-     * @param joinFromState
-     * @param reference
-     * @param viewAliasName
-     * @param filterProperty
-     * @param filterPropertyDef
-     * @param columnName
-     * @param negation
-     * @param clauseValues
-     * @param clause
-     * @throws ServiceException
-     */
     protected void addComplexFilter(
         Connection conn,
         DbObject dbObject,
@@ -6433,15 +6305,7 @@ public class Database_2
 
     /**
      * DB Object retrieval
-     * 
-     * @param conn
-     * @param dbObjectConfiguration
-     * @param accessPath
-     * @param filter
-     * @param isQuery
      * @return the requested DB object
-     * 
-     * @throws ServiceException
      */
     protected DbObject getDbObject(
         Connection conn,
@@ -6940,10 +6804,6 @@ public class Database_2
 
     /**
      * Test whether the exception is recoverable
-     * 
-     * @param exception
-     * @param partitionedObjects
-     * 
      * @return {@code true} if the exception is recoverable
      */
     private boolean isRecoverable(
@@ -7045,7 +6905,7 @@ public class Database_2
      * 
      * @return a new temporary file
      * 
-     * @throws IOException
+     * @throws IOException in case of failure to create a temporary file
      */
     private File newTemporaryFile()
         throws IOException {
@@ -7061,14 +6921,13 @@ public class Database_2
     /**
      * Create Binary Large Object
      * 
-     * @param stream
-     * @param length
-     * 
+     * @param stream the binary stream
+     *
      * @return the newly create BLOB
      * 
-     * @throws IOException
+     * @throws IOException in case of failure
      * 
-     *             @deprecated("For JRE 5/setStreamByValue support only")
+     * @deprecated For JRE 5/setStreamByValue support only
      */
     @Deprecated
     protected BinaryLargeObject tallyLargeObject(InputStream stream)
@@ -7087,12 +6946,8 @@ public class Database_2
 
     /**
      * Create Character Large Object
-     * 
-     * @param stream
-     * @param length
-     * 
      * @return the newly created CLOB
-     * @throws IOException
+     * @throws IOException in case of failure
      */
     protected CharacterLargeObject tallyLargeObject(Reader stream)
         throws IOException {
@@ -7113,7 +6968,7 @@ public class Database_2
     /**
      * Retrieves the configured date time type
      * 
-     * @param connection
+     * @param connection the database connection
      * 
      * @return the date time type to be used
      * 
@@ -7135,11 +6990,11 @@ public class Database_2
     /**
      * The escape clause
      * 
-     * @param connection
+     * @param connection the database connection
      * 
      * @return the escape clause
      * 
-     * @throws ServiceException
+     * @throws ServiceException in case of failure to retrieve the escape clause
      */
     @Override
     public String getEscapeClause(
@@ -7156,7 +7011,7 @@ public class Database_2
     /**
      * Add the escape character '\\' to an equal value
      * 
-     * @param equalValue
+     * @param equalValue the value to be escaped
      * 
      * @return the corresponding like value
      */
@@ -7167,7 +7022,7 @@ public class Database_2
     /**
      * Remove the escape character '\\' from a like value
      * 
-     * @param likeValue
+     * @param likeValue the value to be unescaped
      * 
      * @return the corresponding equals value
      */
@@ -7179,7 +7034,7 @@ public class Database_2
     /**
      * Retrieves the configured date type
      * 
-     * @param connection
+     * @param connection the database connection
      * 
      * @return the date type to be used
      * 
@@ -7201,7 +7056,7 @@ public class Database_2
     /**
      * Retrieves the configured time type
      * 
-     * @param connection
+     * @param connection the database connection
      * 
      * @return the time type to be used
      * 
@@ -7248,7 +7103,7 @@ public class Database_2
     /**
      * Retrieves the configured boolean type
      * 
-     * @param connection
+     * @param connection the database connection
      * 
      * @return the boolean type to be used
      * 
@@ -7332,7 +7187,7 @@ public class Database_2
      * 
      * @return the decoded lock assertion
      * 
-     * @throws ServiceException
+     * @throws ServiceException in case of an unsupported version class
      */
     @Override
     public String toWriteLock(Object version)
@@ -7372,7 +7227,7 @@ public class Database_2
      * 
      * @return the decoded lock assertion
      * 
-     * @throws ServiceException
+     * @throws ServiceException in case of an unsupported lock class
      */
     @Override
     public String toReadLock(Object lock)
@@ -7404,7 +7259,7 @@ public class Database_2
      * select clause as they shall never be put into the same table with other
      * classes not matching this criteria.
      * 
-     * @param qualifiedClassName
+     * @param qualifiedClassName the fully qualified class name
      * 
      * @return {@code true} if the class shall not be checked
      */

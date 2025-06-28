@@ -155,12 +155,12 @@ public class StandardBeanTransformer implements BeanTransformer {
                 );
                 #if CLASSIC_CHRONO_TYPES
                 encoder.setPersistenceDelegate(
-                org.w3c.cci2.ImmutableDate.class,
-                ClassicDatePersistenceDelegate.INSTANCE
+                    org.w3c.cci2.ImmutableDate.class,
+                    ClassicDatePersistenceDelegate.INSTANCE
                 );
                 encoder.setPersistenceDelegate(
-                        org.w3c.cci2.ImmutableDateTime.class,
-                        new ImmutableDateTimePersistenceDelegate()
+                    org.w3c.cci2.ImmutableDateTime.class,
+                    new ImmutableDateTimePersistenceDelegate()
                 );
                 #endif
                 encoder.writeObject(javaBean);

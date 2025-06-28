@@ -47,7 +47,6 @@ package org.openmdx.base.accessor.spi;
 import org.openmdx.base.marshalling.Marshaller;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi2.Datatypes;
-#if CLASSIC_CHRONO_TYPES import org.w3c.format.DateTimeFormat;#endif
 
 /**
  * Date/Time Marshaller
