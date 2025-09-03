@@ -50,7 +50,6 @@ javaPlatform {
     allowDependencies()
 }
 
-// TODO update versions where restriction came from runtime target
 dependencies {
     constraints {
 
@@ -61,12 +60,12 @@ dependencies {
         val groovyVersion = "4.0.+"
         val jdoVersion = "3.1"
         val jakartaVersion = "10.0.0"
-        val junitVersion = "5.13.1"
-        val junitPlatformVersion = "1.13.1"
+        val junitVersion = "5.13.+"
+        val junitPlatformVersion = "1.13.+"
         val ldapVersion = "2.1.+"
-        val manifoldVersion = "2025.1.22"
-        val mockitoVersion = "5.18.0"
-        val oracleVersion = "23.8.0.25.04"
+        val manifoldVersion = "2025.1.+"
+        val mockitoVersion = "5.19.+"
+        val oracleVersion = "23.9.0.25.07"
         val postgresVersion = "42.7.+"
         val radiusVersion = "1.1.+"
         val servletVersion = "6.1.+"
