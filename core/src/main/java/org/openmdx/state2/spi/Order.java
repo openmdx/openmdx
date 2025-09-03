@@ -45,15 +45,18 @@
 
 package org.openmdx.state2.spi;
 
-import #if CLASSIC_CHRONO_TYPES javax.xml.datatype #else java.time #endif.Duration;
-
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.time.ChronoTypes;
-import org.w3c.spi2.Datatypes;
 
 #if CLASSIC_CHRONO_TYPES
-import org.w3c.cci2.ImmutableDatatype;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.util.Date;
 import org.w3c.spi.DatatypeFactories;
+import javax.xml.datatype.Duration;
+#else
+import java.time.LocalDate;
+import java.time.Instant;
+import java.time.Duration;
 #endif
 
 /**
@@ -71,26 +74,36 @@ public class Order {
     /**
      * Plus one day
      */
-    public static final Duration ONE_DAY = #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory(
-    ).newDurationDayTime(
-        true, // isPositive
-        1, // day
-        0, // hour
-        0, // minute
-        0 // second
-    ); #else Duration.ofDays(1) #endif;
+    public static final Duration ONE_DAY =
+    #if CLASSIC_CHRONO_TYPES
+        DatatypeFactories.xmlDatatypeFactory(
+        ).newDurationDayTime(
+            true, // isPositive
+            1, // day
+            0, // hour
+            0, // minute
+            0 // second
+        );
+    #else
+        Duration.ofDays(1)
+    #endif;
 
     /**
      * Minus one day
      */
-    public static final Duration MINUS_ONE_DAY = #if CLASSIC_CHRONO_TYPES org.w3c.spi.DatatypeFactories.xmlDatatypeFactory(
-    ).newDurationDayTime(
-        false, // isPositive
-        1, // day
-        0, // hour
-        0, // minute
-        0 // second
-    ); #else Duration.ofDays(-1) #endif;
+    public static final Duration MINUS_ONE_DAY =
+    #if CLASSIC_CHRONO_TYPES
+        DatatypeFactories.xmlDatatypeFactory(
+        ).newDurationDayTime(
+            false, // isPositive
+            1, // day
+            0, // hour
+            0, // minute
+            0 // second
+        );
+    #else
+        Duration.ofDays(-1)
+    #endif;
 
     //------------------------------------------------------------------------
     // Date States
@@ -105,8 +118,8 @@ public class Order {
      * @throws IllegalArgumentException if validTo is less than validFrom 
      */
     public static void assertTimeRange(
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validFrom,
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif validTo
+        #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif validFrom,
+        #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif validTo
     ){
         if(
             ChronoTypes.compare(
@@ -128,7 +141,7 @@ public class Order {
     }
     
     /**
-     * Compare two XMLGregorianCalendar values where {@code null} is
+     * Compare two org::w3c::date values where {@code null} is
      * considered to be smaller than every other value.
      * 
      * @param d1 the first value
@@ -138,14 +151,14 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareValidFrom(
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d1,
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d2
+        #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif d1,
+        #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif d2
     ){
         return ChronoTypes.compare(d1, d2, ChronoTypes.NullRepresents.NEGATIVE_INFINITY);
     }
 
     /**
-     * Compare two XMLGregorianCalendar values where {@code null} is
+     * Compare two org::w3c::date values where {@code null} is
      * considered to be greater than every other value.
      * 
      * @param d1 the first value
@@ -155,14 +168,14 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareValidTo(
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d1,
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif d2
+        #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif d1,
+        #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif d2
     ){
         return ChronoTypes.compare(d1, d2, ChronoTypes.NullRepresents.POSITIVE_INFINITY);
     }
 
     /**
-     * Compare two XMLGregorianCalendar values where {@code null} is
+     * Compare two org::w3c::date values where {@code null} is
      * considered to be lesser than every other value for {@code from}
      * and greater than every other value for {@code to}.
      * 
@@ -173,8 +186,8 @@ public class Order {
      * is less than, equal to, or greater than {@code to}. 
      */
     public static int compareValidFromToValidTo(
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif from,
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif to
+        #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif from,
+        #if CLASSIC_CHRONO_TYPES XMLGregorianCalendar #else LocalDate #endif to
     ){
         return ChronoTypes.compare(from, to, ChronoTypes.NullRepresents.NEGATIVE_AND_POSITIVE_INFINITY_RESPECTIVELY);
     }
@@ -186,14 +199,14 @@ public class Order {
     /**
      * Tests whether invalidFrom is greater than validFrom
      * 
-     * @param validFrom the first value
-     * @param invalidFrom the second value
+     * @param validFrom the first org::w3c::dateTime value
+     * @param invalidFrom the second org::w3c::dateTime value
      * 
      * @throws IllegalArgumentException if invalidFrom is less than or equal to validFrom 
      */
     public static void assertTimeRange(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif validFrom,
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif invalidFrom
+        #if CLASSIC_CHRONO_TYPES Date #else Instant #endif validFrom,
+        #if CLASSIC_CHRONO_TYPES Date #else Instant #endif invalidFrom
     ){
         if(
             ChronoTypes.compare(
@@ -225,8 +238,8 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareValidFrom(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d1,
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d2
+        #if CLASSIC_CHRONO_TYPES Date #else Instant #endif d1,
+        #if CLASSIC_CHRONO_TYPES Date #else Instant #endif d2
     ){
         return ChronoTypes.compare(d1, d2, ChronoTypes.NullRepresents.NEGATIVE_INFINITY);
     }
@@ -242,8 +255,8 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareInvalidFrom(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d1,
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d2
+        #if CLASSIC_CHRONO_TYPES Date #else Instant #endif d1,
+        #if CLASSIC_CHRONO_TYPES Date #else Instant #endif d2
     ){
         return ChronoTypes.compare(d1, d2, ChronoTypes.NullRepresents.POSITIVE_INFINITY);
     }
@@ -260,8 +273,8 @@ public class Order {
      * is less than, equal to, or greater than {@code to}. 
      */
     public static int compareValidFromToValidTo(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif from,
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif to
+        #if CLASSIC_CHRONO_TYPES Date #else Instant #endif from,
+        #if CLASSIC_CHRONO_TYPES Date #else Instant #endif to
     ){
         return ChronoTypes.compare(from, to, ChronoTypes.NullRepresents.NEGATIVE_AND_POSITIVE_INFINITY_RESPECTIVELY);
     }
@@ -282,8 +295,8 @@ public class Order {
      * than, equal to, or greater than d2. 
      */
     public static int compareRemovedAt(
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d1,
-        #if CLASSIC_CHRONO_TYPES java.util.Date #else java.time.Instant #endif d2
+        #if CLASSIC_CHRONO_TYPES Date #else Instant #endif d1,
+        #if CLASSIC_CHRONO_TYPES Date #else Instant #endif d2
     ){
         return ChronoTypes.compare(d1, d2, ChronoTypes.NullRepresents.POSITIVE_INFINITY);
     }
@@ -294,35 +307,49 @@ public class Order {
     //------------------------------------------------------------------------
     
     /**
-     * Retrieve the previous day
-     * 
-     * @param date a day
-     * 
-     * @return the previous day
-     */
-    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif predecessor(
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif date
-    ){
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif predecessor
-                = Datatypes.DATE_CLASS.cast(date);
-        predecessor.#if CLASSIC_CHRONO_TYPES add #else plus#endif(MINUS_ONE_DAY);
-        return predecessor;
-    }
-
-    /**
      * Retrieve the next day
-     * 
-     * @param date a day
-     * 
+     *
+     * @param date an org::w3c::date value
+     *
      * @return the next day
      */
-    public static #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif successor(
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif date
+    #if CLASSIC_CHRONO_TYPES
+    public static XMLGregorianCalendar successor(
+        XMLGregorianCalendar date
     ){
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif successor
-                = Datatypes.DATE_CLASS.cast(date);
-        successor.#if CLASSIC_CHRONO_TYPES add #else plus#endif(ONE_DAY);
-        return successor;
+        XMLGregorianCalendar successor = (XMLGregorianCalendar) date.clone();
+        successor.add(ONE_DAY);
+        return DatatypeFactories.immutableDatatypeFactory().toImmutableDate(successor);
     }
+    #else
+    public static LocalDate successor(
+        LocalDate date
+    ){
+        return date.plus(ONE_DAY);
+    }
+    #endif
+
+    /**
+     * Retrieve the previous day
+     *
+     * @param date an org::w3c::date value
+     *
+     * @return the previous day
+     */
+    #if CLASSIC_CHRONO_TYPES
+    public static XMLGregorianCalendar predecessor(
+        XMLGregorianCalendar date
+    ){
+        XMLGregorianCalendar successor = (XMLGregorianCalendar) date.clone();
+        successor.add(MINUS_ONE_DAY);
+        return DatatypeFactories.immutableDatatypeFactory().toImmutableDate(successor);
+    }
+    #else
+    public static LocalDate predecessor(
+        LocalDate date
+    ){
+        return date.plus(MINUS_ONE_DAY);
+    }
+    #endif
 
 }
