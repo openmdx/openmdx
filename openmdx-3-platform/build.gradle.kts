@@ -52,20 +52,20 @@ javaPlatform {
 
 dependencies {
     constraints {
-    	
+
 		val atomikosVersion = "6.0.0"
-		val bootstrapVersion = "4.21.0"
+		val bootstrapVersion = "3.21.1"
 		val cacheVersion = "1.1.1"
 		val flexmarkVersion = "0.64.8"
 		val groovyVersion = "3.0.+"
 		val jdoVersion = "3.1"
 		val jakartaVersion = "8.0.+"
-		val junitVersion = "5.13.+"
-		val junitPlatformVersion = "1.13.+"
+		val junitVersion = "5.14.+"
+		val junitPlatformVersion = "1.14.+"
 		val ldapVersion = "2.1.+"
-		val manifoldVersion = "2025.1.+"
-		val mockitoVersion = "5.19.+"
-		val oracleVersion = "23.9.0.25.07"
+		val manifoldVersion = "2026.1.+"
+		val mockitoVersion = "5.21.+"
+		val oracleVersion = "23.26.0.0.0"
 		val postgresVersion = "42.7.+"
 		val radiusVersion = "1.1.+"
 		val servletVersion = "4.0.+"

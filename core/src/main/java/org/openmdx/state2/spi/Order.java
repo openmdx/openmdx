@@ -54,9 +54,9 @@ import java.util.Date;
 import org.w3c.spi.DatatypeFactories;
 import javax.xml.datatype.Duration;
 #else
+import java.time.Period;
 import java.time.LocalDate;
 import java.time.Instant;
-import java.time.Duration;
 #endif
 
 /**
@@ -74,10 +74,10 @@ public class Order {
     /**
      * Plus one day
      */
-    public static final Duration ONE_DAY =
     #if CLASSIC_CHRONO_TYPES
-        DatatypeFactories.xmlDatatypeFactory(
-        ).newDurationDayTime(
+    private static final Duration ONE_DAY = DatatypeFactories
+        .xmlDatatypeFactory()
+        .newDurationDayTime(
             true, // isPositive
             1, // day
             0, // hour
@@ -85,16 +85,16 @@ public class Order {
             0 // second
         );
     #else
-        Duration.ofDays(1)
-    #endif;
+    private static final Period ONE_DAY = Period.ofDays(1);
+    #endif
 
     /**
      * Minus one day
      */
-    public static final Duration MINUS_ONE_DAY =
     #if CLASSIC_CHRONO_TYPES
-        DatatypeFactories.xmlDatatypeFactory(
-        ).newDurationDayTime(
+    private static final Duration MINUS_ONE_DAY = DatatypeFactories
+        .xmlDatatypeFactory()
+        .newDurationDayTime(
             false, // isPositive
             1, // day
             0, // hour
@@ -102,8 +102,8 @@ public class Order {
             0 // second
         );
     #else
-        Duration.ofDays(-1)
-    #endif;
+    private static final Period MINUS_ONE_DAY = Period.ofDays(-1);
+    #endif
 
     //------------------------------------------------------------------------
     // Date States

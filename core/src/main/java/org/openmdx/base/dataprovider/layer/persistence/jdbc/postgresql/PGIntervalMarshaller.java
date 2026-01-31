@@ -70,7 +70,7 @@ public class PGIntervalMarshaller {
 
 	private static final String PG_INTERVAL_CLASS = "org.postgresql.util.PGInterval";
 	private static final Pattern PG_INTERVAL_PATTERN = Pattern.compile(
-			"^(-?[0-9]+) years (-?[0-9]+) mons (-?[0-9]+) days (-?[0-9]+) hours (-?[0-9]+) mins (-?[0-9]+(?:\\.[0-9]+)) secs$");
+			"^(?:(-?[0-9]+) years)? ?(?:(-?[0-9]+) mons)? ?(?:(-?[0-9]+) days)? ?(?:(-?[0-9]+) hours)? ?(?:(-?[0-9]+) mins)? ?(?:(-?[0-9]+(?:\\.[0-9]+)?) secs)?$");
 	private static final BigInteger MONTHS_PER_YEAR = BigInteger.valueOf(12);
 	private static final BigInteger HOURS_PER_DAY = BigInteger.valueOf(24);
 	private static final BigInteger MINUTES_PER_HOUR = BigInteger.valueOf(60);
@@ -137,12 +137,13 @@ public class PGIntervalMarshaller {
 	public Object unmarshal(Object interval) throws ServiceException {
 		final Matcher matcher = PG_INTERVAL_PATTERN.matcher(interval.toString());
 		if(matcher.matches()) {
-			BigInteger years = new BigInteger(matcher.group(1));
-			BigInteger months = new BigInteger(matcher.group(2));
-			BigInteger days = new BigInteger(matcher.group(3));
-			BigInteger hours = new BigInteger(matcher.group(4));
-			BigInteger minutes = new BigInteger(matcher.group(5));
-			BigDecimal seconds = new BigDecimal(matcher.group(6));
+			int group = 1;
+			BigInteger years = getBigInteger(matcher, group++);
+			BigInteger months = getBigInteger(matcher, group++);
+			BigInteger days = getBigInteger(matcher, group++);
+			BigInteger hours = getBigInteger(matcher, group++);
+			BigInteger minutes = getBigInteger(matcher, group++);
+			BigDecimal seconds = getBigDecimal(matcher, group);
 			boolean negative = years.signum() < 0 || months.signum() < 0 || days.signum() < 0 || hours.signum() < 0 || minutes.signum() < 0 || seconds.signum() < 0;
 			if(negative) {
 				boolean positive = years.signum() > 0 || months.signum() > 0 || days.signum() > 0 || hours.signum() > 0 || minutes.signum() > 0 || seconds.signum() > 0;
@@ -243,6 +244,16 @@ public class PGIntervalMarshaller {
 				new BasicException.Parameter("expected", PG_INTERVAL_PATTERN)
 			);
 		}
+	}
+
+	private static BigInteger getBigInteger(final Matcher matcher, final int group) {
+		final String value = matcher.group(group);
+		return value == null ? BigInteger.ZERO : new BigInteger(value);
+	}
+
+	private static BigDecimal getBigDecimal(final Matcher matcher, final int group) {
+		final String value = matcher.group(group);
+		return value == null ? BigDecimal.ZERO : new BigDecimal(value);
 	}
 
 }
