@@ -62,7 +62,6 @@ import java.util.SortedMap;
 
 import javax.jdo.JDOCanRetryException;
 import javax.jdo.JDOUserException;
-import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.spi.ExceptionHelper;
@@ -99,8 +98,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
      *
      * @param self the plug-in holder
      * @param next the next plug-in
-     * 
-     * @throws ServiceException
      */
     protected BasicState_1(
         ObjectView_1_0 self, 
@@ -123,10 +120,10 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /**
      * {@code true} for state views.
      */
-    private boolean enabled = false;
+    private boolean enabled;
 
     /**
-     *  
+     *  Map containing the core features
      */
     private transient Map<?,?> coreFeatures;
 
@@ -157,8 +154,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
      * @param feature the feature to be tested
      * 
      * @return {@code true} for state view features
-     * 
-     * @throws ServiceException  
      */
     private boolean isViewFeature(
         String feature
@@ -178,12 +173,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /**
      * Tests whether a given state is involved in the given context
      * 
-     * @param candidate
-     * @param context
-     * @param accessMode 
      * @return {@code true} if the candidate is involved
-     * 
-     * @throws ServiceException
      */
     protected boolean isInvolved(
         DataObject_1_0 candidate, 
@@ -233,9 +223,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
 
     /**
      * Clone or split state
-     * 
-     * @param source
-     * @throws ServiceException
      */
     protected abstract void enableUpdate(
         Map<DataObject_1_0,BoundaryCrossing> source
@@ -244,10 +231,8 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /**
      * Tells whether the state starts before the time range's start point or
      * ends after the time range's end point.
-     * 
-     * @param state
-     * 
-     * @return {@code true} if the state crosses at least one of the 
+     *
+     * @return {@code true} if the state crosses at least one of the
      * time range limits.
      */
     protected abstract BoundaryCrossing getBoundaryCrossing(
@@ -267,9 +252,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
         );
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.aop2.core.AbstractState_1#getStates()
-     */
     protected Collection<DataObject_1_0> getStates(
     ) throws ServiceException {
         return getStates(self.objGetDelegate());
@@ -302,9 +284,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     protected boolean isToBeRemoved(
         DataObject_1_0 state
     ) throws ServiceException{
-        return 
-            !state.jdoIsDeleted() && 
-            IN_THE_FUTURE.equals(state.objGetValue(REMOVED_AT));
+        return !state.jdoIsDeleted() && Datatypes.equalsIgnoringMutability(IN_THE_FUTURE, state.objGetValue(REMOVED_AT));
     }
     
     protected abstract boolean interfersWith(
@@ -322,9 +302,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
         return (C) this.self.getInteractionSpec();
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.aop1.Involved#getQueryAccessMode()
-     */
     @Override
     public AccessMode getQueryAccessMode() {
         return Parameters.STRICT_QUERY && getContext().getViewKind() == ViewKind.TIME_RANGE_VIEW ? 
@@ -332,9 +309,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
             AccessMode.FOR_QUERY;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.plugin.Involved#getInvolved(org.openmdx.state2.plugin.AccessMode)
-     */
     public Iterable<DataObject_1_0> getInvolved(
         final AccessMode accessMode
     ){
@@ -379,11 +353,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
             ExceptionHelper.newObjectIdParameter("accessMode", accessMode)
         );
     } 	
-    
-    	
-	/* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objGetList(java.lang.String)
-     */
+
     @SuppressWarnings("unchecked")
     @Override
     public List<Object> objGetList(
@@ -405,9 +375,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objGetSet(java.lang.String)
-     */
     @SuppressWarnings("unchecked")
     @Override
     public Set<Object> objGetSet(
@@ -429,9 +396,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objGetSparseArray(java.lang.String)
-     */
     @SuppressWarnings("unchecked")
     @Override
     public SortedMap<Integer, Object> objGetSparseArray(
@@ -454,12 +418,9 @@ public abstract class BasicState_1<C extends StateContext<?>>
     }
 
     protected Boolean transactionTimeUniqueDefaultValue(){
-    	return Boolean.valueOf(!this.enabled);
+    	return !this.enabled;
     }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objGetValue(java.lang.String)
-     */
+
     @Override
     public Object objGetValue(
         String feature
@@ -468,7 +429,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
             if(CORE.equals(feature)) {
                 return this.self.objGetDelegate();
             } else {
-                UniqueValue<Object> reply = new UniqueValue<Object>();
+                UniqueValue<Object> reply = new UniqueValue<>();
                 for(DataObject_1_0 state : getInvolved(this.getQueryAccessMode())){
                     reply.set(state.objGetValue(feature));
                 }
@@ -496,9 +457,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objSetValue(java.lang.String, java.lang.Object)
-     */
     @Override
     public void objSetValue(
         String feature, 
@@ -615,16 +573,11 @@ public abstract class BasicState_1<C extends StateContext<?>>
 
     /**
      * Determine the Id parameter
-     * 
-     * @return
      */
     public BasicException.Parameter getIdParameter() {
         return ExceptionHelper.newObjectIdParameter("id", this);
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objDefaultFetchGroup()
-     */
     @Override
     public Set<String> objDefaultFetchGroup(
     ) throws ServiceException {
@@ -664,9 +617,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objAddToUnitOfWork()
-     */
     @Override
     public void objMakeTransactional(
     ) throws ServiceException {
@@ -679,9 +629,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objRemoveFromUnitOfWork()
-     */
     @Override
     public void objMakeNontransactional(
     ) throws ServiceException {
@@ -694,9 +641,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objRefresh()
-     */
     @Override
     public void objRefresh(
     ) throws ServiceException {
@@ -709,9 +653,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objIsDeleted()
-     */
     @Override
     public boolean jdoIsDeleted(
     ) {
@@ -730,14 +671,11 @@ public abstract class BasicState_1<C extends StateContext<?>>
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetClass()
-     */
     @Override
     public String objGetClass(
     ) throws ServiceException {
         if(this.enabled) {
-            UniqueValue<String> reply = new UniqueValue<String>();
+            UniqueValue<String> reply = new UniqueValue<>();
             for(DataObject_1_0 state : getInvolved(AccessMode.FOR_QUERY)){
                 reply.set(state.objGetClass());
             }
@@ -757,9 +695,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.PersistenceCapable_1_0#objIsDirty()
-     */
     @Override
     public boolean jdoIsDirty(
     ) {
@@ -783,9 +718,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.PersistenceCapable_1_0#objIsInUnitOfWork()
-     */
     @Override
     public boolean jdoIsTransactional(
     ) {
@@ -809,24 +741,12 @@ public abstract class BasicState_1<C extends StateContext<?>>
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.spi.Object_1_5#getFactory()
-     */
-    @Override
-    public PersistenceManager jdoGetPersistenceManager(
-    ) {
-        return this.self.jdoGetPersistenceManager();
-    }
-
     /**
      * Merge similar adjacent states
      */
     protected abstract void reduceStates(
     ) throws ServiceException;
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.view.PlugIn_1#jdoPreStore()
-     */
     @Override
     public void jdoPreStore() {
         try {
@@ -837,10 +757,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
         super.jdoPreStore();
     }
 
-    
-    /* (non-Javadoc)
-	 * @see org.openmdx.base.accessor.view.Interceptor_1#jdoPreClear()
-	 */
 	@Override
 	public void jdoPreClear() {
 		super.jdoPreClear();
@@ -854,8 +770,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
      * Retrieve the actual state version
      * 
      * @return the actual state version
-     * 
-     * @throws ServiceException  
      */
 	int getStateVersion(
 	) throws ServiceException {
@@ -869,8 +783,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
 	 * end of the current unit of work.
 	 * 
 	 * @param state the state to be invalidated
-	 * 
-	 * @throws ServiceException
 	 */
     protected void invalidate(
         DataObject_1_0 state
@@ -888,8 +800,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
      * end of the current unit of work.
      * 
      * @param state the state to be invalidated
-     * 
-     * @throws ServiceException
      */
     protected void reactivate(
         DataObject_1_0 state
@@ -919,47 +829,24 @@ public abstract class BasicState_1<C extends StateContext<?>>
     class InvolvedStatesIterator implements Iterator<DataObject_1_0> {
 
         /**
-         * Constructor 
+         * Constructor
          *
-         * @param states         * 
-         * @param testPersistency 
          * @param accessMode, or {@code null} if filtering is not required
-         *  
-         * @throws ServiceException
          */
         InvolvedStatesIterator(
         	Iterable<DataObject_1_0> states, 
             AccessMode accessMode, 
             boolean testPersistency
-        ) throws ServiceException{
+        ){
             this.candidates = states.iterator();
             this.accessMode = accessMode;
             this.testPersistency = testPersistency;
         }
 
-        /**
-         * 
-         */
         private final Iterator<DataObject_1_0> candidates;
-
-        /**
-         * 
-         */
         private DataObject_1_0 nextInvolved = null;
-
-        /**
-         * 
-         */
         private DataObject_1_0 lastInvolved = null;
-
-        /**
-         * The access mode
-         */
         private final AccessMode accessMode;
-
-        /**
-         * 
-         */
         private final boolean testPersistency;
         
         /**
@@ -975,9 +862,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
 			);
 		}
 
-        /* (non-Javadoc)
-         * @see java.util.Iterator#hasNext()
-         */
         public boolean hasNext(
         ) {
             try {
@@ -996,9 +880,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
             }                
         }
 
-        /* (non-Javadoc)
-         * @see java.util.Iterator#next()
-         */
         public DataObject_1_0 next() {
             if(hasNext()) {
                 this.lastInvolved = this.nextInvolved;
@@ -1009,9 +890,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
             }
         }
 
-        /* (non-Javadoc)
-         * @see java.util.Iterator#remove()
-         */
         public void remove(
         ) {
             if(this.lastInvolved == null) {
@@ -1045,9 +923,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
 
     	/**
     	 * Constructor
-    	 * 
-    	 * @param accessMode
-    	 * @param cacheRequiresFiltering 
     	 */
     	StateCache(
 			AccessMode accessMode, 
@@ -1090,8 +965,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
     	 * Tells whether the cache can be used or must be (re-)built
     	 * 
     	 * @return {@code true} if the cache may be used without rebuilding
-    	 * 
-    	 * @throws ServiceException
     	 */
     	protected boolean isWarm() throws ServiceException{
     		return 
@@ -1105,8 +978,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
     	 * @param delegate the underlying iterator
     	 * 
     	 * @return an up-to-date cache
-    	 * 
-    	 * @throws ServiceException
     	 */
     	protected abstract Iterable<DataObject_1_0> newCache(
     		Iterator<DataObject_1_0> delegate	
@@ -1115,11 +986,8 @@ public abstract class BasicState_1<C extends StateContext<?>>
         /**
          * Retrieve the underlying iterator
          * 
-         * @param states
-         * @param testInvolvement {@code true} if the states must be filtered 
-         * @param testPersistency
+         * @param testInvolvement {@code true} if the states must be filtered
          * @return a new Iterator
-         * @throws ServiceException
          */
         protected final Iterator<DataObject_1_0> iterator(
         	Iterable<DataObject_1_0> states, 
@@ -1129,9 +997,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
         	return testInvolvement ? new InvolvedStatesIterator(states, accessMode, testPersistency) : states.iterator();
         }
 
-        /* (non-Javadoc)
-		 * @see org.openmdx.state2.aop1.BasicState_1.InvolvedStates#iterator()
-		 */
 		public Iterator<DataObject_1_0> iterator() {
 			try {
 				if(isCacheable()){
@@ -1167,8 +1032,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
 
     	/**
     	 * Constructor
-    	 * 
-    	 * @param accessMode
     	 */
 		SingleStateCache(AccessMode accessMode) {
 			super(accessMode, false);
@@ -1188,10 +1051,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     			)
     		);
     	}
-    	
-		/* (non-Javadoc)
-		 * @see org.openmdx.state2.aop1.BasicState_1.StateCache#newCache(java.util.Iterator)
-		 */
+
 		@Override
 		protected Iterable<DataObject_1_0> newCache(
 			Iterator<DataObject_1_0> delegate
@@ -1223,21 +1083,16 @@ public abstract class BasicState_1<C extends StateContext<?>>
 
     	/**
     	 * Constructor
-    	 * 
-    	 * @param accessMode
     	 */
     	MultiStateCache(AccessMode accessMode) {
 			super(accessMode, true);
 		}
-    	
-		/* (non-Javadoc)
-		 * @see org.openmdx.state2.aop1.BasicState_1.StateCache#newCache(java.util.Iterator)
-		 */
+
 		@Override
 		protected Iterable<DataObject_1_0> newCache(
 			Iterator<DataObject_1_0> delegate
-		) throws ServiceException {
-			final List<DataObject_1_0> cachedStates = new ArrayList<DataObject_1_0>();
+		){
+			final List<DataObject_1_0> cachedStates = new ArrayList<>();
 			while(delegate.hasNext()) {
 				cachedStates.add(delegate.next());
 			}
@@ -1257,15 +1112,12 @@ public abstract class BasicState_1<C extends StateContext<?>>
     	
     	/**
     	 * Constructor
-    	 * 
-    	 * @param accessMode
     	 */
     	InvolvedStatesForUpdate() {
     		super(AccessMode.FOR_UPDATE);
 		}
     	
         private final C context = getContext();    	
-
 
 		@Override
 		protected boolean isCacheable() {
@@ -1275,7 +1127,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
 		@Override
 		public Iterator<DataObject_1_0> iterator() {
 			try {
-		       	Map<DataObject_1_0,BoundaryCrossing> pending = new HashMap<DataObject_1_0,BoundaryCrossing>();	       	
+		       	Map<DataObject_1_0,BoundaryCrossing> pending = new HashMap<>();
 	            for(DataObject_1_0 state : getStates()){
 	                if(isInvolved(state, context, accessMode)) {
 	                    BoundaryCrossing boundaryCrossing = getBoundaryCrossing(state);
@@ -1296,4 +1148,5 @@ public abstract class BasicState_1<C extends StateContext<?>>
 		}
 
     }
+
 }

@@ -91,9 +91,6 @@ public class DateState_1
 
     /**
      * Constructor 
-     * 
-     * @param self
-     * @throws ServiceException
      */
     public DateState_1(
         ObjectView_1_0 self, 
@@ -131,9 +128,6 @@ public class DateState_1
     // Extends AbstractState_1
     //------------------------------------------------------------------------
 
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.aop2.core.AbstractState_1#propagateValidTime()
-     */
     @Override
     protected void initialize(
         DataObject_1_0 dataObject
@@ -147,17 +141,11 @@ public class DateState_1
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.aop2.core.BasicState_1#isValidTimeFeature(java.lang.String)
-     */
     @Override
     protected boolean isValidTimeFeature(String featureName) {
         return STATE_VALID_FROM.equals(featureName) || STATE_VALID_TO.equals(featureName);
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.aop2.core.BasicState_1#objGetValue(java.lang.String)
-     */
     @Override
     public Object objGetValue(
         String feature
@@ -172,9 +160,6 @@ public class DateState_1
         return super.objGetValue(feature);
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.plugin.AbstractState_1#enableUpdate(java.util.Collection, int)
-     */
     @Override
     protected void enableUpdate(
         Map<DataObject_1_0,BoundaryCrossing> pending
@@ -270,9 +255,6 @@ public class DateState_1
 		}
 	}
 
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.plugin.AbstractState_1#exceedsTimeRangeLimits(org.openmdx.base.accessor.generic.cci.Object_1_0)
-     */
     @Override
     protected BoundaryCrossing getBoundaryCrossing(
         DataObject_1_0 candidate
@@ -290,9 +272,6 @@ public class DateState_1
         );
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.aop1.BasicState_1#interfers(org.openmdx.base.accessor.cci.DataObject_1_0)
-     */
     @Override
     protected boolean interfersWith(
         DataObject_1_0 candidate
@@ -303,9 +282,6 @@ public class DateState_1
             Order.compareValidFromToValidTo(Datatypes.DATE_CLASS.cast(candidate.objGetValue(STATE_VALID_FROM)), context.getValidTo()) <= 0;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.aop1.AbstractState_1#isInvolved()
-     */
     @Override
     protected boolean isInvolved(
         DataObject_1_0 candidate, 
@@ -382,7 +358,7 @@ public class DateState_1
             final Iterator<DataObject_1_0> i = active.values().iterator();
             final List<DataObject_1_0> merged = new ArrayList<>();
             for(
-                DataObject_1_0 predecessor = i.next(), successor = null;
+                DataObject_1_0 predecessor = i.next(), successor;
                 predecessor != null;
                 predecessor = successor
             ){
@@ -472,7 +448,7 @@ public class DateState_1
     private SortedMap<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif,DataObject_1_0> getActiveStates(
         final Collection<DataObject_1_0> states
     ) throws ServiceException {
-        final SortedMap<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif,DataObject_1_0> activeStates = new TreeMap<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif,DataObject_1_0>(VALID_FROM_COMPARATOR);
+        final SortedMap<#if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif,DataObject_1_0> activeStates = new TreeMap<>(VALID_FROM_COMPARATOR);
         for(DataObject_1_0 state : states){
             if(isActive(state)) {
                 activeStates.put(Datatypes.DATE_CLASS.cast(state.objGetValue(STATE_VALID_FROM)), state);
@@ -551,29 +527,21 @@ public class DateState_1
     }
 
     /**
-     * Tells whether tow states follow each other immediately
-     * 
-     * @param left
-     * @param right
-     * 
+     * Tells whether two states follow each other immediately
+     *
      * @return {@code true} if the two states are dajacent
-     * 
-     * @throws ServiceException
      */
     protected boolean adjacent(
         DataObject_1_0 left,
         DataObject_1_0 right
     ) throws ServiceException{
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif leftEnd = Datatypes.DATE_CLASS.cast(left.objGetValue(STATE_VALID_TO));
-        #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif rightStart = Datatypes.DATE_CLASS.cast(right.objGetValue(STATE_VALID_FROM));
-        return rightStart.equals(Order.successor(leftEnd));
+        final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif leftEnd = Datatypes.DATE_CLASS.cast(left.objGetValue(STATE_VALID_TO));
+        final #if CLASSIC_CHRONO_TYPES javax.xml.datatype.XMLGregorianCalendar #else java.time.LocalDate#endif rightStart = Datatypes.DATE_CLASS.cast(right.objGetValue(STATE_VALID_FROM));
+        return Datatypes.equalsIgnoringMutability(Order.successor(leftEnd), rightStart);
     }
     
     /**
      * Tests whether the two objects are similar
-     * 
-     * @param left
-     * @param right
      * 
      * @return {@code true} if all attributes apart from the ones to be ignored are equal
      */
@@ -608,7 +576,7 @@ public class DateState_1
                 	// Compare values to be lazily fetched later on
                 	//
                     if(postponed == null) {
-                        postponed = new HashMap<String, Multiplicity>();
+                        postponed = new HashMap<>();
                     }
                     postponed.put(featureName, multiplicity);
                 }
@@ -627,28 +595,18 @@ public class DateState_1
     /**
      * Tells whether a feature is either an attribute or a reference stored as attribute.
      * 
-     * @param featureDef
      * @return {@code true} if the feature is either an attribute or a reference stored as attribute
-     * 
-     * @throws ServiceException
      */
     private boolean isAttribute(
     	ModelElement_1_0 featureDef
     ) throws ServiceException {
-    	Model_1_0 model = featureDef.getModel();
+    	final Model_1_0 model = featureDef.getModel();
     	return model.isAttributeType(featureDef) || (
     		model.isReferenceType(featureDef) && model.referenceIsStoredAsAttribute(featureDef)
     	);
     }
     /**
-     * 
-     * @param attribute
-     * @param multiplicity
-     * @param left
-     * @param right
-     * 
-     * @return {@code >true{@code  if the values are equal
-     * @throws ServiceException
+     * @return {@code true} if the values are equal
      */
     private boolean equal(
         String attribute, 
@@ -658,38 +616,33 @@ public class DateState_1
     ) throws ServiceException{
     	switch(multiplicity) {
 	    	case LIST:
-	    		return left.objGetList(attribute).equals(right.objGetList(attribute));
+	    		return Datatypes.equalsIgnoringMutability(
+                    left.objGetList(attribute),
+                    right.objGetList(attribute)
+                );
 	    	case SET:
-	    		return left.objGetSet(attribute).equals(right.objGetSet(attribute));
+                return Datatypes.equalsIgnoringMutability(
+                    left.objGetSet(attribute),
+                    right.objGetSet(attribute)
+                );
 	    	case SPARSEARRAY:
-	    		return left.objGetSparseArray(attribute).equals(right.objGetSparseArray(attribute));
+                return Datatypes.equalsIgnoringMutability(
+                    left.objGetSparseArray(attribute),
+                    right.objGetSparseArray(attribute)
+                );
 	    	case MAP:
-	    	    return left.objGetMap(attribute).equals(right.objGetMap(attribute));
+                return Datatypes.equalsIgnoringMutability(
+                    left.objGetMap(attribute),
+                    right.objGetMap(attribute)
+                );
 	    	case STREAM:
-	    	    return false; // we should not read streams in this context
+	    	    return false; // we should not read streams in this context
 	    	default:
-	    		return equal(left.objGetValue(attribute),right.objGetValue(attribute));
+                return Datatypes.equalsIgnoringMutability(
+                    left.objGetValue(attribute),
+                    right.objGetValue(attribute)
+                );
     	}
     }
     
-    /**
-     * Tests whether the two objects are either equal or both {@code null}
-     * 
-     * @param left
-     * @param right
-     * 
-     * @return {@code true} if the two objects are either equal or both {@code null}
-     */
-    static protected boolean equal(
-        Object left,
-        Object right
-    ){
-        if(left == null) {
-            return right == null;
-        } else {
-            // Some datatype implementations don't accept null as equals argument!
-            return right != null && left.equals(right);
-        }
-    }
-
 }

@@ -577,18 +577,6 @@ public class DataObject_1
     }
 
     /**
-     * Test whether two objects are either both {@code null} or equal.
-     *
-     * @return {@code true} if either both objects are {@code null} or equal.
-     */
-    static boolean equal(
-        Object left,
-        Object right
-    ) {
-        return left == right || (left != null && right != null && left.equals(right));
-    }
-
-    /**
      * Tells whether the object represents an aspect
      *
      * @return {@code true} if the object represents an aspect
@@ -1278,7 +1266,6 @@ public class DataObject_1
      *            The criteria is used to move the object to the container or
      *            {@code null</null>, in which case it is up to the
      *            implementation to define the criteria.
-     *
      * @throws ServiceException<ul>
      *      <li>ILLEGAL_STATE
      *            if the object is persistent</lu>
@@ -2000,13 +1987,25 @@ public class DataObject_1
         switch (multiplicity) {
             case SINGLE_VALUE:
             case OPTIONAL:
-                return !equal(this.beforeImage.objGetValue(featureName), this.objGetValue(featureName));
+                return !Datatypes.equalsIgnoringMutability(
+                    this.beforeImage.objGetValue(featureName),
+                    this.objGetValue(featureName)
+                );
             case LIST:
-                return !equal(this.beforeImage.objGetList(featureName), this.objGetList(featureName));
+                return !Datatypes.equalsIgnoringMutability(
+                    this.beforeImage.objGetList(featureName),
+                    this.objGetList(featureName)
+                );
             case SET:
-                return !equal(this.beforeImage.objGetSet(featureName), this.objGetSet(featureName));
+                return !Datatypes.equalsIgnoringMutability(
+                    this.beforeImage.objGetSet(featureName),
+                    this.objGetSet(featureName)
+                );
             case SPARSEARRAY:
-                return !equal(this.beforeImage.objGetSparseArray(featureName), this.objGetSparseArray(featureName));
+                return !Datatypes.equalsIgnoringMutability(
+                    this.beforeImage.objGetSparseArray(featureName),
+                    this.objGetSparseArray(featureName)
+                );
             case STREAM:
                 SysLog.log(
                     Level.FINER,
@@ -3288,12 +3287,8 @@ public class DataObject_1
      * requested class is created on demand if it hasn't been set yet.
      *
      * @param feature
-     *            List<Object> flushable = getFlushable(feature, List.class);
-     * 
      *            The feature's name.
-     *
      * @return a collection which may be empty but never null.
-     *
      * @exception ServiceException
      *                ILLEGAL_STATE
      *                if the object is deleted
@@ -4575,7 +4570,7 @@ public class DataObject_1
             @Override
             public Map.Entry<String, Object> next() {
                 this.current = this.delegate.next();
-                return new Map.Entry<String, Object>() {
+                return new Map.Entry<String, Object>() { // Java 8 does not accept diamond in this context!
 
                     public String getKey() {
                         return EntryIterator.this.current.getKey();
@@ -4695,7 +4690,7 @@ public class DataObject_1
             this.feature = feature;
             this.nonTransactional = new MarshallingSortedMap(
                 marshaller,
-                    new PopulationMap<Object>() {
+                    new PopulationMap<Object>() { // Java 8 does not accept diamond in this context!
 
                         /*
                          * (non-Javadoc)
@@ -4750,7 +4745,7 @@ public class DataObject_1
          */
         private final SortedMap<Integer, Object> nonTransactional;
 
-        private final Set<Map.Entry<Integer, Object>> entries = new AbstractSet<Map.Entry<Integer, Object>>() {
+        private final Set<Map.Entry<Integer, Object>> entries = new AbstractSet<Map.Entry<Integer, Object>>() { // Java 8 does not accept diamond in this context!
 
             @Override
             public Iterator<Map.Entry<Integer, Object>> iterator() {
@@ -5222,7 +5217,7 @@ public class DataObject_1
             @Override
             public Map.Entry<Integer, Object> next() {
                 this.current = this.delegate.next();
-                return new Map.Entry<Integer, Object>() {
+                return new Map.Entry<Integer, Object>() { // Java 8 does not accept diamond in this context!
 
                     public Integer getKey() {
                         return EntryIterator.this.current.getKey();

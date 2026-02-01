@@ -44,14 +44,11 @@
  */
 package org.w3c.spi2;
 
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.kernel.exception.BasicException;
+import java.util.Set;
 import org.openmdx.kernel.text.spi.Parser;
 import org.w3c.spi.PrimitiveTypeParsers;
 
@@ -127,8 +124,8 @@ public class Datatypes {
      * 
      * @param structureInterface the structure's interface
      * @param members the structure's members
-     * 
-     * @return
+     *
+     * @return a new structure
      */
     public static <S> S create(
         Class<S> structureInterface,
@@ -149,7 +146,132 @@ public class Datatypes {
         T name,
         Object value
     ){
-        return new Structures.Member<T>(name, value);
+        return new Structures.Member<>(name, value);
     }
+
+    /**
+     * Determine equality ignoring mutability
+     *
+     * @param first the 1st argument of the comparison
+     * @param second the 2nd argument of the comparison
+     *
+     * @return {@code true} if the values are either both {@code null} or equal
+     *    independent of their mutability
+     */
+    public static boolean equalsIgnoringMutability(List<?> first, List<?> second) {
+        #if CLASSIC_CHRONO_TYPES
+        try {
+            return first.equals(second);
+        } catch (RuntimeException ignore) {
+            final int limit = first.size();
+            if(limit == second.size()) {
+                for(int i = 0; i < limit; i++) {
+                    if(!equalsIgnoringMutability(first.get(i), second.get(i))) {
+                        return false;
+                    }
+                }
+                return  true;
+            } else {
+                return false;
+            }
+        }
+        #else
+        return first.equals(second);
+        #endif
+    }
+
+    /**
+     * Determine equality ignoring mutability
+     *
+     * @param first the 1st argument of the comparison
+     * @param second the 2nd argument of the comparison
+     *
+     * @return {@code true} if the values are either both {@code null} or equal
+     *    independent of their mutability
+     */
+    public static boolean equalsIgnoringMutability(Set<?> first, Set<?> second) {
+        #if CLASSIC_CHRONO_TYPES
+        try {
+            return first.equals(second);
+        } catch (RuntimeException ignore) {
+            final Set<?> s1 = first.stream().map(Datatypes::toImmutable).collect(java.util.stream.Collectors.toSet());
+            final Set<?> s2 = second.stream().map(Datatypes::toImmutable).collect(java.util.stream.Collectors.toSet());
+            return s1.equals(s2);
+        }
+        #else
+        return first.equals(second);
+        #endif
+    }
+
+    /**
+     * Determine equality ignoring mutability
+     *
+     * @param first the 1st argument of the comparison
+     * @param second the 2nd argument of the comparison
+     *
+     * @return {@code true} if the values are either both {@code null} or equal
+     *    independent of their mutability
+     */
+    public static boolean equalsIgnoringMutability(Map<?,?> first, Map<?,?> second) {
+        #if CLASSIC_CHRONO_TYPES
+        try {
+            return first.equals(second);
+        } catch (RuntimeException ignore) {
+            final Set<?> k1 = first.keySet();
+            final Set<?> k2 = second.keySet();
+            if(k1.equals(k2)) {
+                for(Object i : k1) {
+                    if(!equalsIgnoringMutability(first.get(i), second.get(i))) {
+                        return false;
+                    }
+                }
+                return  true;
+            } else {
+                return false;
+            }
+        }
+        #else
+        return first.equals(second);
+        #endif
+    }
+
+    /**
+     * Determine equality ignoring mutability
+     *
+     * @param first the 1st argument of the comparison
+     * @param second the 2nd argument of the comparison
+     *
+     * @return {@code true} if the values are either both {@code null} or equal
+     *    independent of their mutability
+     */
+    public static boolean equalsIgnoringMutability(Object first, Object second) {
+        #if CLASSIC_CHRONO_TYPES
+        if(isDifferentKindOfFactory(first, second)) {
+            return toImmutable(first).equals(toImmutable(second));
+        }
+        #endif
+        return Objects.equals(first, second);
+    }
+
+    #if CLASSIC_CHRONO_TYPES
+
+    /**
+     * Tests whether two values have the same or a different kind of factory
+     *
+     * @return {@code false} if either is {@code null} or both are created by either a mutable or an immutable data type factory
+     */
+    private static <T> boolean isDifferentKindOfFactory(T first, T second) {
+        return first != null && second != null &&
+            first instanceof org.w3c.cci2.ImmutableDatatype<?> != second instanceof org.w3c.cci2.ImmutableDatatype<?>;
+    }
+
+    private static Object toImmutable(Object value) {
+        return
+            value instanceof java.util.Date ? org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().toImmutableDateTime((java.util.Date) value) :
+            value instanceof javax.xml.datatype.XMLGregorianCalendar ? org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().toImmutableDate((javax.xml.datatype.XMLGregorianCalendar) value) :
+            value;
+    }
+
+    #endif
 
 }

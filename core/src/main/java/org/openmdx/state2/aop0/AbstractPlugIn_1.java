@@ -45,6 +45,7 @@
 package org.openmdx.state2.aop0;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -71,6 +72,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.spi.Propagation;
 import org.openmdx.state2.spi.TechnicalAttributes;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Abstract org::openmdx::state2 Plug-In
@@ -102,9 +104,6 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
         this.stateCapableDeletable = stateCapableDeletable;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.aop0.PlugIn_1_0#flush(org.openmdx.base.accessor.rest.UnitOfWork_1)
-     */
     @Override
     public void flush(
         UnitOfWork_1 dataObjectManager, 
@@ -113,9 +112,6 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
         // nothing to do
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.aop0.PlugIn_1_0#setCore(org.openmdx.base.accessor.rest.DataObject_1, org.openmdx.base.accessor.rest.DataObject_1)
-     */
     @Override
     public void postSetCore(
         DataObject_1 target, 
@@ -151,7 +147,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
      * Build a qualifier for a basic state instance
      * 
      * @param coreComponent the qualifier's core component
-     * @param stateComponent the qualifier's state component
+     * @param stateQualifier the qualifier's state component
      * 
      * @return a newly created qualifier
      */
@@ -163,11 +159,10 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
     /**
      * Tests whether an object is of a given type
      * 
-     * @param object
+     * @param object the object to be examined
      * @param type the model class
      * 
      * @return {@code true} if the object is of the given type
-     * @throws ServiceException
      */
     protected static boolean isInstanceOf(
         DataObject_1 object,
@@ -179,25 +174,20 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
     /**
      * {@code null}-safe sucessor implementation
      * 
-     * @param value
+     * @param value the predecessor or {@code null}
      * 
      * @return the next integer value, or {@code 1} if {@code value} is {@code null}
      */
     private static Integer successor(
         Integer value
     ){
-        return Integer.valueOf(value == null ? 0 : value.intValue() + 1);
+        return value == null ? 0 : value + 1;
     }
     
     /**
      * The getQualifier() dispatching method for BasicState instances
-     * 
-     * @param object
-     * @param qualifier
-     * 
+     *
      * @return the qualifier for a BasicState instance
-     * 
-     * @throws ServiceException
      */
     protected String getBasicStateQualifier(
         final DataObject_1 object,
@@ -253,8 +243,6 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
      * @param core the state's core object
      * 
      * @return the next aspect component
-     * 
-     * @throws ServiceException
      */
     private Integer nextAspectComponent(final DataObject_1_0 core)
         throws ServiceException {
@@ -266,9 +254,6 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
         return apectComponent;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.aop0.PlugIn_1_0#getQualifier(org.openmdx.base.accessor.rest.DataObject_1, java.lang.String)
-     */
     @Override
     public String getQualifier(
         DataObject_1 object, 
@@ -277,16 +262,10 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
         return isInstanceOf(object, "org:openmdx:state2:BasicState") ? getBasicStateQualifier(object, qualifier) : qualifier;        
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.aop0.PlugIn_1_0#getPlugInObject(java.lang.Class)
-     */
     public <T> T getPlugInObject(Class<T> type) {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.aop0.PlugIn_1_0#callbackOnCascadedDeletes()
-     */
     @Override
     public boolean requiresCallbackOnCascadedDelete(DataObject_1 object) {
         return false;
@@ -294,20 +273,13 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
 
     /**
      * Tells whether we are processing a state without its core object
-     * 
-     * @param object
-     * 
+     *
      * @return {@code true} if we are processing a state without its core object
-     * 
-     * @throws ServiceException
      */
     protected boolean isStateOnly(DataObject_1 object) throws ServiceException {
         return isInstanceOf(object, "org:openmdx:state2:StateCapable");
     }
     
-    /* (non-Javadoc)
-     * @see org.openmdx.base.aop0.PlugIn_1_0#isExemptFromValidation(org.openmdx.base.mof.cci.ModelElement_1_0)
-     */
     public boolean isExemptFromValidation(
         DataObject_1 object, 
         ModelElement_1_0 feature
@@ -318,9 +290,6 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
             ("org:openmdx:base:Modifiable:modifiedAt".equals(qualifiedFeatureName) && isStateOnly(object));
     }
 
-	/* (non-Javadoc)
-	 * @see org.openmdx.base.aop0.PlugIn_1_0#isAspect(org.openmdx.base.accessor.rest.DataObject_1)
-	 */
     @Override
 	public Boolean isAspect(
 		DataObject_1 object
@@ -328,14 +297,10 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
 		return null;
 	}
 
-	
     //------------------------------------------------------------------------
     // Implements StoreLifecycleListener
     //------------------------------------------------------------------------
 
-    /* (non-Javadoc)
-     * @see javax.jdo.listener.StoreLifecycleListener#postStore(javax.jdo.listener.InstanceLifecycleEvent)
-     */
     @Override
     public void postStore(
         InstanceLifecycleEvent event
@@ -352,16 +317,10 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
         // nothing to do
     }
 
-    /* (non-Javadoc)
-	 * @see javax.jdo.listener.DeleteLifecycleListener#postDelete(javax.jdo.listener.InstanceLifecycleEvent)
-	 */
 	public void postDelete(InstanceLifecycleEvent event) {
 		// Not yet supported
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.jdo.listener.DeleteLifecycleListener#preDelete(javax.jdo.listener.InstanceLifecycleEvent)
-	 */
 	public void preDelete(InstanceLifecycleEvent event) {
         DataObject_1 persistentInstance = (DataObject_1) event.getPersistentInstance();
         try {
@@ -386,9 +345,6 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
         }
 	}
 
-	/* (non-Javadoc)
-     * @see javax.jdo.listener.StoreLifecycleListener#preStore(javax.jdo.listener.InstanceLifecycleEvent)
-     */
     @Override
     public void preStore(
         InstanceLifecycleEvent event
@@ -420,9 +376,9 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
 		Map<String, DataObject_1_0> states = persistentInstance.getAspect("org:openmdx:state2:BasicState");
 		if(!states.isEmpty()) {
 		    UnitOfWork_1 unitOfWork = persistentInstance.getUnitOfWork();
-		    Set<String> dirtyFeatures = new HashSet<String>(
-		        unitOfWork.getState(persistentInstance,false).dirtyFeatures(true)
-		    );
+		    Set<String> dirtyFeatures = new HashSet<>(
+                unitOfWork.getState(persistentInstance, false).dirtyFeatures(true)
+            );
 		    dirtyFeatures.removeAll(Propagation.NON_PROPAGATED_ATTRIBUTES);
 		    if(persistentInstance.jdoIsNew() || !dirtyFeatures.isEmpty()) {
 		        Model_1_0 model = persistentInstance.jdoGetPersistenceManager().getModel(); 
@@ -436,35 +392,35 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
 		                Multiplicity multiplicity = ModelHelper.getMultiplicity(attributes.get(feature));
 		                switch(multiplicity) {
 		                    case SINGLE_VALUE: case OPTIONAL: {
-		                        Object source = persistentInstance.objGetValue(feature);
-		                        Object target = state.objGetValue(feature);
-		                        if(source == null ? target != null : !source.equals(target)) {
+		                        final Object source = persistentInstance.objGetValue(feature);
+                                final Object target = state.objGetValue(feature);
+                                if(!Datatypes.equalsIgnoringMutability(source, target)) {
 		                            state.objSetValue(feature, source);
 		                        }
 		                    }
 		                    break;
 		                    case LIST: {
-		                        SortedMap<Integer,Object> source = persistentInstance.objGetSparseArray(feature); 
-		                        SortedMap<Integer,Object> target = state.objGetSparseArray(feature);
-		                        if(!target.equals(source)) {
+                                final List<Object> source = persistentInstance.objGetList(feature);
+                                final List<Object> target = state.objGetList(feature);
+                                if(!Datatypes.equalsIgnoringMutability(source, target)) {
 		                            target.clear();
-		                            target.putAll(source);
+		                            target.addAll(source);
 		                        }
 		                    }
 		                    break;
 		                    case SET: {
-		                        Set<Object> source = persistentInstance.objGetSet(feature); 
-		                        Set<Object> target = state.objGetSet(feature);
-		                        if(!target.equals(source)) {
+                                final Set<Object> source = persistentInstance.objGetSet(feature);
+                                final Set<Object> target = state.objGetSet(feature);
+                                if(!Datatypes.equalsIgnoringMutability(source, target)) {
 		                            target.clear();
 		                            target.addAll(source);
 		                        }
 		                    }
 		                    break;
 		                    case SPARSEARRAY: {
-		                        SortedMap<Integer,Object> source = persistentInstance.objGetSparseArray(feature); 
-		                        SortedMap<Integer,Object> target = state.objGetSparseArray(feature);
-		                        if(!target.equals(source)) {
+                                final SortedMap<Integer,Object> source = persistentInstance.objGetSparseArray(feature);
+                                final SortedMap<Integer,Object> target = state.objGetSparseArray(feature);
+                                if(!Datatypes.equalsIgnoringMutability(source, target)) {
 		                            target.clear();
 		                            target.putAll(source);
 		                        }

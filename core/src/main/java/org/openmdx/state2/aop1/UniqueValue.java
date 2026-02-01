@@ -47,6 +47,7 @@ package org.openmdx.state2.aop1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Unique
@@ -72,10 +73,6 @@ final class UniqueValue<T> {
     
     /**
      * Process a single state's reply
-     * 
-     * @param value
-     * 
-     * @throws ServiceException 
      */
     void set(
         T value
@@ -83,7 +80,7 @@ final class UniqueValue<T> {
         if(this.empty) {
             this.value = value;
             this.empty = false;
-        } else if (this.value == null ? value != null : !this.value.equals(value)) {
+        } else if (!Datatypes.equalsIgnoringMutability(this.value, value)) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,

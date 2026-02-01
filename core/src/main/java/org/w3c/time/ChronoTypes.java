@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Time Zones
+ * Description: Chrono Types
  * Owner:       the original authors.
  * ====================================================================
  *
@@ -42,10 +42,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-//#define CLASSIC_CHRONO_TYPES
-//#define CLASSIC_CHRONO_TYPES
-
-//#define CLASSIC_CHRONO_TYPES
 package org.w3c.time;
 
 import org.openmdx.kernel.exception.BasicException;
@@ -270,12 +266,9 @@ public class ChronoTypes {
      * or greater than the specified object.
      */
     public static boolean equals(java.util.Date first, java.util.Date second) {
-        if(first == null || second == null) {
-            return first == second;
-        }
         return comparable(first, second) ?
-                first.equals(second) :
-                makeComparable(first).equals(makeComparable(second));
+            Objects.equals(first, second) :
+            makeComparable(first).equals(makeComparable(second));
     }
 
     /**
@@ -294,11 +287,11 @@ public class ChronoTypes {
         javax.xml.datatype.XMLGregorianCalendar second
     ) {
         return toComparatorReply(
-                first,
-                second,
-                comparable(first, second) ?
-                        first.compare(second) :
-                        makeComparable(first).compare(makeComparable(second))
+            first,
+            second,
+            comparable(first, second) ?
+                first.compare(second) :
+                makeComparable(first).compare(makeComparable(second))
         );
     }
 
@@ -323,11 +316,11 @@ public class ChronoTypes {
             return nullRepresents.compareWithNull(first, second);
         } else {
             return toComparatorReply(
-                    first,
-                    second,
-                    comparable(first, second) ?
-                            first.compare(second) :
-                            makeComparable(first).compare(makeComparable(second))
+                first,
+                second,
+                comparable(first, second) ?
+                    first.compare(second) :
+                    makeComparable(first).compare(makeComparable(second))
             );
         }
     }
@@ -342,16 +335,9 @@ public class ChronoTypes {
      * or greater than the specified object.
      */
     public static boolean equals(javax.xml.datatype.XMLGregorianCalendar first, javax.xml.datatype.XMLGregorianCalendar second) {
-        if(first == null || second == null) {
-            return first == null && second == null;
-        }
         return comparable(first, second) ?
-                first.equals(second) :
-                makeComparable(first).equals(makeComparable(second));
-    }
-
-    private static <T> boolean comparable(T first, T second){
-        return first instanceof org.w3c.cci2.ImmutableDatatype<?> == second instanceof org.w3c.cci2.ImmutableDatatype<?>;
+            Objects.equals(first, second) :
+            makeComparable(first).equals(makeComparable(second));
     }
 
     private static javax.xml.datatype.XMLGregorianCalendar makeComparable(javax.xml.datatype.XMLGregorianCalendar value) {
@@ -360,6 +346,17 @@ public class ChronoTypes {
 
     private static java.util.Date makeComparable(java.util.Date value) {
         return org.w3c.spi.DatatypeFactories.immutableDatatypeFactory().toImmutableDateTime(value);
+    }
+
+    /**
+     * Tests whether two values have the same or a different kind of factory
+     *
+     * @return {@code true} if {@code first} is {@code null}, {@code second} {@code null} or either both are created by a mutable data type factory
+     * or an immutable data type factory.
+     */
+    public static <T> boolean comparable(T first, T second) {
+        return first == null || second == null ||
+            first instanceof org.w3c.cci2.ImmutableDatatype<?> == second instanceof org.w3c.cci2.ImmutableDatatype<?>;
     }
 
     /**
@@ -522,7 +519,7 @@ public class ChronoTypes {
     private static int compare (java.time.Duration first, java.time.Period second) {
         if(second.toTotalMonths() == 0)  {
             final java.time.Duration difference = first.minusDays(second.getDays());
-            return difference.isNegative() ? -1 : difference.isZero() ? 0 : +1;
+            return difference.isNegative() ? -1 : (difference.isZero() ? 0 : +1);
         }
         throw new IllegalArgumentException(
             "Comparison between months and days is not (yet) supported",
@@ -731,7 +728,7 @@ public class ChronoTypes {
                 );
             }
         },
-        IGNORABLE_TERM {;
+        IGNORABLE_TERM {
             @Override
             int compareWithNull(Object first, Object second) {
                 return 0; // null is ignored
