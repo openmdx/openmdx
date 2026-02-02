@@ -48,7 +48,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.marshalling.ReluctantUnmarshalling;
 import org.openmdx.kernel.exception.BasicException;
-#if CLASSIC_CHRONO_TYPESimport org.w3c.cci2.ImmutableDatatype;#endif
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -72,18 +71,12 @@ public class NormalizingMarshaller
      */
     private final Class<?> targetClass;
     
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.marshalling.Marshaller#marshal(java.lang.Object)
-     */
     public Object marshal(
         Object source
     ) throws ServiceException {
         return normalize(source);
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.marshalling.Marshaller#unmarshal(java.lang.Object)
-     */
     public Object unmarshal(
         Object source
     ) throws ServiceException {
@@ -93,7 +86,7 @@ public class NormalizingMarshaller
     /**
      * Normalize the source value to the targetClass
      * 
-     * @param source
+     * @param source the source value to be normalized
      * 
      * @return the normalized value
      */
@@ -103,7 +96,12 @@ public class NormalizingMarshaller
         if(source == null) {
             return null;
         } else if(this.targetClass.isInstance(source)) {
-            return #if source CLASSIC_CHRONO_TYPES instanceof ImmutableDatatype<?> ? ((ImmutableDatatype<?>)source).clone() : #endif source;
+            #if CLASSIC_CHRONO_TYPES
+            if (source instanceof org.w3c.cci2.ImmutableDatatype<?>) {
+                return ((org.w3c.cci2.ImmutableDatatype<?>) source).clone();
+            }
+            #endif
+            return source;
         } else if (source instanceof String) {
             return Datatypes.create(this.targetClass, (String)source);
         } else if (source instanceof Number){
@@ -115,8 +113,8 @@ public class NormalizingMarshaller
 
     /**
      * Normalize numbers not being an instance of the target class
-     * 
-     * @param source
+     *
+     * @param source the source value to be normalized
      * 
      * @return an instance of the target class
      */
@@ -128,10 +126,7 @@ public class NormalizingMarshaller
     
     /**
      * Creates a transformation exception
-     * 
-     * @param exception
-     * @param source
-     * 
+     *
      * @return a transformation exception
      */
     protected ServiceException newServiceException(
